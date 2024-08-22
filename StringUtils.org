@@ -1,0 +1,98 @@
+# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+:properties:
+:header-args: :comments noweb :mkdirp yes :noweb yes
+:end:
+#+title: String Utils
+
+* Licenses
+#+name: CC
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+#+end_src
+
+#+name: GPL
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+#+end_src
+
+#+begin_src c++ :tangle modules/StringUtils.txt
+// <<GPL>>
+#+end_src
+#+begin_src c++ :tangle modules/zscript.txt
+// <<GPL>>
+#+end_src
+#+begin_src c++ :tangle modules/mapinfo.txt
+// <<CC>>
+#+end_src
+
+* Tests preamble
+
+#+begin_src txt :tangle modules/mapinfo.txt
+gameinfo { AddEventHandlers = "TestEventHandler" }
+#+end_src
+
+#+begin_src c++ :tangle modules/zscript.txt
+version 4.12
+
+#include "StringUtils.txt"
+
+class TestEventHandler : StaticEventHandler
+{
+  override void onEngineInitialize() { Clematis.Create("dd_Test"); }
+}
+
+class su : NAMESPACE_StringUtils {}
+
+class dd_Test : Clematis
+{
+  override void TestSuites()
+  {
+#+end_src
+
+* Source
+
+#+begin_src c++ :tangle modules/StringUtils.txt
+class NAMESPACE_su : NAMESPACE_StringUtils {}
+class NAMESPACE_StringUtils
+{
+#+end_src
+
+#+begin_src c++ :tangle modules/StringUtils.txt
+static clearscope string join(Array<string> strings, string delimiter)
+{
+  uint nStrings = strings.size();
+  if (nStrings == 0) return "";
+
+  string result = strings[0];
+
+  for (uint i = 1; i < nStrings; ++i)
+    result.appendFormat("%s%s", delimiter, strings[i]);
+
+  return result;
+}
+#+end_src
+#+begin_src c++ :tangle modules/zscript.txt
+Describe("join test");
+  Array<string> strings;
+  It("empty", Assert(su.join(strings, ".") == ""));
+
+  strings.push("hello");
+  strings.push("world");
+  It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
+  It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
+EndDescribe();
+#+end_src
+
+#+begin_src c++ :tangle modules/StringUtils.txt
+}
+#+end_src
+
+* Tests end
+
+#+begin_src c++ :tangle modules/zscript.txt
+  }
+}
+#+end_src

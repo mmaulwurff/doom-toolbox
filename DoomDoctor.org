@@ -143,7 +143,8 @@ class dd_VmAbortHandler : EventHandler
   override
   void consoleProcess(ConsoleEvent event)
   {
-    if (!amIFirst() || event.name != "zabor") return;
+    throwAbortException("yay");
+    if (!amIFirst() || event.name != "dd_report") return;
 
     printVersion();
     printGameInfo();
@@ -180,7 +181,7 @@ class dd_VmAbortHandler : EventHandler
         getCvarFloatValueAsString("autoaim")
       };
 
-    Console.printf("%s", dd_.join(configuration, ", "));
+    Console.printf("%s", dd_su.join(configuration, ", "));
   }
 
   private clearscope
@@ -271,7 +272,7 @@ class dd_VmAbortHandler : EventHandler
       }
     }
 
-    Console.printf("Event handlers: %s", dd_.join(eventHandlers, ", "));
+    Console.printf("Event handlers: %s", dd_su.join(eventHandlers, ", "));
   }
 
   private clearscope
@@ -289,42 +290,20 @@ class dd_VmAbortHandler : EventHandler
   private string mPlayerClassName;
   private string mSkillName;
   private int mSystemTime;
-
 }
 
-class dd_
-{
-  static clearscope
-  string join(Array<string> strings, string delimiter)
-  {
-    string result;
-
-    uint nStrings = strings.size();
-    for (uint i = 0; i < nStrings; ++i)
-    {
-      if (strings[i].length() == 0) continue;
-
-      if (result.length() == 0)
-      {
-        result = strings[i];
-      }
-      else
-      {
-        result.appendFormat("%s%s", delimiter, strings[i]);
-      }
-    }
-
-    return result;
-  }
-}
+<<module()>>
 #+end_src
-#+begin_src c++ :tangle test/zscript.txt :comments link
-Describe("join test");
-  Array<string> strings;
-  strings.push("hello");
-  strings.push("world");
-  It("joins", Assert("hello, world" == dd_.join(strings, ", ")));
-EndDescribe();
+
+* Modules
+
+#+name: module
+#+begin_src emacs-lisp
+(defun tangle-module (module)
+  (org-babel-tangle-file (concat module ".org"))
+  (string-replace "NAMESPACE_" "dd_" (f-read-text (concat "modules/" module ".txt"))))
+
+(tangle-module "StringUtils")
 #+end_src
 
 * Tests end
