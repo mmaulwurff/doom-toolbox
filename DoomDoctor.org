@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 :properties:
-:header-args: :noweb yes :mkdirp yes
+:header-args: :comments noweb :mkdirp yes :noweb yes
 :end:
 #+title: Doom Doctor
 
@@ -35,85 +35,84 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 - Thanks to Accensus for feature suggestions.
 
 * Licenses
-#+name: TextCopyright
+#+name: CC
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+name: CodeCopyright
+#+name: GPL
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-or-later
 #+end_src
 
 #+begin_src c++ :tangle build/zscript.txt
-// <<CodeCopyright>>
+// <<GPL>>
 #+end_src
-#+begin_src prog :tangle build/keyconf.txt
-// <<TextCopyright>>
+#+begin_src c++ :tangle build/keyconf.txt
+// <<CC>>
 #+end_src
-#+begin_src prog :tangle build/mapinfo.txt
-// <<TextCopyright>>
+#+begin_src c++ :tangle build/mapinfo.txt
+// <<CC>>
 #+end_src
-#+begin_src prog :tangle build/cvarinfo.txt
-// <<TextCopyright>>
+#+begin_src c++ :tangle build/cvarinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src c++ :tangle test/mapinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src c++ :tangle test/zscript.txt
+// <<GPL>>
 #+end_src
 
 * Console alias configuration
-#+begin_src prog :tangle build/keyconf.txt
+#+begin_src txt :tangle build/keyconf.txt
 alias dd_report "event dd_report"
 #+end_src
 
 * Event handler declaration
-#+begin_src prog :tangle build/mapinfo.txt
+#+begin_src txt :tangle build/mapinfo.txt
 gameinfo { AddEventHandlers = "dd_VmAbortHandler" }
 #+end_src
 
 * Console variables
-#+begin_src prog :tangle build/cvarinfo.txt
+#+begin_src txt :tangle build/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
 * Tests preamble
 
-#+begin_src prog :tangle test/mapinfo.txt
+#+begin_src txt :tangle test/mapinfo.txt
 gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 #+end_src
 
-#+begin_src c++ :tangle test/zscript.txt :comments link
+#+begin_src c++ :tangle test/zscript.txt
 version 4.5
 
 class dd_TestEventHandler : StaticEventHandler
 {
-  override
-  void onEngineInitialize()
-  {
-    Clematis.Create("dd_Test");
-  }
-}
+  override void onEngineInitialize() { Clematis.Create("dd_Test"); }
+};
 
 class dd_Test : Clematis
 {
-  override
-  void TestSuites()
+  override void TestSuites()
   {
 #+end_src
 
 * Source code
-#+begin_src c++ :tangle build/zscript.txt :comments link
+#+begin_src c++ :tangle build/zscript.txt
 version 4.5
 
 class dd_VmAbortHandler : EventHandler
 {
+  override void onEngineInitialize() { mReporter = new("dd_Reporter"); }
 
   override
   void playerSpawned(PlayerEvent event)
   {
-    if (event.playerNumber != consolePlayer) return;
-
-    mPlayerClassName = players[consolePlayer].mo.getClassName();
-    mSkillName       = g_SkillName();
+    if (event.playerNumber == consolePlayer) mReporter.setPlayerInfo();
   }
 
   override
@@ -128,32 +127,59 @@ class dd_VmAbortHandler : EventHandler
     if (gameState != GS_FullConsole
         || !amIFirst()
         || !Cvar.getCvar("dd_vm_abort_report_enabled", players[consolePlayer]).getBool())
-    {
-      return;
-    }
+      {
+        return;
+      }
 
-    printVersion();
-    printGameInfo();
-    printConfiguration();
-    printEventHandlers();
-    printRealTime();
+    printReport();
     printAttention();
   }
 
-  override
-  void consoleProcess(ConsoleEvent event)
+  override void consoleProcess(ConsoleEvent event)
   {
-    throwAbortException("yay");
-    if (!amIFirst() || event.name != "dd_report") return;
+    if (amIFirst() && event.name == "dd_report") printReport();
+  }
 
+  private clearscope bool amIFirst()
+  {
+    uint nClasses = AllClasses.size();
+    for (uint i = 0; i < nClasses; ++i)
+      {
+        string className = AllClasses[i].getClassName();
+        bool isVmAbortHandler = (className.indexOf("VmAbortHandler") != -1);
+
+        if (!isVmAbortHandler) continue;
+
+        return className == getClassName();
+      }
+    return false;
+  }
+
+  private dd_Reporter mReporter;
+};
+
+class dd_Reporter
+{
+
+  clearscope void setPlayerInfo()
+  {
+    mPlayerClassName = players[consolePlayer].mo.getClassName();
+    mSkillName       = g_SkillName();
+  }
+
+  clearscope void printReport()
+  {
     printVersion();
-    printGameInfo();
+    Console.Printf("%s", getGameInfo());
     printConfiguration();
     printEventHandlers();
     printRealTime();
   }
 
-// private: ////////////////////////////////////////////////////////////////////
+  play void rememberSystemTime(int value) const
+  {
+    mSystemTime = value;
+  }
 
   private static clearscope
   string getCvarIntValueAsString(string cvarName)
@@ -189,8 +215,8 @@ class dd_VmAbortHandler : EventHandler
   {
     string userName = players[consolePlayer].getUserName();
     string message1 = string.format( "  # %s\cg, please report this VM abort to mod author."
-                                   , userName
-                                   );
+                                     , userName
+                                     );
     string message2 = "  # Attach screenshot to the report.";
     string message3 = "  # Type \"screenshot\" below to take a screenshot.";
 
@@ -205,9 +231,9 @@ class dd_VmAbortHandler : EventHandler
 
     string hashes;
     for (int i = 0; i < length; ++i)
-    {
-      hashes = hashes .. "#";
-    }
+      {
+        hashes = hashes .. "#";
+      }
     Console.printf("\n\cg  %s\n%s\n%s\n%s\n  %s\n", hashes, message1, message2, message3, hashes);
   }
 
@@ -225,32 +251,11 @@ class dd_VmAbortHandler : EventHandler
     Console.printf("Doom Doctor");
   }
 
-  private clearscope
-  bool amIFirst()
+  private clearscope string getGameInfo()
   {
-    uint nClasses = AllClasses.size();
-    for (uint i = 0; i < nClasses; ++i)
-    {
-      class aClass = AllClasses[i];
-      string className = aClass.getClassName();
-      bool isVmAbortHandler = (className.indexOf("VmAbortHandler") != -1);
-      if (!isVmAbortHandler) continue;
-
-      return aClass.getClassName() == getClassName();
-    }
-    return false;
-  }
-
-  private clearscope
-  void printGameInfo()
-  {
-    Console.printf( "Game: level: %s, time: %d, multiplayer: %d, player class: %s, skill: %s"
-                  , level.mapName
-                  , level.totalTime
-                  , multiplayer
-                  , mPlayerClassName
-                  , mSkillName
-                  );
+    return string.format(
+                         "Game: level: %s, time: %d, multiplayer: %d, player class: %s, skill: %s.",
+                         level.mapName, level.totalTime, multiplayer, mPlayerClassName, mSkillName);
   }
 
   private static clearscope
@@ -260,17 +265,17 @@ class dd_VmAbortHandler : EventHandler
 
     uint nClasses = AllClasses.size();
     for (uint i = 0; i < nClasses; ++i)
-    {
-      class aClass = AllClasses[i];
-
-      if (  aClass is "StaticEventHandler"
-         && aClass != "StaticEventHandler"
-         && aClass != "EventHandler"
-         )
       {
-        eventHandlers.push(aClass.getClassName());
+        class aClass = AllClasses[i];
+
+        if (  aClass is "StaticEventHandler"
+              && aClass != "StaticEventHandler"
+              && aClass != "EventHandler"
+              )
+          {
+            eventHandlers.push(aClass.getClassName());
+          }
       }
-    }
 
     Console.printf("Event handlers: %s", dd_su.join(eventHandlers, ", "));
   }
@@ -281,18 +286,12 @@ class dd_VmAbortHandler : EventHandler
     Console.printf("System time: %s", SystemTime.format("%F %T %Z", mSystemTime));
   }
 
-  private play
-  void rememberSystemTime(int value) const
-  {
-    mSystemTime = value;
-  }
-
   private string mPlayerClassName;
-  private string mSkillName;
-  private int mSystemTime;
+                                 private string mSkillName;
+                                                          private int mSystemTime;
 }
 
-<<module()>>
+  <<module()>>
 #+end_src
 
 * Modules
@@ -308,9 +307,9 @@ class dd_VmAbortHandler : EventHandler
 
 * Tests end
 
-#+begin_src c++ :tangle test/zscript.txt :comments link
-  }
+#+begin_src c++ :tangle test/zscript.txt
 }
+};
 #+end_src
 
 * TODO

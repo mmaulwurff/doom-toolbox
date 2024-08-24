@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 :properties:
-:header-args: :comments noweb :mkdirp yes :noweb yes
+:header-args: :comments no :mkdirp yes :noweb yes
 :end:
 #+title: String Utils
 
@@ -18,23 +18,23 @@ SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-or-later
 #+end_src
 
-#+begin_src c++ :tangle modules/StringUtils.txt
+#+begin_src c :tangle modules/StringUtils.txt
 // <<GPL>>
 #+end_src
-#+begin_src c++ :tangle modules/zscript.txt
+#+begin_src c :tangle modules/zscript.txt
 // <<GPL>>
 #+end_src
-#+begin_src c++ :tangle modules/mapinfo.txt
+#+begin_src c :tangle modules/mapinfo.txt
 // <<CC>>
 #+end_src
 
-* Tests preamble
+* Preamble
 
 #+begin_src txt :tangle modules/mapinfo.txt
 gameinfo { AddEventHandlers = "TestEventHandler" }
 #+end_src
 
-#+begin_src c++ :tangle modules/zscript.txt
+#+begin_src c :tangle modules/zscript.txt
 version 4.12
 
 #include "StringUtils.txt"
@@ -52,15 +52,17 @@ class dd_Test : Clematis
   {
 #+end_src
 
-* Source
-
-#+begin_src c++ :tangle modules/StringUtils.txt
+#+begin_src c :tangle modules/StringUtils.txt
 class NAMESPACE_su : NAMESPACE_StringUtils {}
 class NAMESPACE_StringUtils
 {
 #+end_src
 
-#+begin_src c++ :tangle modules/StringUtils.txt
+* Join
+
+Joins strings to a single string separated by delimiter.
+
+#+begin_src c :tangle modules/StringUtils.txt
 static clearscope string join(Array<string> strings, string delimiter)
 {
   uint nStrings = strings.size();
@@ -74,25 +76,24 @@ static clearscope string join(Array<string> strings, string delimiter)
   return result;
 }
 #+end_src
-#+begin_src c++ :tangle modules/zscript.txt
+#+begin_src c :tangle modules/zscript.txt
 Describe("join test");
-  Array<string> strings;
-  It("empty", Assert(su.join(strings, ".") == ""));
+Array<string> strings;
+It("empty", Assert(su.join(strings, ".") == ""));
 
-  strings.push("hello");
-  strings.push("world");
-  It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
-  It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
+strings.push("hello");
+strings.push("world");
+It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
+It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
 EndDescribe();
 #+end_src
 
-#+begin_src c++ :tangle modules/StringUtils.txt
+* End
+
+#+begin_src c :tangle modules/StringUtils.txt
 }
 #+end_src
 
-* Tests end
-
-#+begin_src c++ :tangle modules/zscript.txt
-  }
-}
+#+begin_src c :tangle modules/zscript.txt
+}}
 #+end_src
