@@ -5,36 +5,69 @@
 :end:
 #+title: String Utils
 
-* Licenses
-#+name: CC
-#+begin_src :exports none
-SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: CC0-1.0
+* Classes
+
+#+name: classes
+#+begin_src c
+class NAMESPACE_su : NAMESPACE_StringUtils {}
+class NAMESPACE_StringUtils
 #+end_src
 
-#+name: GPL
-#+begin_src :exports none
-SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-or-later
+* Functions
+
+** Join
+
+Joins strings to a single string separated by delimiter.
+
+#+name: join
+#+begin_src c
+static clearscope string join(Array<string> strings, string delimiter)
+{
+  uint nStrings = strings.size();
+  if (nStrings == 0) return "";
+
+  string result = strings[0];
+
+  for (uint i = 1; i < nStrings; ++i)
+    result.appendFormat("%s%s", delimiter, strings[i]);
+
+  return result;
+}
+#+end_src
+#+name: join_test
+#+begin_src c
+Describe("join test");
+Array<string> strings;
+It("empty", Assert(su.join(strings, ".") == ""));
+
+strings.push("hello");
+strings.push("world");
+It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
+It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
+EndDescribe();
 #+end_src
 
+* ZScript
 #+begin_src c :tangle modules/StringUtils.txt
 // <<GPL>>
-#+end_src
-#+begin_src c :tangle modules/zscript.txt
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle modules/mapinfo.txt
-// <<CC>>
+
+<<classes>>
+{
+  <<join>>
+}
 #+end_src
 
-* Preamble
+* Test
 
 #+begin_src txt :tangle modules/mapinfo.txt
+// <<CC>>
+
 gameinfo { AddEventHandlers = "TestEventHandler" }
 #+end_src
 
 #+begin_src c :tangle modules/zscript.txt
+// <<GPL>>
+
 version 4.12
 
 #include "StringUtils.txt"
@@ -50,50 +83,46 @@ class dd_Test : Clematis
 {
   override void TestSuites()
   {
-#+end_src
-
-#+begin_src c :tangle modules/StringUtils.txt
-class NAMESPACE_su : NAMESPACE_StringUtils {}
-class NAMESPACE_StringUtils
-{
-#+end_src
-
-* Join
-
-Joins strings to a single string separated by delimiter.
-
-#+begin_src c :tangle modules/StringUtils.txt
-static clearscope string join(Array<string> strings, string delimiter)
-{
-  uint nStrings = strings.size();
-  if (nStrings == 0) return "";
-
-  string result = strings[0];
-
-  for (uint i = 1; i < nStrings; ++i)
-    result.appendFormat("%s%s", delimiter, strings[i]);
-
-  return result;
-}
-#+end_src
-#+begin_src c :tangle modules/zscript.txt
-Describe("join test");
-Array<string> strings;
-It("empty", Assert(su.join(strings, ".") == ""));
-
-strings.push("hello");
-strings.push("world");
-It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
-It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
-EndDescribe();
-#+end_src
-
-* End
-
-#+begin_src c :tangle modules/StringUtils.txt
+    <<join_test>>
+  }
 }
 #+end_src
 
-#+begin_src c :tangle modules/zscript.txt
-}}
+#+begin_src python :tangle modules/test_clematis.py
+# <<CC>>
+
+import subprocess
+import pathlib
+
+# sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+
+def setup_function(function):
+    print("hello", function)
+
+def test_clematis():
+    workingDirectory = pathlib.Path().resolve()
+    iwadPath = workingDirectory / "fixtures/miniwad.wad"
+    configPath = workingDirectory / "fixtures/gzdoom.ini"
+    clematisPath = "/home/a_kromm/src/clematis/src"
+
+    # TODO: parse Clematis test results, fail if some tests fail
+    subprocess.run(["gzdoom", "-noautoload", "-nosound",
+                    "-iwad", iwadPath,
+                    "-config", configPath,
+                    "-file", clematisPath, "modules",
+                    "+map", "map01", "+wait 1; quit"])
+    assert False
+#+end_src
+
+* Licenses
+#+name: CC
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+#+end_src
+
+#+name: GPL
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-or-later
 #+end_src
