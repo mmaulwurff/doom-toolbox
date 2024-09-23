@@ -34,7 +34,7 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 - Thanks to Colerx for bug reports.
 - Thanks to Accensus for feature suggestions.
 
-* Licenses
+* Licenses :noexport:
 #+name: CC
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>

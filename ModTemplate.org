@@ -138,7 +138,7 @@ class ModTemplateEventHandler : StaticEventHandler
 #+end_src
 # SPDX-SnippetEnd
 
-* (Org) Licenses - snippets to include to files
+* (Org) Licenses - snippets to include to files :noexport:
 #+name: CC
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>

@@ -114,7 +114,7 @@ def test_clematis():
     assert False
 #+end_src
 
-* Licenses
+* Licenses :noexport:
 #+name: CC
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
