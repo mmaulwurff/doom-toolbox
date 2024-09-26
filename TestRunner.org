@@ -1,0 +1,84 @@
+# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+#+title: Test Runner
+
+* Test Runner
+What should it do?
+
+It should run all tests it can find, in all mods that are loaded alongside.
+
+* Clematis runner
+#+begin_src txt :tangle build/TestRunner/mapinfo.txt
+// <<CC>>
+
+gameinfo { AddEventHandlers = "TestEventHandler" }
+#+end_src
+
+#+begin_src c :tangle build/TestRunner/zscript.txt
+// <<CC>>
+
+version 4.12.2
+
+// TODO: handle tests that reload the map.
+class TestEventHandler : StaticEventHandler
+{
+  override void onEngineInitialize()
+  {
+    Console.Printf("Running tests...");
+    int testsFound = 0;
+    foreach (aClass : AllClasses)
+    {
+      if (!(aClass is "Clematis") || aClass == "Clematis") continue;
+
+      ++testsFound;
+      Clematis.Create(aClass.GetClassName());
+    }
+    Console.Printf("Run tests: %d.", testsFound);
+  }
+}
+#+end_src
+
+* Config
+#+begin_src ini :tangle build/TestRunner/config.ini
+[GlobalSettings]
+autoloadwidescreen=false
+developer=1
+gl_texture_filter=6
+m_simpleoptions=false
+showendoom=0
+
+[Doom.ConsoleVariables]
+m_quickexit=true
+vid_cursor=cursor
+#+end_src
+
+* Launch :noexport:
+Environment:
+- ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
+- ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
+
+#+begin_src elisp
+(org-babel-tangle)
+
+; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+
+(defun run-tests (command)
+    (shell-command (concat "gzdoom -noautoload -nosound \
+-config build/TestRunner/config.ini \
+-iwad " (getenv "IWAD_PATH") " \
+-file " (getenv "CLEMATIS_PATH") " build/* \
+-warp 1 +\"" command  "\"")))
+#+end_src
+
+src_elisp{(run-tests "wait 1; quit")}
+src_elisp{(run-tests "")}
+
+* Licenses :noexport:
+#+name: CC
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+#+end_src

@@ -6,7 +6,6 @@
 #+title: String Utils
 
 * Classes
-
 #+name: classes
 #+begin_src c
 class NAMESPACE_su : NAMESPACE_StringUtils {}
@@ -14,9 +13,7 @@ class NAMESPACE_StringUtils
 #+end_src
 
 * Functions
-
 ** Join
-
 Joins strings to a single string separated by delimiter.
 
 #+name: join
@@ -48,7 +45,7 @@ EndDescribe();
 #+end_src
 
 * ZScript
-#+begin_src c :tangle modules/StringUtils.txt
+#+begin_src c :tangle build/StringUtils/StringUtils.txt
 // <<GPL>>
 
 <<classes>>
@@ -59,23 +56,12 @@ EndDescribe();
 
 * Test
 
-#+begin_src txt :tangle modules/mapinfo.txt
-// <<CC>>
-
-gameinfo { AddEventHandlers = "TestEventHandler" }
-#+end_src
-
-#+begin_src c :tangle modules/zscript.txt
+#+begin_src c :tangle build/StringUtils/zscript.txt
 // <<GPL>>
 
 version 4.12
 
 #include "StringUtils.txt"
-
-class TestEventHandler : StaticEventHandler
-{
-  override void onEngineInitialize() { Clematis.Create("dd_Test"); }
-}
 
 class su : NAMESPACE_StringUtils {}
 
@@ -86,32 +72,6 @@ class dd_Test : Clematis
     <<join_test>>
   }
 }
-#+end_src
-
-#+begin_src python :tangle modules/test_clematis.py
-# <<CC>>
-
-import subprocess
-import pathlib
-
-# sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
-
-def setup_function(function):
-    print("hello", function)
-
-def test_clematis():
-    workingDirectory = pathlib.Path().resolve()
-    iwadPath = workingDirectory / "fixtures/miniwad.wad"
-    configPath = workingDirectory / "fixtures/gzdoom.ini"
-    clematisPath = "/home/a_kromm/src/clematis/src"
-
-    # TODO: parse Clematis test results, fail if some tests fail
-    subprocess.run(["gzdoom", "-noautoload", "-nosound",
-                    "-iwad", iwadPath,
-                    "-config", configPath,
-                    "-file", clematisPath, "modules",
-                    "+map", "map01", "+wait 1; quit"])
-    assert False
 #+end_src
 
 * Licenses :noexport:

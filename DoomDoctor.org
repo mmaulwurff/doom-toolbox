@@ -47,47 +47,47 @@ SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-or-later
 #+end_src
 
-#+begin_src c :tangle build/zscript.txt
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/keyconf.txt
+#+begin_src c :tangle build/DoomDoctor/keyconf.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle build/mapinfo.txt
+#+begin_src c :tangle build/DoomDoctor/mapinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle build/cvarinfo.txt
+#+begin_src c :tangle build/DoomDoctor/cvarinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle test/mapinfo.txt
+#+begin_src c :tangle build/DoomDoctorTest/mapinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle test/zscript.txt
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 // <<GPL>>
 #+end_src
 
 * Console alias configuration
-#+begin_src txt :tangle build/keyconf.txt
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
 alias dd_report "event dd_report"
 #+end_src
 
 * Event handler declaration
-#+begin_src txt :tangle build/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
 gameinfo { AddEventHandlers = "dd_VmAbortHandler" }
 #+end_src
 
 * Console variables
-#+begin_src txt :tangle build/cvarinfo.txt
+#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
 * Tests preamble
 
-#+begin_src txt :tangle test/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
 gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 #+end_src
 
-#+begin_src c :tangle test/zscript.txt
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 version 4.5
 
 class dd_TestEventHandler : StaticEventHandler
@@ -102,7 +102,7 @@ class dd_Test : Clematis
 #+end_src
 
 * Source code
-#+begin_src c :tangle build/zscript.txt
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
 version 4.5
 
 class dd_VmAbortHandler : EventHandler
@@ -289,14 +289,14 @@ class dd_Reporter
 #+begin_src emacs-lisp
 (defun tangle-module (module)
   (org-babel-tangle-file (concat module ".org"))
-  (string-replace "NAMESPACE_" "dd_" (f-read-text (concat "modules/" module ".txt"))))
+  (string-replace "NAMESPACE_" "dd_" (f-read-text (concat "build/" module "/" module ".txt"))))
 
 (tangle-module "StringUtils")
 #+end_src
 
 * Tests end
 
-#+begin_src c :tangle test/zscript.txt
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 }}
 #+end_src
 
