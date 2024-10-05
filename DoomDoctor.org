@@ -65,7 +65,7 @@ SPDX-License-Identifier: CC0-1.0
 #+name: GPL
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
@@ -108,6 +108,9 @@ user bool dd_vm_abort_report_enabled = true;
 gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 #+end_src
 
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 version 4.12.2
 
@@ -121,8 +124,12 @@ class dd_Test : Clematis
   override void TestSuites()
   {
 #+end_src
+# SPDX-SnippetEnd
 
 * Source code
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 version 4.12.2
 
@@ -303,6 +310,7 @@ class dd_Reporter
 
 <<module()>>
 #+end_src
+# SPDX-SnippetEnd
 
 * Modules
 TODO: move tangle-module from this file.

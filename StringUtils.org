@@ -45,6 +45,9 @@ EndDescribe();
 #+end_src
 
 * ZScript
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/StringUtils/StringUtils.txt
 // <<GPL>>
 
@@ -53,8 +56,12 @@ EndDescribe();
   <<join>>
 }
 #+end_src
+# SPDX-SnippetEnd
 
 * Test
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/StringUtils/zscript.txt
 // <<GPL>>
 
@@ -72,6 +79,7 @@ class su_Test : Clematis
   }
 }
 #+end_src
+# SPDX-SnippetEnd
 
 * Licenses :noexport:
 #+name: CC
@@ -83,5 +91,5 @@ SPDX-License-Identifier: CC0-1.0
 #+name: GPL
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: GPL-3.0-only
 #+end_src

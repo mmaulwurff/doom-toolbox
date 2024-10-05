@@ -43,6 +43,8 @@ class TestEventHandler : StaticEventHandler
 
 * Config
 #+begin_src ini :tangle build/TestRunner/config.ini
+# <<CC>>
+
 [GlobalSettings]
 autoloadwidescreen=false
 developer=1
