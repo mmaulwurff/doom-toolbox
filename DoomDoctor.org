@@ -23,7 +23,7 @@ Doom Doctor is a utility mod for ZScript'ed game engines.
   - system time;
   - a request for the user to report the bug.
 
-If there are several Zabor-based handlers loaded, only the first one will print
+If there are several VM abort handlers loaded, only the first one will print
 stuff. For this to work, all handlers must have "VmAbortHandler" somewhere in
 their class name.
 
@@ -301,7 +301,6 @@ class dd_Reporter
 #+end_src
 
 * TODO
-- replace "Zabor" and "zr_", add reference to Zabor
 - test manually for regressions
 - fix colored user names
 - update logo
