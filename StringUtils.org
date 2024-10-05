@@ -59,7 +59,7 @@ EndDescribe();
 #+begin_src c :tangle build/StringUtils/zscript.txt
 // <<GPL>>
 
-version 4.12
+version 4.12.2
 
 #include "StringUtils.txt"
 

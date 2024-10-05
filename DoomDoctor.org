@@ -88,7 +88,7 @@ gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 #+end_src
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
-version 4.5
+version 4.12.2
 
 class dd_TestEventHandler : StaticEventHandler
 {
@@ -103,7 +103,7 @@ class dd_Test : Clematis
 
 * Source code
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
-version 4.5
+version 4.12.2
 
 class dd_VmAbortHandler : EventHandler
 {

@@ -78,7 +78,7 @@ OptionMenu mt_Options
 #+begin_src c :tangle build/ModTemplate/zscript.txt
 // <<GPL>>
 
-version 4.12
+version 4.12.2
 
 class ModTemplateEventHandler : StaticEventHandler
 {
