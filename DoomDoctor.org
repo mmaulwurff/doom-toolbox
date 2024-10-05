@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 :properties:
-:header-args: :comments noweb :mkdirp yes :noweb yes
+:header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
 #+title: Doom Doctor
 
@@ -33,6 +33,27 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 - Thanks to KeksDose for the concept of VM abort handler.
 - Thanks to Colerx for bug reports.
 - Thanks to Accensus for feature suggestions.
+
+* Launch :noexport:
+Environment:
+- ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
+- ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
+
+#+begin_src elisp
+(org-babel-tangle)
+
+; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+
+(defun run-tests (command)
+    (shell-command (concat "gzdoom -noautoload -nosound \
+-config build/TestRunner/config.ini \
+-iwad " (getenv "IWAD_PATH") " \
+-file " (getenv "CLEMATIS_PATH") " build/* \
+-warp 1 +\"" command  "\"")))
+#+end_src
+
+src_elisp{(run-tests "")}
+src_elisp{(run-tests "wait 1; quit")}
 
 * Licenses :noexport:
 #+name: CC
@@ -284,14 +305,15 @@ class dd_Reporter
 #+end_src
 
 * Modules
+TODO: move tangle-module from this file.
 
 #+name: module
 #+begin_src emacs-lisp
-(defun tangle-module (module)
+(defun tangle-module (prefix module)
   (org-babel-tangle-file (concat module ".org"))
-  (string-replace "NAMESPACE_" "dd_" (f-read-text (concat "build/" module "/" module ".txt"))))
+  (string-replace "NAMESPACE_" prefix (f-read-text (concat "build/" module "/" module ".txt"))))
 
-(tangle-module "StringUtils")
+(tangle-module "dd_" "StringUtils")
 #+end_src
 
 * Tests end
