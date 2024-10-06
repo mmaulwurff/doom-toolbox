@@ -62,21 +62,28 @@ Environment:
 - ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
 
-#+begin_src elisp
-(org-babel-tangle)
+#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
+; <<CC>>
 
 ; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+; TODO: filter uninteresting GZDoom output lines.
 
 (defun run-tests (command)
+    (org-babel-tangle)
     (shell-command (concat "gzdoom -noautoload -nosound \
 -config build/TestRunner/config.ini \
 -iwad " (getenv "IWAD_PATH") " \
 -file " (getenv "CLEMATIS_PATH") " build/* \
 -warp 1 +\"" command  "\"")))
+
+(defun tangle-module (prefix module)
+  (org-babel-tangle-file (concat module ".org"))
+  (string-replace "NAMESPACE_" prefix (f-read-text (concat "build/" module "/" module ".txt"))))
 #+end_src
 
-src_elisp{(run-tests "wait 1; quit")}
-src_elisp{(run-tests "")}
+src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
+src_elisp{(load-file scripts-path) (run-tests "")}
+src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
 
 * Licenses :noexport:
 #+name: CC
