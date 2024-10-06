@@ -38,6 +38,7 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
 src_elisp{(load-file scripts-path) (run-tests "")}
 src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
+src_elisp{(load-file scripts-path) (run-tests "wait 1; save-load")}
 
 * Licenses :noexport:
 #+name: CC

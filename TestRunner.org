@@ -52,6 +52,10 @@ gl_texture_filter=6
 m_simpleoptions=false
 showendoom=0
 
+[Doom.ConsoleAliases]
+Name=save-load
+Command=save save; wait 3 ; load save
+
 [Doom.ConsoleVariables]
 m_quickexit=true
 vid_cursor=cursor
