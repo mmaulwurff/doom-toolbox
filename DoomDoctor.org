@@ -35,10 +35,10 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 - Thanks to Accensus for feature suggestions.
 
 * Launch :noexport:
-src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
-src_elisp{(load-file scripts-path) (run-tests "")}
-src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
-src_elisp{(load-file scripts-path) (run-tests "wait 1; save-load")}
+src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
+src_elisp{(run-tests "")}
+src_elisp{(run-tests "wait 1; quit")}
+src_elisp{(run-tests "wait 1; save-load")}
 
 * Licenses :noexport:
 #+name: CC
@@ -53,43 +53,31 @@ SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctor/zscript.txt
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctor/keyconf.txt
-// <<CC>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctor/mapinfo.txt
-// <<CC>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctor/cvarinfo.txt
-// <<CC>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctorTest/mapinfo.txt
-// <<CC>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
-// <<GPL>>
-#+end_src
-
 * Console alias configuration
 #+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+// <<CC>>
+
 alias dd_report "event dd_report"
 #+end_src
 
 * Event handler declaration
 #+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
+// <<CC>>
+
 gameinfo { AddEventHandlers = "dd_VmAbortHandler" }
 #+end_src
 
 * Console variables
 #+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+// <<CC>>
+
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
 * Tests preamble
-
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
+// <<CC>>
+
 gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 #+end_src
 
@@ -97,6 +85,8 @@ gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
+// <<GPL>>
+
 version 4.12.2
 
 class dd_TestEventHandler : StaticEventHandler
@@ -116,6 +106,8 @@ class dd_Test : Clematis
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
+// <<GPL>>
+
 version 4.12.2
 
 class dd_VmAbortHandler : EventHandler
@@ -306,7 +298,6 @@ class dd_Reporter
 #+end_src
 
 * Tests end
-
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 }}
 #+end_src
