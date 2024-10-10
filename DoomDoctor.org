@@ -37,8 +37,8 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 * Launch :noexport:
 src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
 src_elisp{(run-tests "")}
-src_elisp{(run-tests "wait 1; quit")}
-src_elisp{(run-tests "wait 1; save-load")}
+# src_elisp{(run-tests "wait 1; quit")}
+# src_elisp{(run-tests "wait 1; save-load")}
 
 * Licenses :noexport:
 #+name: CC
@@ -83,7 +83,7 @@ gameinfo { AddEventHandlers = "dd_TestEventHandler" }
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 // <<GPL>>
 
@@ -104,7 +104,7 @@ class dd_Test : Clematis
 * Source code
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 // <<GPL>>
 
@@ -115,13 +115,14 @@ class dd_VmAbortHandler : EventHandler
 
   override void playerSpawned(PlayerEvent event)
   {
-    mReporter = new("dd_Reporter");
-    if (event.playerNumber == consolePlayer) mReporter.setPlayerInfo();
+    mReport = new("dd_Report");
+    if (event.playerNumber == consolePlayer) mReport.writePlayerInfo();
   }
 
   override void uiTick()
   {
-    if (level.totalTime % 35 == 0) mReporter.rememberSystemTime(SystemTime.now());
+    bool isOnceASecond = level.totalTime % TICRATE == 0;
+    if (isOnceASecond) mReport.writeSystemTime();
   }
 
   override void onDestroy()
@@ -133,21 +134,24 @@ class dd_VmAbortHandler : EventHandler
         return;
       }
 
-    mReporter.printReport();
-    mReporter.printAttention();
+    mReport.printReport();
+    printAttention();
   }
 
   override void consoleProcess(ConsoleEvent event)
   {
-    if (amIFirst() && event.name == "dd_report") mReporter.printReport();
+    if (amIFirst() && event.name == "dd_report")
+      {
+        mReport.printReport();
+        printAttention();
+      }
   }
 
   private clearscope bool amIFirst()
   {
-    uint nClasses = AllClasses.size();
-    for (uint i = 0; i < nClasses; ++i)
+    foreach (aClass : AllClasses)
       {
-        string className = AllClasses[i].getClassName();
+        string className = aClass.getClassName();
         bool isVmAbortHandler = (className.indexOf("VmAbortHandler") != -1);
 
         if (!isVmAbortHandler) continue;
@@ -155,58 +159,6 @@ class dd_VmAbortHandler : EventHandler
         return className == getClassName();
       }
     return false;
-  }
-
-  private dd_Reporter mReporter;
-}
-
-class dd_Reporter
-{
-
-  clearscope void setPlayerInfo()
-  {
-    mPlayerClassName = players[consolePlayer].mo.getClassName();
-    mSkillName       = g_SkillName();
-  }
-
-  clearscope void printReport()
-  {
-    printVersion();
-    Console.Printf("%s", getGameInfo());
-    printConfiguration();
-    printEventHandlers();
-    printRealTime();
-  }
-
-  play void rememberSystemTime(int value) const
-  {
-    mSystemTime = value;
-  }
-
-  private static clearscope string getCvarIntValueAsString(string cvarName)
-  {
-    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
-    return aCvar ? string.format("%s: %d", cvarName, aCvar.getInt()) : "";
-  }
-
-  private static clearscope string getCvarFloatValueAsString(string cvarName)
-  {
-    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
-    return aCvar ? string.format("%s: %f", cvarName, aCvar.getFloat()) : "";
-  }
-
-  private static clearscope void printConfiguration()
-  {
-    Array<string> configuration =
-      {
-        getCvarIntValueAsString("compatflags"),
-        getCvarIntValueAsString("compatflags2"),
-        getCvarIntValueAsString("dmflags"),
-        getCvarIntValueAsString("dmflags2"),
-        getCvarFloatValueAsString("autoaim")
-      };
-
-    Console.printf("%s", dd_su.join(configuration, ", "));
   }
 
   clearscope void printAttention()
@@ -242,6 +194,58 @@ class dd_Reporter
     return result;
   }
 
+  private dd_Report mReport;
+}
+
+class dd_Report
+{
+
+  clearscope void writePlayerInfo()
+  {
+    mPlayerClassName = players[consolePlayer].mo.getClassName();
+    mSkillName       = g_SkillName();
+  }
+
+  ui void writeSystemTime()
+  {
+    mSystemTime = SystemTime.now();
+  }
+
+  clearscope void printReport()
+  {
+    printVersion();
+    Console.Printf("%s", getGameInfo());
+    printConfiguration();
+    printEventHandlers();
+    printRealTime();
+  }
+
+  private static clearscope string getCvarIntValueAsString(string cvarName)
+  {
+    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
+    return aCvar ? string.format("%s: %d", cvarName, aCvar.getInt()) : "";
+  }
+
+  private static clearscope string getCvarFloatValueAsString(string cvarName)
+  {
+    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
+    return aCvar ? string.format("%s: %f", cvarName, aCvar.getFloat()) : "";
+  }
+
+  private static clearscope void printConfiguration()
+  {
+    Array<string> configuration =
+      {
+        getCvarIntValueAsString("compatflags"),
+        getCvarIntValueAsString("compatflags2"),
+        getCvarIntValueAsString("dmflags"),
+        getCvarIntValueAsString("dmflags2"),
+        getCvarFloatValueAsString("autoaim")
+      };
+
+    Console.printf("%s", dd_su.join(configuration, ", "));
+  }
+
   private static clearscope void printVersion()
   {
     Console.printf("Doom Doctor");
@@ -258,18 +262,12 @@ class dd_Reporter
   {
     Array<string> eventHandlers;
 
-    uint nClasses = AllClasses.size();
-    for (uint i = 0; i < nClasses; ++i)
+    foreach (aClass : AllClasses)
       {
-        class aClass = AllClasses[i];
+        if (!(aClass is "StaticEventHandler")) continue;
+        if (aClass == "StaticEventHandler" || aClass == "EventHandler") continue;
 
-        if (  aClass is "StaticEventHandler"
-              && aClass != "StaticEventHandler"
-              && aClass != "EventHandler"
-              )
-          {
-            eventHandlers.push(aClass.getClassName());
-          }
+        eventHandlers.push(aClass.getClassName());
       }
 
     Console.printf("Event handlers: %s", dd_su.join(eventHandlers, ", "));
