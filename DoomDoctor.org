@@ -179,19 +179,13 @@ class dd_VmAbortHandler : EventHandler
     message2 = fillBox(message2, length);
     message3 = fillBox(message3, length);
 
-    string hashes;
-    for (int i = 0; i < length; ++i)
-      {
-        hashes = hashes .. "#";
-      }
+    string hashes = dd_su.repeat("#", length);
     Console.printf("\n\cg  %s\n%s\n%s\n%s\n  %s\n", hashes, message1, message2, message3, hashes);
   }
 
   private static clearscope string fillBox(string result, int length)
   {
-    for (int i = result.length(); i < length; ++i) result.appendFormat(" ");
-    result.appendFormat(" #");
-    return result;
+    return result .. dd_su.repeat(" ", length - result.length()) .. " #";
   }
 
   private dd_Report mReport;
