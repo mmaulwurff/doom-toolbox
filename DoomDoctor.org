@@ -36,8 +36,8 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 
 * Launch :noexport:
 src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
-src_elisp{(run-tests "")}
-# src_elisp{(run-tests "wait 1; quit")}
+# src_elisp{(run-tests "")}
+src_elisp{(run-tests "wait 1; dd_report;")}
 # src_elisp{(run-tests "wait 1; save-load")}
 
 * Licenses :noexport:
@@ -134,16 +134,14 @@ class dd_VmAbortHandler : EventHandler
         return;
       }
 
-    mReport.printReport();
-    printAttention();
+    Console.printf("%s", mReport.report());
   }
 
   override void consoleProcess(ConsoleEvent event)
   {
     if (amIFirst() && event.name == "dd_report")
       {
-        mReport.printReport();
-        printAttention();
+        Console.printf("%s\n%s", mReport.report(), getAttentionMessage());
       }
   }
 
@@ -161,31 +159,22 @@ class dd_VmAbortHandler : EventHandler
     return false;
   }
 
-  clearscope void printAttention()
+  private clearscope string getAttentionMessage()
   {
     string userName = players[consolePlayer].getUserName();
-    string message1 = string.format( "  # %s\cg, please report this VM abort to mod author."
-                                     , userName
-                                     );
-    string message2 = "  # Attach screenshot to the report.";
-    string message3 = "  # Type \"screenshot\" below to take a screenshot.";
+    string hashes = "\cg" .. dd_su.repeat("#", 60);
 
-    Array<string> tokens;
-    userName.split(tokens, "\c");
-    int colorCharsCount = (tokens.size() - 1) * 3;
-    int length = max(max(message1.length() - colorCharsCount, message2.length()), message3.length());
-
-    message1 = fillBox(message1, length);
-    message2 = fillBox(message2, length);
-    message3 = fillBox(message3, length);
-
-    string hashes = dd_su.repeat("#", length);
-    Console.printf("\n\cg  %s\n%s\n%s\n%s\n  %s\n", hashes, message1, message2, message3, hashes);
-  }
-
-  private static clearscope string fillBox(string result, int length)
-  {
-    return result .. dd_su.repeat(" ", length - result.length()) .. " #";
+    Array<string> lines =
+      {
+        "",
+        hashes,
+        " " .. userName .. "\cg, please report this VM abort to mod author.",
+        " Attach screenshot to the report.",
+        " Type \"screenshot\" below to take a screenshot.",
+        hashes
+      };
+    
+    return dd_su.join(lines, "\n");
   }
 
   private dd_Report mReport;
@@ -205,13 +194,18 @@ class dd_Report
     mSystemTime = SystemTime.now();
   }
 
-  clearscope void printReport()
+  clearscope string report()
   {
-    printVersion();
-    Console.Printf("%s", getGameInfo());
-    printConfiguration();
-    printEventHandlers();
-    printRealTime();
+    Array<string> lines =
+      {
+        "Doom Doctor v0.0.0",
+        getGameInfo(),
+        getConfiguration(),
+        getEventHandlers(),
+        getSystemTime()
+      };
+
+    return dd_su.join(lines, "\n");
   }
 
   private static clearscope string getCvarIntValueAsString(string cvarName)
@@ -226,7 +220,7 @@ class dd_Report
     return aCvar ? string.format("%s: %f", cvarName, aCvar.getFloat()) : "";
   }
 
-  private static clearscope void printConfiguration()
+  private static clearscope string getConfiguration()
   {
     Array<string> configuration =
       {
@@ -237,22 +231,17 @@ class dd_Report
         getCvarFloatValueAsString("autoaim")
       };
 
-    Console.printf("%s", dd_su.join(configuration, ", "));
-  }
-
-  private static clearscope void printVersion()
-  {
-    Console.printf("Doom Doctor");
+    return dd_su.join(configuration, ", ");
   }
 
   private clearscope string getGameInfo()
   {
     return string.format(
-                         "Game: level: %s, time: %d, multiplayer: %d, player class: %s, skill: %s.",
+                         "level: %s, time: %d, multiplayer: %d, player class: %s, skill: %s",
                          level.mapName, level.totalTime, multiplayer, mPlayerClassName, mSkillName);
   }
 
-  private static clearscope void printEventHandlers()
+  private static clearscope string getEventHandlers()
   {
     Array<string> eventHandlers;
 
@@ -264,12 +253,12 @@ class dd_Report
         eventHandlers.push(aClass.getClassName());
       }
 
-    Console.printf("Event handlers: %s", dd_su.join(eventHandlers, ", "));
+    return "Event handlers: " .. dd_su.join(eventHandlers, ", ");
   }
 
-  private clearscope void printRealTime()
+  private clearscope string getSystemTime()
   {
-    Console.printf("System time: %s", SystemTime.format("%F %T %Z", mSystemTime));
+    return "System time: " .. SystemTime.format("%F %T %Z", mSystemTime);
   }
 
   private string mPlayerClassName;
@@ -296,7 +285,7 @@ class dd_Report
 
 * TODO
 - test manually for regressions
-- fix colored user names
-- update logo
-- update licenses
 - incorporate Mod Compatibility Checklist
+- add logging?
+- describe features
+- move cvars access to a module
