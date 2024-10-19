@@ -288,4 +288,3 @@ class dd_Report
 - incorporate Mod Compatibility Checklist
 - add logging?
 - describe features
-- move cvars access to a module
