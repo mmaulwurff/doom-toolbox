@@ -5,31 +5,40 @@
 :end:
 #+title: String Utils
 
-* Classes
+* Preamble
+** Source code
 #+begin_src c :tangle build/StringUtils/StringUtils.txt
 // <<GPL>>
-
-class NAMESPACE_su : NAMESPACE_StringUtils {}
-class NAMESPACE_StringUtils {
 #+end_src
 
-* Tests
+** Tests
 #+begin_src c :tangle build/StringUtils/zscript.txt
 // <<GPL>>
 
 version 4.12.2
 #include "StringUtils.txt"
 
-class su : NAMESPACE_StringUtils {}
+class su : NAMESPACE_su {}
+class Description : NAMESPACE_Description {}
+
 class su_Test : Clematis { override void TestSuites() {
+    Describe("StringUtils tests");
 #+end_src
 
-* Functions
-** Join
+* Classes
+** StringUtils
+This class acts as a namespace for free functions.
+
+#+begin_src c :tangle build/StringUtils/StringUtils.txt :noweb-prefix no
+class NAMESPACE_su { <<StringUtilsBody>> }
+#+end_src
+
+*** join
 Joins strings to a single string separated by delimiter.
 
-#+begin_src c :tangle build/StringUtils/StringUtils.txt
-static clearscope string join(Array<string> strings, string delimiter)
+#+name: join
+#+begin_src c
+static clearscope string join(Array<string> strings, string delimiter = ", ")
 {
   uint nStrings = strings.size();
   if (nStrings == 0) return "";
@@ -43,21 +52,24 @@ static clearscope string join(Array<string> strings, string delimiter)
 }
 #+end_src
 #+begin_src c :tangle build/StringUtils/zscript.txt
-Describe("join test");
-Array<string> strings;
-It("empty", Assert(su.join(strings, ".") == ""));
+{
+  Array<string> strings;
+  it("join: empty", Assert(su.join(strings, ".") == ""));
 
-strings.push("hello");
-strings.push("world");
-It("join with delimiter",    Assert(su.join(strings, ", ") == "hello, world"));
-It("join without delimiter", Assert(su.join(strings, "")   == "helloworld"));
-EndDescribe();
+  strings.push("hello");
+  it("join: one", Assert(su.join(strings) == "hello"));
+
+  strings.push("world");
+  it("join: default delimiter", Assert(su.join(strings) == "hello, world"));
+  it("join: empty delimiter",   Assert(su.join(strings, "") == "helloworld"));
+}
 #+end_src
 
-** Repeat
+*** repeat
 Repeats the specified string the specified number of times.
 
-#+begin_src c :tangle build/StringUtils/StringUtils.txt
+#+name: repeat
+#+begin_src c
 static clearscope string repeat(string aString, int times)
 {
   // Make the specified number of spaces using padding format.
@@ -68,27 +80,379 @@ static clearscope string repeat(string aString, int times)
 }
 #+end_src
 #+begin_src c :tangle build/StringUtils/zscript.txt
-Describe("repeat test");
-It("zero",  Assert(su.repeat("a",     0) == ""));
-It("one",   Assert(su.repeat("hello", 1) == "hello"));
-It("3",     Assert(su.repeat("!?",    3) == "!?!?!?"));
-It("empty", Assert(su.repeat("",      7) == ""));
-EndDescribe();
+{
+  it("repeat: zero",  Assert(su.repeat("a",     0) == ""));
+  it("repeat: one",   Assert(su.repeat("hello", 1) == "hello"));
+  it("repeat: 3",     Assert(su.repeat("!?",    3) == "!?!?!?"));
+  it("repeat: empty", Assert(su.repeat("",      7) == ""));
+}
+#+end_src
+
+*** boolToString
+Writes out a boolean value.
+
+#+name: boolToString
+#+begin_src c
+static clearscope string boolToString(bool value)
+{
+  return value ? "true" : "false";
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  it("boolToString: true",  Assert(su.boolToString(true)  == "true"));
+  it("boolToString: false", Assert(su.boolToString(false) == "false"));
+}
+#+end_src
+
+*** Class contents
+#+name: StringUtilsBody
+#+begin_src c
+<<join>>
+<<repeat>>
+<<boolToString>>
+#+end_src
+
+** Description
+#+begin_src c :tangle build/StringUtils/StringUtils.txt :noweb-prefix no
+class NAMESPACE_Description { <<DescriptionBody>> }
+#+end_src
+
+Optimization opportunity: add... functions append to a private string, not an array. Compose simply returns it.
+
+*** compose
+#+name: compose
+#+begin_src c
+string compose() { return NAMESPACE_su.join(mFields); }
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  it("description: empty:", Assert(d.compose() == ""));
+}
+#+end_src
+
+*** add
+#+name: add
+#+begin_src c
+NAMESPACE_Description add(string name, string value)
+{
+  mFields.push(name .. ": " .. value);
+  return self;
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.add("k1", "v1").add("k2", "v2");
+  it("description: two:", Assert(d.compose() == "k1: v1, k2: v2"));
+}
+#+end_src
+
+*** addObject
+#+name: addObject
+#+begin_src c
+NAMESPACE_Description addObject(string name, Object anObject)
+{
+  if (anObject == NULL) return add(name, "NULL");
+
+  string className = anObject.getClassName();
+  return add(name, className);
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  Object o;
+  d.addObject("n", o).addObject("self", self);
+  it("description: object", Assert(d.compose() == "n: NULL, self: su_Test"));
+}
+#+end_src
+
+*** addClass
+#+name: addClass
+#+begin_src c
+NAMESPACE_Description addClass(string name, Class aClass)
+{
+  if (aClass == NULL) return add(name, "NULL");
+  return add(name, aClass.getClassName());
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  string result = new("Description").addClass("c", self.getClass()).compose();
+  it("description: class:", Assert(result == "c: su_Test"));
+}
+#+end_src
+
+*** addBool
+#+name: addBool
+#+begin_src c
+NAMESPACE_Description addBool(string name, bool value)
+{
+  return add(name, NAMESPACE_su.boolToString(value));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addBool("b", true);
+  it("description: bool:", Assert(d.compose() == "b: true"));
+}
+#+end_src
+
+*** addInt
+#+name: addInt
+#+begin_src c
+NAMESPACE_Description addInt(string name, int value)
+{
+  return add(name, string.format("%d", value));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addInt("value", -19);
+  it("description: int", Assert(d.compose() == "value: -19"));
+}
+#+end_src
+
+*** addFloat
+#+name: addFloat
+#+begin_src c
+NAMESPACE_Description addFloat(string name, double value)
+{
+  return add(name, string.format("%.2f", value));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addFloat("value", -19.4);
+  it("description: float", Assert(d.compose() == "value: -19.40"));
+}
+#+end_src
+
+*** addDamageFlags
+#+name: addDamageFlags
+#+begin_src c
+NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
+{
+  Array<string> results;
+  if (flags & DMG_NO_ARMOR)          results.push("DMG_NO_ARMOR");
+  if (flags & DMG_INFLICTOR_IS_PUFF) results.push("DMG_INFLICTOR_IS_PUFF");
+  if (flags & DMG_THRUSTLESS)        results.push("DMG_THRUSTLESS");
+  if (flags & DMG_FORCED)            results.push("DMG_FORCED");
+  if (flags & DMG_NO_FACTOR)         results.push("DMG_NO_FACTOR");
+  if (flags & DMG_PLAYERATTACK)      results.push("DMG_PLAYERATTACK");
+  if (flags & DMG_FOILINVUL)         results.push("DMG_FOILINVUL");
+  if (flags & DMG_FOILBUDDHA)        results.push("DMG_FOILBUDDHA");
+  if (flags & DMG_NO_PROTECT)        results.push("DMG_NO_PROTECT");
+  if (flags & DMG_USEANGLE)          results.push("DMG_USEANGLE");
+  if (flags & DMG_NO_PAIN)           results.push("DMG_NO_PAIN");
+  if (flags & DMG_EXPLOSION)         results.push("DMG_EXPLOSION");
+  if (flags & DMG_NO_ENHANCE)        results.push("DMG_NO_ENHANCE");
+
+  return add(name, NAMESPACE_su.join(results));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addDamageFlags("d", DMG_NO_ARMOR | DMG_NO_ENHANCE);
+  it("description: damage", Assert(d.compose() == "d: DMG_NO_ARMOR, DMG_NO_ENHANCE"));
+}
+#+end_src
+
+*** addCvar
+#+name: addCvar
+#+begin_src c
+NAMESPACE_Description addCvar(string name)
+{
+  let aCvar = Cvar.getCvar(name, players[consolePlayer]);
+  if (aCvar == NULL) return add(name, "NULL");
+
+  switch (aCvar.getRealType())
+    {
+    case Cvar.CVAR_Bool: return addBool(name, NAMESPACE_su.boolToString(aCvar.getInt()));
+    case Cvar.CVAR_Int: return addInt(name, aCvar.getInt());
+    case Cvar.CVAR_Float: return addFloat(name, aCvar.getFloat());
+    case Cvar.CVAR_String: return add(name, aCvar.getString());
+      // TODO: implement color:
+    case Cvar.CVAR_Color: return addInt(name, aCvar.getInt());
+    }
+
+  return add(name, string.format("unknown type (%d)", aCvar.getRealType()));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addCvar("autoaim").addCvar("dmflags2");
+  it("description: cvar", Assert(d.compose() == "autoaim: 35.00, dmflags2: 0"));
+}
+#+end_src
+
+*** addSpac
+#+name: addSpac
+#+begin_src c
+/// SPAC - special activation types.
+NAMESPACE_Description addSpac(string name, int flags)
+{
+  Array<string> results;
+  if (flags & SPAC_Cross)      results.push("SPAC_Cross");
+  if (flags & SPAC_Use)        results.push("SPAC_Use");
+  if (flags & SPAC_MCross)     results.push("SPAC_MCross");
+  if (flags & SPAC_Impact)     results.push("SPAC_Impact");
+  if (flags & SPAC_Push)       results.push("SPAC_Push");
+  if (flags & SPAC_PCross)     results.push("SPAC_PCross");
+  if (flags & SPAC_UseThrough) results.push("SPAC_UseThrough");
+  if (flags & SPAC_AnyCross)   results.push("SPAC_AnyCross");
+  if (flags & SPAC_MUse)       results.push("SPAC_MUse");
+  if (flags & SPAC_MPush)      results.push("SPAC_MPush");
+  if (flags & SPAC_UseBack)    results.push("SPAC_UseBack");
+  if (flags & SPAC_Damage)     results.push("SPAC_Damage");
+  if (flags & SPAC_Death)      results.push("SPAC_Death");
+
+  return add(name, NAMESPACE_su.join(results));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addSpac("s", SPAC_Cross | SPAC_Death);
+  it("description: SPAC", Assert(d.compose() == "s: SPAC_Cross, SPAC_Death"));
+}
+#+end_src
+
+*** addLine
+#+name: addLine
+#+begin_src c
+NAMESPACE_Description addLine(string name, Line aLine)
+{
+  return addInt(name, aLine.index());
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addLine("l", level.lines[1]);
+  it("description: line", Assert(d.compose() == "l: 1"));
+}
+#+end_src
+
+*** addSectorPart
+#+name: addSectorPart
+#+begin_src c
+NAMESPACE_Description addSectorPart(string name, SectorPart part)
+{
+  switch (part)
+    {
+    case SECPART_None:    return add(name, "SECPART_None");
+    case SECPART_Floor:   return add(name, "SECPART_Floor");
+    case SECPART_Ceiling: return add(name, "SECPART_Ceiling");
+    case SECPART_3D:      return add(name, "SECPART_3D");
+    }
+
+  return add(name, string.format("unknown SECPART (%d)", part));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addSectorPart("s", SECPART_3D);
+  it("description: SECPART", Assert(d.compose() == "s: SECPART_3D"));
+}
+#+end_src
+
+*** addSector
+#+name: addSector
+#+begin_src c
+NAMESPACE_Description addSector(string name, Sector aSector)
+{
+  return addInt(name, aSector.index());
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addSector("s", level.sectors[1]);
+  it("description: sector", Assert(d.compose() == "s: 1"));
+}
+#+end_src
+
+*** addVector3
+#+name: addVector3
+#+begin_src c
+NAMESPACE_Description addVector3(string name, vector3 vector)
+{
+  return add(name, string.format("%.2f, %.2f, %.2f", vector.x, vector.y, vector.z));
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  vector3 v = (1.1, 2.2, 3.3);
+  d.addVector3("v", v);
+  it("description: vector", Assert(d.compose() == "v: 1.10, 2.20, 3.30"));
+}
+#+end_src
+
+*** addState
+#+name: addState
+#+begin_src c
+NAMESPACE_Description addState(string name, State aState)
+{
+  return add(name, new("NAMESPACE_Description").
+             addInt("sprite", aState.sprite).
+             addInt("frame", aState.Frame).compose());
+}
+#+end_src
+#+begin_src c :tangle build/StringUtils/zscript.txt
+{
+  let d = new("Description");
+  d.addState("s", players[consolePlayer].ReadyWeapon.FindState("Fire"));
+  it("description: state", Assert(d.compose() == "s: sprite: 899, frame: 0"));
+}
+#+end_src
+
+*** Private attributes
+#+name: DescriptionPrivate
+#+begin_src c
+private Array<string> mFields;
+#+end_src
+
+*** Class contents
+#+name: DescriptionBody
+#+begin_src c
+<<compose>>
+<<add>>
+<<addObject>>
+<<addClass>>
+<<addBool>>
+<<addInt>>
+<<addFloat>>
+<<addDamageFlags>>
+<<addCvar>>
+<<addSpac>>
+<<addLine>>
+<<addSectorPart>>
+<<addSector>>
+<<addVector3>>
+<<addState>>
+<<DescriptionPrivate>>
 #+end_src
 
 * Launch :noexport:
 src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
 src_elisp{(run-tests "wait 1; quit")}
 
-* Class ends
-#+begin_src c :tangle build/StringUtils/StringUtils.txt
-}
-#+end_src
+* Tests end
 #+begin_src c :tangle build/StringUtils/zscript.txt
-}}
+EndDescribe(); }}
 #+end_src
 
-* Licenses :noexport:
+* License :noexport:
 #+name: GPL
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>

@@ -29,6 +29,9 @@ their class name.
 
 Also there is ~dd_report~ console command for gathering a report by manual request.
 
+* Notes
+- Events cannot be destroyed, so event parameters are never NULL.
+
 * Acknowledgments
 - Thanks to KeksDose for the concept of VM abort handler.
 - Thanks to Colerx for bug reports.
@@ -37,7 +40,7 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 * Launch :noexport:
 src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
 # src_elisp{(run-tests "")}
-src_elisp{(run-tests "wait 1; dd_report;")}
+src_elisp{(run-tests "wait 1; dd_i_report;")}
 # src_elisp{(run-tests "wait 1; save-load")}
 
 * Licenses :noexport:
@@ -53,18 +56,32 @@ SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-* Console alias configuration
+* Console commands
+Categories:
+- i: informational
+- c: critical: these commands imitate events that may cause a VM abort
+- s: cosmetic: these commands imitate events that won't cause a VM abort
+
 #+begin_src txt :tangle build/DoomDoctor/keyconf.txt
 // <<CC>>
 
-alias dd_report "event dd_report"
+Alias dd_i_report "event dd_report"
+
+Alias dd_c_nullify_player "netevent dd_nullify_player"
+Alias dd_c_spawn_null_thing "netevent dd_spawn_null_thing; summon dd_Spawnable"
+Alias dd_c_nullify_player_weapon "netevent dd_nullify_player_weapon"
+Alias dd_c_take_all_weapons "netevent dd_take_all_weapons"
+
+Alias dd_c_all "dd_c_spawn_null_thing; dd_c_nullify_player_weapon; dd_c_take_all_weapons"
+
+Alias dd_s_spawn_with_no_tags "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoTag"
 #+end_src
 
 * Event handler declaration
 #+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
 // <<CC>>
 
-gameinfo { AddEventHandlers = "dd_VmAbortHandler" }
+GameInfo { AddEventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_Logger" }
 #+end_src
 
 * Console variables
@@ -102,14 +119,20 @@ class dd_Test : Clematis
 # SPDX-SnippetEnd
 
 * Source code
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+** Preamble
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 // <<GPL>>
 
 version 4.12.2
 
+<<modules()>>
+#+end_src
+
+** VM Abort Handling
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_VmAbortHandler : EventHandler
 {
 
@@ -134,14 +157,14 @@ class dd_VmAbortHandler : EventHandler
         return;
       }
 
-    Console.printf("%s", mReport.report());
+    Console.printf("%s\n%s", mReport.report(), getAttentionMessage());
   }
 
   override void consoleProcess(ConsoleEvent event)
   {
     if (amIFirst() && event.name == "dd_report")
       {
-        Console.printf("%s\n%s", mReport.report(), getAttentionMessage());
+        Console.printf("%s", mReport.report());
       }
   }
 
@@ -162,7 +185,7 @@ class dd_VmAbortHandler : EventHandler
   private clearscope string getAttentionMessage()
   {
     string userName = players[consolePlayer].getUserName();
-    string hashes = "\cg" .. dd_su.repeat("#", 60);
+    string hashes = "\cg############################################################";
 
     Array<string> lines =
       {
@@ -173,7 +196,7 @@ class dd_VmAbortHandler : EventHandler
         " Type \"screenshot\" below to take a screenshot.",
         hashes
       };
-    
+
     return dd_su.join(lines, "\n");
   }
 
@@ -198,62 +221,51 @@ class dd_Report
   {
     Array<string> lines =
       {
-        "Doom Doctor v0.0.0",
+        "Doom Doctor v0.0.0, " .. getSystemTime(),
         getGameInfo(),
         getConfiguration(),
-        getEventHandlers(),
-        getSystemTime()
+        getEventHandlers()
       };
 
     return dd_su.join(lines, "\n");
   }
 
-  private static clearscope string getCvarIntValueAsString(string cvarName)
-  {
-    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
-    return aCvar ? string.format("%s: %d", cvarName, aCvar.getInt()) : "";
-  }
-
-  private static clearscope string getCvarFloatValueAsString(string cvarName)
-  {
-    let aCvar = Cvar.getCvar(cvarName, players[consolePlayer]);
-    return aCvar ? string.format("%s: %f", cvarName, aCvar.getFloat()) : "";
-  }
-
   private static clearscope string getConfiguration()
   {
-    Array<string> configuration =
-      {
-        getCvarIntValueAsString("compatflags"),
-        getCvarIntValueAsString("compatflags2"),
-        getCvarIntValueAsString("dmflags"),
-        getCvarIntValueAsString("dmflags2"),
-        getCvarFloatValueAsString("autoaim")
-      };
-
-    return dd_su.join(configuration, ", ");
+    return new("dd_Description")
+      .addCVar("compatflags")
+      .addCvar("compatflags2")
+      .addCvar("dmflags")
+      .addCvar("dmflags2")
+      .addCvar("autoaim").compose();
   }
 
   private clearscope string getGameInfo()
   {
-    return string.format(
-                         "level: %s, time: %d, multiplayer: %d, player class: %s, skill: %s",
-                         level.mapName, level.totalTime, multiplayer, mPlayerClassName, mSkillName);
+    return new("dd_Description")
+      .add("level", level.mapName)
+      .addInt("time", level.totalTime)
+      .addBool("multiplayer", multiplayer)
+      .add("player class", mPlayerClassName)
+      .add("skill", mSkillName).compose();
   }
 
   private static clearscope string getEventHandlers()
   {
-    Array<string> eventHandlers;
+    Array<string> normalEventHandlers;
+    Array<string> staticEventHandlers;
 
     foreach (aClass : AllClasses)
       {
         if (!(aClass is "StaticEventHandler")) continue;
         if (aClass == "StaticEventHandler" || aClass == "EventHandler") continue;
 
-        eventHandlers.push(aClass.getClassName());
+        if (aClass is "EventHandler") normalEventHandlers.push(aClass.getClassName());
+        else staticEventHandlers.push(aClass.getClassName());
       }
 
-    return "Event handlers: " .. dd_su.join(eventHandlers, ", ");
+    return "Event handlers: " .. dd_su.join(normalEventHandlers) .. "\n" ..
+      "Static event handlers: " .. dd_su.join(staticEventHandlers);
   }
 
   private clearscope string getSystemTime()
@@ -266,7 +278,531 @@ class dd_Report
   private int mSystemTime;
 }
 
-<<modules()>>
+#+end_src
+# SPDX-SnippetEnd
+
+** Troubles
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
+mixin class dd_Volatile { override void Tick() { if (GetAge() > 0) destroy(); }  }
+
+class dd_WeaponWithNoTag : Weapon { mixin dd_Volatile; }
+class dd_Spawnable : Actor { mixin dd_Volatile; }
+
+class dd_EnemyWithNoTag : Actor
+{
+  Default { +IsMonster; }
+  mixin dd_Volatile;
+}
+
+class dd_Troublemaker : EventHandler
+{
+
+  // To be able to change events before they are processed by other event handlers.
+  override void OnRegister() { setOrder(int.min); }
+
+  override void NetworkProcess(ConsoleEvent event)
+  {
+    string command = event.name;
+
+    if      (command == "dd_nullify_player") nullifyPlayer();
+    else if (command == "dd_spawn_null_thing") nullifySpawnedThing();
+    else if (command == "dd_nullify_player_weapon") nullifyPlayerWeapon();
+    else if (command == "dd_take_all_weapons") takeAllWeapons();
+  }
+
+  override void WorldThingSpawned(WorldEvent event)
+  {
+    if (mIsScheduledSpawnedThingIsNull)
+      {
+        mIsScheduledSpawnedThingIsNull = false;
+        event.thing.destroy();
+      }
+  }
+
+  private void nullifyPlayer()
+  {
+    players[consolePlayer].mo.destroy();
+
+    // Interestingly, the
+    //players[consolePlayer].mo = NULL;
+    // just crashes GZDoom. Don't ever do that!
+  }
+
+  private void nullifySpawnedThing()
+  {
+    mIsScheduledSpawnedThingIsNull = true;
+  }
+
+  private void nullifyPlayerWeapon()
+  {
+    players[consolePlayer].readyWeapon = NULL;
+  }
+
+  private void takeAllWeapons()
+  {
+    let player = players[consolePlayer].mo;
+    Inventory weapon;
+    while (weapon = player.findInventory("Weapon", true))
+      {
+        weapon.depleteOrDestroy();
+      }
+  }
+
+  private bool mIsScheduledSpawnedThingIsNull;
+
+} // class dd_Troublemaker
+#+end_src
+# SPDX-SnippetEnd
+
+** Logging
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
+// TODO: add missing static events
+class dd_Logger : StaticEventHandler
+{
+
+  override void OnRegister()
+  {
+    // To catch all changes to events.
+    setOrder(int.max);
+
+    mFunctionName = "OnRegister";
+    logInfo();
+  }
+
+  override void OnUnregister()
+  {
+    mFunctionName = "OnUnregister";
+    logInfo();
+  }
+
+  enum CheckFlags
+    {
+      Nothing       = 1 << 0,
+      OtherHandlers = 1 << 1,
+      PlayerNull    = 1 << 2,
+      WeaponNull    = 1 << 3,
+      NoWeapons     = 1 << 4,
+      ThingNull     = 1 << 5,
+      NoTag         = 1 << 6,
+    };
+  const PlayerChecks = PlayerNull | WeaponNull | NoWeapons;
+
+  override void WorldLoaded(WorldEvent event)
+  {
+    mFunctionName = "WorldLoaded";
+    logInfo(describeWorldEvent(event, IsSaveGame | IsReopen));
+    check(OtherHandlers | PlayerChecks, event);
+  }
+
+  override void WorldUnloaded(WorldEvent event)
+  {
+    mFunctionName = "WorldUnloaded";
+    logInfo(describeWorldEvent(event, IsSaveGame | NextMap));
+  }
+
+  override void WorldThingSpawned(WorldEvent event)
+  {
+    mFunctionName = "WorldThingSpawned";
+    logInfo(describeWorldEvent(event, Thing));
+    check(PlayerChecks | ThingNull | NoTag, event);
+  }
+
+  override void WorldThingDied(WorldEvent event)
+  {
+    mFunctionName = "WorldThingDied";
+    logInfo(describeWorldEvent(event, Thing | Inflictor));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldThingGround(WorldEvent event)
+  {
+    mFunctionName = "WorldThingGround";
+    logInfo(describeWorldEvent(event, Thing | CrushedState));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldThingRevived(WorldEvent event)
+  {
+    mFunctionName = "WorldThingRevived";
+    logInfo(describeWorldEvent(event, Thing));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldThingDamaged(WorldEvent event)
+  {
+    mFunctionName = "WorldThingDamaged";
+    logInfo(describeWorldEvent(event, Thing | Inflictor | DamageProperties
+                               | DamageFlags | DamageAngle));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldThingDestroyed(WorldEvent event)
+  {
+    mFunctionName = "WorldThingDestroyed";
+    logInfo(describeWorldEvent(event, Thing));
+    // Player can be null here, don't check.
+    check(ThingNull, event);
+  }
+
+  override void WorldLinePreActivated(WorldEvent event)
+  {
+    mFunctionName = "WorldLinePreActivated";
+    logInfo(describeWorldEvent(event, Thing | LineProperties | ShouldActivate));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldLineActivated(WorldEvent event)
+  {
+    mFunctionName = "WorldLineActivated";
+    logInfo(describeWorldEvent(event, Thing | LineProperties));
+    check(PlayerChecks | ThingNull, event);
+  }
+
+  override void WorldSectorDamaged(WorldEvent event)
+  {
+    mFunctionName = "WorldSectorDamaged";
+    logInfo(describeWorldEvent(event, DamageProperties | NewDamage | DamagePosition
+                               | DamageIsRadius | DamageSector | DamageSectorPart));
+    check(PlayerChecks, event);
+  }
+
+  override void WorldLineDamaged(WorldEvent event)
+  {
+    mFunctionName = "WorldLineDamaged";
+    logInfo(describeWorldEvent(event, DamageProperties | NewDamage | DamagePosition
+                               | DamageIsRadius | DamageLine | DamageLineSide));
+    check(PlayerChecks, event);
+  }
+
+  override void WorldLightning(WorldEvent event)
+  {
+    mFunctionName = "WorldLightning";
+    logInfo("no parameters");
+    check(PlayerChecks, event);
+  }
+
+  override void WorldTick()
+  {
+    mFunctionName = "WorldTick";
+    // Do not log: frequent event.
+    check(PlayerChecks);
+  }
+
+  override void PlayerEntered(PlayerEvent event)
+  {
+    mFunctionName = "PlayerEntered";
+    logInfo(describePlayerEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void PlayerSpawned(PlayerEvent event)
+  {
+    mFunctionName = "PlayerSpawned";
+    logInfo(describePlayerEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void PlayerRespawned(PlayerEvent event)
+  {
+    mFunctionName = "PlayerRespawned";
+    logInfo(describePlayerEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void PlayerDied(PlayerEvent event)
+  {
+    mFunctionName = "PlayerDied";
+    logInfo(describePlayerEvent(event));
+    check(PlayerChecks);
+  }
+
+  // TODO: test this.
+  override void PlayerDisconnected(PlayerEvent event)
+  {
+    mFunctionName = "PlayerDisconnected";
+    logInfo(describePlayerEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void ConsoleProcess(ConsoleEvent event)
+  {
+    setFunctionName("ConsoleProcess");
+    logInfo(describeConsoleEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void NetworkProcess(ConsoleEvent event)
+  {
+    mFunctionName = "NetworkProcess";
+    logInfo(describeConsoleEvent(event));
+    check(PlayerChecks);
+  }
+
+  override void CheckReplacement(ReplaceEvent event)
+  {
+    mFunctionName = "CheckReplacement";
+    logInfo(describeReplaceEvent(event));
+  }
+
+  override void CheckReplacee(ReplacedEvent event)
+  {
+    mFunctionName = "CheckReplacee";
+    logInfo(describeReplacedEvent(event));
+  }
+
+  override void NewGame()
+  {
+    mFunctionName = "NewGame";
+    logInfo();
+  }
+
+  // Nothing interesting can change here:
+  // RenderOverlay, RenderUnderlay, UiTick, PostUiTick, InputProcess, UiProcess.
+
+  private clearscope void check(int checks, WorldEvent aWorldEvent = NULL)
+  {
+    if (checks & OtherHandlers) checkOtherEventHandlers();
+    if (checks & PlayerNull)    checkPlayerIsNull();
+    if (checks & NoWeapons)     checkPlayerHasNoWeapons();
+    if (checks & WeaponNull)    checkPlayerWeaponIsNull();
+    if (checks & ThingNull)     checkWorldEventThingIsNull(aWorldEvent);
+    if (checks & NoTag)         checkWorldEventThingTag(aWorldEvent);
+  }
+
+  enum WorldEventParameterFlags
+    {
+      IsSaveGame       = 1 <<  0,
+      IsReopen         = 1 <<  1,
+      NextMap          = 1 <<  2,
+
+      Thing            = 1 <<  3,
+      Inflictor        = 1 <<  4,
+
+      Damage           = 1 <<  5,
+      DamageSource     = 1 <<  6,
+      DamageType       = 1 <<  7,
+      DamageFlags      = 1 <<  8,
+      DamageAngle      = 1 <<  9,
+
+      ActivatedLine    = 1 << 10,
+      ActivationType   = 1 << 11,
+      ShouldActivate   = 1 << 12,
+
+      DamageSectorPart = 1 << 13,
+      DamageLine       = 1 << 14,
+      DamageSector     = 1 << 15,
+      DamageLineSide   = 1 << 16,
+      DamagePosition   = 1 << 17,
+      DamageIsRadius   = 1 << 18,
+      NewDamage        = 1 << 19,
+      CrushedState     = 1 << 20,
+    };
+  const DamageProperties = Damage | DamageSource | DamageType;
+  const LineProperties = ActivatedLine | ActivationType;
+
+  private static string describeWorldEvent(WorldEvent e, int parameters)
+  {
+    let d = new("dd_Description");
+    int p = parameters;
+
+    if (p & IsSaveGame)       d.addBool       ("IsSaveGame",       e.IsSaveGame);
+    if (p & IsReopen)         d.addBool       ("IsReopen",         e.IsReopen);
+    if (p & NextMap)          d.add           ("NextMap",          e.NextMap);
+
+    if (p & Thing)            d.addObject     ("Thing",            e.Thing);
+    if (p & Inflictor)        d.addObject     ("Inflictor",        e.Inflictor);
+
+    if (p & Damage)           d.addInt        ("Damage",           e.Damage);
+    if (p & DamageSource)     d.addObject     ("DamageSource",     e.DamageSource);
+    if (p & DamageType)       d.add           ("DamageType",       e.DamageType);
+
+    if (p & DamageFlags)      d.addDamageFlags("DamageFlags",      e.DamageFlags);
+    if (p & DamageAngle)      d.addFloat      ("DamageAngle",      e.DamageAngle);
+
+    if (p & ActivatedLine)    d.addLine       ("ActivatedLine",    e.ActivatedLine);
+    if (p & ActivationType)   d.addSpac       ("ActivationType",   e.ActivationType);
+    if (p & ShouldActivate)   d.addBool       ("ShouldActivate",   e.ShouldActivate);
+
+    if (p & DamageSector)     d.addSector     ("DamageSector",     e.DamageSector);
+    if (p & DamageSectorPart) d.addSectorPart ("DamageSectorPart", e.DamageSectorPart);
+
+    if (p & DamageLine)       d.addLine       ("DamageLine",       e.DamageLine);
+    if (p & DamageLineSide)   d.addInt        ("DamageLineSide",   e.DamageLineSide);
+
+    if (p & DamagePosition)   d.addVector3    ("DamagePosition",   e.DamagePosition);
+    if (p & DamageIsRadius)   d.addBool       ("DamageIsRadius",   e.DamageIsRadius);
+    if (p & NewDamage)        d.addInt        ("NewDamage",        e.NewDamage);
+
+    if (p & CrushedState)     d.addState      ("CrushedState",     e.CrushedState);
+
+    return d.compose();
+  }
+
+  private static string describePlayerEvent(PlayerEvent event)
+  {
+    return new("dd_Description").
+      addInt("PlayerNumber", event.playerNumber).
+      addBool("IsReturn", event.isReturn).compose();
+  }
+
+  private clearscope static string describeConsoleEvent(ConsoleEvent event)
+  {
+    return new("dd_Description").
+      addInt ("Player",   event.Player).
+      add    ("Name",     event.Name).
+      add    ("Args",     string.format("%d, %d, %d",
+                                        event.Args[0], event.Args[1], event.Args[2])).
+      addBool("IsManual", event.IsManual).compose();
+  }
+
+  private static string describeReplaceEvent(ReplaceEvent event)
+  {
+    return new("dd_Description").
+      addClass("Replacee",    event.Replacee).
+      addClass("Replacement", event.Replacement).
+      addBool ("IsFinal",     event.IsFinal).compose();
+  }
+
+  private static string describeReplacedEvent(ReplacedEvent event)
+  {
+    return new("dd_Description").
+      addClass("Replacee",    event.Replacee).
+      addClass("Replacement", event.Replacement).
+      addBool ("IsFinal",     event.IsFinal).compose();
+  }
+
+  private clearscope void checkPlayerIsNull()
+  {
+    if (mIsPlayerNullLogged ||  players[consolePlayer].mo != NULL) return;
+
+    setIsPlayerNullLogged(true);
+    logError("player is NULL");
+  }
+
+  private clearscope void checkWorldEventThingIsNull(WorldEvent event)
+  {
+    if (event.thing == NULL) logError("WorldEvent.thing is NULL");
+  }
+
+  private clearscope void checkWorldEventThingTag(WorldEvent event)
+  {
+    Actor thing = event.thing;
+    if (thing == NULL) return;
+
+    if ((thing.bIsMonster || thing is "Weapon") && thing.getTag(".") == ".")
+      {
+        logWarning("class " .. thing.getClassName() .. " is missing a tag");
+      }
+  }
+
+  private clearscope void checkPlayerWeaponIsNull()
+  {
+    if (!mIsPlayerWeaponNullLogged && players[consolePlayer].readyWeapon == NULL)
+      {
+        setIsPlayerWeaponNullLogged(true);
+        logError("player weapon is NULL");
+      }
+
+    if (players[consolePlayer].readyWeapon != NULL)
+      setIsPlayerWeaponNullLogged(false);
+  }
+
+  private clearscope void checkPlayerHasNoWeapons()
+  {
+    let player = players[consolePlayer].mo;
+    if (player == NULL) return;
+
+    if (player.findInventory("Weapon", true) == NULL && !mIsPlayerHasNoWeaponsLogged)
+      {
+        setIsPlayerHasNoWeaponsLogged(true);
+        logError("player has no weapons");
+      }
+  }
+
+  private clearscope void checkOtherEventHandlers()
+  {
+    if (mAreOtherEventHandlersChecked) return;
+    setAreOtherEventHandlersChecked(true);
+
+    bool isLoggerFound = false;
+    bool isTroublemakerFound = false;
+
+    foreach (aClass : AllClasses)
+      {
+        if (aClass is "dd_Logger") isLoggerFound = true;
+        if (aClass is "dd_Troublemaker") isTroublemakerFound = true;
+
+        if (!(aClass is "StaticEventHandler")
+            || aClass == "StaticEventHandler"
+            || aClass == "EventHandler"
+            || aClass == "dd_Logger"
+            || aClass == "dd_Troublemaker") continue;
+
+        string eventHandlerName = aClass.getClassName();
+        class<StaticEventHandler> eventHandlerClass = eventHandlerName;
+        let instance = (aClass is "EventHandler")
+          ? EventHandler.find(eventHandlerClass)
+          : StaticEventHandler.find(eventHandlerClass);
+
+        if (instance == NULL)
+          {
+            logWarning("event handler %s is defined but not activated in MAPINFO",
+                       eventHandlerName);
+            continue;
+          }
+
+        int contenderOrder = instance.order;
+        if (contenderOrder == int.max && isLoggerFound)
+          {
+            logWarning("can't inspect events from %s. Load Doom Doctor after it or increase event handler order",
+                       eventHandlerName);
+          }
+
+        else if (contenderOrder == int.min && !isTroublemakerFound)
+          {
+            logWarning("simulated troubles won't affect %s. Load Doom Doctor before it or decrease event handler order",
+                       eventHandlerName);
+          }
+      }
+  }
+
+  // TODO: bundle repeated logs
+  // TODO: redirect Console.printf for testing.
+  private clearscope void logError(string format, string s = "")
+  {
+    Console.printf("[ERROR] %s: %s.", mFunctionName, string.format(format, s));
+  }
+
+  private clearscope void logWarning(string format, string s = "")
+  {
+    Console.printf("[WARNING] %s: %s.", mFunctionName, string.format(format, s));
+  }
+
+  private clearscope void logInfo(string message = "(empty)")
+  {
+    Console.printf("[INFO] %s: %s.", mFunctionName, message);
+  }
+
+  // Hack to set class members from UI and data scopes.
+  private play void setFunctionName(string n) const { mFunctionName = n; }
+  private play void setIsPlayerNullLogged(bool b) const { mIsPlayerNullLogged = b; }
+  private play void setIsPlayerWeaponNullLogged(bool b) const { mIsPlayerWeaponNullLogged = b; }
+  private play void setIsPlayerHasNoWeaponsLogged(bool b) const { mIsPlayerHasNoWeaponsLogged = b; }
+  private play void setAreOtherEventHandlersChecked(bool b) const { mAreOtherEventHandlersChecked = b; }
+
+  private string mFunctionName;
+  private bool mIsPlayerNullLogged;
+  private bool mIsPlayerWeaponNullLogged;
+  private bool mIsPlayerHasNoWeaponsLogged;
+  private bool mAreOtherEventHandlersChecked;
+
+} // class dd_Logger
 #+end_src
 # SPDX-SnippetEnd
 
@@ -285,6 +821,47 @@ class dd_Report
 
 * TODO
 - test manually for regressions
-- incorporate Mod Compatibility Checklist
 - add logging?
 - describe features
+- ? make Doom Doctor savefile-pluggable (StaticEventHandler)
+
+* MCC
+** Readme
+# Mod Compatibility Checklist
+
+Mod Compatibility Checklist (MCC) is a GZDoom add-on that is designed to:
+- help modders make more robust mods;
+- help players make more elaborate bug reports.
+
+MCC consists of two parts: logging suspicious events and simulating them for
+testing purposes.
+
+This add-on is a part of [m8f's doctor's bag](https://mmaulwurff.github.io/pages/doctors-bag).
+
+## Features
+
+### Logging
+
+- if player becomes NULL;
+- if thing in WorldEvent becomes NULL;
+- if an enemy or a weapon doesn't have a tag;
+- if player's current weapon is NULL;
+- if player has no weapons;
+- if an event handler is defined but not used.
+
+Logger is set up so it catches suspicious events from almost all other event
+handlers. If MCC can't catch events from an event handler, a notice to change
+load order is displayed.
+
+### Simulating
+
+- Critical: make player NULL (even base game doesn't survive this event);
+- Important: make a WorldThingSpawned WorldEvent that has NULL thing;
+- Important: make player's current weapon NULL;
+- Important: take away all weapons from the player;
+- A command to call all Important events simultaneously (for faster testing);
+- Cosmetic: spawn a weapon and a monster with no tags (this event is mostly used
+  to test MCC itself).
+
+Commands can be viewed in keyconf.txt lump, or in GZDoom console by pressing tab
+after typing `dd-`. All commands have `dd-` prefix and descriptive names.
