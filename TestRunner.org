@@ -6,15 +6,13 @@
 #+title: Test Runner
 
 * Test Runner
-What should it do?
-
-It should run all tests it can find, in all mods that are loaded alongside.
+It runs all Clematis tests it can find, in all mods that are loaded alongside.
 
 * Clematis runner
 #+begin_src txt :tangle build/TestRunner/mapinfo.txt
 // <<CC>>
 
-gameinfo { AddEventHandlers = "TestEventHandler" }
+GameInfo { EventHandlers = "TestRunner" }
 #+end_src
 
 #+begin_src c :tangle build/TestRunner/zscript.txt
@@ -23,21 +21,49 @@ gameinfo { AddEventHandlers = "TestEventHandler" }
 version 4.12.2
 
 // TODO: handle tests that reload the map.
-class TestEventHandler : StaticEventHandler
+class TestRunner : StaticEventHandler
 {
+  override void OnRegister()
+  {
+    // To run after most event handlers.
+    setOrder(int.max);
+
+    foreach (aClass : AllClasses)
+      {
+        if (!(aClass is "Clematis") || aClass == "Clematis") continue;
+
+        mTestClasses.push(aClass.getClassName());
+      }
+
+    if (mTestClasses.size() == 0)
+      {
+        Console.printf("TestRunner: No tests found.");
+        return;
+      }
+
+    string message = string.format("TestRunner: found tests (%d):", mTestClasses.size());
+    foreach (testClass : mTestClasses)
+      {
+        message.appendFormat(" " .. testClass);
+      }
+    Console.printf(message);
+  }
+
   override void onEngineInitialize()
   {
     Console.Printf("Running tests...");
     int testsFound = 0;
     foreach (aClass : AllClasses)
-    {
-      if (!(aClass is "Clematis") || aClass == "Clematis") continue;
+      {
+        if (!(aClass is "Clematis") || aClass == "Clematis") continue;
 
-      ++testsFound;
-      Clematis.Create(aClass.GetClassName());
-    }
+        ++testsFound;
+        Clematis.Create(aClass.GetClassName());
+      }
     Console.Printf("Run tests: %d.", testsFound);
   }
+
+  Array<Name> mTestClasses;
 }
 #+end_src
 
@@ -67,14 +93,15 @@ Environment:
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
 
 #+begin_src elisp :tangle build/TestRunner/dt-scripts.el
-; <<CC>>
+                                        ; <<CC>>
 
-; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
-; TODO: filter uninteresting GZDoom output lines.
+                                        ; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+                                        ; TODO: filter uninteresting GZDoom output lines.
+                                        ; TODO: replac shell command with direct call?
 
 (defun run-tests (command)
-    (org-babel-tangle)
-    (shell-command (concat "gzdoom -noautoload -nosound \
+  (org-babel-tangle)
+  (shell-command (concat "gzdoom -noautoload -nosound \
 -config build/TestRunner/config.ini \
 -iwad " (getenv "IWAD_PATH") " \
 -file " (getenv "CLEMATIS_PATH") " build/* \
