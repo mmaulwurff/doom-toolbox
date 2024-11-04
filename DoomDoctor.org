@@ -81,7 +81,10 @@ Alias dd_s_spawn_with_no_tags "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoT
 #+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
 // <<CC>>
 
-GameInfo { AddEventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_Logger" }
+GameInfo
+{
+  EventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_BufferedConsole", "dd_Logger"
+}
 #+end_src
 
 * Console variables
@@ -95,7 +98,7 @@ user bool dd_vm_abort_report_enabled = true;
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
 // <<CC>>
 
-gameinfo { AddEventHandlers = "dd_TestEventHandler" }
+GameInfo { EventHandlers = "dd_TestEventHandler" }
 #+end_src
 
 # SPDX-SnippetBegin
@@ -362,6 +365,27 @@ class dd_Troublemaker : EventHandler
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
+class dd_BufferedConsole : StaticEventHandler
+{
+  static clearscope dd_BufferedConsole getInstance()
+  {
+    return dd_BufferedConsole(find("dd_BufferedConsole"));
+  }
+
+  static clearscope void printf(string format, string arg1, string arg2)
+  {
+    string message = string.format(format, arg1, arg2);
+
+    getInstance().append(message);
+    Console.printf(message);
+  }
+
+  void append(string message) const { mBuffer.appendFormat("\n" .. message); }
+  void clear() const { mBuffer = ""; }
+
+  private string mBuffer;
+}
+
 // TODO: add missing static events
 class dd_Logger : StaticEventHandler
 {
@@ -802,6 +826,7 @@ class dd_Logger : StaticEventHandler
   private bool mIsPlayerHasNoWeaponsLogged;
   private bool mAreOtherEventHandlersChecked;
 
+  dd_BufferedConsole console;
 } // class dd_Logger
 #+end_src
 # SPDX-SnippetEnd
