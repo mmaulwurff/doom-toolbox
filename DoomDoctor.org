@@ -22,9 +22,6 @@ If there are several VM abort handlers loaded, only the first one will print stu
 
 Also there is ~dd_report~ console command for gathering a report by manual request.
 
-* Notes
-- Events cannot be destroyed, so event parameters are never NULL.
-
 * Acknowledgments
 - Thanks to KeksDose for the concept of VM abort handler.
 - Thanks to Colerx for bug reports.
@@ -39,6 +36,19 @@ SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
+#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
+// <<CC>>
+#+end_src
+
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src :exports none
@@ -46,58 +56,29 @@ SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-* Console commands
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
-// <<CC>>
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
+// <<GPL>>
 #+end_src
-
-** Helper commands
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
-Alias dd_report                "event dd_report"
-Alias dd_revive_everything     "netevent dd_revive_everything"
-Alias dd_force_lightning       "netevent dd_force_lightning"
-#+end_src
-
-** Commands to cause problematic events
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
-Alias dd_nullify_player        "netevent dd_nullify_player"
-Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
-Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
-Alias dd_take_all_weapons      "netevent dd_take_all_weapons"
-Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoTag"
-#+end_src
-
-* Event handler declaration
-#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
-// <<CC>>
-
-GameInfo
-{
-  EventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_BufferedConsole", "dd_Logger"
-}
-#+end_src
-
-* Console variables
-#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
-// <<CC>>
-
-user bool dd_vm_abort_report_enabled = true;
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
+// <<GPL>>
 #+end_src
 
 * Tests preamble
-src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
-# src_elisp{(run-tests "")}
-# src_elisp{(run-tests "wait 1; save-load")}
-
 Notes:
-- Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet.
-  TODO: make the scripts wait until something happens.
+- Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet. TODO: make the scripts wait until something happens.
 - Triggering several events at once to speed up tests. The events should not interfere with each other.
 - Warp and use commands are supposed to activate the Miniwad end level button.
 
 #+begin_src elisp
+(load-file "build/TestRunner/dt-scripts.el")
+
 (run-tests
- "wait 2;
+ "  dd_logging_engine_events_enabled  true;
+    dd_logging_replace_events_enabled true;
+    dd_logging_world_events_enabled   true;
+    dd_logging_player_events_enabled  true;
+    dd_logging_process_events_enabled true;
+  wait 2;
     dd_i_report;
     map map02;
   wait 2;
@@ -114,8 +95,6 @@ Notes:
 #+end_src
 
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
-// <<CC>>
-
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
@@ -123,8 +102,6 @@ GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
-// <<GPL>>
-
 version 4.12.2
 
 class dd_LoggerTest : Clematis {}
@@ -159,17 +136,22 @@ class dd_LoggerTestRunner : StaticEventHandler
     mTest.EndDescribe();
   }
 #+end_src
+# SPDX-SnippetEnd
 
 #+name: count-logger-tests
 #+begin_src elisp
 (s-count-matches "assert(\"log: " (buffer-string))
 #+end_src
-# SPDX-SnippetEnd
 
 * Source code preamble
-#+begin_src c :tangle build/DoomDoctor/zscript.txt
-// <<GPL>>
+#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
+GameInfo
+{
+  EventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_BufferedConsole", "dd_Logger"
+}
+#+end_src
 
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
 version 4.12.2
 
 <<modules()>>
@@ -184,6 +166,17 @@ TODO: rename TestRunner? Or move module loading script elsewhere.
 #+end_src
 
 * VM Abort Handling
+** Settings
+#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+user bool dd_vm_abort_report_enabled = true;
+#+end_src
+
+** Console commands
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+Alias dd_report "event dd_report"
+#+end_src
+
+** Source
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
@@ -337,6 +330,23 @@ class dd_Report
 # SPDX-SnippetEnd
 
 * Troubles
+** Console commands
+*** Helper commands
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+Alias dd_revive_everything     "netevent dd_revive_everything"
+Alias dd_force_lightning       "netevent dd_force_lightning"
+#+end_src
+
+*** Commands to cause problematic events
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+Alias dd_nullify_player        "netevent dd_nullify_player"
+Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
+Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
+Alias dd_take_all_weapons      "netevent dd_take_all_weapons"
+Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoTag"
+#+end_src
+
+** Source
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
@@ -436,9 +446,17 @@ class dd_Troublemaker : EventHandler
 # SPDX-SnippetEnd
 
 * Logging
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+TODO: add a command to disable all logging.
+
+** Settings
+#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+server bool dd_logging_engine_events_enabled  = false;
+server bool dd_logging_replace_events_enabled = false;
+
+user bool dd_logging_world_events_enabled   = false;
+user bool dd_logging_player_events_enabled  = false;
+user bool dd_logging_process_events_enabled = false;
+#+end_src
 
 ** dd_BufferedConsole
 Prints to the engine console and saves the messages so they can be checked.
@@ -446,6 +464,9 @@ Also prints level time.
 
 StaticEventHandler used as Singleton.
 
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_BufferedConsole : StaticEventHandler
 {
@@ -470,19 +491,28 @@ class dd_BufferedConsole : StaticEventHandler
   private string mBuffer;
 }
 #+end_src
+# SPDX-SnippetEnd
 
 ** dd_Logger
-The following events are not logged, because nothing interesting can change here: RenderOverlay, RenderUnderlay, UiTick, PostUiTick, InputProcess, UiProcess.
+Notes
+- The following events are not logged, because nothing interesting can change here: RenderOverlay, RenderUnderlay, UiTick, PostUiTick, InputProcess, UiProcess.
+- Events cannot be destroyed, so event parameters are never NULL.
 
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_Logger : StaticEventHandler
 {
 #+end_src
 
-*** OnRegister
+*** Engine events
+**** OnRegister
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void OnRegister()
 {
+  if (!dd_logging_engine_events_enabled) return;
+    
   // To catch all changes to events.
   setOrder(int.max - 1);
 
@@ -498,11 +528,12 @@ void OnRegisterTest()
 }
 #+end_src
 
-*** OnUnregister
-- TODO: make TestRunner restart the map for some tests
+**** OnUnregister
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void OnUnregister()
 {
+  if (!dd_logging_engine_events_enabled) return;
+
   mFunctionName = "OnUnregister";
   logInfo();
 }
@@ -510,10 +541,12 @@ override void OnUnregister()
 
 Note: event order for OnUnregister is reversed.
 
-*** OnEngineInitialize
+**** OnEngineInitialize
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void OnEngineInitialize()
 {
+  if (!dd_logging_engine_events_enabled) return;
+
   mFunctionName = "OnEngineInitialize";
   logInfo();
 }
@@ -526,10 +559,36 @@ override void OnEngineInitialize()
 }
 #+end_src
 
-*** WorldLoaded
+**** NewGame
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
+override void NewGame()
+{
+  if (!dd_logging_engine_events_enabled) return;
+
+  mFunctionName = "NewGame";
+  logInfo();
+}
+#+end_src
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
+override void NewGame()
+{
+  <<only-once()>>;
+
+  assert("log: NewGame", mConsole.contains("NewGame"));
+  mConsole.clear();
+}
+#+end_src
+
+*** World events
+**** WorldLoaded
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldLoaded(WorldEvent event)
 {
+  // To load Cvars when the game is loaded from a save.
+  loadCvars();
+
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldLoaded";
   logInfo(describeWorldEvent(event, IsSaveGame | IsReopen));
   check(OtherHandlers | PlayerChecks, event);
@@ -547,10 +606,12 @@ override void WorldLoaded(WorldEvent event)
 }
 #+end_src
 
-*** WorldUnloaded
+**** WorldUnloaded
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldUnloaded(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldUnloaded";
   logInfo(describeWorldEvent(event, IsSaveGame | NextMap));
 }
@@ -558,10 +619,12 @@ override void WorldUnloaded(WorldEvent event)
 
 Note: event order for WorldUnloaded is reversed.
 
-*** WorldThingSpawned
+**** WorldThingSpawned
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingSpawned(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingSpawned";
   logInfo(describeWorldEvent(event, Thing));
   check(PlayerChecks | ThingNull | NoTag, event);
@@ -578,10 +641,12 @@ override void WorldThingSpawned(WorldEvent event)
 }
 #+end_src
 
-*** WorldThingDied
+**** WorldThingDied
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingDied(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingDied";
   logInfo(describeWorldEvent(event, Thing | Inflictor));
   check(PlayerChecks | ThingNull, event);
@@ -600,10 +665,12 @@ override void WorldThingDied(WorldEvent event)
 }
 #+end_src
 
-*** WorldThingGround
+**** WorldThingGround
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingGround(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingGround";
   logInfo(describeWorldEvent(event, Thing | CrushedState));
   check(PlayerChecks | ThingNull, event);
@@ -612,10 +679,12 @@ override void WorldThingGround(WorldEvent event)
 
 TODO: how to test this?
 
-*** WorldThingRevived
+**** WorldThingRevived
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingRevived(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingRevived";
   logInfo(describeWorldEvent(event, Thing));
   check(PlayerChecks | ThingNull, event);
@@ -633,10 +702,12 @@ override void WorldThingRevived(WorldEvent event)
 }
 #+end_src
 
-*** WorldThingDamaged
+**** WorldThingDamaged
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingDamaged(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingDamaged";
   logInfo(describeWorldEvent(event, Thing | Inflictor | DamageProperties
                              | DamageFlags | DamageAngle));
@@ -658,10 +729,12 @@ override void WorldThingDamaged(WorldEvent event)
 }
 #+end_src
 
-*** WorldThingDestroyed
+**** WorldThingDestroyed
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldThingDestroyed(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldThingDestroyed";
   logInfo(describeWorldEvent(event, Thing));
   // Player can be null here, don't check.
@@ -671,10 +744,12 @@ override void WorldThingDestroyed(WorldEvent event)
 
 Note: event order for WorldThingDestroyed is reversed.
 
-*** WorldLinePreActivated
+**** WorldLinePreActivated
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldLinePreActivated(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldLinePreActivated";
   logInfo(describeWorldEvent(event, Thing | LineProperties | ShouldActivate));
   check(PlayerChecks | ThingNull, event);
@@ -691,10 +766,12 @@ override void WorldLinePreActivated(WorldEvent event)
 }
 #+end_src
 
-*** WorldLineActivated
+**** WorldLineActivated
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldLineActivated(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldLineActivated";
   logInfo(describeWorldEvent(event, Thing | LineProperties));
   check(PlayerChecks | ThingNull, event);
@@ -710,10 +787,12 @@ override void WorldLineActivated(WorldEvent event)
 }
 #+end_src
 
-*** WorldSectorDamaged
+**** WorldSectorDamaged
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldSectorDamaged(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldSectorDamaged";
   logInfo(describeWorldEvent(event, DamageProperties | NewDamage | DamagePosition
                              | DamageIsRadius | DamageSector | DamageSectorPart));
@@ -721,10 +800,12 @@ override void WorldSectorDamaged(WorldEvent event)
 }
 #+end_src
 
-*** WorldSectorDamaged
+**** WorldLineDamaged
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldLineDamaged(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldLineDamaged";
   logInfo(describeWorldEvent(event, DamageProperties | NewDamage | DamagePosition
                              | DamageIsRadius | DamageLine | DamageLineSide));
@@ -732,10 +813,12 @@ override void WorldLineDamaged(WorldEvent event)
 }
 #+end_src
 
-*** WorldLightning
+**** WorldLightning
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldLightning(WorldEvent event)
 {
+  if (!dd_logging_world_events_enabled.getBool()) return;
+
   mFunctionName = "WorldLightning";
   logInfo("no parameters");
   check(PlayerChecks, event);
@@ -749,7 +832,7 @@ override void WorldLightning(WorldEvent event)
 }
 #+end_src
 
-*** WorldTick
+**** WorldTick
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void WorldTick()
 {
@@ -759,10 +842,13 @@ override void WorldTick()
 }
 #+end_src
 
-*** PlayerEntered
+*** Player events
+**** PlayerEntered
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void PlayerEntered(PlayerEvent event)
 {
+  if (!dd_logging_player_events_enabled.getBool()) return;
+
   mFunctionName = "PlayerEntered";
   logInfo(describePlayerEvent(event));
   check(PlayerChecks);
@@ -780,10 +866,14 @@ override void PlayerEntered(PlayerEvent event)
 }
 #+end_src
 
-*** PlayerSpawned
+**** PlayerSpawned
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void PlayerSpawned(PlayerEvent event)
 {
+  loadCvars();
+  
+  if (!dd_logging_player_events_enabled.getBool()) return;
+
   mFunctionName = "PlayerSpawned";
   logInfo(describePlayerEvent(event));
   check(PlayerChecks);
@@ -799,10 +889,12 @@ override void PlayerSpawned(PlayerEvent event)
 }
 #+end_src
 
-*** PlayerRespawned
+**** PlayerRespawned
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void PlayerRespawned(PlayerEvent event)
 {
+  if (!dd_logging_player_events_enabled.getBool()) return;
+
   mFunctionName = "PlayerRespawned";
   logInfo(describePlayerEvent(event));
   check(PlayerChecks);
@@ -816,10 +908,12 @@ override void PlayerRespawned(PlayerEvent event)
 }
 #+end_src
 
-*** PlayerDied
+**** PlayerDied
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void PlayerDied(PlayerEvent event)
 {
+  if (!dd_logging_player_events_enabled.getBool()) return;
+
   mFunctionName = "PlayerDied";
   logInfo(describePlayerEvent(event));
   check(PlayerChecks);
@@ -833,21 +927,26 @@ override void PlayerDied(PlayerEvent event)
 }
 #+end_src
 
-*** PlayerDisconnected
+**** PlayerDisconnected
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 // TODO: test this.
 override void PlayerDisconnected(PlayerEvent event)
 {
+  if (!dd_logging_player_events_enabled.getBool()) return;
+
   mFunctionName = "PlayerDisconnected";
   logInfo(describePlayerEvent(event));
   check(PlayerChecks);
 }
 #+end_src
 
-*** ConsoleProcess
+*** Process events
+**** ConsoleProcess
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void ConsoleProcess(ConsoleEvent event)
 {
+  if (!dd_logging_process_events_enabled.getBool()) return;
+
   setFunctionName("ConsoleProcess");
   logInfo(describeConsoleEvent(event));
   check(PlayerChecks);
@@ -862,10 +961,12 @@ override void ConsoleProcess(ConsoleEvent event)
 }
 #+end_src
 
-*** InterfaceProcess
+**** InterfaceProcess
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void InterfaceProcess(ConsoleEvent event)
 {
+  if (!dd_logging_process_events_enabled.getBool()) return;
+
   setFunctionName("InterfaceProcess");
   logInfo(describeConsoleEvent(event));
   check(PlayerChecks);
@@ -881,10 +982,12 @@ override void InterfaceProcess(ConsoleEvent event)
 }
 #+end_src
 
-*** NetworkProcess
+**** NetworkProcess
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void NetworkProcess(ConsoleEvent event)
 {
+  if (!dd_logging_process_events_enabled.getBool()) return;
+
   mFunctionName = "NetworkProcess";
   logInfo(describeConsoleEvent(event));
   check(PlayerChecks);
@@ -902,10 +1005,13 @@ override void NetworkProcess(ConsoleEvent event)
 }
 #+end_src
 
-*** CheckReplacement
+*** Replacement events
+**** CheckReplacement
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void CheckReplacement(ReplaceEvent event)
 {
+  if (!dd_logging_replace_events_enabled) return;
+
   mFunctionName = "CheckReplacement";
   logInfo(describeReplaceEvent(event));
 }
@@ -921,34 +1027,18 @@ override void CheckReplacement(ReplaceEvent event)
 }
 #+end_src
 
-*** CheckReplacee
+**** CheckReplacee
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 override void CheckReplacee(ReplacedEvent event)
 {
+  if (!dd_logging_replace_events_enabled) return;
+
   mFunctionName = "CheckReplacee";
   logInfo(describeReplacedEvent(event));
 }
 #+end_src
 
 Note: nothing is replaced, so no such event in the base game.
-
-*** NewGame
-#+begin_src c :tangle build/DoomDoctor/zscript.txt
-override void NewGame()
-{
-  mFunctionName = "NewGame";
-  logInfo();
-}
-#+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
-override void NewGame()
-{
-  <<only-once()>>;
-
-  assert("log: NewGame", mConsole.contains("NewGame"));
-  mConsole.clear();
-}
-#+end_src
 
 *** Constants
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
@@ -1203,10 +1293,23 @@ private bool mIsPlayerWeaponNullLogged;
 private bool mIsPlayerHasNoWeaponsLogged;
 private bool mAreOtherEventHandlersChecked;
 
-dd_BufferedConsole console;
+private dd_BufferedConsole console;
+
+<<define-cvars('("dd_logging_world_events_enabled" "dd_logging_player_events_enabled" "dd_logging_process_events_enabled"))>>
 } // class dd_Logger
 #+end_src
 # SPDX-SnippetEnd
+
+#+name: define-cvars
+#+begin_src elisp :var cvars=()
+(concat
+ "private void loadCvars()\n{\n"
+ "  PlayerInfo player = players[consolePlayer];\n"
+ (mapconcat (lambda (x) (format "  %1$s = Cvar.getCvar(\"%1$s\", player);\n" x))
+            cvars)
+ "}\n\n"
+ (mapconcat (lambda (x) (format "private Cvar %s;\n" x)) cvars))
+#+end_src
 
 * Tests end
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
@@ -1233,4 +1336,3 @@ dd_BufferedConsole console;
 - test manually for regressions
 - describe features
 - ? make Doom Doctor savefile-pluggable (StaticEventHandler)
-- Move file structure QA to a separate file, add link here.
