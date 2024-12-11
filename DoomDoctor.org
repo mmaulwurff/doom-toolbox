@@ -1325,11 +1325,11 @@ private dd_BufferedConsole console;
 #+end_src
 #+name: only-once-park-flags
 #+begin_src elisp
-(let ((definitions ""))
-  (dotimes (i (1+ only-once-id))
-    (setq definitions (format "%sprivate bool mOnlyOnceFlag%d;\n" definitions i)))
+(let ((id only-once-id))
   (makunbound 'only-once-id)
-  definitions)
+  (mapconcat
+   (lambda (x) (format "private bool mOnlyOnceFlag%d;\n" x))
+   (number-sequence 0 id)))
 #+end_src
 
 * TODO
