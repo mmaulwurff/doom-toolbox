@@ -3,24 +3,37 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Test Runner
+#+title: Elisp Utilities
 
-* Test Runner
+* ZScript modules
+Facilitate ZScript code reuse.
+
+TODO: add a doc-string.
+
+#+begin_src elisp :tangle build/ElispUtilities/dt-scripts.el
+(defun tangle-module (prefix module)
+  (org-babel-tangle-file (concat module ".org"))
+  (string-replace
+   "NAMESPACE_"
+   prefix
+   (f-read-text (concat "build/" module "/" module ".txt"))))
+#+end_src
+
+* Clematis tests runner
 It runs all Clematis tests it can find, in all mods that are loaded alongside.
 
-* Clematis runner
-#+begin_src txt :tangle build/TestRunner/mapinfo.txt
+** TestRunner
+#+begin_src txt :tangle build/ElispUtilities/mapinfo.txt
 // <<CC>>
 
 GameInfo { EventHandlers = "TestRunner" }
 #+end_src
 
-#+begin_src c :tangle build/TestRunner/zscript.txt
+#+begin_src c :tangle build/ElispUtilities/zscript.txt
 // <<CC>>
 
 version 4.12.2
 
-// TODO: handle tests that reload the map.
 class TestRunner : StaticEventHandler
 {
   override void OnRegister()
@@ -67,8 +80,10 @@ class TestRunner : StaticEventHandler
 }
 #+end_src
 
-* Config
-#+begin_src ini :tangle build/TestRunner/config.ini
+** Config
+Minimal config for testing purposes.
+
+#+begin_src ini :tangle build/ElispUtilities/config.ini
 # <<CC>>
 
 [GlobalSettings]
@@ -87,36 +102,35 @@ m_quickexit=true
 vid_cursor=cursor
 #+end_src
 
-* Launch :noexport:
+** Launch script
 Environment:
 - ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
 
-#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
-                                        ; <<CC>>
+TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+TODO: filter uninteresting GZDoom output lines.
+TODO: replace shell command with direct call?
 
-                                        ; TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
-                                        ; TODO: filter uninteresting GZDoom output lines.
-                                        ; TODO: replac shell command with direct call?
+#+begin_src elisp :tangle build/ElispUtilities/dt-scripts.el
+;; <<CC>>
 
 (defun run-tests (command)
   (org-babel-tangle)
   (shell-command (concat "gzdoom -noautoload -nosound \
--config build/TestRunner/config.ini \
+-config build/ElispUtilities/config.ini \
 -iwad " (getenv "IWAD_PATH") " \
 -file " (getenv "CLEMATIS_PATH") " build/* \
 -warp 1 +\"" command  "\"")))
-
-(defun tangle-module (prefix module)
-  (org-babel-tangle-file (concat module ".org"))
-  (string-replace "NAMESPACE_" prefix (f-read-text (concat "build/" module "/" module ".txt"))))
 #+end_src
 
-src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
-src_elisp{(load-file scripts-path) (run-tests "")}
-src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
+Examples:
+src_elisp{(set 'scripts-path "build/ElispUtilities/dt-scripts.el")}
 
-* Licenses :noexport:
+- src_elisp{(load-file scripts-path) (run-tests "")}
+- src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
+
+* License
+[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>

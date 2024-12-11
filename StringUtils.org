@@ -443,16 +443,19 @@ private Array<string> mFields;
 <<DescriptionPrivate>>
 #+end_src
 
-* Launch :noexport:
-src_elisp{(load-file "build/TestRunner/dt-scripts.el")}
-src_elisp{(run-tests "wait 1; quit")}
+* Run tests :noexport:
+#+begin_src elisp
+(load-file "build/ElispUtilities/dt-scripts.el")
+(run-tests "wait 1; quit")
+#+end_src
 
 * Tests end
 #+begin_src c :tangle build/StringUtils/zscript.txt
 EndDescribe(); }}
 #+end_src
 
-* License :noexport:
+* License
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src :exports none
 SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
