@@ -5,22 +5,7 @@
 :end:
 #+title: Doom Doctor
 
-[[file:WhereAreTheProjectFiles.org][Where are the project files?]]
-
-* Doom Doctor
-Doom Doctor is a utility mod for ZScript'ed game engines. It may help to learn how the engine or a mod works.
-
-Features:
-- VM abort reports (controlled by dd_vm_abort_report_enabled cvar):
-  - basic game information: map name, total time, multiplayer status, player class, skill;
-  - game configuration: compat flags, dm flags, autoaim;
-  - event handler list;
-  - system time;
-  - a request for the user to report the bug.
-
-If there are several VM abort handlers loaded, only the first one will print stuff. For this to work, all handlers must have "VmAbortHandler" somewhere in their class name.
-
-Also there is ~dd_report~ console command for gathering a report by manual request.
+* [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Acknowledgments
 - Thanks to KeksDose for the concept of VM abort handler.
@@ -31,35 +16,35 @@ Also there is ~dd_report~ console command for gathering a report by manual reque
 * Licenses
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
-#+begin_src :exports none
+#+begin_src txt :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src :exports none
+#+begin_src txt :exports none
 SPDX-FileTextCopyright: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctor/zscript.txt
+#+begin_src c :tangle build/DoomDoctor/zscript.txt :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt :exports none
 // <<GPL>>
 #+end_src
 
@@ -67,7 +52,7 @@ SPDX-License-Identifier: GPL-3.0-only
 Notes:
 - Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet. TODO: make the scripts wait until something happens.
 - Triggering several events at once to speed up tests. The events should not interfere with each other.
-- Warp and use commands are supposed to activate the Miniwad end level button.
+- Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
 #+begin_src elisp
 (load-file "build/ElispUtilities/dt-scripts.el")
@@ -94,14 +79,14 @@ Notes:
     quit")
 #+end_src
 
-#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
-#+begin_src c :tangle build/DoomDoctorTest/zscript.txt
+#+begin_src c :tangle build/DoomDoctorTest/zscript.txt :exports none
 version 4.12.2
 
 class dd_LoggerTest : Clematis {}
@@ -109,6 +94,7 @@ class dd_LoggerTest : Clematis {}
 // TODO: add lower order logger test runner.
 class dd_LoggerTestRunner : StaticEventHandler
 {
+
   private Clematis mTest;
   private dd_BufferedConsole mConsole;
 
@@ -139,19 +125,19 @@ class dd_LoggerTestRunner : StaticEventHandler
 # SPDX-SnippetEnd
 
 #+name: count-logger-tests
-#+begin_src elisp
+#+begin_src elisp :exports none
 (s-count-matches "assert(\"log: " (buffer-string))
 #+end_src
 
 * Source code preamble
-#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt
+#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt :exports none
 GameInfo
 {
   EventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_BufferedConsole", "dd_Logger"
 }
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctor/zscript.txt
+#+begin_src c :tangle build/DoomDoctor/zscript.txt :exports none
 version 4.12.2
 
 <<modules()>>
@@ -159,12 +145,21 @@ version 4.12.2
 
 [[file:StringUtils.org][StringUtils]]
 #+name: modules
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :exports none
 (load-file "build/ElispUtilities/dt-scripts.el")
 (tangle-module "dd_" "StringUtils")
 #+end_src
 
 * VM Abort Handling
+VM abort reports:
+- system time;
+- basic game information: map name, total time, multiplayer status, player class, skill;
+- game configuration: compat flags, dm flags, autoaim;
+- event handler list;
+- a request for the user to report the bug.
+
+If there are several VM abort handlers loaded, only the first one will print stuff. For this to work, all handlers must have "VmAbortHandler" somewhere in their class name.
+
 ** Settings
 #+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
@@ -175,8 +170,8 @@ user bool dd_vm_abort_report_enabled = true;
 Alias dd_report "event dd_report"
 #+end_src
 
-** Source
-TODO: make dd_VmAbortHandler savefile-pluggable (StaticEventHandler).
+** ~dd_VmAbortHandler~
+TODO: make ~dd_VmAbortHandler~ savefile-pluggable (StaticEventHandler).
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -250,8 +245,12 @@ class dd_VmAbortHandler : EventHandler
   }
 
   private dd_Report mReport;
-}
 
+} // class dd_VmAbortHandler
+#+end_src
+
+** ~dd_Report~
+#+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_Report
 {
 
@@ -270,7 +269,7 @@ class dd_Report
   {
     Array<string> lines =
       {
-        "Doom Doctor v0.0.0, " .. getSystemTime(),
+        "Doom Doctor Report: " .. getSystemTime(),
         getGameInfo(),
         getConfiguration(),
         getEventHandlers()
@@ -325,19 +324,15 @@ class dd_Report
   private string mPlayerClassName;
   private string mSkillName;
   private int mSystemTime;
-}
 
+} // class dd_Report
 #+end_src
 # SPDX-SnippetEnd
 
-* Troubles
-** Console commands
-*** Helper commands
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
-Alias dd_revive_everything     "netevent dd_revive_everything"
-Alias dd_force_lightning       "netevent dd_force_lightning"
-#+end_src
+* Troublemaker
+Troublemaker provides console commands to check if a mod can handle some unexpected events.
 
+** Console commands
 *** Commands to cause problematic events
 #+begin_src txt :tangle build/DoomDoctor/keyconf.txt
 Alias dd_nullify_player        "netevent dd_nullify_player"
@@ -347,8 +342,14 @@ Alias dd_take_all_weapons      "netevent dd_take_all_weapons"
 Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoTag"
 #+end_src
 
+*** Helper commands
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+Alias dd_revive_everything     "netevent dd_revive_everything"
+Alias dd_force_lightning       "netevent dd_force_lightning"
+#+end_src
+
 ** Source
-TODO: make dd_Troublemaker savefile-pluggable (StaticEventHandler).
+TODO: make ~dd_Troublemaker~ savefile-pluggable (StaticEventHandler).
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -464,11 +465,11 @@ user bool dd_logging_process_events_enabled = false;
 Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
 #+end_src
 
-** dd_BufferedConsole
+** ~dd_BufferedConsole~
 Prints to the engine console and saves the messages so they can be checked.
 Also prints level time.
 
-StaticEventHandler used as Singleton.
+StaticEventHandler used as a Singleton.
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -476,6 +477,7 @@ StaticEventHandler used as Singleton.
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_BufferedConsole : StaticEventHandler
 {
+
   static clearscope dd_BufferedConsole getInstance()
   {
     return dd_BufferedConsole(find("dd_BufferedConsole"));
@@ -495,20 +497,24 @@ class dd_BufferedConsole : StaticEventHandler
   bool contains(string substring) const { return mBuffer.IndexOf(substring) != -1; }
 
   private string mBuffer;
-}
+
+} // class dd_BufferedConsole
 #+end_src
 # SPDX-SnippetEnd
 
-** dd_Logger
+** ~dd_Logger~
 Notes
 - The following events are not logged, because nothing interesting can change here: RenderOverlay, RenderUnderlay, UiTick, PostUiTick, InputProcess, UiProcess.
 - Events cannot be destroyed, so event parameters are never NULL.
+- Most events are followed by the test code that also works as an example of what an event report contains.
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
 class dd_Logger : StaticEventHandler
+#+end_src
+#+begin_src c :tangle build/DoomDoctor/zscript.txt :exports none
 {
 #+end_src
 
@@ -1302,12 +1308,13 @@ private bool mAreOtherEventHandlersChecked;
 private dd_BufferedConsole console;
 
 <<define-cvars('("dd_logging_world_events_enabled" "dd_logging_player_events_enabled" "dd_logging_process_events_enabled"))>>
+
 } // class dd_Logger
 #+end_src
 # SPDX-SnippetEnd
 
 #+name: define-cvars
-#+begin_src elisp :var cvars=()
+#+begin_src elisp :var cvars=() :exports none
 (concat
  "private void loadCvars()\n{\n"
  "  PlayerInfo player = players[consolePlayer];\n"
@@ -1317,10 +1324,11 @@ private dd_BufferedConsole console;
  (mapconcat (lambda (x) (format "private Cvar %s;\n" x)) cvars))
 #+end_src
 
-* Tests end
+* Tests end :noexport:
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 <<only-once-park-flags()>>
-}
+
+} // class dd_LoggerTestRunner
 #+end_src
 
 #+name: only-once
