@@ -445,8 +445,6 @@ class dd_Troublemaker : EventHandler
 # SPDX-SnippetEnd
 
 * Logging
-TODO: add a command to disable all logging.
-
 ** Settings
 #+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
 server bool dd_logging_engine_events_enabled  = false;
@@ -455,6 +453,11 @@ server bool dd_logging_replace_events_enabled = false;
 user bool dd_logging_world_events_enabled   = false;
 user bool dd_logging_player_events_enabled  = false;
 user bool dd_logging_process_events_enabled = false;
+#+end_src
+
+** Console commands
+#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
 #+end_src
 
 ** dd_BufferedConsole
