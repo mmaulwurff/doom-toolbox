@@ -176,6 +176,8 @@ Alias dd_report "event dd_report"
 #+end_src
 
 ** Source
+TODO: make dd_VmAbortHandler savefile-pluggable (StaticEventHandler).
+
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
@@ -346,6 +348,8 @@ Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNo
 #+end_src
 
 ** Source
+TODO: make dd_Troublemaker savefile-pluggable (StaticEventHandler).
+
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
 # SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
@@ -655,7 +659,7 @@ override void WorldThingDied(WorldEvent event)
 }
 #+end_src
 
-The player is killed by console commands in [[Launch][Launch]] section.
+The player is killed by console commands in [[Tests preamble]] section.
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 override void WorldThingDied(WorldEvent event)
@@ -693,7 +697,7 @@ override void WorldThingRevived(WorldEvent event)
 }
 #+end_src
 
-The player is resurrected by console commands in [[Launch][Launch]] section.
+The player is resurrected by console commands in [[Tests preamble]] section.
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 override void WorldThingRevived(WorldEvent event)
@@ -717,7 +721,7 @@ override void WorldThingDamaged(WorldEvent event)
 }
 #+end_src
 
-The player is damaged by console commands in [[Launch][Launch]] section.
+The player is damaged by console commands in [[Tests preamble]] section.
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.txt
 override void WorldThingDamaged(WorldEvent event)
@@ -931,7 +935,6 @@ override void PlayerDied(PlayerEvent event)
 
 **** PlayerDisconnected
 #+begin_src c :tangle build/DoomDoctor/zscript.txt
-// TODO: test this.
 override void PlayerDisconnected(PlayerEvent event)
 {
   if (!dd_logging_player_events_enabled.getBool()) return;
@@ -941,6 +944,8 @@ override void PlayerDisconnected(PlayerEvent event)
   check(PlayerChecks);
 }
 #+end_src
+
+TODO: test this.
 
 *** Process events
 **** ConsoleProcess
@@ -1266,7 +1271,6 @@ private clearscope void checkOtherEventHandlers()
     }
 }
 
-// TODO: bundle repeated logs
 private clearscope void logError(string format, string s = "")
 {
   Console.printf("[ERROR] %s: %s.", mFunctionName, string.format(format, s));
@@ -1333,8 +1337,3 @@ private dd_BufferedConsole console;
    (lambda (x) (format "private bool mOnlyOnceFlag%d;\n" x))
    (number-sequence 0 id)))
 #+end_src
-
-* TODO
-- test manually for regressions
-- describe features
-- ? make Doom Doctor savefile-pluggable (StaticEventHandler)
