@@ -2,9 +2,39 @@
 # SPDX-License-Identifier: CC0-1.0
 #+title: Where Are The Project Files?
 
-* Q: Wait! Where are the project files?
-A: This is Emacs Org mode literate project file. Use Emacs to extract the individual files. You don't have to open the Emacs window. The command to extract the files is:
+This is Emacs Org-mode literate project file. Use Emacs to extract the individual files. You don't have to open the Emacs window. The command to extract the files is:
 
 Note: executing code blocks ~<<block()>>~ while tangling in batch mode doesn't work at the moment. TODO: fix (by specifying a config file?). So for now, you have to open a project file in Emacs and call ~org-babel-tangle~ function manually.
 
 emacs this_file.org --quick --batch --funcall=org-babel-tangle
+
+* Pros
+** logical code structure
+You can put related program components together, even if they are in different languages or file formats. Like this: conventinal code structure:
+- application/file1: feature1 settings, feature2 settings;
+- application/file2: feature1 source code, feature2 source code;
+- tests/file3: feature1 tests, feature2 tests.
+
+Logical code structure:
+- file1:
+  - section1: feature1 settings, feature1 source code, feature1 tests,
+  - section2: feature2 settings, feature2 source code, feature2 tests.
+
+** Macros
+Elisp can be used to generate code. Great for boilerplate code.
+
+** Links
+To file sections, to other files, URLs.
+
+** HTML documentation
+Export to HTML produces a very nicely formatted document. Also, GitHub shows .org files as a formatted HTML page, though macros and ~:noexport:~'ing sections are not supported.
+
+* Cons
+** Limited text editor choice
+There is some support for Org-mode for editors other than Emacs, but I believe Elisp macros is out of the question for them.
+
+** Extra syntax
+Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file.
+
+** Licensing mess
+It's a hassle to apply different licenses to different parts of the file.
