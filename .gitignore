@@ -13,3 +13,6 @@
 
 # and these file types:
 !*.org
+
+# and licenses here:
+!LICENSES/*.txt
