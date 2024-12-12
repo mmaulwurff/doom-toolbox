@@ -354,7 +354,7 @@ Troublemaker provides console commands to check if a mod can handle some unexpec
 Alias dd_nullify_player        "netevent dd_nullify_player"
 Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
 Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
-Alias dd_take_all_weapons      "netevent dd_take_all_weapons"
+Alias dd_take_all_weapons      "take weapons"
 Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNoTag"
 #+end_src
 
@@ -395,7 +395,6 @@ class dd_Troublemaker : EventHandler
     if      (command == "dd_nullify_player") nullifyPlayer();
     else if (command == "dd_spawn_null_thing") nullifySpawnedThing();
     else if (command == "dd_nullify_player_weapon") nullifyPlayerWeapon();
-    else if (command == "dd_take_all_weapons") takeAllWeapons();
     else if (command == "dd_revive_everything") reviveEverything();
     else if (command == "dd_force_lightning") forceLightning();
   }
@@ -426,16 +425,6 @@ class dd_Troublemaker : EventHandler
   private void nullifyPlayerWeapon()
   {
     players[consolePlayer].readyWeapon = NULL;
-  }
-
-  private void takeAllWeapons()
-  {
-    let player = players[consolePlayer].mo;
-    Inventory weapon;
-    while (weapon = player.findInventory("Weapon", true))
-      {
-        weapon.depleteOrDestroy();
-      }
   }
 
   private void reviveEverything()
@@ -1224,14 +1213,15 @@ private clearscope void checkWorldEventThingTag(WorldEvent event)
 
 private clearscope void checkPlayerWeaponIsNull()
 {
-  if (!mIsPlayerWeaponNullLogged && players[consolePlayer].readyWeapon == NULL)
+  if (players[consolePlayer].readyWeapon != NULL)
+    {
+      setIsPlayerWeaponNullLogged(false);
+    }
+  else if (!mIsPlayerWeaponNullLogged)
     {
       setIsPlayerWeaponNullLogged(true);
       logError("player weapon is NULL");
     }
-
-  if (players[consolePlayer].readyWeapon != NULL)
-    setIsPlayerWeaponNullLogged(false);
 }
 
 private clearscope void checkPlayerHasNoWeapons()
@@ -1239,7 +1229,11 @@ private clearscope void checkPlayerHasNoWeapons()
   let player = players[consolePlayer].mo;
   if (player == NULL) return;
 
-  if (player.findInventory("Weapon", true) == NULL && !mIsPlayerHasNoWeaponsLogged)
+  if (player.findInventory("Weapon", true) != NULL)
+    {
+      setIsPlayerHasNoWeaponsLogged(false);
+    }
+  else if (!mIsPlayerHasNoWeaponsLogged)
     {
       setIsPlayerHasNoWeaponsLogged(true);
       logError("player has no weapons");
