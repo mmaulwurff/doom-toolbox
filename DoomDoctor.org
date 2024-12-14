@@ -172,7 +172,7 @@ version 4.12.2
 
 (string-replace "NAMESPACE_" "dd_"
                 (with-temp-buffer
-                  (insert-file-contents (format "build/%1$s/%1$s.txt" module-name))
+                  (insert-file-contents (format "build/%1$s/%1$s.zs" module-name))
                   (buffer-string)))
 #+end_src
 
