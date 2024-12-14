@@ -1117,6 +1117,9 @@ const LineProperties = ActivatedLine | ActivationType;
 #+end_src
 
 *** Private Functions
+TODO: move checks to somewhere where they are move visible.
+TODO: add a check if weapons have icons. Filter by weapons that player can have.
+
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 private clearscope void check(int checks, WorldEvent aWorldEvent = NULL)
 {
