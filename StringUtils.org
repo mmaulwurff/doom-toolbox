@@ -26,14 +26,14 @@ class su_Test : Clematis { override void TestSuites() {
 #+end_src
 
 * Classes
-** StringUtils
+** ~StringUtils~
 This class acts as a namespace for free functions.
 
 #+begin_src c :tangle build/StringUtils/StringUtils.zs :noweb-prefix no
 class NAMESPACE_su { <<StringUtilsBody>> }
 #+end_src
 
-*** join
+*** ~join~
 Joins strings to a single string separated by delimiter.
 
 #+name: join
@@ -65,7 +65,7 @@ static clearscope string join(Array<string> strings, string delimiter = ", ")
 }
 #+end_src
 
-*** repeat
+*** ~repeat~
 Repeats the specified string the specified number of times.
 
 #+name: repeat
@@ -88,7 +88,7 @@ static clearscope string repeat(string aString, int times)
 }
 #+end_src
 
-*** boolToString
+*** ~boolToString~
 Writes out a boolean value.
 
 #+name: boolToString
@@ -113,14 +113,14 @@ static clearscope string boolToString(bool value)
 <<boolToString>>
 #+end_src
 
-** Description
+** ~Description~
 #+begin_src c :tangle build/StringUtils/StringUtils.zs :noweb-prefix no
 class NAMESPACE_Description { <<DescriptionBody>> }
 #+end_src
 
 Optimization opportunity: add... functions append to a private string, not an array. Compose simply returns it.
 
-*** compose
+*** ~compose~
 #+name: compose
 #+begin_src c
 string compose() { return NAMESPACE_su.join(mFields); }
@@ -132,7 +132,7 @@ string compose() { return NAMESPACE_su.join(mFields); }
 }
 #+end_src
 
-*** add
+*** ~add~
 #+name: add
 #+begin_src c
 NAMESPACE_Description add(string name, string value)
@@ -149,7 +149,7 @@ NAMESPACE_Description add(string name, string value)
 }
 #+end_src
 
-*** addObject
+*** ~addObject~
 #+name: addObject
 #+begin_src c
 NAMESPACE_Description addObject(string name, Object anObject)
@@ -169,7 +169,7 @@ NAMESPACE_Description addObject(string name, Object anObject)
 }
 #+end_src
 
-*** addClass
+*** ~addClass~
 #+name: addClass
 #+begin_src c
 NAMESPACE_Description addClass(string name, Class aClass)
@@ -185,7 +185,7 @@ NAMESPACE_Description addClass(string name, Class aClass)
 }
 #+end_src
 
-*** addBool
+*** ~addBool~
 #+name: addBool
 #+begin_src c
 NAMESPACE_Description addBool(string name, bool value)
@@ -201,7 +201,7 @@ NAMESPACE_Description addBool(string name, bool value)
 }
 #+end_src
 
-*** addInt
+*** ~addInt~
 #+name: addInt
 #+begin_src c
 NAMESPACE_Description addInt(string name, int value)
@@ -217,7 +217,7 @@ NAMESPACE_Description addInt(string name, int value)
 }
 #+end_src
 
-*** addFloat
+*** ~addFloat~
 #+name: addFloat
 #+begin_src c
 NAMESPACE_Description addFloat(string name, double value)
@@ -233,7 +233,7 @@ NAMESPACE_Description addFloat(string name, double value)
 }
 #+end_src
 
-*** addDamageFlags
+*** ~addDamageFlags~
 #+name: addDamageFlags
 #+begin_src c
 NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
@@ -264,7 +264,7 @@ NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
 }
 #+end_src
 
-*** addCvar
+*** ~addCvar~
 #+name: addCvar
 #+begin_src c
 NAMESPACE_Description addCvar(string name)
@@ -293,7 +293,7 @@ NAMESPACE_Description addCvar(string name)
 }
 #+end_src
 
-*** addSpac
+*** ~addSpac~
 #+name: addSpac
 #+begin_src c
 /// SPAC - special activation types.
@@ -325,7 +325,7 @@ NAMESPACE_Description addSpac(string name, int flags)
 }
 #+end_src
 
-*** addLine
+*** ~addLine~
 #+name: addLine
 #+begin_src c
 NAMESPACE_Description addLine(string name, Line aLine)
@@ -341,7 +341,7 @@ NAMESPACE_Description addLine(string name, Line aLine)
 }
 #+end_src
 
-*** addSectorPart
+*** ~addSectorPart~
 #+name: addSectorPart
 #+begin_src c
 NAMESPACE_Description addSectorPart(string name, SectorPart part)
@@ -365,7 +365,7 @@ NAMESPACE_Description addSectorPart(string name, SectorPart part)
 }
 #+end_src
 
-*** addSector
+*** ~addSector~
 #+name: addSector
 #+begin_src c
 NAMESPACE_Description addSector(string name, Sector aSector)
@@ -381,7 +381,7 @@ NAMESPACE_Description addSector(string name, Sector aSector)
 }
 #+end_src
 
-*** addVector3
+*** ~addVector3~
 #+name: addVector3
 #+begin_src c
 NAMESPACE_Description addVector3(string name, vector3 vector)
@@ -398,7 +398,7 @@ NAMESPACE_Description addVector3(string name, vector3 vector)
 }
 #+end_src
 
-*** addState
+*** ~addState~
 #+name: addState
 #+begin_src c
 NAMESPACE_Description addState(string name, State aState)

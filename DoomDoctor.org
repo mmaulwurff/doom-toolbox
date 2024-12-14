@@ -186,7 +186,7 @@ VM abort reports:
 - event handler list;
 - a request for the user to report the bug.
 
-If there are several VM abort handlers loaded, only the first one will print stuff. For this to work, all handlers must have "VmAbortHandler" somewhere in their class name.
+If there are several VM abort handlers loaded, only the first one will print stuff. For this to work, all handlers must have ~VmAbortHandler~ somewhere in their class name.
 
 ** Settings
 #+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
@@ -199,7 +199,7 @@ Alias dd_report "event dd_report"
 #+end_src
 
 ** ~dd_VmAbortHandler~
-TODO: make ~dd_VmAbortHandler~ savefile-pluggable (StaticEventHandler).
+TODO: make ~dd_VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -377,7 +377,7 @@ Alias dd_force_lightning       "netevent dd_force_lightning"
 #+end_src
 
 ** Source
-TODO: make ~dd_Troublemaker~ savefile-pluggable (StaticEventHandler).
+TODO: make ~dd_Troublemaker~ savefile-compatible (~StaticEventHandler~).
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -486,7 +486,7 @@ Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar 
 Prints to the engine console and saves the messages so they can be checked.
 Also prints level time.
 
-StaticEventHandler used as a Singleton.
+~StaticEventHandler~ used as a Singleton.
 
 # SPDX-SnippetBegin
 # SPDX-License-Identifier: GPL-3.0-only
@@ -521,7 +521,7 @@ class dd_BufferedConsole : StaticEventHandler
 
 ** ~dd_Logger~
 Notes
-- The following events are not logged, because nothing interesting can change here: RenderOverlay, RenderUnderlay, UiTick, PostUiTick, InputProcess, UiProcess.
+- The following events are not logged, because nothing interesting can change here: ~RenderOverlay~, ~RenderUnderlay~, ~UiTick~, ~PostUiTick~, ~InputProcess~, ~UiProcess~.
 - Events cannot be destroyed, so event parameters are never NULL.
 - Most events are followed by the test code that also works as an example of what an event report contains.
 
@@ -536,7 +536,7 @@ class dd_Logger : StaticEventHandler
 #+end_src
 
 *** Engine events
-**** OnRegister
+**** ~OnRegister~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void OnRegister()
 {
@@ -557,7 +557,7 @@ void OnRegisterTest()
 }
 #+end_src
 
-**** OnUnregister
+**** ~OnUnregister~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void OnUnregister()
 {
@@ -568,9 +568,9 @@ override void OnUnregister()
 }
 #+end_src
 
-Note: event order for OnUnregister is reversed.
+Note: event order for ~OnUnregister~ is reversed.
 
-**** OnEngineInitialize
+**** ~OnEngineInitialize~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void OnEngineInitialize()
 {
@@ -588,7 +588,7 @@ override void OnEngineInitialize()
 }
 #+end_src
 
-**** NewGame
+**** ~NewGame~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void NewGame()
 {
@@ -609,7 +609,7 @@ override void NewGame()
 #+end_src
 
 *** World events
-**** WorldLoaded
+**** ~WorldLoaded~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldLoaded(WorldEvent event)
 {
@@ -635,7 +635,7 @@ override void WorldLoaded(WorldEvent event)
 }
 #+end_src
 
-**** WorldUnloaded
+**** ~WorldUnloaded~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldUnloaded(WorldEvent event)
 {
@@ -646,9 +646,9 @@ override void WorldUnloaded(WorldEvent event)
 }
 #+end_src
 
-Note: event order for WorldUnloaded is reversed.
+Note: event order for ~WorldUnloaded~ is reversed.
 
-**** WorldThingSpawned
+**** ~WorldThingSpawned~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingSpawned(WorldEvent event)
 {
@@ -670,7 +670,7 @@ override void WorldThingSpawned(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDied
+**** ~WorldThingDied~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingDied(WorldEvent event)
 {
@@ -694,7 +694,7 @@ override void WorldThingDied(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingGround
+**** ~WorldThingGround~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingGround(WorldEvent event)
 {
@@ -708,7 +708,7 @@ override void WorldThingGround(WorldEvent event)
 
 TODO: how to test this?
 
-**** WorldThingRevived
+**** ~WorldThingRevived~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingRevived(WorldEvent event)
 {
@@ -731,7 +731,7 @@ override void WorldThingRevived(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDamaged
+**** ~WorldThingDamaged~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingDamaged(WorldEvent event)
 {
@@ -758,7 +758,7 @@ override void WorldThingDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDestroyed
+**** ~WorldThingDestroyed~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldThingDestroyed(WorldEvent event)
 {
@@ -771,9 +771,9 @@ override void WorldThingDestroyed(WorldEvent event)
 }
 #+end_src
 
-Note: event order for WorldThingDestroyed is reversed.
+Note: event order for ~WorldThingDestroyed~ is reversed.
 
-**** WorldLinePreActivated
+**** ~WorldLinePreActivated~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldLinePreActivated(WorldEvent event)
 {
@@ -795,7 +795,7 @@ override void WorldLinePreActivated(WorldEvent event)
 }
 #+end_src
 
-**** WorldLineActivated
+**** ~WorldLineActivated~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldLineActivated(WorldEvent event)
 {
@@ -816,7 +816,7 @@ override void WorldLineActivated(WorldEvent event)
 }
 #+end_src
 
-**** WorldSectorDamaged
+**** ~WorldSectorDamaged~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldSectorDamaged(WorldEvent event)
 {
@@ -829,7 +829,7 @@ override void WorldSectorDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldLineDamaged
+**** ~WorldLineDamaged~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldLineDamaged(WorldEvent event)
 {
@@ -842,7 +842,7 @@ override void WorldLineDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldLightning
+**** ~WorldLightning~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldLightning(WorldEvent event)
 {
@@ -861,7 +861,7 @@ override void WorldLightning(WorldEvent event)
 }
 #+end_src
 
-**** WorldTick
+**** ~WorldTick~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void WorldTick()
 {
@@ -872,7 +872,7 @@ override void WorldTick()
 #+end_src
 
 *** Player events
-**** PlayerEntered
+**** ~PlayerEntered~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void PlayerEntered(PlayerEvent event)
 {
@@ -895,7 +895,7 @@ override void PlayerEntered(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerSpawned
+**** ~PlayerSpawned~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void PlayerSpawned(PlayerEvent event)
 {
@@ -918,7 +918,7 @@ override void PlayerSpawned(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerRespawned
+**** ~PlayerRespawned~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void PlayerRespawned(PlayerEvent event)
 {
@@ -937,7 +937,7 @@ override void PlayerRespawned(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerDied
+**** ~PlayerDied~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void PlayerDied(PlayerEvent event)
 {
@@ -956,7 +956,7 @@ override void PlayerDied(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerDisconnected
+**** ~PlayerDisconnected~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void PlayerDisconnected(PlayerEvent event)
 {
@@ -971,7 +971,7 @@ override void PlayerDisconnected(PlayerEvent event)
 TODO: test this.
 
 *** Process events
-**** ConsoleProcess
+**** ~ConsoleProcess~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void ConsoleProcess(ConsoleEvent event)
 {
@@ -991,7 +991,7 @@ override void ConsoleProcess(ConsoleEvent event)
 }
 #+end_src
 
-**** InterfaceProcess
+**** ~InterfaceProcess~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void InterfaceProcess(ConsoleEvent event)
 {
@@ -1012,7 +1012,7 @@ override void InterfaceProcess(ConsoleEvent event)
 }
 #+end_src
 
-**** NetworkProcess
+**** ~NetworkProcess~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void NetworkProcess(ConsoleEvent event)
 {
@@ -1036,7 +1036,7 @@ override void NetworkProcess(ConsoleEvent event)
 #+end_src
 
 *** Replacement events
-**** CheckReplacement
+**** ~CheckReplacement~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void CheckReplacement(ReplaceEvent event)
 {
@@ -1057,7 +1057,7 @@ override void CheckReplacement(ReplaceEvent event)
 }
 #+end_src
 
-**** CheckReplacee
+**** ~CheckReplacee~
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 override void CheckReplacee(ReplacedEvent event)
 {

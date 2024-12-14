@@ -5,19 +5,15 @@
 :end:
 #+title: Mod Template
 
-* Q: Wait! Where are the project files?
-A: This is Emacs Org mode literate project file. Use Emacs to extract the individual
-files. You don't have to open the Emacs window. The command to extract the files is:
-
-emacs ModTemplate.org --quick --batch --funcall=org-babel-tangle
+* [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Mod Template
 This is the template for add-ons (mods) for GZDoom family game engines.
 
 * Cvarinfo - console variable (CVar) definitions
 ~<scope> [features] <type> <name> [= defaultvalue];~
-- features: noarchive, cheat, latch, handlerclass("<classname>")
-- scope: server, user, nosave
+- features: ~noarchive~, ~cheat~, ~latch~, ~handlerclass("<classname>")~
+- scope: ~server~, ~user~, ~nosave~
 
 #+begin_src txt :tangle build/ModTemplate/cvarinfo.txt
 // <<CC>>

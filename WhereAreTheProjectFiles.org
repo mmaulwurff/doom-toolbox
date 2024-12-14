@@ -8,7 +8,7 @@ emacs DoomDoctor.org --quick --batch --eval "(progn (require 'ob-tangle) (setq o
 
 * Pros
 ** logical code structure
-You can put related program components together, even if they are in different languages or file formats. Like this: conventinal code structure:
+You can put related program components together, even if they are in different languages or file formats. Like this: conventional code structure:
 - application/file1: feature1 settings, feature2 settings;
 - application/file2: feature1 source code, feature2 source code;
 - tests/file3: feature1 tests, feature2 tests.
@@ -25,7 +25,7 @@ Elisp can be used to generate code. Great for boilerplate code.
 To file sections, to other files, URLs.
 
 ** HTML documentation
-Export to HTML produces a very nicely formatted document. Also, GitHub shows .org files as a formatted HTML page, though macros and ~:noexport:~'ing sections are not supported.
+Export to HTML produces a very nicely formatted document. Also, GitHub shows .org files as a formatted HTML page, though macros and ~:noexport:~ sections are not supported.
 
 * Cons
 ** Limited text editor choice

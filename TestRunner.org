@@ -28,7 +28,7 @@ SPDX-License-Identifier: CC0-1.0
 # <<CC>>
 #+end_src
 
-* TestRunner
+* ~TestRunner~
 #+begin_src txt :tangle build/TestRunner/mapinfo.txt
 GameInfo { EventHandlers = "TestRunner" }
 #+end_src
@@ -107,7 +107,7 @@ Environment:
 - ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
 
-TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 TODO: filter uninteresting GZDoom output lines.
 TODO: replace shell command with direct call?
 
