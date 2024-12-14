@@ -3,35 +3,37 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Elisp Utilities
+#+title: Test Runner
 
-* ZScript modules
-Facilitate ZScript code reuse.
-
-TODO: add a doc-string.
-
-#+begin_src elisp :tangle build/ElispUtilities/dt-scripts.el
-(defun tangle-module (prefix module)
-  (org-babel-tangle-file (concat module ".org"))
-  (string-replace
-   "NAMESPACE_"
-   prefix
-   (f-read-text (concat "build/" module "/" module ".txt"))))
-#+end_src
-
-* Clematis tests runner
 It runs all Clematis tests it can find, in all mods that are loaded alongside.
 
-** TestRunner
-#+begin_src txt :tangle build/ElispUtilities/mapinfo.txt
-// <<CC>>
+* License
+[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+#+name: CC
+#+begin_src :exports none
+SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+#+end_src
 
+#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
+;; <<CC>>
+#+end_src
+#+begin_src txt :tangle build/TestRunner/mapinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src c :tangle build/TestRunner/zscript.txt
+// <<CC>>
+#+end_src
+#+begin_src ini :tangle build/TestRunner/config.ini
+# <<CC>>
+#+end_src
+
+* TestRunner
+#+begin_src txt :tangle build/TestRunner/mapinfo.txt
 GameInfo { EventHandlers = "TestRunner" }
 #+end_src
 
-#+begin_src c :tangle build/ElispUtilities/zscript.txt
-// <<CC>>
-
+#+begin_src c :tangle build/TestRunner/zscript.txt
 version 4.12.2
 
 class TestRunner : StaticEventHandler
@@ -80,12 +82,10 @@ class TestRunner : StaticEventHandler
 }
 #+end_src
 
-** Config
+* Config
 Minimal config for testing purposes.
 
-#+begin_src ini :tangle build/ElispUtilities/config.ini
-# <<CC>>
-
+#+begin_src ini :tangle build/TestRunner/config.ini
 [GlobalSettings]
 autoloadwidescreen=false
 developer=1
@@ -102,7 +102,7 @@ m_quickexit=true
 vid_cursor=cursor
 #+end_src
 
-** Launch script
+* Launch script
 Environment:
 - ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
@@ -111,28 +111,18 @@ TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
 TODO: filter uninteresting GZDoom output lines.
 TODO: replace shell command with direct call?
 
-#+begin_src elisp :tangle build/ElispUtilities/dt-scripts.el
-;; <<CC>>
-
+#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
 (defun run-tests (command)
   (org-babel-tangle)
   (shell-command (concat "gzdoom -noautoload -nosound \
--config build/ElispUtilities/config.ini \
+-config build/TestRunner/config.ini \
 -iwad " (getenv "IWAD_PATH") " \
 -file " (getenv "CLEMATIS_PATH") " build/* \
 -warp 1 +\"" command  "\"")))
 #+end_src
 
 Examples:
-src_elisp{(set 'scripts-path "build/ElispUtilities/dt-scripts.el")}
+src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
 
 - src_elisp{(load-file scripts-path) (run-tests "")}
 - src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
-
-* License
-[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
-#+name: CC
-#+begin_src :exports none
-SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: CC0-1.0
-#+end_src

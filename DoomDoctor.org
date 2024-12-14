@@ -64,7 +64,7 @@ Notes:
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
 #+begin_src elisp
-(load-file "build/ElispUtilities/dt-scripts.el")
+(load-file "build/TestRunner/dt-scripts.el")
 
 (run-tests
  "  dd_logging_engine_events_enabled  true;
@@ -135,7 +135,12 @@ class dd_LoggerTestRunner : StaticEventHandler
 
 #+name: count-logger-tests
 #+begin_src elisp :exports none
-(s-count-matches "assert(\"log: " (buffer-string))
+(let ((pos 0)
+      (count 0))
+  (while (string-match "assert\(\"log: " (buffer-string) pos)
+    (setq count (1+ count))
+    (setq pos (match-end 0)))
+  count)
 #+end_src
 
 * Source code preamble
@@ -155,16 +160,23 @@ version 4.12.2
 #include "zscript/Troublemaker.zs"
 #include "zscript/Logger.zs"
 #+end_src
+
+[[file:StringUtils.org][StringUtils]]
 #+begin_src c :tangle build/DoomDoctor/zscript/StringUtils.zs :exports none
 <<module("StringUtils")>>
 #+end_src
 
-[[file:StringUtils.org][StringUtils]]
 #+name: module
 #+begin_src emacs-lisp :var module-name = "" :exports none
-(load-file "build/ElispUtilities/dt-scripts.el")
-(tangle-module "dd_" module-name)
+(org-babel-tangle-file (concat module-name ".org"))
+
+(string-replace "NAMESPACE_" "dd_"
+                (with-temp-buffer
+                  (insert-file-contents (format "build/%1$s/%1$s.txt" module-name))
+                  (buffer-string)))
 #+end_src
+
+Note: it would be logical to move the above code block as an Elisp function to a separate file to avoid code duplication. However, this would make tangling this file from a command line more difficult.
 
 * VM Abort Handling
 VM abort reports:

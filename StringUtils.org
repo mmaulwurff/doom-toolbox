@@ -445,7 +445,7 @@ private Array<string> mFields;
 
 * Run tests :noexport:
 #+begin_src elisp
-(load-file "build/ElispUtilities/dt-scripts.el")
+(load-file "build/TestRunner/dt-scripts.el")
 (run-tests "wait 1; quit")
 #+end_src
 
