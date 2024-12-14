@@ -3,7 +3,7 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Test Runner
+#+title: TestRunner
 
 It runs all Clematis tests it can find, in all mods that are loaded alongside.
 

@@ -3,11 +3,11 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Mod Template
+#+title: ModTemplate
 
 * [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
 
-* Mod Template
+* ModTemplate
 This is the template for add-ons (mods) for GZDoom family game engines.
 
 * Cvarinfo - console variable (CVar) definitions
@@ -38,7 +38,7 @@ DefaultBind g +hello
 // <<CC>>
 
 [enu default]
-MT_TITLE = "Mod Template";
+MT_TITLE = "ModTemplate";
 MT_GREET = "Greet";
 MT_HELLO = "Hello, world!";
 MT_VALUE = "Cvar value";

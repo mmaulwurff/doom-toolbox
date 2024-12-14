@@ -3,7 +3,7 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: String Utils
+#+title: StringUtils
 
 * Preamble
 ** Source code

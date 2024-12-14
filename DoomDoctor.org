@@ -3,7 +3,7 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Doom Doctor
+#+title: DoomDoctor
 
 * [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
 
@@ -120,7 +120,7 @@ class dd_LoggerTestRunner : StaticEventHandler
     mTest = new("dd_LoggerTest");
     mConsole = dd_BufferedConsole.getInstance();
 
-    mTest.Describe("Doom Doctor Logger tests");
+    mTest.Describe("DoomDoctor Logger tests");
     OnRegisterTest();
   }
 
@@ -297,7 +297,7 @@ class dd_Report
   {
     Array<string> lines =
       {
-        "Doom Doctor Report: " .. getSystemTime(),
+        "DoomDoctor Report: " .. getSystemTime(),
         getGameInfo(),
         getConfiguration(),
         getEventHandlers()
@@ -1290,13 +1290,13 @@ private clearscope void checkOtherEventHandlers()
       int contenderOrder = instance.order;
       if (contenderOrder == int.max && isLoggerFound)
         {
-          logWarning("can't inspect events from %s. Load Doom Doctor after it or increase event handler order",
+          logWarning("can't inspect events from %s. Load DoomDoctor after it or increase event handler order",
                      eventHandlerName);
         }
 
       else if (contenderOrder == int.min && !isTroublemakerFound)
         {
-          logWarning("simulated troubles won't affect %s. Load Doom Doctor before it or decrease event handler order",
+          logWarning("simulated troubles won't affect %s. Load DoomDoctor before it or decrease event handler order",
                      eventHandlerName);
         }
     }
