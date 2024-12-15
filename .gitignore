@@ -13,6 +13,11 @@
 
 # and these file types:
 !*.org
+!*.sh
 
 # and licenses here:
 !LICENSES/*.txt
+
+# but do ignore them there:
+build/*
+packages/*

@@ -3,7 +3,7 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: DoomDoctor
+#+title: DoomDoctor v1.0.0
 
 * [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
 
