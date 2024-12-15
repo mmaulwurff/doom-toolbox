@@ -4,7 +4,7 @@
 
 This is Emacs Org-mode literate project file. Use Emacs to extract the individual files. You don't have to open the Emacs window. Use the following command line command to extract the files:
 
-emacs DoomDoctor.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
+emacs SomeFile.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
 
 * Pros
 ** logical code structure
