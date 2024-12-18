@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: GPL-3.0-only
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
@@ -68,9 +68,6 @@ OptionMenu mt_Options
 #+end_src
 
 * ZScript - source code
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/ModTemplate/zscript.txt
 // <<GPL>>
 
@@ -132,7 +129,6 @@ class ModTemplateEventHandler : StaticEventHandler
   override void CheckReplacee(ReplacedEvent event) {}
 }
 #+end_src
-# SPDX-SnippetEnd
 
 * (Org) Licenses - snippets to include to files :noexport:
 #+name: CC

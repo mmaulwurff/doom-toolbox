@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: GPL-3.0-only
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
@@ -92,9 +92,6 @@ Notes:
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctorTest/zscript.zs :exports none
 version 4.12.2
 
@@ -131,7 +128,6 @@ class dd_LoggerTestRunner : StaticEventHandler
     mTest.EndDescribe();
   }
 #+end_src
-# SPDX-SnippetEnd
 
 #+name: count-logger-tests
 #+begin_src elisp :exports none
@@ -201,9 +197,6 @@ Alias dd_report "event dd_report"
 ** ~dd_VmAbortHandler~
 TODO: make ~dd_VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
 
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript/VmAbortHandler.zs
 class dd_VmAbortHandler : EventHandler
 {
@@ -355,7 +348,6 @@ class dd_Report
 
 } // class dd_Report
 #+end_src
-# SPDX-SnippetEnd
 
 * Troublemaker
 Troublemaker provides console commands to check if a mod can handle some unexpected events.
@@ -379,9 +371,6 @@ Alias dd_force_lightning       "netevent dd_force_lightning"
 ** Source
 TODO: make ~dd_Troublemaker~ savefile-compatible (~StaticEventHandler~).
 
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript/Troublemaker.zs
 mixin class dd_Volatile { override void Tick() { if (GetAge() > 0) destroy(); }  }
 
@@ -464,7 +453,6 @@ class dd_Troublemaker : EventHandler
 
 } // class dd_Troublemaker
 #+end_src
-# SPDX-SnippetEnd
 
 * Logging
 ** Settings
@@ -488,9 +476,6 @@ Also prints level time.
 
 ~StaticEventHandler~ used as a Singleton.
 
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 class dd_BufferedConsole : StaticEventHandler
 {
@@ -517,7 +502,6 @@ class dd_BufferedConsole : StaticEventHandler
 
 } // class dd_BufferedConsole
 #+end_src
-# SPDX-SnippetEnd
 
 ** ~dd_Logger~
 Notes
@@ -525,9 +509,6 @@ Notes
 - Events cannot be destroyed, so event parameters are never NULL.
 - Most events are followed by the test code that also works as an example of what an event report contains.
 
-# SPDX-SnippetBegin
-# SPDX-License-Identifier: GPL-3.0-only
-# SPDX-SnippetCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 class dd_Logger : StaticEventHandler
 #+end_src
@@ -1336,7 +1317,6 @@ private dd_BufferedConsole console;
 
 } // class dd_Logger
 #+end_src
-# SPDX-SnippetEnd
 
 #+name: define-cvars
 #+begin_src elisp :var cvars=() :exports none
