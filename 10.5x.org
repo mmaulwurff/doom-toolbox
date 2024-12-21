@@ -1,0 +1,828 @@
+# SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+#+title: 10.5x v0.10.0-next
+
+* Description
+Enemy multiplier mod for [GZDoom](https://zdoom.org/).
+
+[2019 Cacowards Mini Mod Safari](https://www.doomworld.com/cacowards/2019/gameplay/):
+> Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
+
+** Features
+- No difficult options, only a single slider;
+- Fractional values!
+- Can increase the number of enemies;
+- Can decrease the number of enemies (anti-slaughter);
+- The number of enemies is decreased for each enemy class separately;
+- Prints estimated enemy density on level start;
+- Works with monster randomizers;
+- Bonus option: optional resurrection of autokilled enemies (x5_raise_divided CVar).
+
+** Anti-features
+- No difficult options, only a single slider;
+- No display of remaining enemies;
+- May not work well with scripted maps;
+- Doesn't affect enemies spawned after the map is loaded;
+- Doesn't work with Zandronum.
+
+** Acknowledgments
+- Original idea: Cutmanmike;
+- Code used as a reference: The Zombie Killer;
+- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol,
+  StroggVorbis.
+- Feature suggestions: Rowsol;
+- Translation support and Russian translation: Blueberryy;
+- Brazilian Portuguese localization: generic name guy.
+
+** Meta
+- Contribution guidelines: [[./CodeOfConduct.org][Code of Conduct]].
+
+* Issues
+** Max monsters amount
+[Submitted](https://github.com/mmaulwurff/10.5x/issues/12) by [Spaceman333](https://github.com/Spaceman333) via GitHub issues.
+
+Would be super useful if I could set a max amount for monsters on a level, after they've been multiplied or divided, so it would never exceed that number.
+
+`MaxMonsterCount = 100`
+
+So lets say a level has 140, 350 or 1020 monsters, that setting would reduce it to only 100 monsters.
+
+This would be excellent for making maps have better performance, less insanity on maps that already have way more monsters than other levels and allow a more consistent level-to-level experience.
+
+Ideally it would be a number field, but can also be a slider.
+
+** Individual monster sliders
+Submitted by Accensus:
+
+> Although it's quite specific, would it be possible to adjust the count of vanilla monsters (or those inheriting from vanilla monsters) individually?  
+Like, reducing only the number of zombiemen and shotgunners while keeping the number of everything else intact.
+
+---
+
+### **[ghost](https://github.com/ghost)** commented [on Dec 26, 2019](https://github.com/mmaulwurff/10.5x/issues/4#issuecomment-568933134)
+
+I'd like to mention that this would not really work for totally custom monsters. The only way to have full compatibility is to leave it in the hands of the users to make their own compatibility patches via an external lump, then generate a slider for each class in it.
+
+OR
+
+Create a slider for each class in the AllActorClasses array that also has the ISMONSTER flag.
+
+There may also be a 3rd option that I'm not aware of right now.
+
+* Licenses
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src txt :exports none
+SPDX-FileTextCopyright: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle build/10.5x/zscript.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/x5_Density.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+// <<GPL>>
+#+end_src
+
+[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+#+name: CC
+#+begin_src txt :exports none
+SPDX-FileTextCopyright: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+#+end_src
+
+#+begin_src c :tangle build/10.5x/cvarinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src ini :tangle build/10.5x/language.txt
+// <<CC>>
+#+end_src
+#+begin_src c :tangle build/10.5x/mapinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle build/10.5x/menudef.txt
+// <<CC>>
+#+end_src
+
+* OptionMenuItemX5Slider.zs
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+class OptionMenuItemX5Slider : OptionMenuItemSlider
+{
+  OptionMenuItemX5Slider Init(String label,
+                              Name command,
+                              double min,
+                              double max,
+                              double step,
+                              int showval = 1)
+  {
+    Super.init(label, command, min, max, step, showval);
+    setLabel(mCvar.getInt());
+    return self;
+  }
+
+  override double getSliderValue() { return (mCVar.getInt() / 100.0); }
+
+  override void setSliderValue(double val)
+  {
+    int v = int(round(val * 100));
+    mCvar.setInt(v);
+    setLabel(v);
+  }
+
+  // private: //////////////////////////////////////////////////////////////////
+
+  private void setLabel(int val)
+  {
+    String specialLabel = getSpecialLabel(val);
+
+    mLabel = (specialLabel.length() > 0)
+      ? String.Format("%s 10.5x:", StringTable.Localize(specialLabel, false))
+      : "10.5x:";
+  }
+
+  private static String getSpecialLabel(int val)
+  {
+    switch (val)
+      {
+      case 0: return "X_000";
+      case 5: return "X_005";
+      case 50: return "X_050";
+      case 100: return "X_100";
+      case 200: return "X_200";
+      case 400: return "X_400";
+      case 1000: return "X_1000";
+      case 1050: return "X_1050";
+      case 2000: return "X_2000";
+      case 10000: return "X_10000";
+      default: return "";
+      }
+  }
+} // class OptionMenuItemX5Slider
+#+end_src
+
+* OptionMenuItemX5TypeSlider.zs
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
+{
+  void init(Class<Actor> type, int value)
+  {
+    let defaultEnemy = getDefaultByType(type);
+    let tag = defaultEnemy.getTag();
+    let label = String.Format("%s", tag);
+    Super.Init(label, "", 0, 10.5, 0.05, 2);
+
+    mValue = value;
+    mType  = type;
+  }
+
+  override double getSliderValue() { return (mValue / 100.0); }
+  override void setSliderValue(double value) { mValue = int(round(value * 100)); }
+
+  Class<Actor> getType() { return mType; }
+  int getValue() { return mValue; }
+
+  private int mValue;
+  private Class<Actor> mType;
+} // class OptionMenuItemX5TypeSlider
+#+end_src
+
+* x5_Density.zs
+TODO: restore printing density?
+#+begin_src c :tangle build/10.5x/zscript/x5_Density.zs
+class x5_Density play
+{
+  static void printMonsterDensity()
+  {
+    let message = "Estimated enemy density: %.3f, health: %.3f.";
+
+    uint nMonsters = 0;
+    uint nHealth   = 0;
+    int minX;
+    int minY;
+    int maxX;
+    int maxY;
+    bool isFirst = true;
+    let i        = ThinkerIterator.Create("Actor");
+    Actor mo;
+    while (mo = Actor(i.Next()))
+      {
+        bool isMonster = mo.bIsMonster;
+        if (!(isMonster || mo is "Inventory")) { continue; }
+
+        if (isMonster)
+          {
+            ++nMonsters;
+            nHealth += mo.Health;
+          }
+
+        if (isFirst)
+          {
+            minX = int(mo.pos.x);
+            minY = int(mo.pos.y);
+            maxX = int(mo.pos.x);
+            maxY = int(mo.pos.y);
+            continue;
+          }
+
+        if (mo.pos.x < minX) { minX = int(mo.pos.x); }
+        else if (mo.pos.x > maxX) { maxX = int(mo.pos.x); }
+
+        if (mo.pos.y < minY) { minY = int(mo.pos.y); }
+        else if (mo.pos.y > maxY) { maxY = int(mo.pos.y); }
+      }
+
+    if (nMonsters == 0)
+      {
+        Console.Printf(message, 0, 0);
+        return;
+      }
+
+    int radius = int(players[consolePlayer].mo.radius);
+    if (maxY - minY < radius) { maxY = minY + radius; }
+    if (maxX - minX < radius) { maxX = minX + radius; }
+
+    int area = (maxX - minX) * (maxY - minY);
+
+    double density       = double(nMonsters) / area / 0.113281; // Doom E1M1 UV
+    double healthDensity = double(nHealth) / area / 3.515625;   // Doom E1M1 UV
+    Console.Printf(message, density, healthDensity);
+  }
+} // class x5_Density
+#+end_src
+
+* x5_EventHandler.zs
+#+begin_src c :tangle build/10.5x/mapinfo.txt
+gameinfo { EventHandlers = "x5_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+class x5_EventHandler : EventHandler
+{
+  // 1. Entry point.
+  override void WorldLoaded(WorldEvent event)
+  {
+    if (level.MapName ~== "titlemap")
+      {
+        destroy();
+        return;
+      }
+
+    collectSpawnPoints(mSpawnPoints);
+
+    if (mSpawnPoints.size() == 0)
+      {
+        destroy();
+        return;
+      }
+
+    mEnemyTypes = collectEnemyTypes(mSpawnPoints);
+
+    if (x5_multiplier == 0)
+      {
+        // Each enemy type has its own multiplier, ask to fill multipliers.
+        mTypeMultipliers = NULL;
+        if (consolePlayer == net_arbitrator) sendInterfaceEvent(consolePlayer, "x5_menu");
+      }
+    else
+      {
+        // The global multiplier is used for all enemy types.
+        mTypeMultipliers = fillTypeMultipliersWithGlobal(mEnemyTypes);
+      }
+  }
+
+  override void InterfaceProcess(ConsoleEvent event)
+  {
+    if (event.name != "x5_menu") return;
+
+    Menu.SetMenu("x5_TypeMultipliers");
+    x5_TypeMultipliersMenu(Menu.GetCurrentMenu()).setUp(self, mEnemyTypes);
+  }
+
+  override void WorldTick()
+  {
+    // wait for type multipliers.
+    if (mTypeMultipliers == NULL) return;
+
+    if (level.maptime > TIME_TO_RANDOMIZE)
+      {
+        multiply();
+        mTypeMultipliers = NULL;
+      }
+  }
+
+  override void NetworkProcess(ConsoleEvent event)
+  {
+    if (event.name.left(3) != "x5_") return;
+
+    mTypeMultipliers = Dictionary.FromString(event.name.mid(3));
+  }
+
+  override void WorldThingSpawned(WorldEvent event)
+  {
+    let thing = event.thing;
+
+    // Otherwise, if two enemies share the same space, their missiles will collide immediately.
+    if (thing != NULL && thing.bMissile && x5_multiplier > 100) { thing.bMThruSpecies = true; }
+  }
+
+  // private: //////////////////////////////////////////////////////////////////
+
+  private static void collectSpawnPoints(out Array<x5_SpawnPoint> result)
+  {
+    Actor anActor;
+    for (let i = ThinkerIterator.Create("Actor"); anActor = Actor(i.Next());)
+      {
+        let replaceeType = Actor.getReplacee(anActor.getClassName());
+
+        if (!isCloneable(getDefaultByType(replaceeType))) { continue; }
+
+        let spawnPoint          = new("x5_SpawnPoint");
+        spawnPoint.position     = anActor.pos;
+        spawnPoint.height       = anActor.height;
+        spawnPoint.radius       = anActor.radius;
+        spawnPoint.replaceeType = replaceeType;
+        spawnPoint.original     = anActor;
+        result.Push(spawnPoint);
+      }
+  }
+
+  private static Dictionary collectEnemyTypes(Array<x5_SpawnPoint> spawnPoints)
+  {
+    let result = Dictionary.Create();
+    foreach (spawnPoint : spawnPoints)
+      {
+        result.Insert(spawnPoint.replaceeType.GetClassName(), "100");
+      }
+    return result;
+  }
+
+  private static Dictionary fillTypeMultipliersWithGlobal(Dictionary enemyTypes)
+  {
+    let result              = Dictionary.Create();
+    let formattedMultiplier = String.Format("%d", x5_multiplier);
+    for (let i = DictionaryIterator.Create(enemyTypes); i.Next();)
+      {
+        result.Insert(i.Key(), formattedMultiplier);
+      }
+    return result;
+  }
+
+  private Dictionary mEnemyTypes;
+  private Dictionary mTypeMultipliers;
+  private Array<x5_SpawnPoint> mSpawnPoints;
+
+  private void multiply()
+  {
+    for (let i = DictionaryIterator.Create(mTypeMultipliers); i.Next();)
+      {
+        int multiplier = i.Value().ToInt();
+        if (multiplier == 100) continue;
+
+        Array<Actor> enemiesByType;
+        collectSpawnedEnemiesByType(i.Key(), enemiesByType);
+        multiplyEnemies(enemiesByType, multiplier);
+      }
+  }
+
+  private void collectSpawnedEnemiesByType(Class<Actor> type, out Array<Actor> enemiesByType)
+  {
+    foreach (spawnPoint : mSpawnPoints)
+      {
+        if (spawnPoint.replaceeType != type) continue;
+
+        // If the actor is still present, great! Otherwise, assume the spawned actor isn't far away.
+        if (spawnPoint.original!= NULL)
+          {
+            enemiesByType.Push(spawnPoint.original);
+          }
+        else
+          {
+            let pos    = spawnPoint.position;
+            let height = spawnPoint.height;
+            let radius = spawnPoint.radius;
+            let i      = BlockThingsIterator.CreateFromPos(pos.x, pos.y, pos.z, height, radius, false);
+
+            if (i.Next()) { enemiesByType.Push(i.thing); }
+          }
+      }
+  }
+
+  private static void multiplyEnemies(Array<Actor> enemies, int multiplier)
+  {
+    if (multiplier == 100) return;
+
+    int integerMultiplier = multiplier / 100;
+    int copiesNumber      = integerMultiplier - 1;
+    foreach (enemy : enemies)
+      {
+        if (multiplier == 0)
+          {
+            let killer = x5_Killer(Actor.Spawn("x5_Killer", x5_Killer.makePosition(enemy)));
+            killer.init(enemy);
+          }
+        else
+          {
+            for (int c = 0; c < copiesNumber; ++c)
+              {
+                clone(enemy);
+              }
+          }
+      }
+
+    if (multiplier % 100 == 0) return;
+
+    shuffle(enemies);
+
+    double fractionMultiplier = (multiplier % 100) * 0.01;
+    uint enemiesNumber        = enemies.Size();
+    uint stp                  = uint(round(enemiesNumber * fractionMultiplier));
+
+    if (integerMultiplier >= 1) // add
+      {
+        for (uint i = 0; i < stp; ++i)
+          {
+            clone(enemies[i]);
+          }
+      }
+    else // decimate
+      {
+        for (uint i = stp; i < enemiesNumber; ++i)
+          {
+            let killer = x5_Killer(Actor.Spawn("x5_Killer", x5_Killer.makePosition(enemies[i])));
+            killer.init(enemies[i]);
+          }
+      }
+  }
+
+  private static void clone(Actor original)
+  {
+    original.bThruSpecies = true;
+
+    let spawned          = Actor.Spawn(original.GetClassName(), original.Pos);
+    spawned.bAmbush      = original.bAmbush;
+    spawned.bThruSpecies = true;
+
+    // copied from randomspawner.zs
+    spawned.SpawnAngle = original.SpawnAngle;
+    spawned.Angle      = original.Angle;
+    spawned.Pitch      = original.Pitch;
+    spawned.Roll       = original.Roll;
+    spawned.SpawnPoint = original.SpawnPoint;
+    spawned.special    = original.special;
+    spawned.args[0]    = original.args[0];
+    spawned.args[1]    = original.args[1];
+    spawned.args[2]    = original.args[2];
+    spawned.args[3]    = original.args[3];
+    spawned.args[4]    = original.args[4];
+    spawned.special1   = original.special1;
+    spawned.special2   = original.special2;
+    // MTF_SECRET needs special treatment to avoid incrementing the secret
+    // counter twice. It had already been processed for the spawner itself.
+    spawned.SpawnFlags = original.SpawnFlags & ~MTF_SECRET;
+    spawned.HandleSpawnFlags();
+
+    spawned.SpawnFlags   = original.SpawnFlags;
+    // "Transfer" count secret flag to spawned actor
+    spawned.bCountSecret = original.SpawnFlags & MTF_SECRET;
+    spawned.ChangeTid(original.tid);
+    spawned.Vel    = original.Vel;
+    // For things such as DamageMaster/DamageChildren, transfer mastery.
+    spawned.master = original.master;
+    spawned.target = original.target;
+    spawned.tracer = original.tracer;
+    spawned.CopyFriendliness(original, false);
+  }
+
+  private static bool isCloneable(readonly<Actor> anActor)
+  {
+    return anActor.bIsMonster && !anActor.bFriendly && anActor.bCountKill;
+  }
+
+  private static void shuffle(out Array<Actor> actors)
+  {
+    // Fisher-Yates shuffle.
+    uint numberOfActors = actors.size();
+    for (uint i = numberOfActors - 1; i >= 1; --i)
+      {
+        int j = Random(0, i);
+
+        let temp  = actors[i];
+        actors[i] = actors[j];
+        actors[j] = temp;
+      }
+  }
+
+  // There are mods that have randomization that takes a few tics.
+  const TIME_TO_RANDOMIZE = 4;
+} // class x5_EventHandler
+
+class x5_SpawnPoint
+{
+  Vector3 position;
+  double height;
+  double radius;
+  Class<Actor> replaceeType;
+  Actor original;
+} // class x5_SpawnPoint
+#+end_src
+
+* x5_Killer.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
+class x5_Killer : Actor
+{
+  Default
+    {
+      Height 30;
+      FloatBobStrength 0.2;
+
+      +NOBLOCKMAP;
+      +NOGRAVITY;
+      +DONTSPLASH;
+      +NOTONAUTOMAP;
+      +FLOATBOB;
+      +BRIGHT;
+    }
+
+  // TODO: make the icon otional
+  States
+    {
+    Spawn:
+      m8rd A - 1;
+      Stop;
+    }
+
+  override void Tick()
+  {
+    Super.Tick();
+
+    if (mWatched == NULL) { return; }
+
+    setOrigin(makePosition(mWatched), true);
+
+    if (mWatched.health > 0 && mWatched.target == NULL) { return; }
+
+    mWatched.A_Die();
+    mWatched.bCorpse = x5_raise_divided;
+    destroy();
+  }
+
+  void init(Actor watched) { mWatched = watched; }
+
+  static Vector3 makePosition(Actor watched)
+  {
+    return watched.pos + (0, 0, watched.height * 1.5);
+  }
+
+  // private: //////////////////////////////////////////////////////////////////
+
+  private Actor mWatched;
+} // class x5_Killer
+#+end_src
+
+* x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+class x5_TypeMultipliersMenu : OptionMenu
+{
+  override bool MenuEvent(int mKey, bool fromController)
+  {
+    if (mKey == MKEY_Back) { report(); }
+
+    return Super.MenuEvent(mKey, fromController);
+  }
+
+  void setUp(EventHandler anEventHandler, Dictionary enemyTypes)
+  {
+    mEventHandler = anEventHandler;
+
+    mDesc.mItems.clear();
+    mDesc.mSelectedItem = 2;
+
+    String description = StringTable.Localize("$X_EXIT");
+    mDesc.mItems.push(new("OptionMenuItemStaticText").InitDirect(description, Font.CR_BLACK));
+    mDesc.mItems.push(new("OptionMenuItemStaticText").Init(""));
+
+    let savedMultipliers = Dictionary.FromString(x5_type_multipliers);
+    for (let i = DictionaryIterator.Create(savedMultipliers); i.Next();)
+      {
+        String type = i.Key();
+
+        if (enemyTypes.at(type).Length() != 0)
+          {
+            int multiplier = i.Value().ToInt();
+            enemyTypes.Insert(type, String.Format("%d", multiplier));
+          }
+      }
+
+    Array<x5_TypeSortElement> types;
+
+    for (let i = DictionaryIterator.Create(enemyTypes); i.Next();)
+      {
+        Class<Actor> enemyClass = i.Key();
+        int multiplier          = i.Value().ToInt();
+        let defaultEnemy        = getDefaultByType(enemyClass);
+
+        let element         = new("x5_TypeSortElement");
+        element.mName       = defaultEnemy.getTag();
+        element.mHealth     = defaultEnemy.health;
+        element.mClass      = enemyClass;
+        element.mMultiplier = multiplier;
+        types.push(element);
+      }
+
+    sortTypes(types);
+
+    foreach (element : types)
+      {
+        let slider = new("OptionMenuItemX5TypeSlider");
+        slider.Init(element.mClass, element.mMultiplier);
+
+        mDesc.mItems.push(slider);
+      }
+  }
+
+  // private: //////////////////////////////////////////////////////////////////
+
+  private void report()
+  {
+    let savedMultipliers = Dictionary.FromString(x5_type_multipliers);
+    Dictionary multipliersToReport = Dictionary.Create();
+    foreach (menuItem : mDesc.mItems)
+      {
+        let slider = OptionMenuItemX5TypeSlider(menuItem);
+        if (slider == NULL) continue;
+
+        STring className  = slider.getType().GetClassName();
+        String multiplier = String.Format("%d", slider.getValue());
+
+        multipliersToReport.Insert(className, multiplier);
+        savedMultipliers.Insert(className, multiplier);
+      }
+
+    CVar.FindCVar("x5_type_multipliers").SetString(savedMultipliers.ToString());
+
+    String event = String.Format("x5_%s", multipliersToReport.ToString());
+    mEventHandler.SendNetworkEvent(event);
+  }
+
+  private void sortTypes(out Array<x5_TypeSortElement> types)
+  {
+    // Gnome sort (stupid sort): https://en.wikipedia.org/wiki/Gnome_sort
+
+    let pos    = 0;
+    let length = types.size();
+
+    while (pos < length)
+      {
+        if (pos == 0 || isGreaterOrEqual(types[pos], types[pos - 1])) { ++pos; }
+        else
+          {
+            // swap
+            let tmp        = types[pos];
+            types[pos]     = types[pos - 1];
+            types[pos - 1] = tmp;
+
+            --pos;
+          }
+      }
+  }
+
+  private bool isGreaterOrEqual(x5_TypeSortElement element1, x5_TypeSortElement element2)
+  {
+    if (element1.mHealth > element2.mHealth) { return true; }
+    if (element1.mHealth == element2.mHealth && element1.mName >= element2.mName) { return true; }
+
+    return false;
+  }
+
+  private EventHandler mEventHandler;
+} // class x5_TypeMultipliersMenu
+
+class x5_TypeSortElement
+{
+  String mName;
+  int mHealth;
+  Class<Actor> mClass;
+  int mMultiplier;
+} // class x5_TypeSortElement
+#+end_src
+
+* cvarinfo.txt
+#+begin_src c :tangle build/10.5x/cvarinfo.txt
+server int  x5_multiplier    = 100;
+server bool x5_raise_divided = false;
+
+nosave string x5_type_multipliers = "";
+#+end_src
+
+* language.txt
+#+begin_src ini :tangle build/10.5x/language.txt
+// SPDX-FileCopyrightText: 2020 Blueberryy
+// SPDX-FileCopyrightText: 2022 generic name guy
+
+[enu default]
+
+X_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
+X_EXIT  = "Exit this menu to start the level.";
+X_000   = "Per enemy type (on level start)";
+X_005   = "Anybody home?";
+X_050   = "Half-Life? Half: death";
+X_100   = "Standard";
+X_200   = "Double trouble";
+X_400   = "Quad Damage!";
+X_1000  = "Classic 10x";
+X_1050  = "Slaughter!";
+X_2000  = "How did you get here?";
+X_10000 = "Are you insane?";
+
+[ru]
+
+X_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
+X_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
+X_000   = "По типу врагов (при старте уровня)";
+X_005   = "Кто-нибудь дома?";
+X_050   = "Полураспад";
+X_100   = "Стандарт";
+X_200   = "Двойные проблемы";
+X_400   = "Четырёхкратный урон!";
+X_1000  = "Классический 10x";
+X_1050  = "Резня!";
+X_2000  = "Как вы сюда попали?";
+X_10000 = "С ума сошли?";
+
+[ptb]
+
+X_005   = "Alguém em casa?";
+X_050   = "Half-Life? Half: morto";
+X_100   = "Normal";
+X_200   = "Problema em dobro";
+X_1000  = "Clássico 10x";
+X_1050  = "Matança!";
+X_2000  = "Como você chegou aqui?";
+X_10000 = "Você é louco?";
+#+end_src
+
+* menudef.txt
+#+begin_src txt :tangle build/10.5x/menudef.txt
+AddOptionMenu OptionsMenu
+{
+  X5Slider "x", x5_multiplier, 0, 10.5, 0.05, 2
+}
+
+OptionMenu "x5_TypeMultipliers"
+{
+  Class "x5_TypeMultipliersMenu"
+  Title "$X_TYPE_MENU_TITLE"
+}
+#+end_src
+
+* zscript.zs
+#+begin_src c :tangle build/10.5x/zscript.zs
+version 4.10
+
+#include "zscript/OptionMenuItemX5Slider.zs"
+#include "zscript/OptionMenuItemX5TypeSlider.zs"
+
+#include "zscript/x5_Density.zs"
+#include "zscript/x5_EventHandler.zs"
+#include "zscript/x5_Killer.zs"
+#include "zscript/x5_TypeMultipliersMenu.zs"
+#+end_src
+
+* Sprites
+[[./media/10.5x/sprites/m8rda0.png]]
+
+#+name: copy-media
+#+begin_src elisp :exports none
+(copy-directory "./media/10.5x" "./build/10.5x" nil t t)
+""
+#+end_src
+This script has to be parked somewhere.
+#+begin_src c :tangle build/10.5x/zscript.zs
+<<copy-media()>>
+#+end_src
+
+* Tests
+#+begin_src elisp
+(load-file "build/TestRunner/dt-scripts.el")
+
+(run-tests
+ "quit")
+#+end_src
