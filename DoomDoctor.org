@@ -67,6 +67,8 @@ Notes:
 (load-file "build/TestRunner/dt-scripts.el")
 
 (run-tests
+ "build/DoomDoctor build/DoomDoctorTest"
+
  "  dd_logging_engine_events_enabled  true;
     dd_logging_replace_events_enabled true;
     dd_logging_world_events_enabled   true;
@@ -74,7 +76,7 @@ Notes:
     dd_logging_process_events_enabled true;
   wait 2;
     dd_i_report;
-    map map02;
+    map map01;
   wait 2;
     dd_force_lightning;
     event TestConsoleEvent;

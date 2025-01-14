@@ -5,8 +5,6 @@
 :end:
 #+title: TestRunner
 
-It runs all Clematis tests it can find, in all mods that are loaded alongside.
-
 * License
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
@@ -18,68 +16,8 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src elisp :tangle build/TestRunner/dt-scripts.el
 ;; <<CC>>
 #+end_src
-#+begin_src txt :tangle build/TestRunner/mapinfo.txt
-// <<CC>>
-#+end_src
-#+begin_src c :tangle build/TestRunner/zscript.txt
-// <<CC>>
-#+end_src
 #+begin_src ini :tangle build/TestRunner/config.ini
 # <<CC>>
-#+end_src
-
-* ~TestRunner~
-#+begin_src txt :tangle build/TestRunner/mapinfo.txt
-GameInfo { EventHandlers = "TestRunner" }
-#+end_src
-
-#+begin_src c :tangle build/TestRunner/zscript.txt
-version 4.12.2
-
-class TestRunner : StaticEventHandler
-{
-  override void OnRegister()
-  {
-    // To run after most event handlers.
-    setOrder(int.max);
-
-    foreach (aClass : AllClasses)
-      {
-        if (!(aClass is "Clematis") || aClass == "Clematis") continue;
-
-        mTestClasses.push(aClass.getClassName());
-      }
-
-    if (mTestClasses.size() == 0)
-      {
-        Console.printf("TestRunner: No tests found.");
-        return;
-      }
-
-    string message = string.format("TestRunner: found tests (%d):", mTestClasses.size());
-    foreach (testClass : mTestClasses)
-      {
-        message.appendFormat(" " .. testClass);
-      }
-    Console.printf(message);
-  }
-
-  override void onEngineInitialize()
-  {
-    Console.Printf("Running tests...");
-    int testsFound = 0;
-    foreach (aClass : AllClasses)
-      {
-        if (!(aClass is "Clematis") || aClass == "Clematis") continue;
-
-        ++testsFound;
-        Clematis.Create(aClass.GetClassName());
-      }
-    Console.Printf("Run tests: %d.", testsFound);
-  }
-
-  Array<Name> mTestClasses;
-}
 #+end_src
 
 * Config
@@ -100,6 +38,7 @@ Command=save save; wait 3 ; load save
 [Doom.ConsoleVariables]
 m_quickexit=true
 vid_cursor=cursor
+wipetype=0
 #+end_src
 
 * Launch script
@@ -112,17 +51,19 @@ TODO: filter uninteresting GZDoom output lines.
 TODO: replace shell command with direct call?
 
 #+begin_src elisp :tangle build/TestRunner/dt-scripts.el
-(defun run-tests (command)
+(defun run-tests (mod-path command)
   (org-babel-tangle)
-  (shell-command (concat "gzdoom -noautoload -nosound \
--config build/TestRunner/config.ini \
--iwad " (getenv "IWAD_PATH") " \
--file " (getenv "CLEMATIS_PATH") " build/* \
--warp 1 +\"" command  "\"")))
+  (shell-command (concat "gzdoom"
+                         " -noautoload"
+                         " -nosound"
+                         " -config build/TestRunner/config.ini"
+                         " -iwad " (getenv "IWAD_PATH")
+                         " -file " (getenv "CLEMATIS_PATH") " " mod-path
+                         " +\"" command "\"")))
 #+end_src
 
-Examples:
-src_elisp{(set 'scripts-path "build/TestRunner/dt-scripts.el")}
-
-- src_elisp{(load-file scripts-path) (run-tests "")}
-- src_elisp{(load-file scripts-path) (run-tests "wait 1; quit")}
+Example:
+#+begin_src elisp
+(load-file "build/TestRunner/dt-scripts.el")
+(run-tests "build/SomeMod" "wait 1; quit")
+#+end_src
