@@ -97,6 +97,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 // <<GPL>>
 #+end_src
+#+begin_src c :tangle build/10.5xTest/zscript.zs
+// <<GPL>>
+#+end_src
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
@@ -117,42 +120,14 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src txt :tangle build/10.5x/menudef.txt
 // <<CC>>
 #+end_src
-
-* OptionMenuItemX5Slider.zs
-#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
-class OptionMenuItemX5Slider : OptionMenuItemSlider
-{
-  OptionMenuItemX5Slider Init(String label,
-                              Name command,
-                              double min,
-                              double max,
-                              double step,
-                              int showval = 1)
-  {
-    Super.init(label, command, min, max, step, showval);
-    setLabel(mCvar.getInt());
-    return self;
-  }
-
-  override double getSliderValue() { return (mCVar.getInt() / 100.0); }
-
-  override void setSliderValue(double val)
-  {
-    int v = int(round(val * 100));
-    mCvar.setInt(v);
-    setLabel(v);
-  }
-
-  private void setLabel(int val)
-  {
-    mLabel = (val == 0)
-      ? StringTable.Localize("$X_000") .. "10.5x:"
-      : "10.5x:";
-  }
-} // class OptionMenuItemX5Slider
+#+begin_src c :tangle build/10.5xTest/cvarinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src c :tangle build/10.5xTest/mapinfo.txt
+// <<CC>>
 #+end_src
 
-* OptionMenuItemX5TypeSlider.zs
+* OptionMenuItemX5TypeSlider
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
@@ -178,7 +153,7 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 } // class OptionMenuItemX5TypeSlider
 #+end_src
 
-* x5_EventHandler.zs
+* x5_EventHandler
 #+begin_src c :tangle build/10.5x/mapinfo.txt
 GameInfo { EventHandlers = "x5_EventHandler" }
 #+end_src
@@ -452,7 +427,7 @@ class x5_SpawnPoint
 } // class x5_SpawnPoint
 #+end_src
 
-* x5_Killer.zs
+* x5_Killer
 #+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
 class x5_Killer : Actor
 {
@@ -461,15 +436,15 @@ class x5_Killer : Actor
       Height 30;
       FloatBobStrength 0.2;
 
-      +NOBLOCKMAP;
-      +NOGRAVITY;
-      +DONTSPLASH;
-      +NOTONAUTOMAP;
-      +FLOATBOB;
-      +BRIGHT;
+      +NoBlockmap;
+      +NoGravity;
+      +DontSplash;
+      +NotOnAutomap;
+      +FloatBob;
+      +Bright;
     }
 
-  // TODO: make the icon otional
+  // TODO: make the icon optional
   States
     {
     Spawn:
@@ -503,7 +478,15 @@ class x5_Killer : Actor
 } // class x5_Killer
 #+end_src
 
-* x5_TypeMultipliersMenu.zs
+* x5_TypeMultipliersMenu
+#+begin_src txt :tangle build/10.5x/menudef.txt
+OptionMenu "x5_TypeMultipliers"
+{
+  Class "x5_TypeMultipliersMenu"
+  Title "$X_TYPE_MENU_TITLE"
+}
+#+end_src
+
 #+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeMultipliersMenu : OptionMenu
 {
@@ -628,7 +611,7 @@ class x5_TypeSortElement
 } // class x5_TypeSortElement
 #+end_src
 
-* cvarinfo.txt
+* cvarinfo
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
 server int  x5_multiplier    = 100;
 server bool x5_raise_divided = false;
@@ -636,7 +619,7 @@ server bool x5_raise_divided = false;
 nosave string x5_type_multipliers = "";
 #+end_src
 
-* language.txt
+* language
 #+begin_src ini :tangle build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
@@ -651,21 +634,50 @@ X_EXIT  = "Выйдите из этого меню, чтобы начать ур
 X_000   = "По типу врагов (при старте уровня)";
 #+end_src
 
-* menudef.txt
+* Slider
+** menudef
 #+begin_src txt :tangle build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
-  X5Slider "x", x5_multiplier, 0, 10.5, 0.05, 2
-}
-
-OptionMenu "x5_TypeMultipliers"
-{
-  Class "x5_TypeMultipliersMenu"
-  Title "$X_TYPE_MENU_TITLE"
+  X5Slider "", x5_multiplier, 0, 10.5, 0.05, 2
 }
 #+end_src
 
-* zscript.zs
+** OptionMenuItemX5Slider
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+class OptionMenuItemX5Slider : OptionMenuItemSlider
+{
+  OptionMenuItemX5Slider Init(String label,
+                              Name command,
+                              double min,
+                              double max,
+                              double step,
+                              int showval = 1)
+  {
+    Super.init(label, command, min, max, step, showval);
+    setLabel(mCvar.getInt());
+    return self;
+  }
+
+  override double getSliderValue() { return (mCVar.getInt() / 100.0); }
+
+  override void setSliderValue(double val)
+  {
+    int v = int(round(val * 100));
+    mCvar.setInt(v);
+    setLabel(v);
+  }
+
+  private void setLabel(int val)
+  {
+    mLabel = (val == 0)
+      ? StringTable.Localize("$X_000") .. " 10.5x:"
+      : "10.5x:";
+  }
+} // class OptionMenuItemX5Slider
+#+end_src
+
+* Zscript
 #+begin_src c :tangle build/10.5x/zscript.zs
 version 4.14
 
@@ -691,81 +703,84 @@ This script has to be parked somewhere.
 #+end_src
 
 * Tests
-TODO: fix: sometimes the first test fails.
 #+begin_src elisp
 (load-file "build/TestRunner/dt-scripts.el")
 
 (run-tests
  "build/10.5x build/10.5xTest"
 
- "set x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
+ "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
   x5t_name IntegerMultiplier;
-  set x5_multiplier 300;
+  x5_multiplier 300; wait 2;
   x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  x5t_expected {'DoomImp':'3','ZombieMan':'3'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'3','ZombieMan':'3'}; wait 10;
 
   x5t_name FractionalMultiplier;
-  set x5_multiplier 270;
+  x5_multiplier 270; wait 2;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
-  x5t_expected {'DoomImp':'27'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'27'}; wait 10;
 
   x5t_name Divider;
-  set x5_multiplier 70;
+  x5_multiplier 70; wait 2;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
   turn180; wait 10; +attack; wait 10; -attack; wait 10;
-  x5t_expected {'DoomImp':'7'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'7'}; wait 10;
 
   x5t_name PerClass;
-  set x5_multiplier 0;
+  x5_multiplier 0; wait 2;
   x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  netevent x5r_{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
-  x5t_expected {'DoomImp':'3','ZombieMan':'5'}; netevent x5t_run; wait 10;
+  netevent x5r{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
+  netevent x5t_run{'DoomImp':'3','ZombieMan':'5'}; wait 10;
 
   netevent x5t_end; wait 2; quit")
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/mapinfo.txt
-GameInfo { EventHandlers = "x5t_Test", "x5t_Resender" }
+GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/cvarinfo.txt
-server string x5t_name = "";
+server string x5t_name  = "";
 server string x5t_spawn = "";
-server string x5t_expected = "";
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
 version 4.14
 
-class x5_Clematis : Clematis {}
+class x5t_Clematis : Clematis {}
 
 class x5t_Test : StaticEventHandler
 {
 
-  override void OnRegister()
+  override void onRegister()
   {
     setOrder(-1);
   }
 
-  override void NetworkProcess(ConsoleEvent event)
+  override void networkProcess(ConsoleEvent event)
   {
     if (event.name == "x5t_begin")
       {
-        mClematis = new("x5_Clematis");
-        mClematis.Describe("10.5x test");
+        mTest = new("x5t_Clematis");
+        mTest.describe("10.5x test");
       }
-    else if (event.name == "x5t_run")
+    else if (event.name.left(7) == "x5t_run")
       {
-        run();
+        Dictionary expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(7)));
+        for (let i = DictionaryIterator.create(expected); i.Next();)
+          {
+            mTest.it(x5t_name .. ", " .. i.key(),
+                     mTest.AssertEval(aliveActorsCount(i.key()), "==", i.value().toInt()));
+          }
       }
     else if (event.name == "x5t_end")
       {
-        mClematis.EndDescribe();
+        mTest.endDescribe();
       }
   }
 
-  override void WorldLoaded(WorldEvent event)
+  override void worldLoaded(WorldEvent event)
   {
     int width = getDefaultByType('DoomImp').radius * 2;
     int yBegin = -2 * width;
@@ -773,7 +788,7 @@ class x5t_Test : StaticEventHandler
     int x = 100;
     int y = yBegin;
 
-    Dictionary spawn = Dictionary.fromString(jsonify(x5t_spawn));
+    Dictionary spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
     for (let i = DictionaryIterator.Create(spawn); i.Next();)
       {
         int count = i.value().toInt();
@@ -791,22 +806,6 @@ class x5t_Test : StaticEventHandler
       }
   }
 
-  static string jsonify(string input)
-  {
-    input.replace("'", "\"");
-    return input;
-  }
-
-  private void run()
-  {
-    Dictionary expected = Dictionary.fromString(jsonify(x5t_expected));
-    for (let i = DictionaryIterator.create(expected); i.Next();)
-      {
-        mClematis.it(x5t_name .. ", " .. i.key(),
-                     mClematis.AssertEval(aliveActorsCount(i.key()), "==", i.value().toInt()));
-      }
-  }
-
   private static int aliveActorsCount(string actorClassName)
   {
     int result = 0;
@@ -819,18 +818,21 @@ class x5t_Test : StaticEventHandler
     return result;
   }
 
-  private x5_Clematis mClematis;
+  private Clematis mTest;
 
 } // class x5t_Test
 
-class x5t_Resender : EventHandler
+class x5t_Quoter : EventHandler
 {
+  static string quote(string input)
+  {
+    input.replace("'", "\"");
+    return input;
+  }
+
   override void NetworkProcess(ConsoleEvent event)
   {
-    if (event.name.left(4) == "x5r_")
-      {
-        sendNetworkEvent("x5_" .. x5t_Test.jsonify(event.name.mid(4)));
-      }
+    if (event.name.left(3) == "x5r") sendNetworkEvent("x5_" .. quote(event.name.mid(3)));
   }
-} // class x5t_Resender
+} // class x5t_Quoter
 #+end_src
