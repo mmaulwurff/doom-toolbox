@@ -743,7 +743,7 @@ OptionMenu "x5_TypeMultipliers"
 
 * zscript.zs
 #+begin_src c :tangle build/10.5x/zscript.zs
-version 4.10
+version 4.14
 
 #include "zscript/OptionMenuItemX5Slider.zs"
 #include "zscript/OptionMenuItemX5TypeSlider.zs"
@@ -768,35 +768,42 @@ This script has to be parked somewhere.
 #+end_src
 
 * Tests
+TODO: fix: sometimes the first test fails.
 #+begin_src elisp
 (load-file "build/TestRunner/dt-scripts.el")
 
 (run-tests
  "build/10.5x build/10.5xTest"
 
- "wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
+ "set x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
   x5t_name IntegerMultiplier;
-  x5_multiplier 300;
+  set x5_multiplier 300;
   x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
   x5t_expected {'DoomImp':'3','ZombieMan':'3'}; netevent x5t_run; wait 10;
 
   x5t_name FractionalMultiplier;
-  x5_multiplier 270;
+  set x5_multiplier 270;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
   x5t_expected {'DoomImp':'27'}; netevent x5t_run; wait 10;
 
   x5t_name Divider;
-  x5_multiplier 70;
+  set x5_multiplier 70;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
   turn180; wait 10; +attack; wait 10; -attack; wait 10;
   x5t_expected {'DoomImp':'7'}; netevent x5t_run; wait 10;
+
+  x5t_name PerClass;
+  set x5_multiplier 0;
+  x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
+  netevent x5r_{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
+  x5t_expected {'DoomImp':'3','ZombieMan':'5'}; netevent x5t_run; wait 10;
 
   netevent x5t_end; wait 2; quit")
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/mapinfo.txt
-GameInfo { EventHandlers = "x5_Test" }
+GameInfo { EventHandlers = "x5t_Test", "x5t_Resender" }
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/cvarinfo.txt
@@ -810,7 +817,7 @@ version 4.14
 
 class x5_Clematis : Clematis {}
 
-class x5_Test : StaticEventHandler
+class x5t_Test : StaticEventHandler
 {
 
   override void OnRegister()
@@ -843,9 +850,7 @@ class x5_Test : StaticEventHandler
     int x = 100;
     int y = yBegin;
 
-    string serializedSpawn = x5t_spawn;
-    serializedSpawn.replace("'", "\"");
-    Dictionary spawn = Dictionary.fromString(serializedSpawn);
+    Dictionary spawn = Dictionary.fromString(jsonify(x5t_spawn));
     for (let i = DictionaryIterator.Create(spawn); i.Next();)
       {
         int count = i.value().toInt();
@@ -863,11 +868,15 @@ class x5_Test : StaticEventHandler
       }
   }
 
+  static string jsonify(string input)
+  {
+    input.replace("'", "\"");
+    return input;
+  }
+
   private void run()
   {
-    string serializedExpected = x5t_expected;
-    serializedExpected.replace("'", "\"");
-    Dictionary expected = Dictionary.fromString(serializedExpected);
+    Dictionary expected = Dictionary.fromString(jsonify(x5t_expected));
     for (let i = DictionaryIterator.create(expected); i.Next();)
       {
         mClematis.it(x5t_name .. ", " .. i.key(),
@@ -889,5 +898,16 @@ class x5_Test : StaticEventHandler
 
   private x5_Clematis mClematis;
 
-} // class x5_Test
+} // class x5t_Test
+
+class x5t_Resender : EventHandler
+{
+  override void NetworkProcess(ConsoleEvent event)
+  {
+    if (event.name.left(4) == "x5r_")
+      {
+        sendNetworkEvent("x5_" .. x5t_Test.jsonify(event.name.mid(4)));
+      }
+  }
+} // class x5t_Resender
 #+end_src
