@@ -151,29 +151,9 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
   private void setLabel(int val)
   {
-    String specialLabel = getSpecialLabel(val);
-
-    mLabel = (specialLabel.length() > 0)
-      ? String.Format("%s 10.5x:", StringTable.Localize(specialLabel, false))
+    mLabel = (val == 0)
+      ? StringTable.Localize("$X_000") .. "10.5x:"
       : "10.5x:";
-  }
-
-  private static String getSpecialLabel(int val)
-  {
-    switch (val)
-      {
-      case 0: return "X_000";
-      case 5: return "X_005";
-      case 50: return "X_050";
-      case 100: return "X_100";
-      case 200: return "X_200";
-      case 400: return "X_400";
-      case 1000: return "X_1000";
-      case 1050: return "X_1050";
-      case 2000: return "X_2000";
-      case 10000: return "X_10000";
-      default: return "";
-      }
   }
 } // class OptionMenuItemX5Slider
 #+end_src
@@ -735,48 +715,16 @@ nosave string x5_type_multipliers = "";
 * language.txt
 #+begin_src ini :tangle build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
-// SPDX-FileCopyrightText: 2022 generic name guy
 
 [enu default]
-
 X_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
 X_EXIT  = "Exit this menu to start the level.";
 X_000   = "Per enemy type (on level start)";
-X_005   = "Anybody home?";
-X_050   = "Half-Life? Half: death";
-X_100   = "Standard";
-X_200   = "Double trouble";
-X_400   = "Quad Damage!";
-X_1000  = "Classic 10x";
-X_1050  = "Slaughter!";
-X_2000  = "How did you get here?";
-X_10000 = "Are you insane?";
 
 [ru]
-
 X_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
 X_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
 X_000   = "По типу врагов (при старте уровня)";
-X_005   = "Кто-нибудь дома?";
-X_050   = "Полураспад";
-X_100   = "Стандарт";
-X_200   = "Двойные проблемы";
-X_400   = "Четырёхкратный урон!";
-X_1000  = "Классический 10x";
-X_1050  = "Резня!";
-X_2000  = "Как вы сюда попали?";
-X_10000 = "С ума сошли?";
-
-[ptb]
-
-X_005   = "Alguém em casa?";
-X_050   = "Half-Life? Half: morto";
-X_100   = "Normal";
-X_200   = "Problema em dobro";
-X_1000  = "Clássico 10x";
-X_1050  = "Matança!";
-X_2000  = "Como você chegou aqui?";
-X_10000 = "Você é louco?";
 #+end_src
 
 * menudef.txt
