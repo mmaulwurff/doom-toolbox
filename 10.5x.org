@@ -691,7 +691,6 @@ This script has to be parked somewhere.
 #+end_src
 
 * Tests
-TODO: fix: sometimes the first test fails.
 #+begin_src elisp
 (load-file "build/TestRunner/dt-scripts.el")
 
@@ -701,71 +700,75 @@ TODO: fix: sometimes the first test fails.
  "set x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
   x5t_name IntegerMultiplier;
-  set x5_multiplier 300;
+  set x5_multiplier 300; wait 2;
   x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  x5t_expected {'DoomImp':'3','ZombieMan':'3'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'3','ZombieMan':'3'}; wait 10;
 
   x5t_name FractionalMultiplier;
-  set x5_multiplier 270;
+  set x5_multiplier 270; wait 2;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
-  x5t_expected {'DoomImp':'27'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'27'}; wait 10;
 
   x5t_name Divider;
-  set x5_multiplier 70;
+  set x5_multiplier 70; wait 2;
   x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
   turn180; wait 10; +attack; wait 10; -attack; wait 10;
-  x5t_expected {'DoomImp':'7'}; netevent x5t_run; wait 10;
+  netevent x5t_run{'DoomImp':'7'}; wait 10;
 
   x5t_name PerClass;
-  set x5_multiplier 0;
+  set x5_multiplier 0; wait 2;
   x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  netevent x5r_{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
-  x5t_expected {'DoomImp':'3','ZombieMan':'5'}; netevent x5t_run; wait 10;
+  netevent x5r{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
+  netevent x5t_run{'DoomImp':'3','ZombieMan':'5'}; wait 10;
 
   netevent x5t_end; wait 2; quit")
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/mapinfo.txt
-GameInfo { EventHandlers = "x5t_Test", "x5t_Resender" }
+GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/cvarinfo.txt
 server string x5t_name = "";
 server string x5t_spawn = "";
-server string x5t_expected = "";
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
 version 4.14
 
-class x5_Clematis : Clematis {}
+class x5t_Clematis : Clematis {}
 
 class x5t_Test : StaticEventHandler
 {
 
-  override void OnRegister()
+  override void onRegister()
   {
     setOrder(-1);
   }
 
-  override void NetworkProcess(ConsoleEvent event)
+  override void networkProcess(ConsoleEvent event)
   {
     if (event.name == "x5t_begin")
       {
-        mClematis = new("x5_Clematis");
-        mClematis.Describe("10.5x test");
+        mTest = new("x5t_Clematis");
+        mTest.describe("10.5x test");
       }
-    else if (event.name == "x5t_run")
+    else if (event.name.left(7) == "x5t_run")
       {
-        run();
+        Dictionary expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(7)));
+        for (let i = DictionaryIterator.create(expected); i.Next();)
+          {
+            mTest.it(x5t_name .. ", " .. i.key(),
+                     mTest.AssertEval(aliveActorsCount(i.key()), "==", i.value().toInt()));
+          }
       }
     else if (event.name == "x5t_end")
       {
-        mClematis.EndDescribe();
+        mTest.endDescribe();
       }
   }
 
-  override void WorldLoaded(WorldEvent event)
+  override void worldLoaded(WorldEvent event)
   {
     int width = getDefaultByType('DoomImp').radius * 2;
     int yBegin = -2 * width;
@@ -773,7 +776,7 @@ class x5t_Test : StaticEventHandler
     int x = 100;
     int y = yBegin;
 
-    Dictionary spawn = Dictionary.fromString(jsonify(x5t_spawn));
+    Dictionary spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
     for (let i = DictionaryIterator.Create(spawn); i.Next();)
       {
         int count = i.value().toInt();
@@ -791,22 +794,6 @@ class x5t_Test : StaticEventHandler
       }
   }
 
-  static string jsonify(string input)
-  {
-    input.replace("'", "\"");
-    return input;
-  }
-
-  private void run()
-  {
-    Dictionary expected = Dictionary.fromString(jsonify(x5t_expected));
-    for (let i = DictionaryIterator.create(expected); i.Next();)
-      {
-        mClematis.it(x5t_name .. ", " .. i.key(),
-                     mClematis.AssertEval(aliveActorsCount(i.key()), "==", i.value().toInt()));
-      }
-  }
-
   private static int aliveActorsCount(string actorClassName)
   {
     int result = 0;
@@ -819,18 +806,21 @@ class x5t_Test : StaticEventHandler
     return result;
   }
 
-  private x5_Clematis mClematis;
+  private Clematis mTest;
 
 } // class x5t_Test
 
-class x5t_Resender : EventHandler
+class x5t_Quoter : EventHandler
 {
+  static string quote(string input)
+  {
+    input.replace("'", "\"");
+    return input;
+  }
+
   override void NetworkProcess(ConsoleEvent event)
   {
-    if (event.name.left(4) == "x5r_")
-      {
-        sendNetworkEvent("x5_" .. x5t_Test.jsonify(event.name.mid(4)));
-      }
+    if (event.name.left(3) == "x5r") sendNetworkEvent("x5_" .. quote(event.name.mid(3)));
   }
-} // class x5t_Resender
+} // class x5t_Quoter
 #+end_src
