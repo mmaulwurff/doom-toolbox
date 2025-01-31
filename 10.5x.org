@@ -17,7 +17,6 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 - Can increase the number of enemies;
 - Can decrease the number of enemies (anti-slaughter);
 - The number of enemies is decreased for each enemy class separately;
-- Prints estimated enemy density on level start;
 - Works with monster randomizers;
 - Bonus option: optional resurrection of autokilled enemies (x5_raise_divided CVar).
 
@@ -89,9 +88,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/x5_Density.zs
-// <<GPL>>
-#+end_src
 #+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
 // <<GPL>>
 #+end_src
@@ -147,8 +143,6 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
     setLabel(v);
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private void setLabel(int val)
   {
     mLabel = (val == 0)
@@ -182,70 +176,6 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
   private int mValue;
   private Class<Actor> mType;
 } // class OptionMenuItemX5TypeSlider
-#+end_src
-
-* x5_Density.zs
-TODO: restore printing density?
-#+begin_src c :tangle build/10.5x/zscript/x5_Density.zs
-class x5_Density play
-{
-  static void printMonsterDensity()
-  {
-    let message = "Estimated enemy density: %.3f, health: %.3f.";
-
-    uint nMonsters = 0;
-    uint nHealth   = 0;
-    int minX;
-    int minY;
-    int maxX;
-    int maxY;
-    bool isFirst = true;
-    let i        = ThinkerIterator.Create("Actor");
-    Actor mo;
-    while (mo = Actor(i.Next()))
-      {
-        bool isMonster = mo.bIsMonster;
-        if (!(isMonster || mo is "Inventory")) { continue; }
-
-        if (isMonster)
-          {
-            ++nMonsters;
-            nHealth += mo.Health;
-          }
-
-        if (isFirst)
-          {
-            minX = int(mo.pos.x);
-            minY = int(mo.pos.y);
-            maxX = int(mo.pos.x);
-            maxY = int(mo.pos.y);
-            continue;
-          }
-
-        if (mo.pos.x < minX) { minX = int(mo.pos.x); }
-        else if (mo.pos.x > maxX) { maxX = int(mo.pos.x); }
-
-        if (mo.pos.y < minY) { minY = int(mo.pos.y); }
-        else if (mo.pos.y > maxY) { maxY = int(mo.pos.y); }
-      }
-
-    if (nMonsters == 0)
-      {
-        Console.Printf(message, 0, 0);
-        return;
-      }
-
-    int radius = int(players[consolePlayer].mo.radius);
-    if (maxY - minY < radius) { maxY = minY + radius; }
-    if (maxX - minX < radius) { maxX = minX + radius; }
-
-    int area = (maxX - minX) * (maxY - minY);
-
-    double density       = double(nMonsters) / area / 0.113281; // Doom E1M1 UV
-    double healthDensity = double(nHealth) / area / 3.515625;   // Doom E1M1 UV
-    Console.Printf(message, density, healthDensity);
-  }
-} // class x5_Density
 #+end_src
 
 * x5_EventHandler.zs
@@ -322,8 +252,6 @@ class x5_EventHandler : EventHandler
     // Otherwise, if two enemies share the same space, their missiles will collide immediately.
     if (thing != NULL && thing.bMissile && x5_multiplier > 100) { thing.bMThruSpecies = true; }
   }
-
-  // private: //////////////////////////////////////////////////////////////////
 
   private static void collectSpawnPoints(out Array<x5_SpawnPoint> result)
   {
@@ -571,8 +499,6 @@ class x5_Killer : Actor
     return watched.pos + (0, 0, watched.height * 1.5);
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private Actor mWatched;
 } // class x5_Killer
 #+end_src
@@ -637,8 +563,6 @@ class x5_TypeMultipliersMenu : OptionMenu
         mDesc.mItems.push(slider);
       }
   }
-
-  // private: //////////////////////////////////////////////////////////////////
 
   private void report()
   {
@@ -748,7 +672,6 @@ version 4.14
 #include "zscript/OptionMenuItemX5Slider.zs"
 #include "zscript/OptionMenuItemX5TypeSlider.zs"
 
-#include "zscript/x5_Density.zs"
 #include "zscript/x5_EventHandler.zs"
 #include "zscript/x5_Killer.zs"
 #include "zscript/x5_TypeMultipliersMenu.zs"
