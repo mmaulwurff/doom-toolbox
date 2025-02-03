@@ -361,6 +361,7 @@ class x5_EventHandler : EventHandler
 
     let spawned          = Actor.Spawn(original.GetClassName(), original.Pos);
     spawned.bAmbush      = original.bAmbush;
+    // TODO: disable through species when an enemy can move without it?
     spawned.bThruSpecies = true;
 
     // copied from randomspawner.zs
@@ -703,39 +704,6 @@ This script has to be parked somewhere.
 #+end_src
 
 * Tests
-#+begin_src elisp
-(load-file "build/TestRunner/dt-scripts.el")
-
-(run-tests
- "build/10.5x build/10.5xTest"
-
- "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
-
-  x5t_name IntegerMultiplier;
-  x5_multiplier 300; wait 2;
-  x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  netevent x5t_run{'DoomImp':'3','ZombieMan':'3'}; wait 10;
-
-  x5t_name FractionalMultiplier;
-  x5_multiplier 270; wait 2;
-  x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
-  netevent x5t_run{'DoomImp':'27'}; wait 10;
-
-  x5t_name Divider;
-  x5_multiplier 70; wait 2;
-  x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
-  turn180; wait 10; +attack; wait 10; -attack; wait 10;
-  netevent x5t_run{'DoomImp':'7'}; wait 10;
-
-  x5t_name PerClass;
-  x5_multiplier 0; wait 2;
-  x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
-  netevent x5r{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
-  netevent x5t_run{'DoomImp':'3','ZombieMan':'5'}; wait 10;
-
-  netevent x5t_end; wait 2; quit")
-#+end_src
-
 #+begin_src c :tangle build/10.5xTest/mapinfo.txt
 GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
@@ -765,13 +733,12 @@ class x5t_Test : StaticEventHandler
         mTest = new("x5t_Clematis");
         mTest.describe("10.5x test");
       }
-    else if (event.name.left(7) == "x5t_run")
+    else if (event.name.left(10) == "x5t_expect")
       {
-        Dictionary expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(7)));
+        Dictionary expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(10)));
         for (let i = DictionaryIterator.create(expected); i.Next();)
           {
-            mTest.it(x5t_name .. ", " .. i.key(),
-                     mTest.AssertEval(aliveActorsCount(i.key()), "==", i.value().toInt()));
+            testActorClass(x5t_name, i.value().toInt(), i.key());
           }
       }
     else if (event.name == "x5t_end")
@@ -806,16 +773,21 @@ class x5t_Test : StaticEventHandler
       }
   }
 
-  private static int aliveActorsCount(string actorClassName)
+  private void testActorClass(string testName, int expectedCount, string actorClassName)
   {
-    int result = 0;
+    int aliveCount = 0;
+    int canMoveCount = 0;
+
     let i = ThinkerIterator.create(actorClassName);
     for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
       {
-        if (anActor.health > 0)
-          ++result;
+        aliveCount += (anActor.health > 0);
+        canMoveCount += (anActor.health > 0) && anActor.checkMove(anActor.pos.xy);
       }
-    return result;
+
+    string description = testName .. ": " .. actorClassName;
+    mTest.it(description .. ": alive", mTest.AssertEval(aliveCount, "==", expectedCount));
+    mTest.it(description .. ": can move", mTest.AssertEval(canMoveCount, "==", expectedCount));
   }
 
   private Clematis mTest;
@@ -836,3 +808,80 @@ class x5t_Quoter : EventHandler
   }
 } // class x5t_Quoter
 #+end_src
+
+Doom monsters with radis 20: 
+| Monster       | In tests | Replacement                    |
+|---------------+----------+--------------------------------|
+| Archvile      | Yes      | x5t_Archvile via RandomSpawner |
+| DoomImp       | Yes      | No                             |
+| Revenant      | Yes      | x5t_Revenant via A_SpawnItemEx |
+| ZombieMan     | Yes      | No                             |
+| ShotgunGuy    |          |                                |
+| ChaingunGuy   |          |                                |
+| WolfensteinSS |          |                                |
+
+#+begin_src c :tangle build/10.5xTest/zscript.zs
+class x5t_Archvile : Archvile {}
+class x5t_ArchvileReplacer : RandomSpawner replaces Archvile
+{
+  Default { DropItem "x5t_Archvile"; }
+}
+
+/// Based on switch-based replacements from Brutal Doom v21.
+class x5t_Revenant : Revenant {}
+class x5t_RevenantReplacer : Actor replaces Revenant
+{
+  States
+    {
+    Spawn:
+      TNT1 A 0 { bThruActors = 1; bCountKill = 0; }
+      TNT1 A 0 a_SpawnItemEx("x5t_Revenant", 0, 0, 0, 0, 0, 0, 0,
+                             SXF_NoCheckPosition | SXF_TransferAmbushFlag, 0);
+      Stop;
+    }
+}
+#+end_src
+
+#+begin_src elisp
+(load-file "build/TestRunner/dt-scripts.el")
+
+(run-tests
+ "build/10.5x build/10.5xTest"
+
+ "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
+
+  x5t_name IntegerMultiplier;
+  x5_multiplier 300; wait 2;
+  x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
+  netevent x5t_expect{'DoomImp':'3','ZombieMan':'3'}; wait 10;
+
+  x5t_name FractionalMultiplier;
+  x5_multiplier 270; wait 2;
+  x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
+  netevent x5t_expect{'DoomImp':'27'}; wait 10;
+
+  x5t_name Divider;
+  x5_multiplier 70; wait 2;
+  x5t_spawn {'DoomImp':'10'}; wait 2; map map01; wait 10;
+  turn180; wait 10; +attack; wait 10; -attack; wait 10;
+  netevent x5t_expect{'DoomImp':'7'}; wait 10;
+
+  x5t_name PerClass;
+  x5_multiplier 0; wait 2;
+  x5t_spawn {'DoomImp':'1','ZombieMan':'1'}; wait 2; map map01; wait 10;
+  netevent x5r{'DoomImp':'300','ZombieMan':'500'}; closemenu; wait 10;
+  netevent x5t_expect{'DoomImp':'3','ZombieMan':'5'}; wait 10;
+
+  x5t_name RandomSpawner;
+  x5_multiplier 200; wait 2;
+  x5t_spawn {'Archvile':'1'}; wait 2; map map01; wait 10;
+  netevent x5t_expect{'x5t_Archvile':'2'}; wait 10;
+
+  x5t_name A_SpawnItemEx;
+  x5_multiplier 200; wait 2;
+  x5t_spawn {'Revenant':'1'}; wait 2; map map01; wait 10;
+  netevent x5t_expect{'x5t_Revenant':'2'}; wait 10;
+
+  netevent x5t_end; wait 2; quit")
+#+end_src
+
