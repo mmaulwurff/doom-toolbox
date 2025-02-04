@@ -30,8 +30,7 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 ** Acknowledgments
 - Original idea: Cutmanmike;
 - Code used as a reference: The Zombie Killer;
-- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol,
-  StroggVorbis.
+- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol, StroggVorbis.
 - Feature suggestions: Rowsol;
 - Translation support and Russian translation: Blueberryy;
 - Brazilian Portuguese localization: generic name guy.
@@ -131,26 +130,25 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
-  void init(Class<Actor> type, int value)
+  void init(class<Actor> enemyClass, int value)
   {
-    let defaultEnemy = getDefaultByType(type);
-    let tag = defaultEnemy.getTag();
-    let label = String.Format("%s", tag);
-    Super.Init(label, "", 0, 10.5, 0.05, 2);
+    Super.init(getDefaultByType(enemyClass).getTag(), "", 0, 10.5, 0.05, 2);
 
-    mValue = value;
-    mType  = type;
+    mValue          = value;
+    mEnemyClassName = enemyClass.getClassName();
   }
 
   override double getSliderValue() { return (mValue / 100.0); }
+
   override void setSliderValue(double value) { mValue = int(round(value * 100)); }
 
-  Class<Actor> getType() { return mType; }
+  string getEnemyClassName() { return mEnemyClassName; }
+
   int getValue() { return mValue; }
 
   private int mValue;
-  private Class<Actor> mType;
-} // class OptionMenuItemX5TypeSlider
+  private string mEnemyClassName;
+}
 #+end_src
 
 * x5_EventHandler
@@ -162,109 +160,111 @@ GameInfo { EventHandlers = "x5_EventHandler" }
 class x5_EventHandler : EventHandler
 {
   // 1. Entry point.
-  override void WorldLoaded(WorldEvent event)
+  override void worldLoaded(WorldEvent event)
   {
-    if (level.MapName ~== "titlemap")
-      {
-        destroy();
-        return;
-      }
+    if (level.mapName ~== "titlemap")
+    {
+      destroy();
+      return;
+    }
 
     collectSpawnPoints(mSpawnPoints);
 
     if (mSpawnPoints.size() == 0)
-      {
-        destroy();
-        return;
-      }
+    {
+      destroy();
+      return;
+    }
 
     mEnemyTypes = collectEnemyTypes(mSpawnPoints);
 
     if (x5_multiplier == 0)
-      {
-        // Each enemy type has its own multiplier, ask to fill multipliers.
-        mTypeMultipliers = NULL;
-        if (consolePlayer == net_arbitrator) sendInterfaceEvent(consolePlayer, "x5_menu");
-      }
+    {
+      // Each enemy type has its own multiplier, ask to fill multipliers.
+      mTypeMultipliers = NULL;
+      if (consolePlayer == net_arbitrator)
+        sendInterfaceEvent(consolePlayer, "x5_menu");
+    }
     else
-      {
-        // The global multiplier is used for all enemy types.
-        mTypeMultipliers = fillTypeMultipliersWithGlobal(mEnemyTypes);
-      }
+    {
+      // The global multiplier is used for all enemy types.
+      mTypeMultipliers = fillTypeMultipliersWithGlobal(mEnemyTypes);
+    }
   }
 
-  override void InterfaceProcess(ConsoleEvent event)
+  override void interfaceProcess(ConsoleEvent event)
   {
     if (event.name != "x5_menu") return;
 
-    Menu.SetMenu("x5_TypeMultipliers");
-    x5_TypeMultipliersMenu(Menu.GetCurrentMenu()).setUp(self, mEnemyTypes);
+    Menu.setMenu("x5_TypeMultipliers");
+    x5_TypeMultipliersMenu(Menu.getCurrentMenu()).setUp(self, mEnemyTypes);
   }
 
-  override void WorldTick()
+  override void worldTick()
   {
     // wait for type multipliers.
     if (mTypeMultipliers == NULL) return;
 
-    if (level.maptime > TIME_TO_RANDOMIZE)
-      {
-        multiply();
-        mTypeMultipliers = NULL;
-      }
+    if (level.mapTime > TIME_TO_RANDOMIZE)
+    {
+      multiply();
+      mTypeMultipliers = NULL;
+    }
   }
 
-  override void NetworkProcess(ConsoleEvent event)
+  override void networkProcess(ConsoleEvent event)
   {
     if (event.name.left(3) != "x5_") return;
 
-    mTypeMultipliers = Dictionary.FromString(event.name.mid(3));
+    mTypeMultipliers = Dictionary.fromString(event.name.mid(3));
   }
 
-  override void WorldThingSpawned(WorldEvent event)
+  override void worldThingSpawned(WorldEvent event)
   {
     let thing = event.thing;
 
-    // Otherwise, if two enemies share the same space, their missiles will collide immediately.
-    if (thing != NULL && thing.bMissile && x5_multiplier > 100) { thing.bMThruSpecies = true; }
+    // Otherwise, if two enemies share the same space,
+    // their missiles will collide immediately.
+    if (thing != NULL && thing.bMissile && x5_multiplier > 100)
+      thing.bMThruSpecies = true;
   }
 
   private static void collectSpawnPoints(out Array<x5_SpawnPoint> result)
   {
     Actor anActor;
-    for (let i = ThinkerIterator.Create("Actor"); anActor = Actor(i.Next());)
-      {
-        let replaceeType = Actor.getReplacee(anActor.getClassName());
+    for (let i = ThinkerIterator.create("Actor"); anActor = Actor(i.next());)
+    {
+      let replaceeType = Actor.getReplacee(anActor.getClassName());
 
-        if (!isCloneable(getDefaultByType(replaceeType))) { continue; }
+      if (!isCloneable(getDefaultByType(replaceeType))) continue;
 
-        let spawnPoint          = new("x5_SpawnPoint");
-        spawnPoint.position     = anActor.pos;
-        spawnPoint.height       = anActor.height;
-        spawnPoint.radius       = anActor.radius;
-        spawnPoint.replaceeType = replaceeType;
-        spawnPoint.original     = anActor;
-        result.Push(spawnPoint);
-      }
+      let spawnPoint          = new ("x5_SpawnPoint");
+      spawnPoint.position     = anActor.pos;
+      spawnPoint.height       = anActor.height;
+      spawnPoint.radius       = anActor.radius;
+      spawnPoint.replaceeType = replaceeType;
+      spawnPoint.original     = anActor;
+      result.push(spawnPoint);
+    }
   }
 
   private static Dictionary collectEnemyTypes(Array<x5_SpawnPoint> spawnPoints)
   {
-    let result = Dictionary.Create();
+    let result = Dictionary.create();
     foreach (spawnPoint : spawnPoints)
-      {
-        result.Insert(spawnPoint.replaceeType.GetClassName(), "100");
-      }
+    {
+      result.insert(spawnPoint.replaceeType.getClassName(), "100");
+    }
     return result;
   }
 
   private static Dictionary fillTypeMultipliersWithGlobal(Dictionary enemyTypes)
   {
-    let result              = Dictionary.Create();
-    let formattedMultiplier = String.Format("%d", x5_multiplier);
-    for (let i = DictionaryIterator.Create(enemyTypes); i.Next();)
-      {
-        result.Insert(i.Key(), formattedMultiplier);
-      }
+    let result              = Dictionary.create();
+    let formattedMultiplier = string.format("%d", x5_multiplier);
+    for (let i = DictionaryIterator.create(enemyTypes); i.next();)
+      result.insert(i.key(), formattedMultiplier);
+
     return result;
   }
 
@@ -274,38 +274,38 @@ class x5_EventHandler : EventHandler
 
   private void multiply()
   {
-    for (let i = DictionaryIterator.Create(mTypeMultipliers); i.Next();)
-      {
-        int multiplier = i.Value().ToInt();
-        if (multiplier == 100) continue;
+    for (let i = DictionaryIterator.create(mTypeMultipliers); i.next();)
+    {
+      int multiplier = i.value().toInt();
+      if (multiplier == 100) continue;
 
-        Array<Actor> enemiesByType;
-        collectSpawnedEnemiesByType(i.Key(), enemiesByType);
-        multiplyEnemies(enemiesByType, multiplier);
-      }
+      Array<Actor> enemiesByType;
+      collectSpawnedEnemiesByType(i.key(), enemiesByType);
+      multiplyEnemies(enemiesByType, multiplier);
+    }
   }
 
-  private void collectSpawnedEnemiesByType(Class<Actor> type, out Array<Actor> enemiesByType)
+  private void collectSpawnedEnemiesByType(class<Actor> type,
+                                           out Array<Actor> enemiesByType)
   {
     foreach (spawnPoint : mSpawnPoints)
+    {
+      if (spawnPoint.replaceeType != type) continue;
+
+      // If the actor is still present, great!
+      // Otherwise, assume the spawned actor isn't far away.
+      if (spawnPoint.original != NULL) { enemiesByType.push(spawnPoint.original); }
+      else
       {
-        if (spawnPoint.replaceeType != type) continue;
+        let pos    = spawnPoint.position;
+        let height = spawnPoint.height;
+        let radius = spawnPoint.radius;
+        let i      = BlockThingsIterator.createFromPos(pos.x, pos.y, pos.z, height,
+                                                       radius, false);
 
-        // If the actor is still present, great! Otherwise, assume the spawned actor isn't far away.
-        if (spawnPoint.original!= NULL)
-          {
-            enemiesByType.Push(spawnPoint.original);
-          }
-        else
-          {
-            let pos    = spawnPoint.position;
-            let height = spawnPoint.height;
-            let radius = spawnPoint.radius;
-            let i      = BlockThingsIterator.CreateFromPos(pos.x, pos.y, pos.z, height, radius, false);
-
-            if (i.Next()) { enemiesByType.Push(i.thing); }
-          }
+        if (i.next()) enemiesByType.push(i.thing);
       }
+    }
   }
 
   private static void multiplyEnemies(Array<Actor> enemies, int multiplier)
@@ -315,61 +315,59 @@ class x5_EventHandler : EventHandler
     int integerMultiplier = multiplier / 100;
     int copiesNumber      = integerMultiplier - 1;
     foreach (enemy : enemies)
+    {
+      if (multiplier == 0)
       {
-        if (multiplier == 0)
-          {
-            let killer = x5_Killer(Actor.Spawn("x5_Killer", x5_Killer.makePosition(enemy)));
-            killer.init(enemy);
-          }
-        else
-          {
-            for (int c = 0; c < copiesNumber; ++c)
-              {
-                clone(enemy);
-              }
-          }
+        let killer =
+            x5_Killer(Actor.spawn("x5_Killer", x5_Killer.makePosition(enemy)));
+        killer.init(enemy);
       }
+      else
+      {
+        for (int c = 0; c < copiesNumber; ++c)
+          clone(enemy);
+      }
+    }
 
     if (multiplier % 100 == 0) return;
 
     shuffle(enemies);
 
     double fractionMultiplier = (multiplier % 100) * 0.01;
-    uint enemiesNumber        = enemies.Size();
+    uint enemiesNumber        = enemies.size();
     uint stp                  = uint(round(enemiesNumber * fractionMultiplier));
 
     if (integerMultiplier >= 1) // add
-      {
-        for (uint i = 0; i < stp; ++i)
-          {
-            clone(enemies[i]);
-          }
-      }
+    {
+      for (uint i = 0; i < stp; ++i)
+        clone(enemies[i]);
+    }
     else // decimate
+    {
+      for (uint i = stp; i < enemiesNumber; ++i)
       {
-        for (uint i = stp; i < enemiesNumber; ++i)
-          {
-            let killer = x5_Killer(Actor.Spawn("x5_Killer", x5_Killer.makePosition(enemies[i])));
-            killer.init(enemies[i]);
-          }
+        let killer =
+            x5_Killer(Actor.spawn("x5_Killer", x5_Killer.makePosition(enemies[i])));
+        killer.init(enemies[i]);
       }
+    }
   }
 
   private static void clone(Actor original)
   {
     original.bThruSpecies = true;
 
-    let spawned          = Actor.Spawn(original.GetClassName(), original.Pos);
+    let spawned          = Actor.spawn(original.getClassName(), original.pos);
     spawned.bAmbush      = original.bAmbush;
     // TODO: disable through species when an enemy can move without it?
     spawned.bThruSpecies = true;
 
     // copied from randomspawner.zs
-    spawned.SpawnAngle = original.SpawnAngle;
-    spawned.Angle      = original.Angle;
-    spawned.Pitch      = original.Pitch;
-    spawned.Roll       = original.Roll;
-    spawned.SpawnPoint = original.SpawnPoint;
+    spawned.spawnAngle = original.spawnAngle;
+    spawned.angle      = original.angle;
+    spawned.pitch      = original.pitch;
+    spawned.roll       = original.roll;
+    spawned.spawnPoint = original.spawnPoint;
     spawned.special    = original.special;
     spawned.args[0]    = original.args[0];
     spawned.args[1]    = original.args[1];
@@ -380,19 +378,19 @@ class x5_EventHandler : EventHandler
     spawned.special2   = original.special2;
     // MTF_SECRET needs special treatment to avoid incrementing the secret
     // counter twice. It had already been processed for the spawner itself.
-    spawned.SpawnFlags = original.SpawnFlags & ~MTF_SECRET;
-    spawned.HandleSpawnFlags();
+    spawned.spawnFlags = original.spawnFlags & ~MTF_SECRET;
+    spawned.handleSpawnFlags();
 
-    spawned.SpawnFlags   = original.SpawnFlags;
+    spawned.spawnFlags   = original.spawnFlags;
     // "Transfer" count secret flag to spawned actor
-    spawned.bCountSecret = original.SpawnFlags & MTF_SECRET;
-    spawned.ChangeTid(original.tid);
-    spawned.Vel    = original.Vel;
+    spawned.bCountSecret = original.spawnFlags & MTF_SECRET;
+    spawned.changeTid(original.tid);
+    spawned.vel    = original.vel;
     // For things such as DamageMaster/DamageChildren, transfer mastery.
     spawned.master = original.master;
     spawned.target = original.target;
     spawned.tracer = original.tracer;
-    spawned.CopyFriendliness(original, false);
+    spawned.copyFriendliness(original, false);
   }
 
   private static bool isCloneable(readonly<Actor> anActor)
@@ -405,25 +403,27 @@ class x5_EventHandler : EventHandler
     // Fisher-Yates shuffle.
     uint numberOfActors = actors.size();
     for (uint i = numberOfActors - 1; i >= 1; --i)
-      {
-        int j = Random(0, i);
+    {
+      int j = random(0, i);
 
-        let temp  = actors[i];
-        actors[i] = actors[j];
-        actors[j] = temp;
-      }
+      let temp  = actors[i];
+      actors[i] = actors[j];
+      actors[j] = temp;
+    }
   }
 
   // There are mods that have randomization that takes a few tics.
   const TIME_TO_RANDOMIZE = 4;
 } // class x5_EventHandler
+#+end_src
 
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
 class x5_SpawnPoint
 {
-  Vector3 position;
+  vector3 position;
   double height;
   double radius;
-  Class<Actor> replaceeType;
+  class<Actor> replaceeType;
   Actor original;
 } // class x5_SpawnPoint
 #+end_src
@@ -433,44 +433,44 @@ class x5_SpawnPoint
 class x5_Killer : Actor
 {
   Default
-    {
-      Height 30;
-      FloatBobStrength 0.2;
+  {
+    Height 30;
+    FloatBobStrength 0.2;
 
-      +NoBlockmap;
-      +NoGravity;
-      +DontSplash;
-      +NotOnAutomap;
-      +FloatBob;
-      +Bright;
-    }
+    +NoBlockmap;
+    +NoGravity;
+    +DontSplash;
+    +NotOnAutomap;
+    +FloatBob;
+    +Bright;
+  }
 
   // TODO: make the icon optional
   States
-    {
-    Spawn:
-      m8rd A - 1;
-      Stop;
-    }
-
-  override void Tick()
   {
-    Super.Tick();
+  Spawn:
+    m8rd A - 1;
+    Stop;
+  }
 
-    if (mWatched == NULL) { return; }
+  override void tick()
+  {
+    Super.tick();
+
+    if (mWatched == NULL) return;
 
     setOrigin(makePosition(mWatched), true);
 
-    if (mWatched.health > 0 && mWatched.target == NULL) { return; }
+    if (mWatched.health > 0 && mWatched.target == NULL) return;
 
-    mWatched.A_Die();
+    mWatched.a_Die();
     mWatched.bCorpse = x5_raise_divided;
     destroy();
   }
 
   void init(Actor watched) { mWatched = watched; }
 
-  static Vector3 makePosition(Actor watched)
+  static vector3 makePosition(Actor watched)
   {
     return watched.pos + (0, 0, watched.height * 1.5);
   }
@@ -491,11 +491,11 @@ OptionMenu "x5_TypeMultipliers"
 #+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeMultipliersMenu : OptionMenu
 {
-  override bool MenuEvent(int mKey, bool fromController)
+  override bool menuEvent(int mKey, bool fromController)
   {
-    if (mKey == MKEY_Back) { report(); }
+    if (mKey == MKey_Back) report();
 
-    return Super.MenuEvent(mKey, fromController);
+    return Super.menuEvent(mKey, fromController);
   }
 
   void setUp(EventHandler anEventHandler, Dictionary enemyTypes)
@@ -505,69 +505,71 @@ class x5_TypeMultipliersMenu : OptionMenu
     mDesc.mItems.clear();
     mDesc.mSelectedItem = 2;
 
-    String description = StringTable.Localize("$X_EXIT");
-    mDesc.mItems.push(new("OptionMenuItemStaticText").InitDirect(description, Font.CR_BLACK));
-    mDesc.mItems.push(new("OptionMenuItemStaticText").Init(""));
+    string description = StringTable.localize("$X_EXIT");
+    mDesc.mItems.push(
+        new ("OptionMenuItemStaticText").initDirect(description, Font.CR_Black));
+    mDesc.mItems.push(new ("OptionMenuItemStaticText").init(""));
 
-    let savedMultipliers = Dictionary.FromString(x5_type_multipliers);
-    for (let i = DictionaryIterator.Create(savedMultipliers); i.Next();)
+    let savedMultipliers = Dictionary.fromString(x5_type_multipliers);
+    for (let i = DictionaryIterator.create(savedMultipliers); i.next();)
+    {
+      string type = i.key();
+
+      if (enemyTypes.at(type).length() != 0)
       {
-        String type = i.Key();
-
-        if (enemyTypes.at(type).Length() != 0)
-          {
-            int multiplier = i.Value().ToInt();
-            enemyTypes.Insert(type, String.Format("%d", multiplier));
-          }
+        int multiplier = i.value().toInt();
+        enemyTypes.insert(type, string.format("%d", multiplier));
       }
+    }
 
     Array<x5_TypeSortElement> types;
 
-    for (let i = DictionaryIterator.Create(enemyTypes); i.Next();)
-      {
-        Class<Actor> enemyClass = i.Key();
-        int multiplier          = i.Value().ToInt();
-        let defaultEnemy        = getDefaultByType(enemyClass);
+    for (let i = DictionaryIterator.create(enemyTypes); i.next();)
+    {
+      class<Actor> enemyClass = i.key();
+      int multiplier          = i.value().toInt();
+      let defaultEnemy        = getDefaultByType(enemyClass);
 
-        let element         = new("x5_TypeSortElement");
-        element.mName       = defaultEnemy.getTag();
-        element.mHealth     = defaultEnemy.health;
-        element.mClass      = enemyClass;
-        element.mMultiplier = multiplier;
-        types.push(element);
-      }
+      let element         = new ("x5_TypeSortElement");
+      element.mName       = defaultEnemy.getTag();
+      element.mHealth     = defaultEnemy.health;
+      element.mClass      = enemyClass;
+      element.mMultiplier = multiplier;
+      types.push(element);
+    }
 
     sortTypes(types);
 
     foreach (element : types)
-      {
-        let slider = new("OptionMenuItemX5TypeSlider");
-        slider.Init(element.mClass, element.mMultiplier);
+    {
+      let slider = new ("OptionMenuItemX5TypeSlider");
+      slider.init(element.mClass, element.mMultiplier);
 
-        mDesc.mItems.push(slider);
-      }
+      mDesc.mItems.push(slider);
+    }
   }
 
   private void report()
   {
-    let savedMultipliers = Dictionary.FromString(x5_type_multipliers);
-    Dictionary multipliersToReport = Dictionary.Create();
+    let savedMultipliers    = Dictionary.fromString(x5_type_multipliers);
+    let multipliersToReport = Dictionary.create();
+
     foreach (menuItem : mDesc.mItems)
-      {
-        let slider = OptionMenuItemX5TypeSlider(menuItem);
-        if (slider == NULL) continue;
+    {
+      let slider = OptionMenuItemX5TypeSlider(menuItem);
+      if (slider == NULL) continue;
 
-        STring className  = slider.getType().GetClassName();
-        String multiplier = String.Format("%d", slider.getValue());
+      string className  = slider.getEnemyClassName();
+      string multiplier = string.format("%d", slider.getValue());
 
-        multipliersToReport.Insert(className, multiplier);
-        savedMultipliers.Insert(className, multiplier);
-      }
+      multipliersToReport.insert(className, multiplier);
+      savedMultipliers.insert(className, multiplier);
+    }
 
-    CVar.FindCVar("x5_type_multipliers").SetString(savedMultipliers.ToString());
+    CVar.findCVar("x5_type_multipliers").setString(savedMultipliers.toString());
 
-    String event = String.Format("x5_%s", multipliersToReport.ToString());
-    mEventHandler.SendNetworkEvent(event);
+    string event = string.format("x5_%s", multipliersToReport.toString());
+    mEventHandler.sendNetworkEvent(event);
   }
 
   private void sortTypes(out Array<x5_TypeSortElement> types)
@@ -578,38 +580,40 @@ class x5_TypeMultipliersMenu : OptionMenu
     let length = types.size();
 
     while (pos < length)
+    {
+      if (pos == 0 || isGreaterOrEqual(types[pos], types[pos - 1])) { ++pos; }
+      else
       {
-        if (pos == 0 || isGreaterOrEqual(types[pos], types[pos - 1])) { ++pos; }
-        else
-          {
-            // swap
-            let tmp        = types[pos];
-            types[pos]     = types[pos - 1];
-            types[pos - 1] = tmp;
+        // swap
+        let tmp        = types[pos];
+        types[pos]     = types[pos - 1];
+        types[pos - 1] = tmp;
 
-            --pos;
-          }
+        --pos;
       }
+    }
   }
 
-  private bool isGreaterOrEqual(x5_TypeSortElement element1, x5_TypeSortElement element2)
+  private bool isGreaterOrEqual(x5_TypeSortElement lhs, x5_TypeSortElement rhs)
   {
-    if (element1.mHealth > element2.mHealth) { return true; }
-    if (element1.mHealth == element2.mHealth && element1.mName >= element2.mName) { return true; }
+    if (lhs.mHealth > rhs.mHealth) return true;
+    if (lhs.mHealth == rhs.mHealth && lhs.mName >= rhs.mName) return true;
 
     return false;
   }
 
   private EventHandler mEventHandler;
 } // class x5_TypeMultipliersMenu
+#+end_src
 
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeSortElement
 {
-  String mName;
+  string mName;
   int mHealth;
-  Class<Actor> mClass;
+  class<Actor> mClass;
   int mMultiplier;
-} // class x5_TypeSortElement
+}
 #+end_src
 
 * cvarinfo
@@ -648,8 +652,8 @@ AddOptionMenu OptionsMenu
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
 class OptionMenuItemX5Slider : OptionMenuItemSlider
 {
-  OptionMenuItemX5Slider Init(String label,
-                              Name command,
+  OptionMenuItemX5Slider init(string label,
+                              name command,
                               double min,
                               double max,
                               double step,
@@ -671,9 +675,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
   private void setLabel(int val)
   {
-    mLabel = (val == 0)
-      ? StringTable.Localize("$X_000") .. " 10.5x:"
-      : "10.5x:";
+    mLabel = (val == 0) ? StringTable.localize("$X_000").." 10.5x:" : "10.5x:";
   }
 } // class OptionMenuItemX5Slider
 #+end_src
@@ -715,85 +717,88 @@ server string x5t_spawn = "";
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
 version 4.14
+#+end_src
 
-class x5t_Clematis : Clematis {}
+#+begin_src c :tangle build/10.5xTest/zscript.zs
+class x5t_Clematis : Clematis
+{
+}
+#+end_src
 
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 class x5t_Test : StaticEventHandler
 {
-
-  override void onRegister()
-  {
-    setOrder(-1);
-  }
+  override void onRegister() { setOrder(-1); }
 
   override void networkProcess(ConsoleEvent event)
   {
     if (event.name == "x5t_begin")
-      {
-        mTest = new("x5t_Clematis");
-        mTest.describe("10.5x test");
-      }
+    {
+      mTest = new ("x5t_Clematis");
+      mTest.describe("10.5x test");
+    }
     else if (event.name.left(10) == "x5t_expect")
-      {
-        Dictionary expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(10)));
-        for (let i = DictionaryIterator.create(expected); i.Next();)
-          {
-            testActorClass(x5t_name, i.value().toInt(), i.key());
-          }
-      }
-    else if (event.name == "x5t_end")
-      {
-        mTest.endDescribe();
-      }
+    {
+      let expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(10)));
+      for (let i = DictionaryIterator.create(expected); i.next();)
+        testActorClass(x5t_name, i.value().toInt(), i.key());
+    }
+    else if (event.name == "x5t_end") { mTest.endDescribe(); }
   }
 
   override void worldLoaded(WorldEvent event)
   {
-    int width = getDefaultByType('DoomImp').radius * 2;
+    int width  = getDefaultByType('DoomImp').radius * 2;
     int yBegin = -2 * width;
-    int yEnd = 2 * width;
-    int x = 100;
-    int y = yBegin;
+    int yEnd   = 2 * width;
+    int x      = 100;
+    int y      = yBegin;
 
-    Dictionary spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
-    for (let i = DictionaryIterator.Create(spawn); i.Next();)
+    let spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
+    for (let i = DictionaryIterator.create(spawn); i.next();)
+    {
+      int count = i.value().toInt();
+      for (int c = 0; c < count; ++c)
       {
-        int count = i.value().toInt();
-        for (int c = 0; c < count; ++c)
-          {
-            Actor.Spawn(i.key(), players[consolePlayer].mo.pos + (x, y, 0), ALLOW_REPLACE);
+        Actor.spawn(i.key(), players[consolePlayer].mo.pos + (x, y, 0),
+                    ALLOW_REPLACE);
 
-            y += width;
-            if (y > yEnd)
-              {
-                y = yBegin;
-                x += width;
-              }
-          }
+        y += width;
+        if (y > yEnd)
+        {
+          y = yBegin;
+          x += width;
+        }
       }
+    }
   }
 
-  private void testActorClass(string testName, int expectedCount, string actorClassName)
+  private void
+  testActorClass(string testName, int expectedCount, string actorClassName)
   {
-    int aliveCount = 0;
+    int aliveCount   = 0;
     int canMoveCount = 0;
 
     let i = ThinkerIterator.create(actorClassName);
     for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
-      {
-        aliveCount += (anActor.health > 0);
-        canMoveCount += (anActor.health > 0) && anActor.checkMove(anActor.pos.xy);
-      }
+    {
+      aliveCount += (anActor.health > 0);
+      canMoveCount += (anActor.health > 0) && anActor.checkMove(anActor.pos.xy);
+    }
 
-    string description = testName .. ": " .. actorClassName;
-    mTest.it(description .. ": alive", mTest.AssertEval(aliveCount, "==", expectedCount));
-    mTest.it(description .. ": can move", mTest.AssertEval(canMoveCount, "==", expectedCount));
+    string description = testName..": "..actorClassName;
+    mTest.it(description..": alive",
+             mTest.assertEval(aliveCount, "==", expectedCount));
+    mTest.it(description..": can move",
+             mTest.assertEval(canMoveCount, "==", expectedCount));
   }
 
   private Clematis mTest;
 
 } // class x5t_Test
+#+end_src
 
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 class x5t_Quoter : EventHandler
 {
   static string quote(string input)
@@ -804,9 +809,10 @@ class x5t_Quoter : EventHandler
 
   override void NetworkProcess(ConsoleEvent event)
   {
-    if (event.name.left(3) == "x5r") sendNetworkEvent("x5_" .. quote(event.name.mid(3)));
+    if (event.name.left(3) == "x5r")
+      sendNetworkEvent("x5_"..quote(event.name.mid(3)));
   }
-} // class x5t_Quoter
+}
 #+end_src
 
 Doom monsters with radis 20: 
@@ -821,24 +827,31 @@ Doom monsters with radis 20:
 | WolfensteinSS |          |                                |
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
+// clang-format off
 class x5t_Archvile : Archvile {}
+class x5t_Revenant : Revenant {}
+// clang-format on
+
 class x5t_ArchvileReplacer : RandomSpawner replaces Archvile
 {
   Default { DropItem "x5t_Archvile"; }
 }
 
 /// Based on switch-based replacements from Brutal Doom v21.
-class x5t_Revenant : Revenant {}
 class x5t_RevenantReplacer : Actor replaces Revenant
 {
   States
+  {
+  Spawn:
+    TNT1 A 0
     {
-    Spawn:
-      TNT1 A 0 { bThruActors = 1; bCountKill = 0; }
-      TNT1 A 0 a_SpawnItemEx("x5t_Revenant", 0, 0, 0, 0, 0, 0, 0,
-                             SXF_NoCheckPosition | SXF_TransferAmbushFlag, 0);
-      Stop;
+      bThruActors = 1;
+      bCountKill  = 0;
     }
+    TNT1 A 0 a_SpawnItemEx("x5t_Revenant", 0, 0, 0, 0, 0, 0, 0,
+                           SXF_NoCheckPosition | SXF_TransferAmbushFlag, 0);
+    Stop;
+  }
 }
 #+end_src
 
@@ -884,4 +897,3 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 
   netevent x5t_end; wait 2; quit")
 #+end_src
-

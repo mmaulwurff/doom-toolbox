@@ -10,6 +10,7 @@
 !.gitattributes
 !.gitignore
 !.editorconfig
+!.clang-format
 
 # and these file types:
 !*.org
