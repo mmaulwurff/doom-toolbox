@@ -10,13 +10,13 @@ name=$(basename "$1" ".org")
 
 emacs "$1" --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
 
-rm -rf "packages/$title"
-rm -rf "packages/$title.pk3"
+rm -rf "build/$title"
+rm -rf "build/$title.pk3"
 
-mkdir -p "packages/$title"
-cp -r "build/$name/"* "packages/$title"
-cp -r LICENSES "packages/$title"
-cp "$1" "packages/$title"
+mkdir -p "build/$title"
+cp -r "build/$name/"* "build/$title"
+cp -r LICENSES "build/$title"
+cp "$1" "build/$title"
 
-cd "packages/$title"
-7z a -tzip "../../packages/$title.pk3" ./*
+cd "build/$title"
+7z a -tzip "../$title.pk3" ./*
