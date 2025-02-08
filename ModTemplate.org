@@ -5,7 +5,7 @@
 :end:
 #+title: ModTemplate
 
-* [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * ModTemplate
 This is the template for add-ons (mods) for GZDoom family game engines.

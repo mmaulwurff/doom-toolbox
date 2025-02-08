@@ -36,7 +36,7 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 - Brazilian Portuguese localization: generic name guy.
 
 ** Meta
-- Contribution guidelines: [[./CodeOfConduct.org][Code of Conduct]].
+- Contribution guidelines: [[./docs/CodeOfConduct.org][Code of Conduct]].
 
 * Issues
 ** Max monsters amount

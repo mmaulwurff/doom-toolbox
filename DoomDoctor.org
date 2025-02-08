@@ -5,7 +5,7 @@
 :end:
 #+title: DoomDoctor v1.0.0-next
 
-* [[file:WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Acknowledgments
 - Thanks to KeksDose for the concept of VM abort handler.
