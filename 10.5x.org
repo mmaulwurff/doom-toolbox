@@ -18,7 +18,7 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 - Can decrease the number of enemies (anti-slaughter);
 - The number of enemies is decreased for each enemy class separately;
 - Works with monster randomizers;
-- Bonus option: optional resurrection of autokilled enemies (x5_raise_divided CVar).
+- Bonus option: optional resurrection of automatically killed enemies (x5_raise_divided CVar).
 
 ** Anti-features
 - No difficult options, only a single slider;
@@ -44,7 +44,7 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 
 Would be super useful if I could set a max amount for monsters on a level, after they've been multiplied or divided, so it would never exceed that number.
 
-`MaxMonsterCount = 100`
+~MaxMonsterCount = 100~
 
 So lets say a level has 140, 350 or 1020 monsters, that setting would reduce it to only 100 monsters.
 
@@ -66,7 +66,7 @@ I'd like to mention that this would not really work for totally custom monsters.
 
 OR
 
-Create a slider for each class in the AllActorClasses array that also has the ISMONSTER flag.
+Create a slider for each class in the ~AllActorClasses~ array that also has the ~ISMONSTER~ flag.
 
 There may also be a 3rd option that I'm not aware of right now.
 
@@ -126,7 +126,7 @@ SPDX-License-Identifier: CC0-1.0
 // <<CC>>
 #+end_src
 
-* OptionMenuItemX5TypeSlider
+* ~OptionMenuItemX5TypeSlider~
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
@@ -151,7 +151,7 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 }
 #+end_src
 
-* x5_EventHandler
+* ~x5_EventHandler~
 #+begin_src c :tangle build/10.5x/mapinfo.txt
 GameInfo { EventHandlers = "x5_EventHandler" }
 #+end_src
@@ -425,7 +425,7 @@ class x5_SpawnPoint
   double radius;
   class<Actor> replaceeType;
   Actor original;
-} // class x5_SpawnPoint
+}
 #+end_src
 
 * x5_Killer
@@ -479,7 +479,7 @@ class x5_Killer : Actor
 } // class x5_Killer
 #+end_src
 
-* x5_TypeMultipliersMenu
+* ~x5_TypeMultipliersMenu~
 #+begin_src txt :tangle build/10.5x/menudef.txt
 OptionMenu "x5_TypeMultipliers"
 {
@@ -616,7 +616,7 @@ class x5_TypeSortElement
 }
 #+end_src
 
-* cvarinfo
+* ~cvarinfo~
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
 server int  x5_multiplier    = 100;
 server bool x5_raise_divided = false;
@@ -624,7 +624,7 @@ server bool x5_raise_divided = false;
 nosave string x5_type_multipliers = "";
 #+end_src
 
-* language
+* ~language~
 #+begin_src ini :tangle build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
@@ -640,7 +640,7 @@ X_000   = "По типу врагов (при старте уровня)";
 #+end_src
 
 * Slider
-** menudef
+** ~menudef~
 #+begin_src txt :tangle build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
@@ -648,7 +648,7 @@ AddOptionMenu OptionsMenu
 }
 #+end_src
 
-** OptionMenuItemX5Slider
+** ~OptionMenuItemX5Slider~
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
 class OptionMenuItemX5Slider : OptionMenuItemSlider
 {
@@ -680,7 +680,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 } // class OptionMenuItemX5Slider
 #+end_src
 
-* Zscript
+* ~Zscript~
 #+begin_src c :tangle build/10.5x/zscript.zs
 version 4.14
 
@@ -815,16 +815,16 @@ class x5t_Quoter : EventHandler
 }
 #+end_src
 
-Doom monsters with radis 20: 
-| Monster       | In tests | Replacement                    |
-|---------------+----------+--------------------------------|
-| Archvile      | Yes      | x5t_Archvile via RandomSpawner |
-| DoomImp       | Yes      | No                             |
-| Revenant      | Yes      | x5t_Revenant via A_SpawnItemEx |
-| ZombieMan     | Yes      | No                             |
-| ShotgunGuy    |          |                                |
-| ChaingunGuy   |          |                                |
-| WolfensteinSS |          |                                |
+Doom monsters with radius 20:
+| Monster         | In tests | Replacement                        |
+|-----------------+----------+------------------------------------|
+| ~Archvile~      | Yes      | ~x5t_Archvile~ via ~RandomSpawner~ |
+| ~DoomImp~       | Yes      | No                                 |
+| ~Revenant~      | Yes      | ~x5t_Revenant~ via ~A_SpawnItemEx~ |
+| ~ZombieMan~     | Yes      | No                                 |
+| ~ShotgunGuy~    |          |                                    |
+| ~ChaingunGuy~   |          |                                    |
+| ~WolfensteinSS~ |          |                                    |
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
 // clang-format off

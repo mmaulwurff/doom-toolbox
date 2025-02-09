@@ -7,12 +7,14 @@
 # Except directories
 !**/
 # and these files:
+!.clang-format
+!.dir-locals.el
+!.editorconfig
 !.gitattributes
 !.gitignore
-!.editorconfig
-!.clang-format
 
 # and these file types:
+!*.en.pws
 !*.org
 !*.sh
 
