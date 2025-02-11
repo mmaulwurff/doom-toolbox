@@ -16,7 +16,9 @@
 # and these file types:
 !*.en.pws
 !*.org
+!*.png
 !*.sh
+!*.toml
 
 # and licenses here:
 !LICENSES/*.txt

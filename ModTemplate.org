@@ -131,14 +131,17 @@ class ModTemplateEventHandler : StaticEventHandler
 #+end_src
 
 * (Org) Licenses - snippets to include to files :noexport:
+
+[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
-#+begin_src :exports none
-SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src :exports none
-SPDX-FileTextCopyright: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src

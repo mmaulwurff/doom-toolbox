@@ -74,7 +74,7 @@ There may also be a 3rd option that I'm not aware of right now.
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
-SPDX-FileTextCopyright: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
@@ -103,7 +103,7 @@ SPDX-License-Identifier: GPL-3.0-only
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src txt :exports none
-SPDX-FileTextCopyright: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
