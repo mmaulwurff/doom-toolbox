@@ -29,3 +29,7 @@
 * Abbreviations
 
 Minimize the use of abbreviations. Capitalize abbreviations as single words (~Http~).
+
+* Language
+
+See [[../.dir-locals.el]] for spellcheck settings.

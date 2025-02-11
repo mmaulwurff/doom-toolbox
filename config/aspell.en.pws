@@ -1,13 +1,16 @@
-personal_ws-1.1 en 40 
+personal_ws-1.1 en 49
 Accensus
 Arkezuli
 Blueberryy
 CVar
 Cacowards
+Colerx
 Cutmanmike
+DoomDoctor
 FileCopyrightText
 GPL
 GZDoom
+KeksDose
 Kromm
 MTF
 Nems
@@ -16,7 +19,9 @@ RANDOMIZE
 Rowsol
 SPDX
 StroggVorbis
+VM
 Zandronum
+ZippeyKeys
 args
 bool
 doomworld
@@ -26,15 +31,19 @@ https
 init
 lhs
 localize
+mkdirp
 mmaulwurff
 murka
+noweb
 pos
 randomizers
 readonly
 rhs
 shotgunners
 slaughtermap
+src
 titlemap
+txt
 uint
 vel
 zdoom
