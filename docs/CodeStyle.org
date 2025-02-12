@@ -26,6 +26,10 @@
 
 - console variables and aliases: ~snake_case~
 
+* Formatting
+
+See [[../.clang-format]] for formatting settings.
+
 * Abbreviations
 
 Minimize the use of abbreviations. Capitalize abbreviations as single words (~Http~).
