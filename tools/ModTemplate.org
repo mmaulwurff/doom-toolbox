@@ -5,7 +5,7 @@
 :end:
 #+title: ModTemplate
 
-* [[file:docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * ModTemplate
 This is the template for add-ons (mods) for GZDoom family game engines.
@@ -15,14 +15,14 @@ This is the template for add-ons (mods) for GZDoom family game engines.
 - features: ~noarchive~, ~cheat~, ~latch~, ~handlerclass("<classname>")~
 - scope: ~server~, ~user~, ~nosave~
 
-#+begin_src txt :tangle build/ModTemplate/cvarinfo.txt
+#+begin_src txt :tangle ../build/ModTemplate/cvarinfo.txt
 // <<CC>>
 
 server int mt_value = 2;
 #+end_src
 
 * Keyconf - key and command definitions
-#+begin_src txt :tangle build/ModTemplate/keyconf.txt
+#+begin_src txt :tangle ../build/ModTemplate/keyconf.txt
 // <<CC>>
 
 Alias +hello "netevent mt_print_hello"
@@ -34,7 +34,7 @@ DefaultBind g +hello
 #+end_src
 
 * Language - user-visible strings
-#+begin_src ini :tangle build/ModTemplate/language.txt
+#+begin_src ini :tangle ../build/ModTemplate/language.txt
 // <<CC>>
 
 [enu default]
@@ -45,14 +45,14 @@ MT_VALUE = "Cvar value";
 #+end_src
 
 * Mapinfo - map and event handler definitions
-#+begin_src txt :tangle build/ModTemplate/mapinfo.txt
+#+begin_src txt :tangle ../build/ModTemplate/mapinfo.txt
 // <<CC>>
 
 GameInfo { AddEventHandlers = "ModTemplateEventHandler" }
 #+end_src
 
 * Menudef - menu definitions
-#+begin_src txt :tangle build/ModTemplate/menudef.txt
+#+begin_src txt :tangle ../build/ModTemplate/menudef.txt
 // <<CC>>
 
 AddOptionMenu OptionsMenu       { SubMenu "$MT_TITLE", mt_Options }
@@ -68,7 +68,7 @@ OptionMenu mt_Options
 #+end_src
 
 * ZScript - source code
-#+begin_src c :tangle build/ModTemplate/zscript.txt
+#+begin_src c :tangle ../build/ModTemplate/zscript.txt
 // <<GPL>>
 
 version 4.12.2
@@ -132,14 +132,14 @@ class ModTemplateEventHandler : StaticEventHandler
 
 * (Org) Licenses - snippets to include to files :noexport:
 
-[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>

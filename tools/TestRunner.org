@@ -6,24 +6,24 @@
 #+title: TestRunner
 
 * License
-[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src :exports none
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
+#+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
 ;; <<CC>>
 #+end_src
-#+begin_src ini :tangle build/TestRunner/config.ini
+#+begin_src ini :tangle ../build/TestRunner/config.ini
 # <<CC>>
 #+end_src
 
 * Config
 Minimal config for testing purposes.
 
-#+begin_src ini :tangle build/TestRunner/config.ini
+#+begin_src ini :tangle ../build/TestRunner/config.ini
 [GlobalSettings]
 autoloadwidescreen=false
 developer=1
@@ -50,28 +50,28 @@ TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 TODO: filter uninteresting GZDoom output lines.
 TODO: replace shell command with direct call?
 
-#+begin_src elisp :tangle build/TestRunner/dt-scripts.el
+#+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
 (defun run-tests (mod-path command)
   (org-babel-tangle)
   (compile (concat "gzdoom"
                    " -noautoload"
                    " -nosound"
-                   " -config build/TestRunner/config.ini"
+                   " -config ../build/TestRunner/config.ini"
                    " -iwad " (getenv "IWAD_PATH")
                    " -file " (getenv "CLEMATIS_PATH") " " mod-path
                    " +\"" command "\""
-                   " | grep -vf build/TestRunner/ignored.txt")))
+                   " | grep -vf ../build/TestRunner/ignored.txt")))
 #+end_src
 
 Example:
 #+begin_src elisp
-(load-file "build/TestRunner/dt-scripts.el")
+(load-file "../build/TestRunner/dt-scripts.el")
 (run-tests "build/SomeMod" "wait 1; quit")
 #+end_src
 
 * Ignored output
 
-#+begin_src txt :tangle build/TestRunner/ignored.txt
+#+begin_src txt :tangle ../build/TestRunner/ignored.txt
 ----------------------------------------
 ^$
 ^Adding dehacked patch miniwad.wad:DEHACKED
