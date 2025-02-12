@@ -6,8 +6,6 @@
 #+title: 10.5x v0.10.0-next
 
 * Description
-Enemy multiplier mod for [GZDoom](https://zdoom.org/).
-
 [2019 Cacowards Mini Mod Safari](https://www.doomworld.com/cacowards/2019/gameplay/):
 > Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
 
@@ -36,7 +34,7 @@ Enemy multiplier mod for [GZDoom](https://zdoom.org/).
 - Brazilian Portuguese localization: generic name guy.
 
 ** Meta
-- Contribution guidelines: [[./docs/CodeOfConduct.org][Code of Conduct]].
+- Contribution guidelines: [[../docs/CodeOfConduct.org][Code of Conduct]].
 
 * Issues
 ** Max monsters amount
@@ -71,63 +69,63 @@ Create a slider for each class in the ~AllActorClasses~ array that also has the 
 There may also be a 3rd option that I'm not aware of right now.
 
 * Licenses
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/10.5x/zscript.zs
+#+begin_src c :tangle ../build/10.5x/zscript.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 // <<GPL>>
 #+end_src
 
-[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src c :tangle build/10.5x/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src ini :tangle build/10.5x/language.txt
+#+begin_src ini :tangle ../build/10.5x/language.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle build/10.5x/mapinfo.txt
+#+begin_src c :tangle ../build/10.5x/mapinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/10.5x/menudef.txt
+#+begin_src txt :tangle ../build/10.5x/menudef.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle build/10.5xTest/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle build/10.5xTest/mapinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
 // <<CC>>
 #+end_src
 
 * ~OptionMenuItemX5TypeSlider~
-#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
   void init(class<Actor> enemyClass, int value)
@@ -152,11 +150,11 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 #+end_src
 
 * ~x5_EventHandler~
-#+begin_src c :tangle build/10.5x/mapinfo.txt
+#+begin_src c :tangle ../build/10.5x/mapinfo.txt
 GameInfo { EventHandlers = "x5_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
 class x5_EventHandler : EventHandler
 {
   // 1. Entry point.
@@ -417,7 +415,7 @@ class x5_EventHandler : EventHandler
 } // class x5_EventHandler
 #+end_src
 
-#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
 class x5_SpawnPoint
 {
   vector3 position;
@@ -429,7 +427,7 @@ class x5_SpawnPoint
 #+end_src
 
 * x5_Killer
-#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
 class x5_Killer : Actor
 {
   Default
@@ -480,7 +478,7 @@ class x5_Killer : Actor
 #+end_src
 
 * ~x5_TypeMultipliersMenu~
-#+begin_src txt :tangle build/10.5x/menudef.txt
+#+begin_src txt :tangle ../build/10.5x/menudef.txt
 OptionMenu "x5_TypeMultipliers"
 {
   Class "x5_TypeMultipliersMenu"
@@ -488,7 +486,7 @@ OptionMenu "x5_TypeMultipliers"
 }
 #+end_src
 
-#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeMultipliersMenu : OptionMenu
 {
   override bool menuEvent(int mKey, bool fromController)
@@ -606,7 +604,7 @@ class x5_TypeMultipliersMenu : OptionMenu
 } // class x5_TypeMultipliersMenu
 #+end_src
 
-#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeSortElement
 {
   string mName;
@@ -617,7 +615,7 @@ class x5_TypeSortElement
 #+end_src
 
 * ~cvarinfo~
-#+begin_src c :tangle build/10.5x/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
 server int  x5_multiplier    = 100;
 server bool x5_raise_divided = false;
 
@@ -625,7 +623,7 @@ nosave string x5_type_multipliers = "";
 #+end_src
 
 * ~language~
-#+begin_src ini :tangle build/10.5x/language.txt
+#+begin_src ini :tangle ../build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
 [enu default]
@@ -641,7 +639,7 @@ X_000   = "По типу врагов (при старте уровня)";
 
 * Slider
 ** ~menudef~
-#+begin_src txt :tangle build/10.5x/menudef.txt
+#+begin_src txt :tangle ../build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
   X5Slider "", x5_multiplier, 0, 10.5, 0.05, 2
@@ -649,7 +647,7 @@ AddOptionMenu OptionsMenu
 #+end_src
 
 ** ~OptionMenuItemX5Slider~
-#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
 class OptionMenuItemX5Slider : OptionMenuItemSlider
 {
   OptionMenuItemX5Slider init(string label,
@@ -681,7 +679,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 #+end_src
 
 * ~Zscript~
-#+begin_src c :tangle build/10.5x/zscript.zs
+#+begin_src c :tangle ../build/10.5x/zscript.zs
 version 4.14
 
 #include "zscript/OptionMenuItemX5Slider.zs"
@@ -693,39 +691,39 @@ version 4.14
 #+end_src
 
 * Sprites
-[[./media/10.5x/sprites/m8rda0.png]]
+[[../media/10.5x/sprites/m8rda0.png]]
 
 #+name: copy-media
 #+begin_src elisp :exports none
-(copy-directory "./media/10.5x" "./build/10.5x" nil t t)
+(copy-directory "../media/10.5x" "../../build/10.5x" nil t t)
 ""
 #+end_src
 This script has to be parked somewhere.
-#+begin_src c :tangle build/10.5x/zscript.zs
+#+begin_src c :tangle ../build/10.5x/zscript.zs
 <<copy-media()>>
 #+end_src
 
 * Tests
-#+begin_src c :tangle build/10.5xTest/mapinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
 GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
 
-#+begin_src c :tangle build/10.5xTest/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt
 server string x5t_name  = "";
 server string x5t_spawn = "";
 #+end_src
 
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 version 4.14
 #+end_src
 
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 class x5t_Clematis : Clematis
 {
 }
 #+end_src
 
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 class x5t_Test : StaticEventHandler
 {
   override void onRegister() { setOrder(-1); }
@@ -798,7 +796,7 @@ class x5t_Test : StaticEventHandler
 } // class x5t_Test
 #+end_src
 
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 class x5t_Quoter : EventHandler
 {
   static string quote(string input)
@@ -826,7 +824,7 @@ Doom monsters with radius 20:
 | ~ChaingunGuy~   |          |                                    |
 | ~WolfensteinSS~ |          |                                    |
 
-#+begin_src c :tangle build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs
 // clang-format off
 class x5t_Archvile : Archvile {}
 class x5t_Revenant : Revenant {}
@@ -856,10 +854,10 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 #+end_src
 
 #+begin_src elisp
-(load-file "build/TestRunner/dt-scripts.el")
+(load-file "../build/TestRunner/dt-scripts.el")
 
 (run-tests
- "build/10.5x build/10.5xTest"
+ "../build/10.5x ../build/10.5xTest"
 
  "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
