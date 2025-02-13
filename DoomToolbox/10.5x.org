@@ -404,7 +404,7 @@ class x5_EventHandler : EventHandler
     uint numberOfActors = actors.size();
     for (uint i = numberOfActors - 1; i >= 1; --i)
     {
-      int j = random(0, i);
+      int j = random[x105](0, i);
 
       let temp  = actors[i];
       actors[i] = actors[j];
