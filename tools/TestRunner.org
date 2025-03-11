@@ -47,26 +47,28 @@ Environment:
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
 
 TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
-TODO: filter uninteresting GZDoom output lines.
-TODO: replace shell command with direct call?
 
 #+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
-(defun run-tests (mod-path command)
+(defun dt-build-gzdoom-parameters (mod-paths command)
+  (concat "gzdoom"
+          " -noautoload"
+          " -nosound"
+          " -config ../build/TestRunner/config.ini"
+          " -iwad " (getenv "IWAD_PATH")
+          " -file " (getenv "CLEMATIS_PATH") " " mod-paths
+          " +wi_autoadvance 1"
+          " +\"" command "\""))
+
+(defun dt-run-tests (mod-paths command)
   (org-babel-tangle)
-  (compile (concat "gzdoom"
-                   " -noautoload"
-                   " -nosound"
-                   " -config ../build/TestRunner/config.ini"
-                   " -iwad " (getenv "IWAD_PATH")
-                   " -file " (getenv "CLEMATIS_PATH") " " mod-path
-                   " +\"" command "\""
+  (compile (concat (dt-build-gzdoom-parameters mod-paths command)
                    " | grep -vf ../build/TestRunner/ignored.txt")))
 #+end_src
 
 Example:
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(run-tests "build/SomeMod" "wait 1; quit")
+(dt-run-tests "build/SomeMod" "wait 1; quit")
 #+end_src
 
 * Ignored output

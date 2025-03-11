@@ -855,10 +855,12 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 }
 #+end_src
 
+TODO: make multiplayer tests, maybe?
+
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 
-(run-tests
+(dt-run-tests
  "../build/10.5x ../build/10.5xTest"
 
  "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
