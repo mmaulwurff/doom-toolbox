@@ -438,6 +438,8 @@ class x5_Killer : Actor
   {
     Height 30;
     FloatBobStrength 0.2;
+    RenderStyle 'translucent'; // Change this to 'none' to hide killer marks.
+    Alpha 0.1;
 
     +NoBlockmap;
     +NoGravity;
@@ -447,7 +449,6 @@ class x5_Killer : Actor
     +Bright;
   }
 
-  // TODO: make the icon optional
   States
   {
   Spawn:
