@@ -312,6 +312,8 @@ class x5_EventHandler : EventHandler
   {
     if (multiplier == 100) return;
 
+    console.printf("multiply time: %d, multiplier: %d", level.time, multiplier);
+
     int integerMultiplier = multiplier / 100;
     int copiesNumber      = integerMultiplier - 1;
     foreach (enemy : enemies)
@@ -754,6 +756,7 @@ class x5t_Test : StaticEventHandler
     int x      = 100;
     int y      = yBegin;
 
+    console.printf("spawn time: %d", level.time);
     let spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
     for (let i = DictionaryIterator.create(spawn); i.next();)
     {
