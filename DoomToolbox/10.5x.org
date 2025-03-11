@@ -459,7 +459,11 @@ class x5_Killer : Actor
   {
     Super.tick();
 
-    if (mWatched == NULL) return;
+    if (mWatched == NULL)
+    {
+      destroy();
+      return;
+    }
 
     setOrigin(makePosition(mWatched), true);
 
