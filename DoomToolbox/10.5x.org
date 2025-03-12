@@ -8,67 +8,34 @@
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Description
-[2019 Cacowards Mini Mod Safari](https://www.doomworld.com/cacowards/2019/gameplay/):
-> Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
+[[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]: ~Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.~
 
 ** Features
-- No difficult options, only a single slider;
-- Fractional values!
-- Can increase the number of enemies;
-- Can decrease the number of enemies (anti-slaughter);
-- The number of enemies is decreased for each enemy class separately;
-- Works with monster randomizers;
-- Bonus option: optional resurrection of automatically killed enemies (x5_raise_divided CVar).
+- Can increase or decrease the number of enemies;
+- Should work with enemy replacers and randomizers;
+
+** Options
+- Global enemy multiplier.
+- Enemy multiplier by type (set the global multiplier to 0 and start the map).
+- Resurrection of automatically killed enemies (~x5_raise_divided~ Cvar, off by default).
 
 ** Anti-features
-- No difficult options, only a single slider;
 - No display of remaining enemies;
 - May not work well with scripted maps;
 - Doesn't affect enemies spawned after the map is loaded;
-- Doesn't work with Zandronum.
+- Suggested max enemy amount: no, because it would limit enemy numbers disproportionately to the map size.
 
 ** Acknowledgments
 - Original idea: Cutmanmike;
 - Code used as a reference: The Zombie Killer;
-- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol, StroggVorbis.
-- Feature suggestions: Rowsol;
+- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol, StroggVorbis;
+- Feature suggestions: Rowsol, Accensus;
 - Translation support and Russian translation: Blueberryy;
 - Brazilian Portuguese localization: generic name guy.
 
 ** Meta
 - Contribution guidelines: [[../docs/CodeOfConduct.org][Code of Conduct]].
-
-* Issues
-** Max monsters amount
-[Submitted](https://github.com/mmaulwurff/10.5x/issues/12) by [Spaceman333](https://github.com/Spaceman333) via GitHub issues.
-
-Would be super useful if I could set a max amount for monsters on a level, after they've been multiplied or divided, so it would never exceed that number.
-
-~MaxMonsterCount = 100~
-
-So lets say a level has 140, 350 or 1020 monsters, that setting would reduce it to only 100 monsters.
-
-This would be excellent for making maps have better performance, less insanity on maps that already have way more monsters than other levels and allow a more consistent level-to-level experience.
-
-Ideally it would be a number field, but can also be a slider.
-
-** Individual monster sliders
-Submitted by Accensus:
-
-> Although it's quite specific, would it be possible to adjust the count of vanilla monsters (or those inheriting from vanilla monsters) individually?  
-Like, reducing only the number of zombiemen and shotgunners while keeping the number of everything else intact.
-
----
-
-### **[ghost](https://github.com/ghost)** commented [on Dec 26, 2019](https://github.com/mmaulwurff/10.5x/issues/4#issuecomment-568933134)
-
-I'd like to mention that this would not really work for totally custom monsters. The only way to have full compatibility is to leave it in the hands of the users to make their own compatibility patches via an external lump, then generate a slider for each class in it.
-
-OR
-
-Create a slider for each class in the ~AllActorClasses~ array that also has the ~ISMONSTER~ flag.
-
-There may also be a 3rd option that I'm not aware of right now.
+- [[../docs/CodeStyle.org][Code style]].
 
 * Licenses
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
@@ -124,31 +91,6 @@ SPDX-License-Identifier: CC0-1.0
 #+end_src
 #+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
 // <<CC>>
-#+end_src
-
-* ~OptionMenuItemX5TypeSlider~
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
-class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
-{
-  void init(class<Actor> enemyClass, int value)
-  {
-    Super.init(getDefaultByType(enemyClass).getTag(), "", 0, 10.5, 0.05, 2);
-
-    mValue          = value;
-    mEnemyClassName = enemyClass.getClassName();
-  }
-
-  override double getSliderValue() { return (mValue / 100.0); }
-
-  override void setSliderValue(double value) { mValue = int(round(value * 100)); }
-
-  string getEnemyClassName() { return mEnemyClassName; }
-
-  int getValue() { return mValue; }
-
-  private int mValue;
-  private string mEnemyClassName;
-}
 #+end_src
 
 * ~x5_EventHandler~
@@ -430,7 +372,9 @@ class x5_SpawnPoint
 }
 #+end_src
 
-* x5_Killer
+* ~x5_Killer~
+This class kills an enemy when the enemy becomes active. Such an enemy is marked with a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is controlled by ~x5_raise_divided~ [[~cvarinfo~][Cvar]].
+
 #+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
 class x5_Killer : Actor
 {
@@ -486,7 +430,71 @@ class x5_Killer : Actor
 } // class x5_Killer
 #+end_src
 
-* ~x5_TypeMultipliersMenu~
+* ~cvarinfo~
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+server int  x5_multiplier    = 100;
+server bool x5_raise_divided = false;
+
+nosave string x5_type_multipliers = "";
+#+end_src
+
+* ~language~
+#+begin_src ini :tangle ../build/10.5x/language.txt
+// SPDX-FileCopyrightText: 2020 Blueberryy
+
+[enu default]
+X_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
+X_EXIT  = "Exit this menu to start the level.";
+X_000   = "Per enemy type (on level start)";
+
+[ru]
+X_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
+X_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
+X_000   = "По типу врагов (при старте уровня)";
+#+end_src
+
+* Global multiplier
+** ~OptionMenuItemX5Slider~
+#+begin_src txt :tangle ../build/10.5x/menudef.txt
+AddOptionMenu OptionsMenu
+{
+  X5Slider "", x5_multiplier, 0, 10.5, 0.05, 2
+}
+#+end_src
+
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
+class OptionMenuItemX5Slider : OptionMenuItemSlider
+{
+  OptionMenuItemX5Slider init(string label,
+                              name command,
+                              double min,
+                              double max,
+                              double step,
+                              int showval = 1)
+  {
+    Super.init(label, command, min, max, step, showval);
+    setLabel(mCvar.getInt());
+    return self;
+  }
+
+  override double getSliderValue() { return (mCvar.getInt() / 100.0); }
+
+  override void setSliderValue(double val)
+  {
+    int v = int(round(val * 100));
+    mCvar.setInt(v);
+    setLabel(v);
+  }
+
+  private void setLabel(int val)
+  {
+    mLabel = (val == 0) ? StringTable.localize("$X_000").." 10.5x:" : "10.5x:";
+  }
+} // class OptionMenuItemX5Slider
+#+end_src
+
+* Type multipliers
+** ~x5_TypeMultipliersMenu~
 #+begin_src txt :tangle ../build/10.5x/menudef.txt
 OptionMenu "x5_TypeMultipliers"
 {
@@ -573,7 +581,7 @@ class x5_TypeMultipliersMenu : OptionMenu
       savedMultipliers.insert(className, multiplier);
     }
 
-    CVar.findCVar("x5_type_multipliers").setString(savedMultipliers.toString());
+    Cvar.findCvar("x5_type_multipliers").setString(savedMultipliers.toString());
 
     string event = string.format("x5_%s", multipliersToReport.toString());
     mEventHandler.sendNetworkEvent(event);
@@ -623,68 +631,29 @@ class x5_TypeSortElement
 }
 #+end_src
 
-* ~cvarinfo~
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
-server int  x5_multiplier    = 100;
-server bool x5_raise_divided = false;
-
-nosave string x5_type_multipliers = "";
-#+end_src
-
-* ~language~
-#+begin_src ini :tangle ../build/10.5x/language.txt
-// SPDX-FileCopyrightText: 2020 Blueberryy
-
-[enu default]
-X_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
-X_EXIT  = "Exit this menu to start the level.";
-X_000   = "Per enemy type (on level start)";
-
-[ru]
-X_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
-X_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
-X_000   = "По типу врагов (при старте уровня)";
-#+end_src
-
-* Slider
-** ~menudef~
-#+begin_src txt :tangle ../build/10.5x/menudef.txt
-AddOptionMenu OptionsMenu
+** ~OptionMenuItemX5TypeSlider~
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
-  X5Slider "", x5_multiplier, 0, 10.5, 0.05, 2
+  void init(class<Actor> enemyClass, int value)
+  {
+    Super.init(getDefaultByType(enemyClass).getTag(), "", 0, 10.5, 0.05, 2);
+
+    mValue          = value;
+    mEnemyClassName = enemyClass.getClassName();
+  }
+
+  override double getSliderValue() { return (mValue / 100.0); }
+
+  override void setSliderValue(double value) { mValue = int(round(value * 100)); }
+
+  string getEnemyClassName() { return mEnemyClassName; }
+
+  int getValue() { return mValue; }
+
+  private int mValue;
+  private string mEnemyClassName;
 }
-#+end_src
-
-** ~OptionMenuItemX5Slider~
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
-class OptionMenuItemX5Slider : OptionMenuItemSlider
-{
-  OptionMenuItemX5Slider init(string label,
-                              name command,
-                              double min,
-                              double max,
-                              double step,
-                              int showval = 1)
-  {
-    Super.init(label, command, min, max, step, showval);
-    setLabel(mCvar.getInt());
-    return self;
-  }
-
-  override double getSliderValue() { return (mCVar.getInt() / 100.0); }
-
-  override void setSliderValue(double val)
-  {
-    int v = int(round(val * 100));
-    mCvar.setInt(v);
-    setLabel(v);
-  }
-
-  private void setLabel(int val)
-  {
-    mLabel = (val == 0) ? StringTable.localize("$X_000").." 10.5x:" : "10.5x:";
-  }
-} // class OptionMenuItemX5Slider
 #+end_src
 
 * ~Zscript~
