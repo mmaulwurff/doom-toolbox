@@ -6,6 +6,18 @@ This is Emacs Org-mode literate project file. Use Emacs to extract the individua
 
 emacs SomeFile.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
 
+⚠ Warning! Don't run scripts from the sources you don't trust.
+
+The breakdown of the script above:
+- launch Emacs with the SomeFile.org file:
+  - ~--quick~ - don't load the Emacs settings and don't show the splash screen,
+  - ~--batch~ - launch Emacs without interface, so it processes the command and exits,
+  - ~--eval~ - run the following Elisp commands:
+    - ~progn~ - run the following command sequence;
+    - ~require 'ob-tangle~ - load the Emacs module for separating .org files;
+    - ~setq org-confirm-babel-evaluate nil~ - allow running code from .org file, which is used for macros and text generation. Running code from .org file is disabled by default;
+    - ~org-babel-tangle~ - move the parts of the .org file into separate files.
+
 * Pros
 ** logical code structure
 You can put related program components together, even if they are in different languages or file formats. Like this: conventional code structure:
@@ -30,6 +42,9 @@ Export to HTML produces a very nicely formatted document. Also, GitHub shows .or
 * Cons
 ** Limited text editor choice
 There is some support for Org-mode for editors other than Emacs, but I believe Elisp macros is out of the question for them.
+
+** Limited project size
+Emacs becomes less responsive with big and complex Org-mode files.
 
 ** Extra syntax
 Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file.
