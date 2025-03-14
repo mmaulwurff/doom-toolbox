@@ -3,5 +3,13 @@
 
 ;; This is directory local variables file for Emacs.
 
-((nil . ((ispell-personal-dictionary . "./config/aspell.en.pws")
+((nil . (
+         ;; Set the path to the dircionary file so it works in files in subdirectories too.
+         ;; See https://stackoverflow.com/questions/4012321/how-can-i-access-the-path-to-the-current-directory-in-an-emacs-directory-variabl
+         (eval . (setq ispell-personal-dictionary
+                       (expand-file-name
+                        "./config/aspell.en.pws"
+                        (file-name-directory
+                         (let ((d (dir-locals-find-file "./")))
+                           (if (stringp d) d (car d)))))))
          (ispell-local-dictionary . "american"))))

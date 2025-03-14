@@ -1,4 +1,4 @@
-personal_ws-1.1 en 49
+personal_ws-1.1 en 65 
 Accensus
 Arkezuli
 Blueberryy
@@ -6,13 +6,20 @@ CVar
 Cacowards
 Colerx
 Cutmanmike
+Cvar
+Cvarinfo
 DoomDoctor
+Elisp
 FileCopyrightText
 GPL
 GZDoom
+Http
 KeksDose
+Keyconf
 Kromm
 MTF
+Mapinfo
+Menudef
 Nems
 Nightsentinel
 RANDOMIZE
@@ -20,11 +27,16 @@ Rowsol
 SPDX
 StroggVorbis
 VM
+ZScript
 Zandronum
 ZippeyKeys
 args
 bool
+dir
 doomworld
+el
+emacs
+eval
 foreach
 gmail
 https
@@ -35,13 +47,17 @@ mkdirp
 mmaulwurff
 murka
 noweb
+ons
 pos
+progn
 randomizers
 readonly
 rhs
+setq
 shotgunners
 slaughtermap
 src
+structs
 titlemap
 txt
 uint

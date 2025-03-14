@@ -3,14 +3,14 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: ModTemplate
+#+title: Mod Template
 
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
-* ModTemplate
+* Mod Template
 This is the template for add-ons (mods) for GZDoom family game engines.
 
-* Cvarinfo - console variable (CVar) definitions
+* Cvarinfo - console variable (Cvar) definitions
 ~<scope> [features] <type> <name> [= defaultvalue];~
 - features: ~noarchive~, ~cheat~, ~latch~, ~handlerclass("<classname>")~
 - scope: ~server~, ~user~, ~nosave~
