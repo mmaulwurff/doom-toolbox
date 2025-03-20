@@ -656,16 +656,16 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 }
 #+end_src
 
-* ~Zscript~
+* ZScript
 #+begin_src c :tangle ../build/10.5x/zscript.zs
 version 4.14
 
-#include "zscript/OptionMenuItemX5Slider.zs"
-#include "zscript/OptionMenuItemX5TypeSlider.zs"
-
-#include "zscript/x5_EventHandler.zs"
-#include "zscript/x5_Killer.zs"
-#include "zscript/x5_TypeMultipliersMenu.zs"
+<<list-includes()>>
+#+end_src
+#+name: list-includes
+#+begin_src elisp :exports none
+(mapconcat (lambda (x) (concat "#include \"zscript/" x "\""))
+           (directory-files "../build/10.5x/zscript" nil ".*\.zs") "\n")
 #+end_src
 
 * Sprites
