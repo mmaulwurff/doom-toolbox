@@ -8,24 +8,33 @@
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Description
-[[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]: ~Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.~
+[[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
+#+begin_quote
+Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
+#+end_quote
 
-** Features
+Required ZScript version:
+#+name: zscript-version
+#+begin_src c
+4.14
+#+end_src
+
+Features:
 - Can increase or decrease the number of enemies;
 - Should work with enemy replacers and randomizers;
 
-** Options
+Options:
 - Global enemy multiplier.
 - Enemy multiplier by type (set the global multiplier to 0 and start the map).
 - Resurrection of automatically killed enemies (~x5_raise_divided~ Cvar, off by default).
 
-** Anti-features
+Anti-features:
 - No display of remaining enemies;
 - May not work well with scripted maps;
 - Doesn't affect enemies spawned after the map is loaded;
 - Suggested max enemy amount: no, because it would limit enemy numbers disproportionately to the map size.
 
-** Acknowledgments
+Acknowledgments:
 - Original idea: Cutmanmike;
 - Code used as a reference: The Zombie Killer;
 - Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol, StroggVorbis;
@@ -33,7 +42,7 @@
 - Translation support and Russian translation: Blueberryy;
 - Brazilian Portuguese localization: generic name guy.
 
-** Meta
+** Development notes
 - Contribution guidelines: [[../docs/CodeOfConduct.org][Code of Conduct]].
 - [[../docs/CodeStyle.org][Code style]].
 
@@ -45,25 +54,25 @@ SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript.zs
+#+begin_src c :tangle ../build/10.5x/zscript.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs :exports none
 // <<GPL>>
 #+end_src
 
@@ -74,28 +83,32 @@ SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src ini :tangle ../build/10.5x/language.txt
+#+begin_src ini :tangle ../build/10.5x/language.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/mapinfo.txt
+#+begin_src c :tangle ../build/10.5x/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle ../build/10.5x/menudef.txt
+#+begin_src txt :tangle ../build/10.5x/menudef.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
+#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
 * ~x5_EventHandler~
 #+begin_src c :tangle ../build/10.5x/mapinfo.txt
 GameInfo { EventHandlers = "x5_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+server int x5_multiplier = 100;
 #+end_src
 
 #+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
@@ -373,7 +386,11 @@ class x5_SpawnPoint
 #+end_src
 
 * ~x5_Killer~
-This class kills an enemy when the enemy becomes active. Such an enemy is marked with a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is controlled by ~x5_raise_divided~ [[~cvarinfo~][Cvar]].
+This class kills an enemy when the enemy becomes active. Such an enemy is marked with a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is controlled by ~x5_raise_divided~ Cvar.
+
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+server bool x5_raise_divided = false;
+#+end_src
 
 #+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
 class x5_Killer : Actor
@@ -428,14 +445,6 @@ class x5_Killer : Actor
 
   private Actor mWatched;
 } // class x5_Killer
-#+end_src
-
-* ~cvarinfo~
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
-server int  x5_multiplier    = 100;
-server bool x5_raise_divided = false;
-
-nosave string x5_type_multipliers = "";
 #+end_src
 
 * ~language~
@@ -501,6 +510,10 @@ OptionMenu "x5_TypeMultipliers"
   Class "x5_TypeMultipliersMenu"
   Title "$X_TYPE_MENU_TITLE"
 }
+#+end_src
+
+#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+nosave string x5_type_multipliers = "";
 #+end_src
 
 #+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
@@ -656,9 +669,9 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 }
 #+end_src
 
-* ZScript
+* ZScript :noexport:
 #+begin_src c :tangle ../build/10.5x/zscript.zs
-version 4.14
+version <<zscript-version>>
 
 <<list-includes()>>
 #+end_src
@@ -669,15 +682,15 @@ version 4.14
 #+end_src
 
 * Sprites
-[[../media/10.5x/sprites/m8rda0.png]]
+sprites/m8rda0.png: [[../media/10.5x/sprites/m8rda0.png]]
 
 #+name: copy-media
 #+begin_src elisp :exports none
 (copy-directory "../media/10.5x" "../../build/10.5x" nil t t)
 ""
+; This script has to be parked somewhere, so put it in zscript.zs.
 #+end_src
-This script has to be parked somewhere.
-#+begin_src c :tangle ../build/10.5x/zscript.zs
+#+begin_src c :tangle ../build/10.5x/zscript.zs :exports none
 <<copy-media()>>
 #+end_src
 
@@ -691,14 +704,12 @@ server string x5t_name  = "";
 server string x5t_spawn = "";
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
-version 4.14
+#+begin_src c :tangle ../build/10.5xTest/zscript.zs :exports none
+version <<zscript-version>>
 #+end_src
 
 #+begin_src c :tangle ../build/10.5xTest/zscript.zs
-class x5t_Clematis : Clematis
-{
-}
+class x5t_Clematis : Clematis {}
 #+end_src
 
 #+begin_src c :tangle ../build/10.5xTest/zscript.zs
