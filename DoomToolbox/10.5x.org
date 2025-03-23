@@ -174,16 +174,6 @@ class x5_EventHandler : EventHandler
     mTypeMultipliers = Dictionary.fromString(event.name.mid(3));
   }
 
-  override void worldThingSpawned(WorldEvent event)
-  {
-    let thing = event.thing;
-
-    // Otherwise, if two enemies share the same space,
-    // their missiles will collide immediately.
-    if (thing != NULL && thing.bMissile && x5_multiplier > 100)
-      thing.bMThruSpecies = true;
-  }
-
   private static void collectSpawnPoints(out Array<x5_SpawnPoint> result)
   {
     Actor anActor;
@@ -312,13 +302,18 @@ class x5_EventHandler : EventHandler
 
   private static void clone(Actor original)
   {
-    original.bThruSpecies = true;
+    let spawned = Actor.spawn(original.getClassName(), original.pos);
 
-    let spawned          = Actor.spawn(original.getClassName(), original.pos);
-    spawned.bAmbush      = original.bAmbush;
-    // TODO: disable through species when an enemy can move without it?
-    spawned.bThruSpecies = true;
+    if (!original.bThruActors)
+    {
+      // for debugging:
+      //spawned.a_SetRenderStyle(1, STYLE_Stencil);
 
+      spawned.bThruActors = true;
+      spawned.a_GiveInventory('x5_WalkAbilityWatcher', 1);
+    }
+
+    spawned.bAmbush    = original.bAmbush;
     // copied from randomspawner.zs
     spawned.spawnAngle = original.spawnAngle;
     spawned.angle      = original.angle;
@@ -383,6 +378,32 @@ class x5_SpawnPoint
   class<Actor> replaceeType;
   Actor original;
 }
+#+end_src
+
+* ~x5_WalkAbilityWatcher~
+This inventory item resets ~bThruActors~ flag if the actor is able to move without it.
+
+#+begin_src c :tangle ../build/10.5x/zscript/x5_WalkAbilityWatcher.zs
+class x5_WalkAbilityWatcher : Inventory
+{
+  override void tick()
+  {
+    owner.bThruActors = false;
+    bool ownerCanMove = owner.checkMove(owner.pos.xy);
+
+    if (ownerCanMove)
+    {
+      // for debugging:
+      //owner.a_SetRenderStyle(1, STYLE_Normal);
+      owner.removeInventory(self);
+      destroy();
+      return;
+    }
+    else { owner.bThruActors = true; }
+
+    Super.tick();
+  }
+} // class x5_WalkAbilityWatcher
 #+end_src
 
 * ~x5_Killer~
