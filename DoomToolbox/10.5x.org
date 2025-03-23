@@ -741,7 +741,7 @@ class x5t_Test : StaticEventHandler
     int x      = 100;
     int y      = yBegin;
 
-    console.printf("spawn time: %d", level.time);
+    console.printf("spawn time: %d, x: %d, spawn: %s", level.time, x5_multiplier, x5t_spawn);
     let spawn = Dictionary.fromString(x5t_Quoter.quote(x5t_spawn));
     for (let i = DictionaryIterator.create(spawn); i.next();)
     {
