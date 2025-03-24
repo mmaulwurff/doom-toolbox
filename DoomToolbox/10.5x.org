@@ -142,8 +142,7 @@ class x5_EventHandler : EventHandler
     }
     else
     {
-      // The global multiplier is used for all enemy types.
-      mTypeMultipliers = fillTypeMultipliersWithGlobal(mEnemyTypes);
+      mTypeMultipliers = fillTypeMultipliers(mEnemyTypes, x5_multiplier);
     }
   }
 
@@ -203,19 +202,15 @@ class x5_EventHandler : EventHandler
     return result;
   }
 
-  private static Dictionary fillTypeMultipliersWithGlobal(Dictionary enemyTypes)
+  private static Dictionary fillTypeMultipliers(Dictionary enemyTypes, int multiplier)
   {
     let result              = Dictionary.create();
-    let formattedMultiplier = string.format("%d", x5_multiplier);
+    let formattedMultiplier = string.format("%d", multiplier);
     for (let i = DictionaryIterator.create(enemyTypes); i.next();)
       result.insert(i.key(), formattedMultiplier);
 
     return result;
   }
-
-  private Dictionary mEnemyTypes;
-  private Dictionary mTypeMultipliers;
-  private Array<x5_SpawnPoint> mSpawnPoints;
 
   private void multiply()
   {
@@ -300,6 +295,7 @@ class x5_EventHandler : EventHandler
     }
   }
 
+  // TODO: don't clone the actor, clone its replacee.
   private static void clone(Actor original)
   {
     let spawned = Actor.spawn(original.getClassName(), original.pos);
@@ -366,6 +362,10 @@ class x5_EventHandler : EventHandler
 
   // There are mods that have randomization that takes a few tics.
   const TIME_TO_RANDOMIZE = 4;
+
+  private Dictionary mEnemyTypes;
+  private Dictionary mTypeMultipliers;
+  private Array<x5_SpawnPoint> mSpawnPoints;
 } // class x5_EventHandler
 #+end_src
 
