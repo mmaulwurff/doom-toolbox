@@ -140,10 +140,7 @@ class x5_EventHandler : EventHandler
       if (consolePlayer == net_arbitrator)
         sendInterfaceEvent(consolePlayer, "x5_menu");
     }
-    else
-    {
-      mTypeMultipliers = fillTypeMultipliers(mEnemyTypes, x5_multiplier);
-    }
+    else { mTypeMultipliers = fillTypeMultipliers(mEnemyTypes, x5_multiplier); }
   }
 
   override void interfaceProcess(ConsoleEvent event)
@@ -171,6 +168,19 @@ class x5_EventHandler : EventHandler
     if (event.name.left(3) != "x5_") return;
 
     mTypeMultipliers = Dictionary.fromString(event.name.mid(3));
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    Actor thing = event.thing;
+
+    if (thing == NULL || !isCloneable(thing)) return;
+    if (thing.bThruActors || thing.checkMove(thing.pos.xy)) return;
+
+    //thing.a_SetRenderStyle(1, STYLE_Stencil); // for debugging.
+
+    thing.bThruActors = true;
+    thing.a_GiveInventory('x5_WalkAbilityWatcher', 1);
   }
 
   private static void collectSpawnPoints(out Array<x5_SpawnPoint> result)
@@ -202,7 +212,8 @@ class x5_EventHandler : EventHandler
     return result;
   }
 
-  private static Dictionary fillTypeMultipliers(Dictionary enemyTypes, int multiplier)
+  private static Dictionary fillTypeMultipliers(Dictionary enemyTypes,
+                                                int multiplier)
   {
     let result              = Dictionary.create();
     let formattedMultiplier = string.format("%d", multiplier);
@@ -300,15 +311,6 @@ class x5_EventHandler : EventHandler
   {
     let spawned = Actor.spawn(original.getClassName(), original.pos);
 
-    if (!original.bThruActors)
-    {
-      // for debugging:
-      //spawned.a_SetRenderStyle(1, STYLE_Stencil);
-
-      spawned.bThruActors = true;
-      spawned.a_GiveInventory('x5_WalkAbilityWatcher', 1);
-    }
-
     spawned.bAmbush    = original.bAmbush;
     // copied from randomspawner.zs
     spawned.spawnAngle = original.spawnAngle;
@@ -341,6 +343,7 @@ class x5_EventHandler : EventHandler
     spawned.copyFriendliness(original, false);
   }
 
+  // TODO: don't clone non-killable enemies? Find examples (Eviternity II turrets)?
   private static bool isCloneable(readonly<Actor> anActor)
   {
     return anActor.bIsMonster && !anActor.bFriendly && anActor.bCountKill;
@@ -393,8 +396,8 @@ class x5_WalkAbilityWatcher : Inventory
 
     if (ownerCanMove)
     {
-      // for debugging:
-      //owner.a_SetRenderStyle(1, STYLE_Normal);
+      //owner.a_SetRenderStyle(1, STYLE_Normal); // for debugging.
+
       owner.removeInventory(self);
       destroy();
       return;
