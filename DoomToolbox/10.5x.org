@@ -137,6 +137,7 @@ class x5_EventHandler : EventHandler
     {
       // Each enemy type has its own multiplier, ask to fill multipliers.
       mTypeMultipliers = NULL;
+      // TODO: freeze other players.
       if (consolePlayer == net_arbitrator)
         sendInterfaceEvent(consolePlayer, "x5_menu");
     }
@@ -177,7 +178,7 @@ class x5_EventHandler : EventHandler
     if (thing == NULL || !isCloneable(thing)) return;
     if (thing.bThruActors || thing.checkMove(thing.pos.xy)) return;
 
-    //thing.a_SetRenderStyle(1, STYLE_Stencil); // for debugging.
+    // thing.a_SetRenderStyle(1, STYLE_Stencil); // for debugging.
 
     thing.bThruActors = true;
     thing.a_GiveInventory('x5_WalkAbilityWatcher', 1);
@@ -230,9 +231,10 @@ class x5_EventHandler : EventHandler
       int multiplier = i.value().toInt();
       if (multiplier == 100) continue;
 
+      class<Actor> type = i.key();
       Array<Actor> enemiesByType;
-      collectSpawnedEnemiesByType(i.key(), enemiesByType);
-      multiplyEnemies(enemiesByType, multiplier);
+      collectSpawnedEnemiesByType(type, enemiesByType);
+      multiplyEnemies(type, enemiesByType, multiplier);
     }
   }
 
@@ -259,7 +261,8 @@ class x5_EventHandler : EventHandler
     }
   }
 
-  private static void multiplyEnemies(Array<Actor> enemies, int multiplier)
+  private static void
+  multiplyEnemies(class<Actor> originalType, Array<Actor> enemies, int multiplier)
   {
     if (multiplier == 100) return;
 
@@ -278,7 +281,7 @@ class x5_EventHandler : EventHandler
       else
       {
         for (int c = 0; c < copiesNumber; ++c)
-          clone(enemy);
+          clone(originalType, enemy);
       }
     }
 
@@ -293,7 +296,7 @@ class x5_EventHandler : EventHandler
     if (integerMultiplier >= 1) // add
     {
       for (uint i = 0; i < stp; ++i)
-        clone(enemies[i]);
+        clone(originalType, enemies[i]);
     }
     else // decimate
     {
@@ -306,41 +309,40 @@ class x5_EventHandler : EventHandler
     }
   }
 
-  // TODO: don't clone the actor, clone its replacee.
-  private static void clone(Actor original)
+  private static void clone(class<Actor> originalType, Actor enemy)
   {
-    let spawned = Actor.spawn(original.getClassName(), original.pos);
+    let spawned = Actor.spawn(originalType, enemy.pos, ALLOW_REPLACE);
 
-    spawned.bAmbush    = original.bAmbush;
+    spawned.bAmbush    = enemy.bAmbush;
     // copied from randomspawner.zs
-    spawned.spawnAngle = original.spawnAngle;
-    spawned.angle      = original.angle;
-    spawned.pitch      = original.pitch;
-    spawned.roll       = original.roll;
-    spawned.spawnPoint = original.spawnPoint;
-    spawned.special    = original.special;
-    spawned.args[0]    = original.args[0];
-    spawned.args[1]    = original.args[1];
-    spawned.args[2]    = original.args[2];
-    spawned.args[3]    = original.args[3];
-    spawned.args[4]    = original.args[4];
-    spawned.special1   = original.special1;
-    spawned.special2   = original.special2;
+    spawned.spawnAngle = enemy.spawnAngle;
+    spawned.angle      = enemy.angle;
+    spawned.pitch      = enemy.pitch;
+    spawned.roll       = enemy.roll;
+    spawned.spawnPoint = enemy.spawnPoint;
+    spawned.special    = enemy.special;
+    spawned.args[0]    = enemy.args[0];
+    spawned.args[1]    = enemy.args[1];
+    spawned.args[2]    = enemy.args[2];
+    spawned.args[3]    = enemy.args[3];
+    spawned.args[4]    = enemy.args[4];
+    spawned.special1   = enemy.special1;
+    spawned.special2   = enemy.special2;
     // MTF_SECRET needs special treatment to avoid incrementing the secret
     // counter twice. It had already been processed for the spawner itself.
-    spawned.spawnFlags = original.spawnFlags & ~MTF_SECRET;
+    spawned.spawnFlags = enemy.spawnFlags & ~MTF_SECRET;
     spawned.handleSpawnFlags();
 
-    spawned.spawnFlags   = original.spawnFlags;
+    spawned.spawnFlags   = enemy.spawnFlags;
     // "Transfer" count secret flag to spawned actor
-    spawned.bCountSecret = original.spawnFlags & MTF_SECRET;
-    spawned.changeTid(original.tid);
-    spawned.vel    = original.vel;
+    spawned.bCountSecret = enemy.spawnFlags & MTF_SECRET;
+    spawned.changeTid(enemy.tid);
+    spawned.vel    = enemy.vel;
     // For things such as DamageMaster/DamageChildren, transfer mastery.
-    spawned.master = original.master;
-    spawned.target = original.target;
-    spawned.tracer = original.tracer;
-    spawned.copyFriendliness(original, false);
+    spawned.master = enemy.master;
+    spawned.target = enemy.target;
+    spawned.tracer = enemy.tracer;
+    spawned.copyFriendliness(enemy, false);
   }
 
   // TODO: don't clone non-killable enemies? Find examples (Eviternity II turrets)?
