@@ -69,6 +69,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs :exports none
 // <<GPL>>
 #+end_src
+#+begin_src c :tangle ../build/10.5x/zscript/x5_Freezer.zs :exports none
+// <<GPL>>
+#+end_src
 #+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs :exports none
 // <<GPL>>
 #+end_src
@@ -137,9 +140,14 @@ class x5_EventHandler : EventHandler
     {
       // Each enemy type has its own multiplier, ask to fill multipliers.
       mTypeMultipliers = NULL;
-      // TODO: freeze other players.
+
+      mFreezer = x5_Freezer.init();
+      mFreezer.freeze();
+
       if (consolePlayer == net_arbitrator)
         sendInterfaceEvent(consolePlayer, "x5_menu");
+      else
+        Console.midPrint(null, StringTable.Localize("$X5_HOST_SELECTS"), true);
     }
     else { mTypeMultipliers = fillTypeMultipliers(mEnemyTypes, x5_multiplier); }
   }
@@ -156,6 +164,9 @@ class x5_EventHandler : EventHandler
   {
     // wait for type multipliers.
     if (mTypeMultipliers == NULL) return;
+
+    if (mFreezer != NULL)
+      mFreezer.thaw();
 
     if (level.mapTime > TIME_TO_RANDOMIZE)
     {
@@ -371,6 +382,7 @@ class x5_EventHandler : EventHandler
   private Dictionary mEnemyTypes;
   private Dictionary mTypeMultipliers;
   private Array<x5_SpawnPoint> mSpawnPoints;
+  private x5_Freezer mFreezer;
 } // class x5_EventHandler
 #+end_src
 
@@ -383,6 +395,87 @@ class x5_SpawnPoint
   class<Actor> replaceeType;
   Actor original;
 }
+#+end_src
+
+* ~x5_Freezer~
+#+begin_src c :tangle ../build/10.5x/zscript/x5_Freezer.zs
+class x5_Freezer play
+{
+  static x5_Freezer init()
+  {
+    let result             = new ("x5_Freezer");
+    result.mWasFrozen      = false;
+    result.mWasLevelFrozen = false;
+    return result;
+  }
+
+  void freeze()
+  {
+    if (mWasFrozen) return;
+    mWasFrozen = true;
+
+    freezeLevel();
+    freezePlayer();
+  }
+
+  void thaw()
+  {
+    if (!mWasFrozen) return;
+    mWasFrozen = false;
+
+    thawLevel();
+    thawPlayer();
+  }
+
+  private void freezeLevel()
+  {
+    mWasLevelFrozen = level.isFrozen();
+    level.setFrozen(true);
+  }
+
+  private void freezePlayer()
+  {
+    mWasPlayerFrozen = true;
+
+    PlayerInfo player = players[consolePlayer];
+
+    mCheats   = player.cheats;
+    mVelocity = player.mo.vel;
+    mGravity  = player.mo.gravity;
+
+    setPlayerFrozen(player.cheats | FROZEN_CHEATS_FLAGS, (0, 0, 0), 0);
+  }
+
+  private void thawLevel() const { level.setFrozen(mWasLevelFrozen); }
+
+  private void thawPlayer() const
+  {
+    if (mWasPlayerFrozen) setPlayerFrozen(mCheats, mVelocity, mGravity);
+    mWasPlayerFrozen = false;
+  }
+
+  private static void setPlayerFrozen(int cheats, vector3 velocity, double gravity)
+  {
+    PlayerInfo player = players[consolePlayer];
+    if (player.mo == NULL) return;
+
+    player.cheats     = cheats;
+    player.vel        = velocity.xy;
+    player.mo.vel     = velocity;
+    player.mo.gravity = gravity;
+  }
+
+  const FROZEN_CHEATS_FLAGS = CF_TotallyFrozen | CF_Frozen;
+
+  private bool mWasFrozen;
+  private bool mWasLevelFrozen;
+  private bool mWasPlayerFrozen;
+
+  private int mCheats;
+  private vector3 mVelocity; // to reset weapon bobbing.
+  private double mGravity;
+
+} // class x5_Freezer
 #+end_src
 
 * ~x5_WalkAbilityWatcher~
@@ -478,14 +571,16 @@ class x5_Killer : Actor
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
 [enu default]
-X_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
-X_EXIT  = "Exit this menu to start the level.";
-X_000   = "Per enemy type (on level start)";
+X5_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
+X5_EXIT  = "Exit this menu to start the level.";
+X5_000   = "Per enemy type (on level start)";
+X5_HOST_SELECTS = "The host selects the multipliers";
 
 [ru]
-X_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
-X_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
-X_000   = "По типу врагов (при старте уровня)";
+X5_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
+X5_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
+X5_000   = "По типу врагов (при старте уровня)";
+X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 #+end_src
 
 * Global multiplier
@@ -523,7 +618,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
   private void setLabel(int val)
   {
-    mLabel = (val == 0) ? StringTable.localize("$X_000").." 10.5x:" : "10.5x:";
+    mLabel = (val == 0) ? StringTable.localize("$X5_000").." 10.5x:" : "10.5x:";
   }
 } // class OptionMenuItemX5Slider
 #+end_src
@@ -534,7 +629,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 OptionMenu "x5_TypeMultipliers"
 {
   Class "x5_TypeMultipliersMenu"
-  Title "$X_TYPE_MENU_TITLE"
+  Title "$X5_TYPE_MENU_TITLE"
 }
 #+end_src
 
@@ -559,7 +654,7 @@ class x5_TypeMultipliersMenu : OptionMenu
     mDesc.mItems.clear();
     mDesc.mSelectedItem = 2;
 
-    string description = StringTable.localize("$X_EXIT");
+    string description = StringTable.localize("$X5_EXIT");
     mDesc.mItems.push(
         new ("OptionMenuItemStaticText").initDirect(description, Font.CR_Black));
     mDesc.mItems.push(new ("OptionMenuItemStaticText").init(""));
