@@ -75,6 +75,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs :exports none
 // <<GPL>>
 #+end_src
+#+begin_src c :tangle ../build/10.5x/zscript/x5_WalkAbilityWatcher.zs :exports none
+// <<GPL>>
+#+end_src
 #+begin_src c :tangle ../build/10.5xTest/zscript.zs :exports none
 // <<GPL>>
 #+end_src
@@ -794,12 +797,14 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 #+begin_src c :tangle ../build/10.5x/zscript.zs
 version <<zscript-version>>
 
-<<list-includes()>>
-#+end_src
-#+name: list-includes
-#+begin_src elisp :exports none
-(mapconcat (lambda (x) (concat "#include \"zscript/" x "\""))
-           (directory-files "../build/10.5x/zscript" nil ".*\.zs") "\n")
+#include "zscript/OptionMenuItemX5Slider.zs"
+#include "zscript/OptionMenuItemX5TypeSlider.zs"
+#include "zscript/x5_TypeMultipliersMenu.zs"
+
+#include "zscript/x5_EventHandler.zs"
+#include "zscript/x5_Killer.zs"
+#include "zscript/x5_Freezer.zs"
+#include "zscript/x5_WalkAbilityWatcher.zs"
 #+end_src
 
 * Sprites
