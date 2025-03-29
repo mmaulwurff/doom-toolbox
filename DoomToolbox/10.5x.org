@@ -591,7 +591,7 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 #+begin_src txt :tangle ../build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
-  X5Slider "", x5_multiplier, 0, 10.5, 0.05, 2
+  X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1
 }
 #+end_src
 
@@ -774,7 +774,7 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
   void init(class<Actor> enemyClass, int value)
   {
-    Super.init(getDefaultByType(enemyClass).getTag(), "", 0, 10.5, 0.05, 2);
+    Super.init(getDefaultByType(enemyClass).getTag(), "", 0, 10.5, 0.1, 1);
 
     mValue          = value;
     mEnemyClassName = enemyClass.getClassName();
