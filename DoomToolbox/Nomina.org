@@ -45,27 +45,51 @@ server nosave string na_config = "";
 //MT_VALUE = "Cvar value";
 #+end_src
 
-* Mapinfo - map and event handler definitions
+* Tests begin
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+// <<GPL>>
+
+version 4.14
+
+#include "zscript/nat_Actors.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+class nat_Test : Clematis
+{
+}
+
+class nat_EventHandler : StaticEventHandler
+{
+  override void worldLoaded(WorldEvent event)
+  {
+    mTest = new ("nat_Test");
+    mTest.Describe("Nomina tests");
+
+    mExpectedNames = Dictionary.create();
+    // continued elsewhere.
+#+end_src
+
+* ZScript - source code
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+// <<GPL>>
+
+version 4.14
+#+end_src
+
 #+begin_src txt :tangle ../build/Nomina/mapinfo.txt
 // <<GPL>>
 
 GameInfo { EventHandlers = "na_EventHandler" }
 #+end_src
 
-* ZScript - source code
-#+begin_src c :tangle ../build/Nomina/zscript.txt
-// <<GPL>>
-
-version 4.14
-#+end_src
-
-#+begin_src c :tangle ../build/Nomina/zscript.txt
+#+begin_src c :tangle ../build/Nomina/zscript.zs
 class na_EventHandler : StaticEventHandler
 {
   override void onEngineInitialize()
   {
-    Array<INamer> namers = {new ('StubNamer'), new ('StubNamer')};
-    mNamer               = new ('Namers').initialize(namers);
+    Array<INamer> namers = {new ("AutoNamer")};
+    mNamer               = new ("Namers").initialize(namers);
   }
 
   override void worldThingSpawned(WorldEvent event)
@@ -76,8 +100,13 @@ class na_EventHandler : StaticEventHandler
 
     bool hasTag = thing.getTag(".") != ".";
     if (hasTag) return;
-
-    let[found, name] = mNamer.name(thing.getClass());
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    mExpectedNames.insert("DoomImp", "Imp");
+    mExpectedNames.insert("nat_Imp", "Imp");
+#+end_src
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+    let[found, name] = mNamer.name(thing.getClassName());
     if (found) thing.setTag(name);
   }
 
@@ -87,11 +116,6 @@ class na_EventHandler : StaticEventHandler
 class INamer
 {
   virtual bool, string name(string className) { return true, ""; }
-}
-
-class StubNamer : INamer
-{
-  override bool, string name(string className) { return true, ""; }
 }
 
 class Namers : INamer
@@ -114,14 +138,101 @@ class Namers : INamer
 
   private Array<INamer> mNamers;
 }
+
+/// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
+/// splits camelCase.
+class AutoNamer : INamer
+{
+  override bool, string name(string className)
+  {
+    className.replace("_", " ");
+
+    Array<string> words;
+    className.split(words, " ", TOK_SkipEmpty);
+
+    string result;
+
+    foreach (word : words)
+    {
+      // It seems that non-latin characters are not allowed in class names. Overkill?
+      let[firstChar, firstLength] = word.getNextCodepoint(0);
+
+      string split = string.format("%c", string.charUpper(firstChar));
+      for (uint i = firstLength; i < word.length();)
+      {
+        let[letter, next] = word.getNextCodepoint(i);
+
+        if (string.charLower(letter) != letter) split.appendFormat(" %c", letter);
+        else split.appendFormat("%c", letter);
+
+        i = next;
+      }
+
+      if (result.length() != 0) result.appendCharacter(0x20);
+      result.appendFormat("%s", split);
+    }
+
+    return true, result;
+  }
+}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class _nat__nameless_ : nat_Monster {}
+class nat_CamelCaseEnemy : nat_Monster {}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    mExpectedNames.insert("_nat__nameless_", "Nat Nameless");
+    mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
 #+end_src
 
-* Tests
+* Tests end
+#+begin_src txt :tangle ../build/NominaTest/mapinfo.txt
+// <<GPL>>
+
+GameInfo { EventHandlers = "nat_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_Imp : DoomImp {}
+
+class nat_Monster : Actor
+{
+  Default { Monster; }
+}
+#+end_src
+
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    // started elsewhere.
+    vector3 spawnPoint = players[consolePlayer].mo.pos + (100, 0, 0);
+
+    for (let i = DictionaryIterator.create(mExpectedNames); i.next();)
+      Actor.Spawn(i.key(), spawnPoint);
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    Actor thing = event.thing;
+
+    if (thing == NULL || !(thing.bIsMonster || thing is "Weapon")) return;
+
+    string className = thing.getClassName();
+    if (mExpectedNames.at(className).length() == 0) return;
+
+    bool isExpected = thing.getTag() == mExpectedNames.at(className);
+    mTest.it(className, mTest.assert(isExpected));
+    if (!isExpected)
+      Console.printf("%s", thing.getTag());
+  }
+
+  override void OnUnregister() { mTest.EndDescribe(); }
+
+  private Clematis mTest;
+  private Dictionary mExpectedNames;
+}
+#+end_src
+
+* Run tests
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-
-(dt-run-tests
- "../build/Nomina"
-
- "quit")
+(dt-run-tests "../build/Nomina ../build/NominaTest" "wait 2; map map01; wait 9; quit")
 #+end_src
