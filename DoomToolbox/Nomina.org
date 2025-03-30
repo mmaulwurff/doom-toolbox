@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+#+title: Nomina
+
+* [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* License :noexport:
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+* Cvarinfo - console variable (Cvar) definitions
+#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
+// <<GPL>>
+
+server nosave string na_config = "";
+#+end_src
+
+* Keyconf - key and command definitions
+#+begin_src txt :tangle ../build/Nomina/keyconf.txt
+// <<GPL>>
+
+//Alias +hello "netevent mt_print_hello"
+//Alias -hello "netevent mt_print_value"
+//
+//AddKeySection "$MT_TITLE" Nomina
+//AddMenuKey "$MT_GREET" +hello
+//DefaultBind g +hello
+#+end_src
+
+* Language - user-visible strings
+#+begin_src ini :tangle ../build/Nomina/language.txt
+// <<GPL>>
+
+[enu default]
+//MT_TITLE = "Nomina";
+//MT_GREET = "Greet";
+//MT_HELLO = "Hello, world!";
+//MT_VALUE = "Cvar value";
+#+end_src
+
+* Mapinfo - map and event handler definitions
+#+begin_src txt :tangle ../build/Nomina/mapinfo.txt
+// <<GPL>>
+
+GameInfo { EventHandlers = "na_EventHandler" }
+#+end_src
+
+* ZScript - source code
+#+begin_src c :tangle ../build/Nomina/zscript.txt
+// <<GPL>>
+
+version 4.14
+#+end_src
+
+#+begin_src c :tangle ../build/Nomina/zscript.txt
+class na_EventHandler : StaticEventHandler
+{
+  override void onEngineInitialize()
+  {
+    Array<INamer> namers = {new ('StubNamer'), new ('StubNamer')};
+    mNamer               = new ('Namers').initialize(namers);
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    Actor thing = event.thing;
+
+    if (thing == NULL || !(thing.bIsMonster || thing is "Weapon")) return;
+
+    bool hasTag = thing.getTag(".") != ".";
+    if (hasTag) return;
+
+    let[found, name] = mNamer.name(thing.getClass());
+    if (found) thing.setTag(name);
+  }
+
+  INamer mNamer;
+}
+
+class INamer
+{
+  virtual bool, string name(string className) { return true, ""; }
+}
+
+class StubNamer : INamer
+{
+  override bool, string name(string className) { return true, ""; }
+}
+
+class Namers : INamer
+{
+  INamer initialize(Array<INamer> namers)
+  {
+    mNamers = namers;
+    return self;
+  }
+
+  override bool, string name(string className)
+  {
+    foreach (namer : mNamers)
+    {
+      let[found, name] = namer.name(className);
+      if (found) return true, name;
+    }
+    return false, "";
+  }
+
+  private Array<INamer> mNamers;
+}
+#+end_src
+
+* Tests
+#+begin_src elisp
+(load-file "../build/TestRunner/dt-scripts.el")
+
+(dt-run-tests
+ "../build/Nomina"
+
+ "quit")
+#+end_src
