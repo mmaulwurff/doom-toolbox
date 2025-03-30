@@ -81,28 +81,37 @@ GameInfo { EventHandlers = "na_EventHandler" }
 #+begin_src c :tangle ../build/Nomina/zscript.zs
 class na_EventHandler : StaticEventHandler
 {
-  override void onEngineInitialize()
-  {
-    Array<INamer> namers = {new("ConfigNamer"), new ("AutoNamer")};
-    mNamer               = new ("Namers").initialize(namers);
-  }
-
   override void worldThingSpawned(WorldEvent event)
   {
     Actor thing = event.thing;
 
     if (thing == NULL || !(thing.bIsMonster || thing is "Weapon")) return;
 
+    {
+      let[found, name] = findNameInConfig(thing.getClassName());
+      if (found)
+      {
+        thing.setTag(name);
+        return;
+      }
+    }
+
+    // TODO: search names in loadable data files.
+
     bool hasTag = thing.getTag(".") != ".";
     if (hasTag) return;
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_Imp : DoomImp {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     mExpectedNames.insert("DoomImp", "Imp");
     mExpectedNames.insert("nat_Imp", "Imp");
 #+end_src
 #+begin_src c :tangle ../build/Nomina/zscript.zs
-    let[found, name] = mNamer.name(thing.getClassName());
-    if (found) thing.setTag(name);
+
+    string name = makeAutoName(thing.getClassName());
+    thing.setTag(name);
   }
 
   override void networkProcess(ConsoleEvent event)
@@ -113,10 +122,11 @@ class na_EventHandler : StaticEventHandler
     if (parts.size() == 0 || parts[0] != "na_rename") return;
 
     string className = parts[1];
-    string newTag = parts[2];
+    string newTag    = parts[2];
 
     if (parts.size() != 3 || className.length() == 0 || newTag.length() == 0)
     {
+      // TODO: Translate this?
       Console.printf("Usage:\nna_rename ClassName NewTag");
       return;
     }
@@ -130,40 +140,9 @@ class na_EventHandler : StaticEventHandler
       anActor.setTag(newTag);
   }
 
-  INamer mNamer;
-}
-
-class INamer
-{
-  virtual bool, string name(string className) { return true, ""; }
-}
-
-class Namers : INamer
-{
-  INamer initialize(Array<INamer> namers)
-  {
-    mNamers = namers;
-    return self;
-  }
-
-  override bool, string name(string className)
-  {
-    foreach (namer : mNamers)
-    {
-      let[found, name] = namer.name(className);
-      if (found) return true, name;
-    }
-    return false, "";
-  }
-
-  private Array<INamer> mNamers;
-}
-
-/// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
-/// splits camelCase.
-class AutoNamer : INamer
-{
-  override bool, string name(string className)
+  /// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
+  /// splits camelCase.
+  private static string makeAutoName(string className)
   {
     className.replace("_", " ");
 
@@ -188,29 +167,26 @@ class AutoNamer : INamer
         i = next;
       }
 
-      if (result.length() != 0) result.appendCharacter(0x20);
-      result.appendFormat("%s", split);
+      if (result.length() != 0) result.appendFormat(" %s", split);
+      else result.appendFormat("%s", split);
     }
 
-    return true, result;
+    return result;
   }
-}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class _nat__nameless_ : nat_Monster {}
+class _nat__nameless1_   : nat_Monster {}
 class nat_CamelCaseEnemy : nat_Monster {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
-    mExpectedNames.insert("_nat__nameless_", "Nat Nameless");
+    mExpectedNames.insert("_nat__nameless1_", "Nat Nameless1");
     mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
 #+end_src
-
 #+begin_src c :tangle ../build/Nomina/zscript.zs
-class ConfigNamer : INamer
-{
-  override bool, string name(string className)
+
+  private static bool, string findNameInConfig(string className)
   {
-    let config = Dictionary.fromString(na_config);
+    let config    = Dictionary.fromString(na_config);
     string newTag = config.at(className);
 
     return newTag.length() != 0, newTag;
@@ -222,8 +198,10 @@ class nat_NamelessByConfig : nat_Monster {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     // Cannot set a string value with " in the console, have to do it programmatically.
-    CVar.getCvar("na_config").setString("{\"nat_NamelessByConfig\":\"TestName\"}");
+    CVar.getCvar("na_config").setString(
+      "{\"nat_NamelessByConfig\":\"TestName\", \"Zombieman\":\"TestZombie\"}");
     mExpectedNames.insert("nat_NamelessByConfig", "TestName");
+    mExpectedNames.insert("Zombieman", "TestZombie");
 #+end_src
 
 * Tests end
@@ -234,12 +212,7 @@ GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
 
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class nat_Imp : DoomImp {}
-
-class nat_Monster : Actor
-{
-  Default { Monster; }
-}
+class nat_Monster : Actor { Default { Monster; } }
 #+end_src
 
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
