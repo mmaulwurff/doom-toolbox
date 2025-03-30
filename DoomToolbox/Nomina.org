@@ -26,12 +26,7 @@ server nosave string na_config = "";
 #+begin_src txt :tangle ../build/Nomina/keyconf.txt
 // <<GPL>>
 
-//Alias +hello "netevent mt_print_hello"
-//Alias -hello "netevent mt_print_value"
-//
-//AddKeySection "$MT_TITLE" Nomina
-//AddMenuKey "$MT_GREET" +hello
-//DefaultBind g +hello
+Alias na_rename "netevent na_rename:%1:%2"
 #+end_src
 
 * Language - user-visible strings
@@ -88,7 +83,7 @@ class na_EventHandler : StaticEventHandler
 {
   override void onEngineInitialize()
   {
-    Array<INamer> namers = {new ("AutoNamer")};
+    Array<INamer> namers = {new("ConfigNamer"), new ("AutoNamer")};
     mNamer               = new ("Namers").initialize(namers);
   }
 
@@ -108,6 +103,31 @@ class na_EventHandler : StaticEventHandler
 #+begin_src c :tangle ../build/Nomina/zscript.zs
     let[found, name] = mNamer.name(thing.getClassName());
     if (found) thing.setTag(name);
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    Array<string> parts;
+    event.name.split(parts, ":");
+
+    if (parts.size() == 0 || parts[0] != "na_rename") return;
+
+    string className = parts[1];
+    string newTag = parts[2];
+
+    if (parts.size() != 3 || className.length() == 0 || newTag.length() == 0)
+    {
+      Console.printf("Usage:\nna_rename ClassName NewTag");
+      return;
+    }
+
+    let config = Dictionary.fromString(na_config);
+    config.insert(className, newTag);
+    CVar.getCvar("na_config").setString(config.toString());
+
+    let i = ThinkerIterator.create(className);
+    for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
+      anActor.setTag(newTag);
   }
 
   INamer mNamer;
@@ -183,6 +203,27 @@ class nat_CamelCaseEnemy : nat_Monster {}
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     mExpectedNames.insert("_nat__nameless_", "Nat Nameless");
     mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
+#+end_src
+
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+class ConfigNamer : INamer
+{
+  override bool, string name(string className)
+  {
+    let config = Dictionary.fromString(na_config);
+    string newTag = config.at(className);
+
+    return newTag.length() != 0, newTag;
+  }
+}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_NamelessByConfig : nat_Monster {}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    // Cannot set a string value with " in the console, have to do it programmatically.
+    CVar.getCvar("na_config").setString("{\"nat_NamelessByConfig\":\"TestName\"}");
+    mExpectedNames.insert("nat_NamelessByConfig", "TestName");
 #+end_src
 
 * Tests end
