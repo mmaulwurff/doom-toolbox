@@ -34,10 +34,10 @@ Alias na_rename "netevent na_rename:%1:%2"
 // <<GPL>>
 
 [enu default]
-//MT_TITLE = "Nomina";
-//MT_GREET = "Greet";
-//MT_HELLO = "Hello, world!";
-//MT_VALUE = "Cvar value";
+NA_USAGE = "Usage";
+
+[ru]
+NA_USAGE = "Использование";
 #+end_src
 
 * Tests begin
@@ -132,8 +132,8 @@ class nat_Imp : DoomImp {}
 
     if (parts.size() != 3 || className.length() == 0 || newTag.length() == 0)
     {
-      // TODO: Translate this?
-      Console.printf("Usage:\nna_rename ClassName NewTag");
+      Console.printf("%s:\nna_rename ClassName NewTag",
+                     StringTable.localize("$NA_USAGE"));
       return;
     }
 
