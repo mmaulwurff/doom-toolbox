@@ -95,8 +95,14 @@ class na_EventHandler : StaticEventHandler
         return;
       }
     }
-
-    // TODO: search names in loadable data files.
+    {
+      let[found, name] = findNameInData(thing.getClassName());
+      if (found)
+      {
+        thing.setTag(name);
+        return;
+      }
+    }
 
     bool hasTag = thing.getTag(".") != ".";
     if (hasTag) return;
@@ -183,7 +189,6 @@ class nat_CamelCaseEnemy : nat_Monster {}
     mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
 #+end_src
 #+begin_src c :tangle ../build/Nomina/zscript.zs
-
   private static bool, string findNameInConfig(string className)
   {
     let config    = Dictionary.fromString(na_config);
@@ -191,7 +196,6 @@ class nat_CamelCaseEnemy : nat_Monster {}
 
     return newTag.length() != 0, newTag;
   }
-}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class nat_NamelessByConfig : nat_Monster {}
@@ -202,6 +206,64 @@ class nat_NamelessByConfig : nat_Monster {}
       "{\"nat_NamelessByConfig\":\"TestName\", \"Zombieman\":\"TestZombie\"}");
     mExpectedNames.insert("nat_NamelessByConfig", "TestName");
     mExpectedNames.insert("Zombieman", "TestZombie");
+#+end_src
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+  private bool, string findNameInData(string className)
+  {
+    string newTag = mData.at(className);
+
+    return newTag.length() != 0, newTag;
+  }
+
+  override void OnEngineInitialize()
+  {
+    mData = Dictionary.create();
+
+    string dataLump = "na_data";
+    for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
+         i != -1;
+         i = Wads.findLump(dataLump, i + 1, Wads.AnyNamespace))
+    {
+      let data = Dictionary.fromString(Wads.readLump(i));
+      for (let i = DictionaryIterator.create(data); i.next();)
+      {
+        mData.insert(i.key(), i.value());
+      }
+    }
+  }
+
+  private Dictionary mData;
+}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_NamelessByData1: nat_Monster {}
+class nat_NamelessByData2: nat_Monster {}
+class nat_NamelessByData3: nat_Monster {}
+class nat_NamelessByData4: nat_Monster {}
+#+end_src
+#+begin_src js :tangle ../build/NominaTest/1/na_data.json
+{
+  "nat_NamelessByData1": "TestData1",
+  "nat_NamelessByData3": "TestData3"
+}
+#+end_src
+#+begin_src js :tangle ../build/NominaTest/na_data.json
+{
+  "nat_NamelessByData2": "TestData2",
+  "nat_NamelessByData3": "TestData3-2",
+  "nat_NamelessByData4": "TestData4"
+}
+#+end_src
+#+begin_src js :tangle ../build/na_data.json
+{
+  "nat_NamelessByData4": "TestData4-2"
+}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    mExpectedNames.insert("nat_NamelessByData1", "TestData1");
+    mExpectedNames.insert("nat_NamelessByData2", "TestData2");
+    mExpectedNames.insert("nat_NamelessByData3", "TestData3-2");
+    mExpectedNames.insert("nat_NamelessByData4", "TestData4-2");
 #+end_src
 
 * Tests end
@@ -248,5 +310,6 @@ class nat_Monster : Actor { Default { Monster; } }
 * Run tests
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(dt-run-tests "../build/Nomina ../build/NominaTest" "wait 2; map map01; wait 9; quit")
+(dt-run-tests "../build/Nomina ../build/NominaTest ../build/na_data.json"
+              "wait 2; map map01; wait 9; quit")
 #+end_src
