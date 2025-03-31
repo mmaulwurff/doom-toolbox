@@ -3,9 +3,17 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
-#+title: Nomina
+#+title: Nomina v2.0.0-beta
 
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* Nomina
+Nomina is a GZDoom add-on that helps with enemy names (tags).
+
+Features:
+- Automatic tags: if an enemy doesn't have a tag, Nomina assigns to beautify its class name and use it is a tag.
+- In-game enemy tag correction: use ~na_rename <Class> <NewName>~ console command to assign a tag to a class manually.
+- Tag databases: load ~na_data.json~ JSON lump (file) that contains class-tag pairs. See examples in tests below.
 
 * License :noexport:
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
@@ -15,24 +23,41 @@ SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-* Cvarinfo - console variable (Cvar) definitions
-#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
+#+begin_src c :tangle ../build/Nomina/zscript.zs :exports none
 // <<GPL>>
-
-server nosave string na_config = "";
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs :exports none
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs :exports none
+// <<GPL>>
 #+end_src
 
-* Keyconf - key and command definitions
-#+begin_src txt :tangle ../build/Nomina/keyconf.txt
-// <<GPL>>
-
-Alias na_rename "netevent na_rename:%1:%2"
+[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
+#+name: CC
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-* Language - user-visible strings
+#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt :exports none
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle ../build/Nomina/keyconf.txt :exports none
+// <<CC>>
+#+end_src
+#+begin_src ini :tangle ../build/Nomina/language.txt :exports none
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle ../build/Nomina/mapinfo.txt :exports none
+// <<CC>>
+#+end_src
+#+begin_src txt :tangle ../build/NominaTest/mapinfo.txt :exports none
+// <<CC>>
+#+end_src
+
+* Strings
 #+begin_src ini :tangle ../build/Nomina/language.txt
-// <<GPL>>
-
 [enu default]
 NA_USAGE = "Usage";
 
@@ -42,17 +67,11 @@ NA_USAGE = "Использование";
 
 * Tests begin
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
-// <<GPL>>
-
 version 4.14
 
 #include "zscript/nat_Actors.zs"
-#+end_src
 
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-class nat_Test : Clematis
-{
-}
+class nat_Test : Clematis {}
 
 class nat_EventHandler : StaticEventHandler
 {
@@ -65,22 +84,27 @@ class nat_EventHandler : StaticEventHandler
     // continued elsewhere.
 #+end_src
 
-* ZScript - source code
+* ZScript
 #+begin_src c :tangle ../build/Nomina/zscript.zs
-// <<GPL>>
-
 version 4.14
 #+end_src
 
 #+begin_src txt :tangle ../build/Nomina/mapinfo.txt
-// <<GPL>>
-
 GameInfo { EventHandlers = "na_EventHandler" }
+#+end_src
+
+#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
+server nosave string na_config = "";
+#+end_src
+
+#+begin_src txt :tangle ../build/Nomina/keyconf.txt
+Alias na_rename "netevent na_rename:%1:%2"
 #+end_src
 
 #+begin_src c :tangle ../build/Nomina/zscript.zs
 class na_EventHandler : StaticEventHandler
 {
+  // Renames the spawned thing, if needed.
   override void worldThingSpawned(WorldEvent event)
   {
     Actor thing = event.thing;
@@ -120,6 +144,7 @@ class nat_Imp : DoomImp {}
     thing.setTag(name);
   }
 
+  // Handles `na_rename` command.
   override void networkProcess(ConsoleEvent event)
   {
     Array<string> parts;
@@ -215,6 +240,7 @@ class nat_NamelessByConfig : nat_Monster {}
     return newTag.length() != 0, newTag;
   }
 
+  // Initializes the event handler.
   override void OnEngineInitialize()
   {
     mData = Dictionary.create();
@@ -268,8 +294,6 @@ class nat_NamelessByData4: nat_Monster {}
 
 * Tests end
 #+begin_src txt :tangle ../build/NominaTest/mapinfo.txt
-// <<GPL>>
-
 GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
 
