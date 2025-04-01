@@ -529,7 +529,7 @@ class x5_Killer : Actor
     Height 30;
     FloatBobStrength 0.2;
     RenderStyle 'translucent'; // Change this to 'none' to hide killer marks.
-    Alpha 0.1;
+    Alpha 0.3;
 
     +NoBlockmap;
     +NoGravity;
