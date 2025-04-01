@@ -270,7 +270,14 @@ class x5_EventHandler : EventHandler
         let i      = BlockThingsIterator.createFromPos(pos.x, pos.y, pos.z, height,
                                                        radius, false);
 
-        if (i.next()) enemiesByType.push(i.thing);
+        while (i.next())
+        {
+          if (((pos.x, pos.y) - i.thing.pos.xy).length() < radius)
+          {
+            enemiesByType.push(i.thing);
+            break;
+          }
+        }
       }
     }
   }
