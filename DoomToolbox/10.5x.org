@@ -812,7 +812,7 @@ sprites/m8rda0.png: [[../media/10.5x/sprites/m8rda0.png]]
 
 #+name: copy-media
 #+begin_src elisp :exports none
-(copy-directory "../media/10.5x" "../../build/10.5x" nil t t)
+(copy-directory "../media/10.5x" "../build/10.5x" nil t t)
 ""
 ; This script has to be parked somewhere, so put it in zscript.zs.
 #+end_src
