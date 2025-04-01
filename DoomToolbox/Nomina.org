@@ -97,10 +97,6 @@ GameInfo { EventHandlers = "na_EventHandler" }
 server nosave string na_config = "";
 #+end_src
 
-#+begin_src txt :tangle ../build/Nomina/keyconf.txt
-Alias na_rename "netevent na_rename:%1:%2"
-#+end_src
-
 #+begin_src c :tangle ../build/Nomina/zscript.zs
 class na_EventHandler : StaticEventHandler
 {
@@ -144,6 +140,13 @@ class nat_Imp : DoomImp {}
     thing.setTag(name);
   }
 
+#+end_src
+#+begin_src txt :tangle ../build/Nomina/keyconf.txt
+// Limited to 10 words. For more words, use the external name data (na_data.json).
+Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
+#+end_src
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+
   // Handles `na_rename` command.
   override void networkProcess(ConsoleEvent event)
   {
@@ -154,8 +157,10 @@ class nat_Imp : DoomImp {}
 
     string className = parts[1];
     string newTag    = parts[2];
+    for (int i = 3; i < parts.size(); ++i)
+      if (parts[i].length() != 0) newTag.appendFormat(" %s", parts[i]);
 
-    if (parts.size() != 3 || className.length() == 0 || newTag.length() == 0)
+    if (parts.size() < 3 || className.length() == 0 || newTag.length() == 0)
     {
       Console.printf("%s:\nna_rename ClassName NewTag",
                      StringTable.localize("$NA_USAGE"));
@@ -170,6 +175,15 @@ class nat_Imp : DoomImp {}
     for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
       anActor.setTag(newTag);
   }
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_NamelessToRename : Actor { Default { Monster; } }
+#+end_src
+#+name: expect-after-spawn
+#+begin_src c
+    mExpectedNames.insert("nat_NamelessToRename", "Renamed To Several Words");
+#+end_src
+#+begin_src c :tangle ../build/Nomina/zscript.zs
 
   /// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
   /// splits camelCase.
@@ -307,6 +321,8 @@ class nat_Monster : Actor { Default { Monster; } }
 
     for (let i = DictionaryIterator.create(mExpectedNames); i.next();)
       Actor.Spawn(i.key(), spawnPoint);
+
+    <<expect-after-spawn>>
   }
 
   override void worldThingSpawned(WorldEvent event)
@@ -318,10 +334,12 @@ class nat_Monster : Actor { Default { Monster; } }
     string className = thing.getClassName();
     if (mExpectedNames.at(className).length() == 0) return;
 
-    bool isExpected = thing.getTag() == mExpectedNames.at(className);
+    string actual   = thing.getTag();
+    string expected = mExpectedNames.at(className);
+    bool isExpected = actual == expected;
     mTest.it(className, mTest.assert(isExpected));
     if (!isExpected)
-      Console.printf("%s", thing.getTag());
+      Console.printf("Actual: %s, expected: %s", actual, expected);
   }
 
   override void OnUnregister() { mTest.EndDescribe(); }
@@ -334,6 +352,10 @@ class nat_Monster : Actor { Default { Monster; } }
 * Run tests
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(dt-run-tests "../build/Nomina ../build/NominaTest ../build/na_data.json"
-              "wait 2; map map01; wait 9; quit")
+(dt-run-tests
+ "../build/Nomina ../build/NominaTest ../build/na_data.json"
+ "wait 2; map map01;
+  wait 2; na_rename nat_NamelessToRename Renamed To Several Words;
+    wait 2; summon nat_NamelessToRename;
+  wait 9; quit")
 #+end_src
