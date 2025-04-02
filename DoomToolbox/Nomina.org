@@ -3,19 +3,22 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
+
 #+title: Nomina v2.0.0-beta
 
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
-* Nomina
+* Description
+
 Nomina is a GZDoom add-on that helps with enemy names (tags).
 
 Features:
-- Automatic tags: if an enemy doesn't have a tag, Nomina assigns to beautify its class name and use it is a tag.
-- In-game enemy tag correction: use ~na_rename <Class> <NewName>~ console command to assign a tag to a class manually.
-- Tag databases: load ~na_data.json~ JSON lump (file) that contains class-tag pairs. See examples in tests below.
+- [[Automatic tags]]: if an enemy doesn't have a tag, Nomina assigns to beautify its class name and use it is a tag.
+- [[In-game enemy tag correction]]: use ~na_rename <Class> <NewName>~ console command to assign a tag to a class manually.
+- [[Tag databases]]: load ~na_data.json~ JSON lump (file) that contains class-tag pairs. See examples in tests below.
 
 * License :noexport:
+
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
@@ -56,45 +59,18 @@ SPDX-License-Identifier: CC0-1.0
 // <<CC>>
 #+end_src
 
-* Strings
-#+begin_src ini :tangle ../build/Nomina/language.txt
-[enu default]
-NA_USAGE = "Usage";
+* Source code
 
-[ru]
-NA_USAGE = "Использование";
-#+end_src
-
-* Tests begin
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
-version 4.14
-
-#include "zscript/nat_Actors.zs"
-
-class nat_Test : Clematis {}
-
-class nat_EventHandler : StaticEventHandler
-{
-  override void worldLoaded(WorldEvent event)
-  {
-    mTest = new ("nat_Test");
-    mTest.Describe("Nomina tests");
-
-    mExpectedNames = Dictionary.create();
-    // continued elsewhere.
+<<tests-preamble>>
 #+end_src
 
-* ZScript
 #+begin_src c :tangle ../build/Nomina/zscript.zs
 version 4.14
 #+end_src
 
 #+begin_src txt :tangle ../build/Nomina/mapinfo.txt
 GameInfo { EventHandlers = "na_EventHandler" }
-#+end_src
-
-#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
-server nosave string na_config = "";
 #+end_src
 
 #+begin_src c :tangle ../build/Nomina/zscript.zs
@@ -141,50 +117,10 @@ class nat_Imp : DoomImp {}
   }
 
 #+end_src
-#+begin_src txt :tangle ../build/Nomina/keyconf.txt
-// Limited to 10 words. For more words, use the external name data (na_data.json).
-Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
-#+end_src
+
+** Automatic tags
+
 #+begin_src c :tangle ../build/Nomina/zscript.zs
-
-  // Handles `na_rename` command.
-  override void networkProcess(ConsoleEvent event)
-  {
-    Array<string> parts;
-    event.name.split(parts, ":");
-
-    if (parts.size() == 0 || parts[0] != "na_rename") return;
-
-    string className = parts[1];
-    string newTag    = parts[2];
-    for (int i = 3; i < parts.size(); ++i)
-      if (parts[i].length() != 0) newTag.appendFormat(" %s", parts[i]);
-
-    if (parts.size() < 3 || className.length() == 0 || newTag.length() == 0)
-    {
-      Console.printf("%s:\nna_rename ClassName NewTag",
-                     StringTable.localize("$NA_USAGE"));
-      return;
-    }
-
-    let config = Dictionary.fromString(na_config);
-    config.insert(className, newTag);
-    CVar.getCvar("na_config").setString(config.toString());
-
-    let i = ThinkerIterator.create(className);
-    for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
-      anActor.setTag(newTag);
-  }
-#+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class nat_NamelessToRename : Actor { Default { Monster; } }
-#+end_src
-#+name: expect-after-spawn
-#+begin_src c
-    mExpectedNames.insert("nat_NamelessToRename", "Renamed To Several Words");
-#+end_src
-#+begin_src c :tangle ../build/Nomina/zscript.zs
-
   /// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
   /// splits camelCase.
   private static string makeAutoName(string className)
@@ -227,6 +163,15 @@ class nat_CamelCaseEnemy : nat_Monster {}
     mExpectedNames.insert("_nat__nameless1_", "Nat Nameless1");
     mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
 #+end_src
+
+** In-game enemy tag correction
+
+*** ~na_config~ CVar
+
+#+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
+server nosave string na_config = "";
+#+end_src
+
 #+begin_src c :tangle ../build/Nomina/zscript.zs
   private static bool, string findNameInConfig(string className)
   {
@@ -246,6 +191,63 @@ class nat_NamelessByConfig : nat_Monster {}
     mExpectedNames.insert("nat_NamelessByConfig", "TestName");
     mExpectedNames.insert("Zombieman", "TestZombie");
 #+end_src
+
+*** ~na_rename~ console command
+
+#+begin_src txt :tangle ../build/Nomina/keyconf.txt
+// Limited to 10 words. For more words, use the external name data (na_data.json).
+Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
+#+end_src
+
+#+begin_src ini :tangle ../build/Nomina/language.txt
+[enu default]
+NA_USAGE = "Usage";
+
+[ru]
+NA_USAGE = "Использование";
+#+end_src
+
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+
+  // Handles `na_rename` command.
+  override void networkProcess(ConsoleEvent event)
+  {
+    Array<string> parts;
+    event.name.split(parts, ":");
+
+    if (parts.size() == 0 || parts[0] != "na_rename") return;
+
+    string className = parts[1];
+    string newTag    = parts[2];
+    for (int i = 3; i < parts.size(); ++i)
+      if (parts[i].length() != 0) newTag.appendFormat(" %s", parts[i]);
+
+    if (parts.size() < 3 || className.length() == 0 || newTag.length() == 0)
+    {
+      Console.printf("%s:\nna_rename ClassName NewTag",
+                     StringTable.localize("$NA_USAGE"));
+      return;
+    }
+
+    let config = Dictionary.fromString(na_config);
+    config.insert(className, newTag);
+    CVar.getCvar("na_config").setString(config.toString());
+
+    let i = ThinkerIterator.create(className);
+    for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
+      anActor.setTag(newTag);
+  }
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+class nat_NamelessToRename : Actor { Default { Monster; } }
+#+end_src
+#+name: expect-after-spawn
+#+begin_src c
+    mExpectedNames.insert("nat_NamelessToRename", "Renamed To Several Words");
+#+end_src
+
+** Tag databases
+
 #+begin_src c :tangle ../build/Nomina/zscript.zs
   private bool, string findNameInData(string className)
   {
@@ -306,7 +308,8 @@ class nat_NamelessByData4: nat_Monster {}
     mExpectedNames.insert("nat_NamelessByData4", "TestData4-2");
 #+end_src
 
-* Tests end
+* Tests
+
 #+begin_src txt :tangle ../build/NominaTest/mapinfo.txt
 GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
@@ -315,8 +318,26 @@ GameInfo { EventHandlers = "nat_EventHandler" }
 class nat_Monster : Actor { Default { Monster; } }
 #+end_src
 
+#+name: tests-preamble
+#+begin_src c
+version 4.14
+
+#include "zscript/nat_Actors.zs"
+
+class nat_Test : Clematis {}
+
+class nat_EventHandler : StaticEventHandler
+{
+  override void worldLoaded(WorldEvent event)
+  {
+    mTest = new ("nat_Test");
+    mTest.Describe("Nomina tests");
+
+    mExpectedNames = Dictionary.create();
+
+    // Setting expectations goes here.
+#+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
-    // started elsewhere.
     vector3 spawnPoint = players[consolePlayer].mo.pos + (100, 0, 0);
 
     for (let i = DictionaryIterator.create(mExpectedNames); i.next();)
@@ -350,6 +371,7 @@ class nat_Monster : Actor { Default { Monster; } }
 #+end_src
 
 * Run tests
+
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 (dt-run-tests

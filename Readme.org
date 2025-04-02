@@ -6,3 +6,4 @@ This repository contains add-ons for Doom-based game engines which support ZScri
 
 - [[file:DoomToolbox/10.5x.org][10.5x]]
 - [[file:DoomToolbox/DoomDoctor.org][DoomDoctor]]
+- [[file:DoomToolbox/Nomina.org][Nomina]]
