@@ -62,12 +62,15 @@ SPDX-License-Identifier: CC0-1.0
 * Source code
 
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
+version 4.14
 <<tests-preamble>>
 #+end_src
 
 #+begin_src c :tangle ../build/Nomina/zscript.zs
 version 4.14
 #+end_src
+
+** Event handler
 
 #+begin_src txt :tangle ../build/Nomina/mapinfo.txt
 GameInfo { EventHandlers = "na_EventHandler" }
@@ -102,6 +105,10 @@ class na_EventHandler : StaticEventHandler
 
     bool hasTag = thing.getTag(".") != ".";
     if (hasTag) return;
+
+    string name = makeAutoName(thing.getClassName());
+    thing.setTag(name);
+  }
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class nat_Imp : DoomImp {}
@@ -109,13 +116,6 @@ class nat_Imp : DoomImp {}
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     mExpectedNames.insert("DoomImp", "Imp");
     mExpectedNames.insert("nat_Imp", "Imp");
-#+end_src
-#+begin_src c :tangle ../build/Nomina/zscript.zs
-
-    string name = makeAutoName(thing.getClassName());
-    thing.setTag(name);
-  }
-
 #+end_src
 
 ** Automatic tags
@@ -330,8 +330,6 @@ class nat_Monster : Actor { Default { Monster; } }
 
 #+name: tests-preamble
 #+begin_src c
-version 4.14
-
 #include "zscript/nat_Actors.zs"
 
 class nat_Test : Clematis {}
