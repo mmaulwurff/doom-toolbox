@@ -142,26 +142,36 @@ class nat_Imp : DoomImp {}
       {
         let[letter, next] = word.getNextCodepoint(i);
 
-        if (string.charLower(letter) != letter) split.appendFormat(" %c", letter);
-        else split.appendFormat("%c", letter);
+        bool mustSplit = isUpper(letter)
+          && uint(next) < word.length()
+          && isLower(word.getNextCodepoint(next));
+
+        split.appendFormat(mustSplit ? " %c" : "%c", letter);
 
         i = next;
       }
 
-      if (result.length() != 0) result.appendFormat(" %s", split);
-      else result.appendFormat("%s", split);
+      bool isFirst = result.length() == 0;
+      result.appendFormat(isFirst ? "%s" : " %s", split);
     }
 
     return result;
   }
+
+  private static bool isUpper(int letter) { return string.charLower(letter) != letter; }
+  private static bool isLower(int letter) { return string.charUpper(letter) != letter; }
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class _nat__nameless1_   : nat_Monster {}
 class nat_CamelCaseEnemy : nat_Monster {}
+class nat_BFGZombie      : nat_Monster {}
+class NAT_BFG9000        : nat_Monster {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     mExpectedNames.insert("_nat__nameless1_", "Nat Nameless1");
     mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
+    mExpectedNames.insert("nat_BFGZombie", "Nat BFG Zombie");
+    mExpectedNames.insert("NAT_BFG9000", "NAT BFG9000");
 #+end_src
 
 ** In-game enemy tag correction
