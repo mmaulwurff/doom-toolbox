@@ -6,9 +6,24 @@
 
 #+title: Ultimate Custom Doom
 
+#+begin_src c
+/******************************************************************************\
+|****                  __  ______  _                 __                    ****|
+|**                   / / / / / /_(_)___ ___  ____ _/ /____                  **|
+|*                   / / / / / __/ / __ `__ \/ __ `/ __/ _ \                  *|
+|*                  / /_/ / / /_/ / / / / / / /_/ / /_/  __/                  *|
+|**                 \____/_/\__/_/_/ /_/ /_/\__,_/\__/\___/                  **|
+|***     ______           __                     ____                       ***|
+|**     / ____/_  _______/ /_____  ____ ___     / __ \____  ____  ____ ___   **|
+|*     / /   / / / / ___/ __/ __ \/ __ `__ \   / / / / __ \/ __ \/ __ `__ \   *|
+|*    / /___/ /_/ (__  ) /_/ /_/ / / / / / /  / /_/ / /_/ / /_/ / / / / / /   *|
+|**   \____/\__,_/____/\__/\____/_/ /_/ /_/  /_____/\____/\____/_/ /_/ /_/   **|
+|****                                                                      ****|
+\******************************************************************************/
+#+end_src
+
 * To do
 - add licenses.
-- scriptify zscript.txt: collect ":tangle" entries.
 
 #+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
 // Entry point /////////////////////////////////////////////////////////////////
@@ -2135,24 +2150,6 @@ class cd_PeriodSettings
 
 } // class cd_PeriodSettings
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_ultimate_custom_doom_template.zs
-/**
- * This class provides mod information.
- *
- * @attention this class may be used by other mods to check if Ultimate
- * Custom Doom is loaded. Do not remove this class even if it's not used
- * in this mod.
- */
-class cd_UltimateCustomDoom
-{
-
-  // public: ///////////////////////////////////////////////////////////////////
-
-  static string getTitle()   { return StringTable.Localize("$CD_MAIN_TITLE"); }
-  static string getVersion() { return "{VERSION}"; }
-
-} // class cd_UltimateCustomDoom
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_ultimate_custom_doom.zs
 /**
  * This class provides mod information.
@@ -3346,109 +3343,25 @@ class cd_Time
 
 } // class cd_Time
 #+end_src
+
+* ~zscript.zs~
+
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript.zs
 version 4.5
 
-
-
-/******************************************************************************\
-|****                  __  ______  _                 __                    ****|
-|**                   / / / / / /_(_)___ ___  ____ _/ /____                  **|
-|*                   / / / / / __/ / __ `__ \/ __ `/ __/ _ \                  *|
-|*                  / /_/ / / /_/ / / / / / / /_/ / /_/  __/                  *|
-|**                 \____/_/\__/_/_/ /_/ /_/\__,_/\__/\___/                  **|
-|***     ______           __                     ____                       ***|
-|**     / ____/_  _______/ /_____  ____ ___     / __ \____  ____  ____ ___   **|
-|*     / /   / / / / ___/ __/ __ \/ __ `__ \   / / / / __ \/ __ \/ __ `__ \   *|
-|*    / /___/ /_/ (__  ) /_/ /_/ / / / / / /  / /_/ / /_/ / /_/ / / / / / /   *|
-|**   \____/\__,_/____/\__/\____/_/ /_/ /_/  /_____/\____/\____/_/ /_/ /_/   **|
-|****                                                                      ****|
-\******************************************************************************/
-
-
-
-// Base ////////////////////////////////////////////////////////////////////////
-
-#include "zscript/cd_ultimate_custom_doom.zs"
-#include "zscript/cd_event_handler.zs"
-
-// Settings ////////////////////////////////////////////////////////////////////
-
-#include "zscript/settings/cd_settings.zs"
-#include "zscript/settings/cd_settings_base.zs"
-
-#include "zscript/settings/cd_cvar_setting.zs"
-#include "zscript/settings/cd_bool_setting.zs"
-#include "zscript/settings/cd_int_setting.zs"
-#include "zscript/settings/cd_double_setting.zs"
-
-#include "zscript/settings/cd_player_settings.zs"
-#include "zscript/settings/cd_misc_settings.zs"
-#include "zscript/settings/cd_monster_settings.zs"
-
-#include "zscript/settings/cd_blend_settings.zs"
-
-#include "zscript/settings/cd_period_settings.zs"
-
-#include "zscript/settings/cd_health_regeneration_settings.zs"
-#include "zscript/settings/cd_armor_regeneration_settings.zs"
-#include "zscript/settings/cd_ammo_regeneration_settings.zs"
-
-#include "zscript/settings/cd_degeneration_settings.zs"
-#include "zscript/settings/cd_health_degeneration_settings.zs"
-#include "zscript/settings/cd_armor_degeneration_settings.zs"
-
-#include "zscript/settings/cd_permanent_powerup_settings.zs"
-
-#include "zscript/settings/cd_randomizer_settings.zs"
-
-#include "zscript/settings/cd_min_max_int_settings.zs"
-#include "zscript/settings/cd_min_max_double_settings.zs"
-
-#include "zscript/settings/cd_randomizer_limits.zs"
-#include "zscript/settings/cd_player_limits.zs"
-#include "zscript/settings/cd_health_regeneration_limits.zs"
-#include "zscript/settings/cd_armor_regeneration_limits.zs"
-#include "zscript/settings/cd_ammo_regeneration_limits.zs"
-#include "zscript/settings/cd_degeneration_limits.zs"
-#include "zscript/settings/cd_health_degeneration_limits.zs"
-#include "zscript/settings/cd_armor_degeneration_limits.zs"
-
-// Object manipulation /////////////////////////////////////////////////////////
-
-#include "zscript/properties/cd_player_properties.zs"
-#include "zscript/properties/cd_misc_properties.zs"
-
-#include "zscript/properties/cd_monster_properties.zs"
-
-#include "zscript/properties/cd_player_health.zs"
-#include "zscript/properties/cd_player_armor.zs"
-#include "zscript/properties/cd_player_ammo.zs"
-
-#include "zscript/properties/cd_permanent_powerup_properties.zs"
-
-// Utilities ///////////////////////////////////////////////////////////////////
-
-#include "zscript/utils/cd_time.zs"
-#include "zscript/utils/cd_effects.zs"
-
-// Helper Inventory Items //////////////////////////////////////////////////////
-
-#include "zscript/inventory/cd_start_giver_check.zs"
-
-#include "zscript/inventory/cd_armor_bonus.zs"
-#include "zscript/inventory/cd_start_armor_bonus.zs"
-
-// Randomizer //////////////////////////////////////////////////////////////////
-
-#include "zscript/cd_randomizer.zs"
-
-// Menu ////////////////////////////////////////////////////////////////////////
-
-#include "zscript/menu/cd_hint.zs"
-#include "zscript/menu/cd_min_field.zs"
-
+<<collect-includes()>>
 <<copy-media()>>
+#+end_src
+
+#+name: collect-includes
+#+begin_src elisp :exports none
+(save-match-data
+  (let ((pos 0) (string (buffer-string)) (matches ""))
+    (while (string-match
+            "\.\.\/build\/UltimateCustomDoom\/\\(zscript\/.*zs\\)" string pos)
+      (setq matches (concat matches "\n#include \"" (match-string 1 string) "\""))
+      (setq pos (match-end 0)))
+    matches))
 #+end_src
 
 #+name: copy-media
@@ -3458,9 +3371,11 @@ version 4.5
 ; This script has to be parked somewhere, so put it in zscript.zs.
 #+end_src
 
+* Tests run script
+
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 
 (dt-run-tests "../build/UltimateCustomDoom"
-              "map map01; wait 2; quit")
+              "wait 2; map map01; wait 2; quit")
 #+end_src
