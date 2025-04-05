@@ -34,6 +34,10 @@ Anti-features:
 - Doesn't affect enemies spawned after the map is loaded;
 - Suggested max enemy amount: no, because it would limit enemy numbers disproportionately to the map size.
 
+Known issues:
+- Tags 666 and 667 may be triggered more than once per map;
+- Close-range enemies (like demons) may stand too close to the player to be hit.
+
 Acknowledgments:
 - Original idea: Cutmanmike;
 - Code used as a reference: The Zombie Killer;
