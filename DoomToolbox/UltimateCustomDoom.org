@@ -8,7 +8,6 @@
 
 * To do
 - add licenses.
-- remove math.round.
 - scriptify zscript.txt: collect ":tangle" entries.
 
 #+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
@@ -2377,8 +2376,8 @@ class cd_Monsters play
     int    oldHealth      = thing.health;
     double relativeHealth = double(oldHealth) / oldStartHealth;
 
-    int    newStartHealth = cd_math.round(defStartHealth * multiplier * ldlMultiplier);
-    int    newHealth      = cd_math.round(newStartHealth * relativeHealth);
+    int    newStartHealth = round(defStartHealth * multiplier * ldlMultiplier);
+    int    newHealth      = round(newStartHealth * relativeHealth);
 
     if (cap > 0 && newStartHealth > cap) newStartHealth = cap;
     if (cap > 0 && newHealth      > cap) newHealth      = cap;
@@ -2393,7 +2392,7 @@ class cd_Monsters play
     if (multiplier <= 0) { multiplier = 1; }
 
     double spawnSpeed = getDefault(thing).Speed;
-    int    speed      = cd_math.round(spawnSpeed * multiplier);
+    int    speed      = round(spawnSpeed * multiplier);
 
     thing.Speed = speed;
   }
@@ -3315,17 +3314,6 @@ class cd_Effects
 
 } // class cd_Effects
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_math.zs
-class cd_Math
-{
-
-  static int round(double value)
-  {
-    return int(value + 0.5);
-  }
-
-} // class cd_Math
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_time.zs
 /**
  * This class provides time-related ancillary functions.
@@ -3441,7 +3429,6 @@ version 4.5
 
 // Utilities ///////////////////////////////////////////////////////////////////
 
-#include "zscript/utils/cd_math.zs"
 #include "zscript/utils/cd_time.zs"
 #include "zscript/utils/cd_effects.zs"
 
