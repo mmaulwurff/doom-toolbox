@@ -24,6 +24,10 @@
 
 * To do
 - add licenses.
+- simplify settings:
+  - direct access to server settings,
+  - cvar is serialized now: remove wrappers around transient
+
 
 #+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
 // Entry point /////////////////////////////////////////////////////////////////
@@ -327,37 +331,37 @@ OptionMenu ArmorDegenerationMenu
 OptionMenu cd_Powerup
 {
 
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Powerup Options"                          , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
+  StaticText "========================================" , CDLightBlue
+  StaticText "Powerup Options"                          , CDLightBlue
+  StaticText "========================================" , CDLightBlue
 
-  StaticText  ""
-  Option      "Permanent Invisibility"        , cd_power_invisibility_permanent      , OnOff
-  Option      "Permanent Invulnerability"     , cd_power_invulnerability_permanent   , OnOff
-  Option      "Permanent Iron Feet"           , cd_power_ironFeet_permanent          , OnOff
-  Option      "Permanent Light Amp"           , cd_power_lightAmp_permanent          , OnOff
-  Option      "Permanent Drain"               , cd_power_drain_permanent             , OnOff
-  Option      "Permanent High Jump"           , cd_power_highJump_permanent          , OnOff
-  Option      "Permanent Infinite Ammo"       , cd_power_infiniteAmmo_permanent      , OnOff
-  Option      "Permanent Protection"          , cd_power_protecton_permanent         , OnOff
-  Option      "Permanent Regeneration"        , cd_power_regeneraton_permanent       , OnOff
-  Option      "Permanent Speed"               , cd_power_speed_permanent             , OnOff
-  Option      "Permanent Strength"            , cd_power_strength_permanent          , OnOff
-  Option      "Permanent Time Freeze"         , cd_power_timeFreezer_permanent       , OnOff
-  Option      "Permanent Double Firing Speed" , cd_power_doubleFiringSpeed_permanent , OnOff
-  Option      "Permanent Flight"              , cd_power_flight_permanent            , OnOff
-  Option      "Permanent Frightener"          , cd_power_frightener_permanent        , OnOff
-  Option      "Permanent Scanner"             , cd_power_scanner_permanent           , OnOff
-  Option      "Permanent Damage"              , cd_power_damage_permanent            , OnOff
-  Option      "Permanent Ghost"               , cd_power_ghost_permanent             , OnOff
-  Option      "Permanent Shadow"              , cd_power_shadow_permanent            , OnOff
-  Option      "Permanent Torch"               , cd_power_torch_permanent             , OnOff
-  Option      "Permanent Minotaur"            , cd_power_minotaur_permanent          , OnOff
-  Option      "Permanent Morph"               , cd_power_morph_permanent             , OnOff
-  Option      "Permanent Mask"                , cd_power_mask_permanent              , OnOff
-  Option      "Permanent Weapon Level 2"      , cd_power_weaponLevel2_permanent      , OnOff
-  Option      "Permanent Targeter"            , cd_power_targeter_permanent          , OnOff
-  Option      "Permanent Buddha"              , cd_power_buddha_permanent            , OnOff
+  StaticText ""
+  Option "Permanent Invisibility"        , cd_power_invisibility_permanent      , OnOff
+  Option "Permanent Invulnerability"     , cd_power_invulnerability_permanent   , OnOff
+  Option "Permanent Iron Feet"           , cd_power_ironFeet_permanent          , OnOff
+  Option "Permanent Light Amp"           , cd_power_lightAmp_permanent          , OnOff
+  Option "Permanent Drain"               , cd_power_drain_permanent             , OnOff
+  Option "Permanent High Jump"           , cd_power_highJump_permanent          , OnOff
+  Option "Permanent Infinite Ammo"       , cd_power_infiniteAmmo_permanent      , OnOff
+  Option "Permanent Protection"          , cd_power_protecton_permanent         , OnOff
+  Option "Permanent Regeneration"        , cd_power_regeneraton_permanent       , OnOff
+  Option "Permanent Speed"               , cd_power_speed_permanent             , OnOff
+  Option "Permanent Strength"            , cd_power_strength_permanent          , OnOff
+  Option "Permanent Time Freeze"         , cd_power_timeFreezer_permanent       , OnOff
+  Option "Permanent Double Firing Speed" , cd_power_doubleFiringSpeed_permanent , OnOff
+  Option "Permanent Flight"              , cd_power_flight_permanent            , OnOff
+  Option "Permanent Frightener"          , cd_power_frightener_permanent        , OnOff
+  Option "Permanent Scanner"             , cd_power_scanner_permanent           , OnOff
+  Option "Permanent Damage"              , cd_power_damage_permanent            , OnOff
+  Option "Permanent Ghost"               , cd_power_ghost_permanent             , OnOff
+  Option "Permanent Shadow"              , cd_power_shadow_permanent            , OnOff
+  Option "Permanent Torch"               , cd_power_torch_permanent             , OnOff
+  Option "Permanent Minotaur"            , cd_power_minotaur_permanent          , OnOff
+  Option "Permanent Morph"               , cd_power_morph_permanent             , OnOff
+  Option "Permanent Mask"                , cd_power_mask_permanent              , OnOff
+  Option "Permanent Weapon Level 2"      , cd_power_weaponLevel2_permanent      , OnOff
+  Option "Permanent Targeter"            , cd_power_targeter_permanent          , OnOff
+  Option "Permanent Buddha"              , cd_power_buddha_permanent            , OnOff
 
 } // OptionMenu cd_Powerup
 
@@ -1048,8 +1052,6 @@ class cd_HealthRegenerationSettings
     _cap   .randomize(p, limits.cap   ());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_IntSetting     _amount;
   private cd_IntSetting     _cap;
 
@@ -1081,8 +1083,6 @@ class cd_ArmorRegenerationLimits
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private
   cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
   {
@@ -1097,13 +1097,9 @@ class cd_ArmorRegenerationLimits
 } // class cd_ArmorRegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_double_setting.zs
-/**
- * This class represents a single double setting.
- */
+/// This class represents a single double setting.
 class cd_DoubleSetting : cd_CvarSetting
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   double value() { return variable().GetFloat(); }
 
@@ -1126,10 +1122,7 @@ class cd_DoubleSetting : cd_CvarSetting
     variable().SetFloat(newValue);
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
-  private
-  double randomDouble(double min, double max)
+  private double randomDouble(double min, double max)
   {
     int intMin = int(ceil(min * RANDOM_PRECISION));
     int intMax = int(     max * RANDOM_PRECISION );
@@ -1139,24 +1132,18 @@ class cd_DoubleSetting : cd_CvarSetting
     return r;
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   const RANDOM_PRECISION = 1000.0;
 
 } // class cd_DoubleSetting
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_limits.zs
-/**
- * This class provides value limits for Degeneration Randomization.
- */
+/// This class provides value limits for Degeneration Randomization.
 class cd_DegenerationLimits
 {
 
   cd_MinMaxIntSettings amount() { return _amount; }
   cd_MinMaxIntSettings period() { return _period; }
   cd_MinMaxIntSettings limit () { return _limit ; }
-
-// protected: //////////////////////////////////////////////////////////////////////////////////////
 
   protected
   cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
@@ -1171,9 +1158,7 @@ class cd_DegenerationLimits
 } // class cd_DegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_permanent_powerup_settings.zs
-/**
- * This class provides the permanent powerup settings.
- */
+/// This class provides the permanent powerup settings.
 class cd_PermanentPowerupSettings
 {
 
@@ -1236,8 +1221,6 @@ class cd_PermanentPowerupSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_BoolSetting _buddha;
   private cd_BoolSetting _damage;
   private cd_BoolSetting _doubleFiringSpeed;
@@ -1284,8 +1267,6 @@ class cd_MonsterSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_DoubleSetting _healthMultiplier;
   private cd_DoubleSetting _speedMultiplier;
   private cd_IntSetting    _healthCap;
@@ -1293,13 +1274,9 @@ class cd_MonsterSettings
 } // class cd_MonsterSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_cvar_setting.zs
-/**
- * This class represents a single setting.
- */
+/// This class represents a single setting.
 class cd_CvarSetting : cd_SettingsBase
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   cd_CvarSetting init(string cvarName, PlayerInfo p)
   {
@@ -1307,21 +1284,14 @@ class cd_CvarSetting : cd_SettingsBase
     return self;
   }
 
-// protected: //////////////////////////////////////////////////////////////////////////////////////
-
-  protected
-  Cvar variable() { return _cvar; }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
+  protected Cvar variable() { return _cvar; }
 
   private transient CVar _cvar;
 
 } // class cd_CvarSetting
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_blend_settings.zs
-/**
- * This class provides blend settings.
- */
+/// This class provides blend settings.
 class cd_BlendSettings
 {
 
@@ -1349,8 +1319,6 @@ class cd_BlendSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_BoolSetting   _isEnabled;
 
   private cd_IntSetting    _red;
@@ -1362,13 +1330,9 @@ class cd_BlendSettings
 } // class cd_BlendSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings.zs
-/**
- * This class contains all the settings of Ultimate Custom Doom.
- */
+/// This class contains all the settings of Ultimate Custom Doom.
 class cd_Settings
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   cd_PlayerSettings  player () { return _player ; }
   cd_MiscSettings    misc   () { return _misc   ; }
@@ -1385,9 +1349,7 @@ class cd_Settings
 
   cd_RandomizerSettings         randomizer        () { return _randomizer        ; }
 
-  /**
-   * Initiate cd_Settings instance.
-   */
+  /// Initialize a cd_Settings instance.
   cd_Settings init(PlayerInfo p)
   {
     _player             = new("cd_PlayerSettings" ).init(p);
@@ -1420,8 +1382,6 @@ class cd_Settings
     _armorDegeneration .randomize(p, limits.armorDegeneration ());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_PlayerSettings  _player;
   private cd_MiscSettings    _misc;
   private cd_MonsterSettings _monster;
@@ -1440,9 +1400,7 @@ class cd_Settings
 } // class cd_Settings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_limits.zs
-/**
- * This class provides limits for health regeneration settings.
- */
+/// This class provides limits for health regeneration settings.
 class cd_HealthRegenerationLimits
 {
 
@@ -1459,8 +1417,6 @@ class cd_HealthRegenerationLimits
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
   {
     return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
@@ -1473,13 +1429,9 @@ class cd_HealthRegenerationLimits
 } // class cd_HealthRegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_misc_settings.zs
-/**
- * This class represents miscellaneous settings.
- */
+/// This class represents miscellaneous settings.
 class cd_MiscSettings
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   bool   isEnabled () { return _isEnabled .value(); }
   double airControl() { return _airControl.value(); }
@@ -1496,8 +1448,6 @@ class cd_MiscSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_BoolSetting   _isEnabled;
   private cd_DoubleSetting _airControl;
   private cd_DoubleSetting _friction;
@@ -1506,9 +1456,7 @@ class cd_MiscSettings
 } // class cd_MiscSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_limits.zs
-/**
- * This class provides value limits for Armor Degeneration Randomization.
- */
+/// This class provides value limits for Armor Degeneration Randomization.
 class cd_ArmorDegenerationLimits : cd_DegenerationLimits
 {
 
@@ -1524,9 +1472,7 @@ class cd_ArmorDegenerationLimits : cd_DegenerationLimits
 } // class cd_ArmorDegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_limits.zs
-/**
- * This class provides value limits for Ammo Regeneration Randomization.
- */
+/// This class provides value limits for Ammo Regeneration Randomization.
 class cd_AmmoRegenerationLimits
 {
 
@@ -1541,8 +1487,6 @@ class cd_AmmoRegenerationLimits
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private
   cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
   {
@@ -1555,13 +1499,9 @@ class cd_AmmoRegenerationLimits
 } // class cd_AmmoRegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_int_setting.zs
-/**
- * This class represents a single integer setting.
- */
+/// This class represents a single integer setting.
 class cd_IntSetting : cd_CvarSetting
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   int value() { return variable().GetInt(); }
 
@@ -1587,13 +1527,9 @@ class cd_IntSetting : cd_CvarSetting
 } // class cd_IntSetting
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_bool_setting.zs
-/**
- * This class represents a single boolean setting.
- */
+/// This class represents a single boolean setting.
 class cd_BoolSetting : cd_CvarSetting
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   bool value() { return variable().GetInt(); }
 
@@ -1606,9 +1542,7 @@ class cd_BoolSetting : cd_CvarSetting
 } // class cd_BoolSetting
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_settings.zs
-/**
- * This class contains Player settings of Ultimate Custom Doom.
- */
+/// This class contains Player settings of Ultimate Custom Doom.
 class cd_PlayerSettings
 {
 
@@ -1665,8 +1599,6 @@ class cd_PlayerSettings
     _jumpZMultiplier      .randomize(p, limits.jumpHeightMultiplier ());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_DoubleSetting _damageMultiplier;
   private cd_DoubleSetting _damageTakenMultiplier;
 
@@ -1683,9 +1615,7 @@ class cd_PlayerSettings
 } // class cd_PlayerSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_double_settings.zs
-/**
- * This class provides a pair of minimal and maximal double values.
- */
+/// This class provides a pair of minimal and maximal double values.
 class cd_MinMaxDoubleSettings
 {
 
@@ -1700,17 +1630,13 @@ class cd_MinMaxDoubleSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_DoubleSetting _min;
   private cd_DoubleSetting _max;
 
 } // class cd_MinMaxDoubleSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_settings.zs
-/**
- * What?
- */
+/// What?
 class cd_RandomizerSettings
 {
 
@@ -1740,8 +1666,6 @@ class cd_RandomizerSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_PeriodSettings _period;
 
   private cd_BoolSetting    _isTimerEnabled;
@@ -1752,9 +1676,7 @@ class cd_RandomizerSettings
 } // class cd_RandomizerSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_settings.zs
-/**
- * This class provides the degeneration settings.
- */
+/// This class provides the degeneration settings.
 class cd_DegenerationSettings
 {
 
@@ -1784,8 +1706,6 @@ class cd_DegenerationSettings
     _period.randomize(p, limits.period());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_IntSetting     _amount;
   private cd_IntSetting     _limit;
   private cd_PeriodSettings _period;
@@ -1793,9 +1713,7 @@ class cd_DegenerationSettings
 } // class cd_ArmorDegenerationSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_int_settings.zs
-/**
- * This class provides a pair of minimal and maximal integer values.
- */
+/// This class provides a pair of minimal and maximal integer values.
 class cd_MinMaxIntSettings
 {
 
@@ -1810,17 +1728,13 @@ class cd_MinMaxIntSettings
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_IntSetting _min;
   private cd_IntSetting _max;
 
 } // class cd_MinMaxIntSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_limits.zs
-/**
- * This class provides limits for Player Settings.
- */
+/// This class provides limits for Player Settings.
 class cd_PlayerLimits
 {
 
@@ -1874,8 +1788,6 @@ class cd_PlayerLimits
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private
   cd_MinMaxIntSettings newIntSetting(string minCvar, string maxCvar, PlayerInfo p)
   {
@@ -1887,8 +1799,6 @@ class cd_PlayerLimits
   {
     return new("cd_MinMaxDoubleSettings").init(minCvar, maxCvar, p);
   }
-
-  // private: //////////////////////////////////////////////////////////////////
 
   private cd_MinMaxDoubleSettings _damageMultiplier;
   private cd_MinMaxDoubleSettings _damageTakenMultiplier;
@@ -1902,13 +1812,9 @@ class cd_PlayerLimits
 } // class cd_PlayerLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_settings.zs
-/**
- * This class provides the health degeneration settings.
- */
+/// This class provides the health degeneration settings.
 class cd_HealthDegenerationSettings : cd_DegenerationSettings
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   cd_HealthDegenerationSettings init(PlayerInfo p)
   {
@@ -1925,13 +1831,9 @@ class cd_HealthDegenerationSettings : cd_DegenerationSettings
 } // class cd_HealthDegenerationSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_settings.zs
-/**
- * This class provides the ammo degeneration settings.
- */
+/// This class provides the ammo degeneration settings.
 class cd_ArmorDegenerationSettings : cd_DegenerationSettings
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   cd_ArmorDegenerationSettings init(PlayerInfo p)
   {
@@ -1948,9 +1850,7 @@ class cd_ArmorDegenerationSettings : cd_DegenerationSettings
 } // class cd_ArmorDegenerationSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_settings.zs
-/**
- * This class provides the ammo regeneration settings.
- */
+/// This class provides the ammo regeneration settings.
 class cd_AmmoRegenerationSettings
 {
 
@@ -1984,8 +1884,6 @@ class cd_AmmoRegenerationSettings
     _period.randomize(p, limits.period());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_BoolSetting    _isBackpackRequired;
   private cd_IntSetting     _amount;
   private cd_PeriodSettings _period;
@@ -1994,9 +1892,7 @@ class cd_AmmoRegenerationSettings
 } // class cd_AmmoRegenerationSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_limits.zs
-/**
- * This class provides value limits for Health Degeneration Randomization.
- */
+/// This class provides value limits for Health Degeneration Randomization.
 class cd_HealthDegenerationLimits : cd_DegenerationLimits
 {
 
@@ -2012,9 +1908,7 @@ class cd_HealthDegenerationLimits : cd_DegenerationLimits
 } // class cd_HealthDegenerationLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_regeneration_settings.zs
-/**
- * This class provides the armor regeneration settings.
- */
+/// This class provides the armor regeneration settings.
 class cd_ArmorRegenerationSettings
 {
 
@@ -2062,8 +1956,6 @@ class cd_ArmorRegenerationSettings
     _cap      .randomize(p, limits.cap   ());
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private cd_IntSetting     _amount;
   private cd_IntSetting     _minAmount;
   private cd_IntSetting     _cap;
@@ -2076,9 +1968,7 @@ class cd_ArmorRegenerationSettings
 } // class cd_ArmorRegenerationSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_limits.zs
-/**
- * This class provides value limits for Ultimate Custom Doom Randomization.
- */
+/// This class provides value limits for Ultimate Custom Doom Randomization.
 class cd_RandomizerLimits
 {
 
@@ -2105,8 +1995,6 @@ class cd_RandomizerLimits
     return self;
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_PlayerLimits             _player;
 
   private cd_HealthRegenerationLimits _healthRegeneration;
@@ -2119,9 +2007,7 @@ class cd_RandomizerLimits
 } // class cd_RandomizerLimits
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_period_settings.zs
-/**
- * This class provides settings for periodic events.
- */
+/// This class provides settings for periodic events.
 class cd_PeriodSettings
 {
 
@@ -2143,25 +2029,19 @@ class cd_PeriodSettings
     _period.randomize(p, limits);
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private cd_BoolSetting _isEnabled;
   private cd_IntSetting  _period;
 
 } // class cd_PeriodSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_ultimate_custom_doom.zs
-/**
- * This class provides mod information.
- *
- * @attention this class may be used by other mods to check if Ultimate
- * Custom Doom is loaded. Do not remove this class even if it's not used
- * in this mod.
- */
+/// This class provides mod information.
+///
+/// @attention this class may be used by other mods to check if Ultimate
+/// Custom Doom is loaded. Do not remove this class even if it's not used
+/// in this mod.
 class cd_UltimateCustomDoom
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   static string getTitle()   { return StringTable.Localize("$CD_MAIN_TITLE"); }
   static string getVersion() { return "v0.5.0"; }
@@ -2169,13 +2049,9 @@ class cd_UltimateCustomDoom
 } // class cd_UltimateCustomDoom
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_health.zs
-/**
- * This class provides player health manipulation functions.
- */
+/// This class provides player health manipulation functions.
 class cd_PlayerHealth play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   static
   void regenerate(PlayerInfo player, cd_HealthRegenerationSettings settings)
@@ -2220,8 +2096,6 @@ class cd_PlayerHealth play
     pawn.A_SetHealth(newHealth);
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private static
   bool isRegenerate(int health, int maxHealth, int cap)
   {
@@ -2246,13 +2120,9 @@ class cd_PlayerHealth play
 } // class cd_PlayerHealth
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_misc_properties.zs
-/**
- * This class represents miscellaneous properties.
- */
+/// This class represents miscellaneous properties.
 class cd_MiscProperties play
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   cd_MiscProperties init(cd_MiscSettings settings, PlayerInfo player)
   {
@@ -2267,8 +2137,6 @@ class cd_MiscProperties play
     updateFriction(settings, player);
     updateSelfDamage(settings, player);
   }
-
-  // private: //////////////////////////////////////////////////////////////////
 
   private
   void updateAirControl(cd_MiscSettings settings)
@@ -2316,8 +2184,6 @@ class cd_MiscProperties play
     _originalSelfDamage = pawn.selfDamageFactor;
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private double _originalAirControl;
   private double _originalFriction;
   private double _originalSelfDamage;
@@ -2329,10 +2195,7 @@ class cd_MiscProperties play
 } // class cd_MiscProperties
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_monster_properties.zs
-/**
- * This class provides the monster manipulation functions.
- */
-
+/// This class provides the monster manipulation functions.
 class cd_Monsters play
 {
 
@@ -2356,8 +2219,6 @@ class cd_Monsters play
       applyMonsterMultipliersTo(a, settings);
     }
   }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
 
   private static
   void applyHealthMultiplierTo(Actor thing, double multiplier, int cap)
@@ -2406,13 +2267,9 @@ class cd_Monsters play
 } // class cd_Monsters
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_properties.zs
-/**
- * This class represents player properties.
- */
+/// This class represents player properties.
 class cd_PlayerProperties play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   cd_PlayerProperties init(PlayerInfo player)
   {
@@ -2420,9 +2277,7 @@ class cd_PlayerProperties play
     return self;
   }
 
-  /**
-   * Player properties are set according to Player settings.
-   */
+  /// Player properties are set according to Player settings.
   void update(cd_PlayerSettings settings, PlayerInfo player)
   {
     PlayerPawn           pawn    = player.mo;
@@ -2453,8 +2308,6 @@ class cd_PlayerProperties play
       break;
     }
   }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
 
   private static
   void updateDamageMultiply(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
@@ -2579,13 +2432,9 @@ class cd_PlayerProperties play
 } // class cd_PlayerProperties
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_armor.zs
-/**
- * This class provides player armor manipulation functions
- */
+/// This class provides player armor manipulation functions
 class cd_PlayerArmor play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   static
   void regenerate(PlayerInfo player, cd_ArmorRegenerationSettings settings)
@@ -2634,8 +2483,6 @@ class cd_PlayerArmor play
     pawn.TakeInventory("BasicArmor", settings.amount());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   static private
   bool isRegenerate(int health, int armor, int min, int max)
   {
@@ -2660,13 +2507,9 @@ class cd_PlayerArmor play
 } // class cd_PlayerArmor
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_ammo.zs
-/**
- * This class provides the player ammo manipulation functions.
- */
+/// This class provides the player ammo manipulation functions.
 class cd_PlayerAmmo play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   static
   void regenerate(PlayerInfo player, cd_AmmoRegenerationSettings settings)
@@ -2689,8 +2532,6 @@ class cd_PlayerAmmo play
     cd_Effects.maybeBlend(pawn, settings.blend());
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   private static
   bool isAllowedToRegenerate(PlayerPawn pawn, cd_AmmoRegenerationSettings settings)
   {
@@ -2706,13 +2547,9 @@ class cd_PlayerAmmo play
 } // class cd_PlayerAmmo
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_permanent_powerup_properties.zs
-/**
- * This class provides permanent powerups manipulation functions.
- */
+/// This class provides permanent powerups manipulation functions.
 class cd_PermanentPowerupProperties play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   static
   void adjustTimes(PlayerInfo player, cd_PermanentPowerupSettings settings)
@@ -2749,8 +2586,6 @@ class cd_PermanentPowerupProperties play
 
     if (settings.minotaur()) prolongMinotaur(pawn); else restoreMinotaur(pawn);
   }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
 
   private static
   void prolongEffect(PlayerPawn pawn, string power)
@@ -2798,13 +2633,9 @@ class cd_PermanentPowerupProperties play
 } // class cd_PermanentPowerupProperties
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_event_handler.zs
-/**
- * This class provides the entry point for all Ultimate Custom Doom features.
- */
+/// This class provides the entry point for all Ultimate Custom Doom features.
 class cd_EventHandler : EventHandler
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   override
   void PlayerEntered(PlayerEvent event)
@@ -2855,8 +2686,6 @@ class cd_EventHandler : EventHandler
 
     _randomizer.show(players[consolePlayer], _settings.randomizer());
   }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
 
   private
   void applyMonsterSettings()
@@ -2938,13 +2767,9 @@ class cd_EventHandler : EventHandler
 } // class cd_EventHandler
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_randomizer.zs
-/**
- * What?
- */
+/// What?
 class cd_Randomizer play
 {
-
-// public: /////////////////////////////////////////////////////////////////////////////////////////
 
   cd_Randomizer init()
   {
@@ -2979,8 +2804,6 @@ class cd_Randomizer play
     showNotification(player, settings);
     showTimer(player, settings.period());
   }
-
-// private: ////////////////////////////////////////////////////////////////////////////////////////
 
   private ui
   void showTimer(PlayerInfo player, cd_PeriodSettings settings)
@@ -3125,12 +2948,10 @@ class cd_Randomizer play
 } // class cd_Randomizer
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_start_giver_check.zs
-/**
- * This inventory item is used to determine if the player has started a new
- * game or entered this level from the previous level.
- *
- * The absence of this item means that the player has started a new game.
- */
+/// This inventory item is used to determine if the player has started a new
+/// game or entered this level from the previous level.
+///
+/// The absence of this item means that the player has started a new game.
 class cd_StartGiverCheck : Inventory
 {
 
@@ -3144,9 +2965,7 @@ class cd_StartGiverCheck : Inventory
 } // class cd_StartGiverCheck
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_armor_bonus.zs
-/**
- * This class is the armor giving helper.
- */
+/// This class is the armor giving helper.
 class cd_ArmorBonus : BasicArmorBonus
 {
 
@@ -3170,17 +2989,13 @@ class cd_StartArmorBonus : cd_ArmorBonus
 } // class cd_StartArmorBonus
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_min_field.zs
-/**
- * This menu item provides a text field with a check for lower bound (minimal
- * value).
- *
- * If the entered value is lower than the specified minimal value, it's
- * corrected to the minimal value.
- */
+/// This menu item provides a text field with a check for lower bound (minimal
+/// value).
+///
+/// If the entered value is lower than the specified minimal value, it's
+/// corrected to the minimal value.
 class OptionMenuItemCd_MinField : OptionMenuItemTextField
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   OptionMenuItemCd_MinField Init(String label, Name command, double min)
   {
@@ -3188,8 +3003,6 @@ class OptionMenuItemCd_MinField : OptionMenuItemTextField
     _min = min;
     return self;
   }
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   override
   bool SetString(int i, String s)
@@ -3208,26 +3021,18 @@ class OptionMenuItemCd_MinField : OptionMenuItemTextField
     return Super.SetString(i, correctedString);
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private double _min;
 
 } // class OptionMenuItemCd_MinField : OptionMenuItemTextField
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_hint.zs
-/**
- * This class provides the Hint Option Menu item.
- * Hint is a static text that is visible only if the items above are selected.
- * The number of items above is configurable, and by default is 1.
- */
+/// This class provides the Hint Option Menu item.
+/// Hint is a static text that is visible only if the items above are selected.
+/// The number of items above is configurable, and by default is 1.
 class OptionMenuItemCd_Hint : OptionMenuItemStaticText
 {
 
-  // public: ///////////////////////////////////////////////////////////////////
-
-  /**
-   * nAbove means for how many selectable items above this hint should appear.
-   */
+  /// nAbove means for how many selectable items above this hint should appear.
   OptionMenuItemCd_Hint Init(String label, int nAbove = 1)
   {
     Super.InitDirect(label, Font.CR_WHITE);
@@ -3236,8 +3041,6 @@ class OptionMenuItemCd_Hint : OptionMenuItemStaticText
     return self;
   }
 
-  // public: ///////////////////////////////////////////////////////////////////
-
   override
   int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
   {
@@ -3245,8 +3048,6 @@ class OptionMenuItemCd_Hint : OptionMenuItemStaticText
       ? Super.Draw(desc, y, indent, selected)
       : -1;
   }
-
-  // private: //////////////////////////////////////////////////////////////////
 
   private
   bool isAboveSelected(OptionMenuDescriptor desc)
@@ -3273,20 +3074,14 @@ class OptionMenuItemCd_Hint : OptionMenuItemStaticText
     return isAboveSelected;
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   private int _nAbove;
 
 } // class OptionMenuItemCd_Hint
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_effects.zs
-/**
- * This class provides visual and audio effects.
- */
+/// This class provides visual and audio effects.
 class cd_Effects
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
 
   static play
   void maybeBlend(PlayerPawn pawn, cd_BlendSettings settings)
@@ -3305,27 +3100,19 @@ class cd_Effects
     }
   }
 
-  // private: //////////////////////////////////////////////////////////////////
-
   const BLEND_DURATION = TicRate / 2;
 
 } // class cd_Effects
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_time.zs
-/**
- * This class provides time-related ancillary functions.
- */
+/// This class provides time-related ancillary functions.
 class cd_Time
 {
 
-  // public: ///////////////////////////////////////////////////////////////////
-
-  /**
-   * This function checks if something periodic should happen now.
-   *
-   * @returns a pointer to player pawn if the event should happen,
-   * otherwise null.
-   */
+  /// This function checks if something periodic should happen now.
+  ///
+  /// @returns a pointer to player pawn if the event should happen,
+  /// otherwise null.
   static
   PlayerPawn now(PlayerInfo player, cd_PeriodSettings settings)
   {
