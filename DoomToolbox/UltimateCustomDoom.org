@@ -24,10 +24,6 @@
 
 * To do
 - add licenses.
-- simplify settings:
-  - direct access to server settings,
-  - cvar is serialized now: remove wrappers around transient
-
 
 #+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
 // Entry point /////////////////////////////////////////////////////////////////
@@ -1002,12 +998,6 @@ server int   cd_random_armor_degen_freq_max;
 server int   cd_random_armor_degen_limit_min;
 server int   cd_random_armor_degen_limit_max;
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings_base.zs
-class cd_SettingsBase abstract
-{
-
-} // class cd_SettingsBase
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_settings.zs
 
 /// This class provides the health regeneration settings.
@@ -1162,91 +1152,32 @@ class cd_DegenerationLimits
 class cd_PermanentPowerupSettings
 {
 
-  bool buddha           () { return _buddha           .value(); }
-  bool damage           () { return _damage           .value(); }
-  bool doubleFiringSpeed() { return _doubleFiringSpeed.value(); }
-  bool drain            () { return _drain            .value(); }
-  bool flight           () { return _flight           .value(); }
-  bool frightener       () { return _frightener       .value(); }
-  bool highJump         () { return _highJump         .value(); }
-  bool infiniteAmmo     () { return _infiniteAmmo     .value(); }
-  bool invisibility     () { return _invisibility     .value(); }
-  bool ghost            () { return _ghost            .value(); }
-  bool shadow           () { return _shadow           .value(); }
-  bool invulnerability  () { return _invulnerability  .value(); }
-  bool ironFeet         () { return _ironFeet         .value(); }
-  bool mask             () { return _mask             .value(); }
-  bool lightAmp         () { return _lightAmp         .value(); }
-  bool torch            () { return _torch            .value(); }
-  bool minotaur         () { return _minotaur         .value(); }
-  bool morph            () { return _morph            .value(); }
-  bool protection       () { return _protection       .value(); }
-  bool regeneration     () { return _regeneration     .value(); }
-  bool scanner          () { return _scanner          .value(); }
-  bool speed            () { return _speed            .value(); }
-  bool strength         () { return _strength         .value(); }
-  bool targeter         () { return _targeter         .value(); }
-  bool timeFreezer      () { return _timeFreezer      .value(); }
-  bool weaponLevel2     () { return _weaponLevel2     .value(); }
-
-  cd_PermanentPowerupSettings init(PlayerInfo p)
-  {
-    _buddha            = new("cd_BoolSetting").init("cd_power_buddha_permanent"           , p);
-    _damage            = new("cd_BoolSetting").init("cd_power_damage_permanent"           , p);
-    _doubleFiringSpeed = new("cd_BoolSetting").init("cd_power_doubleFiringSpeed_permanent", p);
-    _drain             = new("cd_BoolSetting").init("cd_power_drain_permanent"            , p);
-    _flight            = new("cd_BoolSetting").init("cd_power_flight_permanent"           , p);
-    _frightener        = new("cd_BoolSetting").init("cd_power_frightener_permanent"       , p);
-    _highJump          = new("cd_BoolSetting").init("cd_power_highJump_permanent"         , p);
-    _infiniteAmmo      = new("cd_BoolSetting").init("cd_power_infiniteAmmo_permanent"     , p);
-    _invisibility      = new("cd_BoolSetting").init("cd_power_invisibility_permanent"     , p);
-    _ghost             = new("cd_BoolSetting").init("cd_power_ghost_permanent"            , p);
-    _shadow            = new("cd_BoolSetting").init("cd_power_shadow_permanent"           , p);
-    _invulnerability   = new("cd_BoolSetting").init("cd_power_invulnerability_permanent"  , p);
-    _ironFeet          = new("cd_BoolSetting").init("cd_power_ironFeet_permanent"         , p);
-    _mask              = new("cd_BoolSetting").init("cd_power_mask_permanent"             , p);
-    _lightAmp          = new("cd_BoolSetting").init("cd_power_lightAmp_permanent"         , p);
-    _torch             = new("cd_BoolSetting").init("cd_power_torch_permanent"            , p);
-    _minotaur          = new("cd_BoolSetting").init("cd_power_minotaur_permanent"         , p);
-    _morph             = new("cd_BoolSetting").init("cd_power_morph_permanent"            , p);
-    _protection        = new("cd_BoolSetting").init("cd_power_protecton_permanent"        , p);
-    _regeneration      = new("cd_BoolSetting").init("cd_power_regeneraton_permanent"      , p);
-    _scanner           = new("cd_BoolSetting").init("cd_power_scanner_permanent"          , p);
-    _speed             = new("cd_BoolSetting").init("cd_power_speed_permanent"            , p);
-    _strength          = new("cd_BoolSetting").init("cd_power_strength_permanent"         , p);
-    _targeter          = new("cd_BoolSetting").init("cd_power_targeter_permanent"         , p);
-    _timeFreezer       = new("cd_BoolSetting").init("cd_power_timeFreezer_permanent"      , p);
-    _weaponLevel2      = new("cd_BoolSetting").init("cd_power_weaponLevel2_permanent"     , p);
-
-    return self;
-  }
-
-  private cd_BoolSetting _buddha;
-  private cd_BoolSetting _damage;
-  private cd_BoolSetting _doubleFiringSpeed;
-  private cd_BoolSetting _drain;
-  private cd_BoolSetting _flight;
-  private cd_BoolSetting _frightener;
-  private cd_BoolSetting _highJump;
-  private cd_BoolSetting _infiniteAmmo;
-  private cd_BoolSetting _invisibility;
-  private cd_BoolSetting _ghost;
-  private cd_BoolSetting _shadow;
-  private cd_BoolSetting _invulnerability;
-  private cd_BoolSetting _ironFeet;
-  private cd_BoolSetting _mask;
-  private cd_BoolSetting _lightAmp;
-  private cd_BoolSetting _torch;
-  private cd_BoolSetting _minotaur;
-  private cd_BoolSetting _morph;
-  private cd_BoolSetting _protection;
-  private cd_BoolSetting _regeneration;
-  private cd_BoolSetting _scanner;
-  private cd_BoolSetting _speed;
-  private cd_BoolSetting _strength;
-  private cd_BoolSetting _targeter;
-  private cd_BoolSetting _timeFreezer;
-  private cd_BoolSetting _weaponLevel2;
+  bool buddha           () { return cd_power_buddha_permanent; }
+  bool damage           () { return cd_power_damage_permanent; }
+  bool doubleFiringSpeed() { return cd_power_doubleFiringSpeed_permanent; }
+  bool drain            () { return cd_power_drain_permanent; }
+  bool flight           () { return cd_power_flight_permanent; }
+  bool frightener       () { return cd_power_frightener_permanent; }
+  bool highJump         () { return cd_power_highJump_permanent; }
+  bool infiniteAmmo     () { return cd_power_infiniteAmmo_permanent; }
+  bool invisibility     () { return cd_power_invisibility_permanent; }
+  bool ghost            () { return cd_power_ghost_permanent; }
+  bool shadow           () { return cd_power_shadow_permanent; }
+  bool invulnerability  () { return cd_power_invulnerability_permanent; }
+  bool ironFeet         () { return cd_power_ironFeet_permanent; }
+  bool mask             () { return cd_power_mask_permanent; }
+  bool lightAmp         () { return cd_power_lightAmp_permanent; }
+  bool torch            () { return cd_power_torch_permanent; }
+  bool minotaur         () { return cd_power_minotaur_permanent; }
+  bool morph            () { return cd_power_morph_permanent; }
+  bool protection       () { return cd_power_protecton_permanent; }
+  bool regeneration     () { return cd_power_regeneraton_permanent; }
+  bool scanner          () { return cd_power_scanner_permanent; }
+  bool speed            () { return cd_power_speed_permanent; }
+  bool strength         () { return cd_power_strength_permanent; }
+  bool targeter         () { return cd_power_targeter_permanent; }
+  bool timeFreezer      () { return cd_power_timeFreezer_permanent; }
+  bool weaponLevel2     () { return cd_power_weaponLevel2_permanent; }
 
 } // class cd_PermanentPowerupSettings
 #+end_src
@@ -1275,7 +1206,7 @@ class cd_MonsterSettings
 #+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_cvar_setting.zs
 /// This class represents a single setting.
-class cd_CvarSetting : cd_SettingsBase
+class cd_CvarSetting
 {
 
   cd_CvarSetting init(string cvarName, PlayerInfo p)
@@ -1286,7 +1217,7 @@ class cd_CvarSetting : cd_SettingsBase
 
   protected Cvar variable() { return _cvar; }
 
-  private transient CVar _cvar;
+  private CVar _cvar;
 
 } // class cd_CvarSetting
 #+end_src
@@ -1363,7 +1294,7 @@ class cd_Settings
     _healthDegeneration = new("cd_HealthDegenerationSettings").init(p);
     _armorDegeneration  = new("cd_ArmorDegenerationSettings" ).init(p);
 
-    _permanentPowerup   = new("cd_PermanentPowerupSettings"  ).init(p);
+    _permanentPowerup   = new("cd_PermanentPowerupSettings"  );
 
     _randomizer         = new("cd_RandomizerSettings"        ).init(p);
 
@@ -1433,14 +1364,13 @@ class cd_HealthRegenerationLimits
 class cd_MiscSettings
 {
 
-  bool   isEnabled () { return _isEnabled .value(); }
+  bool   isEnabled () { return cd_player_misc_enabled; }
   double airControl() { return _airControl.value(); }
   double friction  () { return _friction  .value(); }
   double selfDamage() { return _selfDamage.value(); }
 
   cd_MiscSettings init(PlayerInfo player)
   {
-    _isEnabled  = new("cd_BoolSetting"  ).init("cd_player_misc_enabled"     , player);
     _airControl = new("cd_DoubleSetting").init("cd_player_airControl_mult"  , player);
     _friction   = new("cd_DoubleSetting").init("cd_player_friction_mult"    , player);
     _selfDamage = new("cd_DoubleSetting").init("cd_player_self_damage_mult" , player);
@@ -1448,7 +1378,6 @@ class cd_MiscSettings
     return self;
   }
 
-  private cd_BoolSetting   _isEnabled;
   private cd_DoubleSetting _airControl;
   private cd_DoubleSetting _friction;
   private cd_DoubleSetting _selfDamage;
@@ -1854,27 +1783,26 @@ class cd_ArmorDegenerationSettings : cd_DegenerationSettings
 class cd_AmmoRegenerationSettings
 {
 
-  bool isBackpackRequired() { return _isBackpackRequired.value(); }
-  int  amount()             { return _amount.value();             }
+  bool isBackpackRequired() { return cd_ammo_regen_backpack_req; }
+  int  amount()             { return _amount.value();            }
 
   cd_PeriodSettings period() { return _period; }
   cd_BlendSettings  blend () { return _blend;  }
 
   cd_AmmoRegenerationSettings init(PlayerInfo p)
   {
-    _isBackpackRequired = new("cd_BoolSetting"   ).init("cd_ammo_regen_backpack_req", p);
-    _amount             = new("cd_IntSetting"    ).init("cd_ammo_regen_amount"      , p);
-    _period             = new("cd_PeriodSettings").init( "cd_ammo_regen_enabled"
-                                                       , "cd_ammo_regen_freq"
-                                                       , p
-                                                       );
-    _blend              = new("cd_BlendSettings" ).init( "cd_ammo_regen_pulse"
-                                                       , "cd_ammo_blend_color_r"
-                                                       , "cd_ammo_blend_color_g"
-                                                       , "cd_ammo_blend_color_b"
-                                                       , "cd_ammo_blend_color_int"
-                                                       , p
-                                                       );
+    _amount = new("cd_IntSetting"    ).init("cd_ammo_regen_amount", p);
+    _period = new("cd_PeriodSettings").init( "cd_ammo_regen_enabled"
+                                           , "cd_ammo_regen_freq"
+                                           , p
+                                           );
+    _blend  = new("cd_BlendSettings" ).init( "cd_ammo_regen_pulse"
+                                           , "cd_ammo_blend_color_r"
+                                           , "cd_ammo_blend_color_g"
+                                           , "cd_ammo_blend_color_b"
+                                           , "cd_ammo_blend_color_int"
+                                           , p
+                                           );
     return self;
   }
 
@@ -1884,7 +1812,6 @@ class cd_AmmoRegenerationSettings
     _period.randomize(p, limits.period());
   }
 
-  private cd_BoolSetting    _isBackpackRequired;
   private cd_IntSetting     _amount;
   private cd_PeriodSettings _period;
   private cd_BlendSettings  _blend;
@@ -2640,7 +2567,7 @@ class cd_EventHandler : EventHandler
   override
   void PlayerEntered(PlayerEvent event)
   {
-    initEvent(event);
+    if (event.playerNumber == consolePlayer) init(players[consolePlayer]);
   }
 
   override
@@ -2648,8 +2575,6 @@ class cd_EventHandler : EventHandler
   {
     PlayerInfo player = players[consolePlayer];
     if (player == null) { return; }
-
-    if (isJustLoadedGame()) { init(player); }
 
     updateProperties(player);
 
@@ -2691,17 +2616,6 @@ class cd_EventHandler : EventHandler
   void applyMonsterSettings()
   {
     cd_Monsters.applyMonsterMultipliersToAll(_settings.monster());
-  }
-
-  private
-  void initEvent(PlayerEvent event)
-  {
-    if (event == null) { return; }
-    if (event.playerNumber != consolePlayer) { return; }
-
-    PlayerInfo player = players[consolePlayer];
-
-    init(player);
   }
 
   private
@@ -2748,21 +2662,11 @@ class cd_EventHandler : EventHandler
     cd_Randomizer.randomize(player, _settings, _randomizerLimits);
   }
 
-  private
-  bool isJustLoadedGame()
-  {
-    bool result = !_isNotLoadedGame;
-    _isNotLoadedGame = true;
-    return result;
-  }
-
   private cd_Settings         _settings;
   private cd_PlayerProperties _playerProperties;
   private cd_MiscProperties   _miscProperties;
   private cd_Randomizer       _randomizer;
   private cd_RandomizerLimits _randomizerLimits;
-
-  private transient bool _isNotLoadedGame;
 
 } // class cd_EventHandler
 #+end_src
@@ -3134,7 +3038,7 @@ class cd_Time
 * ~zscript.zs~
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript.zs
-version 4.5
+version 4.14
 
 <<collect-includes()>>
 <<copy-media()>>
