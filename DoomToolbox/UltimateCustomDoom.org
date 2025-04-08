@@ -25,21 +25,26 @@
 * License
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-* To do
+* Preamble
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+[enu default]
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+[ru]
+#+end_src
 
-#+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
-// Entry point /////////////////////////////////////////////////////////////////
+* Options
 
+** Main menu
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 AddOptionMenu OptionsMenu
 {
-  SubMenu     "$CD_MAIN_TITLE", cd_Menu
+  SubMenu "$CD_MAIN_TITLE", cd_Menu
 }
-
-// Menus ///////////////////////////////////////////////////////////////////////
 
 OptionMenu cd_Menu
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Welcome to Ultimate Custom Doom!"         , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -51,7 +56,7 @@ OptionMenu cd_Menu
   SubMenu     "Miscellaneous"             , cd_MiscPlayer
 
   StaticText  ""
-  StaticText  "Regeneration Options"      , White
+  StaticText  "$CD_REGENERATION_TITLE"    , White
   SubMenu     "Health"                    , cd_HealthRegeneration
   SubMenu     "Armor"                     , cd_ArmorRegeneration
   SubMenu     "Ammo"                      , cd_AmmoRegeneration
@@ -71,30 +76,136 @@ OptionMenu cd_Menu
 
   StaticText  ""
   SubMenu     "Commands"                  , cd_Commands
+}
+#+end_src
 
-} // OptionMenu cd_Menu
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_MAIN_TITLE = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
 
-OptionMenu cd_Commands
+CD_REGENERATION_TITLE = "Regeneration Options";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_REGENERATION_TITLE = "Настройки регенерации";
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings.zs
+/// This class contains all the settings of Ultimate Custom Doom.
+class cd_Settings
 {
+  cd_Settings init()
+  {
+    _player             = new("cd_PlayerSettings" ).init();
+    _misc               = new("cd_MiscSettings"   );
+    _monster            = new("cd_MonsterSettings").init();
 
+    _healthRegeneration = new("cd_HealthRegenerationSettings").init();
+    _armorRegeneration  = new("cd_ArmorRegenerationSettings" ).init();
+    _ammoRegeneration   = new("cd_AmmoRegenerationSettings"  ).init();
+
+    _healthDegeneration = new("cd_HealthDegenerationSettings").init();
+    _armorDegeneration  = new("cd_ArmorDegenerationSettings" ).init();
+
+    _permanentPowerup   = new("cd_PermanentPowerupSettings"  );
+
+    _randomizer         = new("cd_RandomizerSettings"        ).init();
+
+    return self;
+  }
+
+  cd_PlayerSettings  player () { return _player ; }
+  cd_MiscSettings    misc   () { return _misc   ; }
+  cd_MonsterSettings monster() { return _monster; }
+
+  cd_HealthRegenerationSettings healthRegeneration() { return _healthRegeneration; }
+  cd_ArmorRegenerationSettings  armorRegeneration () { return _armorRegeneration ; }
+  cd_AmmoRegenerationSettings   ammoRegeneration  () { return _ammoRegeneration  ; }
+
+  cd_HealthDegenerationSettings healthDegeneration() { return _healthDegeneration; }
+  cd_ArmorDegenerationSettings  armorDegeneration () { return _armorDegeneration ; }
+
+  cd_PermanentPowerupSettings   permanentPowerup  () { return _permanentPowerup  ; }
+
+  cd_RandomizerSettings         randomizer        () { return _randomizer        ; }
+
+  void randomize(cd_RandomizerLimits limits)
+  {
+    _player            .randomize(limits.player            ());
+
+    _healthRegeneration.randomize(limits.healthRegeneration());
+    _armorRegeneration .randomize(limits.armorRegeneration ());
+    _ammoRegeneration  .randomize(limits.ammoRegeneration  ());
+
+    _healthDegeneration.randomize(limits.healthDegeneration());
+    _armorDegeneration .randomize(limits.armorDegeneration ());
+  }
+
+  private cd_PlayerSettings  _player;
+  private cd_MiscSettings    _misc;
+  private cd_MonsterSettings _monster;
+
+  private cd_HealthRegenerationSettings _healthRegeneration;
+  private cd_ArmorRegenerationSettings  _armorRegeneration;
+  private cd_AmmoRegenerationSettings   _ammoRegeneration;
+
+  private cd_HealthDegenerationSettings _healthDegeneration;
+  private cd_ArmorDegenerationSettings  _armorDegeneration;
+
+  private cd_PermanentPowerupSettings   _permanentPowerup;
+
+  private cd_RandomizerSettings         _randomizer;
+}
+#+end_src
+
+** Manual
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_Manual
+{
   StaticText  "========================================" , CDLightBlue
-  StaticText  "$CD_COMMANDS_TITLE"                       , CDLightBlue
+  StaticText  "The Manual"                               , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "This is Ultimate Custom Doom reference page."      , CDLightBlue
+  StaticText  "All useful information regarding the mod is here." , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Zero-terminated modifiers."               , CDLightBlue
   StaticText  "========================================" , CDLightBlue
 
-  StaticText  ""
-  SafeCommand "$CD_KILL", kill, "$CD_KILL_CONFIRMATION"
-  cd_Hint     "$CD_KILL_HINT"
+  StaticText  "$CD_MANUAL", White
+}
+#+end_src
 
-  SafeCommand "$CD_RESET_OPTIONS", cd_reset_to_defaults, "$CD_RESET_OPTIONS_CONFIRMATION"
-  cd_Hint     "$CD_RESET_OPTIONS_HINT"
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_MANUAL = "These modifiers have a default value of 0. They will not do\
+anything until you change their values to something positive.\
+\
+Such are the monster modifiers, almost all player modifiers\
+and all randomizer options.\
+\
+These options can be enabled individually by using any\
+number above 0.\
+\
+Switching to 0 from a positive number during gameplay\
+will not revert the changes done.\
+\
+To do that, you must set value to its default (most often 1),\
+exit the menu, wait until the change is in effect, then zero-\
+terminate the modifier,\
+\
+0 means that other mods' effects will not be overridden\
+by Ultimate Custom Doom.";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_MANUAL = "Эти модификаторы имеют значение по умолчанию 0. Они не будут делать\nничего, пока вы не измените значения на что-то положительное.\n\nТак ведут себя модификаторы монстров, почти все модификаторы игрока\nи все модификаторы рандомайзера.\n\nЭти настройки могут быть включены индивидуально с помощью любого\nчисла выше 0.\n\nПереключение на 0 с положительного числа во время игры\nне вернёт сделанные изменения.\n\nДля этого вы должны установить значение по умолчанию (чаще всего 1),\nвыйти из меню, подождать, пока изменения не вступят в силу, затем очистить\nнулевой модификатор установкой 0.\n\n0 означает, что эффекты других модов не будут переопределены\nUltimate Custom Doom.";
+#+end_src
 
-  SafeCommand "$CD_RESET_RANDOMIZER", cd_reset_random_to_defaults, "$CD_RESET_RANDOMIZER_CONFIRMATION"
+** Gameplay
 
-} // OptionMenu cd_Commands
+TODO: rename player options to gameplay options.
+*** Basic
 
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_BasicPlayer
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Basic Player Options"                     , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -109,12 +220,30 @@ OptionMenu cd_BasicPlayer
   Slider      "$CD_PLAYER_MAX_VIEW_PITCH"                  , maxViewPitch, 0, 90, 5
   cd_Hint     "0 is not recommended without autoaim."
   cd_Hint     "90 is the default."
+}
+#+end_src
 
-} // OptionMenu cd_BasicPlayer
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server float cd_player_weapon_damage_mult = 0;
+server float cd_player_damage_taken_mult  = 0;
+#+end_src
 
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Weapon damage multiplier";
+CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Damage taken multiplier";
+CD_PLAYER_MAX_VIEW_PITCH                  = "Max view pitch";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Множитель урона от оружия";
+CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Множитель полученного урона";
+CD_PLAYER_MAX_VIEW_PITCH                  = "Максимальный угол обзора";
+#+end_src
+
+*** Advanced
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_AdvancedPlayer
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Advanced Player Options"                  , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -133,12 +262,58 @@ OptionMenu cd_AdvancedPlayer
 
   cd_MinField "$CD_SPEED_MULTIPLIER_CAPTION"  , cd_player_speed_mult , 0
   cd_MinField "$CD_JUMP_Z_MULTIPLIER_CAPTION" , cd_player_jump_mult  , 0
+}
 
-} // OptionMenu cd_AdvancedPlayer
+OptionValue cd_player_start_type_values
+{
+  0, "$CD_START_TYPE_OPTION_GAME"
+  1, "$CD_START_TYPE_OPTION_LEVEL"
+  2, "$CD_START_TYPE_OPTION_NEVER"
+}
+#+end_src
 
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_player_start_type = 2;
+
+server int   cd_player_start_health      = 0;
+server int   cd_player_start_armor       = 0;
+server int   cd_player_start_savePercent = 33;
+
+server int   cd_player_max_health = 0;
+server float cd_player_speed_mult = 0;
+server float cd_player_jump_mult  = 0;
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_START_HEALTH_CAPTION = "Start health";
+CD_START_ARMOR_CAPTION  = "Start armor";
+
+CD_MAX_HEALTH_CAPTION        = "Max health";
+CD_SPEED_MULTIPLIER_CAPTION  = "Speed multiplier";
+CD_JUMP_Z_MULTIPLIER_CAPTION = "Jump multiplier";
+
+CD_START_TYPE_OPTION_GAME  = "Per game";
+CD_START_TYPE_OPTION_LEVEL = "Per level/respawn";
+CD_START_TYPE_OPTION_NEVER = "Never";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_START_HEALTH_CAPTION = "Начальное здоровье";
+CD_START_ARMOR_CAPTION  = "Начальная броня";
+
+CD_MAX_HEALTH_CAPTION        = "Максимальное здоровье";
+CD_SPEED_MULTIPLIER_CAPTION  = "Множитель скорости";
+CD_JUMP_Z_MULTIPLIER_CAPTION = "Множитель прыжка";
+
+CD_START_TYPE_OPTION_GAME  = "За игру";
+CD_START_TYPE_OPTION_LEVEL = "За уровень/возрождение";
+CD_START_TYPE_OPTION_NEVER = "Никогда";
+#+end_src
+
+*** Miscellaneous
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_MiscPlayer
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "$CD_MISC_TITLE"                           , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -150,12 +325,355 @@ OptionMenu cd_MiscPlayer
   cd_MinField "$CD_AIR_CONTROL_CAPTION" , cd_player_airControl_mult  , 0
   Slider      "$CD_FRICTION_CAPTION"    , cd_player_friction_mult    , 0.95, 1.25, 0.01, 2
   cd_MinField "$CD_SELF_DAMAGE"         , cd_player_self_damage_mult , 0
+}
+#+end_src
 
-} // OptionMenu cd_MiscPlayer
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_player_misc_enabled     = false;
+server float cd_player_airControl_mult  = 1;
+server float cd_player_friction_mult    = 1;
+server float cd_player_self_damage_mult = 1;
+#+end_src
 
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_MISC_TITLE          = "Miscellaneous Player Options";
+CD_MISC_ENABLE_CAPTION = "Toggles the options below on or off.";
+CD_AIR_CONTROL_CAPTION = "Air control multiplier";
+CD_FRICTION_CAPTION    = "Friction multiplier";
+CD_SELF_DAMAGE         = "Self damage multiplier";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_AIR_CONTROL_CAPTION = "Множитель контроля в воздухе";
+CD_FRICTION_CAPTION    = "Коэффициент трения";
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_misc_settings.zs
+/// This class represents miscellaneous player settings.
+class cd_MiscSettings
+{
+  bool   enabled   () { return cd_player_misc_enabled; }
+  double airControl() { return cd_player_airControl_mult; }
+  double friction  () { return cd_player_friction_mult; }
+  double selfDamage() { return cd_player_self_damage_mult; }
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_misc_properties.zs
+/// This class represents miscellaneous properties.
+class cd_MiscProperties play
+{
+  cd_MiscProperties init(cd_MiscSettings settings, PlayerInfo player)
+  {
+    rememberOriginals(player);
+
+    return self;
+  }
+
+  void update(cd_MiscSettings settings, PlayerInfo player)
+  {
+    updateAirControl(settings);
+    updateFriction(settings, player);
+    updateSelfDamage(settings, player);
+  }
+
+  private void updateAirControl(cd_MiscSettings settings)
+  {
+    if (level.airControl != _airControl) // something changed the level air control
+    {
+      _originalAirControl = level.airControl;
+    }
+
+    level.airControl = settings.enabled()
+      ? _originalAirControl * settings.airControl()
+      : _originalAirControl;
+
+    _airControl = level.airControl;
+  }
+
+  private void updateFriction(cd_MiscSettings settings, PlayerInfo player)
+  {
+    PlayerPawn pawn = player.mo;
+
+    pawn.friction = settings.enabled()
+      ? _originalFriction * settings.friction()
+      : _originalFriction;
+  }
+
+  private void updateSelfDamage(cd_MiscSettings settings, PlayerInfo player)
+  {
+    PlayerPawn pawn = player.mo;
+
+    pawn.selfDamageFactor = settings.enabled()
+      ? _originalSelfDamage * settings.selfDamage()
+      : _originalSelfDamage;
+  }
+
+  private void rememberOriginals(PlayerInfo player)
+  {
+    PlayerPawn pawn = player.mo;
+
+    _originalAirControl = level.airControl;
+    _originalFriction   = pawn.friction;
+    _airControl         = _originalAirControl;
+    _originalSelfDamage = pawn.selfDamageFactor;
+  }
+
+  private double _originalAirControl;
+  private double _originalFriction;
+  private double _originalSelfDamage;
+
+  // Level air control can be changed without UCD knowing about it,
+  // so better save the value and check it.
+  private double _airControl;
+}
+#+end_src
+
+*** Implementation
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_settings.zs
+class cd_PlayerSettings : cd_SettingsMaker
+{
+  enum StartTypes
+  {
+    PER_GAME,
+    PER_LEVEL,
+    NEVER,
+  };
+
+  cd_PlayerSettings init()
+  {
+    _damageMultiplier      = doubleFrom("cd_player_weapon_damage_mult");
+    _damageTakenMultiplier = doubleFrom("cd_player_damage_taken_mult");
+
+    _startType             = intFrom("cd_player_start_type");
+    _startHealth           = intFrom("cd_player_start_health");
+    _startArmor            = intFrom("cd_player_start_armor");
+    _startArmorSavePercent = intFrom("cd_player_start_savePercent");
+    _maxHealth             = intFrom("cd_player_max_health");
+
+    _speedMultiplier       = doubleFrom("cd_player_speed_mult");
+    _jumpZMultiplier       = doubleFrom("cd_player_jump_mult");
+
+    return self;
+  }
+
+  double damageMultiplier     () { return _damageMultiplier     .value(); }
+  double damageTakenMultiplier() { return _damageTakenMultiplier.value(); }
+
+  int    startType            () { return _startType            .value(); }
+  int    startHealth          () { return _startHealth          .value(); }
+  int    startArmor           () { return _startArmor           .value(); }
+  int    maxHealth            () { return _maxHealth            .value(); }
+
+  double speedMultiplier      () { return _speedMultiplier      .value(); }
+  double jumpZMultiplier      () { return _jumpZMultiplier      .value(); }
+
+  void randomize(cd_PlayerLimits limits)
+  {
+    _damageMultiplier     .randomize(limits.damageMultiplier     ());
+    _damageTakenMultiplier.randomize(limits.damageTakenMultiplier());
+
+    _startHealth          .randomize(limits.startHealth          ());
+    _startArmor           .randomize(limits.startArmor           ());
+    _startArmorSavePercent.randomize(limits.savePercent          ());
+
+    _maxHealth            .randomize(limits.maxHealth            ());
+
+    _speedMultiplier      .randomize(limits.speedMultiplier      ());
+    _jumpZMultiplier      .randomize(limits.jumpHeightMultiplier ());
+  }
+
+  private cd_DoubleSetting _damageMultiplier;
+  private cd_DoubleSetting _damageTakenMultiplier;
+
+  private cd_IntSetting    _startType;
+  private cd_IntSetting    _startHealth;
+  private cd_IntSetting    _startArmor;
+  private cd_IntSetting    _startArmorSavePercent;
+  private cd_IntSetting    _maxHealth;
+
+  private cd_DoubleSetting _speedMultiplier;
+  private cd_DoubleSetting _jumpZMultiplier;
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_properties.zs
+class cd_PlayerProperties play
+{
+  cd_PlayerProperties init(PlayerInfo player)
+  {
+    _jumpZ = player.mo.jumpZ;
+    return self;
+  }
+
+  /// Player properties are set according to Player settings.
+  void update(cd_PlayerSettings settings, PlayerInfo player)
+  {
+    PlayerPawn pawn = player.mo;
+
+    updateDamageMultiply(settings, pawn);
+    updateDamageFactor  (settings, pawn);
+    updateMaxHealth     (settings, pawn);
+    updateSpeed         (settings, pawn);
+    updateJumpZ         (settings, pawn);
+  }
+
+  static
+  void maybeSetStartingProperties(cd_PlayerSettings settings, PlayerInfo player)
+  {
+    switch (settings.startType())
+    {
+    case cd_PlayerSettings.PER_GAME:
+      if (isNewGame(player)) { setStartingProperties(settings, player); }
+      break;
+
+    case cd_PlayerSettings.PER_LEVEL:
+      setStartingProperties(settings, player);
+      break;
+
+    case cd_PlayerSettings.NEVER:
+      break;
+    }
+  }
+
+  private static
+  void updateDamageMultiply(cd_PlayerSettings settings, PlayerPawn pawn)
+  {
+    double originalDamageMultiplier = pawn.default.DamageMultiply;
+
+    pawn.DamageMultiply = settings.damageMultiplier()
+      ? originalDamageMultiplier * settings.damageMultiplier()
+      : originalDamageMultiplier;
+  }
+
+  private static
+  void updateDamageFactor(cd_PlayerSettings settings, PlayerPawn pawn)
+  {
+    double originalDamageTakenMultiplier = pawn.default.DamageFactor;
+
+    pawn.DamageFactor = settings.damageTakenMultiplier()
+      ? originalDamageTakenMultiplier * settings.damageTakenMultiplier()
+      : originalDamageTakenMultiplier;
+  }
+
+  private static void updateSpeed(cd_PlayerSettings settings, PlayerPawn pawn)
+  {
+    double originalSpeed = pawn.default.Speed;
+
+    pawn.Speed = settings.speedMultiplier()
+      ? originalSpeed * settings.speedMultiplier()
+      : originalSpeed;
+  }
+
+  private void updateJumpZ(cd_PlayerSettings settings, PlayerPawn pawn)
+  {
+    double originalJumpZ = pawn.default.JumpZ;
+
+    if (pawn.JumpZ != _jumpZ) // something changed the jump height
+    {
+      originalJumpZ = pawn.JumpZ;
+    }
+
+    pawn.JumpZ = settings.jumpZMultiplier()
+      ? originalJumpZ * settings.jumpZMultiplier()
+      : originalJumpZ;
+
+    _jumpZ = pawn.JumpZ;
+  }
+
+  private void updateMaxHealth(cd_PlayerSettings settings, PlayerPawn pawn)
+  {
+    int    originalMaxHealth = pawn.default.MaxHealth;
+    double newMaxHealth      = settings.maxHealth();
+
+    if (newMaxHealth == _oldMaxHealth) return;
+
+    double realMaxHealth  = pawn.MaxHealth ? pawn.MaxHealth : 100;
+    double relativeHealth = pawn.health / realMaxHealth;
+
+    pawn.MaxHealth = int(newMaxHealth ? newMaxHealth : originalMaxHealth);
+
+    realMaxHealth = pawn.MaxHealth ? pawn.MaxHealth : 100;
+    pawn.A_SetHealth(int(relativeHealth * realMaxHealth));
+
+    _oldMaxHealth = newMaxHealth;
+
+    let healthFinder = ThinkerIterator.Create("Health", Thinker.STAT_DEFAULT);
+    Health mo;
+    while (mo = Health(healthFinder.Next()))
+    {
+      if (newMaxHealth)
+      {
+        // Zero max amount means no limit, leave it so.
+        if (mo.MaxAmount) { mo.MaxAmount = int(newMaxHealth + OVERHEAL); }
+      }
+      else
+      {
+        // Restore default.
+        mo.MaxAmount = mo.default.MaxAmount;
+      }
+    }
+  }
+
+  private static
+  void setStartingProperties(cd_PlayerSettings settings, PlayerInfo player)
+  {
+    // health
+    if (settings.startHealth())
+    {
+      player.mo.A_SetHealth(settings.startHealth());
+    }
+
+    // armor
+    if (settings.startArmor())
+    {
+      player.mo.SetInventory("BasicArmor", 0);
+
+      int nArmor = settings.startArmor();
+      for (int i = 0; i < nArmor; ++i)
+      {
+        player.mo.GiveInventoryType("cd_StartArmorBonus");
+      }
+    }
+  }
+
+  private static bool isNewGame(PlayerInfo player)
+  {
+    bool isNewGame = (player.mo.FindInventory("cd_StartGiverCheck") == NULL);
+    return isNewGame;
+  }
+
+  private double _oldMaxHealth;
+
+  // Level air control can be changed without UCD knowing about it,
+  // so better save the value and check it.
+  private double _jumpZ;
+
+  const OVERHEAL = 100;
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_start_giver_check.zs
+/// This inventory item is used to determine if the player has started a new
+/// game or entered this level from the previous level.
+///
+/// The absence of this item means that the player has started a new game.
+class cd_StartGiverCheck : Inventory
+{
+  Default
+  {
+    Inventory.MaxAmount 1;
+
+    +Inventory.UNDROPPABLE;
+  }
+}
+#+end_src
+
+** Monster
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_Monster
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "$CD_MONSTER_OPTIONS_TITLE"                , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -171,12 +689,121 @@ OptionMenu cd_Monster
 
   StaticText  ""
   Command     "$CD_APPLY_MONSTER_CAPTION", cd_apply_monster_settings
+}
+#+end_src
 
-} // OptionMenu cd_Monster
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server float cd_monster_health_mult = 0;
+server float cd_monster_speed_mult  = 0;
+server int   cd_monster_health_cap  = 0;
+#+end_src
 
+#+begin_src prog :tangle ../build/UltimateCustomDoom/keyconf.txt
+Alias cd_apply_monster_settings "netevent cd_apply_monster_settings"
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_MONSTER_OPTIONS_TITLE = "Monster Options";
+CD_MONSTER_NOTE1         = "All modifiers are zero-terminated.";
+CD_MONSTER_NOTE2         = "They are applied once per level or";
+CD_MONSTER_NOTE3         = "manually by the command below.";
+
+CD_MONSTER_HEALTH        = "Health multiplier";
+CD_MONSTER_SPEED         = "Speed multiplier";
+CD_MONSTER_HEALTH_CAP    = "Health cap";
+CD_APPLY_MONSTER_CAPTION = "Apply Monster Options now";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_MONSTER_OPTIONS_TITLE = "Настройки монстров";
+
+CD_MONSTER_HEALTH        = "Множитель здоровья";
+CD_MONSTER_SPEED         = "Множитель скорости";
+CD_APPLY_MONSTER_CAPTION = "Применить настройки сейчас";
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_monster_settings.zs
+class cd_MonsterSettings : cd_SettingsMaker
+{
+  cd_MonsterSettings init()
+  {
+    _healthMultiplier = doubleFrom("cd_monster_health_mult");
+    _speedMultiplier  = doubleFrom("cd_monster_speed_mult");
+    _healthCap        = intFrom   ("cd_monster_health_cap");
+    return self;
+  }
+
+  double healthMultiplier() { return _healthMultiplier.value(); }
+  double speedMultiplier () { return _speedMultiplier .value(); }
+  int    healthCap       () { return _healthCap       .value(); }
+
+  private cd_DoubleSetting _healthMultiplier;
+  private cd_DoubleSetting _speedMultiplier;
+  private cd_IntSetting    _healthCap;
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_monster_properties.zs
+/// This class provides the monster manipulation functions.
+class cd_Monsters play
+{
+  static void applyMonsterMultipliersTo(Actor thing, cd_MonsterSettings settings)
+  {
+    applyHealthMultiplierTo(thing, settings.healthMultiplier(), settings.healthCap());
+    applySpeedMultiplierTo (thing, settings.speedMultiplier ());
+  }
+
+  static void applyMonsterMultipliersToAll(cd_MonsterSettings settings)
+  {
+    let   iterator = ThinkerIterator.Create();
+    Actor a;
+
+    while (a = Actor(iterator.Next()))
+    {
+      if (a.bIsMonster) applyMonsterMultipliersTo(a, settings);
+    }
+  }
+
+  private static void applyHealthMultiplierTo(Actor thing, double multiplier, int cap)
+  {
+    if (multiplier <= 0) { multiplier = 1; }
+
+    // LegenDoom Lite
+    string ldlToken       = "LDLegendaryMonsterToken";
+    int    ldlMultiplier  = (thing.CountInv(ldlToken) > 0) ? 3 : 1;
+
+    int    defStartHealth = thing.default.SpawnHealth();
+    int    oldStartHealth = thing.SpawnHealth();
+    int    oldHealth      = thing.health;
+    double relativeHealth = double(oldHealth) / oldStartHealth;
+
+    int    newStartHealth = round(defStartHealth * multiplier * ldlMultiplier);
+    int    newHealth      = round(newStartHealth * relativeHealth);
+
+    if (cap > 0 && newStartHealth > cap) newStartHealth = cap;
+    if (cap > 0 && newHealth      > cap) newHealth      = cap;
+
+    thing.StartHealth = newStartHealth;
+    thing.A_SetHealth(newHealth);
+  }
+
+  private static void applySpeedMultiplierTo(Actor thing, double multiplier)
+  {
+    if (multiplier <= 0) { multiplier = 1; }
+
+    double spawnSpeed = thing.default.Speed;
+    int    speed      = round(spawnSpeed * multiplier);
+
+    thing.Speed = speed;
+  }
+}
+#+end_src
+
+** Health
+*** Regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_HealthRegeneration
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Health Regeneration Options"              , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -206,12 +833,184 @@ OptionMenu cd_HealthRegeneration
   Slider      "$PLYRMNU_BLUE"  , cd_health_blend_color_b,   0, 255, 15, 0
   Slider      "Intensity"      , cd_health_blend_color_int, 0, 1, 0.05, 2
   cd_Hint     "Changes blend color and intensity.", 4
+}
+#+end_src
 
-} // OptionMenu cd_HealthRegeneration
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_health_regen_enabled = false;
+server int   cd_health_regen_amount  = 5;
+server int   cd_health_regen_freq    = 5;
+server int   cd_health_regen_cap     = 100;
 
+user   bool  cd_health_sound_enabled   = false;
+user   bool  cd_health_regen_pulse     = false;
+user   int   cd_health_blend_color_r   = 255;  // Red
+user   int   cd_health_blend_color_g   =   0;  // Green
+user   int   cd_health_blend_color_b   =   0;  // Blue
+user   float cd_health_blend_color_int = 0.25; // Intensity
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_settings.zs
+/// This class provides the health regeneration settings.
+class cd_HealthRegenerationSettings : cd_SettingsMaker
+{
+  cd_HealthRegenerationSettings init()
+  {
+    _amount       = intFrom   ("cd_health_regen_amount");
+    _cap          = intFrom   ("cd_health_regen_cap");
+    _soundEnabled = boolFrom  ("cd_health_sound_enabled");
+    _period       = periodFrom("cd_health_regen_enabled", "cd_health_regen_freq");
+    _blend        = blendFrom ("cd_health_regen_pulse",
+                               "cd_health_blend_color_r",
+                               "cd_health_blend_color_g",
+                               "cd_health_blend_color_b",
+                               "cd_health_blend_color_int");
+    return self;
+  }
+
+  int              amount()       { return _amount      .value(); }
+  int              cap()          { return _cap         .value(); }
+  bool             soundEnabled() { return _soundEnabled.value(); }
+  cd_PeriodSetting period()       { return _period; }
+  cd_BlendSetting  blend ()       { return _blend;  }
+
+  void randomize(cd_HealthRegenerationLimits limits)
+  {
+    _amount.randomize(limits.amount());
+    _period.randomize(limits.period());
+    _cap   .randomize(limits.cap   ());
+  }
+
+  private cd_IntSetting    _amount;
+  private cd_IntSetting    _cap;
+  private cd_BoolSetting   _soundEnabled;
+  private cd_PeriodSetting _period;
+  private cd_BlendSetting  _blend;
+}
+#+end_src
+
+*** Degeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu HealthDegenerationMenu
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Health Degeneration Options"              , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  Option      "$CD_ENABLE"         , cd_health_degen_enabled, OnOff
+
+  StaticText  ""
+  cd_MinField "$CD_AMOUNT_CAPTION" , cd_health_degen_amount, 0
+  cd_Hint     "Health degeneration amount."
+
+  cd_MinField "$CD_PERIOD_CAPTION" , cd_health_degen_freq, 0
+  cd_Hint     "Health degeneration period in seconds."
+
+  cd_MinField "$CD_LIMIT_CAPTION"  , cd_health_degen_limit, 0
+  cd_Hint     "Health will not degenerate further if it is"
+  cd_Hint     "below this number. Caps at 1."
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_health_degen_enabled = false;
+server int   cd_health_degen_amount  = 1;
+server int   cd_health_degen_freq    = 1;
+server int   cd_health_degen_limit   = 25;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_settings.zs
+/// This class provides the health degeneration settings.
+class cd_HealthDegenerationSettings : cd_DegenerationSettings
+{
+  cd_HealthDegenerationSettings init()
+  {
+    super.init("cd_health_degen_enabled",
+               "cd_health_degen_freq",
+               "cd_health_degen_amount",
+               "cd_health_degen_limit");
+
+    return self;
+  }
+}
+#+end_src
+
+*** Implementation
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_health.zs
+/// This class provides player health manipulation functions.
+class cd_PlayerHealth play
+{
+  static void regenerate(PlayerInfo player, cd_HealthRegenerationSettings settings)
+  {
+    if (!cd_Time.isEventNow(settings.period())) return;
+
+    PlayerPawn pawn = player.mo;
+    if (pawn == null || pawn.Health <= 0) return;
+
+    int health    = pawn.Health;
+    int maxHealth = pawn.MaxHealth ? pawn.MaxHealth : 100;
+    int cap       = settings.cap();
+    if (cap == 0) { cap = maxHealth; }
+
+    bool isRegenerate = isRegenerate(health, maxHealth, cap);
+
+    if (!isRegenerate) { return; }
+
+    int maxRegenAmount  = settings.amount();
+    int realCap         = min(maxHealth, cap);
+    int realRegenAmount = min(realCap - health, maxRegenAmount);
+
+    if (realRegenAmount <= 0) { return; }
+
+    pawn.A_SetHealth(health + realRegenAmount);
+
+    cd_Effects.maybeSound(pawn, settings.soundEnabled(), REGEN_SOUND);
+    cd_Effects.maybeBlend(pawn, settings.blend());
+  }
+
+  static void degenerate(PlayerInfo player, cd_HealthDegenerationSettings settings)
+  {
+    if (!cd_Time.isEventNow(settings.period())) return;
+
+    PlayerPawn pawn = player.mo;
+    if (pawn == null || pawn.Health <= 0) { return; }
+
+    int oldHealth = pawn.health;
+    int newHealth = max(settings.limit(), oldHealth - settings.amount());
+
+    if (newHealth == oldHealth) { return; }
+
+    pawn.A_SetHealth(newHealth);
+  }
+
+  private static bool isRegenerate(int health, int maxHealth, int cap)
+  {
+    bool isAlive         = (health > 0);
+    bool isHealthNotMax  = (health < maxHealth);
+    bool isCapNotReached = (health < cap);
+    bool isRegenerate    = (isAlive && isHealthNotMax && isCapNotReached);
+
+    return isRegenerate;
+  }
+
+  const REGEN_SOUND = "Regeneration/Heartbeat";
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/UltimateCustomDoom/sndinfo.txt
+Regeneration/Heartbeat "sounds/cd_heartbeat.ogg"
+#+end_src
+
+
+** Armor
+*** Regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_ArmorRegeneration
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Armor Regeneration Options"               , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -245,12 +1044,208 @@ OptionMenu cd_ArmorRegeneration
   Slider      "$PLYRMNU_BLUE"  , cd_armor_blend_color_b,   0, 255, 15, 0
   Slider      "Intensity"      , cd_armor_blend_color_int, 0, 1, 0.05, 2
   cd_Hint     "Changes blend color and intensity.", 4
+}
+#+end_src
 
-} // OptionMenu cd_ArmorRegeneration
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_armor_regen_enabled = false;
+server int   cd_armor_regen_amount  = 5;
+server int   cd_armor_regen_freq    = 5;
+server int   cd_armor_regen_min     = 25;
+server int   cd_armor_regen_cap     = 100;
 
+user   bool  cd_armor_sound_enabled   = false;
+user   bool  cd_armor_regen_pulse     = false;
+user   int   cd_armor_blend_color_r   =   0;  // Red
+user   int   cd_armor_blend_color_g   =   0;  // Green
+user   int   cd_armor_blend_color_b   = 255;  // Blue
+user   float cd_armor_blend_color_int = 0.25; // Intensity
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_regeneration_settings.zs
+class cd_ArmorRegenerationSettings : cd_SettingsMaker
+{
+  cd_ArmorRegenerationSettings init()
+  {
+    _amount       = intFrom   ("cd_armor_regen_amount");
+    _minAmount    = intFrom   ("cd_armor_regen_min");
+    _cap          = intFrom   ("cd_armor_regen_cap");
+    _soundEnabled = boolFrom  ("cd_armor_sound_enabled");
+    _period       = periodFrom("cd_armor_regen_enabled", "cd_armor_regen_freq");
+    _blend        = blendFrom ("cd_armor_regen_pulse",
+                               "cd_armor_blend_color_r",
+                               "cd_armor_blend_color_g",
+                               "cd_armor_blend_color_b",
+                               "cd_armor_blend_color_int");
+    return self;
+  }
+
+  int              amount()       { return _amount.value();         }
+  int              minAmount()    { return _minAmount.value();      }
+  int              cap()          { return _cap.value();            }
+  bool             soundEnabled() { return _soundEnabled.value();   }
+  cd_PeriodSetting period()       { return _period; }
+  cd_BlendSetting  blend ()       { return _blend;  }
+
+  void randomize(cd_ArmorRegenerationLimits limits)
+  {
+    _amount   .randomize(limits.amount());
+    _period   .randomize(limits.period());
+    _minAmount.randomize(limits.min   ());
+    _cap      .randomize(limits.cap   ());
+  }
+
+  private cd_IntSetting    _amount;
+  private cd_IntSetting    _minAmount;
+  private cd_IntSetting    _cap;
+  private cd_BoolSetting   _soundEnabled;
+  private cd_PeriodSetting _period;
+  private cd_BlendSetting  _blend;
+}
+#+end_src
+
+*** Degeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu ArmorDegenerationMenu
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Armor Degeneration Options"               , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  Option      "$CD_ENABLE"         , cd_armor_degen_enabled, OnOff
+
+  StaticText  ""
+  cd_MinField "$CD_AMOUNT_CAPTION" , cd_armor_degen_amount, 0
+  cd_Hint     "Armor degeneration amount."
+
+  cd_MinField "$CD_PERIOD_CAPTION" , cd_armor_degen_freq, 0
+  cd_Hint     "Armor degeneration period in seconds."
+
+  cd_MinField "$CD_LIMIT_CAPTION"  , cd_armor_degen_limit, 0
+  cd_Hint     "Armor will not degenerate further if it is"
+  cd_Hint     "below this number."
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_armor_degen_enabled = false;
+server int   cd_armor_degen_amount  = 1;
+server int   cd_armor_degen_freq    = 1;
+server int   cd_armor_degen_limit   = 0;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_settings.zs
+class cd_ArmorDegenerationSettings : cd_DegenerationSettings
+{
+  cd_ArmorDegenerationSettings init()
+  {
+    super.init("cd_armor_degen_enabled",
+               "cd_armor_degen_freq",
+               "cd_armor_degen_amount",
+               "cd_armor_degen_limit");
+    return self;
+  }
+}
+#+end_src
+
+*** Implementation
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_armor.zs
+/// This class provides player armor manipulation functions
+class cd_PlayerArmor play
+{
+  static void regenerate(PlayerInfo player, cd_ArmorRegenerationSettings settings)
+  {
+    if (!cd_Time.isEventNow(settings.period())) return;
+
+    PlayerPawn pawn = player.mo;
+    if (pawn == null) { return; }
+
+    int health = pawn.Health;
+    int armor  = pawn.CountInv("BasicArmor");
+    int min    = settings.minAmount();
+    int max    = settings.cap();
+
+    bool isRegenerate = isRegenerate(health, armor, min, max);
+
+    if (!isRegenerate) { return; }
+
+    int maxRegenAmount = settings.amount();
+    int regenAmount    = max
+                       ? min(max - armor, maxRegenAmount)
+                       : maxRegenAmount
+                       ;
+
+    if (regenAmount <= 0) { return; }
+
+    pawn.GiveInventory("cd_ArmorBonus", regenAmount);
+
+    cd_Effects.maybeSound(pawn, settings.soundEnabled(), ARMOR_REGEN_SOUND);
+    cd_Effects.maybeBlend(pawn, settings.blend());
+  }
+
+  static void degenerate(PlayerInfo player, cd_ArmorDegenerationSettings settings)
+  {
+    if (!cd_Time.isEventNow(settings.period())) return;
+
+    PlayerPawn pawn = player.mo;
+    if (pawn == null) { return; }
+
+    int health = pawn.health;
+    int armor  = pawn.CountInv("BasicArmor");
+
+    bool shouldDegenerate = (health > 0) && (armor > settings.limit());
+
+    if (!shouldDegenerate) { return; }
+
+    pawn.TakeInventory("BasicArmor", settings.amount());
+  }
+
+  static private bool isRegenerate(int health, int armor, int min, int max)
+  {
+    bool isAlive      = (health >    0);
+    bool isEnough     = (armor  >= min);
+    bool isNotTooMuch = (armor  <  max || max == 0);
+    bool isRegenerate = isAlive && isEnough && isNotTooMuch;
+
+    return isRegenerate;
+  }
+
+  const ARMOR_REGEN_SOUND = "Regeneration/Armor";
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/UltimateCustomDoom/sndinfo.txt
+Regeneration/Armor "sounds/cd_armor_regen.ogg"
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_armor.zs
+/// This class is the armor giving helper.
+class cd_ArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    Armor.SaveAmount    1;
+    Armor.MaxSaveAmount 0x7FFFFFFF;
+  }
+}
+
+class cd_StartArmorBonus : cd_ArmorBonus
+{
+  override void BeginPlay()
+  {
+    SavePercent = cd_player_start_savePercent;
+  }
+}
+#+end_src
+
+** Ammo regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_AmmoRegeneration
 {
-
   StaticText  "========================================" , CDLightBlue
   StaticText  "Ammo Regeneration Options"                , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -277,58 +1272,99 @@ OptionMenu cd_AmmoRegeneration
   Slider      "$PLYRMNU_BLUE"  , cd_ammo_blend_color_b,   0, 255, 15, 0
   Slider      "Intensity"      , cd_ammo_blend_color_int, 0, 1, 0.05, 2
   cd_Hint     "Changes blend color and intensity.", 4
+}
+#+end_src
 
-} // OptionMenu RegenerationMenu
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_ammo_regen_enabled      = false;
+server bool  cd_ammo_regen_backpack_req = true;
+server int   cd_ammo_regen_amount       = 1;
+server int   cd_ammo_regen_freq         = 30;
 
-OptionMenu HealthDegenerationMenu
+user   bool  cd_ammo_regen_pulse     = false;
+user   int   cd_ammo_blend_color_r   =   0;  // Red
+user   int   cd_ammo_blend_color_g   = 255;  // Green
+user   int   cd_ammo_blend_color_b   =   0;  // Blue
+user   float cd_ammo_blend_color_int = 0.25; // Intensity
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_settings.zs
+class cd_AmmoRegenerationSettings : cd_SettingsMaker
 {
+  cd_AmmoRegenerationSettings init()
+  {
+    _amount = intFrom   ("cd_ammo_regen_amount");
+    _period = periodFrom("cd_ammo_regen_enabled", "cd_ammo_regen_freq");
+    _blend  = blendFrom ("cd_ammo_regen_pulse",
+                         "cd_ammo_blend_color_r",
+                         "cd_ammo_blend_color_g",
+                         "cd_ammo_blend_color_b",
+                         "cd_ammo_blend_color_int");
+    return self;
+  }
 
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Health Degeneration Options"              , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
+  bool             backpackRequired() { return cd_ammo_regen_backpack_req; }
+  int              amount()           { return _amount.value();            }
+  cd_PeriodSetting period()           { return _period; }
+  cd_BlendSetting  blend ()           { return _blend;  }
 
-  StaticText  ""
-  Option      "$CD_ENABLE"         , cd_health_degen_enabled, OnOff
+  void randomize(cd_AmmoRegenerationLimits limits)
+  {
+    _amount.randomize(limits.amount());
+    _period.randomize(limits.period());
+  }
 
-  StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION" , cd_health_degen_amount, 0
-  cd_Hint     "Health degeneration amount."
+  private cd_IntSetting     _amount;
+  private cd_PeriodSetting _period;
+  private cd_BlendSetting  _blend;
+}
+#+end_src
 
-  cd_MinField "$CD_PERIOD_CAPTION" , cd_health_degen_freq, 0
-  cd_Hint     "Health degeneration period in seconds."
-
-  cd_MinField "$CD_LIMIT_CAPTION"  , cd_health_degen_limit, 0
-  cd_Hint     "Health will not degenerate further if it is"
-  cd_Hint     "below this number. Caps at 1."
-
-} // OptionMenu HealthDegenerationMenu
-
-OptionMenu ArmorDegenerationMenu
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_ammo.zs
+/// This class provides the player ammo manipulation functions.
+class cd_PlayerAmmo play
 {
+  static
+  void regenerate(PlayerInfo player, cd_AmmoRegenerationSettings settings)
+  {
+    if (!cd_Time.isEventNow(settings.period())) return;
 
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Armor Degeneration Options"               , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
+    PlayerPawn pawn = player.mo;
+    if (pawn == null) { return; }
 
-  StaticText  ""
-  Option      "$CD_ENABLE"         , cd_armor_degen_enabled, OnOff
+    if (!isAllowedToRegenerate(pawn, settings)) { return; }
 
-  StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION" , cd_armor_degen_amount, 0
-  cd_Hint     "Armor degeneration amount."
+    int amount = settings.amount();
 
-  cd_MinField "$CD_PERIOD_CAPTION" , cd_armor_degen_freq, 0
-  cd_Hint     "Armor degeneration period in seconds."
+    for (int i = 0; i < amount; ++i)
+    {
+      let aBackpack = Inventory(Actor.spawn("Backpack", replace: ALLOW_REPLACE));
+      aBackpack.clearCounters();
+      if (!aBackpack.CallTryPickup(pawn)) aBackpack.destroy();
+    }
 
-  cd_MinField "$CD_LIMIT_CAPTION"  , cd_armor_degen_limit, 0
-  cd_Hint     "Armor will not degenerate further if it is"
-  cd_Hint     "below this number."
+    cd_Effects.maybeBlend(pawn, settings.blend());
+  }
 
-} // OptionMenu DegenerationMenu
+  private static
+  bool isAllowedToRegenerate(PlayerPawn pawn, cd_AmmoRegenerationSettings settings)
+  {
+    bool backpackRequired = settings.backpackRequired();
+    bool isBackpackOwned  = pawn.countInv("Backpack");
+    bool isBagOwned       = pawn.countInv("BagOfHolding");
+    bool isSatchelOwned   = pawn.countInv("AmmoSatchel");
+    bool isAllowed = !backpackRequired || isBackpackOwned || isBagOwned || isSatchelOwned;
 
+    return isAllowed;
+  }
+}
+#+end_src
+
+** Powerup
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_Powerup
 {
-
   StaticText "========================================" , CDLightBlue
   StaticText "Powerup Options"                          , CDLightBlue
   StaticText "========================================" , CDLightBlue
@@ -360,800 +1396,42 @@ OptionMenu cd_Powerup
   Option "Permanent Weapon Level 2"      , cd_power_weaponLevel2_permanent      , OnOff
   Option "Permanent Targeter"            , cd_power_targeter_permanent          , OnOff
   Option "Permanent Buddha"              , cd_power_buddha_permanent            , OnOff
-
-} // OptionMenu cd_Powerup
-
-OptionMenu cd_Randomizer
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Options"                       , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "The Randomizer works by shifting the options between"  , CDLightBlue
-  StaticText  "the corresponding min and max values every n seconds." , CDLightBlue
-  StaticText  "========================================"              , CDLightBlue
-
-  StaticText  ""
-  Option      "Enable Randomizer"    , cd_random_enabled, OnOff
-
-  StaticText  ""
-  cd_MinField "Period"               , cd_random_frequency, 0
-  cd_Hint     "How often the randomizer will shift the values in seconds."
-
-  Option      "Show Timer"           , cd_random_timer_enabled, OnOff
-  Option      "Notification Type"    , cd_random_notification_type, "NotificationType"
-  Option      "Notification Sound"   , cd_random_notification_sound_enabled, OnOff
-  Slider      "Notification Volume"  , cd_random_notification_volume, 0.0, 1.0, 0.05, 2
-
-  StaticText  ""
-  StaticText  "Player Options"       , White
-  SubMenu     "Basic"                , cd_RandomizerBasicPlayer
-  SubMenu     "Advanced"             , cd_RandomizerAdvancedPlayer
-
-  StaticText  ""
-  StaticText  "Regeneration Options" , White
-  SubMenu     "Health"               , cd_RandomizerHealthRegeneration
-  SubMenu     "Armor"                , cd_RandomizerArmorRegeneration
-  SubMenu     "Ammo"                 , cd_RandomizerAmmoRegeneration
-
-  StaticText  ""
-  StaticText  "Degeneration Options" , White
-  SubMenu     "Health"               , cd_RandomizerHealthDegeneration
-  SubMenu     "Armor"                , cd_RandomizerArmorDegeneration
-
-} // OptionMenu cd_Randomizer
-
-OptionMenu cd_RandomizerBasicPlayer
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Basic Player Options"          , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Weapon Damage Min" , cd_random_player_weapon_damage_mult_min, 0
-  cd_MinField "Weapon Damage Max" , cd_random_player_weapon_damage_mult_max, 0
-  StaticText  ""
-  cd_MinField "Damage Taken Min"  , cd_random_player_damage_taken_mult_min, 0
-  cd_MinField "Damage Taken Max"  , cd_random_player_damage_taken_mult_max, 0
-
-} // OptionMenu cd_RandomizerBasicPlayer
-
-OptionMenu cd_RandomizerAdvancedPlayer
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Advanced Player Options"       , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Starting Health Min"  , cd_random_player_start_health_min, 0
-  cd_MinField "Starting Health Max"  , cd_random_player_start_health_max, 0
-  StaticText  ""
-  cd_MinField "Max Health Min"       , cd_random_player_max_health_min, 0
-  cd_MinField "Max Health Max"       , cd_random_player_max_health_max, 0
-  StaticText  ""
-  cd_MinField "Speed Multiplier Min" , cd_random_player_speed_mult_min, 0
-  cd_MinField "Speed Multiplier Max" , cd_random_player_speed_mult_max, 0
-  StaticText  ""
-  cd_MinField "Jump Multiplier Min"  , cd_random_player_jump_mult_min, 0
-  cd_MinField "Jump Multiplier Max"  , cd_random_player_jump_mult_max, 0
-
-} // OptionMenu cd_RandomizerAdvancedPlayer
-
-OptionMenu cd_RandomizerHealthRegeneration
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Health Regeneration Options"   , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Health Amount Min"     , cd_random_health_regen_amount_min, 0
-  cd_MinField "Health Amount Max"     , cd_random_health_regen_amount_max, 0
-
-  StaticText  ""
-  cd_MinField "Health Period Min"     , cd_random_health_regen_freq_min, 0
-  cd_MinField "Health Period Max"     , cd_random_health_regen_freq_max, 0
-
-  StaticText  ""
-  cd_MinField "Health Cap Amount Min" , cd_random_health_regen_cap_min, 0
-  cd_MinField "Health Cap Amount Max" , cd_random_health_regen_cap_max, 0
-
-} // OptionMenu cd_RandomizerHealthRegeneration
-
-OptionMenu cd_RandomizerArmorRegeneration
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Armor Regeneration Options"    , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Armor Amount Min"     , cd_random_armor_regen_amount_min, 0
-  cd_MinField "Armor Amount Max"     , cd_random_armor_regen_amount_max, 0
-
-  StaticText  ""
-  cd_MinField "Armor Period Min"     , cd_random_armor_regen_freq_min, 0
-  cd_MinField "Armor Period Max"     , cd_random_armor_regen_freq_max, 0
-
-  StaticText  ""
-  cd_MinField "Armor Min Amount Min" , cd_random_armor_regen_min_min, 0
-  cd_MinField "Armor Min Amount Max" , cd_random_armor_regen_min_max, 0
-
-  StaticText  ""
-  cd_MinField "Armor Cap Amount Min" , cd_random_armor_regen_cap_min, 0
-  cd_MinField "Armor Cap Amount Max" , cd_random_armor_regen_cap_max, 0
-
-} // OptionMenu cd_RandomizerArmorRegeneration
-
-OptionMenu cd_RandomizerAmmoRegeneration
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Ammo Regeneration Options"     , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Ammo Amount Min" , cd_random_ammo_regen_amount_min, 0
-  cd_MinField "Ammo Amount Max" , cd_random_ammo_regen_amount_max, 0
-
-  StaticText  ""
-  cd_MinField "Ammo Period Min" , cd_random_ammo_regen_freq_min, 0
-  cd_MinField "Ammo Period Max" , cd_random_ammo_regen_freq_max, 0
-
-} // OptionMenu RandomizerAmmoRegenerationOptionsMenu
-
-OptionMenu cd_RandomizerHealthDegeneration
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Health Degeneration Options"   , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Health Amount Min" , cd_random_health_degen_amount_min, 0
-  cd_MinField "Health Amount Max" , cd_random_health_degen_amount_max, 0
-
-  StaticText  ""
-  cd_MinField "Health Period Min" , cd_random_health_degen_freq_min, 0
-  cd_MinField "Health Period Max" , cd_random_health_degen_freq_max, 0
-
-  StaticText  ""
-  cd_MinField "Health Limit Min"  , cd_random_health_degen_limit_min, 0
-  cd_MinField "Health Limit Max"  , cd_random_health_degen_limit_max, 0
-
-} // OptionMenu cd_RandomizerHealthDegeneration
-
-OptionMenu cd_RandomizerArmorDegeneration
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Randomizer Armor Degeneration Options"    , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Min must be smaller than max."            , CDLightBlue
-  StaticText  ""
-  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
-  StaticText  "randomization for that option."           , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  ""
-  cd_MinField "Armor Amount Min" , cd_random_armor_degen_amount_min, 0
-  cd_MinField "Armor Amount Max" , cd_random_armor_degen_amount_max, 0
-
-  StaticText  ""
-  cd_MinField "Armor Period Min" , cd_random_armor_degen_freq_min, 0
-  cd_MinField "Armor Period Max" , cd_random_armor_degen_freq_max, 0
-
-  StaticText  ""
-  cd_MinField "Armor Limit Min"  , cd_random_armor_degen_limit_min, 0
-  cd_MinField "Armor Limit Max"  , cd_random_armor_degen_limit_max, 0
-
-} // OptionMenu cd_RandomizerArmorDegeneration
-
-OptionMenu cd_Manual
-{
-
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "The Manual"                               , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "This is Ultimate Custom Doom reference page."      , CDLightBlue
-  StaticText  "All useful information regarding the mod is here." , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-  StaticText  "Zero-terminated modifiers."               , CDLightBlue
-  StaticText  "========================================" , CDLightBlue
-
-  StaticText  "$CD_MANUAL", White
-
-} // OptionMenu cd_Manual
-
-// Option Values ///////////////////////////////////////////////////////////////
-
-OptionValue NotificationType
-{
-  0, "None"
-  1, "Text"
-  2, "Picture"
-}
-
-OptionValue cd_player_start_type_values
-{
-  0, "$CD_START_TYPE_OPTION_GAME"
-  1, "$CD_START_TYPE_OPTION_LEVEL"
-  2, "$CD_START_TYPE_OPTION_NEVER"
 }
 #+end_src
-#+begin_src ini :tangle ../build/UltimateCustomDoom/language.txt
-[enu default]
 
-CD_MAIN_TITLE = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
-
-CD_KEYS_TITLE = "Ultimate Custom Doom Keys";
-CD_KEYS_MENU  = "Open Configuration Menu";
-
-CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Weapon damage multiplier";
-CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Damage taken multiplier";
-CD_PLAYER_MAX_VIEW_PITCH                  = "Max view pitch";
-
-CD_START_TYPE_OPTION_GAME  = "Per game";
-CD_START_TYPE_OPTION_LEVEL = "Per level/respawn";
-CD_START_TYPE_OPTION_NEVER = "Never";
-
-CD_START_HEALTH_CAPTION = "Start health";
-CD_START_ARMOR_CAPTION  = "Start armor";
-
-CD_MAX_HEALTH_CAPTION        = "Max health";
-CD_SPEED_MULTIPLIER_CAPTION  = "Speed multiplier";
-CD_JUMP_Z_MULTIPLIER_CAPTION = "Jump multiplier";
-
-// Miscellaneous Options Menu //////////////////////////////////////////////////
-
-CD_MISC_TITLE          = "Miscellaneous Player Options";
-CD_MISC_ENABLE_CAPTION = "Toggles the options below on or off.";
-CD_AIR_CONTROL_CAPTION = "Air control multiplier";
-CD_FRICTION_CAPTION    = "Friction multiplier";
-CD_SELF_DAMAGE         = "Self damage multiplier";
-
-// Monster Options Menu ////////////////////////////////////////////////////////
-
-CD_MONSTER_OPTIONS_TITLE = "Monster Options";
-CD_MONSTER_NOTE1         = "All modifiers are zero-terminated.";
-CD_MONSTER_NOTE2         = "They are applied once per level or";
-CD_MONSTER_NOTE3         = "manually by the command below.";
-
-CD_MONSTER_HEALTH        = "Health multiplier";
-CD_MONSTER_SPEED         = "Speed multiplier";
-CD_MONSTER_HEALTH_CAP    = "Health cap";
-CD_APPLY_MONSTER_CAPTION = "Apply Monster Options now";
-
-// Common /////////////////////////////////////////////////////////////////////
-
-CD_ENABLE             = "Enable";
-CD_AMOUNT_CAPTION     = "Amount";
-CD_PERIOD_CAPTION     = "Period";
-CD_LIMIT_CAPTION      = "Limit";
-CD_CAP_AMOUNT_CAPTION = "Cap amount";
-CD_MIN_AMOUNT_CAPTION = "Min amount";
-
-CD_NEGATIVE_FIXED_MESSAGE = " cannot be negative. Fixed.";
-CD_ZERO_FIXED_MESSAGE     = " cannot be zero. Fixed.";
-
-// Regeneration ////////////////////////////////////////////////////////////////
-
-CD_REGENERATION_TITLE = "Regeneration Options";
-
-CD_HEALTH_REGENERATION_CAPTION = "Health Regeneration";
-
-// Manual
-
-CD_MANUAL = "These modifiers have a default value of 0. They will not do\
-anything until you change their values to something positive.\
-\
-Such are the monster modifiers, almost all player modifiers\
-and all randomizer options.\
-\
-These options can be enabled individually by using any\
-number above 0.\
-\
-Switching to 0 from a positive number during gameplay\
-will not revert the changes done.\
-\
-To do that, you must set value to its default (most often 1),\
-exit the menu, wait until the change is in effect, then zero-\
-terminate the modifier,\
-\
-0 means that other mods' effects will not be overridden\
-by Ultimate Custom Doom.";
-
-// Commands
-
-CD_COMMANDS_TITLE = "Ultimate Custom Doom Commands";
-CD_KILL = "Kill Player";
-CD_KILL_CONFIRMATION = "This will kill the player. Are you sure?";
-CD_KILL_HINT = "Use if stuck in death exit.";
-
-CD_RESET_OPTIONS = "Reset option values to defaults";
-CD_RESET_OPTIONS_CONFIRMATION = "This will reset all option values to their defaults.";
-CD_RESET_OPTIONS_HINT = "This doesn't reset the Randomizer min/max values.";
-
-CD_RESET_RANDOMIZER = "Reset Randomizer min/max to zero";
-CD_RESET_RANDOMIZER_CONFIRMATION = "This will set all randomizer min/max values to zero.";
-
-[ru]
-
-CD_KEYS_TITLE = "Клавиши Ultimate Custom Doom";
-CD_KEYS_MENU  = "Открыть меню конфигурации";
-
-CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Множитель урона от оружия";
-CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Множитель полученного урона";
-CD_PLAYER_MAX_VIEW_PITCH                  = "Максимальный угол обзора";
-
-CD_START_TYPE_OPTION_GAME  = "За игру";
-CD_START_TYPE_OPTION_LEVEL = "За уровень/возрождение";
-CD_START_TYPE_OPTION_NEVER = "Никогда";
-
-CD_START_HEALTH_CAPTION = "Начальное здоровье";
-CD_START_ARMOR_CAPTION  = "Начальная броня";
-
-CD_MAX_HEALTH_CAPTION        = "Максимальное здоровье";
-CD_SPEED_MULTIPLIER_CAPTION  = "Множитель скорости";
-CD_JUMP_Z_MULTIPLIER_CAPTION = "Множитель прыжка";
-
-CD_AIR_CONTROL_CAPTION = "Множитель контроля в воздухе";
-CD_FRICTION_CAPTION    = "Коэффициент трения";
-
-// Monster Options Menu ////////////////////////////////////////////////////////
-
-CD_MONSTER_OPTIONS_TITLE = "Настройки монстров";
-
-CD_MONSTER_HEALTH        = "Множитель здоровья";
-CD_MONSTER_SPEED         = "Множитель скорости";
-CD_APPLY_MONSTER_CAPTION = "Применить настройки сейчас";
-
-// Common /////////////////////////////////////////////////////////////////////
-
-CD_AMOUNT_CAPTION     = "Кол-во";
-CD_PERIOD_CAPTION     = "Период";
-CD_LIMIT_CAPTION      = "Лимит";
-CD_CAP_AMOUNT_CAPTION = "Макс. кол-во";
-CD_MIN_AMOUNT_CAPTION = "Мин. кол-во";
-
-CD_NEGATIVE_FIXED_MESSAGE = " не может быть отрицательным. Исправлено.";
-CD_ZERO_FIXED_MESSAGE     = " не может быть нулем. Исправлено.";
-
-// Regeneration ////////////////////////////////////////////////////////////////
-
-CD_REGENERATION_TITLE = "Настройки регенерации";
-
-CD_HEALTH_REGENERATION_CAPTION = "Регенерация здоровья";
-
-// Manual
-
-CD_MANUAL = "Эти модификаторы имеют значение по умолчанию 0. Они не будут делать\nничего, пока вы не измените значения на что-то положительное.\n\nТак ведут себя модификаторы монстров, почти все модификаторы игрока\nи все модификаторы рандомайзера.\n\nЭти настройки могут быть включены индивидуально с помощью любого\nчисла выше 0.\n\nПереключение на 0 с положительного числа во время игры\nне вернёт сделанные изменения.\n\nДля этого вы должны установить значение по умолчанию (чаще всего 1),\nвыйти из меню, подождать, пока изменения не вступят в силу, затем очистить\nнулевой модификатор установкой 0.\n\n0 означает, что эффекты других модов не будут переопределены\nUltimate Custom Doom.";
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool cd_power_invisibility_permanent      = false;
+server bool cd_power_invulnerability_permanent   = false;
+server bool cd_power_ironFeet_permanent          = false;
+server bool cd_power_lightAmp_permanent          = false;
+server bool cd_power_drain_permanent             = false;
+server bool cd_power_highJump_permanent          = false;
+server bool cd_power_infiniteAmmo_permanent      = false;
+server bool cd_power_protecton_permanent         = false;
+server bool cd_power_regeneraton_permanent       = false;
+server bool cd_power_speed_permanent             = false;
+server bool cd_power_strength_permanent          = false;
+server bool cd_power_timeFreezer_permanent       = false;
+server bool cd_power_doubleFiringSpeed_permanent = false;
+server bool cd_power_flight_permanent            = false;
+server bool cd_power_frightener_permanent        = false;
+server bool cd_power_scanner_permanent           = false;
+server bool cd_power_damage_permanent            = false;
+server bool cd_power_ghost_permanent             = false;
+server bool cd_power_shadow_permanent            = false;
+server bool cd_power_torch_permanent             = false;
+server bool cd_power_minotaur_permanent          = false;
+server bool cd_power_morph_permanent             = false;
+server bool cd_power_mask_permanent              = false;
+server bool cd_power_weaponLevel2_permanent      = false;
+server bool cd_power_targeter_permanent          = false;
+server bool cd_power_buddha_permanent            = false;
 #+end_src
-#+begin_src txt :tangle ../build/UltimateCustomDoom/keyconf.txt
-// Aliases 
 
-alias cd_reset_to_defaults "resetcvar cd_player_weapon_damage_mult; resetcvar cd_player_damage_taken_mult; resetcvar cd_player_start_type; resetcvar cd_player_start_health; resetcvar cd_player_start_armor; resetcvar cd_player_start_savePercent; resetcvar cd_player_max_health; resetcvar cd_player_speed_mult; resetcvar cd_player_jump_mult; resetcvar cd_player_misc_enabled; resetcvar cd_player_airControl_mult; resetcvar cd_player_friction_mult; resetcvar cd_player_self_damage_mult; resetcvar cd_monster_health_mult; resetcvar cd_monster_speed_mult; resetcvar cd_monster_health_cap; resetcvar cd_health_regen_enabled; resetcvar cd_health_regen_amount; resetcvar cd_health_regen_freq; resetcvar cd_health_regen_cap; resetcvar cd_health_sound_enabled; resetcvar cd_health_regen_pulse; resetcvar cd_health_blend_color_r; resetcvar cd_health_blend_color_g; resetcvar cd_health_blend_color_b; resetcvar cd_health_blend_color_int; resetcvar cd_armor_regen_enabled; resetcvar cd_armor_regen_amount; resetcvar cd_armor_regen_freq; resetcvar cd_armor_regen_min; resetcvar cd_armor_regen_cap; resetcvar cd_armor_sound_enabled; resetcvar cd_armor_regen_pulse; resetcvar cd_armor_blend_color_r; resetcvar cd_armor_blend_color_g; resetcvar cd_armor_blend_color_b; resetcvar cd_armor_blend_color_int; resetcvar cd_ammo_regen_enabled; resetcvar cd_ammo_regen_backpack_req; resetcvar cd_ammo_regen_amount; resetcvar cd_ammo_regen_freq; resetcvar cd_ammo_regen_pulse; resetcvar cd_ammo_blend_color_r; resetcvar cd_ammo_blend_color_g; resetcvar cd_ammo_blend_color_b; resetcvar cd_ammo_blend_color_int; resetcvar cd_health_degen_enabled; resetcvar cd_health_degen_amount; resetcvar cd_health_degen_freq; resetcvar cd_health_degen_limit; resetcvar cd_armor_degen_amount; resetcvar cd_armor_degen_freq; resetcvar cd_armor_degen_limit; resetcvar cd_power_invisibility_permanent; resetcvar cd_power_invulnerability_permanent; resetcvar cd_power_ironFeet_permanent; resetcvar cd_power_lightAmp_permanent; resetcvar cd_power_drain_permanent; resetcvar cd_power_highJump_permanent; resetcvar cd_power_infiniteAmmo_permanent; resetcvar cd_power_protecton_permanent; resetcvar cd_power_regeneraton_permanent; resetcvar cd_power_speed_permanent; resetcvar cd_power_strength_permanent; resetcvar cd_power_timeFreezer_permanent; resetcvar cd_power_doubleFiringSpeed_permanent; resetcvar cd_power_flight_permanent; resetcvar cd_power_frightener_permanent; resetcvar cd_power_scanner_permanent; resetcvar cd_power_damage_permanent; resetcvar cd_power_ghost_permanent; resetcvar cd_power_shadow_permanent; resetcvar cd_power_torch_permanent; resetcvar cd_power_minotaur_permanent; resetcvar cd_power_morph_permanent; resetcvar cd_power_mask_permanent; resetcvar cd_power_weaponLevel2_permanent; resetcvar cd_power_targeter_permanent; resetcvar cd_power_buddha_permanent"
-
-alias cd_reset_random_to_defaults "resetcvar cd_random_enabled; resetcvar cd_random_frequency; resetcvar cd_random_timer_enabled; resetcvar cd_random_notification_type; resetcvar cd_random_notification_sound_enabled; resetcvar cd_random_notification_volume; resetcvar cd_random_player_weapon_damage_mult_min; resetcvar cd_random_player_weapon_damage_mult_max; resetcvar cd_random_player_damage_taken_mult_min; resetcvar cd_random_player_damage_taken_mult_max; resetcvar cd_random_player_start_health_min; resetcvar cd_random_player_start_health_max; resetcvar cd_random_player_start_armor_min; resetcvar cd_random_player_start_armor_max; resetcvar cd_random_player_start_savePercent_min; resetcvar cd_random_player_start_savePercent_max; resetcvar cd_random_player_max_health_min; resetcvar cd_random_player_max_health_max; resetcvar cd_random_player_speed_mult_min; resetcvar cd_random_player_speed_mult_max; resetcvar cd_random_player_jump_mult_min; resetcvar cd_random_player_jump_mult_max; resetcvar cd_random_health_regen_amount_min; resetcvar cd_random_health_regen_amount_max; resetcvar cd_random_health_regen_freq_min; resetcvar cd_random_health_regen_freq_max; resetcvar cd_random_health_regen_cap_min; resetcvar cd_random_health_regen_cap_max; resetcvar cd_random_armor_regen_amount_min; resetcvar cd_random_armor_regen_amount_max; resetcvar cd_random_armor_regen_freq_min; resetcvar cd_random_armor_regen_freq_max; resetcvar cd_random_armor_regen_min_min; resetcvar cd_random_armor_regen_min_max; resetcvar cd_random_armor_regen_cap_min; resetcvar cd_random_armor_regen_cap_max; resetcvar cd_random_ammo_regen_amount_min; resetcvar cd_random_ammo_regen_amount_max; resetcvar cd_random_ammo_regen_freq_min; resetcvar cd_random_ammo_regen_freq_max; resetcvar cd_random_health_degen_amount_min; resetcvar cd_random_health_degen_amount_max; resetcvar cd_random_health_degen_freq_min; resetcvar cd_random_health_degen_freq_max; resetcvar cd_random_health_degen_limit_min; resetcvar cd_random_health_degen_limit_max; resetcvar cd_random_armor_degen_amount_min; resetcvar cd_random_armor_degen_amount_max; resetcvar cd_random_armor_degen_freq_min; resetcvar cd_random_armor_degen_freq_max; resetcvar cd_random_armor_degen_limit_min; resetcvar cd_random_armor_degen_limit_max"
-
-alias menu_custom "OpenMenu cd_Menu"
-
-alias cd_apply_monster_settings "netevent cd_apply_monster_settings"
-
-// Keys
-
-AddKeySection "$CD_KEYS_TITLE" CustomDoomKeys
-AddMenuKey    "$CD_KEYS_MENU"  menu_custom
-#+end_src
-#+begin_src txt :tangle ../build/UltimateCustomDoom/sndinfo.txt
-Regeneration/Heartbeat  "sounds/cd_heartbeat.ogg"
-Regeneration/Armor      "sounds/cd_armor_regen.ogg"
-
-Randomizer/Notification "sounds/cd_randomizer_notification.ogg"
-#+end_src
-#+begin_src txt :tangle ../build/UltimateCustomDoom/textcolo.txt
-CDLightBlue { #111111 #99CCFF }
-#+end_src
-#+begin_src txt :tangle ../build/UltimateCustomDoom/mapinfo.txt
-gameinfo { EventHandlers = "cd_EventHandler" }
-#+end_src
-#+begin_src txt :tangle ../build/UltimateCustomDoom/cvarinfo.txt
-// =============================================================================
-// Ultimate Custom Doom configuration variables
-// =============================================================================
-
-// When adding new CVARs, don't forget to add them to reset commands in keyconf.
-
-// Player menu CVARs ///////////////////////////////////////////////////////////
-
-server float cd_player_weapon_damage_mult = 0;
-server float cd_player_damage_taken_mult  = 0;
-
-server int   cd_player_start_type = 2;
-
-server int   cd_player_start_health      = 0;
-server int   cd_player_start_armor       = 0;
-server int   cd_player_start_savePercent = 33;
-
-server int   cd_player_max_health = 0;
-server float cd_player_speed_mult = 0;
-server float cd_player_jump_mult  = 0;
-
-server bool  cd_player_misc_enabled     = false;
-server float cd_player_airControl_mult  = 1;
-server float cd_player_friction_mult    = 1;
-server float cd_player_self_damage_mult = 1;
-
-// Monster menu CVARs //////////////////////////////////////////////////////////
-
-server float cd_monster_health_mult = 0;
-server float cd_monster_speed_mult  = 0;
-server int   cd_monster_health_cap  = 0;
-
-// Health regeneration menu CVARs //////////////////////////////////////////////
-
-server bool  cd_health_regen_enabled = false;
-server int   cd_health_regen_amount  = 5;
-server int   cd_health_regen_freq    = 5;
-server int   cd_health_regen_cap     = 100;
-
-user   bool  cd_health_sound_enabled   = false;
-user   bool  cd_health_regen_pulse     = false;
-user   int   cd_health_blend_color_r   = 255;  // Red
-user   int   cd_health_blend_color_g   =   0;  // Green
-user   int   cd_health_blend_color_b   =   0;  // Blue
-user   float cd_health_blend_color_int = 0.25; // Intensity
-
-// Armor regeneration menu CVARs ///////////////////////////////////////////////
-
-server bool  cd_armor_regen_enabled = false;
-server int   cd_armor_regen_amount  = 5;
-server int   cd_armor_regen_freq    = 5;
-server int   cd_armor_regen_min     = 25;
-server int   cd_armor_regen_cap     = 100;
-
-user   bool  cd_armor_sound_enabled   = false;
-user   bool  cd_armor_regen_pulse     = false;
-user   int   cd_armor_blend_color_r   =   0;  // Red
-user   int   cd_armor_blend_color_g   =   0;  // Green
-user   int   cd_armor_blend_color_b   = 255;  // Blue
-user   float cd_armor_blend_color_int = 0.25; // Intensity
-
-// Ammo regeneration menu CVARs ////////////////////////////////////////////////
-
-server bool  cd_ammo_regen_enabled      = false;
-server bool  cd_ammo_regen_backpack_req = true;
-server int   cd_ammo_regen_amount       = 1;
-server int   cd_ammo_regen_freq         = 30;
-
-user   bool  cd_ammo_regen_pulse     = false;
-user   int   cd_ammo_blend_color_r   =   0;  // Red
-user   int   cd_ammo_blend_color_g   = 255;  // Green
-user   int   cd_ammo_blend_color_b   =   0;  // Blue
-user   float cd_ammo_blend_color_int = 0.25; // Intensity
-
-// Health degeneration menu CVARs //////////////////////////////////////////////
-
-server bool  cd_health_degen_enabled = false;
-server int   cd_health_degen_amount  = 1;
-server int   cd_health_degen_freq    = 1;
-server int   cd_health_degen_limit   = 25;
-
-// Armor degeneration menu CVARs ///////////////////////////////////////////////
-
-server bool  cd_armor_degen_enabled = false;
-server int   cd_armor_degen_amount  = 1;
-server int   cd_armor_degen_freq    = 1;
-server int   cd_armor_degen_limit   = 0;
-
-// =============================================================================
-// Powerup menu CVARs
-// =============================================================================
-
-server bool  cd_power_invisibility_permanent      = false;
-server bool  cd_power_invulnerability_permanent   = false;
-server bool  cd_power_ironFeet_permanent          = false;
-server bool  cd_power_lightAmp_permanent          = false;
-server bool  cd_power_drain_permanent             = false;
-server bool  cd_power_highJump_permanent          = false;
-server bool  cd_power_infiniteAmmo_permanent      = false;
-server bool  cd_power_protecton_permanent         = false;
-server bool  cd_power_regeneraton_permanent       = false;
-server bool  cd_power_speed_permanent             = false;
-server bool  cd_power_strength_permanent          = false;
-server bool  cd_power_timeFreezer_permanent       = false;
-server bool  cd_power_doubleFiringSpeed_permanent = false;
-server bool  cd_power_flight_permanent            = false;
-server bool  cd_power_frightener_permanent        = false;
-server bool  cd_power_scanner_permanent           = false;
-server bool  cd_power_damage_permanent            = false;
-server bool  cd_power_ghost_permanent             = false;
-server bool  cd_power_shadow_permanent            = false;
-server bool  cd_power_torch_permanent             = false;
-server bool  cd_power_minotaur_permanent          = false;
-server bool  cd_power_morph_permanent             = false;
-server bool  cd_power_mask_permanent              = false;
-server bool  cd_power_weaponLevel2_permanent      = false;
-server bool  cd_power_targeter_permanent          = false;
-server bool  cd_power_buddha_permanent            = false;
-
-// =============================================================================
-// RANDOMIZATION CVARs. Mother of God!
-// =============================================================================
-
-// Main ////////////////////////////////////////////////////////////////////////
-
-server bool  cd_random_enabled   = false;
-server int   cd_random_frequency = 30;
-
-user   bool  cd_random_timer_enabled              = true;
-user   int   cd_random_notification_type          = 1;
-user   bool  cd_random_notification_sound_enabled = true;
-user   float cd_random_notification_volume        = 0.5;
-
-// Basic Options ///////////////////////////////////////////////////////////////
-
-server float cd_random_player_weapon_damage_mult_min;
-server float cd_random_player_weapon_damage_mult_max;
-
-server float cd_random_player_damage_taken_mult_min;
-server float cd_random_player_damage_taken_mult_max;
-
-// Advanced Options ////////////////////////////////////////////////////////////
-
-server int   cd_random_player_start_health_min;
-server int   cd_random_player_start_health_max;
-
-server int   cd_random_player_start_armor_min;
-server int   cd_random_player_start_armor_max;
-
-server int   cd_random_player_start_savePercent_min;
-server int   cd_random_player_start_savePercent_max;
-
-server int   cd_random_player_max_health_min;
-server int   cd_random_player_max_health_max;
-
-server float cd_random_player_speed_mult_min;
-server float cd_random_player_speed_mult_max;
-
-server float cd_random_player_jump_mult_min;
-server float cd_random_player_jump_mult_max;
-
-// Regeneration ////////////////////////////////////////////////////////////////
-
-server int   cd_random_health_regen_amount_min;
-server int   cd_random_health_regen_amount_max;
-
-server int   cd_random_health_regen_freq_min;
-server int   cd_random_health_regen_freq_max;
-
-server int   cd_random_health_regen_cap_min;
-server int   cd_random_health_regen_cap_max;
-
-server int   cd_random_armor_regen_amount_min;
-server int   cd_random_armor_regen_amount_max;
-
-server int   cd_random_armor_regen_freq_min;
-server int   cd_random_armor_regen_freq_max;
-
-server int   cd_random_armor_regen_min_min;
-server int   cd_random_armor_regen_min_max;
-
-server int   cd_random_armor_regen_cap_min;
-server int   cd_random_armor_regen_cap_max;
-
-server int   cd_random_ammo_regen_amount_min;
-server int   cd_random_ammo_regen_amount_max;
-
-server int   cd_random_ammo_regen_freq_min;
-server int   cd_random_ammo_regen_freq_max;
-
-// Degeneration ////////////////////////////////////////////////////////////////
-
-server int   cd_random_health_degen_amount_min;
-server int   cd_random_health_degen_amount_max;
-
-server int   cd_random_health_degen_freq_min;
-server int   cd_random_health_degen_freq_max;
-
-server int   cd_random_health_degen_limit_min;
-server int   cd_random_health_degen_limit_max;
-
-server int   cd_random_armor_degen_amount_min;
-server int   cd_random_armor_degen_amount_max;
-
-server int   cd_random_armor_degen_freq_min;
-server int   cd_random_armor_degen_freq_max;
-
-server int   cd_random_armor_degen_limit_min;
-server int   cd_random_armor_degen_limit_max;
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_settings.zs
-
-/// This class provides the health regeneration settings.
-class cd_HealthRegenerationSettings
-{
-
-  int  amount()         { return _amount        .value(); }
-
-  /// Regeneration stops if health reaches this number.
-  int  cap()            { return _cap           .value(); }
-
-  bool isSoundEnabled() { return _isSoundEnabled.value(); }
-
-  cd_PeriodSettings period() { return _period; }
-  cd_BlendSettings  blend () { return _blend;  }
-
-  cd_HealthRegenerationSettings init(PlayerInfo p)
-  {
-    _amount         = new("cd_IntSetting")    .init("cd_health_regen_amount" , p);
-    _cap            = new("cd_IntSetting")    .init("cd_health_regen_cap"    , p);
-    _isSoundEnabled = new("cd_BoolSetting")   .init("cd_health_sound_enabled", p);
-
-    _period         = new("cd_PeriodSettings").init( "cd_health_regen_enabled"
-                                                   , "cd_health_regen_freq"
-                                                   , p
-                                                   );
-
-    _blend          = new("cd_BlendSettings" ).init( "cd_health_regen_pulse"
-                                                   , "cd_health_blend_color_r"
-                                                   , "cd_health_blend_color_g"
-                                                   , "cd_health_blend_color_b"
-                                                   , "cd_health_blend_color_int"
-                                                   , p
-                                                   );
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_HealthRegenerationLimits limits)
-  {
-    _amount.randomize(p, limits.amount());
-    _period.randomize(p, limits.period());
-    _cap   .randomize(p, limits.cap   ());
-  }
-
-  private cd_IntSetting     _amount;
-  private cd_IntSetting     _cap;
-
-  private cd_BoolSetting    _isSoundEnabled;
-
-  private cd_PeriodSettings _period;
-  private cd_BlendSettings  _blend;
-
-} // class cd_HealthRegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_regeneration_limits.zs
-
-/// This class represents limits for Armor Regeneration Settings.
-class cd_ArmorRegenerationLimits
-{
-
-  cd_MinMaxIntSettings amount() { return _amount; }
-  cd_MinMaxIntSettings period() { return _period; }
-  cd_MinMaxIntSettings min   () { return _min   ; }
-  cd_MinMaxIntSettings cap   () { return _cap   ; }
-
-  cd_ArmorRegenerationLimits init(PlayerInfo p)
-  {
-    _amount = newSetting("cd_random_armor_regen_amount_min", "cd_random_armor_regen_amount_max", p);
-    _period = newSetting("cd_random_armor_regen_freq_min"  , "cd_random_armor_regen_freq_max"  , p);
-    _min    = newSetting("cd_random_armor_regen_min_min"   , "cd_random_armor_regen_min_max"   , p);
-    _cap    = newSetting("cd_random_armor_regen_cap_min"   , "cd_random_armor_regen_cap_max"   , p);
-
-    return self;
-  }
-
-  private
-  cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
-  }
-
-  private cd_MinMaxIntSettings _amount;
-  private cd_MinMaxIntSettings _period;
-  private cd_MinMaxIntSettings _min;
-  private cd_MinMaxIntSettings _cap;
-
-} // class cd_ArmorRegenerationLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_double_setting.zs
-/// This class represents a single double setting.
-class cd_DoubleSetting : cd_CvarSetting
-{
-
-  double value() { return variable().GetFloat(); }
-
-  cd_DoubleSetting init(string cvarName, PlayerInfo p)
-  {
-    super.init(cvarName, p);
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_MinMaxDoubleSettings minMax)
-  {
-    double min = minMax.min();
-    double max = minMax.max();
-
-    if (min >= max)           { return; }
-    if (min == 0 && max == 0) { return; }
-
-    double newValue = randomDouble(min, max);
-
-    variable().SetFloat(newValue);
-  }
-
-  private double randomDouble(double min, double max)
-  {
-    int intMin = int(ceil(min * RANDOM_PRECISION));
-    int intMax = int(     max * RANDOM_PRECISION );
-
-    double r = random(intMin, intMax) / RANDOM_PRECISION;
-
-    return r;
-  }
-
-  const RANDOM_PRECISION = 1000.0;
-
-} // class cd_DoubleSetting
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_limits.zs
-/// This class provides value limits for Degeneration Randomization.
-class cd_DegenerationLimits
-{
-
-  cd_MinMaxIntSettings amount() { return _amount; }
-  cd_MinMaxIntSettings period() { return _period; }
-  cd_MinMaxIntSettings limit () { return _limit ; }
-
-  protected
-  cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
-  }
-
-  protected cd_MinMaxIntSettings _amount;
-  protected cd_MinMaxIntSettings _period;
-  protected cd_MinMaxIntSettings _limit;
-
-} // class cd_DegenerationLimits
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_permanent_powerup_settings.zs
 /// This class provides the permanent powerup settings.
 class cd_PermanentPowerupSettings
 {
-
   bool buddha           () { return cd_power_buddha_permanent; }
   bool damage           () { return cd_power_damage_permanent; }
   bool doubleFiringSpeed() { return cd_power_doubleFiringSpeed_permanent; }
@@ -1180,1306 +1458,13 @@ class cd_PermanentPowerupSettings
   bool targeter         () { return cd_power_targeter_permanent; }
   bool timeFreezer      () { return cd_power_timeFreezer_permanent; }
   bool weaponLevel2     () { return cd_power_weaponLevel2_permanent; }
-
-} // class cd_PermanentPowerupSettings
+}
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_monster_settings.zs
-class cd_MonsterSettings
-{
 
-  double healthMultiplier() { return _healthMultiplier.value(); }
-  double speedMultiplier () { return _speedMultiplier .value(); }
-  int    healthCap       () { return _healthCap       .value(); }
-
-  cd_MonsterSettings init(PlayerInfo p)
-  {
-    _healthMultiplier = new("cd_DoubleSetting").init("cd_monster_health_mult", p);
-    _speedMultiplier  = new("cd_DoubleSetting").init("cd_monster_speed_mult" , p);
-    _healthCap        = new("cd_IntSetting"   ).init("cd_monster_health_cap" , p);
-
-    return self;
-  }
-
-  private cd_DoubleSetting _healthMultiplier;
-  private cd_DoubleSetting _speedMultiplier;
-  private cd_IntSetting    _healthCap;
-
-} // class cd_MonsterSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_cvar_setting.zs
-/// This class represents a single setting.
-class cd_CvarSetting
-{
-
-  cd_CvarSetting init(string cvarName, PlayerInfo p)
-  {
-    _cvar = CVar.GetCvar(cvarName, p);
-    return self;
-  }
-
-  protected Cvar variable() { return _cvar; }
-
-  private CVar _cvar;
-
-} // class cd_CvarSetting
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_blend_settings.zs
-/// This class provides blend settings.
-class cd_BlendSettings
-{
-
-  bool   isEnabled() { return _isEnabled.value(); }
-
-  int    red      () { return _red      .value(); }
-  int    green    () { return _green    .value(); }
-  int    blue     () { return _blue     .value(); }
-  double intensity() { return _intensity.value(); }
-
-  cd_BlendSettings init( string enabledCvar
-                       , string redCvar
-                       , string greenCvar
-                       , string blueCvar
-                       , string intensityCvar
-                       , PlayerInfo p
-                       )
-  {
-    _isEnabled = new("cd_BoolSetting"  ).init(enabledCvar  , p);
-    _red       = new("cd_IntSetting"   ).init(redCvar      , p);
-    _green     = new("cd_IntSetting"   ).init(greenCvar    , p);
-    _blue      = new("cd_IntSetting"   ).init(blueCvar     , p);
-    _intensity = new("cd_DoubleSetting").init(intensityCvar, p);
-
-    return self;
-  }
-
-  private cd_BoolSetting   _isEnabled;
-
-  private cd_IntSetting    _red;
-  private cd_IntSetting    _green;
-  private cd_IntSetting    _blue;
-
-  private cd_DoubleSetting _intensity;
-
-} // class cd_BlendSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings.zs
-/// This class contains all the settings of Ultimate Custom Doom.
-class cd_Settings
-{
-
-  cd_PlayerSettings  player () { return _player ; }
-  cd_MiscSettings    misc   () { return _misc   ; }
-  cd_MonsterSettings monster() { return _monster; }
-
-  cd_HealthRegenerationSettings healthRegeneration() { return _healthRegeneration; }
-  cd_ArmorRegenerationSettings  armorRegeneration () { return _armorRegeneration ; }
-  cd_AmmoRegenerationSettings   ammoRegeneration  () { return _ammoRegeneration  ; }
-
-  cd_HealthDegenerationSettings healthDegeneration() { return _healthDegeneration; }
-  cd_ArmorDegenerationSettings  armorDegeneration () { return _armorDegeneration ; }
-
-  cd_PermanentPowerupSettings   permanentPowerup  () { return _permanentPowerup  ; }
-
-  cd_RandomizerSettings         randomizer        () { return _randomizer        ; }
-
-  /// Initialize a cd_Settings instance.
-  cd_Settings init(PlayerInfo p)
-  {
-    _player             = new("cd_PlayerSettings" ).init(p);
-    _misc               = new("cd_MiscSettings"   ).init(p);
-    _monster            = new("cd_MonsterSettings").init(p);
-
-    _healthRegeneration = new("cd_HealthRegenerationSettings").init(p);
-    _armorRegeneration  = new("cd_ArmorRegenerationSettings" ).init(p);
-    _ammoRegeneration   = new("cd_AmmoRegenerationSettings"  ).init(p);
-
-    _healthDegeneration = new("cd_HealthDegenerationSettings").init(p);
-    _armorDegeneration  = new("cd_ArmorDegenerationSettings" ).init(p);
-
-    _permanentPowerup   = new("cd_PermanentPowerupSettings"  );
-
-    _randomizer         = new("cd_RandomizerSettings"        ).init(p);
-
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_RandomizerLimits limits)
-  {
-    _player            .randomize(p, limits.player            ());
-
-    _healthRegeneration.randomize(p, limits.healthRegeneration());
-    _armorRegeneration .randomize(p, limits.armorRegeneration ());
-    _ammoRegeneration  .randomize(p, limits.ammoRegeneration  ());
-
-    _healthDegeneration.randomize(p, limits.healthDegeneration());
-    _armorDegeneration .randomize(p, limits.armorDegeneration ());
-  }
-
-  private cd_PlayerSettings  _player;
-  private cd_MiscSettings    _misc;
-  private cd_MonsterSettings _monster;
-
-  private cd_HealthRegenerationSettings _healthRegeneration;
-  private cd_ArmorRegenerationSettings  _armorRegeneration;
-  private cd_AmmoRegenerationSettings   _ammoRegeneration;
-
-  private cd_HealthDegenerationSettings _healthDegeneration;
-  private cd_ArmorDegenerationSettings  _armorDegeneration;
-
-  private cd_PermanentPowerupSettings   _permanentPowerup;
-
-  private cd_RandomizerSettings         _randomizer;
-
-} // class cd_Settings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_limits.zs
-/// This class provides limits for health regeneration settings.
-class cd_HealthRegenerationLimits
-{
-
-  cd_MinMaxIntSettings amount() { return _amount; }
-  cd_MinMaxIntSettings period() { return _period; }
-  cd_MinMaxIntSettings cap   () { return _cap   ; }
-
-  cd_HealthRegenerationLimits init(PlayerInfo p)
-  {
-    _amount = newSetting("cd_random_health_regen_amount_min", "cd_random_health_regen_amount_max", p);
-    _period = newSetting("cd_random_health_regen_freq_min"  , "cd_random_health_regen_freq_max"  , p);
-    _cap    = newSetting("cd_random_health_regen_cap_min"   , "cd_random_health_regen_cap_max"   , p);
-
-    return self;
-  }
-
-  cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
-  }
-
-  private cd_MinMaxIntSettings _amount;
-  private cd_MinMaxIntSettings _period;
-  private cd_MinMaxIntSettings _cap;
-
-} // class cd_HealthRegenerationLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_misc_settings.zs
-/// This class represents miscellaneous settings.
-class cd_MiscSettings
-{
-
-  bool   isEnabled () { return cd_player_misc_enabled; }
-  double airControl() { return _airControl.value(); }
-  double friction  () { return _friction  .value(); }
-  double selfDamage() { return _selfDamage.value(); }
-
-  cd_MiscSettings init(PlayerInfo player)
-  {
-    _airControl = new("cd_DoubleSetting").init("cd_player_airControl_mult"  , player);
-    _friction   = new("cd_DoubleSetting").init("cd_player_friction_mult"    , player);
-    _selfDamage = new("cd_DoubleSetting").init("cd_player_self_damage_mult" , player);
-
-    return self;
-  }
-
-  private cd_DoubleSetting _airControl;
-  private cd_DoubleSetting _friction;
-  private cd_DoubleSetting _selfDamage;
-
-} // class cd_MiscSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_limits.zs
-/// This class provides value limits for Armor Degeneration Randomization.
-class cd_ArmorDegenerationLimits : cd_DegenerationLimits
-{
-
-  cd_ArmorDegenerationLimits init(PlayerInfo p)
-  {
-    _amount = newSetting("cd_random_armor_degen_amount_min", "cd_random_armor_degen_amount_max", p);
-    _period = newSetting("cd_random_armor_degen_freq_min"  , "cd_random_armor_degen_freq_max"  , p);
-    _limit  = newSetting("cd_random_armor_degen_limit_min" , "cd_random_armor_degen_limit_max" , p);
-
-    return self;
-  }
-
-} // class cd_ArmorDegenerationLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_limits.zs
-/// This class provides value limits for Ammo Regeneration Randomization.
-class cd_AmmoRegenerationLimits
-{
-
-  cd_MinMaxIntSettings amount() { return _amount; }
-  cd_MinMaxIntSettings period() { return _period; }
-
-  cd_AmmoRegenerationLimits init(PlayerInfo p)
-  {
-    _amount = newSetting("cd_random_ammo_regen_amount_min", "cd_random_ammo_regen_amount_max", p);
-    _period = newSetting("cd_random_ammo_regen_freq_min"  , "cd_random_ammo_regen_freq_max"  , p);
-
-    return self;
-  }
-
-  private
-  cd_MinMaxIntSettings newSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
-  }
-
-  private cd_MinMaxIntSettings _amount;
-  private cd_MinMaxIntSettings _period;
-
-} // class cd_AmmoRegenerationLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_int_setting.zs
-/// This class represents a single integer setting.
-class cd_IntSetting : cd_CvarSetting
-{
-
-  int value() { return variable().GetInt(); }
-
-  cd_IntSetting init(string cvarName, PlayerInfo p)
-  {
-    super.init(cvarName, p);
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_MinMaxIntSettings minMax)
-  {
-    int min = minMax.min();
-    int max = minMax.max();
-
-    if (min >= max)           { return; }
-    if (min == 0 && max == 0) { return; }
-
-    int newValue = random(min, max);
-
-    variable().SetInt(newValue);
-  }
-
-} // class cd_IntSetting
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_bool_setting.zs
-/// This class represents a single boolean setting.
-class cd_BoolSetting : cd_CvarSetting
-{
-
-  bool value() { return variable().GetInt(); }
-
-  cd_BoolSetting init(string cvarName, PlayerInfo p)
-  {
-    super.init(cvarName, p);
-    return self;
-  }
-
-} // class cd_BoolSetting
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_settings.zs
-/// This class contains Player settings of Ultimate Custom Doom.
-class cd_PlayerSettings
-{
-
-  enum StartTypes
-  {
-    PER_GAME,
-    PER_LEVEL,
-    NEVER,
-  };
-
-  double damageMultiplier     () { return _damageMultiplier     .value(); }
-  double damageTakenMultiplier() { return _damageTakenMultiplier.value(); }
-
-  /// Shows when to reset health and armor.
-  int    startType            () { return _startType            .value(); }
-  int    startHealth          () { return _startHealth          .value(); }
-  int    startArmor           () { return _startArmor           .value(); }
-
-  int    maxHealth            () { return _maxHealth            .value(); }
-
-  double speedMultiplier      () { return _speedMultiplier      .value(); }
-  double jumpZMultiplier      () { return _jumpZMultiplier      .value(); }
-
-  cd_PlayerSettings init(PlayerInfo p)
-  {
-    _damageMultiplier      = new("cd_DoubleSetting").init("cd_player_weapon_damage_mult", p);
-    _damageTakenMultiplier = new("cd_DoubleSetting").init("cd_player_damage_taken_mult" , p);
-
-    _startType             = new("cd_IntSetting"   ).init("cd_player_start_type"        , p);
-    _startHealth           = new("cd_IntSetting"   ).init("cd_player_start_health"      , p);
-    _startArmor            = new("cd_IntSetting"   ).init("cd_player_start_armor"       , p);
-    _startArmorSavePercent = new("cd_IntSetting"   ).init("cd_player_start_savePercent" , p);
-
-    _maxHealth             = new("cd_IntSetting"   ).init("cd_player_max_health"        , p);
-
-    _speedMultiplier       = new("cd_DoubleSetting").init("cd_player_speed_mult"        , p);
-    _jumpZMultiplier       = new("cd_DoubleSetting").init("cd_player_jump_mult"         , p);
-
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_PlayerLimits limits)
-  {
-    _damageMultiplier     .randomize(p, limits.damageMultiplier     ());
-    _damageTakenMultiplier.randomize(p, limits.damageTakenMultiplier());
-
-    _startHealth          .randomize(p, limits.startHealth          ());
-    _startArmor           .randomize(p, limits.startArmor           ());
-    _startArmorSavePercent.randomize(p, limits.savePercent          ());
-
-    _maxHealth            .randomize(p, limits.maxHealth            ());
-
-    _speedMultiplier      .randomize(p, limits.speedMultiplier      ());
-    _jumpZMultiplier      .randomize(p, limits.jumpHeightMultiplier ());
-  }
-
-  private cd_DoubleSetting _damageMultiplier;
-  private cd_DoubleSetting _damageTakenMultiplier;
-
-  private cd_IntSetting    _startType;
-  private cd_IntSetting    _startHealth;
-  private cd_IntSetting    _startArmor;
-  private cd_IntSetting    _startArmorSavePercent;
-
-  private cd_IntSetting    _maxHealth;
-
-  private cd_DoubleSetting _speedMultiplier;
-  private cd_DoubleSetting _jumpZMultiplier;
-
-} // class cd_PlayerSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_double_settings.zs
-/// This class provides a pair of minimal and maximal double values.
-class cd_MinMaxDoubleSettings
-{
-
-  double min() { return _min.value(); }
-  double max() { return _max.value(); }
-
-  cd_MinMaxDoubleSettings init(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    _min = new("cd_DoubleSetting").init(minCvar, p);
-    _max = new("cd_DoubleSetting").init(maxCvar, p);
-
-    return self;
-  }
-
-  private cd_DoubleSetting _min;
-  private cd_DoubleSetting _max;
-
-} // class cd_MinMaxDoubleSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_settings.zs
-/// What?
-class cd_RandomizerSettings
-{
-
-  enum NotificationTypes
-  {
-    NOTHING,
-    TEXT,
-    IMAGE,
-  }
-
-  cd_PeriodSettings period() { return _period; }
-
-  bool   isTimerEnabled            () { return _isTimerEnabled            .value(); }
-  int    notificationType          () { return _notificationType          .value(); }
-  bool   isNotificationSoundEnabled() { return _isNotificationSoundEnabled.value(); }
-  double notificationVolume        () { return _notificationVolume        .value(); }
-
-  cd_RandomizerSettings init(PlayerInfo p)
-  {
-    _period                     = new("cd_PeriodSettings").init("cd_random_enabled", "cd_random_frequency", p);
-
-    _isTimerEnabled             = new("cd_BoolSetting"   ).init("cd_random_timer_enabled"             , p);
-    _notificationType           = new("cd_IntSetting"    ).init("cd_random_notification_type"         , p);
-    _isNotificationSoundEnabled = new("cd_BoolSetting"   ).init("cd_random_notification_sound_enabled", p);
-    _notificationVolume         = new("cd_DoubleSetting" ).init("cd_random_notification_volume"       , p);
-
-    return self;
-  }
-
-  private cd_PeriodSettings _period;
-
-  private cd_BoolSetting    _isTimerEnabled;
-  private cd_IntSetting     _notificationType;
-  private cd_BoolSetting    _isNotificationSoundEnabled;
-  private cd_DoubleSetting  _notificationVolume;
-
-} // class cd_RandomizerSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_settings.zs
-/// This class provides the degeneration settings.
-class cd_DegenerationSettings
-{
-
-  int amount() { return _amount.value(); }
-  int limit () { return _limit .value(); }
-
-  cd_PeriodSettings period() { return _period; }
-
-  cd_DegenerationSettings init( string enabledCvar
-                              , string periodCvar
-                              , string amountCvar
-                              , string limitCvar
-                              , PlayerInfo p
-                              )
-  {
-    _amount = new("cd_IntSetting"    ).init(amountCvar, p);
-    _limit  = new("cd_IntSetting"    ).init(limitCvar , p);
-    _period = new("cd_PeriodSettings").init(enabledCvar, periodCvar, p);
-
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_DegenerationLimits limits)
-  {
-    _amount.randomize(p, limits.amount());
-    _limit .randomize(p, limits.limit ());
-    _period.randomize(p, limits.period());
-  }
-
-  private cd_IntSetting     _amount;
-  private cd_IntSetting     _limit;
-  private cd_PeriodSettings _period;
-
-} // class cd_ArmorDegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_int_settings.zs
-/// This class provides a pair of minimal and maximal integer values.
-class cd_MinMaxIntSettings
-{
-
-  int min() { return _min.value(); }
-  int max() { return _max.value(); }
-
-  cd_MinMaxIntSettings init(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    _min = new("cd_IntSetting").init(minCvar, p);
-    _max = new("cd_IntSetting").init(maxCvar, p);
-
-    return self;
-  }
-
-  private cd_IntSetting _min;
-  private cd_IntSetting _max;
-
-} // class cd_MinMaxIntSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_limits.zs
-/// This class provides limits for Player Settings.
-class cd_PlayerLimits
-{
-
-  cd_MinMaxDoubleSettings damageMultiplier     () { return _damageMultiplier     ; }
-  cd_MinMaxDoubleSettings damageTakenMultiplier() { return _damageTakenMultiplier; }
-
-  cd_MinMaxIntSettings    startHealth          () { return _startHealth          ; }
-  cd_MinMaxIntSettings    startArmor           () { return _startArmor           ; }
-  cd_MinMaxIntSettings    savePercent          () { return _savePercent          ; }
-
-  cd_MinMaxIntSettings    maxHealth            () { return _maxHealth            ; }
-
-  cd_MinMaxDoubleSettings speedMultiplier      () { return _speedMultiplier      ; }
-  cd_MinMaxDoubleSettings jumpHeightMultiplier () { return _jumpHeightMultiplier ; }
-
-  cd_PlayerLimits init(PlayerInfo p)
-  {
-    _damageMultiplier      = newDoubleSetting( "cd_random_player_weapon_damage_mult_min"
-                                             , "cd_random_player_weapon_damage_mult_max"
-                                             , p
-                                             );
-    _damageTakenMultiplier = newDoubleSetting( "cd_random_player_damage_taken_mult_min"
-                                             , "cd_random_player_damage_taken_mult_max"
-                                             , p
-                                             );
-    _startHealth           = newIntSetting   ( "cd_random_player_start_health_min"
-                                             , "cd_random_player_start_health_max"
-                                             , p
-                                             );
-    _startArmor            = newIntSetting   ( "cd_random_player_start_armor_min"
-                                             , "cd_random_player_start_armor_max"
-                                             , p
-                                             );
-    _savePercent           = newIntSetting   ( "cd_random_player_start_savePercent_min"
-                                             , "cd_random_player_start_savePercent_max"
-                                             , p
-                                             );
-    _maxHealth             = newIntSetting   ( "cd_random_player_max_health_min"
-                                             , "cd_random_player_max_health_max"
-                                             , p
-                                             );
-    _speedMultiplier       = newDoubleSetting( "cd_random_player_speed_mult_min"
-                                             , "cd_random_player_speed_mult_max"
-                                             , p
-                                             );
-    _jumpHeightMultiplier  = newDoubleSetting( "cd_random_player_jump_mult_min"
-                                             , "cd_random_player_jump_mult_max"
-                                             , p
-                                             );
-
-    return self;
-  }
-
-  private
-  cd_MinMaxIntSettings newIntSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxIntSettings").init(minCvar, maxCvar, p);
-  }
-
-  private
-  cd_MinMaxDoubleSettings newDoubleSetting(string minCvar, string maxCvar, PlayerInfo p)
-  {
-    return new("cd_MinMaxDoubleSettings").init(minCvar, maxCvar, p);
-  }
-
-  private cd_MinMaxDoubleSettings _damageMultiplier;
-  private cd_MinMaxDoubleSettings _damageTakenMultiplier;
-  private cd_MinMaxIntSettings    _startHealth;
-  private cd_MinMaxIntSettings    _startArmor;
-  private cd_MinMaxIntSettings    _savePercent;
-  private cd_MinMaxIntSettings    _maxHealth;
-  private cd_MinMaxDoubleSettings _speedMultiplier;
-  private cd_MinMaxDoubleSettings _jumpHeightMultiplier;
-
-} // class cd_PlayerLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_settings.zs
-/// This class provides the health degeneration settings.
-class cd_HealthDegenerationSettings : cd_DegenerationSettings
-{
-
-  cd_HealthDegenerationSettings init(PlayerInfo p)
-  {
-    super.init( "cd_health_degen_enabled"
-              , "cd_health_degen_freq"
-              , "cd_health_degen_amount"
-              , "cd_health_degen_limit"
-              , p
-              );
-
-    return self;
-  }
-
-} // class cd_HealthDegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_settings.zs
-/// This class provides the ammo degeneration settings.
-class cd_ArmorDegenerationSettings : cd_DegenerationSettings
-{
-
-  cd_ArmorDegenerationSettings init(PlayerInfo p)
-  {
-    super.init( "cd_armor_degen_enabled"
-              , "cd_armor_degen_freq"
-              , "cd_armor_degen_amount"
-              , "cd_armor_degen_limit"
-              , p
-              );
-
-    return self;
-  }
-
-} // class cd_ArmorDegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_settings.zs
-/// This class provides the ammo regeneration settings.
-class cd_AmmoRegenerationSettings
-{
-
-  bool isBackpackRequired() { return cd_ammo_regen_backpack_req; }
-  int  amount()             { return _amount.value();            }
-
-  cd_PeriodSettings period() { return _period; }
-  cd_BlendSettings  blend () { return _blend;  }
-
-  cd_AmmoRegenerationSettings init(PlayerInfo p)
-  {
-    _amount = new("cd_IntSetting"    ).init("cd_ammo_regen_amount", p);
-    _period = new("cd_PeriodSettings").init( "cd_ammo_regen_enabled"
-                                           , "cd_ammo_regen_freq"
-                                           , p
-                                           );
-    _blend  = new("cd_BlendSettings" ).init( "cd_ammo_regen_pulse"
-                                           , "cd_ammo_blend_color_r"
-                                           , "cd_ammo_blend_color_g"
-                                           , "cd_ammo_blend_color_b"
-                                           , "cd_ammo_blend_color_int"
-                                           , p
-                                           );
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_AmmoRegenerationLimits limits)
-  {
-    _amount.randomize(p, limits.amount());
-    _period.randomize(p, limits.period());
-  }
-
-  private cd_IntSetting     _amount;
-  private cd_PeriodSettings _period;
-  private cd_BlendSettings  _blend;
-
-} // class cd_AmmoRegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_limits.zs
-/// This class provides value limits for Health Degeneration Randomization.
-class cd_HealthDegenerationLimits : cd_DegenerationLimits
-{
-
-  cd_HealthDegenerationLimits init(PlayerInfo p)
-  {
-    _amount = newSetting("cd_random_health_degen_amount_min", "cd_random_health_degen_amount_max", p);
-    _period = newSetting("cd_random_health_degen_freq_min"  , "cd_random_health_degen_freq_max"  , p);
-    _limit  = newSetting("cd_random_health_degen_limit_min" , "cd_random_health_degen_limit_max" , p);
-
-    return self;
-  }
-
-} // class cd_HealthDegenerationLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_regeneration_settings.zs
-/// This class provides the armor regeneration settings.
-class cd_ArmorRegenerationSettings
-{
-
-  int  amount()         { return _amount.value();         }
-
-  /// Minimal amount of armor the player must have before regeneration starts.
-  int  minAmount()      { return _minAmount.value();      }
-
-  /// Regeneration stops if armor reaches this number.
-  int  cap()            { return _cap.value();            }
-
-  bool isSoundEnabled() { return _isSoundEnabled.value(); }
-
-  cd_PeriodSettings period() { return _period; }
-  cd_BlendSettings  blend () { return _blend;  }
-
-  cd_ArmorRegenerationSettings init(PlayerInfo p)
-  {
-    _amount         = new("cd_IntSetting" ).init("cd_armor_regen_amount" , p);
-    _minAmount      = new("cd_IntSetting" ).init("cd_armor_regen_min"    , p);
-    _cap            = new("cd_IntSetting" ).init("cd_armor_regen_cap"    , p);
-
-    _isSoundEnabled = new("cd_BoolSetting").init("cd_armor_sound_enabled", p);
-
-    _period = new("cd_PeriodSettings").init( "cd_armor_regen_enabled"
-                                           , "cd_armor_regen_freq"
-                                           , p
-                                           );
-
-    _blend  = new("cd_BlendSettings" ).init( "cd_armor_regen_pulse"
-                                           , "cd_armor_blend_color_r"
-                                           , "cd_armor_blend_color_g"
-                                           , "cd_armor_blend_color_b"
-                                           , "cd_armor_blend_color_int"
-                                           , p
-                                           );
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_ArmorRegenerationLimits limits)
-  {
-    _amount   .randomize(p, limits.amount());
-    _period   .randomize(p, limits.period());
-    _minAmount.randomize(p, limits.min   ());
-    _cap      .randomize(p, limits.cap   ());
-  }
-
-  private cd_IntSetting     _amount;
-  private cd_IntSetting     _minAmount;
-  private cd_IntSetting     _cap;
-
-  private cd_BoolSetting    _isSoundEnabled;
-
-  private cd_PeriodSettings _period;
-  private cd_BlendSettings  _blend;
-
-} // class cd_ArmorRegenerationSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_limits.zs
-/// This class provides value limits for Ultimate Custom Doom Randomization.
-class cd_RandomizerLimits
-{
-
-  cd_PlayerLimits             player            () { return _player            ; }
-
-  cd_HealthRegenerationLimits healthRegeneration() { return _healthRegeneration; }
-  cd_ArmorRegenerationLimits  armorRegeneration () { return _armorRegeneration ; }
-  cd_AmmoRegenerationLimits   ammoRegeneration  () { return _ammoRegeneration  ; }
-
-  cd_HealthDegenerationLimits healthDegeneration() { return _healthDegeneration; }
-  cd_ArmorDegenerationLimits  armorDegeneration () { return _armorDegeneration ; }
-
-  cd_RandomizerLimits init(PlayerInfo p)
-  {
-    _player             = new("cd_PlayerLimits"            ).init(p);
-
-    _healthRegeneration = new("cd_HealthRegenerationLimits").init(p);
-    _armorRegeneration  = new("cd_ArmorRegenerationLimits" ).init(p);
-    _ammoRegeneration   = new("cd_AmmoRegenerationLimits"  ).init(p);
-
-    _healthDegeneration = new("cd_HealthDegenerationLimits").init(p);
-    _armorDegeneration  = new("cd_ArmorDegenerationLimits" ).init(p);
-
-    return self;
-  }
-
-  private cd_PlayerLimits             _player;
-
-  private cd_HealthRegenerationLimits _healthRegeneration;
-  private cd_ArmorRegenerationLimits  _armorRegeneration;
-  private cd_AmmoRegenerationLimits   _ammoRegeneration;
-
-  private cd_HealthDegenerationLimits _healthDegeneration;
-  private cd_ArmorDegenerationLimits  _armorDegeneration;
-
-} // class cd_RandomizerLimits
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_period_settings.zs
-/// This class provides settings for periodic events.
-class cd_PeriodSettings
-{
-
-  bool isEnabled() { return _isEnabled.value(); }
-
-  /// In seconds.
-  int  period   () { return _period   .value(); }
-
-  cd_PeriodSettings init(string isEnabledCvar, string periodCvar, PlayerInfo p)
-  {
-    _isEnabled = new("cd_BoolSetting").init(isEnabledCvar, p);
-    _period    = new("cd_IntSetting" ).init(periodCvar   , p);
-
-    return self;
-  }
-
-  void randomize(PlayerInfo p, cd_MinMaxIntSettings limits)
-  {
-    _period.randomize(p, limits);
-  }
-
-  private cd_BoolSetting _isEnabled;
-  private cd_IntSetting  _period;
-
-} // class cd_PeriodSettings
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_ultimate_custom_doom.zs
-/// This class provides mod information.
-///
-/// @attention this class may be used by other mods to check if Ultimate
-/// Custom Doom is loaded. Do not remove this class even if it's not used
-/// in this mod.
-class cd_UltimateCustomDoom
-{
-
-  static string getTitle()   { return StringTable.Localize("$CD_MAIN_TITLE"); }
-  static string getVersion() { return "v0.5.0"; }
-
-} // class cd_UltimateCustomDoom
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_health.zs
-/// This class provides player health manipulation functions.
-class cd_PlayerHealth play
-{
-
-  static
-  void regenerate(PlayerInfo player, cd_HealthRegenerationSettings settings)
-  {
-    PlayerPawn pawn = cd_Time.now(player, settings.period());
-
-    if (pawn == null || pawn.Health <= 0) { return; }
-
-    int health    = pawn.Health;
-    int maxHealth = pawn.MaxHealth ? pawn.MaxHealth : 100;
-    int cap       = settings.cap();
-    if (cap == 0) { cap = maxHealth; }
-
-    bool isRegenerate = isRegenerate(health, maxHealth, cap);
-
-    if (!isRegenerate) { return; }
-
-    int maxRegenAmount  = settings.amount();
-    int realCap         = min(maxHealth, cap);
-    int realRegenAmount = min(realCap - health, maxRegenAmount);
-
-    if (realRegenAmount <= 0) { return; }
-
-    pawn.A_SetHealth(health + realRegenAmount);
-
-    maybeSound(pawn, settings);
-    cd_Effects.maybeBlend(pawn, settings.blend());
-  }
-
-  static
-  void degenerate(PlayerInfo player, cd_HealthDegenerationSettings settings)
-  {
-    PlayerPawn pawn = cd_Time.now(player, settings.period());
-
-    if (pawn == null || pawn.Health <= 0) { return; }
-
-    int oldHealth = pawn.health;
-    int newHealth = max(settings.limit(), oldHealth - settings.amount());
-
-    if (newHealth == oldHealth) { return; }
-
-    pawn.A_SetHealth(newHealth);
-  }
-
-  private static
-  bool isRegenerate(int health, int maxHealth, int cap)
-  {
-    bool isAlive         = (health > 0);
-    bool isHealthNotMax  = (health < maxHealth);
-    bool isCapNotReached = (health < cap);
-    bool isRegenerate    = (isAlive && isHealthNotMax && isCapNotReached);
-
-    return isRegenerate;
-  }
-
-  private static
-  void maybeSound(PlayerPawn pawn, cd_HealthRegenerationSettings settings)
-  {
-    bool isSoundEnabled = settings.isSoundEnabled();
-
-    if (isSoundEnabled) { pawn.A_StartSound(REGEN_SOUND, CHAN_AUTO); }
-  }
-
-  const REGEN_SOUND = "Regeneration/Heartbeat";
-
-} // class cd_PlayerHealth
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_misc_properties.zs
-/// This class represents miscellaneous properties.
-class cd_MiscProperties play
-{
-
-  cd_MiscProperties init(cd_MiscSettings settings, PlayerInfo player)
-  {
-    rememberOriginals(player);
-
-    return self;
-  }
-
-  void update(cd_MiscSettings settings, PlayerInfo player)
-  {
-    updateAirControl(settings);
-    updateFriction(settings, player);
-    updateSelfDamage(settings, player);
-  }
-
-  private
-  void updateAirControl(cd_MiscSettings settings)
-  {
-    if (level.airControl != _airControl) // something changed the level air control
-    {
-      _originalAirControl = level.airControl;
-    }
-
-    level.airControl = settings.isEnabled()
-      ? _originalAirControl * settings.airControl()
-      : _originalAirControl;
-
-    _airControl = level.airControl;
-  }
-
-  private
-  void updateFriction(cd_MiscSettings settings, PlayerInfo player)
-  {
-    PlayerPawn pawn = player.mo;
-
-    pawn.friction = settings.isEnabled()
-      ? _originalFriction * settings.friction()
-      : _originalFriction;
-  }
-
-  private
-  void updateSelfDamage(cd_MiscSettings settings, PlayerInfo player)
-  {
-    PlayerPawn pawn = player.mo;
-
-    pawn.selfDamageFactor = settings.isEnabled()
-      ? _originalSelfDamage * settings.selfDamage()
-      : _originalSelfDamage;
-  }
-
-  private
-  void rememberOriginals(PlayerInfo player)
-  {
-    PlayerPawn pawn = player.mo;
-
-    _originalAirControl = level.airControl;
-    _originalFriction   = pawn.friction;
-    _airControl         = _originalAirControl;
-    _originalSelfDamage = pawn.selfDamageFactor;
-  }
-
-  private double _originalAirControl;
-  private double _originalFriction;
-  private double _originalSelfDamage;
-
-  // level air control can be changed without UCD knowing about it,
-  // so better save the value and check it.
-  private double _airControl;
-
-} // class cd_MiscProperties
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_monster_properties.zs
-/// This class provides the monster manipulation functions.
-class cd_Monsters play
-{
-
-  static
-  void applyMonsterMultipliersTo(Actor thing, cd_MonsterSettings settings)
-  {
-    applyHealthMultiplierTo(thing, settings.healthMultiplier(), settings.healthCap());
-    applySpeedMultiplierTo (thing, settings.speedMultiplier ());
-  }
-
-  static
-  void applyMonsterMultipliersToAll(cd_MonsterSettings settings)
-  {
-    let   iterator = ThinkerIterator.Create();
-    Actor a;
-
-    while (a = Actor(iterator.Next()))
-    {
-      if (!a.bIsMonster) { continue; }
-
-      applyMonsterMultipliersTo(a, settings);
-    }
-  }
-
-  private static
-  void applyHealthMultiplierTo(Actor thing, double multiplier, int cap)
-  {
-    if (multiplier <= 0) { multiplier = 1; }
-
-    // LegenDoom Lite
-    string ldlToken       = "LDLegendaryMonsterToken";
-    int    ldlMultiplier  = (thing.CountInv(ldlToken) > 0) ? 3 : 1;
-
-    int    defStartHealth = getDefault(thing).SpawnHealth();
-    int    oldStartHealth = thing.SpawnHealth();
-    int    oldHealth      = thing.health;
-    double relativeHealth = double(oldHealth) / oldStartHealth;
-
-    int    newStartHealth = round(defStartHealth * multiplier * ldlMultiplier);
-    int    newHealth      = round(newStartHealth * relativeHealth);
-
-    if (cap > 0 && newStartHealth > cap) newStartHealth = cap;
-    if (cap > 0 && newHealth      > cap) newHealth      = cap;
-
-    thing.StartHealth = newStartHealth;
-    thing.A_SetHealth(newHealth);
-  }
-
-  private static
-  void applySpeedMultiplierTo(Actor thing, double multiplier)
-  {
-    if (multiplier <= 0) { multiplier = 1; }
-
-    double spawnSpeed = getDefault(thing).Speed;
-    int    speed      = round(spawnSpeed * multiplier);
-
-    thing.Speed = speed;
-  }
-
-  private static
-  readonly<Actor> getDefault(Actor thing)
-  {
-    class<Actor> type = thing.GetClassName();
-    let          tmp  = GetDefaultByType(type);
-
-    return tmp;
-  }
-
-} // class cd_Monsters
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_properties.zs
-/// This class represents player properties.
-class cd_PlayerProperties play
-{
-
-  cd_PlayerProperties init(PlayerInfo player)
-  {
-    _jumpZ = player.mo.jumpZ;
-    return self;
-  }
-
-  /// Player properties are set according to Player settings.
-  void update(cd_PlayerSettings settings, PlayerInfo player)
-  {
-    PlayerPawn           pawn    = player.mo;
-    class<PlayerPawn>    type    = pawn.GetClassName();
-    readonly<PlayerPawn> default = GetDefaultByType(type);
-
-    updateDamageMultiply(settings, pawn, default);
-    updateDamageFactor  (settings, pawn, default);
-    updateMaxHealth     (settings, pawn, default);
-    updateSpeed         (settings, pawn, default);
-    updateJumpZ         (settings, pawn, default);
-  }
-
-  static
-  void maybeSetStartingProperties(cd_PlayerSettings settings, PlayerInfo player)
-  {
-    switch (settings.startType())
-    {
-    case cd_PlayerSettings.PER_GAME:
-      if (isNewGame(player)) { setStartingProperties(settings, player); }
-      break;
-
-    case cd_PlayerSettings.PER_LEVEL:
-      setStartingProperties(settings, player);
-      break;
-
-    case cd_PlayerSettings.NEVER:
-      break;
-    }
-  }
-
-  private static
-  void updateDamageMultiply(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
-  {
-    double originalDamageMultiplier = default.DamageMultiply;
-
-    pawn.DamageMultiply = settings.damageMultiplier()
-      ? originalDamageMultiplier * settings.damageMultiplier()
-      : originalDamageMultiplier;
-  }
-
-  private static
-  void updateDamageFactor(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
-  {
-    double originalDamageTakenMultiplier = default.DamageFactor;
-
-    pawn.DamageFactor = settings.damageTakenMultiplier()
-      ? originalDamageTakenMultiplier * settings.damageTakenMultiplier()
-      : originalDamageTakenMultiplier;
-  }
-
-  private static
-  void updateSpeed(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
-  {
-    double originalSpeed = default.Speed;
-
-    pawn.Speed = settings.speedMultiplier()
-      ? originalSpeed * settings.speedMultiplier()
-      : originalSpeed;
-  }
-
-  private
-  void updateJumpZ(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
-  {
-    double originalJumpZ = default.JumpZ;
-
-    if (pawn.JumpZ != _jumpZ) // something changed the jump height
-    {
-      originalJumpZ = pawn.JumpZ;
-    }
-
-    pawn.JumpZ = settings.jumpZMultiplier()
-      ? originalJumpZ * settings.jumpZMultiplier()
-      : originalJumpZ;
-
-    _jumpZ = pawn.JumpZ;
-  }
-
-  private
-  void updateMaxHealth(cd_PlayerSettings settings, PlayerPawn pawn, readonly<PlayerPawn> default)
-  {
-    int    originalMaxHealth = default.MaxHealth;
-    double newMaxHealth      = settings.maxHealth();
-
-    if (newMaxHealth == _oldMaxHealth) return;
-
-    double realMaxHealth  = pawn.MaxHealth ? pawn.MaxHealth : 100;
-    double relativeHealth = pawn.health / realMaxHealth;
-
-    pawn.MaxHealth = int(newMaxHealth ? newMaxHealth : originalMaxHealth);
-
-    realMaxHealth = pawn.MaxHealth ? pawn.MaxHealth : 100;
-    pawn.A_SetHealth(int(relativeHealth * realMaxHealth));
-
-    _oldMaxHealth = newMaxHealth;
-
-    let healthFinder = ThinkerIterator.Create("Health", Thinker.STAT_DEFAULT);
-    Health mo;
-    while (mo = Health(healthFinder.Next()))
-    {
-      if (newMaxHealth)
-      {
-        // Zero max amount means no limit, leave it so.
-        if (mo.MaxAmount) { mo.MaxAmount = int(newMaxHealth + OVERHEAL); }
-      }
-      else
-      {
-        // Restore default.
-        class<Health>    type             = mo.GetClassName();
-        readonly<Health> defaultHealth    = GetDefaultByType(type);
-        int              defaultMaxAmount = defaultHealth.MaxAmount;
-
-        mo.MaxAmount = defaultMaxAmount;
-      }
-    }
-  }
-
-  private static
-  void setStartingProperties(cd_PlayerSettings settings, PlayerInfo player)
-  {
-    // health
-    if (settings.startHealth())
-    {
-      player.mo.A_SetHealth(settings.startHealth());
-    }
-
-    // armor
-    if (settings.startArmor())
-    {
-      player.mo.SetInventory("BasicArmor", 0);
-
-      int nArmor = settings.startArmor();
-      for (int i = 0; i < nArmor; ++i) { player.mo.GiveInventoryType("cd_StartArmorBonus"); }
-    }
-  }
-
-  private static
-  bool isNewGame(PlayerInfo player)
-  {
-    bool isNewGame = (player.mo.FindInventory("cd_StartGiverCheck") == NULL);
-    return isNewGame;
-  }
-
-  private double _oldMaxHealth;
-
-  // level air control can be changed without UCD knowing about it,
-  // so better save the value and check it.
-  private double _jumpZ;
-
-  const OVERHEAL = 100;
-
-} // class cd_PlayerProperties
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_armor.zs
-/// This class provides player armor manipulation functions
-class cd_PlayerArmor play
-{
-
-  static
-  void regenerate(PlayerInfo player, cd_ArmorRegenerationSettings settings)
-  {
-    PlayerPawn pawn = cd_Time.now(player, settings.period());
-
-    if (pawn == null) { return; }
-
-    int health = pawn.Health;
-    int armor  = pawn.CountInv("BasicArmor");
-    int min    = settings.minAmount();
-    int max    = settings.cap();
-
-    bool isRegenerate = isRegenerate(health, armor, min, max);
-
-    if (!isRegenerate) { return; }
-
-    int maxRegenAmount = settings.amount();
-    int regenAmount    = max
-                       ? min(max - armor, maxRegenAmount)
-                       : maxRegenAmount
-                       ;
-
-    if (regenAmount <= 0) { return; }
-
-    pawn.GiveInventory("cd_ArmorBonus", regenAmount);
-
-    maybeSound(pawn, settings);
-    cd_Effects.maybeBlend(pawn, settings.blend());
-  }
-
-  static
-  void degenerate(PlayerInfo player, cd_ArmorDegenerationSettings settings)
-  {
-    PlayerPawn pawn = cd_Time.now(player, settings.period());
-
-    if (pawn == null) { return; }
-
-    int health = pawn.health;
-    int armor  = pawn.CountInv("BasicArmor");
-
-    bool shouldDegenerate = (health > 0) && (armor > settings.limit());
-
-    if (!shouldDegenerate) { return; }
-
-    pawn.TakeInventory("BasicArmor", settings.amount());
-  }
-
-  static private
-  bool isRegenerate(int health, int armor, int min, int max)
-  {
-    bool isAlive      = (health >    0);
-    bool isEnough     = (armor  >= min);
-    bool isNotTooMuch = (armor  <  max || max == 0);
-    bool isRegenerate = isAlive && isEnough && isNotTooMuch;
-
-    return isRegenerate;
-  }
-
-  static private
-  void maybeSound(PlayerPawn pawn, cd_ArmorRegenerationSettings settings)
-  {
-    bool isSoundEnabled = settings.isSoundEnabled();
-
-    if (isSoundEnabled) { pawn.A_StartSound(ARMOR_REGEN_SOUND, CHAN_AUTO); }
-  }
-
-  const ARMOR_REGEN_SOUND = "Regeneration/Armor";
-
-} // class cd_PlayerArmor
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_player_ammo.zs
-/// This class provides the player ammo manipulation functions.
-class cd_PlayerAmmo play
-{
-
-  static
-  void regenerate(PlayerInfo player, cd_AmmoRegenerationSettings settings)
-  {
-    PlayerPawn pawn = cd_Time.now(player, settings.period());
-
-    if (pawn == null) { return; }
-
-    if (!isAllowedToRegenerate(pawn, settings)) { return; }
-
-    int amount = settings.amount();
-
-    for (int i = 0; i < amount; ++i)
-    {
-      let aBackpack = Inventory(Actor.spawn("Backpack", replace: ALLOW_REPLACE));
-      aBackpack.clearCounters();
-      if (!aBackpack.CallTryPickup(pawn)) aBackpack.destroy();
-    }
-
-    cd_Effects.maybeBlend(pawn, settings.blend());
-  }
-
-  private static
-  bool isAllowedToRegenerate(PlayerPawn pawn, cd_AmmoRegenerationSettings settings)
-  {
-    bool isBackpackRequired = settings.isBackpackRequired();
-    bool isBackpackOwned    = pawn.CountInv("Backpack");
-    bool isBagOwned         = pawn.CountInv("BagOfHolding");
-    bool isSatchelOwned     = pawn.CountInv("AmmoSatchel");
-    bool isAllowed = !isBackpackRequired || isBackpackOwned || isBagOwned || isSatchelOwned;
-
-    return isAllowed;
-  }
-
-} // class cd_PlayerAmmo
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_permanent_powerup_properties.zs
 /// This class provides permanent powerups manipulation functions.
 class cd_PermanentPowerupProperties play
 {
-
   static
   void adjustTimes(PlayerInfo player, cd_PermanentPowerupSettings settings)
   {
@@ -2487,33 +1472,40 @@ class cd_PermanentPowerupProperties play
 
     if (pawn == NULL) return;
 
-    if (settings.buddha           ()) prolongEffect(pawn, "PowerBuddha"           ); else restore(pawn, "PowerBuddha"           );
-    if (settings.damage           ()) prolongEffect(pawn, "PowerDamage"           ); else restore(pawn, "PowerDamage"           );
-    if (settings.doubleFiringSpeed()) prolongEffect(pawn, "PowerDoubleFiringSpeed"); else restore(pawn, "PowerDoubleFiringSpeed");
-    if (settings.drain            ()) prolongEffect(pawn, "PowerDrain"            ); else restore(pawn, "PowerDrain"            );
-    if (settings.flight           ()) prolongEffect(pawn, "PowerFlight"           ); else restore(pawn, "PowerFlight"           );
-    if (settings.frightener       ()) prolongEffect(pawn, "PowerFrightener"       ); else restore(pawn, "PowerFrightener"       );
-    if (settings.highJump         ()) prolongEffect(pawn, "PowerHighJump"         ); else restore(pawn, "PowerHighJump"         );
-    if (settings.infiniteAmmo     ()) prolongEffect(pawn, "PowerInfiniteAmmo"     ); else restore(pawn, "PowerInfiniteAmmo"     );
-    if (settings.invisibility     ()) prolongEffect(pawn, "PowerInvisibility"     ); else restore(pawn, "PowerInvisibility"     );
-    if (settings.ghost            ()) prolongEffect(pawn, "PowerGhost"            ); else restore(pawn, "PowerGhost"            );
-    if (settings.shadow           ()) prolongEffect(pawn, "PowerShadow"           ); else restore(pawn, "PowerShadow"           );
-    if (settings.invulnerability  ()) prolongEffect(pawn, "PowerInvulnerable"     ); else restore(pawn, "PowerInvulnerable"     );
-    if (settings.ironFeet         ()) prolongEffect(pawn, "PowerIronFeet"         ); else restore(pawn, "PowerIronFeet"         );
-    if (settings.mask             ()) prolongEffect(pawn, "PowerMask"             ); else restore(pawn, "PowerMask"             );
-    if (settings.lightAmp         ()) prolongEffect(pawn, "PowerLightAmp"         ); else restore(pawn, "PowerLightAmp"         );
-    if (settings.torch            ()) prolongEffect(pawn, "PowerTorch"            ); else restore(pawn, "PowerTorch"            );
-    if (settings.morph            ()) prolongEffect(pawn, "PowerMorph"            ); else restore(pawn, "PowerMorph"            );
-    if (settings.protection       ()) prolongEffect(pawn, "PowerProtection"       ); else restore(pawn, "PowerProtection"       );
-    if (settings.regeneration     ()) prolongEffect(pawn, "PowerRegeneration"     ); else restore(pawn, "PowerRegeneration"     );
-    if (settings.scanner          ()) prolongEffect(pawn, "PowerScanner"          ); else restore(pawn, "PowerScanner"          );
-    if (settings.speed            ()) prolongEffect(pawn, "PowerSpeed"            ); else restore(pawn, "PowerSpeed"            );
-    if (settings.strength         ()) prolongEffect(pawn, "PowerStrength"         ); else restore(pawn, "PowerStrength"         );
-    if (settings.targeter         ()) prolongEffect(pawn, "PowerTargeter"         ); else restore(pawn, "PowerTargeter"         );
-    if (settings.timeFreezer      ()) prolongEffect(pawn, "PowerTimeFreezer"      ); else restore(pawn, "PowerTimeFreezer"      );
-    if (settings.weaponLevel2     ()) prolongEffect(pawn, "PowerWeaponLevel2"     ); else restore(pawn, "PowerWeaponLevel2"     );
+    update(settings.buddha           (), pawn, "PowerBuddha"           );
+    update(settings.damage           (), pawn, "PowerDamage"           );
+    update(settings.doubleFiringSpeed(), pawn, "PowerDoubleFiringSpeed");
+    update(settings.drain            (), pawn, "PowerDrain"            );
+    update(settings.flight           (), pawn, "PowerFlight"           );
+    update(settings.frightener       (), pawn, "PowerFrightener"       );
+    update(settings.highJump         (), pawn, "PowerHighJump"         );
+    update(settings.infiniteAmmo     (), pawn, "PowerInfiniteAmmo"     );
+    update(settings.invisibility     (), pawn, "PowerInvisibility"     );
+    update(settings.ghost            (), pawn, "PowerGhost"            );
+    update(settings.shadow           (), pawn, "PowerShadow"           );
+    update(settings.invulnerability  (), pawn, "PowerInvulnerable"     );
+    update(settings.ironFeet         (), pawn, "PowerIronFeet"         );
+    update(settings.mask             (), pawn, "PowerMask"             );
+    update(settings.lightAmp         (), pawn, "PowerLightAmp"         );
+    update(settings.torch            (), pawn, "PowerTorch"            );
+    update(settings.morph            (), pawn, "PowerMorph"            );
+    update(settings.protection       (), pawn, "PowerProtection"       );
+    update(settings.regeneration     (), pawn, "PowerRegeneration"     );
+    update(settings.scanner          (), pawn, "PowerScanner"          );
+    update(settings.speed            (), pawn, "PowerSpeed"            );
+    update(settings.strength         (), pawn, "PowerStrength"         );
+    update(settings.targeter         (), pawn, "PowerTargeter"         );
+    update(settings.timeFreezer      (), pawn, "PowerTimeFreezer"      );
+    update(settings.weaponLevel2     (), pawn, "PowerWeaponLevel2"     );
 
     if (settings.minotaur()) prolongMinotaur(pawn); else restoreMinotaur(pawn);
+  }
+
+  private static
+  void update(bool prolonged, PlayerPawn pawn, string power)
+  {
+    if (prolonged) prolongEffect(pawn, power);
+    else restore(pawn, power);
   }
 
   private static
@@ -2530,13 +1522,7 @@ class cd_PermanentPowerupProperties play
   void restore(PlayerPawn pawn, string power)
   {
     let p = Powerup(pawn.FindInventory(power));
-    if (p == null) { return; }
-
-    class<Inventory>    type    = power;
-    readonly<Inventory> default = GetDefaultByType(type);
-    bool                orig    = default.bNoScreenBlink;
-
-    p.bNoScreenBlink = orig;
+    if (p != null) p.bNoScreenBlink = p.default.bNoScreenBlink;
   }
 
   private static
@@ -2558,14 +1544,776 @@ class cd_PermanentPowerupProperties play
   {
     restore(pawn, "PowerMinotaur");
   }
-
-} // class cd_PermanentPowerupProperties
+}
 #+end_src
+
+** Randomizer
+
+*** Main
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_Randomizer
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Options"                       , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "The Randomizer works by shifting the options between"  , CDLightBlue
+  StaticText  "the corresponding min and max values every n seconds." , CDLightBlue
+  StaticText  "========================================"              , CDLightBlue
+
+  StaticText  ""
+  Option      "Enable Randomizer"    , cd_random_enabled, OnOff
+
+  StaticText  ""
+  cd_MinField "Period"               , cd_random_frequency, 0
+  cd_Hint     "How often the randomizer will shift the values in seconds."
+
+  // TODO: show timer. lost, forgotten?
+  Option      "Show Timer"           , cd_random_timer_enabled, OnOff
+  Option      "Notification Type"    , cd_random_notification_type, "NotificationType"
+  Option      "Notification Sound"   , cd_random_notification_sound_enabled, OnOff
+  Slider      "Notification Volume"  , cd_random_notification_volume, 0.0, 1.0, 0.05, 2
+
+  StaticText  ""
+  StaticText  "Player Options"       , White
+  SubMenu     "Basic"                , cd_RandomizerBasicPlayer
+  SubMenu     "Advanced"             , cd_RandomizerAdvancedPlayer
+
+  StaticText  ""
+  StaticText  "$CD_REGENERATION_TITLE", White
+  SubMenu     "Health"               , cd_RandomizerHealthRegeneration
+  SubMenu     "Armor"                , cd_RandomizerArmorRegeneration
+  SubMenu     "Ammo"                 , cd_RandomizerAmmoRegeneration
+
+  StaticText  ""
+  StaticText  "Degeneration Options" , White
+  SubMenu     "Health"               , cd_RandomizerHealthDegeneration
+  SubMenu     "Armor"                , cd_RandomizerArmorDegeneration
+}
+
+OptionValue NotificationType
+{
+  0, "None"
+  1, "Text"
+  2, "Picture"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server bool  cd_random_enabled   = false;
+server int   cd_random_frequency = 30;
+
+user   bool  cd_random_timer_enabled              = true;
+user   int   cd_random_notification_type          = 1;
+user   bool  cd_random_notification_sound_enabled = true;
+user   float cd_random_notification_volume        = 0.5;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_settings.zs
+class cd_RandomizerSettings : cd_SettingsMaker
+{
+  enum NotificationTypes
+  {
+    NOTHING,
+    TEXT,
+    IMAGE,
+  }
+
+  cd_RandomizerSettings init()
+  {
+    _period = periodFrom("cd_random_enabled", "cd_random_frequency");
+
+    _timerEnabled             = boolFrom  ("cd_random_timer_enabled");
+    _notificationType         = intFrom   ("cd_random_notification_type");
+    _notificationSoundEnabled = boolFrom  ("cd_random_notification_sound_enabled");
+    _notificationVolume       = doubleFrom("cd_random_notification_volume");
+
+    return self;
+  }
+
+  cd_PeriodSetting period() { return _period; }
+
+  bool   timerEnabled            () { return _timerEnabled            .value(); }
+  int    notificationType        () { return _notificationType        .value(); }
+  bool   notificationSoundEnabled() { return _notificationSoundEnabled.value(); }
+  double notificationVolume      () { return _notificationVolume      .value(); }
+
+  private cd_PeriodSetting _period;
+  private cd_BoolSetting   _timerEnabled;
+  private cd_IntSetting    _notificationType;
+  private cd_BoolSetting   _notificationSoundEnabled;
+  private cd_DoubleSetting _notificationVolume;
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_randomizer_limits.zs
+/// This class provides value limits for randomization.
+class cd_RandomizerLimits
+{
+  cd_RandomizerLimits init()
+  {
+    _player             = new("cd_PlayerLimits"            ).init();
+    _healthRegeneration = new("cd_HealthRegenerationLimits").init();
+    _armorRegeneration  = new("cd_ArmorRegenerationLimits" ).init();
+    _ammoRegeneration   = new("cd_AmmoRegenerationLimits"  ).init();
+    _healthDegeneration = new("cd_HealthDegenerationLimits").init();
+    _armorDegeneration  = new("cd_ArmorDegenerationLimits" ).init();
+    return self;
+  }
+
+  cd_PlayerLimits             player            () { return _player            ; }
+  cd_HealthRegenerationLimits healthRegeneration() { return _healthRegeneration; }
+  cd_ArmorRegenerationLimits  armorRegeneration () { return _armorRegeneration ; }
+  cd_AmmoRegenerationLimits   ammoRegeneration  () { return _ammoRegeneration  ; }
+  cd_HealthDegenerationLimits healthDegeneration() { return _healthDegeneration; }
+  cd_ArmorDegenerationLimits  armorDegeneration () { return _armorDegeneration ; }
+
+  private cd_PlayerLimits             _player;
+  private cd_HealthRegenerationLimits _healthRegeneration;
+  private cd_ArmorRegenerationLimits  _armorRegeneration;
+  private cd_AmmoRegenerationLimits   _ammoRegeneration;
+  private cd_HealthDegenerationLimits _healthDegeneration;
+  private cd_ArmorDegenerationLimits  _armorDegeneration;
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_randomizer.zs
+class cd_Randomizer play
+{
+  cd_Randomizer init()
+  {
+    _timerColor = Font.FindFontColor("CDLightBlue");
+    return self;
+  }
+
+  static
+  void randomize(cd_Settings settings, cd_RandomizerLimits limits)
+  {
+    cd_RandomizerSettings randomizerSettings = settings.randomizer();
+
+    if (!cd_Time.isEventNow(randomizerSettings.period())) return;
+
+    PlayerPawn pawn = players[consolePlayer].mo;
+    if (pawn == null) { return; }
+
+    settings.randomize(limits);
+
+    if (randomizerSettings.notificationSoundEnabled())
+    {
+      pawn.A_StartSound( RANDOMIZER_NOTIFICATION_SOUND
+                       , CHAN_AUTO
+                       , int(randomizerSettings.notificationVolume())
+                       );
+    }
+  }
+
+  ui
+  void show(PlayerInfo player, cd_RandomizerSettings settings)
+  {
+    showNotification(player, settings);
+    showTimer(player, settings.period());
+  }
+
+  private ui
+  void showTimer(PlayerInfo player, cd_PeriodSetting settings)
+  {
+    if (!settings.enabled()) { return; }
+
+    int    periodSeconds        = settings.period();
+    int    goneSeconds          = (level.time / TicRate) % periodSeconds;
+    int    remainingSeconds     = periodSeconds - goneSeconds;
+    int    remainingMinutes     = remainingSeconds / 60;
+    int    remainingSecondsOnly = remainingSeconds % 60;
+    string timerString          = String.Format("%02d:%02d", remainingMinutes, remainingSecondsOnly);
+
+    drawTextCenter(timerString, _timerColor, TEXT_SCALE, X_CENTER, TIMER_Y, BigFont);
+  }
+
+  private ui
+  void showNotification(PlayerInfo player, cd_RandomizerSettings settings)
+  {
+    if (!settings.period().enabled()) { return; }
+
+    int  periodTicks   = settings.period().period() * TicRate;
+    int  ticsFromReset = level.time % periodTicks;
+    bool shouldShow    = (ticsFromReset < NOTIFICATION_TIME);
+
+    if (!shouldShow) { return; }
+
+    int notificationType = settings.notificationType();
+
+    switch (notificationType)
+    {
+    case cd_RandomizerSettings.NOTHING:
+      break;
+
+    case cd_RandomizerSettings.TEXT:
+      drawTextCenter("The rules have changed!",
+                     NOTIFICATION_COLOR,
+                     TEXT_SCALE,
+                     X_CENTER,
+                     NOTIFICATION_Y,
+                     SmallFont);
+      break;
+
+    case cd_RandomizerSettings.IMAGE:
+      double    alpha = makeAlpha(ticsFromReset);
+      TextureID image = TexMan.CheckForTexture("RNDMIZED", TexMan.Type_Any);
+
+      drawImageCenter(image, X_CENTER, NOTIFICATION_IMAGE_Y, alpha);
+      break;
+    }
+  }
+
+  private static ui
+  double makeAlpha(int ticsFromReset)
+  {
+    if (ticsFromReset > FADE_OUT_TIME) // fade out
+    {
+      return 1.0 - 1.0 / (NOTIFICATION_TIME - FADE_OUT_TIME) * (ticsFromReset - FADE_OUT_TIME);
+    }
+    if (ticsFromReset > FADE_IN_TIME ) // normal
+    {
+      return 1.0;
+    }
+    else // fade in
+    {
+      return 1.0 / FADE_IN_TIME * ticsFromReset;
+    }
+  }
+
+  private static ui
+  void drawTextCenter(string text,
+                      int    color,
+                      double scale,
+                      double relativeX,
+                      double relativeY,
+                      Font   font)
+  {
+    int width    = int(scale * Screen.GetWidth());
+    int height   = int(scale * (Screen.GetHeight() - font.GetHeight()));
+    int position = width - font.StringWidth(text);
+
+    double x = position * relativeX;
+    double y = height   * relativeY;
+
+    Screen.DrawText(font,
+                    color,
+                    x,
+                    y,
+                    text,
+                    DTA_KeepRatio     , true,
+                    DTA_VirtualWidth  , width,
+                    DTA_VirtualHeight , height);
+  }
+
+  private static ui
+  void drawImageCenter(TextureID image,
+                       double    relativeX,
+                       double    relativeY,
+                       double    alpha)
+  {
+    int width  = Screen.GetWidth();
+    int height = Screen.GetHeight();
+
+    int imageWidth;
+    int imageHeight;
+    [imageWidth, imageHeight] = TexMan.GetSize(image);
+    double x = width  * relativeX - imageWidth / 2;
+    double y = height * relativeY - imageHeight / 2;
+
+    Screen.DrawTexture(image,
+                       false,
+                       x,
+                       y,
+                       DTA_KeepRatio     , true,
+                       DTA_VirtualWidth  , width,
+                       DTA_VirtualHeight , height,
+                       DTA_Alpha         , alpha);
+  }
+
+  private int _timerColor;
+
+  const TEXT_SCALE  = 1.0;
+  const X_CENTER    = 0.5;
+
+  const TIMER_Y     = 0.1;
+
+  const NOTIFICATION_COLOR   = Font.CR_RED;
+  const NOTIFICATION_Y       = 0.37;
+  const NOTIFICATION_IMAGE_Y = 0.25;
+
+  const RANDOMIZER_NOTIFICATION_SOUND = "Randomizer/Notification";
+
+  const FADE_IN_TIME      = 8; // time when fade in stops, tics
+  const FADE_OUT_TIME     = NOTIFICATION_TIME - 8; // time when fade out begins, tics
+  const NOTIFICATION_TIME = 3 * TicRate;
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/UltimateCustomDoom/sndinfo.txt
+Randomizer/Notification "sounds/cd_randomizer_notification.ogg"
+#+end_src
+
+*** Player
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_player_limits.zs
+/// This class prov ides limits for Player Settings.
+class cd_PlayerLimits : cd_SettingsMaker
+{
+  cd_PlayerLimits init()
+  {
+    _damageMultiplier      = minMaxDoubleFrom(
+                                "cd_random_player_weapon_damage_mult_min",
+                                "cd_random_player_weapon_damage_mult_max");
+    _damageTakenMultiplier = minMaxDoubleFrom(
+                                "cd_random_player_damage_taken_mult_min",
+                                "cd_random_player_damage_taken_mult_max");
+
+    _startHealth     = minMaxIntFrom   ("cd_random_player_start_health_min",
+                                        "cd_random_player_start_health_max");
+    _startArmor      = minMaxIntFrom   ("cd_random_player_start_armor_min",
+                                        "cd_random_player_start_armor_max");
+    _savePercent     = minMaxIntFrom   ("cd_random_player_start_savePercent_min",
+                                        "cd_random_player_start_savePercent_max");
+    _maxHealth       = minMaxIntFrom   ("cd_random_player_max_health_min",
+                                        "cd_random_player_max_health_max");
+    _speedMultiplier = minMaxDoubleFrom("cd_random_player_speed_mult_min",
+                                        "cd_random_player_speed_mult_max");
+
+    _jumpHeightMultiplier = minMaxDoubleFrom("cd_random_player_jump_mult_min",
+                                             "cd_random_player_jump_mult_max");
+
+    return self;
+  }
+
+  cd_MinMaxDoubleSetting damageMultiplier     () { return _damageMultiplier     ; }
+  cd_MinMaxDoubleSetting damageTakenMultiplier() { return _damageTakenMultiplier; }
+
+  cd_MinMaxIntSetting    startHealth          () { return _startHealth          ; }
+  cd_MinMaxIntSetting    startArmor           () { return _startArmor           ; }
+  cd_MinMaxIntSetting    savePercent          () { return _savePercent          ; }
+  cd_MinMaxIntSetting    maxHealth            () { return _maxHealth            ; }
+
+  cd_MinMaxDoubleSetting speedMultiplier      () { return _speedMultiplier      ; }
+  cd_MinMaxDoubleSetting jumpHeightMultiplier () { return _jumpHeightMultiplier ; }
+
+  private cd_MinMaxDoubleSetting _damageMultiplier;
+  private cd_MinMaxDoubleSetting _damageTakenMultiplier;
+  private cd_MinMaxIntSetting    _startHealth;
+  private cd_MinMaxIntSetting    _startArmor;
+  private cd_MinMaxIntSetting    _savePercent;
+  private cd_MinMaxIntSetting    _maxHealth;
+  private cd_MinMaxDoubleSetting _speedMultiplier;
+  private cd_MinMaxDoubleSetting _jumpHeightMultiplier;
+}
+#+end_src
+
+**** Basic
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerBasicPlayer
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Basic Player Options"          , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Weapon Damage Min" , cd_random_player_weapon_damage_mult_min, 0
+  cd_MinField "Weapon Damage Max" , cd_random_player_weapon_damage_mult_max, 0
+  StaticText  ""
+  cd_MinField "Damage Taken Min"  , cd_random_player_damage_taken_mult_min, 0
+  cd_MinField "Damage Taken Max"  , cd_random_player_damage_taken_mult_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server float cd_random_player_weapon_damage_mult_min;
+server float cd_random_player_weapon_damage_mult_max;
+
+server float cd_random_player_damage_taken_mult_min;
+server float cd_random_player_damage_taken_mult_max;
+#+end_src
+
+**** Advanced
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerAdvancedPlayer
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Advanced Player Options"       , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Starting Health Min"  , cd_random_player_start_health_min, 0
+  cd_MinField "Starting Health Max"  , cd_random_player_start_health_max, 0
+
+  StaticText  ""
+  cd_MinField "Max Health Min"       , cd_random_player_max_health_min, 0
+  cd_MinField "Max Health Max"       , cd_random_player_max_health_max, 0
+
+  StaticText  ""
+  cd_MinField "Starting Armor Min"   , cd_random_player_start_armor_min, 0
+  cd_MinField "Starting Armor Max"   , cd_random_player_start_armor_max, 0
+
+  StaticText  ""
+  cd_MinField "Starting Armor Save Percent Min", cd_random_player_start_savePercent_min, 0
+  cd_MinField "Starting Armor Save Percent Max", cd_random_player_start_savePercent_max, 0
+
+  StaticText  ""
+  cd_MinField "Speed Multiplier Min" , cd_random_player_speed_mult_min, 0
+  cd_MinField "Speed Multiplier Max" , cd_random_player_speed_mult_max, 0
+
+  StaticText  ""
+  cd_MinField "Jump Multiplier Min"  , cd_random_player_jump_mult_min, 0
+  cd_MinField "Jump Multiplier Max"  , cd_random_player_jump_mult_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_player_start_health_min;
+server int   cd_random_player_start_health_max;
+
+server int   cd_random_player_max_health_min;
+server int   cd_random_player_max_health_max;
+
+server int   cd_random_player_start_armor_min;
+server int   cd_random_player_start_armor_max;
+
+server int   cd_random_player_start_savePercent_min;
+server int   cd_random_player_start_savePercent_max;
+
+server float cd_random_player_speed_mult_min;
+server float cd_random_player_speed_mult_max;
+
+server float cd_random_player_jump_mult_min;
+server float cd_random_player_jump_mult_max;
+#+end_src
+
+*** Health regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerHealthRegeneration
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Health Regeneration Options"   , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Health Amount Min"     , cd_random_health_regen_amount_min, 0
+  cd_MinField "Health Amount Max"     , cd_random_health_regen_amount_max, 0
+
+  StaticText  ""
+  cd_MinField "Health Period Min"     , cd_random_health_regen_freq_min, 0
+  cd_MinField "Health Period Max"     , cd_random_health_regen_freq_max, 0
+
+  StaticText  ""
+  cd_MinField "Health Cap Amount Min" , cd_random_health_regen_cap_min, 0
+  cd_MinField "Health Cap Amount Max" , cd_random_health_regen_cap_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_health_regen_amount_min;
+server int   cd_random_health_regen_amount_max;
+
+server int   cd_random_health_regen_freq_min;
+server int   cd_random_health_regen_freq_max;
+
+server int   cd_random_health_regen_cap_min;
+server int   cd_random_health_regen_cap_max;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_regeneration_limits.zs
+/// This class provides limits for health regeneration settings.
+class cd_HealthRegenerationLimits : cd_SettingsMaker
+{
+  cd_HealthRegenerationLimits init()
+  {
+    _amount = minMaxIntFrom("cd_random_health_regen_amount_min",
+                            "cd_random_health_regen_amount_max");
+    _period = minMaxIntFrom("cd_random_health_regen_freq_min",
+                            "cd_random_health_regen_freq_max");
+    _cap    = minMaxIntFrom("cd_random_health_regen_cap_min",
+                            "cd_random_health_regen_cap_max");
+    return self;
+  }
+
+  cd_MinMaxIntSetting amount() { return _amount; }
+  cd_MinMaxIntSetting period() { return _period; }
+  cd_MinMaxIntSetting cap   () { return _cap   ; }
+
+  private cd_MinMaxIntSetting _amount;
+  private cd_MinMaxIntSetting _period;
+  private cd_MinMaxIntSetting _cap;
+}
+#+end_src
+
+*** Armor regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerArmorRegeneration
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Armor Regeneration Options"    , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Armor Amount Min"     , cd_random_armor_regen_amount_min, 0
+  cd_MinField "Armor Amount Max"     , cd_random_armor_regen_amount_max, 0
+
+  StaticText  ""
+  cd_MinField "Armor Period Min"     , cd_random_armor_regen_freq_min, 0
+  cd_MinField "Armor Period Max"     , cd_random_armor_regen_freq_max, 0
+
+  StaticText  ""
+  cd_MinField "Armor Min Amount Min" , cd_random_armor_regen_min_min, 0
+  cd_MinField "Armor Min Amount Max" , cd_random_armor_regen_min_max, 0
+
+  StaticText  ""
+  cd_MinField "Armor Cap Amount Min" , cd_random_armor_regen_cap_min, 0
+  cd_MinField "Armor Cap Amount Max" , cd_random_armor_regen_cap_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_armor_regen_amount_min;
+server int   cd_random_armor_regen_amount_max;
+
+server int   cd_random_armor_regen_freq_min;
+server int   cd_random_armor_regen_freq_max;
+
+server int   cd_random_armor_regen_min_min;
+server int   cd_random_armor_regen_min_max;
+
+server int   cd_random_armor_regen_cap_min;
+server int   cd_random_armor_regen_cap_max;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_regeneration_limits.zs
+/// This class represents limits for Armor Regeneration Settings.
+class cd_ArmorRegenerationLimits : cd_SettingsMaker
+{
+  cd_ArmorRegenerationLimits init()
+  {
+    _amount = minMaxIntFrom("cd_random_armor_regen_amount_min",
+                            "cd_random_armor_regen_amount_max");
+    _period = minMaxIntFrom("cd_random_armor_regen_freq_min",
+                            "cd_random_armor_regen_freq_max");
+    _min    = minMaxIntFrom("cd_random_armor_regen_min_min",
+                            "cd_random_armor_regen_min_max");
+    _cap    = minMaxIntFrom("cd_random_armor_regen_cap_min",
+                            "cd_random_armor_regen_cap_max");
+    return self;
+  }
+
+  cd_MinMaxIntSetting amount() { return _amount; }
+  cd_MinMaxIntSetting period() { return _period; }
+  cd_MinMaxIntSetting min   () { return _min   ; }
+  cd_MinMaxIntSetting cap   () { return _cap   ; }
+
+  private cd_MinMaxIntSetting _amount;
+  private cd_MinMaxIntSetting _period;
+  private cd_MinMaxIntSetting _min;
+  private cd_MinMaxIntSetting _cap;
+}
+#+end_src
+
+*** Ammo regeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerAmmoRegeneration
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Ammo Regeneration Options"     , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Ammo Amount Min" , cd_random_ammo_regen_amount_min, 0
+  cd_MinField "Ammo Amount Max" , cd_random_ammo_regen_amount_max, 0
+
+  StaticText  ""
+  cd_MinField "Ammo Period Min" , cd_random_ammo_regen_freq_min, 0
+  cd_MinField "Ammo Period Max" , cd_random_ammo_regen_freq_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_ammo_regen_amount_min;
+server int   cd_random_ammo_regen_amount_max;
+
+server int   cd_random_ammo_regen_freq_min;
+server int   cd_random_ammo_regen_freq_max;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_ammo_regeneration_limits.zs
+/// This class provides value limits for Ammo Regeneration Randomization.
+class cd_AmmoRegenerationLimits : cd_SettingsMaker
+{
+  cd_AmmoRegenerationLimits init()
+  {
+    _amount = minMaxIntFrom("cd_random_ammo_regen_amount_min",
+                            "cd_random_ammo_regen_amount_max");
+    _period = minMaxIntFrom("cd_random_ammo_regen_freq_min",
+                            "cd_random_ammo_regen_freq_max");
+    return self;
+  }
+
+  cd_MinMaxIntSetting amount() { return _amount; }
+  cd_MinMaxIntSetting period() { return _period; }
+
+  private cd_MinMaxIntSetting _amount;
+  private cd_MinMaxIntSetting _period;
+}
+#+end_src
+
+*** Health degeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerHealthDegeneration
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Health Degeneration Options"   , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Health Amount Min" , cd_random_health_degen_amount_min, 0
+  cd_MinField "Health Amount Max" , cd_random_health_degen_amount_max, 0
+
+  StaticText  ""
+  cd_MinField "Health Period Min" , cd_random_health_degen_freq_min, 0
+  cd_MinField "Health Period Max" , cd_random_health_degen_freq_max, 0
+
+  StaticText  ""
+  cd_MinField "Health Limit Min"  , cd_random_health_degen_limit_min, 0
+  cd_MinField "Health Limit Max"  , cd_random_health_degen_limit_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_health_degen_amount_min;
+server int   cd_random_health_degen_amount_max;
+
+server int   cd_random_health_degen_freq_min;
+server int   cd_random_health_degen_freq_max;
+
+server int   cd_random_health_degen_limit_min;
+server int   cd_random_health_degen_limit_max;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_health_degeneration_limits.zs
+/// This class provides value limits for Health Degeneration Randomization.
+class cd_HealthDegenerationLimits : cd_DegenerationLimits
+{
+  cd_HealthDegenerationLimits init()
+  {
+    _amount = minMaxIntFrom("cd_random_health_degen_amount_min",
+                            "cd_random_health_degen_amount_max");
+    _period = minMaxIntFrom("cd_random_health_degen_freq_min",
+                            "cd_random_health_degen_freq_max");
+    _limit  = minMaxIntFrom("cd_random_health_degen_limit_min",
+                            "cd_random_health_degen_limit_max");
+    return self;
+  }
+}
+#+end_src
+
+*** Armor degeneration
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_RandomizerArmorDegeneration
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Randomizer Armor Degeneration Options"    , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "Min must be smaller than max."            , CDLightBlue
+  StaticText  ""
+  StaticText  "Leaving both fields at 0 will disable"    , CDLightBlue
+  StaticText  "randomization for that option."           , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  cd_MinField "Armor Amount Min" , cd_random_armor_degen_amount_min, 0
+  cd_MinField "Armor Amount Max" , cd_random_armor_degen_amount_max, 0
+
+  StaticText  ""
+  cd_MinField "Armor Period Min" , cd_random_armor_degen_freq_min, 0
+  cd_MinField "Armor Period Max" , cd_random_armor_degen_freq_max, 0
+
+  StaticText  ""
+  cd_MinField "Armor Limit Min"  , cd_random_armor_degen_limit_min, 0
+  cd_MinField "Armor Limit Max"  , cd_random_armor_degen_limit_max, 0
+}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/cvarinfo.txt
+server int   cd_random_armor_degen_amount_min;
+server int   cd_random_armor_degen_amount_max;
+
+server int   cd_random_armor_degen_freq_min;
+server int   cd_random_armor_degen_freq_max;
+
+server int   cd_random_armor_degen_limit_min;
+server int   cd_random_armor_degen_limit_max;
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_armor_degeneration_limits.zs
+/// This class provides value limits for Armor Degeneration Randomization.
+class cd_ArmorDegenerationLimits : cd_DegenerationLimits
+{
+  cd_ArmorDegenerationLimits init()
+  {
+    _amount = minMaxIntFrom("cd_random_armor_degen_amount_min",
+                            "cd_random_armor_degen_amount_max");
+    _period = minMaxIntFrom("cd_random_armor_degen_freq_min",
+                            "cd_random_armor_degen_freq_max");
+    _limit  = minMaxIntFrom("cd_random_armor_degen_limit_min",
+                            "cd_random_armor_degen_limit_max");
+    return self;
+  }
+}
+#+end_src
+
+** Event handler
+
+#+begin_src prog :tangle ../build/UltimateCustomDoom/mapinfo.txt
+gameinfo { EventHandlers = "cd_EventHandler" }
+#+end_src
+
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_event_handler.zs
 /// This class provides the entry point for all Ultimate Custom Doom features.
 class cd_EventHandler : EventHandler
 {
-
   override
   void PlayerEntered(PlayerEvent event)
   {
@@ -2638,8 +2386,8 @@ class cd_EventHandler : EventHandler
   private
   void initSettings(PlayerInfo player)
   {
-    _settings         = new("cd_Settings"        ).init(player);
-    _randomizerLimits = new("cd_RandomizerLimits").init(player);
+    _settings         = new("cd_Settings"        ).init();
+    _randomizerLimits = new("cd_RandomizerLimits").init();
   }
 
   private
@@ -2661,7 +2409,7 @@ class cd_EventHandler : EventHandler
 
     cd_PermanentPowerupProperties.adjustTimes(player, _settings.permanentPowerup());
 
-    cd_Randomizer.randomize(player, _settings, _randomizerLimits);
+    cd_Randomizer.randomize(_settings, _randomizerLimits);
   }
 
   private cd_Settings         _settings;
@@ -2669,275 +2417,37 @@ class cd_EventHandler : EventHandler
   private cd_MiscProperties   _miscProperties;
   private cd_Randomizer       _randomizer;
   private cd_RandomizerLimits _randomizerLimits;
-
-} // class cd_EventHandler
+}
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_randomizer.zs
-/// What?
-class cd_Randomizer play
-{
 
-  cd_Randomizer init()
-  {
-    _timerColor = Font.FindFontColor("CDLightBlue");
+** Common elemments
 
-    return self;
-  }
-
-  static
-  void randomize(PlayerInfo player, cd_Settings settings, cd_RandomizerLimits limits)
-  {
-    cd_RandomizerSettings randomizerSettings = settings.randomizer();
-
-    PlayerPawn pawn = cd_Time.now(player, randomizerSettings.period());
-
-    if (pawn == null) { return; }
-
-    settings.randomize(player, limits);
-
-    if (randomizerSettings.isNotificationSoundEnabled())
-    {
-      pawn.A_StartSound( RANDOMIZER_NOTIFICATION_SOUND
-                       , CHAN_AUTO
-                       , int(randomizerSettings.notificationVolume())
-                       );
-    }
-  }
-
-  ui
-  void show(PlayerInfo player, cd_RandomizerSettings settings)
-  {
-    showNotification(player, settings);
-    showTimer(player, settings.period());
-  }
-
-  private ui
-  void showTimer(PlayerInfo player, cd_PeriodSettings settings)
-  {
-    if (!settings.isEnabled()) { return; }
-
-    int    periodSeconds        = settings.period();
-    int    goneSeconds          = (level.time / TicRate) % periodSeconds;
-    int    remainingSeconds     = periodSeconds - goneSeconds;
-    int    remainingMinutes     = remainingSeconds / 60;
-    int    remainingSecondsOnly = remainingSeconds % 60;
-    string timerString          = String.Format("%02d:%02d", remainingMinutes, remainingSecondsOnly);
-
-    drawTextCenter(timerString, _timerColor, TEXT_SCALE, X_CENTER, TIMER_Y, BigFont);
-  }
-
-  private ui
-  void showNotification(PlayerInfo player, cd_RandomizerSettings settings)
-  {
-    if (!settings.period().isEnabled()) { return; }
-
-    int  periodTicks   = settings.period().period() * TicRate;
-    int  ticsFromReset = level.time % periodTicks;
-    bool shouldShow    = (ticsFromReset < NOTIFICATION_TIME);
-
-    if (!shouldShow) { return; }
-
-    int notificationType = settings.notificationType();
-
-    switch (notificationType)
-    {
-    case cd_RandomizerSettings.NOTHING:
-      break;
-
-    case cd_RandomizerSettings.TEXT:
-      drawTextCenter( "The rules have changed!"
-                    , NOTIFICATION_COLOR
-                    , TEXT_SCALE
-                    , X_CENTER
-                    , NOTIFICATION_Y
-                    , SmallFont
-                    );
-      break;
-
-    case cd_RandomizerSettings.IMAGE:
-      double    alpha = makeAlpha(ticsFromReset);
-      TextureID image = TexMan.CheckForTexture("RNDMIZED", TexMan.Type_Any);
-
-      drawImageCenter(image, X_CENTER, NOTIFICATION_IMAGE_Y, alpha);
-      break;
-    }
-  }
-
-  private static ui
-  double makeAlpha(int ticsFromReset)
-  {
-    if (ticsFromReset > FADE_OUT_TIME) // fade out
-    {
-      return 1.0 - 1.0 / (NOTIFICATION_TIME - FADE_OUT_TIME) * (ticsFromReset - FADE_OUT_TIME);
-    }
-    if (ticsFromReset > FADE_IN_TIME ) // normal
-    {
-      return 1.0;
-    }
-    else // fade in
-    {
-      return 1.0 / FADE_IN_TIME * ticsFromReset;
-    }
-  }
-
-  private static ui
-  void drawTextCenter( string text
-                     , int    color
-                     , double scale
-                     , double relativeX
-                     , double relativeY
-                     , Font   font
-                     )
-  {
-    int width    = int(scale * Screen.GetWidth());
-    int height   = int(scale * (Screen.GetHeight() - font.GetHeight()));
-    int position = width - font.StringWidth(text);
-
-    double x = position * relativeX;
-    double y = height   * relativeY;
-
-    Screen.DrawText( font
-                   , color
-                   , x
-                   , y
-                   , text
-                   , DTA_KeepRatio     , true
-                   , DTA_VirtualWidth  , width
-                   , DTA_VirtualHeight , height
-                   );
-  }
-
-  private static ui
-  void drawImageCenter( TextureID image
-                      , double    relativeX
-                      , double    relativeY
-                      , double    alpha
-                      )
-  {
-    int width    = Screen.GetWidth();
-    int height   = Screen.GetHeight();
-
-    int imageWidth;
-    int imageHeight;
-    [imageWidth, imageHeight] = TexMan.GetSize(image);
-    double x = width  * relativeX - imageWidth / 2;
-    double y = height * relativeY - imageHeight / 2;
-
-    Screen.DrawTexture( image
-                      , false
-                      , x
-                      , y
-                      , DTA_KeepRatio     , true
-                      , DTA_VirtualWidth  , width
-                      , DTA_VirtualHeight , height
-                      , DTA_Alpha         , alpha
-                      );
-  }
-
-  private int _timerColor;
-
-  const TEXT_SCALE  = 1.0;
-  const X_CENTER    = 0.5;
-
-  const TIMER_Y     = 0.1;
-
-  const NOTIFICATION_COLOR   = Font.CR_RED;
-  const NOTIFICATION_Y       = 0.37;
-  const NOTIFICATION_IMAGE_Y = 0.25;
-
-  const RANDOMIZER_NOTIFICATION_SOUND = "Randomizer/Notification";
-
-  const FADE_IN_TIME      = 8; // time when fade in stops, tics
-  const FADE_OUT_TIME     = NOTIFICATION_TIME - 8; // time when fade out begins, tics
-  const NOTIFICATION_TIME = 3 * TicRate;
-
-} // class cd_Randomizer
+#+begin_src prog :tangle ../build/UltimateCustomDoom/textcolo.txt
+CDLightBlue { #111111 #99CCFF }
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_start_giver_check.zs
-/// This inventory item is used to determine if the player has started a new
-/// game or entered this level from the previous level.
-///
-/// The absence of this item means that the player has started a new game.
-class cd_StartGiverCheck : Inventory
-{
 
-  Default
-  {
-    Inventory.MaxAmount 1;
-
-    +Inventory.UNDROPPABLE;
-  }
-
-} // class cd_StartGiverCheck
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_ENABLE             = "Enable";
+CD_AMOUNT_CAPTION     = "Amount";
+CD_PERIOD_CAPTION     = "Period";
+CD_LIMIT_CAPTION      = "Limit";
+CD_CAP_AMOUNT_CAPTION = "Cap amount";
+CD_MIN_AMOUNT_CAPTION = "Min amount";
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_armor_bonus.zs
-/// This class is the armor giving helper.
-class cd_ArmorBonus : BasicArmorBonus
-{
-
-  Default
-  {
-    Armor.SaveAmount    1;
-    Armor.MaxSaveAmount 0x7FFFFFFF;
-  }
-
-} // class cd_ArmorBonus
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_AMOUNT_CAPTION     = "Кол-во";
+CD_PERIOD_CAPTION     = "Период";
+CD_LIMIT_CAPTION      = "Лимит";
+CD_CAP_AMOUNT_CAPTION = "Макс. кол-во";
+CD_MIN_AMOUNT_CAPTION = "Мин. кол-во";
 #+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/inventory/cd_start_armor_bonus.zs
-class cd_StartArmorBonus : cd_ArmorBonus
-{
 
-  override void BeginPlay()
-  {
-    SavePercent = GetCVAR("cd_player_start_savePercent");
-  }
-
-} // class cd_StartArmorBonus
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_min_field.zs
-/// This menu item provides a text field with a check for lower bound (minimal
-/// value).
-///
-/// If the entered value is lower than the specified minimal value, it's
-/// corrected to the minimal value.
-class OptionMenuItemCd_MinField : OptionMenuItemTextField
-{
-
-  OptionMenuItemCd_MinField Init(String label, Name command, double min)
-  {
-    Super.Init(label, command);
-    _min = min;
-    return self;
-  }
-
-  override
-  bool SetString(int i, String s)
-  {
-    double original  = s.ToDouble();
-    double corrected = max(_min, original);
-
-    if (original != corrected)
-    {
-      string localized = StringTable.Localize(mLabel);
-      console.printf("%s cannot be less than %f.", localized, _min);
-    }
-
-    String correctedString = String.Format("%f", corrected);
-
-    return Super.SetString(i, correctedString);
-  }
-
-  private double _min;
-
-} // class OptionMenuItemCd_MinField : OptionMenuItemTextField
-#+end_src
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_hint.zs
 /// This class provides the Hint Option Menu item.
 /// Hint is a static text that is visible only if the items above are selected.
 /// The number of items above is configurable, and by default is 1.
 class OptionMenuItemCd_Hint : OptionMenuItemStaticText
 {
-
   /// nAbove means for how many selectable items above this hint should appear.
   OptionMenuItemCd_Hint Init(String label, int nAbove = 1)
   {
@@ -2981,20 +2491,431 @@ class OptionMenuItemCd_Hint : OptionMenuItemStaticText
   }
 
   private int _nAbove;
-
-} // class OptionMenuItemCd_Hint
+}
 #+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_min_field.zs
+/// This menu item provides a text field with a check for lower bound (minimal
+/// value).
+///
+/// If the entered value is lower than the specified minimal value, it's
+/// corrected to the minimal value.
+class OptionMenuItemCd_MinField : OptionMenuItemTextField
+{
+  OptionMenuItemCd_MinField Init(String label, Name command, double min)
+  {
+    Super.Init(label, command);
+    _min = min;
+    return self;
+  }
+
+  override
+  bool SetString(int i, String s)
+  {
+    double original  = s.ToDouble();
+    double corrected = max(_min, original);
+
+    if (original != corrected)
+    {
+      string localized = StringTable.Localize(mLabel);
+      console.printf("%s cannot be less than %f.", localized, _min);
+    }
+
+    String correctedString = String.Format("%f", corrected);
+
+    return Super.SetString(i, correctedString);
+  }
+
+  private double _min;
+}
+#+end_src
+
+* Commands
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
+OptionMenu cd_Commands
+{
+  StaticText  "========================================" , CDLightBlue
+  StaticText  "$CD_COMMANDS_TITLE"                       , CDLightBlue
+  StaticText  "========================================" , CDLightBlue
+
+  StaticText  ""
+  SafeCommand "$CD_KILL", kill, "$CD_KILL_CONFIRMATION"
+  cd_Hint     "$CD_KILL_HINT"
+
+  SafeCommand "$CD_RESET_OPTIONS", cd_reset_to_defaults, "$CD_RESET_OPTIONS_CONFIRMATION"
+  cd_Hint     "$CD_RESET_OPTIONS_HINT"
+
+  SafeCommand "$CD_RESET_RANDOMIZER", cd_reset_random_to_defaults, "$CD_RESET_RANDOMIZER_CONFIRMATION"
+}
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_COMMANDS_TITLE = "Ultimate Custom Doom Commands";
+CD_KILL = "Kill Player";
+CD_KILL_CONFIRMATION = "This will kill the player. Are you sure?";
+CD_KILL_HINT = "Use if stuck in death exit.";
+
+CD_RESET_OPTIONS = "Reset option values to defaults";
+CD_RESET_OPTIONS_CONFIRMATION = "This will reset all option values to their defaults.";
+CD_RESET_OPTIONS_HINT = "This doesn't reset the Randomizer min/max values.";
+
+CD_RESET_RANDOMIZER = "Reset Randomizer min/max to zero";
+CD_RESET_RANDOMIZER_CONFIRMATION = "This will set all randomizer min/max values to zero.";
+#+end_src
+
+TODO: handle these via netevent?
+#+begin_src prog :tangle ../build/UltimateCustomDoom/keyconf.txt
+Alias cd_reset_to_defaults "resetcvar cd_player_weapon_damage_mult; resetcvar cd_player_damage_taken_mult; resetcvar cd_player_start_type; resetcvar cd_player_start_health; resetcvar cd_player_start_armor; resetcvar cd_player_start_savePercent; resetcvar cd_player_max_health; resetcvar cd_player_speed_mult; resetcvar cd_player_jump_mult; resetcvar cd_player_misc_enabled; resetcvar cd_player_airControl_mult; resetcvar cd_player_friction_mult; resetcvar cd_player_self_damage_mult; resetcvar cd_monster_health_mult; resetcvar cd_monster_speed_mult; resetcvar cd_monster_health_cap; resetcvar cd_health_regen_enabled; resetcvar cd_health_regen_amount; resetcvar cd_health_regen_freq; resetcvar cd_health_regen_cap; resetcvar cd_health_sound_enabled; resetcvar cd_health_regen_pulse; resetcvar cd_health_blend_color_r; resetcvar cd_health_blend_color_g; resetcvar cd_health_blend_color_b; resetcvar cd_health_blend_color_int; resetcvar cd_armor_regen_enabled; resetcvar cd_armor_regen_amount; resetcvar cd_armor_regen_freq; resetcvar cd_armor_regen_min; resetcvar cd_armor_regen_cap; resetcvar cd_armor_sound_enabled; resetcvar cd_armor_regen_pulse; resetcvar cd_armor_blend_color_r; resetcvar cd_armor_blend_color_g; resetcvar cd_armor_blend_color_b; resetcvar cd_armor_blend_color_int; resetcvar cd_ammo_regen_enabled; resetcvar cd_ammo_regen_backpack_req; resetcvar cd_ammo_regen_amount; resetcvar cd_ammo_regen_freq; resetcvar cd_ammo_regen_pulse; resetcvar cd_ammo_blend_color_r; resetcvar cd_ammo_blend_color_g; resetcvar cd_ammo_blend_color_b; resetcvar cd_ammo_blend_color_int; resetcvar cd_health_degen_enabled; resetcvar cd_health_degen_amount; resetcvar cd_health_degen_freq; resetcvar cd_health_degen_limit; resetcvar cd_armor_degen_amount; resetcvar cd_armor_degen_freq; resetcvar cd_armor_degen_limit; resetcvar cd_power_invisibility_permanent; resetcvar cd_power_invulnerability_permanent; resetcvar cd_power_ironFeet_permanent; resetcvar cd_power_lightAmp_permanent; resetcvar cd_power_drain_permanent; resetcvar cd_power_highJump_permanent; resetcvar cd_power_infiniteAmmo_permanent; resetcvar cd_power_protecton_permanent; resetcvar cd_power_regeneraton_permanent; resetcvar cd_power_speed_permanent; resetcvar cd_power_strength_permanent; resetcvar cd_power_timeFreezer_permanent; resetcvar cd_power_doubleFiringSpeed_permanent; resetcvar cd_power_flight_permanent; resetcvar cd_power_frightener_permanent; resetcvar cd_power_scanner_permanent; resetcvar cd_power_damage_permanent; resetcvar cd_power_ghost_permanent; resetcvar cd_power_shadow_permanent; resetcvar cd_power_torch_permanent; resetcvar cd_power_minotaur_permanent; resetcvar cd_power_morph_permanent; resetcvar cd_power_mask_permanent; resetcvar cd_power_weaponLevel2_permanent; resetcvar cd_power_targeter_permanent; resetcvar cd_power_buddha_permanent"
+
+Alias cd_reset_random_to_defaults "resetcvar cd_random_enabled; resetcvar cd_random_frequency; resetcvar cd_random_timer_enabled; resetcvar cd_random_notification_type; resetcvar cd_random_notification_sound_enabled; resetcvar cd_random_notification_volume; resetcvar cd_random_player_weapon_damage_mult_min; resetcvar cd_random_player_weapon_damage_mult_max; resetcvar cd_random_player_damage_taken_mult_min; resetcvar cd_random_player_damage_taken_mult_max; resetcvar cd_random_player_start_health_min; resetcvar cd_random_player_start_health_max; resetcvar cd_random_player_start_armor_min; resetcvar cd_random_player_start_armor_max; resetcvar cd_random_player_start_savePercent_min; resetcvar cd_random_player_start_savePercent_max; resetcvar cd_random_player_max_health_min; resetcvar cd_random_player_max_health_max; resetcvar cd_random_player_speed_mult_min; resetcvar cd_random_player_speed_mult_max; resetcvar cd_random_player_jump_mult_min; resetcvar cd_random_player_jump_mult_max; resetcvar cd_random_health_regen_amount_min; resetcvar cd_random_health_regen_amount_max; resetcvar cd_random_health_regen_freq_min; resetcvar cd_random_health_regen_freq_max; resetcvar cd_random_health_regen_cap_min; resetcvar cd_random_health_regen_cap_max; resetcvar cd_random_armor_regen_amount_min; resetcvar cd_random_armor_regen_amount_max; resetcvar cd_random_armor_regen_freq_min; resetcvar cd_random_armor_regen_freq_max; resetcvar cd_random_armor_regen_min_min; resetcvar cd_random_armor_regen_min_max; resetcvar cd_random_armor_regen_cap_min; resetcvar cd_random_armor_regen_cap_max; resetcvar cd_random_ammo_regen_amount_min; resetcvar cd_random_ammo_regen_amount_max; resetcvar cd_random_ammo_regen_freq_min; resetcvar cd_random_ammo_regen_freq_max; resetcvar cd_random_health_degen_amount_min; resetcvar cd_random_health_degen_amount_max; resetcvar cd_random_health_degen_freq_min; resetcvar cd_random_health_degen_freq_max; resetcvar cd_random_health_degen_limit_min; resetcvar cd_random_health_degen_limit_max; resetcvar cd_random_armor_degen_amount_min; resetcvar cd_random_armor_degen_amount_max; resetcvar cd_random_armor_degen_freq_min; resetcvar cd_random_armor_degen_freq_max; resetcvar cd_random_armor_degen_limit_min; resetcvar cd_random_armor_degen_limit_max"
+#+end_src
+
+* Keys
+
+#+begin_src prog :tangle ../build/UltimateCustomDoom/keyconf.txt
+AddKeySection "$CD_KEYS_TITLE" CustomDoomKeys
+AddMenuKey    "$CD_KEYS_MENU"  menu_custom
+Alias         menu_custom      "OpenMenu cd_Menu"
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
+CD_KEYS_TITLE = "Ultimate Custom Doom Keys";
+CD_KEYS_MENU  = "Open Configuration Menu";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
+CD_KEYS_TITLE = "Клавиши Ultimate Custom Doom";
+CD_KEYS_MENU  = "Открыть меню конфигурации";
+#+end_src
+
+* Common classes
+** Int setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_int_setting.zs
+/// This class represents a single integer setting.
+class cd_IntSetting
+{
+  int value() { return _cvar.GetInt(); }
+
+  cd_IntSetting init(string cvarName)
+  {
+    _cvar = CVar.GetCvar(cvarName, players[consolePlayer]);
+    return self;
+  }
+
+  void randomize(cd_MinMaxIntSetting minMax)
+  {
+    int min = minMax.min();
+    int max = minMax.max();
+
+    if (min >= max)           { return; }
+    if (min == 0 && max == 0) { return; }
+
+    int newValue = random(min, max);
+
+    _cvar.SetInt(newValue);
+  }
+
+  private CVar _cvar;
+}
+#+end_src
+
+** Bool setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_bool_setting.zs
+/// This class represents a single boolean setting.
+class cd_BoolSetting
+{
+  bool value() { return _cvar.GetInt(); }
+
+  cd_BoolSetting init(string cvarName)
+  {
+    _cvar = CVar.GetCvar(cvarName, players[consolePlayer]);
+    return self;
+  }
+
+  private CVar _cvar;
+}
+#+end_src
+
+** Double setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_double_setting.zs
+/// This class represents a single double setting.
+class cd_DoubleSetting
+{
+  double value() { return _cvar.GetFloat(); }
+
+  cd_DoubleSetting init(string cvarName)
+  {
+    _cvar = CVar.GetCvar(cvarName, players[consolePlayer]);
+    return self;
+  }
+
+  void randomize(cd_MinMaxDoubleSetting minMax)
+  {
+    double min = minMax.min();
+    double max = minMax.max();
+
+    if (min >= max)           { return; }
+    if (min == 0 && max == 0) { return; }
+
+    double newValue = randomDouble(min, max);
+
+    _cvar.SetFloat(newValue);
+  }
+
+  private double randomDouble(double min, double max)
+  {
+    int intMin = int(ceil(min * RANDOM_PRECISION));
+    int intMax = int(     max * RANDOM_PRECISION );
+
+    double r = random(intMin, intMax) / RANDOM_PRECISION;
+
+    return r;
+  }
+
+  const RANDOM_PRECISION = 1000.0;
+
+  private CVar _cvar;
+}
+#+end_src
+
+** Min-max int setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_int_settings.zs
+/// This class provides a pair of minimal and maximal integer values.
+class cd_MinMaxIntSetting
+{
+  int min() { return _min.value(); }
+  int max() { return _max.value(); }
+
+  cd_MinMaxIntSetting init(string minCvar, string maxCvar)
+  {
+    _min = new("cd_IntSetting").init(minCvar);
+    _max = new("cd_IntSetting").init(maxCvar);
+
+    return self;
+  }
+
+  private cd_IntSetting _min;
+  private cd_IntSetting _max;
+}
+#+end_src
+
+** Min-max double setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_min_max_double_settings.zs
+/// This class provides a pair of minimal and maximal double values.
+class cd_MinMaxDoubleSetting
+{
+  double min() { return _min.value(); }
+  double max() { return _max.value(); }
+
+  cd_MinMaxDoubleSetting init(string minCvar, string maxCvar)
+  {
+    _min = new("cd_DoubleSetting").init(minCvar);
+    _max = new("cd_DoubleSetting").init(maxCvar);
+
+    return self;
+  }
+
+  private cd_DoubleSetting _min;
+  private cd_DoubleSetting _max;
+}
+#+end_src
+
+** Blend setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_blend_settings.zs
+/// This class provides blend settings.
+class cd_BlendSetting : cd_SettingsMaker
+{
+  cd_BlendSetting init(string enabledCvar,
+                       string redCvar,
+                       string greenCvar,
+                       string blueCvar,
+                       string intensityCvar)
+  {
+    _enabled   = boolFrom(enabledCvar);
+    _red       = intFrom(redCvar);
+    _green     = intFrom(greenCvar);
+    _blue      = intFrom(blueCvar);
+    _intensity = doubleFrom(intensityCvar);
+    return self;
+  }
+
+  bool   enabled  () { return _enabled  .value(); }
+  int    red      () { return _red      .value(); }
+  int    green    () { return _green    .value(); }
+  int    blue     () { return _blue     .value(); }
+  double intensity() { return _intensity.value(); }
+
+  private cd_BoolSetting   _enabled;
+  private cd_IntSetting    _red;
+  private cd_IntSetting    _green;
+  private cd_IntSetting    _blue;
+  private cd_DoubleSetting _intensity;
+}
+#+end_src
+
+** Period setting
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_period_settings.zs
+/// This class provides settings for periodic events.
+class cd_PeriodSetting
+{
+  bool enabled() { return _enabled.value(); }
+  int  period () { return _period .value(); }
+
+  cd_PeriodSetting init(string enabledCvar, string periodCvar)
+  {
+    _enabled = new("cd_BoolSetting").init(enabledCvar);
+    _period  = new("cd_IntSetting" ).init(periodCvar);
+    return self;
+  }
+
+  void randomize(cd_MinMaxIntSetting limits)
+  {
+    _period.randomize(limits);
+  }
+
+  private cd_BoolSetting _enabled;
+  private cd_IntSetting  _period;
+}
+#+end_src
+
+** Degeneration settings
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_settings.zs
+class cd_DegenerationSettings : cd_SettingsMaker
+{
+  cd_DegenerationSettings init(string enabledCvar,
+                               string periodCvar,
+                               string amountCvar,
+                               string limitCvar)
+  {
+    _amount = intFrom(amountCvar);
+    _limit  = intFrom(limitCvar);
+    _period = periodFrom(enabledCvar, periodCvar);
+    return self;
+  }
+
+  int              amount() { return _amount.value(); }
+  int              limit () { return _limit .value(); }
+  cd_PeriodSetting period() { return _period; }
+
+  void randomize(cd_DegenerationLimits limits)
+  {
+    _amount.randomize(limits.amount());
+    _limit .randomize(limits.limit ());
+    _period.randomize(limits.period());
+  }
+
+  private cd_IntSetting    _amount;
+  private cd_IntSetting    _limit;
+  private cd_PeriodSetting _period;
+}
+#+end_src
+
+** Degeneration limits
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_degeneration_limits.zs
+/// This class provides value limits for Degeneration Randomization.
+class cd_DegenerationLimits : cd_SettingsMaker
+{
+  cd_MinMaxIntSetting amount() { return _amount; }
+  cd_MinMaxIntSetting period() { return _period; }
+  cd_MinMaxIntSetting limit () { return _limit ; }
+
+  protected cd_MinMaxIntSetting _amount;
+  protected cd_MinMaxIntSetting _period;
+  protected cd_MinMaxIntSetting _limit;
+}
+#+end_src
+
+** Settings maker
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings_maker.zs
+class cd_SettingsMaker
+{
+  static protected cd_IntSetting intFrom(string intCvar)
+  {
+    return new("cd_IntSetting").init(intCvar);
+  }
+
+  static protected cd_BoolSetting boolFrom(string boolCvar)
+  {
+    return new("cd_BoolSetting").init(boolCvar);
+  }
+
+  static protected cd_DoubleSetting doubleFrom(string doubleCvar)
+  {
+    return new("cd_DoubleSetting").init(doubleCvar);
+  }
+
+  static protected cd_PeriodSetting periodFrom(string enabledCvar, string freqCvar)
+  {
+    return new("cd_PeriodSetting").init(enabledCvar, freqCvar);
+  }
+
+  static protected cd_BlendSetting blendFrom(string enabledCvar,
+                                             string redCvar,
+                                             string greenCvar,
+                                             string blueCvar,
+                                             string intensityCvar)
+  {
+    return new("cd_BlendSetting").init(enabledCvar,
+                                       redCvar,
+                                       greenCvar,
+                                       blueCvar,
+                                       intensityCvar);
+  }
+
+  static protected cd_MinMaxIntSetting minMaxIntFrom(string minCvar, string maxCvar)
+  {
+    return new("cd_MinMaxIntSetting").init(minCvar, maxCvar);
+  }
+
+  static protected cd_MinMaxDoubleSetting minMaxDoubleFrom(string minCvar,
+                                                           string maxCvar)
+  {
+    return new("cd_MinMaxDoubleSetting").init(minCvar, maxCvar);
+  }
+}
+#+end_src
+
+** Time
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_time.zs
+class cd_Time
+{
+  /// This function checks if something periodic should happen now.
+  static bool isEventNow(cd_PeriodSetting settings)
+  {
+    if (!settings.enabled()) return false;
+
+    int periodTicks = settings.period() * TicRate;
+    if (periodTicks == 0) return false;
+
+    bool isTimeNow = ((level.time % periodTicks) == 0);
+    if (!isTimeNow) return false;
+
+    return true;
+  }
+}
+#+end_src
+
+** Effects
+
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_effects.zs
 /// This class provides visual and audio effects.
 class cd_Effects
 {
-
-  static play
-  void maybeBlend(PlayerPawn pawn, cd_BlendSettings settings)
+  static play void maybeBlend(PlayerPawn pawn, cd_BlendSetting settings)
   {
-    bool isBlendEnabled = settings.isEnabled();
+    bool blendEnabled = settings.enabled();
 
-    if (isBlendEnabled)
+    if (blendEnabled)
     {
       int    red   = settings.red();
       int    green = settings.green();
@@ -3006,35 +2927,27 @@ class cd_Effects
     }
   }
 
-  const BLEND_DURATION = TicRate / 2;
-
-} // class cd_Effects
-#+end_src
-#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/utils/cd_time.zs
-/// This class provides time-related ancillary functions.
-class cd_Time
-{
-
-  /// This function checks if something periodic should happen now.
-  ///
-  /// @returns a pointer to player pawn if the event should happen,
-  /// otherwise null.
-  static
-  PlayerPawn now(PlayerInfo player, cd_PeriodSettings settings)
+  static play void maybeSound(PlayerPawn pawn, bool soundEnabled, string sound)
   {
-    if (!settings.isEnabled()) { return null; }
-
-    int periodTicks = settings.period() * TicRate;
-    if (periodTicks == 0) { return null; }
-
-    bool isTimeNow = ((level.time % periodTicks) == 0);
-    if (!isTimeNow) { return null; }
-
-    PlayerPawn pawn = player.mo;
-    return pawn;
+    if (soundEnabled) pawn.A_StartSound(sound, CHAN_AUTO);
   }
 
-} // class cd_Time
+  const BLEND_DURATION = TicRate / 2;
+}
+#+end_src
+
+* External API
+
+#+begin_src c :tangle ../build/UltimateCustomDoom/zscript/cd_ultimate_custom_doom.zs
+/// This class provides mod information.
+///
+/// @attention This class may be used by other mods to check if Ultimate Custom Doom
+/// is loaded. Do not remove this class even if it's not used in this mod.
+class cd_UltimateCustomDoom
+{
+  static string getTitle()   { return "Ultimate Custom Doom"; }
+  static string getVersion() { return "v0.5.0"; }
+}
 #+end_src
 
 * ~zscript.zs~
@@ -3076,7 +2989,8 @@ version 4.14
 * Local variables :noexport:
 
 # local variables:
-# eval: (add-hook 'org-babel-tangle-body-hook (lambda () (save-excursion
+# eval: (add-hook 'org-babel-post-tangle-hook (lambda () (progn
 #   (goto-char (point-min))
-#   (insert "// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>\n// SPDX-License-Identifier: GPL-3.0-only\n\n"))))
+#   (insert "// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>\n// SPDX-License-Identifier: GPL-3.0-only\n\n")
+#   (save-buffer))))
 # end:
