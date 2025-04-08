@@ -22,8 +22,10 @@
 \******************************************************************************/
 #+end_src
 
+* License
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
 * To do
-- add licenses.
 
 #+begin_src txt :tangle ../build/UltimateCustomDoom/menudef.txt
 // Entry point /////////////////////////////////////////////////////////////////
@@ -3070,3 +3072,11 @@ version 4.14
 (dt-run-tests "../build/UltimateCustomDoom"
               "wait 2; map map01; wait 2; quit")
 #+end_src
+
+* Local variables :noexport:
+
+# local variables:
+# eval: (add-hook 'org-babel-tangle-body-hook (lambda () (save-excursion
+#   (goto-char (point-min))
+#   (insert "// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>\n// SPDX-License-Identifier: GPL-3.0-only\n\n"))))
+# end:
