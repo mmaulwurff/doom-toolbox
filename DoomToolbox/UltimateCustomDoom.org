@@ -200,14 +200,13 @@ CD_MANUAL = "Эти модификаторы имеют значение по у
 
 ** Gameplay
 
-TODO: rename player options to gameplay options.
 *** Basic
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 OptionMenu cd_BasicPlayer
 {
   StaticText  "========================================" , CDLightBlue
-  StaticText  "Basic Player Options"                     , CDLightBlue
+  StaticText  "Basic Gameplay Options"                   , CDLightBlue
   StaticText  "========================================" , CDLightBlue
   StaticText  "All modifiers are zero-terminated."       , CDLightBlue
   StaticText  "========================================" , CDLightBlue
@@ -245,13 +244,13 @@ CD_PLAYER_MAX_VIEW_PITCH                  = "Максимальный угол �
 OptionMenu cd_AdvancedPlayer
 {
   StaticText  "========================================" , CDLightBlue
-  StaticText  "Advanced Player Options"                  , CDLightBlue
+  StaticText  "Advanced Gameplay Options"                , CDLightBlue
   StaticText  "========================================" , CDLightBlue
   StaticText  "All modifiers are zero-terminated."       , CDLightBlue
   StaticText  "========================================" , CDLightBlue
 
   StaticText  ""
-  Option      "Set start values"         , cd_player_start_type, cd_player_start_type_values
+  Option      "Set start values"         , cd_player_start_type, cd_PlayerStartTypeValues
   cd_MinField "$CD_START_HEALTH_CAPTION" , cd_player_start_health , 0
   cd_MinField "$CD_START_ARMOR_CAPTION"  , cd_player_start_armor  , 0
   Slider      "Save Percent"             , cd_player_start_savePercent, 1, 100, 1, 0
@@ -264,7 +263,7 @@ OptionMenu cd_AdvancedPlayer
   cd_MinField "$CD_JUMP_Z_MULTIPLIER_CAPTION" , cd_player_jump_mult  , 0
 }
 
-OptionValue cd_player_start_type_values
+OptionValue cd_PlayerStartTypeValues
 {
   0, "$CD_START_TYPE_OPTION_GAME"
   1, "$CD_START_TYPE_OPTION_LEVEL"
@@ -336,7 +335,7 @@ server float cd_player_self_damage_mult = 1;
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_MISC_TITLE          = "Miscellaneous Player Options";
+CD_MISC_TITLE          = "Miscellaneous Gameplay Options";
 CD_MISC_ENABLE_CAPTION = "Toggles the options below on or off.";
 CD_AIR_CONTROL_CAPTION = "Air control multiplier";
 CD_FRICTION_CAPTION    = "Friction multiplier";
@@ -348,7 +347,7 @@ CD_FRICTION_CAPTION    = "Коэффициент трения";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_misc_settings.zs
-/// This class represents miscellaneous player settings.
+/// This class represents miscellaneous gameplay settings.
 class cd_MiscSettings
 {
   bool   enabled   () { return cd_player_misc_enabled; }
@@ -359,7 +358,7 @@ class cd_MiscSettings
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/properties/cd_misc_properties.zs
-/// This class represents miscellaneous properties.
+/// This class represents miscellaneous gameplay properties.
 class cd_MiscProperties play
 {
   cd_MiscProperties init(cd_MiscSettings settings, PlayerInfo player)
