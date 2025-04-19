@@ -65,7 +65,7 @@ Notes:
 
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-
+(org-babel-tangle)
 (dt-run-tests
  "../build/DoomDoctor ../build/DoomDoctorTest"
 

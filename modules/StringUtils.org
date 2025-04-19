@@ -446,6 +446,7 @@ private Array<string> mFields;
 * Run tests :noexport:
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
+(org-babel-tangle)
 (dt-run-tests
  "../build/StringUtils"
 

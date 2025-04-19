@@ -49,25 +49,22 @@ Environment:
 TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 
 #+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
-(defun dt-build-gzdoom-parameters (mod-paths command)
-  (concat "gzdoom"
-          " -noautoload"
-          " -nosound"
-          " -config ../build/TestRunner/config.ini"
-          " -iwad " (getenv "IWAD_PATH")
-          " -file " (getenv "CLEMATIS_PATH") " " mod-paths
-          " +wi_autoadvance 1"
-          " +\"" command "\""))
-
 (defun dt-run-tests (mod-paths command)
-  (org-babel-tangle)
-  (compile (concat (dt-build-gzdoom-parameters mod-paths command)
+  (compile (concat "gzdoom"
+                   " -noautoload"
+                   " -nosound"
+                   " -config ../build/TestRunner/config.ini"
+                   " -iwad " (getenv "IWAD_PATH")
+                   " -file " (getenv "CLEMATIS_PATH") " " mod-paths
+                   " +wi_autoadvance 1"
+                   " +\"" command "\""
                    " | grep -vf ../build/TestRunner/ignored.txt")))
 #+end_src
 
 Example:
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
+(org-babel-tangle)
 (dt-run-tests "build/SomeMod" "wait 1; quit")
 #+end_src
 

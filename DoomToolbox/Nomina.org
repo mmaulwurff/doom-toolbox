@@ -382,6 +382,7 @@ class nat_EventHandler : StaticEventHandler
 
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
+(org-babel-tangle)
 (dt-run-tests
  "../build/Nomina ../build/NominaTest ../build/na_data.json"
  "wait 2; map map01;

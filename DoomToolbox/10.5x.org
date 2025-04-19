@@ -984,7 +984,7 @@ TODO: make multiplayer tests, maybe?
 
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-
+(org-babel-tangle)
 (dt-run-tests
  "../build/10.5x ../build/10.5xTest"
 
