@@ -40,7 +40,7 @@
 #+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
 AddOptionMenu OptionsMenu
 {
-  SubMenu "$CD_MAIN_TITLE", cd_Menu
+  SubMenu "$CD_MAIN", cd_Menu
 }
 
 OptionMenu cd_Menu
@@ -50,42 +50,42 @@ OptionMenu cd_Menu
   StaticText  "========================================" , CDLightBlue
 
   StaticText  ""
-  StaticText  "Player Options"            , White
-  SubMenu     "Basic"                     , cd_BasicPlayer
-  SubMenu     "Advanced"                  , cd_AdvancedPlayer
-  SubMenu     "Miscellaneous"             , cd_MiscPlayer
+  StaticText  "Player Options"       , White
+  SubMenu     "Basic"                , cd_BasicGameplay
+  SubMenu     "Advanced"             , cd_AdvancedPlayer
+  SubMenu     "Miscellaneous"        , cd_MiscPlayer
 
   StaticText  ""
-  StaticText  "$CD_REGENERATION_TITLE"    , White
-  SubMenu     "Health"                    , cd_HealthRegeneration
-  SubMenu     "Armor"                     , cd_ArmorRegeneration
-  SubMenu     "Ammo"                      , cd_AmmoRegeneration
+  StaticText  "$CD_REGENERATION"     , White
+  SubMenu     "Health"               , cd_HealthRegeneration
+  SubMenu     "Armor"                , cd_ArmorRegeneration
+  SubMenu     "Ammo"                 , cd_AmmoRegeneration
 
   StaticText  ""
-  StaticText  "Degeneration Options"      , White
-  SubMenu     "Health"                    , HealthDegenerationMenu
-  SubMenu     "Armor"                     , ArmorDegenerationMenu
+  StaticText  "Degeneration Options" , White
+  SubMenu     "Health"               , HealthDegenerationMenu
+  SubMenu     "Armor"                , ArmorDegenerationMenu
 
   StaticText  ""
-  SubMenu     "$CD_MONSTER_OPTIONS_TITLE" , cd_Monster
-  SubMenu     "Powerup Options"           , cd_Powerup
-  SubMenu     "Randomizer Options"        , cd_Randomizer
+  SubMenu     "$CD_MONSTER_OPTIONS"  , cd_Monster
+  SubMenu     "Powerup Options"      , cd_Powerup
+  SubMenu     "Randomizer Options"   , cd_Randomizer
 
   StaticText  ""
-  SubMenu     "The Manual"                , cd_Manual
+  SubMenu     "The Manual"           , cd_Manual
 
   StaticText  ""
-  SubMenu     "Commands"                  , cd_Commands
+  SubMenu     "Commands"             , cd_Commands
 }
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_MAIN_TITLE = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
+CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
 
-CD_REGENERATION_TITLE = "Regeneration Options";
+CD_REGENERATION = "Regeneration Options";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_REGENERATION_TITLE = "Настройки регенерации";
+CD_REGENERATION = "Настройки регенерации";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_settings.zs
@@ -203,7 +203,7 @@ CD_MANUAL = "Эти модификаторы имеют значение по у
 *** Basic
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
-OptionMenu cd_BasicPlayer
+OptionMenu cd_BasicGameplay
 {
   StaticText  "========================================" , CDLightBlue
   StaticText  "Basic Gameplay Options"                   , CDLightBlue
@@ -212,8 +212,8 @@ OptionMenu cd_BasicPlayer
   StaticText  "========================================" , CDLightBlue
 
   StaticText  ""
-  cd_MinField "$CD_PLAYER_WEAPON_MULTIPLIER_CAPTION"       , cd_player_weapon_damage_mult , 0
-  cd_MinField "$CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION" , cd_player_damage_taken_mult  , 0
+  cd_MinField "$CD_PLAYER_WEAPON_MULTIPLIER"       , cd_player_weapon_damage_mult , 0
+  cd_MinField "$CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER" , cd_player_damage_taken_mult  , 0
 
   StaticText  ""
   Slider      "$CD_PLAYER_MAX_VIEW_PITCH"                  , maxViewPitch, 0, 90, 5
@@ -228,14 +228,14 @@ server float cd_player_damage_taken_mult  = 0;
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Weapon damage multiplier";
-CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Damage taken multiplier";
-CD_PLAYER_MAX_VIEW_PITCH                  = "Max view pitch";
+CD_PLAYER_WEAPON_MULTIPLIER       = "Weapon damage multiplier";
+CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER = "Damage taken multiplier";
+CD_PLAYER_MAX_VIEW_PITCH          = "Max view pitch";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_PLAYER_WEAPON_MULTIPLIER_CAPTION       = "Множитель урона от оружия";
-CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER_CAPTION = "Множитель полученного урона";
-CD_PLAYER_MAX_VIEW_PITCH                  = "Максимальный угол обзора";
+CD_PLAYER_WEAPON_MULTIPLIER       = "Множитель урона от оружия";
+CD_PLAYER_DAMAGE_TAKEN_MULTIPLIER = "Множитель полученного урона";
+CD_PLAYER_MAX_VIEW_PITCH          = "Максимальный угол обзора";
 #+end_src
 
 *** Advanced
@@ -251,16 +251,16 @@ OptionMenu cd_AdvancedPlayer
 
   StaticText  ""
   Option      "Set start values"         , cd_player_start_type, cd_PlayerStartTypeValues
-  cd_MinField "$CD_START_HEALTH_CAPTION" , cd_player_start_health , 0
-  cd_MinField "$CD_START_ARMOR_CAPTION"  , cd_player_start_armor  , 0
-  Slider      "Save Percent"             , cd_player_start_savePercent, 1, 100, 1, 0
+  cd_MinField "$CD_START_HEALTH" , cd_player_start_health , 0
+  cd_MinField "$CD_START_ARMOR"  , cd_player_start_armor  , 0
+  Slider      "Save Percent"     , cd_player_start_savePercent, 1, 100, 1, 0
 
   StaticText  ""
-  cd_MinField "$CD_MAX_HEALTH_CAPTION"        , cd_player_max_health , 0
+  cd_MinField "$CD_MAX_HEALTH"        , cd_player_max_health , 0
   cd_Hint     "Bonus items overheal up to max + 100."
 
-  cd_MinField "$CD_SPEED_MULTIPLIER_CAPTION"  , cd_player_speed_mult , 0
-  cd_MinField "$CD_JUMP_Z_MULTIPLIER_CAPTION" , cd_player_jump_mult  , 0
+  cd_MinField "$CD_SPEED_MULTIPLIER"  , cd_player_speed_mult , 0
+  cd_MinField "$CD_JUMP_Z_MULTIPLIER" , cd_player_jump_mult  , 0
 }
 
 OptionValue cd_PlayerStartTypeValues
@@ -284,24 +284,24 @@ server float cd_player_jump_mult  = 0;
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_START_HEALTH_CAPTION = "Start health";
-CD_START_ARMOR_CAPTION  = "Start armor";
+CD_START_HEALTH = "Start health";
+CD_START_ARMOR  = "Start armor";
 
-CD_MAX_HEALTH_CAPTION        = "Max health";
-CD_SPEED_MULTIPLIER_CAPTION  = "Speed multiplier";
-CD_JUMP_Z_MULTIPLIER_CAPTION = "Jump multiplier";
+CD_MAX_HEALTH        = "Max health";
+CD_SPEED_MULTIPLIER  = "Speed multiplier";
+CD_JUMP_Z_MULTIPLIER = "Jump multiplier";
 
 CD_START_TYPE_OPTION_GAME  = "Per game";
 CD_START_TYPE_OPTION_LEVEL = "Per level/respawn";
 CD_START_TYPE_OPTION_NEVER = "Never";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_START_HEALTH_CAPTION = "Начальное здоровье";
-CD_START_ARMOR_CAPTION  = "Начальная броня";
+CD_START_HEALTH = "Начальное здоровье";
+CD_START_ARMOR  = "Начальная броня";
 
-CD_MAX_HEALTH_CAPTION        = "Максимальное здоровье";
-CD_SPEED_MULTIPLIER_CAPTION  = "Множитель скорости";
-CD_JUMP_Z_MULTIPLIER_CAPTION = "Множитель прыжка";
+CD_MAX_HEALTH        = "Максимальное здоровье";
+CD_SPEED_MULTIPLIER  = "Множитель скорости";
+CD_JUMP_Z_MULTIPLIE = "Множитель прыжка";
 
 CD_START_TYPE_OPTION_GAME  = "За игру";
 CD_START_TYPE_OPTION_LEVEL = "За уровень/возрождение";
@@ -314,15 +314,15 @@ CD_START_TYPE_OPTION_NEVER = "Никогда";
 OptionMenu cd_MiscPlayer
 {
   StaticText  "========================================" , CDLightBlue
-  StaticText  "$CD_MISC_TITLE"                           , CDLightBlue
+  StaticText  "$CD_MISC"                                 , CDLightBlue
   StaticText  "========================================" , CDLightBlue
 
   StaticText  ""
   Option      "$CD_ENABLE", cd_player_misc_enabled, OnOff
-  cd_Hint     "$CD_MISC_ENABLE_CAPTION"
+  cd_Hint     "$CD_MISC_ENABLE"
 
-  cd_MinField "$CD_AIR_CONTROL_CAPTION" , cd_player_airControl_mult  , 0
-  Slider      "$CD_FRICTION_CAPTION"    , cd_player_friction_mult    , 0.95, 1.25, 0.01, 2
+  cd_MinField "$CD_AIR_CONTROL" , cd_player_airControl_mult  , 0
+  Slider      "$CD_FRICTION"    , cd_player_friction_mult    , 0.95, 1.25, 0.01, 2
   cd_MinField "$CD_SELF_DAMAGE"         , cd_player_self_damage_mult , 0
 }
 #+end_src
@@ -335,15 +335,15 @@ server float cd_player_self_damage_mult = 1;
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_MISC_TITLE          = "Miscellaneous Gameplay Options";
-CD_MISC_ENABLE_CAPTION = "Toggles the options below on or off.";
-CD_AIR_CONTROL_CAPTION = "Air control multiplier";
-CD_FRICTION_CAPTION    = "Friction multiplier";
-CD_SELF_DAMAGE         = "Self damage multiplier";
+CD_MISC        = "Miscellaneous Gameplay Options";
+CD_MISC_ENABLE = "Toggles the options below on or off.";
+CD_AIR_CONTROL = "Air control multiplier";
+CD_FRICTION    = "Friction multiplier";
+CD_SELF_DAMAGE = "Self damage multiplier";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_AIR_CONTROL_CAPTION = "Множитель контроля в воздухе";
-CD_FRICTION_CAPTION    = "Коэффициент трения";
+CD_AIR_CONTROL = "Множитель контроля в воздухе";
+CD_FRICTION    = "Коэффициент трения";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_misc_settings.zs
@@ -674,7 +674,7 @@ class cd_StartGiverCheck : Inventory
 OptionMenu cd_Monster
 {
   StaticText  "========================================" , CDLightBlue
-  StaticText  "$CD_MONSTER_OPTIONS_TITLE"                , CDLightBlue
+  StaticText  "$CD_MONSTER_OPTIONS"                      , CDLightBlue
   StaticText  "========================================" , CDLightBlue
   StaticText  "$CD_MONSTER_NOTE1"                        , CDLightBlue
   StaticText  "$CD_MONSTER_NOTE2"                        , CDLightBlue
@@ -687,7 +687,7 @@ OptionMenu cd_Monster
   cd_MinField "$CD_MONSTER_HEALTH_CAP" , cd_monster_health_cap  , 0
 
   StaticText  ""
-  Command     "$CD_APPLY_MONSTER_CAPTION", cd_apply_monster_settings
+  Command     "$CD_APPLY_MONSTER"      , cd_apply_monster_settings
 }
 #+end_src
 
@@ -702,22 +702,22 @@ Alias cd_apply_monster_settings "netevent cd_apply_monster_settings"
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_MONSTER_OPTIONS_TITLE = "Monster Options";
-CD_MONSTER_NOTE1         = "All modifiers are zero-terminated.";
-CD_MONSTER_NOTE2         = "They are applied once per level or";
-CD_MONSTER_NOTE3         = "manually by the command below.";
+CD_MONSTER_OPTIONS    = "Monster Options";
+CD_MONSTER_NOTE1      = "All modifiers are zero-terminated.";
+CD_MONSTER_NOTE2      = "They are applied once per level or";
+CD_MONSTER_NOTE3      = "manually by the command below.";
 
-CD_MONSTER_HEALTH        = "Health multiplier";
-CD_MONSTER_SPEED         = "Speed multiplier";
-CD_MONSTER_HEALTH_CAP    = "Health cap";
-CD_APPLY_MONSTER_CAPTION = "Apply Monster Options now";
+CD_MONSTER_HEALTH     = "Health multiplier";
+CD_MONSTER_SPEED      = "Speed multiplier";
+CD_MONSTER_HEALTH_CAP = "Health cap";
+CD_APPLY_MONSTER      = "Apply Monster Options now";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_MONSTER_OPTIONS_TITLE = "Настройки монстров";
+CD_MONSTER_OPTIONS    = "Настройки монстров";
 
-CD_MONSTER_HEALTH        = "Множитель здоровья";
-CD_MONSTER_SPEED         = "Множитель скорости";
-CD_APPLY_MONSTER_CAPTION = "Применить настройки сейчас";
+CD_MONSTER_HEALTH     = "Множитель здоровья";
+CD_MONSTER_SPEED      = "Множитель скорости";
+CD_APPLY_MONSTER      = "Применить настройки сейчас";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/settings/cd_monster_settings.zs
@@ -798,6 +798,7 @@ class cd_Monsters play
 #+end_src
 
 ** Health
+
 *** Regeneration
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
@@ -811,13 +812,13 @@ OptionMenu cd_HealthRegeneration
   Option      "$CD_ENABLE"             , cd_health_regen_enabled, OnOff
 
   StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION"     , cd_health_regen_amount, 0
+  cd_MinField "$CD_AMOUNT"     , cd_health_regen_amount, 0
   cd_Hint     "Health regeneration amount."
 
-  cd_MinField "$CD_PERIOD_CAPTION"     , cd_health_regen_freq, 0
+  cd_MinField "$CD_PERIOD"     , cd_health_regen_freq, 0
   cd_Hint     "Health regeneration period in seconds."
 
-  cd_MinField "$CD_CAP_AMOUNT_CAPTION" , cd_health_regen_cap, 0
+  cd_MinField "$CD_CAP_AMOUNT" , cd_health_regen_cap, 0
   cd_Hint     "Regeneration stops if your health exceeds this number."
   cd_Hint     "0 = until you reach max health."
 
@@ -901,13 +902,13 @@ OptionMenu HealthDegenerationMenu
   Option      "$CD_ENABLE"         , cd_health_degen_enabled, OnOff
 
   StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION" , cd_health_degen_amount, 0
+  cd_MinField "$CD_AMOUNT" , cd_health_degen_amount, 0
   cd_Hint     "Health degeneration amount."
 
-  cd_MinField "$CD_PERIOD_CAPTION" , cd_health_degen_freq, 0
+  cd_MinField "$CD_PERIOD" , cd_health_degen_freq, 0
   cd_Hint     "Health degeneration period in seconds."
 
-  cd_MinField "$CD_LIMIT_CAPTION"  , cd_health_degen_limit, 0
+  cd_MinField "$CD_LIMIT"  , cd_health_degen_limit, 0
   cd_Hint     "Health will not degenerate further if it is"
   cd_Hint     "below this number. Caps at 1."
 }
@@ -1003,8 +1004,8 @@ class cd_PlayerHealth play
 Regeneration/Heartbeat "sounds/cd_heartbeat.ogg"
 #+end_src
 
-
 ** Armor
+
 *** Regeneration
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/menudef.txt
@@ -1018,24 +1019,24 @@ OptionMenu cd_ArmorRegeneration
   Option      "$CD_ENABLE"             , cd_armor_regen_enabled, OnOff
 
   StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION"     , cd_armor_regen_amount, 0
+  cd_MinField "$CD_AMOUNT"     , cd_armor_regen_amount, 0
   cd_Hint     "Armor regeneration amount."
 
-  cd_MinField "$CD_PERIOD_CAPTION"     , cd_armor_regen_freq, 0
+  cd_MinField "$CD_PERIOD"     , cd_armor_regen_freq, 0
   cd_Hint     "Armor regeneration period in seconds."
 
-  cd_MinField "$CD_MIN_AMOUNT_CAPTION" , cd_armor_regen_min, 0
+  cd_MinField "$CD_MIN_AMOUNT" , cd_armor_regen_min, 0
   cd_Hint     "Regeneration stops if your armor is below this number."
   cd_Hint     "0 = no limit."
 
-  cd_MinField "$CD_CAP_AMOUNT_CAPTION" , cd_armor_regen_cap, 0
+  cd_MinField "$CD_CAP_AMOUNT" , cd_armor_regen_cap, 0
   cd_Hint     "Regeneration stops if your armor exceeds this number."
   cd_Hint     "0 = no limit."
 
-  Option      "Sound Effect"           , cd_armor_sound_enabled, OnOff
+  Option      "Sound Effect"   , cd_armor_sound_enabled, OnOff
   cd_Hint     "Toggles shard sound on or off."
 
-  Option      "Blend Pulse"            , cd_armor_regen_pulse, OnOff
+  Option      "Blend Pulse"    , cd_armor_regen_pulse, OnOff
   cd_Hint     "Toggles blend pulse on regeneration on or off."
 
   Slider      "$PLYRMNU_RED"   , cd_armor_blend_color_r,   0, 255, 15, 0
@@ -1116,13 +1117,13 @@ OptionMenu ArmorDegenerationMenu
   Option      "$CD_ENABLE"         , cd_armor_degen_enabled, OnOff
 
   StaticText  ""
-  cd_MinField "$CD_AMOUNT_CAPTION" , cd_armor_degen_amount, 0
+  cd_MinField "$CD_AMOUNT" , cd_armor_degen_amount, 0
   cd_Hint     "Armor degeneration amount."
 
-  cd_MinField "$CD_PERIOD_CAPTION" , cd_armor_degen_freq, 0
+  cd_MinField "$CD_PERIOD" , cd_armor_degen_freq, 0
   cd_Hint     "Armor degeneration period in seconds."
 
-  cd_MinField "$CD_LIMIT_CAPTION"  , cd_armor_degen_limit, 0
+  cd_MinField "$CD_LIMIT"  , cd_armor_degen_limit, 0
   cd_Hint     "Armor will not degenerate further if it is"
   cd_Hint     "below this number."
 }
@@ -1579,7 +1580,7 @@ OptionMenu cd_Randomizer
   SubMenu     "Advanced"             , cd_RandomizerAdvancedPlayer
 
   StaticText  ""
-  StaticText  "$CD_REGENERATION_TITLE", White
+  StaticText  "$CD_REGENERATION"     , White
   SubMenu     "Health"               , cd_RandomizerHealthRegeneration
   SubMenu     "Armor"                , cd_RandomizerArmorRegeneration
   SubMenu     "Ammo"                 , cd_RandomizerAmmoRegeneration
@@ -2426,19 +2427,19 @@ CDLightBlue { #111111 #99CCFF }
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_ENABLE             = "Enable";
-CD_AMOUNT_CAPTION     = "Amount";
-CD_PERIOD_CAPTION     = "Period";
-CD_LIMIT_CAPTION      = "Limit";
-CD_CAP_AMOUNT_CAPTION = "Cap amount";
-CD_MIN_AMOUNT_CAPTION = "Min amount";
+CD_ENABLE     = "Enable";
+CD_AMOUNT     = "Amount";
+CD_PERIOD     = "Period";
+CD_LIMIT      = "Limit";
+CD_CAP_AMOUNT = "Cap amount";
+CD_MIN_AMOUNT = "Min amount";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_AMOUNT_CAPTION     = "Кол-во";
-CD_PERIOD_CAPTION     = "Период";
-CD_LIMIT_CAPTION      = "Лимит";
-CD_CAP_AMOUNT_CAPTION = "Макс. кол-во";
-CD_MIN_AMOUNT_CAPTION = "Мин. кол-во";
+CD_AMOUNT     = "Кол-во";
+CD_PERIOD     = "Период";
+CD_LIMIT      = "Лимит";
+CD_CAP_AMOUNT = "Макс. кол-во";
+CD_MIN_AMOUNT = "Мин. кол-во";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoom/zscript/menu/cd_hint.zs
@@ -2535,7 +2536,7 @@ class OptionMenuItemCd_MinField : OptionMenuItemTextField
 OptionMenu cd_Commands
 {
   StaticText  "========================================" , CDLightBlue
-  StaticText  "$CD_COMMANDS_TITLE"                       , CDLightBlue
+  StaticText  "$CD_COMMANDS"                             , CDLightBlue
   StaticText  "========================================" , CDLightBlue
 
   StaticText  ""
@@ -2550,16 +2551,16 @@ OptionMenu cd_Commands
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_COMMANDS_TITLE = "Ultimate Custom Doom Commands";
-CD_KILL = "Kill Player";
+CD_COMMANDS          = "Ultimate Custom Doom Commands";
+CD_KILL              = "Kill Player";
 CD_KILL_CONFIRMATION = "This will kill the player. Are you sure?";
-CD_KILL_HINT = "Use if stuck in death exit.";
+CD_KILL_HINT         = "Use if stuck in death exit.";
 
-CD_RESET_OPTIONS = "Reset option values to defaults";
+CD_RESET_OPTIONS              = "Reset option values to defaults";
 CD_RESET_OPTIONS_CONFIRMATION = "This will reset all option values to their defaults.";
-CD_RESET_OPTIONS_HINT = "This doesn't reset the Randomizer min/max values.";
+CD_RESET_OPTIONS_HINT         = "This doesn't reset the Randomizer min/max values.";
 
-CD_RESET_RANDOMIZER = "Reset Randomizer min/max to zero";
+CD_RESET_RANDOMIZER              = "Reset Randomizer min/max to zero";
 CD_RESET_RANDOMIZER_CONFIRMATION = "This will set all randomizer min/max values to zero.";
 #+end_src
 
@@ -2573,18 +2574,18 @@ Alias cd_reset_random_to_defaults "resetcvar cd_random_enabled; resetcvar cd_ran
 * Keys
 
 #+begin_src prog :tangle ../build/UltimateCustomDoom/keyconf.txt
-AddKeySection "$CD_KEYS_TITLE" CustomDoomKeys
-AddMenuKey    "$CD_KEYS_MENU"  menu_custom
-Alias         menu_custom      "OpenMenu cd_Menu"
+AddKeySection "$CD_KEYS"      CustomDoomKeys
+AddMenuKey    "$CD_KEYS_MENU" menu_custom
+Alias         menu_custom     "OpenMenu cd_Menu"
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.enu.txt
-CD_KEYS_TITLE = "Ultimate Custom Doom Keys";
-CD_KEYS_MENU  = "Open Configuration Menu";
+CD_KEYS      = "Ultimate Custom Doom Keys";
+CD_KEYS_MENU = "Open Configuration Menu";
 #+end_src
 #+begin_src ini :tangle ../build/UltimateCustomDoom/language.ru.txt
-CD_KEYS_TITLE = "Клавиши Ultimate Custom Doom";
-CD_KEYS_MENU  = "Открыть меню конфигурации";
+CD_KEYS      = "Клавиши Ultimate Custom Doom";
+CD_KEYS_MENU = "Открыть меню конфигурации";
 #+end_src
 
 * Common classes
