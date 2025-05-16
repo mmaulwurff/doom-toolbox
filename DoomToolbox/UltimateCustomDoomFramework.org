@@ -95,8 +95,6 @@ class cd_Engine play
     pawn.damageMultiply = getDefaultByType(pawn.getClass()).damageMultiply * value;
   }
 
-  static double getPawnDamageMultiply() { return     1.0; }
-
   private static PlayerPawn getPawn()
   {
     if (players[consolePlayer].mo == NULL) throwAbortException("player pawn is null");
@@ -123,7 +121,6 @@ class cd_Option
 
   class<Object> mClass;
   Function<play void(double)> mSetter;
-  Function<play double()> mGetter;
 }
 
 class cd_OptionParser
@@ -137,10 +134,10 @@ class cd_OptionParser
     let [nameError, category, name] = parseName(lumpName);
     if (nameError.length() != 0) return lumpName .. ": " .. nameError, NULL, "";
 
-    let [contentsError, aClass, getter, setter] = parseContents(Wads.readLump(lumpIndex));
+    let [contentsError, aClass, setter] = parseContents(Wads.readLump(lumpIndex));
     if (contentsError.length() != 0) return lumpName .. ": " .. contentsError, NULL, "";
 
-    let [constructError, option] = construct(name, aClass, getter, setter);
+    let [constructError, option] = construct(name, aClass, setter);
     if (constructError.length() != 0) return lumpName .. ": " .. constructError, NULL, "";
 
     return "", option, category;
@@ -164,20 +161,19 @@ class cd_OptionParser
     return "", category, parts[1];
   }
 
-  /// @returns either: "", class, getter, setter;
+  /// @returns either: "", class, setter;
   /// or: error message, "", "", "".
-  private static string, string, string, string parseContents(string serialized)
+  private static string, string, string parseContents(string serialized)
   {
     let aDictionary = Dictionary.fromString(serialized);
 
     Array<string> errors;
     string aClass = read("class", aDictionary, errors);
-    string getter = read("getter", aDictionary, errors);
     string setter = read("setter", aDictionary, errors);
 
-    if (errors.size() != 0) return cd_su.join(errors), "", "", "";
+    if (errors.size() != 0) return cd_su.join(errors), "", "";
 
-    return "", aClass, getter, setter;
+    return "", aClass, setter;
   }
 
   private static string read(string key, Dictionary aDictionary, out Array<string> errors)
@@ -191,19 +187,16 @@ class cd_OptionParser
   /// or error message, NULL.
   private static string, cd_Option construct(string name,
                                              string aClass,
-                                             string getter,
                                              string setter)
   {
     cd_Option result = new("cd_Option");
 
     result.mName = name;
     result.mClass = aClass;
-    result.mGetter = (Function<play double()>)(findFunction(aClass, getter));
     result.mSetter = (Function<play void(double)>)(findFunction(aClass, setter));
 
     Array<string> errors;
     if (result.mClass == NULL) errors.push("class is null");
-    if (result.mGetter == NULL) errors.push("getter is null");
     if (result.mSetter == NULL) errors.push("setter is null");
 
     if (errors.size() != 0) return cd_su.join(errors), NULL;
@@ -365,7 +358,6 @@ class cd_MainMenu : OptionMenu
 #+begin_src js :tangle ../build/UltimateCustomDoomF/options/player/cd_option.DamageMultiply.json
 {
   "class": "cd_Engine",
-  "getter": "getPawnDamageMultiply",
   "setter": "setPawnDamageMultiply"
 }
 #+end_src
