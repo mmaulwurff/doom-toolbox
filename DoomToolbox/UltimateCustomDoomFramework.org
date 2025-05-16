@@ -14,8 +14,6 @@ CDLightBlue { #111111 #99CCFF }
 AddOptionMenu OptionsMenu { SubMenu "$CD_MAIN", cd_MainMenu }
 
 OptionMenu cd_MainMenu { Class cd_MainMenu }
-OptionMenu cd_CategoryMenu {}
-
 OptionMenu cd_MainMenuStatic
 {
   StaticText "========================================", CDLightBlue
@@ -26,13 +24,24 @@ OptionMenu cd_MainMenuStatic
   StaticText ""
 }
 
+OptionMenu cd_CategoryMenu {}
+OptionMenu cd_CategoryMenuStatic
+{
+  StaticText "========================================", CDLightBlue
+  StaticText "(set dynamically)"                       , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText "All modifiers are zero-terminated."      , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText ""
+}
+
 OptionMenu cd_Manual
 {
   StaticText "========================================", CDLightBlue
   StaticText "The Manual"                              , CDLightBlue
   StaticText "========================================", CDLightBlue
-  StaticText "This is Ultimate Custom Doom reference page."      , CDLightBlue
-  StaticText "All useful information regarding the mod is here." , CDLightBlue
+  StaticText "This is Ultimate Custom Doom reference page."     , CDLightBlue
+  StaticText "All useful information regarding the mod is here.", CDLightBlue
   StaticText "========================================", CDLightBlue
   StaticText "Zero-terminated modifiers."              , CDLightBlue
   StaticText "========================================", CDLightBlue
@@ -50,6 +59,9 @@ OptionMenu cd_Manual
 
 #+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
 CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
+
+CD_CATEGORY_Gameplay = "Gameplay";
+CD_OPTION_DamageMultiply = "Weapon damage multiplier";
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
@@ -310,7 +322,10 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
     Super.activate();
 
     let categoryMenu = OptionMenu(Menu.getCurrentMenu());
-    categoryMenu.mDesc.mItems.clear();
+    categoryMenu.mDesc.mItems =
+      OptionMenuDescriptor(MenuDescriptor.getDescriptor("cd_CategoryMenuStatic")).mItems;
+    let titleText = OptionMenuItemStaticText(categoryMenu.mDesc.mItems[1]);
+    titleText.initDirect(cd_MainMenu.localizeCategoryName(mCategory), titleText.mColor);
 
     let eventHandler = cd_EventHandler.getInstance();
     int optionsCount = eventHandler.getOptionsCount(mCategory);
@@ -318,10 +333,12 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
     {
       cd_Option option = eventHandler.getOption(mCategory, i);
       let item = new("cd_OptionItem");
-      item.init(option.mName, "");
+      item.init(cd_MainMenu.localizeOptionName(option.mName), "");
       item.mTag = mCategory .. ":" .. option.mName;
       categoryMenu.mDesc.mItems.push(item);
     }
+
+    categoryMenu.mDesc.mSelectedItem = categoryMenu.firstSelectable();
 
     return true;
   }
@@ -341,21 +358,42 @@ class cd_MainMenu : OptionMenu
     for (int i = 0; i < categoriesCount; ++i)
     {
       string categoryName = eventHandler.getCategory(i).mName;
+
       let submenu = new("cd_CategorySubmenu");
-      submenu.init(categoryName, "cd_CategoryMenu");
+      submenu.init(localizeCategoryName(categoryName), "cd_CategoryMenu");
       submenu.mCategory = categoryName;
 
       descriptor.mItems.push(submenu);
     }
 
     Super.init(parent, descriptor);
+    descriptor.mSelectedItem = firstSelectable();
+  }
+
+  static string localizeCategoryName(string name)
+  {
+    return localizeName("CD_CATEGORY_", name);
+  }
+
+  static string localizeOptionName(string name)
+  {
+    return localizeName("CD_OPTION_", name);
+  }
+
+  static string localizeName(string prefix, string categoryName)
+  {
+    string localizationTag = prefix .. categoryName;
+    string result = StringTable.localize(localizationTag, false);
+    if (result == localizationTag) result = categoryName;
+
+    return result;
   }
 }
 
 <<module("StringUtils")>>
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/player/cd_option.DamageMultiply.json
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.DamageMultiply.json
 {
   "class": "cd_Engine",
   "setter": "setPawnDamageMultiply"
