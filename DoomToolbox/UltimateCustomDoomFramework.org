@@ -1,0 +1,334 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+
+#+title: Ultimate Custom Doom (framework)
+
+#+begin_src prog :tangle ../build/UltimateCustomDoomF/textcolor.txt
+CDLightBlue { #111111 #99CCFF }
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoomF/menudef.txt
+AddOptionMenu OptionsMenu { SubMenu "$CD_MAIN", cd_MainMenu }
+
+OptionMenu cd_MainMenu { Class cd_MainMenu }
+OptionMenu cd_CategoryMenu {}
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoomF/cvarinfo.txt
+server string cd_settings = "";
+#+end_src
+
+#+begin_src prog :tangle ../build/UltimateCustomDoomF/mapinfo.txt
+GameInfo { EventHandlers = "cd_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript.txt
+version 4.14.2
+
+class cd_Engine play
+{
+  static void setPawnDamageMultiply(double value)
+  {
+    let pawn = getPawn();
+    pawn.damageMultiply = getDefaultByType(pawn.getClass()).damageMultiply * value;
+  }
+
+  static double getPawnDamageMultiply() { return     1.0; }
+
+  private static PlayerPawn getPawn()
+  {
+    if (players[consolePlayer].mo == NULL) throwAbortException("player pawn is null");
+    return players[consolePlayer].mo;
+  }
+}
+
+class cd_Category
+{
+  static cd_Category from(string name)
+  {
+    let result = new("cd_Category");
+    result.mName = name;
+    return result;
+  }
+
+  string mName;
+  Array<cd_Option> mOptions;
+}
+
+class cd_Option
+{
+  string mName;
+
+  class<Object> mClass;
+  Function<play void(double)> mSetter;
+  Function<play double()> mGetter;
+}
+
+class cd_OptionParser
+{
+  /// @returns either "", option, category;
+  /// or error message, NULL.
+  static string, cd_Option, string parseLump(int lumpIndex)
+  {
+    string lumpName = Wads.getLumpFullName(lumpIndex);
+
+    let [nameError, category, name] = parseName(lumpName);
+    if (nameError.length() != 0) return lumpName .. ": " .. nameError, NULL, "";
+
+    let [contentsError, aClass, getter, setter] = parseContents(Wads.readLump(lumpIndex));
+    if (contentsError.length() != 0) return lumpName .. ": " .. contentsError, NULL, "";
+
+    let [constructError, option] = construct(name, aClass, getter, setter);
+    if (constructError.length() != 0) return lumpName .. ": " .. constructError, NULL, "";
+
+    return "", option, category;
+  }
+
+  /// @returns either "", category, option name;
+  /// or error message, "", "".
+  private static string, string, string parseName(string fullLumpName)
+  {
+    Array <string> pathParts;
+    fullLumpName.split(pathParts, "/");
+
+    string category = pathParts.size() > 1 ? pathParts[pathParts.size() - 2] : "general";
+    string fileName = pathParts[pathParts.size() - 1];
+
+    Array<string> parts;
+    fileName.split(parts, ".");
+    if (parts.size() != 3)
+      return string.format("bad lump name format, expected: cd_option.Name.json"), "", "";
+
+    return "", category, parts[1];
+  }
+
+  /// @returns either: "", class, getter, setter;
+  /// or: error message, "", "", "".
+  private static string, string, string, string parseContents(string serialized)
+  {
+    let aDictionary = Dictionary.fromString(serialized);
+
+    Array<string> errors;
+    string aClass = read("class", aDictionary, errors);
+    string getter = read("getter", aDictionary, errors);
+    string setter = read("setter", aDictionary, errors);
+
+    if (errors.size() != 0) return cd_su.join(errors), "", "", "";
+
+    return "", aClass, getter, setter;
+  }
+
+  private static string read(string key, Dictionary aDictionary, out Array<string> errors)
+  {
+    string result = aDictionary.at(key);
+    if (result == "") errors.push(string.format("key %s not found", key));
+    return result;
+  }
+
+  /// @returns either "", cd_Option;
+  /// or error message, NULL.
+  private static string, cd_Option construct(string name,
+                                             string aClass,
+                                             string getter,
+                                             string setter)
+  {
+    cd_Option result = new("cd_Option");
+
+    result.mName = name;
+    result.mClass = aClass;
+    result.mGetter = (Function<play double()>)(findFunction(aClass, getter));
+    result.mSetter = (Function<play void(double)>)(findFunction(aClass, setter));
+
+    Array<string> errors;
+    if (result.mClass == NULL) errors.push("class is null");
+    if (result.mGetter == NULL) errors.push("getter is null");
+    if (result.mSetter == NULL) errors.push("setter is null");
+
+    if (errors.size() != 0) return cd_su.join(errors), NULL;
+
+    return "", result;
+  }
+}
+
+class cd_EventHandler : StaticEventHandler
+{
+  static clearscope cd_EventHandler getInstance()
+  {
+    return cd_EventHandler(StaticEventHandler.find("cd_EventHandler"));
+  }
+
+  override void onEngineInitialize()
+  {
+    string dataLump = "cd_option";
+    for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
+         i != -1;
+         i = Wads.findLump(dataLump, i + 1, Wads.AnyNamespace))
+    {
+      let [error, option, category] = cd_OptionParser.parseLump(i);
+
+      if (error.length() != 0)
+      {
+        Console.printf("%s", error);
+        continue;
+      }
+
+      if (!mCategoryIndices.checkKey(category))
+      {
+        mCategoryIndices.insert(category, mCategories.size());
+        mCategories.push(cd_Category.from(category));
+      }
+
+      mCategories[mCategoryIndices.get(category)].mOptions.push(option);
+    }
+  }
+
+  override void worldTick()
+  {
+    int categoriesCount = getCategoriesCount();
+    for (int i = 0; i < categoriesCount; ++i)
+    {
+      let category = getCategory(i);
+      int optionsCount = category.mOptions.size();
+      for (int j = 0; j < optionsCount; ++j)
+      {
+        cd_Option option = category.mOptions[j];
+        string tag = category.mName .. ":" .. option.mName;
+        double setting = getSetting(tag);
+        option.mSetter.call(setting);
+      }
+    }
+  }
+
+  double getSetting(string tag) const
+  {
+    double result = Dictionary.fromString(cd_settings).at(tag).toDouble();
+    if (result == 0) result = 1;
+    return result;
+  }
+
+  clearscope void setSetting(string tag, double value)
+  {
+    let settings = Dictionary.fromString(cd_settings);
+    settings.insert(tag, string.format("%f", value));
+    CVar.GetCvar("cd_settings", players[consolePlayer]).setString(settings.toString());
+  }
+
+  int getCategoriesCount() const { return mCategories.size(); }
+  cd_Category getCategory(int i) const { return mCategories[i]; }
+
+  int getOptionsCount(string category) const { return find(category).mOptions.size(); }
+  cd_Option getOption(string category, int i) const { return find(category).mOptions[i]; }
+
+  private cd_Category find(string category)
+  {
+    return mCategories[mCategoryIndices.get(category)];
+  }
+
+  private Array<cd_Category> mCategories;
+  private Map<string, int> mCategoryIndices;
+}
+
+class cd_OptionItem : OptionMenuItemTextField
+{
+  override bool, string getString(int i)
+  {
+    if (i != 0) return false, "";
+
+    return true, string.format("%.2f", cd_EventHandler.getInstance().getSetting(mTag));
+  }
+
+  override bool setString(int i, String s)
+  {
+    double corrected = max(0, s.toDouble());
+
+    cd_EventHandler.getInstance().setSetting(mTag, corrected);
+    return Super.setString(i, string.format("%f", corrected));
+  }
+
+  string mTag;
+}
+
+class cd_CategorySubmenu : OptionMenuItemSubmenu
+{
+  string mCategory;
+
+  override bool activate()
+  {
+    Super.activate();
+
+    let categoryMenu = OptionMenu(Menu.getCurrentMenu());
+    categoryMenu.mDesc.mItems.clear();
+
+    let eventHandler = cd_EventHandler.getInstance();
+    int optionsCount = eventHandler.getOptionsCount(mCategory);
+    for (int i = 0; i < optionsCount; ++i)
+    {
+      cd_Option option = eventHandler.getOption(mCategory, i);
+      let item = new("cd_OptionItem");
+      item.init(option.mName, "");
+      item.mTag = mCategory .. ":" .. option.mName;
+      categoryMenu.mDesc.mItems.push(item);
+    }
+
+    return true;
+  }
+}
+
+class cd_MainMenu : OptionMenu
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    descriptor.mItems.clear();
+
+    int lightBlue = Font.findFontColor("CDLightBlue");
+    descriptor.mItems.push(new("OptionMenuItemStaticText").
+                           initDirect("Welcome!", lightBlue));
+
+    let eventHandler = cd_EventHandler.getInstance();
+    int categoriesCount = eventHandler.getCategoriesCount();
+    for (int i = 0; i < categoriesCount; ++i)
+    {
+      let category = eventHandler.getCategory(i);
+      let submenu = new("cd_CategorySubmenu");
+      submenu.init(category.mName, "cd_CategoryMenu");
+      submenu.mCategory = category.mName;
+
+      descriptor.mItems.push(submenu);
+    }
+
+    Super.init(parent, descriptor);
+  }
+}
+
+<<module("StringUtils")>>
+#+end_src
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/player/cd_option.DamageMultiply.json
+{
+  "class": "cd_Engine",
+  "getter": "getPawnDamageMultiply",
+  "setter": "setPawnDamageMultiply"
+}
+#+end_src
+
+#+begin_src elisp :lexical t
+(load-file "../build/TestRunner/dt-scripts.el")
+(org-babel-tangle)
+(dt-run-tests "../build/UltimateCustomDoomF" "wait 2;")
+#+end_src
+
+* Modules
+
+[[file:../modules/StringUtils.org][StringUtils]]
+#+name: module
+#+begin_src emacs-lisp :var module-name = "" :exports none
+(org-babel-tangle-file (concat "../modules/" module-name ".org"))
+
+(string-replace "NAMESPACE_" "cd_"
+                (with-temp-buffer
+                  (insert-file-contents (format "../build/%1$s/%1$s.zs" module-name))
+                  (buffer-string)))
+#+end_src
