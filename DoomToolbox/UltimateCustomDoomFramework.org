@@ -313,7 +313,8 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
       categoryMenu.mDesc.mItems.push(item);
     }
 
-    categoryMenu.mDesc.mSelectedItem = categoryMenu.firstSelectable();
+    if (categoryMenu.mDesc.mSelectedItem <= 0)
+      categoryMenu.mDesc.mSelectedItem = categoryMenu.firstSelectable();
 
     return true;
   }
@@ -342,7 +343,6 @@ class cd_MainMenu : OptionMenu
     }
 
     Super.init(parent, descriptor);
-    descriptor.mSelectedItem = firstSelectable();
   }
 
   static string localizeCategoryName(string name)
