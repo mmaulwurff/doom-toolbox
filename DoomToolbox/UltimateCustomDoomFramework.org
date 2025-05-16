@@ -50,21 +50,10 @@ OptionMenu cd_Manual
 }
 #+end_src
 
-#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
 [enu default]
-#+end_src
-#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.ru.txt
-[ru]
-#+end_src
-
-#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
 CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
 
-CD_CATEGORY_Gameplay = "Gameplay";
-CD_OPTION_WeaponDamage = "Weapon damage multiplier";
-#+end_src
-
-#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
 CD_MANUAL = "These modifiers have a default value of 0. They will not do\
 anything until you change their values to something positive.\
 \
@@ -83,8 +72,8 @@ terminate the modifier,\
 \
 0 means that other mods' effects will not be overridden\
 by Ultimate Custom Doom.";
-#+end_src
-#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.ru.txt
+
+[ru]
 CD_MANUAL = "Эти модификаторы имеют значение по умолчанию 0. Они не будут делать\nничего, пока вы не измените значения на что-то положительное.\n\nТак ведут себя модификаторы монстров, почти все модификаторы игрока\nи все модификаторы рандомайзера.\n\nЭти настройки могут быть включены индивидуально с помощью любого\nчисла выше 0.\n\nПереключение на 0 с положительного числа во время игры\nне вернёт сделанные изменения.\n\nДля этого вы должны установить значение по умолчанию (чаще всего 1),\nвыйти из меню, подождать, пока изменения не вступят в силу, затем очистить\nнулевой модификатор установкой 0.\n\n0 означает, что эффекты других модов не будут переопределены\nUltimate Custom Doom.";
 #+end_src
 
@@ -99,20 +88,7 @@ GameInfo { EventHandlers = "cd_EventHandler" }
 #+begin_src c :tangle ../build/UltimateCustomDoomF/zscript.txt
 version 4.14.2
 
-class cd_Engine play
-{
-  static void setPawnWeaponDamage(double value)
-  {
-    let pawn = getPawn();
-    pawn.damageMultiply = getDefaultByType(pawn.getClass()).damageMultiply * value;
-  }
-
-  private static PlayerPawn getPawn()
-  {
-    if (players[consolePlayer].mo == NULL) throwAbortException("player pawn is null");
-    return players[consolePlayer].mo;
-  }
-}
+#include "zscript/cd_Engine.zs"
 
 class cd_Category
 {
@@ -392,19 +368,6 @@ class cd_MainMenu : OptionMenu
 <<module("StringUtils")>>
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.WeaponDamage.json
-{
-  "class": "cd_Engine",
-  "setter": "setPawnWeaponDamage"
-}
-#+end_src
-
-#+begin_src elisp :lexical t
-(load-file "../build/TestRunner/dt-scripts.el")
-(org-babel-tangle)
-(dt-run-tests "../build/UltimateCustomDoomF" "wait 2;")
-#+end_src
-
 * Modules
 
 [[file:../modules/StringUtils.org][StringUtils]]
@@ -416,4 +379,81 @@ class cd_MainMenu : OptionMenu
                 (with-temp-buffer
                   (insert-file-contents (format "../build/%1$s/%1$s.zs" module-name))
                   (buffer-string)))
+#+end_src
+
+* Options
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+class cd_Engine play
+{
+  private static PlayerPawn getPawn()
+  {
+    if (players[consolePlayer].mo == NULL) throwAbortException("player pawn is null");
+    return players[consolePlayer].mo;
+  }
+
+  private static readonly<PlayerPawn> getDefaultPawn()
+  {
+    return getDefaultByType(getPawn().getClass());
+  }
+}
+#+end_src
+
+** Weapon Damage
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.WeaponDamage.json
+{
+  "class": "cd_Engine",
+  "setter": "setPawnWeaponDamage"
+}
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
+[enu default]
+CD_OPTION_WeaponDamage = "Weapon damage multiplier";
+#+end_src
+#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+extend class cd_Engine
+{
+  static void setPawnWeaponDamage(double value)
+  {
+    getPawn().damageMultiply = getDefaultPawn().damageMultiply * value;
+  }
+}
+#+end_src
+
+** Taken Damage
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.TakenDamage.json
+{
+  "class": "cd_Engine",
+  "setter": "setPawnTakenDamage"
+}
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
+[enu default]
+CD_OPTION_TakenDamage = "Damage taken multiplier";
+#+end_src
+#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+extend class cd_Engine
+{
+  static void setPawnTakenDamage(double value)
+  {
+    getPawn().damageFactor = getDefaultPawn().damageFactor * value;
+  }
+}
+#+end_src
+
+** Categories
+
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
+[enu default]
+CD_CATEGORY_Gameplay = "Gameplay";
+#+end_src
+
+* Run
+
+#+begin_src elisp :lexical t
+(load-file "../build/TestRunner/dt-scripts.el")
+(org-babel-tangle)
+(dt-run-tests "../build/UltimateCustomDoomF" "wait 2;")
 #+end_src
