@@ -15,6 +15,65 @@ AddOptionMenu OptionsMenu { SubMenu "$CD_MAIN", cd_MainMenu }
 
 OptionMenu cd_MainMenu { Class cd_MainMenu }
 OptionMenu cd_CategoryMenu {}
+
+OptionMenu cd_MainMenuStatic
+{
+  StaticText "========================================", CDLightBlue
+  StaticText "Welcome to Ultimate Custom Doom!"        , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText ""
+  SubMenu    "The Manual", cd_Manual
+  StaticText ""
+}
+
+OptionMenu cd_Manual
+{
+  StaticText "========================================", CDLightBlue
+  StaticText "The Manual"                              , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText "This is Ultimate Custom Doom reference page."      , CDLightBlue
+  StaticText "All useful information regarding the mod is here." , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText "Zero-terminated modifiers."              , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText ""
+  StaticText "$CD_MANUAL", White
+}
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
+[enu default]
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.ru.txt
+[ru]
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
+CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
+CD_MANUAL = "These modifiers have a default value of 0. They will not do\
+anything until you change their values to something positive.\
+\
+Such are the monster modifiers, almost all player modifiers\
+and all randomizer options.\
+\
+These options can be enabled individually by using any\
+number above 0.\
+\
+Switching to 0 from a positive number during gameplay\
+will not revert the changes done.\
+\
+To do that, you must set value to its default (most often 1),\
+exit the menu, wait until the change is in effect, then zero-\
+terminate the modifier,\
+\
+0 means that other mods' effects will not be overridden\
+by Ultimate Custom Doom.";
+#+end_src
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.ru.txt
+CD_MANUAL = "Эти модификаторы имеют значение по умолчанию 0. Они не будут делать\nничего, пока вы не измените значения на что-то положительное.\n\nТак ведут себя модификаторы монстров, почти все модификаторы игрока\nи все модификаторы рандомайзера.\n\nЭти настройки могут быть включены индивидуально с помощью любого\nчисла выше 0.\n\nПереключение на 0 с положительного числа во время игры\nне вернёт сделанные изменения.\n\nДля этого вы должны установить значение по умолчанию (чаще всего 1),\nвыйти из меню, подождать, пока изменения не вступят в силу, затем очистить\nнулевой модификатор установкой 0.\n\n0 означает, что эффекты других модов не будут переопределены\nUltimate Custom Doom.";
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoomF/cvarinfo.txt
@@ -253,8 +312,6 @@ class cd_OptionItem : OptionMenuItemTextField
 
 class cd_CategorySubmenu : OptionMenuItemSubmenu
 {
-  string mCategory;
-
   override bool activate()
   {
     Super.activate();
@@ -275,26 +332,25 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
 
     return true;
   }
+
+  string mCategory;
 }
 
 class cd_MainMenu : OptionMenu
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
-    descriptor.mItems.clear();
-
-    int lightBlue = Font.findFontColor("CDLightBlue");
-    descriptor.mItems.push(new("OptionMenuItemStaticText").
-                           initDirect("Welcome!", lightBlue));
+    descriptor.mItems =
+      OptionMenuDescriptor(MenuDescriptor.getDescriptor("cd_MainMenuStatic")).mItems;
 
     let eventHandler = cd_EventHandler.getInstance();
     int categoriesCount = eventHandler.getCategoriesCount();
     for (int i = 0; i < categoriesCount; ++i)
     {
-      let category = eventHandler.getCategory(i);
+      string categoryName = eventHandler.getCategory(i).mName;
       let submenu = new("cd_CategorySubmenu");
-      submenu.init(category.mName, "cd_CategoryMenu");
-      submenu.mCategory = category.mName;
+      submenu.init(categoryName, "cd_CategoryMenu");
+      submenu.mCategory = categoryName;
 
       descriptor.mItems.push(submenu);
     }
