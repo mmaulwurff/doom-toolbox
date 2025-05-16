@@ -11,7 +11,7 @@ CDLightBlue { #111111 #99CCFF }
 #+end_src
 
 #+begin_src c :tangle ../build/UltimateCustomDoomF/menudef.txt
-AddOptionMenu OptionsMenu { SubMenu "$CD_MAIN", cd_MainMenu }
+AddOptionMenu OptionsMenu { Submenu "$CD_MAIN", cd_MainMenu }
 
 OptionMenu cd_MainMenu { Class cd_MainMenu }
 OptionMenu cd_MainMenuStatic
@@ -20,8 +20,21 @@ OptionMenu cd_MainMenuStatic
   StaticText "Welcome to Ultimate Custom Doom!"        , CDLightBlue
   StaticText "========================================", CDLightBlue
   StaticText ""
-  SubMenu    "The Manual", cd_Manual
+  Submenu    "The Manual", cd_Manual
   StaticText ""
+  Submenu    "Builtins", cd_Builtins
+  StaticText ""
+}
+
+OptionMenu cd_Builtins
+{
+  StaticText "========================================", CDLightBlue
+  StaticText "Builtins"                                , CDLightBlue
+  StaticText "========================================", CDLightBlue
+  StaticText ""
+  Slider     "$CD_PLAYER_MAX_VIEW_PITCH"               , maxViewPitch, 0, 90, 5
+  cd_Hint    "0 is not recommended without autoaim."
+  cd_Hint    "90 is the default."
 }
 
 OptionMenu cd_CategoryMenu {}
@@ -54,6 +67,8 @@ OptionMenu cd_Manual
 [enu default]
 CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
 
+CD_PLAYER_MAX_VIEW_PITCH = "Max view pitch";
+
 CD_MANUAL = "These modifiers have a default value of 0. They will not do\
 anything until you change their values to something positive.\
 \
@@ -74,6 +89,8 @@ terminate the modifier,\
 by Ultimate Custom Doom.";
 
 [ru]
+CD_PLAYER_MAX_VIEW_PITCH = "Максимальный угол обзора";
+
 CD_MANUAL = "Эти модификаторы имеют значение по умолчанию 0. Они не будут делать\nничего, пока вы не измените значения на что-то положительное.\n\nТак ведут себя модификаторы монстров, почти все модификаторы игрока\nи все модификаторы рандомайзера.\n\nЭти настройки могут быть включены индивидуально с помощью любого\nчисла выше 0.\n\nПереключение на 0 с положительного числа во время игры\nне вернёт сделанные изменения.\n\nДля этого вы должны установить значение по умолчанию (чаще всего 1),\nвыйти из меню, подождать, пока изменения не вступят в силу, затем очистить\nнулевой модификатор установкой 0.\n\n0 означает, что эффекты других модов не будут переопределены\nUltimate Custom Doom.";
 #+end_src
 
@@ -89,6 +106,7 @@ GameInfo { EventHandlers = "cd_EventHandler" }
 version 4.14.2
 
 #include "zscript/cd_Engine.zs"
+#include "zscript/cd_Hint.zs"
 
 class cd_Category
 {
@@ -366,6 +384,56 @@ class cd_MainMenu : OptionMenu
 }
 
 <<module("StringUtils")>>
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Hint.zs
+/// This class provides the Hint Option Menu item.
+/// Hint is a static text that is visible only if the items above are selected.
+/// The number of items above is configurable, and by default is 1.
+class OptionMenuItemCd_Hint : OptionMenuItemStaticText
+{
+  /// nAbove means for how many selectable items above this hint should appear.
+  OptionMenuItemCd_Hint Init(String label, int nAbove = 1)
+  {
+    Super.InitDirect(label, Font.CR_WHITE);
+    if (nAbove < 1) { nAbove = 1; }
+    _nAbove = nAbove;
+    return self;
+  }
+
+  override int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    return isAboveSelected(desc)
+      ? Super.Draw(desc, y, indent, selected)
+      : -1;
+  }
+
+  private bool isAboveSelected(OptionMenuDescriptor desc)
+  {
+    int selfIndex = desc.mItems.find(self);
+    int aboveEnd  = selfIndex - 1;
+
+    while (aboveEnd >= 0 && !desc.mItems[aboveEnd].Selectable()) { --aboveEnd; }
+
+    int aboveBegin      = aboveEnd;
+    int foundSelectable = 0;
+    for (; aboveBegin >= 0 && foundSelectable < _nAbove; --aboveBegin)
+    {
+      if (desc.mItems[aboveBegin].Selectable())
+      {
+        ++foundSelectable;
+      }
+    }
+    ++aboveBegin;
+
+    int  selected        = desc.mSelectedItem;
+    bool isAboveSelected = (aboveBegin <= selected && selected <= aboveEnd);
+
+    return isAboveSelected;
+  }
+
+  private int _nAbove;
+}
 #+end_src
 
 * Modules
