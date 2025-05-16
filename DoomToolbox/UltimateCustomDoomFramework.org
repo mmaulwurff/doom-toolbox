@@ -61,7 +61,7 @@ OptionMenu cd_Manual
 CD_MAIN = "\c[CDLightBlue]⚒\c- Ultimate Custom Doom";
 
 CD_CATEGORY_Gameplay = "Gameplay";
-CD_OPTION_DamageMultiply = "Weapon damage multiplier";
+CD_OPTION_WeaponDamage = "Weapon damage multiplier";
 #+end_src
 
 #+begin_src ini :tangle ../build/UltimateCustomDoomF/language.enu.txt
@@ -101,7 +101,7 @@ version 4.14.2
 
 class cd_Engine play
 {
-  static void setPawnDamageMultiply(double value)
+  static void setPawnWeaponDamage(double value)
   {
     let pawn = getPawn();
     pawn.damageMultiply = getDefaultByType(pawn.getClass()).damageMultiply * value;
@@ -261,6 +261,7 @@ class cd_EventHandler : StaticEventHandler
         cd_Option option = category.mOptions[j];
         string tag = category.mName .. ":" .. option.mName;
         double setting = getSetting(tag);
+        if (setting == 0) setting = 1;
         option.mSetter.call(setting);
       }
     }
@@ -268,9 +269,7 @@ class cd_EventHandler : StaticEventHandler
 
   double getSetting(string tag) const
   {
-    double result = Dictionary.fromString(cd_settings).at(tag).toDouble();
-    if (result == 0) result = 1;
-    return result;
+    return Dictionary.fromString(cd_settings).at(tag).toDouble();
   }
 
   clearscope void setSetting(string tag, double value)
@@ -301,7 +300,7 @@ class cd_OptionItem : OptionMenuItemTextField
   {
     if (i != 0) return false, "";
 
-    return true, string.format("%.2f", cd_EventHandler.getInstance().getSetting(mTag));
+    return true, string.format("%.1f", cd_EventHandler.getInstance().getSetting(mTag));
   }
 
   override bool setString(int i, String s)
@@ -393,10 +392,10 @@ class cd_MainMenu : OptionMenu
 <<module("StringUtils")>>
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.DamageMultiply.json
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/gameplay/cd_option.WeaponDamage.json
 {
   "class": "cd_Engine",
-  "setter": "setPawnDamageMultiply"
+  "setter": "setPawnWeaponDamage"
 }
 #+end_src
 
