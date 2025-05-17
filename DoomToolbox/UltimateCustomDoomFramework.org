@@ -517,7 +517,7 @@ class cd_Engine play
 
 *** Weapon damage
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/BasicGameplay/cd_option.WeaponDamage.json
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/01/BasicGameplay/cd_option01.WeaponDamage.json
 {
   "class": "cd_Engine",
   "setter": "setPawnWeaponDamage",
@@ -542,7 +542,7 @@ extend class cd_Engine
 
 *** Taken damage
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/BasicGameplay/cd_option.TakenDamage.json
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/01/BasicGameplay/cd_option02.TakenDamage.json
 {
   "class": "cd_Engine",
   "setter": "setPawnTakenDamage",
@@ -569,7 +569,7 @@ extend class cd_Engine
 
 *** Starting health
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/options/AdvancedGameplay/cd_option.StartHealth.json
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/02/AdvancedGameplay/cd_option01.StartHealth.json
 {
   "class": "cd_Engine",
   "setter": "setHealth",
