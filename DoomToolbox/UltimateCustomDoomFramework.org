@@ -239,6 +239,8 @@ class cd_EventHandler : StaticEventHandler
 
   override void onEngineInitialize()
   {
+    mCategoryMenuSelections = new("cd_CategoryMenuSelections");
+
     string dataLump = "cd_option";
     for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
          i != -1;
@@ -321,6 +323,8 @@ class cd_EventHandler : StaticEventHandler
     }
   }
 
+  cd_CategoryMenuSelections mCategoryMenuSelections;
+
   private Array<cd_Category> mCategories;
   private Map<string, int> mCategoryIndices;
 }
@@ -361,12 +365,22 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
     Super.activate();
 
     let categoryMenu = OptionMenu(Menu.getCurrentMenu());
+    let eventHandler = cd_EventHandler.getInstance();
+    let categoryMenuSelections = eventHandler.mCategoryMenuSelections;
+
+    if (categoryMenuSelections.mOldCategory != "")
+    {
+      categoryMenuSelections.mLastSelected.insert(categoryMenuSelections.mOldCategory,
+                                                  categoryMenu.mDesc.mSelectedItem);
+    }
+
+    categoryMenuSelections.mOldCategory = mCategory;
+
     categoryMenu.mDesc.mItems =
       OptionMenuDescriptor(MenuDescriptor.getDescriptor("cd_CategoryMenuStatic")).mItems;
     let titleText = OptionMenuItemStaticText(categoryMenu.mDesc.mItems[1]);
     titleText.initDirect(cd_MainMenu.localizeCategoryName(mCategory), titleText.mColor);
 
-    let eventHandler = cd_EventHandler.getInstance();
     int optionsCount = eventHandler.getOptionsCount(mCategory);
     for (int i = 0; i < optionsCount; ++i)
     {
@@ -377,13 +391,24 @@ class cd_CategorySubmenu : OptionMenuItemSubmenu
       categoryMenu.mDesc.mItems.push(item);
     }
 
-    if (categoryMenu.mDesc.mSelectedItem <= 0)
+    if (categoryMenuSelections.mLastSelected.checkKey(mCategory))
+    {
+      categoryMenu.mDesc.mSelectedItem =
+        categoryMenuSelections.mLastSelected.get(mCategory);
+    }
+    else
       categoryMenu.mDesc.mSelectedItem = categoryMenu.firstSelectable();
 
     return true;
   }
 
   string mCategory;
+}
+
+class cd_CategoryMenuSelections
+{
+  string mOldCategory;
+  Map<string, int> mLastSelected;
 }
 
 class cd_MainMenu : OptionMenu
