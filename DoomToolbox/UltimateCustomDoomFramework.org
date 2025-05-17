@@ -340,8 +340,8 @@ class cd_OldGameMarker : Inventory
 {
   Default
   {
-    Inventory.MaxAmount 1;
-    +Inventory.Untossable;
+    inventory.maxAmount 1;
+    +inventory.untossable;
   }
 }
 
@@ -529,7 +529,7 @@ class OptionMenuItemCd_Hint : OptionMenuItemStaticText
 
 * Options
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
 class cd_Engine play
 {
   private static PlayerPawn getPawn()
@@ -562,7 +562,7 @@ class cd_Engine play
 CD_OPTION_WeaponDamage = "Weapon damage multiplier";
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
 extend class cd_Engine
 {
   static void setPawnWeaponDamage(double value)
@@ -587,9 +587,11 @@ extend class cd_Engine
 CD_OPTION_TakenDamage = "Damage taken multiplier";
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
 extend class cd_Engine
 {
+  static void doNothing(double value) {}
+
   static void setPawnTakenDamage(double value)
   {
     getPawn().damageFactor = getDefaultPawn().damageFactor * value;
@@ -599,7 +601,7 @@ extend class cd_Engine
 
 ** Advanced gameplay
 
-*** Starting health
+*** Start health
 
 #+begin_src js :tangle ../build/UltimateCustomDoomF/options/02/AdvancedGameplay/cd_option01.StartHealth.json
 {
@@ -611,15 +613,67 @@ extend class cd_Engine
 
 #+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
 [enu default]
-CD_OPTION_StartHealth = "Start health";
+CD_OPTION_StartHealth = "Start health multiplier";
 #+end_src
 
-#+begin_src js :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
 extend class cd_Engine
 {
   static void setHealth(double value)
   {
     getPawn().a_setHealth(int(round(getDefaultPawn().health * value)));
+  }
+}
+#+end_src
+
+*** Start armor
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/02/AdvancedGameplay/cd_option02.StartArmor.json
+{
+  "class": "cd_Engine",
+  "setter": "setArmor",
+  "when": "onGameStart"
+}
+#+end_src
+
+Note: armor save percent is handled differently. The option itself does nothing, but it is read in cd_StartArmorBonus.
+
+#+begin_src js :tangle ../build/UltimateCustomDoomF/options/02/AdvancedGameplay/cd_option03.StartArmorSavePercent.json
+{
+  "class": "cd_Engine",
+  "setter": "doNothing",
+  "when": "onGameStart"
+}
+#+end_src
+
+#+begin_src ini :tangle ../build/UltimateCustomDoomF/language.txt
+[enu default]
+CD_OPTION_StartArmor = "Start armor";
+CD_OPTION_StartArmorSavePercent = "Save percent";
+#+end_src
+
+#+begin_src c :tangle ../build/UltimateCustomDoomF/zscript/cd_Engine.zs
+extend class cd_Engine
+{
+  static void setArmor(double value)
+  {
+    getPawn().giveInventory("cd_StartArmorBonus", int(value));
+  }
+}
+
+class cd_StartArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    armor.saveAmount    1;
+    armor.maxSaveAmount 0x7FFFFFFF;
+  }
+
+  override void BeginPlay()
+  {
+    // warning: hardcoded category and option name.
+    savePercent = int(CD_EventHandler.getInstance()
+          .getSetting("advancedgameplay:startarmorsavepercent"));
   }
 }
 #+end_src
