@@ -280,6 +280,13 @@ class cd_EventHandler : StaticEventHandler
     player.giveInventoryType("cd_OldGameMarker");
   }
 
+  override void playerRespawned(PlayerEvent event)
+  {
+    if (event.playerNumber != consolePlayer) return;
+
+    activateOptions(cd_Option.OnGameStart);
+  }
+
   double getSetting(string tag) const
   {
     return Dictionary.fromString(cd_settings).at(tag).toDouble();
