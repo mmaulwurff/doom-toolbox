@@ -26,7 +26,7 @@ Minimal config for testing purposes.
 #+begin_src ini :tangle ../build/TestRunner/config.ini
 [GlobalSettings]
 autoloadwidescreen=false
-developer=1
+developer=2
 gl_texture_filter=6
 m_simpleoptions=false
 showendoom=0
@@ -50,12 +50,16 @@ TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 
 #+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
 (defun dt-run-tests (mod-paths command)
+  (dolist (mod-path mod-paths)
+    (delete-directory mod-path t))
+  (org-babel-tangle)
   (compile (concat "gzdoom"
                    " -noautoload"
                    " -nosound"
                    " -config ../build/TestRunner/config.ini"
                    " -iwad " (getenv "IWAD_PATH")
-                   " -file " (getenv "CLEMATIS_PATH") " " mod-paths
+                   " -file " (getenv "CLEMATIS_PATH") " "
+                        (mapconcat 'identity mod-paths " ")
                    " +wi_autoadvance 1"
                    " +\"" command "\""
                    " | grep -vf ../build/TestRunner/ignored.txt")))
@@ -64,8 +68,7 @@ TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 Example:
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(org-babel-tangle)
-(dt-run-tests "build/SomeMod" "wait 1; quit")
+(dt-run-tests '("build/SomeMod") "wait 1; quit")
 #+end_src
 
 * Ignored output

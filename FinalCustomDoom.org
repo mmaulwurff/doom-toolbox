@@ -1,0 +1,1331 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+#+startup: content
+
+#+title: Final Custom Doom
+
+* Description
+
+TODO: copy LICENSES to build.
+TODO: add multiplayer (apply effects to all pawns?) or a warning on network play.
+TODO: add different menu with engine Cvars and commands.
+TODO: add engine commands to restart level with and without keeping inventory.
+TODO: ? weapons push back?
+
+Removed:
+- Max view pitch: engine Cvar: ~maxviewpitch~
+- Air control: engine Cvar: ~sv_aircontrol~
+- Randomizer
+
+Final Custom Doom options are set and stored not like normal GZDoom options. They are defined like normal Cvar options, but option menu items are transformed when Final Custom Doom loads. Item transformations:
+- ~TextField~ -> double setting,
+- ~NumberField~, ~Option~ -> int setting,
+- ~ColorPicker~ -> color setting.
+
+Other option menu elements remain the same.
+
+Translation note: most items have their string written in plain English and not as ~$~, but is still translatable, for example: ~TextField "Weapon damage multiplier"~ - here the string identifier to translate is ~$cd_Weapon_damage_multiplier~. ~$~ identifier can still be used directly.
+
+* Licenses
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
+// <<GPL>>
+#+end_src
+#+begin_src ini :tangle ../build/FinalCustomDoom/language.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+// <<GPL>>
+#+end_src
+
+* Main menu
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+AddOptionMenu OptionsMenu { Submenu "$cd_Title", cd_Menu }
+
+OptionMenu cd_Menu
+{
+  Class cd_Menu
+  <<OptionMenuTitle("$cd_Title")>>
+
+  Submenu    "Manual"       , cd_Manual
+  StaticText ""
+
+  StaticText "Gameplay"     , White
+  Submenu    "Basic"        , cd_BasicGameplay
+  Submenu    "Advanced"     , cd_AdvancedGameplay
+  Submenu    "Actors"       , cd_Actors
+  Submenu    "Powerup"      , cd_Powerup
+  Submenu    "Miscellaneous", cd_MiscGameplay
+  StaticText ""
+
+  StaticText "Regeneration/Degeneration", White
+  Submenu    "Health"       , cd_HealthRegeneration
+  Submenu    "Armor"        , cd_ArmorRegeneration
+  Submenu    "Ammo"         , cd_AmmoRegeneration
+
+  StaticText ""
+  Submenu    "Commands"     , cd_Commands
+}
+
+OptionMenu cd_Manual
+{
+  <<OptionMenuTitle("Manual")>>
+  <<OptionMenuNotes("$cd_ZeroTerminatedTitle")>>
+
+  StaticText "$cd_ManualText", White
+}
+#+end_src
+
+* Basic gameplay
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_BasicGameplay
+{
+  <<OptionMenuTitle("Basic Gameplay")>>
+  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+
+  TextField  "Weapon damage multiplier", "cd_Gameplay:weaponDamage"
+  TextField  "Taken damage multiplier" , "cd_Gameplay:takenDamage"
+}
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_Gameplay : cd_EffectsBase
+{
+  static void takenDamage(string value)
+  {
+    pawn().damageFactor = defaultPawn().damageFactor * as0to1Multiplier(value);
+  }
+
+  static void weaponDamage(string value)
+  {
+    pawn().damageMultiply = defaultPawn().damageMultiply * as0to1Multiplier(value);
+  }
+}
+#+end_src
+
+* Advanced gameplay
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_AdvancedGameplay
+{
+  <<OptionMenuTitle("Advanced Gameplay")>>
+  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+
+  NumberField "Start health"    , "cd_Gameplay:startHealth:OnPlayerStarted"
+  NumberField "Start armor"     , "cd_Gameplay:startArmor:OnPlayerStarted"
+  TextField   "Save percent"    , "cd_Gameplay:savePercent:Never"
+  StaticText  ""
+  NumberField "Max health"      , "cd_Gameplay:maxHealth"
+  cd_Hint     "$cd_MaxHealthHint"
+  TextField   "Speed multiplier", "cd_Gameplay:speedMultiplier"
+  TextField   "Jump height multiplier", "cd_Gameplay:jumpMultiplier"
+}
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+extend class cd_Gameplay
+{
+  static void startHealth(string value)
+  {
+    pawn().a_setHealth(value.toInt());
+  }
+
+  static void startArmor(string value)
+  {
+    pawn().giveInventory('cd_StartArmorBonus', value.toInt());
+  }
+
+  static void maxHealth(string value)
+  {
+    let pawn = pawn();
+    int newMaxHealth = value.toInt();
+
+    if (newMaxHealth == pawn.maxHealth) return;
+
+    // 1. Update health items healing ability.
+    let healthFinder = ThinkerIterator.create("Health", Thinker.STAT_DEFAULT);
+    Health healthItem;
+    if (newMaxHealth != 0)
+    {
+      while (healthItem = Health(healthFinder.next()))
+      {
+        // Zero max amount means no limit, leave it so.
+        if (healthItem.maxAmount != 0) continue;
+
+        healthItem.maxAmount = newMaxHealth * 2;
+      }
+    }
+    else
+    {
+      while (healthItem = Health(healthFinder.next()))
+        healthItem.maxAmount = healthItem.default.maxAmount;
+    }
+
+    if (newMaxHealth == 0) newMaxHealth = pawn.default.maxHealth;
+
+    // 2. Set max health and update current health accordingly.
+    int safeMaxHealth = (pawn.maxHealth == 0) ? pawn.default.health : pawn.maxHealth;
+    double relativeHealth = double(pawn.health) / safeMaxHealth;
+    pawn.maxHealth = newMaxHealth;
+    pawn.a_setHealth(int(round(relativeHealth * newMaxHealth)));
+  }
+
+  static void speedMultiplier(string value)
+  {
+    pawn().speed = defaultPawn().speed * as0to1Multiplier(value);
+  }
+
+  static void jumpMultiplier(string value)
+  {
+    pawn().jumpZ = defaultPawn().jumpZ * as0to1Multiplier(value);
+  }
+}
+
+class cd_StartArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    armor.saveAmount    1;
+    armor.maxSaveAmount 0x7FFFFFFF;
+  }
+
+  override void beginPlay()
+  {
+    let settings = Dictionary.fromString(cd_settings);
+    double value = settings.at("cd_Gameplay:savePercent:Never").toDouble();
+    if (value ~== 0) value = 100.0;
+    savePercent = value;
+  }
+}
+#+end_src
+
+* Miscellaneous gameplay
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_MiscGameplay
+{
+  <<OptionMenuTitle("Miscellaneous Gameplay")>>
+  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+
+  TextField "Friction multiplier"   , "cd_Gameplay:friction"
+  TextField "Self damage multiplier", "cd_Gameplay:selfDamage"
+}
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+extend class cd_Gameplay
+{
+  static void friction(string value)
+  {
+    pawn().friction = defaultPawn().friction * as0to1Multiplier(value);
+  }
+
+  static void selfDamage(string value)
+  {
+    pawn().selfDamageFactor =
+      defaultPawn().selfDamageFactor * as0to1Multiplier(value);
+  }
+}
+#+end_src
+
+* Health regeneration/degeneration
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_HealthRegeneration
+{
+  <<OptionMenuTitle("Health Regeneration")>>
+
+  NumberField "Amount", "cd_HealthRegeneration:amount:Periodically"
+  Option "Type", "cd_HealthRegeneration:type:Never", cd_RegenerationType
+  NumberField "Period (seconds)", "cd_HealthRegeneration:period:Never"
+  StaticText  ""
+  NumberField "Min", "cd_HealthRegeneration:min:Never"
+  NumberField "Max", "cd_HealthRegeneration:max:Never"
+  StaticText  ""
+  Textfield   "Sound effect volume"    , "cd_HealthRegeneration:sound:Never"
+  TextField   "Visual effect intensity", "cd_HealthRegeneration:visual:Never"
+  ColorPicker "Visual effect color"    , "cd_HealthRegeneration:color:Never"
+}
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_HealthRegeneration : cd_EffectsBase
+{
+  static void amount(string amount)
+  {
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_HealthRegeneration:period:Never").toInt())) return;
+
+    int type   = settings.at("cd_HealthRegeneration:type:Never").toInt();
+    int min    = settings.at("cd_HealthRegeneration:min:Never").toInt();
+    int max    = settings.at("cd_HealthRegeneration:max:Never").toInt();
+    int old    = pawn().health;
+    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
+    int new    = getNew(old, target, min, max);
+
+    if (old == new) return;
+
+    pawn().a_setHealth(new);
+
+    playSound("cd_health", settings.at("cd_HealthRegeneration:sound:Never").toDouble());
+    flashColor(settings.at("cd_HealthRegeneration:visual:Never").toDouble(),
+               settings.at("cd_HealthRegeneration:color:Never").toInt());
+  }
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+
+cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
+#+end_src
+
+* Armor regeneration/degeneration
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_ArmorRegeneration
+{
+  <<OptionMenuTitle("$Armor Regeneration")>>
+
+  NumberField "Amount", "cd_ArmorRegeneration:amount:Periodically"
+  Option      "Type"  , "cd_ArmorRegeneration:type:Never", cd_RegenerationType
+  NumberField "Period (seconds)", "cd_ArmorRegeneration:period:Never"
+  StaticText  ""
+  NumberField "Min", "cd_ArmorRegeneration:min:Never"
+  NumberField "Max", "cd_ArmorRegeneration:max:Never"
+  StaticText  ""
+  TextField   "Sound effect volume"    , "cd_ArmorRegeneration:sound:Never"
+  TextField   "Visual effect intensity", "cd_ArmorRegeneration:visual:Never"
+  ColorPicker "Visual effect color"    , "cd_ArmorRegeneration:color:Never"
+}
+#+end_src
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_ArmorRegeneration : cd_EffectsBase
+{
+  static void amount(string amount)
+  {
+    if (pawn().health <= 0) return;
+
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_ArmorRegeneration:period:Never").toInt())) return;
+
+    int type   = settings.at("cd_ArmorRegeneration:type:Never").toInt();
+    int min    = settings.at("cd_ArmorRegeneration:min:Never").toInt();
+    int max    = settings.at("cd_ArmorRegeneration:max:Never").toInt();
+    int old    = pawn().countInv('BasicArmor');
+    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
+    int new    = getNew(old, target, min, max);
+
+    if (old == new) return;
+
+    if (type == Regeneration) pawn().giveInventory('cd_ArmorBonus', new - old);
+    else pawn().takeInventory('BasicArmor', old - new);
+
+    playSound("cd_armor", settings.at("cd_ArmorRegeneration:sound:Never").toDouble());
+    flashColor(settings.at("cd_ArmorRegeneration:visual:Never").toDouble(),
+               settings.at("cd_ArmorRegeneration:color:Never").toInt());
+  }
+}
+
+class cd_ArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    armor.saveAmount    1;
+    armor.maxSaveAmount 0x7FFFFFFF;
+  }
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+
+cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
+#+end_src
+
+* Ammo regeneration
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_AmmoRegeneration
+{
+  <<OptionMenuTitle("Ammo Regeneration")>>
+
+  NumberField "Amount", "cd_AmmoRegeneration:amount:Periodically"
+  NumberField "Period (seconds)", "cd_AmmoRegeneration:period:Never"
+  Option "Backpack required", "cd_AmmoRegeneration:backpackRequired:Never", OnOff
+  StaticText  ""
+  TextField   "Sound effect volume" , "cd_AmmoRegeneration:sound:Never"
+  TextField   "Visual effect intensity", "cd_AmmoRegeneration:visual:Never"
+  ColorPicker "Visual effect color" , "cd_AmmoRegeneration:color:Never"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_AmmoRegeneration : cd_EffectsBase
+{
+  static void amount(string amountString)
+  {
+    let pawn = pawn();
+    if (pawn.health <= 0) return;
+
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_AmmoRegeneration:period:Never").toInt())) return;
+
+    bool isBackpackRequired = settings.at("cd_AmmoRegeneration:backpackRequired:Never").toInt();
+    if (isBackpackRequired && !isBackpackOwned(pawn)) return;
+
+    int amount = amountString.toInt();
+    for (int i = 0; i < amount; ++i)
+    {
+      let aBackpack = Inventory(Actor.spawn("Backpack", replace: ALLOW_REPLACE));
+      aBackpack.clearCounters();
+      if (!aBackpack.CallTryPickup(pawn)) aBackpack.destroy();
+    }
+
+    playSound("cd_ammo", settings.at("cd_ArmorRegeneration:sound:Never").toDouble());
+    flashColor(settings.at("cd_AmmoRegeneration:visual:Never").toDouble(),
+               settings.at("cd_AmmoRegeneration:color:Never").toInt());
+  }
+
+  private static bool isBackpackOwned(PlayerPawn pawn)
+  {
+    return pawn.countInv("Backpack")
+      || pawn.countInv("BagOfHolding")
+      || pawn.countInv("AmmoSatchel");
+  }
+}
+#+end_src
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+
+cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
+#+end_src
+
+* Enemy
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_Actors
+{
+  <<OptionMenuTitle("$cd_ActorsTitle")>>
+  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+
+  StaticText  "Enemies", White
+  TextField   "Health multiplier", "cd_Actors:enemyHealth:OnActorSpawned"
+  NumberField "Health max"       , "cd_Actors:enemyHealthMax:OnActorSpawned"
+  TextField   "Speed multiplier" , "cd_Actors:enemySpeed:OnActorSpawned"
+  StaticText  ""
+  StaticText  "Friends", White
+  TextField   "Health multiplier", "cd_Actors:friendHealth:OnActorSpawned"
+  NumberField "Health max"       , "cd_Actors:friendHealthMax:OnActorSpawned"
+  TextField   "Speed multiplier" , "cd_Actors:friendSpeed:OnActorSpawned"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_Actors : cd_EffectsBase
+{
+  static void enemyHealth(string multiplier)
+  {
+    multiplyHealthIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(multiplier),
+      getSetting("cd_Actors:enemyHealthMax:OnActorSpawned").toInt(),
+      isEnemy);
+ }
+
+  static void enemyHealthMax(string max)
+  {
+    multiplyHealthIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(getSetting("cd_Actors:enemyHealth:OnActorSpawned")),
+      max.toInt(),
+      isEnemy);
+  }
+
+  static void enemySpeed(string multiplier)
+  {
+    multiplySpeedIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(multiplier),
+      isEnemy);
+  }
+
+  static void friendHealth(string multiplier)
+  {
+    multiplyHealthIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(multiplier),
+      getSetting("cd_Actors:friendHealthMax:OnActorSpawned").toInt(),
+      isFriend);
+  }
+
+  static void friendHealthMax(string max)
+  {
+    multiplyHealthIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(getSetting("cd_Actors:friendHealth:OnActorSpawned")),
+      max.toInt(),
+      isFriend);
+  }
+
+  static void friendSpeed(string multiplier)
+  {
+    multiplySpeedIf(
+      cd_EventHandler.getLastSpawnedActor(),
+      as0to1Multiplier(multiplier),
+      isFriend);
+  }
+
+  private static void multiplyHealthIf(Actor lastSpawned,
+                                       double multiplier,
+                                       int max,
+                                       Function<play bool(Actor)> predicate)
+  {
+    if (lastSpawned == NULL)
+    {
+      Actor anActor;
+      for (let i = ThinkerIterator.create(); anActor = Actor(i.next());)
+        if (predicate.call(anActor))
+          multiplyHealth(anActor, multiplier, max);
+    }
+    else if (predicate.call(lastSpawned))
+      multiplyHealth(lastSpawned, multiplier, max);
+  }
+
+  private static void multiplySpeedIf(Actor lastSpawned,
+                                      double multiplier,
+                                      Function<play bool(Actor)> predicate)
+  {
+    if (lastSpawned == NULL)
+    {
+      Actor anActor;
+      for (let i = ThinkerIterator.create(); anActor = Actor(i.next());)
+        if (predicate.call(anActor))
+          multiplySpeed(anActor, multiplier);
+    }
+    else if (predicate.call(lastSpawned))
+      multiplySpeed(lastSpawned, multiplier);
+  }
+
+  private static bool isEnemy(Actor anActor)
+  {
+    return anActor.bIsMonster && !anActor.bFriendly;
+  }
+
+  private static bool isFriend(Actor anActor)
+  {
+    return anActor.bIsMonster && anActor.bFriendly;
+  }
+
+  private static void multiplyHealth(Actor anActor, double multiplier, int max)
+  {
+    // For LegenDoom Lite compatibility.
+    let ldlToken       = "LDLegendaryMonsterToken";
+    int ldlMultiplier  = (anActor.countInv(ldlToken) > 0) ? 3 : 1;
+
+    int defStartHealth = anActor.default.spawnHealth();
+    int oldStartHealth = anActor.spawnHealth();
+    int oldHealth      = anActor.health;
+    let relativeHealth = double(oldHealth) / oldStartHealth;
+
+    int newStartHealth = int(round(defStartHealth * multiplier * ldlMultiplier));
+    int newHealth      = int(round(newStartHealth * relativeHealth));
+
+    if (max != 0)
+    {
+      if (newHealth      > max) newHealth      = max;
+      if (newStartHealth > max) newStartHealth = max;
+    }
+
+    anActor.startHealth = newStartHealth;
+    anActor.a_setHealth(newHealth);
+  }
+
+  private static void multiplySpeed(Actor anActor, double multiplier)
+  {
+    anActor.speed = anActor.default.speed * multiplier;
+  }
+}
+#+end_src
+
+* Powerup
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_Powerup
+{
+  <<OptionMenuTitle("$cd_PowerupTitle")>>
+
+  StaticText "Permanent", White
+  Option "Buddha"             , "cd_Powerup:buddha:Periodically"           , OnOff
+  Option "Damage"             , "cd_Powerup:damage:Periodically"           , OnOff
+  Option "Double firing speed", "cd_Powerup:doubleFiringSpeed:Periodically", OnOff
+  Option "Drain"              , "cd_Powerup:drain:Periodically"            , OnOff
+  Option "Flight"             , "cd_Powerup:flight:Periodically"           , OnOff
+  Option "Frightener"         , "cd_Powerup:frightener:Periodically"       , OnOff
+  Option "Ghost"              , "cd_Powerup:ghost:Periodically"            , OnOff
+  Option "High jump"          , "cd_Powerup:highJump:Periodically"         , OnOff
+  Option "Infinite ammo"      , "cd_Powerup:infiniteAmmo:Periodically"     , OnOff
+  Option "Invisibility"       , "cd_Powerup:invisibility:Periodically"     , OnOff
+  Option "Invulnerability"    , "cd_Powerup:invulnerability:Periodically"  , OnOff
+  Option "IronFeet"           , "cd_Powerup:ironFeet:Periodically"         , OnOff
+  Option "LightAmp"           , "cd_Powerup:lightAmp:Periodically"         , OnOff
+  Option "Mask"               , "cd_Powerup:mask:Periodically"             , OnOff
+  Option "Minotaur"           , "cd_Powerup:minotaur:Periodically"         , OnOff
+  Option "Morph"              , "cd_Powerup:morph:Periodically"            , OnOff
+  Option "Protection"         , "cd_Powerup:protection:Periodically"       , OnOff
+  Option "Regeneration"       , "cd_Powerup:regeneration:Periodically"     , OnOff
+  Option "Scanner"            , "cd_Powerup:scanner:Periodically"          , OnOff
+  Option "Shadow"             , "cd_Powerup:shadow:Periodically"           , OnOff
+  Option "Speed"              , "cd_Powerup:speed:Periodically"            , OnOff
+  Option "Strength"           , "cd_Powerup:strength:Periodically"         , OnOff
+  Option "Targeter"           , "cd_Powerup:targeter:Periodically"         , OnOff
+  Option "Time freeze"        , "cd_Powerup:timeFreeze:Periodically"       , OnOff
+  Option "Torch"              , "cd_Powerup:torch:Periodically"            , OnOff
+  Option "Weapon level 2"     , "cd_Powerup:weaponLevel2:Periodically"     , OnOff
+}
+#+end_src
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_Powerup : cd_EffectsBase
+{
+  static void buddha           (string value) { prolong("PowerBuddha"           ); }
+  static void damage           (string value) { prolong("PowerDamage"           ); }
+  static void doubleFiringSpeed(string value) { prolong("PowerDoubleFiringSpeed"); }
+  static void drain            (string value) { prolong("PowerDrain"            ); }
+  static void flight           (string value) { prolong("PowerFlight"           ); }
+  static void frightener       (string value) { prolong("PowerFrightener"       ); }
+  static void ghost            (string value) { prolong("PowerGhost"            ); }
+  static void highJump         (string value) { prolong("PowerHighJump"         ); }
+  static void infiniteAmmo     (string value) { prolong("PowerInfiniteAmmo"     ); }
+  static void invisibility     (string value) { prolong("PowerInvisibility"     ); }
+  static void invulnerability  (string value) { prolong("PowerInvulnerable"     ); }
+  static void ironFeet         (string value) { prolong("PowerIronFeet"         ); }
+  static void lightAmp         (string value) { prolong("PowerLightAmp"         ); }
+  static void mask             (string value) { prolong("PowerMask"             ); }
+  static void minotaur         (string value) { prolongMinotaur(); }
+  static void morph            (string value) { prolong("PowerMorph"            ); }
+  static void protection       (string value) { prolong("PowerProtection"       ); }
+  static void regeneration     (string value) { prolong("PowerRegeneration"     ); }
+  static void scanner          (string value) { prolong("PowerScanner"          ); }
+  static void shadow           (string value) { prolong("PowerShadow"           ); }
+  static void speed            (string value) { prolong("PowerSpeed"            ); }
+  static void strength         (string value) { prolong("PowerStrength"         ); }
+  static void targeter         (string value) { prolong("PowerTargeter"         ); }
+  static void timeFreezer      (string value) { prolong("PowerTimeFreezer"      ); }
+  static void torch            (string value) { prolong("PowerTorch"            ); }
+  static void weaponLevel2     (string value) { prolong("PowerWeaponLevel2"     ); }
+
+  private static void prolong(string power)
+  {
+    let powerup = Powerup(pawn().findInventory(power));
+    if (powerup == NULL) return;
+
+    if (powerup.effectTics <= Inventory.BLINKTHRESHOLD + TICRATE)
+      powerup.effectTics += TICRATE;
+  }
+
+  private static void prolongMinotaur()
+  {
+    prolong("PowerMinotaur");
+
+    MinotaurFriend mo;
+    let i = ThinkerIterator.create("MinotaurFriend");
+    while ((mo = MinotaurFriend(i.next())) != NULL)
+      mo.startTime = level.mapTime;
+  }
+}
+#+end_src
+
+* Commands
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_Commands
+{
+  <<OptionMenuTitle("$cd_CommandsTitle")>>
+
+  SafeCommand "$cd_ResetOptions"  , cd_reset_to_defaults
+  StaticText  ""
+  SafeCommand "$cd_BackupOptions" , cd_backup_options
+  SafeCommand "$cd_RestoreOptions", cd_restore_options
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
+
+Alias cd_reset_to_defaults "cd_settings \"\""
+
+Alias cd_backup_options  "cd_settings_backup $cd_settings"
+Alias cd_restore_options "cd_settings $cd_settings_backup"
+#+end_src
+
+* Implementation details
+
+** Menus
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+
+OptionValue cd_RegenerationType
+{
+  0, "$cd_Regeneration"
+  1, "$cd_Degeneration"
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
+
+CDLightBlue { #111111 #99CCFF }
+#+end_src
+
+#+name: OptionMenuTitle
+#+begin_src elisp :var title = "" :exports none
+(concat "StaticText \"========================================\", CDLightBlue
+StaticText \"" title "\", CDLightBlue
+StaticText \"========================================\", CDLightBlue
+StaticText \"\"")
+#+end_src
+
+#+name: OptionMenuNotes
+#+begin_src elisp :var subtitles = "" :exports none
+(concat (mapconcat
+         (lambda (x) (format "StaticText \"%s\", CDLightBlue\n" x))
+         (split-string subtitles " " nil))
+        "StaticText \"\"")
+#+end_src
+
+TODO: fix the manual.
+
+#+begin_src ini :tangle ../build/FinalCustomDoom/language.txt
+
+[enu default]
+cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
+// todo: rewrite this (to "0 to 1"?).
+cd_ZeroTerminated = "All modifiers are zero-terminated.";
+cd_ZeroTerminatedTitle = "Zero-terminated modifiers";
+
+cd_MaxHealthHint = "Bonus items overheal up to max + 100.";
+
+cd_ManualText = "These modifiers have a default value of 0. They will not do\
+anything until you change their values to something positive.\
+\
+Such are the monster modifiers, and almost all player modifiers.\
+\
+These options can be enabled individually by using any\
+number above 0.\
+\
+Switching to 0 from a positive number during gameplay\
+will not revert the changes done.\
+\
+To do that, you must set value to its default (most often 1),\
+exit the menu, wait until the change is in effect, then zero-\
+terminate the modifier,\
+\
+0 means that other mods' effects will not be overridden\
+by Final Custom Doom.";
+
+[ru]
+cd_Manual = "Руководство";
+cd_Weapon_damage_multiplier = "Множитель урона от оружия";
+cd_Gameplay = "Игра";
+#+end_src
+
+** Project setup
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+
+version 4.14.2
+
+#include "zscript/cd_EventHandler.zs"
+#include "zscript/cd_Effects.zs"
+#include "zscript/cd_Hint.zs"
+#+end_src
+
+#+begin_src txt :tangle ../build/tmp.txt
+<<import-module("Hint")>>
+<<copy-media()>>
+#+end_src
+
+#+name: import-module
+#+begin_src elisp :var module-name = "" :exports none
+(org-babel-tangle-file (format "../modules/%s.org" module-name))
+(make-directory "../build/FinalCustomDoom/zscript" t)
+(with-temp-file (format "../build/FinalCustomDoom/zscript/cd_%s.zs" module-name)
+  (insert-file-contents (format "../build/%1$s/%1$s.zs" module-name))
+  (replace-string "NAMESPACE_" "cd_")))
+#+end_src
+
+#+name: copy-media
+#+begin_src elisp :exports none
+(copy-directory "../media/FinalCustomDoom" "../build/FinalCustomDoom" nil t t)
+#+end_src
+
+** Menu item replacements
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+
+class cd_Menu : OptionMenu
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    replaceItems(descriptor.mItems);
+    Super.init(parent, descriptor);
+  }
+
+  private void replaceItems(out Array<OptionMenuItem> items)
+  {
+    int itemsCount = items.size();
+    for (int i = 0; i < itemsCount; ++i)
+      items[i] = getReplacement(items[i]);
+  }
+
+  private OptionMenuItem getReplacement(OptionMenuItem item)
+  {
+    let itemClass = item.getClass();
+
+    if (itemClass == 'OptionMenuItemTextField')
+      return new("cd_DoubleField").init(item.mLabel, item.getAction());
+
+    if (itemClass == 'OptionMenuItemNumberField')
+      return new("cd_IntField").init(item.mLabel, item.getAction());
+
+    if (itemClass == 'OptionMenuItemColorPicker')
+      return new("cd_ColorPicker").init(item.mLabel, item.getAction());
+
+    if (itemClass == 'OptionMenuItemOption')
+    {
+      let option = OptionMenuItemOption(item);
+      return new("cd_Option").init(item.mLabel, item.getAction(), option.mValues);
+    }
+
+    if (itemClass == 'OptionMenuItemStaticText')
+    {
+      let text = OptionMenuItemStaticText(item);
+      return new("cd_Text").initDirect(item.mLabel, text.mColor);
+    }
+
+    if (itemClass == 'OptionMenuItemSubmenu')
+    {
+      let descriptor = MenuDescriptor.getDescriptor(item.getAction());
+      replaceItems(OptionMenuDescriptor(descriptor).mItems);
+
+      return new("cd_Submenu").init(item.mLabel, item.getAction());
+    }
+
+    return item;
+  }
+}
+
+mixin class cd_SettingItem
+{
+  string mTag;
+
+  private string getSetting() const
+  {
+    return Dictionary.fromString(cd_settings).at(mTag);
+  }
+
+  private void setSetting(string value)
+  {
+    let settings = Dictionary.fromString(cd_settings);
+    string oldValue = settings.at(mTag);
+
+    double doubleValue = value.toDouble();
+    if (doubleValue ~== oldValue.toDouble()) return;
+    if (doubleValue < 0) return;
+
+    if (doubleValue ~== 0)
+      settings.remove(mTag);
+    else
+      settings.insert(mTag, value);
+
+    Cvar.getCvar('cd_settings', players[consolePlayer]).setString(settings.toString());
+
+    let [_1, _2, _3, when] = cd_EventHandler.parseEffect(mTag);
+    if (when == cd_EventHandler.Immediately || when == cd_EventHandler.OnActorSpawned)
+      EventHandler.sendNetworkEvent(string.format("%s:%s", mTag, value));
+  }
+}
+
+mixin class cd_DirectlyTranslatable
+{
+  string mRawLabel;
+  string mLabelId;
+
+  void initializeTranslation(string rawLabel)
+  {
+    mRawLabel = rawLabel;
+
+    string labelWithUnderscores = mRawLabel;
+    labelWithUnderscores.replace(" ", "_");
+    mLabelId = "cd_" .. labelWithUnderscores;
+  }
+
+  string getLocalizedLabel()
+  {
+    string localizedLabel = StringTable.localize(mLabelId, false);
+    bool localizationFound = localizedLabel != mLabelId;
+
+    return localizationFound ? localizedLabel : mRawLabel;
+  }
+}
+
+class cd_NumberField : OptionMenuItemTextField
+{
+  mixin cd_SettingItem;
+  mixin cd_DirectlyTranslatable;
+  string mFormat;
+
+  OptionMenuItem init(string label, Name command, int decimalPlaces)
+  {
+    mTag = command;
+    mFormat = string.format("%%.%df", decimalPlaces);
+    initializeTranslation(label);
+
+    return Super.init(label, '');
+  }
+
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    mLabel = getLocalizedLabel();
+    return Super.draw(desc, y, indent, selected);
+  }
+
+  override bool, string getString(int i)
+  {
+    if (i != 0) return false, "";
+
+    return true, string.format(mFormat, getSetting().toDouble());
+  }
+
+  override bool setString(int i, string aString)
+  {
+    if (i != 0) return false;
+
+    setSetting(string.format(mFormat, aString.toDouble()));
+    return true;
+  }
+
+  override string represent()
+  {
+    return mEnter ? Super.represent()
+                  : string.format(mFormat, getSetting().toDouble());
+  }
+}
+
+class cd_DoubleField : cd_NumberField
+{
+  OptionMenuItem init(string label, Name command)
+  {
+    return Super.init(label, command, 2);
+  }
+}
+
+class cd_IntField : cd_NumberField
+{
+  OptionMenuItem init(string label, Name command)
+  {
+    return Super.init(label, command, 0);
+  }
+}
+
+class cd_Option : OptionMenuItemOptionBase
+{
+  mixin cd_SettingItem;
+
+  OptionMenuItem init(string label, Name command, Name values)
+  {
+    mTag = command;
+    Super.init(label, '', values, NULL, 0);
+    return self;
+  }
+
+  override int getSelection()
+  {
+    int valuesCount = OptionValues.getCount(mValues);
+    if (valuesCount <= 0) return -1;
+
+    if (OptionValues.getTextValue(mValues, 0).length() == 0)
+    {
+      double value = getSetting().toDouble();
+      for(int i = 0; i < valuesCount; ++i)
+      {
+        if (value ~== OptionValues.getValue(mValues, i)) return i;
+      }
+    }
+    else
+    {
+      string value = getSetting();
+      for(int i = 0; i < valuesCount; ++i)
+      {
+        if (value ~== OptionValues.getTextValue(mValues, i)) return i;
+      }
+    }
+
+    return -1;
+  }
+
+  override void setSelection(int selection)
+  {
+    if (OptionValues.getCount(mValues) <= 0) return;
+
+    if (OptionValues.getTextValue(mValues, 0).length() == 0)
+      setSetting(string.format("%f", OptionValues.getValue(mValues, selection)));
+    else
+      setSetting(OptionValues.getTextValue(mValues, selection));
+  }
+}
+
+// Uses a proxy Cvar as a hack just to reuse ColorPickerMenu code.
+class cd_ColorPicker : OptionMenuItemColorPicker
+{
+  mixin cd_SettingItem;
+  const CPF_RESET = 0x20001;
+
+  OptionMenuItem init(string label, Name command)
+  {
+    mTag = command;
+    return Super.init(label, 'cd_proxy_color');
+  }
+
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    drawLabel(indent, y, selected ? OptionMenuSettings.mFontColorSelection
+                                  : OptionMenuSettings.mFontColor, isGrayed());
+
+    int box_x = indent + cursorSpace();
+    int box_y = y + CleanYfac_1;
+    Screen.clear(box_x,
+                 box_y,
+                 box_x + CleanXfac_1 * 32,
+                 box_y + CleanYfac_1 * OptionMenuSettings.mLinespacing,
+                 getSetting().toInt() | 0xff000000);
+
+    return indent;
+  }
+
+  override bool setValue(int i, int v)
+  {
+    if (i != CPF_RESET) return false;
+
+    setSetting("");
+    return true;
+  }
+
+  override bool activate()
+  {
+    Menu.menuSound("menu/choose");
+
+    mCvar.setInt(getSetting().toInt());
+
+    let desc = OptionMenuDescriptor(MenuDescriptor.getDescriptor('ColorPickerMenu'));
+    let picker = new("cd_ColorPickerMenu");
+    picker.mTag = mTag;
+    picker.init(Menu.getCurrentMenu(), mLabel, desc, mCvar);
+    picker.activateMenu();
+    return true;
+  }
+}
+
+// Uses a proxy Cvar as a hack just to reuse ColorPickerMenu code.
+class cd_ColorPickerMenu : ColorPickerMenu
+{
+  mixin cd_SettingItem;
+
+  override void onDestroy()
+  {
+    Super.onDestroy();
+    setSetting(string.format("%d", Color(int(mRed), int(mGreen), int(mBlue))));
+    mCvar.setInt(0);
+  }
+}
+
+class cd_Submenu : OptionMenuItemSubmenu
+{
+  mixin cd_DirectlyTranslatable;
+
+  OptionMenuItemSubmenu init(String label, Name command)
+  {
+    initializeTranslation(label);
+    return Super.init(label, command);
+  }
+
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    mLabel = getLocalizedLabel();
+    return Super.draw(desc, y, indent, selected);
+  }
+}
+
+class cd_Text : OptionMenuItemStaticText
+{
+  mixin cd_DirectlyTranslatable;
+
+  OptionMenuItemStaticText initDirect(String label, int cr)
+  {
+    initializeTranslation(label);
+    return Super.initDirect(label, cr);
+  }
+
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    mLabel = getLocalizedLabel();
+    return Super.draw(desc, y, indent, selected);
+  }
+}
+#+end_src
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+
+server string cd_settings;
+server string cd_settings_backup;
+
+user color cd_proxy_color;
+#+end_src
+
+** Event handler
+
+#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
+
+GameInfo { EventHandlers = "cd_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
+
+class cd_EventHandler : StaticEventHandler
+{
+  enum EffecTime
+  {
+    Immediately,
+    OnPlayerStarted,
+    OnActorSpawned,
+    Periodically,
+    Never,
+  }
+
+  private clearscope static int toEffectTime(string effectTime)
+  {
+    if (effectTime ~== "OnPlayerStarted") return OnPlayerStarted;
+    if (effectTime ~== "OnActorSpawned")  return OnActorSpawned;
+    if (effectTime ~== "Periodically")    return Periodically;
+    if (effectTime ~== "Never")           return Never;
+
+    return Immediately;
+  }
+
+  // Returns class name, function name, value as a string, effect time.
+  // Effect string examples:
+  // cd_ExampleClass:exampleFunction:onPlayerStarted:3.5
+  // cd_ExampleClass:exampleFunction:3.5
+  // cd_ExampleClass:exampleFunction:onPlayerStarted
+  static clearscope string, string, string, int parseEffect(string input)
+  {
+    Array<string> parts;
+    input.split(parts, ":");
+
+    switch (parts.size())
+    {
+      case 0:
+      case 1: throwAbortException("no class and function in effect description");
+      case 2: return parts[0], parts[1], "", Immediately;
+      case 3: return parts[0], parts[1], parts[2], toEffectTime(parts[2]);
+      case 4: return parts[0], parts[1], parts[3], toEffectTime(parts[2]);
+      default: throwAbortException("too much parts: %s", input);
+    }
+
+    return "", "", "", Immediately;
+  }
+
+  private static void callByName(string className, string functionName, string value)
+  {
+    class<Object> aClass = className;
+    if (aClass == NULL)
+      throwAbortException("class %s not found", className);
+
+    let aFunction = (Function<play void(string)>)(findFunction(aClass, functionName));
+    if (aFunction == NULL)
+      throwAbortException("function %s.%s not found", className, functionName);
+
+    aFunction.call(value);
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (event.name.left(3) != "cd_") return;
+
+    let [className, functionName, value, when] = parseEffect(event.name);
+    callByName(className, functionName, value);
+  }
+
+  private void applyEffects(int effectTime)
+  {
+    let settings = Dictionary.fromString(cd_settings);
+    for (let i = DictionaryIterator.create(settings); i.next();)
+    {
+      let [className, functionName, _, when] = parseEffect(i.key());
+      if (when == effectTime)
+        callByName(className, functionName, i.value());
+    }
+  }
+
+  override void playerEntered(PlayerEvent event)
+  {
+    PlayerPawn player = players[event.playerNumber].mo;
+
+    bool isOldGame = (player.findInventory('cd_OldGameMarker') != NULL);
+    if (isOldGame) return;
+
+    player.giveInventoryType('cd_OldGameMarker');
+
+    applyEffects(OnPlayerStarted);
+    applyEffects(Immediately);
+  }
+
+  private Actor mLastSpawnedActor;
+
+  static Actor getLastSpawnedActor()
+  {
+    return cd_EventHandler(find('cd_EventHandler')).mLastSpawnedActor;
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    if (event.thing == NULL) return;
+
+    mLastSpawnedActor = event.thing;
+    applyEffects(OnActorSpawned);
+    mLastSpawnedActor = NULL;
+  }
+
+  override void worldTick()
+  {
+    // TODO: stagger periodic events.
+    if (level.totalTime % TICRATE != 0) return;
+
+    applyEffects(Periodically);
+  }
+}
+
+class cd_OldGameMarker : Inventory
+{
+  Default
+  {
+    inventory.maxAmount 1;
+    +inventory.untossable;
+  }
+}
+#+end_src
+
+** Effects base
+
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_EffectsBase play
+{
+  enum GenerationType
+  {
+    Regeneration,
+    Degeneration
+  }
+
+  const BLEND_DURATION = TICRATE / 2;
+
+  protected static PlayerPawn pawn()
+  {
+    return players[consolePlayer].mo;
+  }
+
+  protected static readonly<PlayerPawn> defaultPawn()
+  {
+    return getDefaultByType(pawn().getClass());
+  }
+
+  // 0 to 1 multipliers: 0.0 acts as 1.0, both meaning it effectively does nothing.
+  protected static double as0to1Multiplier(string stringValue)
+  {
+    double value = stringValue.toDouble();
+    return (value ~== 0.0) ? 1.0 : value;
+  }
+
+  protected static bool isMyTime(int period)
+  {
+    return (period != 0) && ((level.totalTime / TICRATE) % period == 0);
+  }
+
+  protected static void playSound(string sound, double volume)
+  {
+    if (volume != 0.0) pawn().a_startSound(sound, CHAN_AUTO, 0, volume);
+  }
+
+  protected static void flashColor(double intensity, int aColor)
+  {
+    if (intensity != 0.0) pawn().a_setBlend(aColor, intensity, BLEND_DURATION);
+  }
+
+  protected static int getNew(int old, int target, int min, int max)
+  {
+    if (min == 0) min = 1;
+    if (max == 0) max = max(old, target);
+    if (!(min <= old && old <= max)) return old;
+
+    return clamp(target, min, max);
+  }
+
+  protected static string getSetting(string setting)
+  {
+    return Dictionary.fromString(cd_settings).at(setting);
+  }
+}
+#+end_src
+
+* Run
+
+#+begin_src elisp
+(load-file "../build/TestRunner/dt-scripts.el")
+(dt-run-tests '("../build/FinalCustomDoom") "wait 2; openmenu cd_menu")
+#+end_src

@@ -446,9 +446,8 @@ private Array<string> mFields;
 * Run tests :noexport:
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(org-babel-tangle)
 (dt-run-tests
- "../build/StringUtils"
+ '("../build/StringUtils")
 
  "wait 2; map map01;
   wait 2; netevent test:su_Test;

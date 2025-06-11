@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+:properties:
+:header-args: :comments no :mkdirp yes :noweb yes :results none
+:end:
+
+#+title:  Hint
+
+#+begin_src c :tangle ../build/Hint/Hint.zs
+
+// SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: GPL-3.0-only
+
+// This class provides the Hint Option Menu item.
+// Hint is a static text that is visible only if the items above are selected.
+// The number of items above is configurable, and by default is 1.
+class OptionMenuItemNAMESPACE_Hint : OptionMenuItemStaticText
+{
+  // nAbove means for how many selectable items above this hint should appear.
+  OptionMenuItemNAMESPACE_Hint Init(String label, int nAbove = 1)
+  {
+    Super.InitDirect(label, Font.CR_WHITE);
+    if (nAbove < 1) { nAbove = 1; }
+    _nAbove = nAbove;
+    return self;
+  }
+
+  override int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    return isAboveSelected(desc)
+      ? Super.Draw(desc, y, indent, selected)
+      : -1;
+  }
+
+  private bool isAboveSelected(OptionMenuDescriptor desc)
+  {
+    int selfIndex = desc.mItems.find(self);
+    int aboveEnd  = selfIndex - 1;
+
+    while (aboveEnd >= 0 && !desc.mItems[aboveEnd].Selectable()) { --aboveEnd; }
+
+    int aboveBegin      = aboveEnd;
+    int foundSelectable = 0;
+    for (; aboveBegin >= 0 && foundSelectable < _nAbove; --aboveBegin)
+    {
+      if (desc.mItems[aboveBegin].Selectable())
+      {
+        ++foundSelectable;
+      }
+    }
+    ++aboveBegin;
+
+    int  selected        = desc.mSelectedItem;
+    bool isAboveSelected = (aboveBegin <= selected && selected <= aboveEnd);
+
+    return isAboveSelected;
+  }
+
+  private int _nAbove;
+}
+#+end_src

@@ -984,9 +984,8 @@ TODO: make multiplayer tests, maybe?
 
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-(org-babel-tangle)
 (dt-run-tests
- "../build/10.5x ../build/10.5xTest"
+ '("../build/10.5x ../build/10.5xTest")
 
  "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
