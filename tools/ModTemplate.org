@@ -3,14 +3,17 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
+
 #+title: Mod Template
 
 * [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Mod Template
+
 This is the template for add-ons (mods) for GZDoom family game engines.
 
 * Cvarinfo - console variable (Cvar) definitions
+
 ~<scope> [features] <type> <name> [= defaultvalue];~
 - features: ~noarchive~, ~cheat~, ~latch~, ~handlerclass("<classname>")~
 - scope: ~server~, ~user~, ~nosave~
@@ -22,6 +25,7 @@ server int mt_value = 2;
 #+end_src
 
 * Keyconf - key and command definitions
+
 #+begin_src txt :tangle ../build/ModTemplate/keyconf.txt
 // <<CC>>
 
@@ -34,6 +38,7 @@ DefaultBind g +hello
 #+end_src
 
 * Language - user-visible strings
+
 #+begin_src ini :tangle ../build/ModTemplate/language.txt
 // <<CC>>
 
@@ -45,6 +50,7 @@ MT_VALUE = "Cvar value";
 #+end_src
 
 * Mapinfo - map and event handler definitions
+
 #+begin_src txt :tangle ../build/ModTemplate/mapinfo.txt
 // <<CC>>
 
@@ -52,6 +58,7 @@ GameInfo { AddEventHandlers = "ModTemplateEventHandler" }
 #+end_src
 
 * Menudef - menu definitions
+
 #+begin_src txt :tangle ../build/ModTemplate/menudef.txt
 // <<CC>>
 
@@ -68,6 +75,7 @@ OptionMenu mt_Options
 #+end_src
 
 * ZScript - source code
+
 #+begin_src c :tangle ../build/ModTemplate/zscript.txt
 // <<GPL>>
 

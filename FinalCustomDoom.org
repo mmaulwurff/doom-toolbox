@@ -9,7 +9,6 @@
 
 * Description
 
-TODO: copy LICENSES to build.
 TODO: add multiplayer (apply effects to all pawns?) or a warning on network play.
 TODO: add different menu with engine Cvars and commands.
 TODO: add engine commands to restart level with and without keeping inventory.
@@ -31,47 +30,47 @@ Translation note: most items have their string written in plain English and not 
 
 * Licenses
 
-[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 // <<GPL>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
 // <<GPL>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
+#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
 // <<GPL>>
 #+end_src
-#+begin_src ini :tangle ../build/FinalCustomDoom/language.txt
+#+begin_src ini :tangle build/FinalCustomDoom/language.txt
 // <<GPL>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
 // <<GPL>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
 // <<GPL>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
+#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 // <<GPL>>
 #+end_src
 
 * Main menu
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 AddOptionMenu OptionsMenu { Submenu "$cd_Title", cd_Menu }
 
@@ -111,7 +110,7 @@ OptionMenu cd_Manual
 
 * Basic gameplay
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_BasicGameplay
 {
@@ -122,7 +121,7 @@ OptionMenu cd_BasicGameplay
   TextField  "Taken damage multiplier" , "cd_Gameplay:takenDamage"
 }
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Gameplay : cd_EffectsBase
 {
@@ -140,7 +139,7 @@ class cd_Gameplay : cd_EffectsBase
 
 * Advanced gameplay
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_AdvancedGameplay
 {
@@ -157,7 +156,7 @@ OptionMenu cd_AdvancedGameplay
   TextField   "Jump height multiplier", "cd_Gameplay:jumpMultiplier"
 }
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 extend class cd_Gameplay
 {
@@ -237,7 +236,7 @@ class cd_StartArmorBonus : BasicArmorBonus
 
 * Miscellaneous gameplay
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_MiscGameplay
 {
@@ -248,7 +247,7 @@ OptionMenu cd_MiscGameplay
   TextField "Self damage multiplier", "cd_Gameplay:selfDamage"
 }
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 extend class cd_Gameplay
 {
@@ -267,7 +266,7 @@ extend class cd_Gameplay
 
 * Health regeneration/degeneration
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_HealthRegeneration
 {
@@ -285,7 +284,7 @@ OptionMenu cd_HealthRegeneration
   ColorPicker "Visual effect color"    , "cd_HealthRegeneration:color:Never"
 }
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_HealthRegeneration : cd_EffectsBase
 {
@@ -313,14 +312,14 @@ class cd_HealthRegeneration : cd_EffectsBase
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
 
 cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 #+end_src
 
 * Armor regeneration/degeneration
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_ArmorRegeneration
 {
@@ -338,7 +337,7 @@ OptionMenu cd_ArmorRegeneration
   ColorPicker "Visual effect color"    , "cd_ArmorRegeneration:color:Never"
 }
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_ArmorRegeneration : cd_EffectsBase
 {
@@ -378,14 +377,14 @@ class cd_ArmorBonus : BasicArmorBonus
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
 
 cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 #+end_src
 
 * Ammo regeneration
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_AmmoRegeneration
 {
@@ -401,7 +400,7 @@ OptionMenu cd_AmmoRegeneration
 }
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_AmmoRegeneration : cd_EffectsBase
 {
@@ -438,14 +437,14 @@ class cd_AmmoRegeneration : cd_EffectsBase
   }
 }
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
 
 cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
 #+end_src
 
 * Enemy
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Actors
 {
@@ -464,7 +463,7 @@ OptionMenu cd_Actors
 }
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Actors : cd_EffectsBase
 {
@@ -594,7 +593,7 @@ class cd_Actors : cd_EffectsBase
 
 * Powerup
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Powerup
 {
@@ -630,7 +629,7 @@ OptionMenu cd_Powerup
 }
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Powerup : cd_EffectsBase
 {
@@ -684,7 +683,7 @@ class cd_Powerup : cd_EffectsBase
 
 * Commands
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Commands
 {
@@ -697,7 +696,7 @@ OptionMenu cd_Commands
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
+#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
 
 Alias cd_reset_to_defaults "cd_settings \"\""
 
@@ -709,7 +708,7 @@ Alias cd_restore_options "cd_settings $cd_settings_backup"
 
 ** Menus
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/menudef.txt
+#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
 
 OptionValue cd_RegenerationType
 {
@@ -718,7 +717,7 @@ OptionValue cd_RegenerationType
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
+#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt
 
 CDLightBlue { #111111 #99CCFF }
 #+end_src
@@ -741,7 +740,7 @@ StaticText \"\"")
 
 TODO: fix the manual.
 
-#+begin_src ini :tangle ../build/FinalCustomDoom/language.txt
+#+begin_src ini :tangle build/FinalCustomDoom/language.txt
 
 [enu default]
 cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
@@ -777,7 +776,7 @@ cd_Gameplay = "Игра";
 
 ** Project setup
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 
 version 4.14.2
 
@@ -786,28 +785,31 @@ version 4.14.2
 #include "zscript/cd_Hint.zs"
 #+end_src
 
-#+begin_src txt :tangle ../build/tmp.txt
+#+begin_src txt :tangle build/tmp.txt :exports none
 <<import-module("Hint")>>
 <<copy-media()>>
 #+end_src
 
 #+name: import-module
 #+begin_src elisp :var module-name = "" :exports none
-(org-babel-tangle-file (format "../modules/%s.org" module-name))
-(make-directory "../build/FinalCustomDoom/zscript" t)
-(with-temp-file (format "../build/FinalCustomDoom/zscript/cd_%s.zs" module-name)
-  (insert-file-contents (format "../build/%1$s/%1$s.zs" module-name))
+(org-babel-tangle-file (format "modules/%s.org" module-name))
+(make-directory "build/FinalCustomDoom/zscript" t)
+(with-temp-file (format "build/FinalCustomDoom/zscript/cd_%s.zs" module-name)
+  (insert-file-contents (format "build/%1$s/%1$s.zs" module-name))
   (replace-string "NAMESPACE_" "cd_")))
 #+end_src
 
 #+name: copy-media
 #+begin_src elisp :exports none
-(copy-directory "../media/FinalCustomDoom" "../build/FinalCustomDoom" nil t t)
+(copy-directory "media/FinalCustomDoom" "build/FinalCustomDoom" nil t t)
+(copy-directory "LICENSES" "build/FinalCustomDoom/LICENSES" nil t t)
+(copy-directory "docs" "build/FinalCustomDoom/docs" nil t t)
+(copy-file "FinalCustomDoom.org" "build/FinalCustomDoom/Readme.org")
 #+end_src
 
 ** Menu item replacements
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 
 class cd_Menu : OptionMenu
 {
@@ -1120,7 +1122,7 @@ class cd_Text : OptionMenuItemStaticText
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
 
 server string cd_settings;
 server string cd_settings_backup;
@@ -1130,12 +1132,12 @@ user color cd_proxy_color;
 
 ** Event handler
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
+#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
 
 GameInfo { EventHandlers = "cd_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
 
 class cd_EventHandler : StaticEventHandler
 {
@@ -1263,7 +1265,7 @@ class cd_OldGameMarker : Inventory
 
 ** Effects base
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_EffectsBase play
 {
@@ -1326,6 +1328,6 @@ class cd_EffectsBase play
 * Run
 
 #+begin_src elisp
-(load-file "../build/TestRunner/dt-scripts.el")
-(dt-run-tests '("../build/FinalCustomDoom") "wait 2; openmenu cd_menu")
+(load-file "build/TestRunner/dt-scripts.el")
+(dt-run-tests '("build/FinalCustomDoom") "wait 2; openmenu cd_menu")
 #+end_src

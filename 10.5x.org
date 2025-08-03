@@ -3,11 +3,13 @@
 :properties:
 :header-args: :comments no :mkdirp yes :noweb yes :results none
 :end:
+
 #+title: 10.5x v0.11.1-beta
 
-* [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:docs/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Description
+
 [[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
 Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
@@ -48,81 +50,84 @@ Acknowledgments:
 - Brazilian Portuguese localization: generic name guy.
 
 ** Development notes
-- Contribution guidelines: [[../docs/CodeOfConduct.org][Code of Conduct]].
-- [[../docs/CodeStyle.org][Code style]].
+
+- Contribution guidelines: [[file:docs/CodeOfConduct.org][Code of Conduct]].
+- [[file:docs/CodeStyle.org][Code style]].
 
 * Licenses
-[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_Freezer.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/x5_Freezer.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript/x5_WalkAbilityWatcher.zs :exports none
+#+begin_src c :tangle build/10.5x/zscript/x5_WalkAbilityWatcher.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs :exports none
+#+begin_src c :tangle build/10.5xTest/zscript.zs :exports none
 // <<GPL>>
 #+end_src
 
-[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
+[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src txt :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt :exports none
+#+begin_src c :tangle build/10.5x/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src ini :tangle ../build/10.5x/language.txt :exports none
+#+begin_src ini :tangle build/10.5x/language.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/mapinfo.txt :exports none
+#+begin_src c :tangle build/10.5x/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle ../build/10.5x/menudef.txt :exports none
+#+begin_src txt :tangle build/10.5x/menudef.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt :exports none
+#+begin_src c :tangle build/10.5xTest/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt :exports none
+#+begin_src c :tangle build/10.5xTest/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
 * ~x5_EventHandler~
-#+begin_src c :tangle ../build/10.5x/mapinfo.txt
+
+#+begin_src c :tangle build/10.5x/mapinfo.txt
 GameInfo { EventHandlers = "x5_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+#+begin_src c :tangle build/10.5x/cvarinfo.txt
 server int x5_multiplier = 100;
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
 class x5_EventHandler : EventHandler
 {
   // 1. Entry point.
@@ -401,7 +406,7 @@ class x5_EventHandler : EventHandler
 } // class x5_EventHandler
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_EventHandler.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
 class x5_SpawnPoint
 {
   vector3 position;
@@ -413,7 +418,8 @@ class x5_SpawnPoint
 #+end_src
 
 * ~x5_Freezer~
-#+begin_src c :tangle ../build/10.5x/zscript/x5_Freezer.zs
+
+#+begin_src c :tangle build/10.5x/zscript/x5_Freezer.zs
 class x5_Freezer play
 {
   static x5_Freezer init()
@@ -494,9 +500,10 @@ class x5_Freezer play
 #+end_src
 
 * ~x5_WalkAbilityWatcher~
+
 This inventory item resets ~bThruActors~ flag if the actor is able to move without it.
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_WalkAbilityWatcher.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_WalkAbilityWatcher.zs
 class x5_WalkAbilityWatcher : Inventory
 {
   override void tick()
@@ -520,13 +527,14 @@ class x5_WalkAbilityWatcher : Inventory
 #+end_src
 
 * ~x5_Killer~
+
 This class kills an enemy when the enemy becomes active. Such an enemy is marked with a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is controlled by ~x5_raise_divided~ Cvar.
 
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+#+begin_src c :tangle build/10.5x/cvarinfo.txt
 server bool x5_raise_divided = false;
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_Killer.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
 class x5_Killer : Actor
 {
   Default
@@ -582,7 +590,8 @@ class x5_Killer : Actor
 #+end_src
 
 * ~language~
-#+begin_src ini :tangle ../build/10.5x/language.txt
+
+#+begin_src ini :tangle build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
 [enu default]
@@ -599,15 +608,17 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 #+end_src
 
 * Global multiplier
+
 ** ~OptionMenuItemX5Slider~
-#+begin_src txt :tangle ../build/10.5x/menudef.txt
+
+#+begin_src txt :tangle build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
   X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1
 }
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5Slider.zs
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
 class OptionMenuItemX5Slider : OptionMenuItemSlider
 {
   OptionMenuItemX5Slider init(string label,
@@ -639,8 +650,10 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 #+end_src
 
 * Type multipliers
+
 ** ~x5_TypeMultipliersMenu~
-#+begin_src txt :tangle ../build/10.5x/menudef.txt
+
+#+begin_src txt :tangle build/10.5x/menudef.txt
 OptionMenu "x5_TypeMultipliers"
 {
   Class "x5_TypeMultipliersMenu"
@@ -648,11 +661,11 @@ OptionMenu "x5_TypeMultipliers"
 }
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/cvarinfo.txt
+#+begin_src c :tangle build/10.5x/cvarinfo.txt
 nosave string x5_type_multipliers = "";
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeMultipliersMenu : OptionMenu
 {
   override bool menuEvent(int mKey, bool fromController)
@@ -770,7 +783,7 @@ class x5_TypeMultipliersMenu : OptionMenu
 } // class x5_TypeMultipliersMenu
 #+end_src
 
-#+begin_src c :tangle ../build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+#+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
 class x5_TypeSortElement
 {
   string mName;
@@ -781,7 +794,8 @@ class x5_TypeSortElement
 #+end_src
 
 ** ~OptionMenuItemX5TypeSlider~
-#+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+
+#+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
   void init(class<Actor> enemyClass, int value)
@@ -806,7 +820,8 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 #+end_src
 
 * ZScript :noexport:
-#+begin_src c :tangle ../build/10.5x/zscript.zs
+
+#+begin_src c :tangle build/10.5x/zscript.zs
 version <<zscript-version>>
 
 #include "zscript/OptionMenuItemX5Slider.zs"
@@ -820,37 +835,40 @@ version <<zscript-version>>
 #+end_src
 
 * Sprites
-sprites/m8rda0.png: [[../media/10.5x/sprites/m8rda0.png]]
+
+sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 
 #+name: copy-media
 #+begin_src elisp :exports none
-(copy-directory "../media/10.5x" "../build/10.5x" nil t t)
-""
-; This script has to be parked somewhere, so put it in zscript.zs.
+(copy-directory "media/10.5x" "build/10.5x" nil t t)
+(copy-directory "LICENSES" "build/10.5x/LICENSES" nil t t)
+(copy-directory "docs" "build/10.5x/docs" nil t t)
+(copy-file "10.5x.org" "build/10.5x/Readme.org")
 #+end_src
-#+begin_src c :tangle ../build/10.5x/zscript.zs :exports none
+#+begin_src txt :tangle build/tmp.txt :exports none
 <<copy-media()>>
 #+end_src
 
 * Tests
-#+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
+
+#+begin_src c :tangle build/10.5xTest/mapinfo.txt
 GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/cvarinfo.txt
+#+begin_src c :tangle build/10.5xTest/cvarinfo.txt
 server string x5t_name  = "";
 server string x5t_spawn = "";
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs :exports none
+#+begin_src c :tangle build/10.5xTest/zscript.zs :exports none
 version <<zscript-version>>
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 class x5t_Clematis : Clematis {}
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 class x5t_Test : StaticEventHandler
 {
   override void onRegister() { setOrder(-1); }
@@ -924,7 +942,7 @@ class x5t_Test : StaticEventHandler
 } // class x5t_Test
 #+end_src
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 class x5t_Quoter : EventHandler
 {
   static string quote(string input)
@@ -952,7 +970,7 @@ Doom monsters with radius 20:
 | ~ChaingunGuy~   |          |                                    |
 | ~WolfensteinSS~ |          |                                    |
 
-#+begin_src c :tangle ../build/10.5xTest/zscript.zs
+#+begin_src c :tangle build/10.5xTest/zscript.zs
 // clang-format off
 class x5t_Archvile : Archvile {}
 class x5t_Revenant : Revenant {}
@@ -984,9 +1002,9 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 TODO: make multiplayer tests, maybe?
 
 #+begin_src elisp
-(load-file "../build/TestRunner/dt-scripts.el")
+(load-file "build/TestRunner/dt-scripts.el")
 (dt-run-tests
- '("../build/10.5x ../build/10.5xTest")
+ '("build/10.5x build/10.5xTest")
 
  "x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
