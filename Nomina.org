@@ -176,7 +176,7 @@ class NAT_BFG9000        : nat_Monster {}
 
 ** In-game enemy tag correction
 
-*** ~na_config~ CVar
+*** ~na_config~ Cvar
 
 #+begin_src txt :tangle ../build/Nomina/cvarinfo.txt
 server nosave string na_config = "";
@@ -196,7 +196,7 @@ class nat_NamelessByConfig : nat_Monster {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
     // Cannot set a string value with " in the console, have to do it programmatically.
-    CVar.getCvar("na_config").setString(
+    Cvar.getCvar("na_config").setString(
       "{\"nat_NamelessByConfig\":\"TestName\", \"Zombieman\":\"TestZombie\"}");
     mExpectedNames.insert("nat_NamelessByConfig", "TestName");
     mExpectedNames.insert("Zombieman", "TestZombie");
@@ -241,7 +241,7 @@ NA_USAGE = "Использование";
 
     let config = Dictionary.fromString(na_config);
     config.insert(className, newTag);
-    CVar.getCvar("na_config").setString(config.toString());
+    Cvar.getCvar("na_config").setString(config.toString());
 
     let i = ThinkerIterator.create(className);
     for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
@@ -383,7 +383,7 @@ class nat_EventHandler : StaticEventHandler
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 (dt-run-tests
- "../build/Nomina ../build/NominaTest ../build/na_data.json"
+ '("../build/Nomina ../build/NominaTest ../build/na_data.json")
  "wait 2; map map01;
   wait 2; na_rename nat_NamelessToRename Renamed To Several Words;
     wait 2; summon nat_NamelessToRename;

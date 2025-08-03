@@ -447,7 +447,7 @@ private Array<string> mFields;
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 (dt-run-tests
- "../build/StringUtils"
+ '("../build/StringUtils")
 
  "wait 2; map map01;
   wait 2; netevent test:su_Test;

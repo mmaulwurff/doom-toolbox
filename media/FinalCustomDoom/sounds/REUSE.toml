@@ -1,0 +1,24 @@
+# https://reuse.software/
+
+version = 1
+
+# Heartbeat (Dumpf-Dumpf)
+# https://freesound.org/s/540985/
+[[annotations]]
+path = "540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
+SPDX-FileCopyrightText = "magnuswaker"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Bullet Shell Falling on Concrete Surface 024
+# https://freesound.org/s/730748/
+[[annotations]]
+path = "730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
+SPDX-FileCopyrightText = "Debsound"
+SPDX-License-Identifier = "CC-BY-NC-4.0"
+
+# Denim_And_Cloth_Step_Foley_12
+# https://freesound.org/s/778514/
+[[annotations]]
+path = "778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
+SPDX-FileCopyrightText = "BlondPanda"
+SPDX-License-Identifier = "CC0-1.0"

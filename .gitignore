@@ -15,6 +15,7 @@
 
 # and these file types:
 !*.en.pws
+!*.ogg
 !*.org
 !*.png
 !*.sh

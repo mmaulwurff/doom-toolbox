@@ -65,9 +65,8 @@ Notes:
 
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
-
 (dt-run-tests
- "../build/DoomDoctor ../build/DoomDoctorTest"
+ '("../build/DoomDoctor ../build/DoomDoctorTest")
 
  "  dd_logging_engine_events_enabled  true;
     dd_logging_replace_events_enabled true;
@@ -165,7 +164,7 @@ version 4.12.2
 #+end_src
 
 #+name: module
-#+begin_src emacs-lisp :var module-name = "" :exports none
+#+begin_src elisp :var module-name = "" :exports none
 (org-babel-tangle-file (concat "../modules/" module-name ".org"))
 
 (string-replace "NAMESPACE_" "dd_"
@@ -304,7 +303,7 @@ class dd_Report
   private static clearscope string getConfiguration()
   {
     return new("dd_Description")
-      .addCVar("compatflags")
+      .addCvar("compatflags")
       .addCvar("compatflags2")
       .addCvar("dmflags")
       .addCvar("dmflags2")
