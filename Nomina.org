@@ -378,6 +378,18 @@ class nat_EventHandler : StaticEventHandler
 }
 #+end_src
 
+* Project files :noexport:
+
+#+name: copy-files
+#+begin_src elisp :exports none
+(copy-directory "LICENSES" "build/Nomina/LICENSES" nil t t)
+(copy-directory "docs" "build/Nomina/docs" nil t t)
+(copy-file "Nomina.org" "build/Nomina/Readme.org")
+#+end_src
+#+begin_src txt :tangle build/tmp.txt :exports none
+<<copy-files()>>
+#+end_src
+
 * Run tests
 
 #+begin_src elisp
