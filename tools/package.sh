@@ -22,7 +22,8 @@ rm --recursive --force "build/$title.pk3"
 mkdir --parents "build/$title"
 cp --recursive "build/$name/"* "build/$title"
 cp --recursive LICENSES "build/$title"
-cp "$1" "build/$title"
+cp --recursive documentation "build/$title"
+cp "$1" "build/$title/Readme.org"
 
 cd "build/$title" || exit
 7z a -tzip "../$title.pk3" ./*

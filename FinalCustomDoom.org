@@ -3,7 +3,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 #+startup: content
 
-#+title: Final Custom Doom
+#+title: FinalCustomDoom v0.1.0
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
@@ -802,9 +802,6 @@ version 4.14.2
 #+name: copy-media
 #+begin_src elisp :exports none
 (copy-directory "media/FinalCustomDoom" "build/FinalCustomDoom" nil t t)
-(copy-directory "LICENSES" "build/FinalCustomDoom/LICENSES" nil t t)
-(copy-directory "documentation" "build/FinalCustomDoom/documentation" nil t t)
-(copy-file "FinalCustomDoom.org" "build/FinalCustomDoom/Readme.org" t)
 #+end_src
 
 ** Menu item replacements

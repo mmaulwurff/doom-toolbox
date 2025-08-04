@@ -1380,18 +1380,6 @@ private dd_BufferedConsole console;
  (mapconcat (lambda (x) (format "private Cvar %s;\n" x)) cvars))
 #+end_src
 
-* Project files :noexport:
-
-#+name: copy-files
-#+begin_src elisp :exports none
-(copy-directory "LICENSES" "build/DoomDoctor/LICENSES" nil t t)
-(copy-directory "documentation" "build/DoomDoctor/documentation" nil t t)
-(copy-file "DoomDoctor.org" "build/DoomDoctor/Readme.org" t)
-#+end_src
-#+begin_src txt :tangle build/tmp.txt :exports none
-<<copy-files()>>
-#+end_src
-
 * Tests end :noexport:
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.zs
