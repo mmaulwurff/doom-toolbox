@@ -9,7 +9,6 @@
 
 * Description
 
-TODO: add multiplayer (apply effects to all pawns?) or a warning on network play.
 TODO: ? weapons push back?
 
 Removed:
@@ -1215,6 +1214,9 @@ class cd_EventHandler : StaticEventHandler
 
   override void playerEntered(PlayerEvent event)
   {
+    if (multiplayer)
+      throwAbortException("Final Custom Doom doesn't support multiplayer (yet?).");
+
     PlayerPawn player = players[event.playerNumber].mo;
 
     bool isOldGame = (player.findInventory('cd_OldGameMarker') != NULL);
