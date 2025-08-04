@@ -5,6 +5,8 @@
 
 #+title: Final Custom Doom
 
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
 * Description
 
 TODO: add multiplayer (apply effects to all pawns?) or a warning on network play.
@@ -801,7 +803,7 @@ version 4.14.2
 #+begin_src elisp :exports none
 (copy-directory "media/FinalCustomDoom" "build/FinalCustomDoom" nil t t)
 (copy-directory "LICENSES" "build/FinalCustomDoom/LICENSES" nil t t)
-(copy-directory "docs" "build/FinalCustomDoom/docs" nil t t)
+(copy-directory "documentation" "build/FinalCustomDoom/documentation" nil t t)
 (copy-file "FinalCustomDoom.org" "build/FinalCustomDoom/Readme.org" t)
 #+end_src
 

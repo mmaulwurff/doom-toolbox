@@ -5,6 +5,9 @@
 
 #+title:  Hint
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* Hint
 #+begin_src c :tangle ../build/Hint/Hint.zs
 
 // SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>

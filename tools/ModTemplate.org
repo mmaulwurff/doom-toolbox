@@ -5,7 +5,7 @@
 
 #+title: Mod Template
 
-* [[file:../docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Mod Template
 

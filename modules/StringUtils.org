@@ -5,6 +5,8 @@
 
 #+title: StringUtils
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
 * Preamble
 
 ** Source code

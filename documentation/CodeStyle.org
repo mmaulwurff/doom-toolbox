@@ -29,7 +29,7 @@
 
 * Formatting
 
-See [[../.clang-format]] for formatting settings.
+See [[../.clang-format]] and [[../.editorconfig]] for formatting settings.
 
 * Abbreviations
 

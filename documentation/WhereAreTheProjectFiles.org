@@ -7,7 +7,7 @@ This is Emacs Org-mode literate project file. Use Emacs to extract the individua
 
 emacs File.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
 
-⚠ Warning! Don't run scripts from the sources you don't trust. Org files may contain code too, always examine the file before extracting source code from it.
+⚠ !WARNING! Org files may contain code, and extracting the source files from it may execute it. Don't extract files from Org files from the sources you don't trust.
 
 The breakdown of the script above:
 - launch Emacs with the File.org file:
@@ -24,18 +24,18 @@ The breakdown of the script above:
 ** Logical code structure
 
 You can put related program components together, even if they are in different languages or file formats. Like this: conventional code structure:
-- application/file1: feature1 settings, feature2 settings;
+- application/file1: feature1 documentation, feature2 documentation;
 - application/file2: feature1 source code, feature2 source code;
 - tests/file3: feature1 tests, feature2 tests.
 
 Logical code structure:
 - file1:
-  - section1: feature1 settings, feature1 source code, feature1 tests,
-  - section2: feature2 settings, feature2 source code, feature2 tests.
+  - section1: feature1 documentation, feature1 source code, feature1 tests,
+  - section2: feature2 documentation, feature2 source code, feature2 tests.
 
 ** Macros
 
-Elisp can be used to generate code. Great for boilerplate code.
+Your project's main programming language can be extended with a scripting language like Python or Emacs Lisp, which can be used to generate code. Great for boilerplate code.
 
 ** Links
 
@@ -49,16 +49,20 @@ Export to HTML produces a very nicely formatted document. Also, GitHub shows .or
 
 ** Limited text editor choice
 
-There is some support for Org-mode for editors other than Emacs, but I believe Elisp macros is out of the question for them.
+There is some support for Org-mode for editors other than Emacs, but I believe code execution, especially Emacs Lisp, is out of the question for them.
 
 ** Limited project size
 
-Emacs becomes less responsive with big and complex Org-mode files.
+Emacs may become less responsive with big and complex Org-mode files. Projects with big feature scope will be difficult to understand as one file. But, maybe it's a good thing, and helps prevent feature creep?
 
 ** Extra syntax
 
-Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file.
+Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file. Besides your project's main programming language syntax and formatting, you now also have to spend time formatting Org.
+
+** Compilation error reporting
+
+The compiler reports errors and warnings with line numbers of the source files that are extracted from the Org files, not line numbers in the Org file.
 
 ** Licensing mess
 
-It's a hassle to apply different licenses to different parts of the file.
+If you want to license your project properly and apply different licenses to project source files and documentation, it's a hassle to do that.

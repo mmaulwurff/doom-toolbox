@@ -5,7 +5,7 @@
 
 #+title: 10.5x v0.11.1-beta
 
-* [[file:docs/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Description
 
@@ -50,8 +50,8 @@ Acknowledgments:
 
 ** Development notes
 
-- Contribution guidelines: [[file:docs/CodeOfConduct.org][Code of Conduct]].
-- [[file:docs/CodeStyle.org][Code style]].
+- Contribution guidelines: [[file:documentation/CodeOfConduct.org][Code of Conduct]].
+- [[file:documentation/CodeStyle.org][Code style]].
 
 * Licenses
 
@@ -841,7 +841,7 @@ sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 #+begin_src elisp :exports none
 (copy-directory "media/10.5x" "build/10.5x" nil t t)
 (copy-directory "LICENSES" "build/10.5x/LICENSES" nil t t)
-(copy-directory "docs" "build/10.5x/docs" nil t t)
+(copy-directory "documentation" "build/10.5x/documentation" nil t t)
 (copy-file "10.5x.org" "build/10.5x/Readme.org" t)
 #+end_src
 #+begin_src txt :tangle build/tmp.txt :exports none
