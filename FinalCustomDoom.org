@@ -9,8 +9,6 @@
 
 * Description
 
-TODO: ? weapons push back?
-
 Removed:
 - Max view pitch: engine Cvar: ~maxviewpitch~
 - Air control: engine Cvar: ~sv_aircontrol~
@@ -1214,6 +1212,7 @@ class cd_EventHandler : StaticEventHandler
 
   override void playerEntered(PlayerEvent event)
   {
+    // TODO: support multiplayer?
     if (multiplayer)
       throwAbortException("Final Custom Doom doesn't support multiplayer (yet?).");
 
@@ -1246,10 +1245,7 @@ class cd_EventHandler : StaticEventHandler
 
   override void worldTick()
   {
-    // TODO: stagger periodic events.
-    if (level.totalTime % TICRATE != 0) return;
-
-    applyEffects(Periodically);
+    if (level.totalTime % TICRATE == 0) applyEffects(Periodically);
   }
 }
 
