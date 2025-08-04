@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
+
 #+title: Where Are The Project Files?
 
 This is Emacs Org-mode literate project file. Use Emacs to extract the individual files. You don't have to open the Emacs window. Use the following command line command to extract source code from a file named File.org:
@@ -19,7 +20,9 @@ The breakdown of the script above:
     - ~org-babel-tangle~ - extract source code from .org file to separate files.
 
 * Pros
+
 ** Logical code structure
+
 You can put related program components together, even if they are in different languages or file formats. Like this: conventional code structure:
 - application/file1: feature1 settings, feature2 settings;
 - application/file2: feature1 source code, feature2 source code;
@@ -31,23 +34,31 @@ Logical code structure:
   - section2: feature2 settings, feature2 source code, feature2 tests.
 
 ** Macros
+
 Elisp can be used to generate code. Great for boilerplate code.
 
 ** Links
+
 To file sections, to other files, URLs.
 
 ** HTML documentation
+
 Export to HTML produces a very nicely formatted document. Also, GitHub shows .org files as a formatted HTML page, though macros and ~:noexport:~ sections are not supported.
 
 * Cons
+
 ** Limited text editor choice
+
 There is some support for Org-mode for editors other than Emacs, but I believe Elisp macros is out of the question for them.
 
 ** Limited project size
+
 Emacs becomes less responsive with big and complex Org-mode files.
 
 ** Extra syntax
+
 Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file.
 
 ** Licensing mess
+
 It's a hassle to apply different licenses to different parts of the file.
