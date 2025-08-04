@@ -60,6 +60,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 // <<GPL>>
 #+end_src
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
+// <<GPL>>
+#+end_src
 
 * Main menu
 
@@ -786,6 +789,7 @@ version 4.14.2
 
 #include "zscript/cd_EventHandler.zs"
 #include "zscript/cd_Effects.zs"
+#include "zscript/cd_Menu.zs"
 #+end_src
 
 #+begin_src txt :tangle build/tmp.txt :exports none
@@ -799,7 +803,7 @@ version 4.14.2
 
 ** Menu item replacements
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
 
 class cd_Menu : OptionMenu
 {
@@ -890,7 +894,7 @@ mixin class cd_SettingItem
 server string cd_settings;
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
 
 mixin class cd_DirectlyTranslatable
 {
