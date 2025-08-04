@@ -4,7 +4,7 @@
 ;; This is directory local variables file for Emacs.
 
 ((nil . (
-         ;; Set the path to the dircionary file so it works in files in subdirectories too.
+         ;; Set the path to the dictionary file so it works in files in subdirectories too.
          ;; See https://stackoverflow.com/questions/4012321/how-can-i-access-the-path-to-the-current-directory-in-an-emacs-directory-variabl
          (eval . (setq ispell-personal-dictionary
                        (expand-file-name
