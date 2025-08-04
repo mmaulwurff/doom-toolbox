@@ -10,8 +10,6 @@
 * Description
 
 TODO: add multiplayer (apply effects to all pawns?) or a warning on network play.
-TODO: add different menu with engine Cvars and commands.
-TODO: add engine commands to restart level with and without keeping inventory.
 TODO: ? weapons push back?
 
 Removed:
@@ -25,8 +23,6 @@ Final Custom Doom options are set and stored not like normal GZDoom options. The
 - ~ColorPicker~ -> color setting.
 
 Other option menu elements remain the same.
-
-Translation note: most items have their string written in plain English and not as ~$~, but is still translatable, for example: ~TextField "Weapon damage multiplier"~ - here the string identifier to translate is ~$cd_Weapon_damage_multiplier~. ~$~ identifier can still be used directly.
 
 * Licenses
 
@@ -79,9 +75,6 @@ OptionMenu cd_Menu
   Class cd_Menu
   <<OptionMenuTitle("$cd_Title")>>
 
-  Submenu    "Manual"       , cd_Manual
-  StaticText ""
-
   StaticText "Gameplay"     , White
   Submenu    "Basic"        , cd_BasicGameplay
   Submenu    "Advanced"     , cd_AdvancedGameplay
@@ -98,14 +91,6 @@ OptionMenu cd_Menu
   StaticText ""
   Submenu    "Commands"     , cd_Commands
 }
-
-OptionMenu cd_Manual
-{
-  <<OptionMenuTitle("Manual")>>
-  <<OptionMenuNotes("$cd_ZeroTerminatedTitle")>>
-
-  StaticText "$cd_ManualText", White
-}
 #+end_src
 
 * Basic gameplay
@@ -115,7 +100,7 @@ OptionMenu cd_Manual
 OptionMenu cd_BasicGameplay
 {
   <<OptionMenuTitle("Basic Gameplay")>>
-  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   TextField  "Weapon damage multiplier", "cd_Gameplay:weaponDamage"
   TextField  "Taken damage multiplier" , "cd_Gameplay:takenDamage"
@@ -144,14 +129,13 @@ class cd_Gameplay : cd_EffectsBase
 OptionMenu cd_AdvancedGameplay
 {
   <<OptionMenuTitle("Advanced Gameplay")>>
-  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   NumberField "Start health"    , "cd_Gameplay:startHealth:OnPlayerStarted"
   NumberField "Start armor"     , "cd_Gameplay:startArmor:OnPlayerStarted"
   TextField   "Save percent"    , "cd_Gameplay:savePercent:Never"
   StaticText  ""
   NumberField "Max health"      , "cd_Gameplay:maxHealth"
-  cd_Hint     "$cd_MaxHealthHint"
   TextField   "Speed multiplier", "cd_Gameplay:speedMultiplier"
   TextField   "Jump height multiplier", "cd_Gameplay:jumpMultiplier"
 }
@@ -241,7 +225,7 @@ class cd_StartArmorBonus : BasicArmorBonus
 OptionMenu cd_MiscGameplay
 {
   <<OptionMenuTitle("Miscellaneous Gameplay")>>
-  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   TextField "Friction multiplier"   , "cd_Gameplay:friction"
   TextField "Self damage multiplier", "cd_Gameplay:selfDamage"
@@ -271,6 +255,7 @@ extend class cd_Gameplay
 OptionMenu cd_HealthRegeneration
 {
   <<OptionMenuTitle("Health Regeneration")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   NumberField "Amount", "cd_HealthRegeneration:amount:Periodically"
   Option "Type", "cd_HealthRegeneration:type:Never", cd_RegenerationType
@@ -324,6 +309,7 @@ cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 OptionMenu cd_ArmorRegeneration
 {
   <<OptionMenuTitle("$Armor Regeneration")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   NumberField "Amount", "cd_ArmorRegeneration:amount:Periodically"
   Option      "Type"  , "cd_ArmorRegeneration:type:Never", cd_RegenerationType
@@ -389,6 +375,7 @@ cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 OptionMenu cd_AmmoRegeneration
 {
   <<OptionMenuTitle("Ammo Regeneration")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   NumberField "Amount", "cd_AmmoRegeneration:amount:Periodically"
   NumberField "Period (seconds)", "cd_AmmoRegeneration:period:Never"
@@ -448,8 +435,8 @@ cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024
 
 OptionMenu cd_Actors
 {
-  <<OptionMenuTitle("$cd_ActorsTitle")>>
-  <<OptionMenuNotes("$cd_ZeroTerminated")>>
+  <<OptionMenuTitle("Actors")>>
+  <<OptionMenuNote("$cd_0asDisabled")>>
 
   StaticText  "Enemies", White
   TextField   "Health multiplier", "cd_Actors:enemyHealth:OnActorSpawned"
@@ -597,9 +584,8 @@ class cd_Actors : cd_EffectsBase
 
 OptionMenu cd_Powerup
 {
-  <<OptionMenuTitle("$cd_PowerupTitle")>>
+  <<OptionMenuTitle("Permanent powerups")>>
 
-  StaticText "Permanent", White
   Option "Buddha"             , "cd_Powerup:buddha:Periodically"           , OnOff
   Option "Damage"             , "cd_Powerup:damage:Periodically"           , OnOff
   Option "Double firing speed", "cd_Powerup:doubleFiringSpeed:Periodically", OnOff
@@ -687,7 +673,7 @@ class cd_Powerup : cd_EffectsBase
 
 OptionMenu cd_Commands
 {
-  <<OptionMenuTitle("$cd_CommandsTitle")>>
+  <<OptionMenuTitle("Commands")>>
 
   SafeCommand "$cd_ResetOptions"  , cd_reset_to_defaults
   StaticText  ""
@@ -724,54 +710,42 @@ CDLightBlue { #111111 #99CCFF }
 
 #+name: OptionMenuTitle
 #+begin_src elisp :var title = "" :exports none
-(concat "StaticText \"========================================\", CDLightBlue
-StaticText \"" title "\", CDLightBlue
+(format "\
 StaticText \"========================================\", CDLightBlue
-StaticText \"\"")
+StaticText \"%s\", CDLightBlue
+StaticText \"========================================\", CDLightBlue
+StaticText \"\"" title)
 #+end_src
 
-#+name: OptionMenuNotes
-#+begin_src elisp :var subtitles = "" :exports none
-(concat (mapconcat
-         (lambda (x) (format "StaticText \"%s\", CDLightBlue\n" x))
-         (split-string subtitles " " nil))
-        "StaticText \"\"")
+#+name: OptionMenuNote
+#+begin_src elisp :var note = "" :exports none
+(format "\
+StaticText \"%s\", CDLightBlue
+StaticText \"\"" note)
 #+end_src
-
-TODO: fix the manual.
 
 #+begin_src ini :tangle build/FinalCustomDoom/language.txt
 
+// Translation note: most FCD menu items have their strings written in plain English
+// and not as $, but are still translatable, for example:
+// TextField "Weapon damage multiplier" "cd_something"
+// here the string identifier to translate is $cd_Weapon_damage_multiplier.
+// Normal $ string identifier can be used too.
+
 [enu default]
 cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
-// todo: rewrite this (to "0 to 1"?).
-cd_ZeroTerminated = "All modifiers are zero-terminated.";
-cd_ZeroTerminatedTitle = "Zero-terminated modifiers";
+cd_0asDisabled = "Value 0: option disabled";
+cd_Regeneration = "Regeneration";
+cd_Degeneration = "Degeneration";
 
-cd_MaxHealthHint = "Bonus items overheal up to max + 100.";
-
-cd_ManualText = "These modifiers have a default value of 0. They will not do\
-anything until you change their values to something positive.\
-\
-Such are the monster modifiers, and almost all player modifiers.\
-\
-These options can be enabled individually by using any\
-number above 0.\
-\
-Switching to 0 from a positive number during gameplay\
-will not revert the changes done.\
-\
-To do that, you must set value to its default (most often 1),\
-exit the menu, wait until the change is in effect, then zero-\
-terminate the modifier,\
-\
-0 means that other mods' effects will not be overridden\
-by Final Custom Doom.";
+cd_ResetOptions = "Reset options";
+cd_BackupOptions = "Back up options";
+cd_RestoreOptions = "Restore options from a backup";
 
 [ru]
-cd_Manual = "Руководство";
 cd_Weapon_damage_multiplier = "Множитель урона от оружия";
 cd_Gameplay = "Игра";
+cd_Basic_Gameplay = "Базовая игра";
 #+end_src
 
 ** Project setup
@@ -782,21 +756,10 @@ version 4.14.2
 
 #include "zscript/cd_EventHandler.zs"
 #include "zscript/cd_Effects.zs"
-#include "zscript/cd_Hint.zs"
 #+end_src
 
 #+begin_src txt :tangle build/tmp.txt :exports none
-<<import-module("Hint")>>
 <<copy-media()>>
-#+end_src
-
-#+name: import-module
-#+begin_src elisp :var module-name = "" :exports none
-(org-babel-tangle-file (format "modules/%s.org" module-name))
-(make-directory "build/FinalCustomDoom/zscript" t)
-(with-temp-file (format "build/FinalCustomDoom/zscript/cd_%s.zs" module-name)
-  (insert-file-contents (format "build/%1$s/%1$s.zs" module-name))
-  (replace-string "NAMESPACE_" "cd_")))
 #+end_src
 
 #+name: copy-media
