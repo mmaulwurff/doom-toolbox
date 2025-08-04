@@ -1,17 +1,20 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-only
-:properties:
-:header-args: :comments no :mkdirp yes :noweb yes :results none
-:end:
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+#+startup: content
+
 #+title: StringUtils
 
 * Preamble
+
 ** Source code
+
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 // <<GPL>>
 #+end_src
 
 ** Tests
+
 #+begin_src c :tangle ../build/StringUtils/zscript.zs
 // <<GPL>>
 
@@ -26,7 +29,9 @@ class su_Test : Clematis { override void TestSuites() {
 #+end_src
 
 * Classes
+
 ** ~StringUtils~
+
 This class acts as a namespace for free functions.
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
@@ -34,6 +39,7 @@ class NAMESPACE_su { <<StringUtilsBody>> }
 #+end_src
 
 *** ~join~
+
 Joins strings to a single string separated by delimiter.
 
 #+name: join
@@ -66,6 +72,7 @@ static clearscope string join(Array<string> strings, string delimiter = ", ")
 #+end_src
 
 *** ~repeat~
+
 Repeats the specified string the specified number of times.
 
 #+name: repeat
@@ -89,6 +96,7 @@ static clearscope string repeat(string aString, int times)
 #+end_src
 
 *** ~boolToString~
+
 Writes out a boolean value.
 
 #+name: boolToString
@@ -106,6 +114,7 @@ static clearscope string boolToString(bool value)
 #+end_src
 
 *** Class contents
+
 #+name: StringUtilsBody
 #+begin_src c
 <<join>>
@@ -114,6 +123,7 @@ static clearscope string boolToString(bool value)
 #+end_src
 
 ** ~Description~
+
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
 class NAMESPACE_Description { <<DescriptionBody>> }
 #+end_src
@@ -121,6 +131,7 @@ class NAMESPACE_Description { <<DescriptionBody>> }
 Optimization opportunity: add... functions append to a private string, not an array. Compose simply returns it.
 
 *** ~compose~
+
 #+name: compose
 #+begin_src c
 string compose() { return NAMESPACE_su.join(mFields); }
@@ -133,6 +144,7 @@ string compose() { return NAMESPACE_su.join(mFields); }
 #+end_src
 
 *** ~add~
+
 #+name: add
 #+begin_src c
 NAMESPACE_Description add(string name, string value)
@@ -150,6 +162,7 @@ NAMESPACE_Description add(string name, string value)
 #+end_src
 
 *** ~addObject~
+
 #+name: addObject
 #+begin_src c
 NAMESPACE_Description addObject(string name, Object anObject)
@@ -170,6 +183,7 @@ NAMESPACE_Description addObject(string name, Object anObject)
 #+end_src
 
 *** ~addClass~
+
 #+name: addClass
 #+begin_src c
 NAMESPACE_Description addClass(string name, Class aClass)
@@ -186,6 +200,7 @@ NAMESPACE_Description addClass(string name, Class aClass)
 #+end_src
 
 *** ~addBool~
+
 #+name: addBool
 #+begin_src c
 NAMESPACE_Description addBool(string name, bool value)
@@ -202,6 +217,7 @@ NAMESPACE_Description addBool(string name, bool value)
 #+end_src
 
 *** ~addInt~
+
 #+name: addInt
 #+begin_src c
 NAMESPACE_Description addInt(string name, int value)
@@ -218,6 +234,7 @@ NAMESPACE_Description addInt(string name, int value)
 #+end_src
 
 *** ~addFloat~
+
 #+name: addFloat
 #+begin_src c
 NAMESPACE_Description addFloat(string name, double value)
@@ -234,6 +251,7 @@ NAMESPACE_Description addFloat(string name, double value)
 #+end_src
 
 *** ~addDamageFlags~
+
 #+name: addDamageFlags
 #+begin_src c
 NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
@@ -265,6 +283,7 @@ NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
 #+end_src
 
 *** ~addCvar~
+
 #+name: addCvar
 #+begin_src c
 NAMESPACE_Description addCvar(string name)
@@ -294,6 +313,7 @@ NAMESPACE_Description addCvar(string name)
 #+end_src
 
 *** ~addSpac~
+
 #+name: addSpac
 #+begin_src c
 /// SPAC - special activation types.
@@ -326,6 +346,7 @@ NAMESPACE_Description addSpac(string name, int flags)
 #+end_src
 
 *** ~addLine~
+
 #+name: addLine
 #+begin_src c
 NAMESPACE_Description addLine(string name, Line aLine)
@@ -342,6 +363,7 @@ NAMESPACE_Description addLine(string name, Line aLine)
 #+end_src
 
 *** ~addSectorPart~
+
 #+name: addSectorPart
 #+begin_src c
 NAMESPACE_Description addSectorPart(string name, SectorPart part)
@@ -366,6 +388,7 @@ NAMESPACE_Description addSectorPart(string name, SectorPart part)
 #+end_src
 
 *** ~addSector~
+
 #+name: addSector
 #+begin_src c
 NAMESPACE_Description addSector(string name, Sector aSector)
@@ -382,6 +405,7 @@ NAMESPACE_Description addSector(string name, Sector aSector)
 #+end_src
 
 *** ~addVector3~
+
 #+name: addVector3
 #+begin_src c
 NAMESPACE_Description addVector3(string name, vector3 vector)
@@ -399,6 +423,7 @@ NAMESPACE_Description addVector3(string name, vector3 vector)
 #+end_src
 
 *** ~addState~
+
 #+name: addState
 #+begin_src c
 NAMESPACE_Description addState(string name, State aState)
@@ -417,12 +442,14 @@ NAMESPACE_Description addState(string name, State aState)
 #+end_src
 
 *** Private attributes
+
 #+name: DescriptionPrivate
 #+begin_src c
 private Array<string> mFields;
 #+end_src
 
 *** Class contents
+
 #+name: DescriptionBody
 #+begin_src c
 <<compose>>
@@ -444,6 +471,7 @@ private Array<string> mFields;
 #+end_src
 
 * Run tests :noexport:
+
 #+begin_src elisp
 (load-file "../build/TestRunner/dt-scripts.el")
 (dt-run-tests
@@ -455,11 +483,13 @@ private Array<string> mFields;
 #+end_src
 
 * Tests end
+
 #+begin_src c :tangle ../build/StringUtils/zscript.zs
 EndDescribe(); }}
 #+end_src
 
 * License
+
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src :exports none

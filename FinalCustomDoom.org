@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-only
-:properties:
-:header-args: :comments no :mkdirp yes :noweb yes :results none
-:end:
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
 #+startup: content
 
 #+title: Final Custom Doom

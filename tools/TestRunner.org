@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
-:properties:
-:header-args: :comments no :mkdirp yes :noweb yes :results none
-:end:
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+#+startup: content
+
 #+title: TestRunner
 
 * License
+
 [[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
 #+begin_src :exports none
@@ -21,6 +22,7 @@ SPDX-License-Identifier: CC0-1.0
 #+end_src
 
 * Config
+
 Minimal config for testing purposes.
 
 #+begin_src ini :tangle ../build/TestRunner/config.ini
@@ -42,6 +44,7 @@ wipetype=0
 #+end_src
 
 * Launch script
+
 Environment:
 - ~CLEMATIS_PATH~: path to Clematis directory, example: ~"/home/user/src/clematis/src"~
 - ~IWAD_PATH~: path to an IWAD, example: ~"/home/user/src/miniwad/miniwad.wad"~
