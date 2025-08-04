@@ -843,7 +843,7 @@ sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 (copy-directory "media/10.5x" "build/10.5x" nil t t)
 (copy-directory "LICENSES" "build/10.5x/LICENSES" nil t t)
 (copy-directory "docs" "build/10.5x/docs" nil t t)
-(copy-file "10.5x.org" "build/10.5x/Readme.org")
+(copy-file "10.5x.org" "build/10.5x/Readme.org" t)
 #+end_src
 #+begin_src txt :tangle build/tmp.txt :exports none
 <<copy-media()>>

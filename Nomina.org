@@ -384,7 +384,7 @@ class nat_EventHandler : StaticEventHandler
 #+begin_src elisp :exports none
 (copy-directory "LICENSES" "build/Nomina/LICENSES" nil t t)
 (copy-directory "docs" "build/Nomina/docs" nil t t)
-(copy-file "Nomina.org" "build/Nomina/Readme.org")
+(copy-file "Nomina.org" "build/Nomina/Readme.org" t)
 #+end_src
 #+begin_src txt :tangle build/tmp.txt :exports none
 <<copy-files()>>

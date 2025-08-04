@@ -1387,7 +1387,7 @@ private dd_BufferedConsole console;
 #+begin_src elisp :exports none
 (copy-directory "LICENSES" "build/DoomDoctor/LICENSES" nil t t)
 (copy-directory "docs" "build/DoomDoctor/docs" nil t t)
-(copy-file "DoomDoctor.org" "build/DoomDoctor/Readme.org")
+(copy-file "DoomDoctor.org" "build/DoomDoctor/Readme.org" t)
 #+end_src
 #+begin_src txt :tangle build/tmp.txt :exports none
 <<copy-files()>>

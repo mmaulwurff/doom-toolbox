@@ -804,7 +804,7 @@ version 4.14.2
 (copy-directory "media/FinalCustomDoom" "build/FinalCustomDoom" nil t t)
 (copy-directory "LICENSES" "build/FinalCustomDoom/LICENSES" nil t t)
 (copy-directory "docs" "build/FinalCustomDoom/docs" nil t t)
-(copy-file "FinalCustomDoom.org" "build/FinalCustomDoom/Readme.org")
+(copy-file "FinalCustomDoom.org" "build/FinalCustomDoom/Readme.org" t)
 #+end_src
 
 ** Menu item replacements
