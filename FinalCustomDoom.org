@@ -674,11 +674,18 @@ class cd_Powerup : cd_EffectsBase
 OptionMenu cd_Commands
 {
   <<OptionMenuTitle("Commands")>>
+  <<OptionMenuNote("$cd_CommandsNote")>>
 
   SafeCommand "$cd_ResetOptions"  , cd_reset_to_defaults
   StaticText  ""
-  SafeCommand "$cd_BackupOptions" , cd_backup_options
-  SafeCommand "$cd_RestoreOptions", cd_restore_options
+  SafeCommand "$cd_BackupOptions1" , cd_backup_options1
+  SafeCommand "$cd_RestoreOptions1", cd_restore_options1
+  StaticText  ""
+  SafeCommand "$cd_BackupOptions2" , cd_backup_options2
+  SafeCommand "$cd_RestoreOptions2", cd_restore_options2
+  StaticText  ""
+  SafeCommand "$cd_BackupOptions3" , cd_backup_options3
+  SafeCommand "$cd_RestoreOptions3", cd_restore_options3
 }
 #+end_src
 
@@ -686,8 +693,38 @@ OptionMenu cd_Commands
 
 Alias cd_reset_to_defaults "cd_settings \"\""
 
-Alias cd_backup_options  "cd_settings_backup $cd_settings"
-Alias cd_restore_options "cd_settings $cd_settings_backup"
+Alias cd_backup_options1  "cd_settings_profile1 $cd_settings"
+Alias cd_restore_options1 "cd_settings $cd_settings_profile1"
+
+Alias cd_backup_options2  "cd_settings_profile2 $cd_settings"
+Alias cd_restore_options2 "cd_settings $cd_settings_profile2"
+
+Alias cd_backup_options3  "cd_settings_profile3 $cd_settings"
+Alias cd_restore_options3 "cd_settings $cd_settings_profile3"
+#+end_src
+
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+
+server string cd_settings_profile1;
+server string cd_settings_profile2;
+server string cd_settings_profile3;
+#+end_src
+
+#+begin_src ini :tangle build/FinalCustomDoom/language.txt
+
+[enu default]
+cd_CommandsNote = "Resetting and restoring aren't applied if in a game.";
+
+cd_ResetOptions = "Reset options to defaults";
+
+cd_BackupOptions1 = "Back up options to Profile 1";
+cd_RestoreOptions1 = "Restore options from Profile 1 backup";
+
+cd_BackupOptions2 = "Back up options to Profile 2";
+cd_RestoreOptions2 = "Restore options from Profile 2 backup";
+
+cd_BackupOptions3 = "Back up options to Profile 3";
+cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 #+end_src
 
 * Implementation details
@@ -734,13 +771,9 @@ StaticText \"\"" note)
 
 [enu default]
 cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
-cd_0asDisabled = "Value 0: option disabled";
+cd_0asDisabled = "When option value is 0, that option is disabled.";
 cd_Regeneration = "Regeneration";
 cd_Degeneration = "Degeneration";
-
-cd_ResetOptions = "Reset options";
-cd_BackupOptions = "Back up options";
-cd_RestoreOptions = "Restore options from a backup";
 
 [ru]
 cd_Weapon_damage_multiplier = "Множитель урона от оружия";
@@ -853,6 +886,14 @@ mixin class cd_SettingItem
       EventHandler.sendNetworkEvent(string.format("%s:%s", mTag, value));
   }
 }
+#+end_src
+
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+
+server string cd_settings;
+#+end_src
+
+#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 
 mixin class cd_DirectlyTranslatable
 {
@@ -1083,9 +1124,6 @@ class cd_Text : OptionMenuItemStaticText
 #+end_src
 
 #+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
-
-server string cd_settings;
-server string cd_settings_backup;
 
 user color cd_proxy_color;
 #+end_src
