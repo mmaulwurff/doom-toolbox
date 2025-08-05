@@ -5,110 +5,78 @@
 
 #+title: FinalCustomDoom v0.1.0
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+Final Custom Doom provides gameplay customization. It can be used to increase or decrease the difficulty in various ways.
 
-* Description
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
-Removed:
-- Max view pitch: engine Cvar: ~maxviewpitch~
-- Air control: engine Cvar: ~sv_aircontrol~
-- Randomizer
+* Licenses :noexport:
 
-Final Custom Doom options are set and stored not like normal GZDoom options. They are defined like normal Cvar options, but option menu items are transformed when Final Custom Doom loads. Item transformations:
-- ~TextField~ -> double setting,
-- ~NumberField~, ~Option~ -> int setting,
-- ~ColorPicker~ -> color setting.
-
-Other option menu elements remain the same.
-
-* Licenses
-
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
-#+begin_src txt :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
-// <<GPL>>
-#+end_src
-#+begin_src ini :tangle build/FinalCustomDoom/language.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
 // <<GPL>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
 // <<GPL>>
 #+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+// <<GPL>>
+#+end_src
+#+begin_src ini :tangle build/FinalCustomDoom/language.txt
+// <<GPL>>
+#+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt
 // <<GPL>>
 #+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
+// <<GPL>>
+#+end_src
+
 #+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
 // <<GPL>>
 #+end_src
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
 // <<GPL>>
 #+end_src
 
-* Main menu
+* Options
 
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
+** Player
 
-AddOptionMenu OptionsMenu { Submenu "$cd_Title", cd_Menu }
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
 
-OptionMenu cd_Menu
+OptionMenu cd_Player
 {
-  Class cd_Menu
-  <<OptionMenuTitle("$cd_Title")>>
+  <<OptionMenuTitle("Player")>>
+  <<OptionMenuNote("0 disables the option.")>>
 
-  StaticText "Gameplay"     , White
-  Submenu    "Basic"        , cd_BasicGameplay
-  Submenu    "Advanced"     , cd_AdvancedGameplay
-  Submenu    "Actors"       , cd_Actors
-  Submenu    "Powerup"      , cd_Powerup
-  Submenu    "Miscellaneous", cd_MiscGameplay
-  StaticText ""
-
-  StaticText "Regeneration/Degeneration", White
-  Submenu    "Health"       , cd_HealthRegeneration
-  Submenu    "Armor"        , cd_ArmorRegeneration
-  Submenu    "Ammo"         , cd_AmmoRegeneration
-
-  StaticText ""
-  Submenu    "Commands"     , cd_Commands
+  TextField   "Weapon damage multiplier", "cd_Player:weaponDamage:Immediately"
+  TextField   "Taken damage multiplier" , "cd_Player:takenDamage:Immediately"
+  StaticText  ""
+  NumberField "Start health"            , "cd_Player:startHealth:OnPlayerStarted"
+  NumberField "Start armor"             , "cd_Player:startArmor:OnPlayerStarted"
+  TextField   "Save percent"            , "cd_Player:savePercent"
+  StaticText  ""
+  NumberField "Max health"              , "cd_Player:maxHealth:Immediately"
+  TextField   "Speed multiplier"        , "cd_Player:speedMultiplier:Immediately"
+  TextField   "Jump height multiplier"  , "cd_Player:jumpMultiplier:Immediately"
+  StaticText  ""
+  TextField   "Friction multiplier"     , "cd_Player:friction:Immediately"
+  TextField   "Self damage multiplier"  , "cd_Player:selfDamage:Immediately"
 }
 #+end_src
 
-* Basic gameplay
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_BasicGameplay
-{
-  <<OptionMenuTitle("Basic Gameplay")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  TextField  "Weapon damage multiplier", "cd_Gameplay:weaponDamage"
-  TextField  "Taken damage multiplier" , "cd_Gameplay:takenDamage"
-}
-#+end_src
+@@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
-class cd_Gameplay : cd_EffectsBase
+class cd_Player : cd_EffectsBase
 {
   static void takenDamage(string value)
   {
@@ -119,31 +87,7 @@ class cd_Gameplay : cd_EffectsBase
   {
     pawn().damageMultiply = defaultPawn().damageMultiply * as0to1Multiplier(value);
   }
-}
-#+end_src
 
-* Advanced gameplay
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_AdvancedGameplay
-{
-  <<OptionMenuTitle("Advanced Gameplay")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  NumberField "Start health"    , "cd_Gameplay:startHealth:OnPlayerStarted"
-  NumberField "Start armor"     , "cd_Gameplay:startArmor:OnPlayerStarted"
-  TextField   "Save percent"    , "cd_Gameplay:savePercent:Never"
-  StaticText  ""
-  NumberField "Max health"      , "cd_Gameplay:maxHealth"
-  TextField   "Speed multiplier", "cd_Gameplay:speedMultiplier"
-  TextField   "Jump height multiplier", "cd_Gameplay:jumpMultiplier"
-}
-#+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
-
-extend class cd_Gameplay
-{
   static void startHealth(string value)
   {
     pawn().a_setHealth(value.toInt());
@@ -211,29 +155,13 @@ class cd_StartArmorBonus : BasicArmorBonus
   override void beginPlay()
   {
     let settings = Dictionary.fromString(cd_settings);
-    double value = settings.at("cd_Gameplay:savePercent:Never").toDouble();
+    double value = settings.at("cd_Player:savePercent").toDouble();
     if (value ~== 0) value = 100.0;
     savePercent = value;
   }
 }
-#+end_src
 
-* Miscellaneous gameplay
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_MiscGameplay
-{
-  <<OptionMenuTitle("Miscellaneous Gameplay")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  TextField "Friction multiplier"   , "cd_Gameplay:friction"
-  TextField "Self damage multiplier", "cd_Gameplay:selfDamage"
-}
-#+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
-
-extend class cd_Gameplay
+extend class cd_Player
 {
   static void friction(string value)
   {
@@ -247,209 +175,30 @@ extend class cd_Gameplay
   }
 }
 #+end_src
+@@html:</details>@@
 
-* Health regeneration/degeneration
+** Actors
 
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_HealthRegeneration
-{
-  <<OptionMenuTitle("Health Regeneration")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  NumberField "Amount", "cd_HealthRegeneration:amount:Periodically"
-  Option "Type", "cd_HealthRegeneration:type:Never", cd_RegenerationType
-  NumberField "Period (seconds)", "cd_HealthRegeneration:period:Never"
-  StaticText  ""
-  NumberField "Min", "cd_HealthRegeneration:min:Never"
-  NumberField "Max", "cd_HealthRegeneration:max:Never"
-  StaticText  ""
-  Textfield   "Sound effect volume"    , "cd_HealthRegeneration:sound:Never"
-  TextField   "Visual effect intensity", "cd_HealthRegeneration:visual:Never"
-  ColorPicker "Visual effect color"    , "cd_HealthRegeneration:color:Never"
-}
-#+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
-
-class cd_HealthRegeneration : cd_EffectsBase
-{
-  static void amount(string amount)
-  {
-    let settings = Dictionary.fromString(cd_settings);
-
-    if (!isMyTime(settings.at("cd_HealthRegeneration:period:Never").toInt())) return;
-
-    int type   = settings.at("cd_HealthRegeneration:type:Never").toInt();
-    int min    = settings.at("cd_HealthRegeneration:min:Never").toInt();
-    int max    = settings.at("cd_HealthRegeneration:max:Never").toInt();
-    int old    = pawn().health;
-    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
-    int new    = getNew(old, target, min, max);
-
-    if (old == new) return;
-
-    pawn().a_setHealth(new);
-
-    playSound("cd_health", settings.at("cd_HealthRegeneration:sound:Never").toDouble());
-    flashColor(settings.at("cd_HealthRegeneration:visual:Never").toDouble(),
-               settings.at("cd_HealthRegeneration:color:Never").toInt());
-  }
-}
-#+end_src
-
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
-
-cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
-#+end_src
-
-* Armor regeneration/degeneration
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_ArmorRegeneration
-{
-  <<OptionMenuTitle("$Armor Regeneration")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  NumberField "Amount", "cd_ArmorRegeneration:amount:Periodically"
-  Option      "Type"  , "cd_ArmorRegeneration:type:Never", cd_RegenerationType
-  NumberField "Period (seconds)", "cd_ArmorRegeneration:period:Never"
-  StaticText  ""
-  NumberField "Min", "cd_ArmorRegeneration:min:Never"
-  NumberField "Max", "cd_ArmorRegeneration:max:Never"
-  StaticText  ""
-  TextField   "Sound effect volume"    , "cd_ArmorRegeneration:sound:Never"
-  TextField   "Visual effect intensity", "cd_ArmorRegeneration:visual:Never"
-  ColorPicker "Visual effect color"    , "cd_ArmorRegeneration:color:Never"
-}
-#+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
-
-class cd_ArmorRegeneration : cd_EffectsBase
-{
-  static void amount(string amount)
-  {
-    if (pawn().health <= 0) return;
-
-    let settings = Dictionary.fromString(cd_settings);
-
-    if (!isMyTime(settings.at("cd_ArmorRegeneration:period:Never").toInt())) return;
-
-    int type   = settings.at("cd_ArmorRegeneration:type:Never").toInt();
-    int min    = settings.at("cd_ArmorRegeneration:min:Never").toInt();
-    int max    = settings.at("cd_ArmorRegeneration:max:Never").toInt();
-    int old    = pawn().countInv('BasicArmor');
-    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
-    int new    = getNew(old, target, min, max);
-
-    if (old == new) return;
-
-    if (type == Regeneration) pawn().giveInventory('cd_ArmorBonus', new - old);
-    else pawn().takeInventory('BasicArmor', old - new);
-
-    playSound("cd_armor", settings.at("cd_ArmorRegeneration:sound:Never").toDouble());
-    flashColor(settings.at("cd_ArmorRegeneration:visual:Never").toDouble(),
-               settings.at("cd_ArmorRegeneration:color:Never").toInt());
-  }
-}
-
-class cd_ArmorBonus : BasicArmorBonus
-{
-  Default
-  {
-    armor.saveAmount    1;
-    armor.maxSaveAmount 0x7FFFFFFF;
-  }
-}
-#+end_src
-
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
-
-cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
-#+end_src
-
-* Ammo regeneration
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
-
-OptionMenu cd_AmmoRegeneration
-{
-  <<OptionMenuTitle("Ammo Regeneration")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
-
-  NumberField "Amount", "cd_AmmoRegeneration:amount:Periodically"
-  NumberField "Period (seconds)", "cd_AmmoRegeneration:period:Never"
-  Option "Backpack required", "cd_AmmoRegeneration:backpackRequired:Never", OnOff
-  StaticText  ""
-  TextField   "Sound effect volume" , "cd_AmmoRegeneration:sound:Never"
-  TextField   "Visual effect intensity", "cd_AmmoRegeneration:visual:Never"
-  ColorPicker "Visual effect color" , "cd_AmmoRegeneration:color:Never"
-}
-#+end_src
-
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
-
-class cd_AmmoRegeneration : cd_EffectsBase
-{
-  static void amount(string amountString)
-  {
-    let pawn = pawn();
-    if (pawn.health <= 0) return;
-
-    let settings = Dictionary.fromString(cd_settings);
-
-    if (!isMyTime(settings.at("cd_AmmoRegeneration:period:Never").toInt())) return;
-
-    bool isBackpackRequired = settings.at("cd_AmmoRegeneration:backpackRequired:Never").toInt();
-    if (isBackpackRequired && !isBackpackOwned(pawn)) return;
-
-    int amount = amountString.toInt();
-    for (int i = 0; i < amount; ++i)
-    {
-      let aBackpack = Inventory(Actor.spawn("Backpack", replace: ALLOW_REPLACE));
-      aBackpack.clearCounters();
-      if (!aBackpack.CallTryPickup(pawn)) aBackpack.destroy();
-    }
-
-    playSound("cd_ammo", settings.at("cd_ArmorRegeneration:sound:Never").toDouble());
-    flashColor(settings.at("cd_AmmoRegeneration:visual:Never").toDouble(),
-               settings.at("cd_AmmoRegeneration:color:Never").toInt());
-  }
-
-  private static bool isBackpackOwned(PlayerPawn pawn)
-  {
-    return pawn.countInv("Backpack")
-      || pawn.countInv("BagOfHolding")
-      || pawn.countInv("AmmoSatchel");
-  }
-}
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
-
-cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
-#+end_src
-
-* Enemy
-
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Actors
 {
   <<OptionMenuTitle("Actors")>>
-  <<OptionMenuNote("$cd_0asDisabled")>>
+  <<OptionMenuNote("0 disables the option.")>>
 
-  StaticText  "Enemies", White
+  StaticText  "Enemies"          , White
   TextField   "Health multiplier", "cd_Actors:enemyHealth:OnActorSpawned"
   NumberField "Health max"       , "cd_Actors:enemyHealthMax:OnActorSpawned"
   TextField   "Speed multiplier" , "cd_Actors:enemySpeed:OnActorSpawned"
   StaticText  ""
-  StaticText  "Friends", White
+  StaticText  "Friends"          , White
   TextField   "Health multiplier", "cd_Actors:friendHealth:OnActorSpawned"
   NumberField "Health max"       , "cd_Actors:friendHealthMax:OnActorSpawned"
   TextField   "Speed multiplier" , "cd_Actors:friendSpeed:OnActorSpawned"
 }
 #+end_src
 
+@@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Actors : cd_EffectsBase
@@ -577,47 +326,49 @@ class cd_Actors : cd_EffectsBase
   }
 }
 #+end_src
+@@html:</details>@@
 
-* Powerup
+** Powerup
 
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
 
-OptionMenu cd_Powerup
+OptionMenu cd_Powerups
 {
   <<OptionMenuTitle("Permanent powerups")>>
 
-  Option "Buddha"             , "cd_Powerup:buddha:Periodically"           , OnOff
-  Option "Damage"             , "cd_Powerup:damage:Periodically"           , OnOff
-  Option "Double firing speed", "cd_Powerup:doubleFiringSpeed:Periodically", OnOff
-  Option "Drain"              , "cd_Powerup:drain:Periodically"            , OnOff
-  Option "Flight"             , "cd_Powerup:flight:Periodically"           , OnOff
-  Option "Frightener"         , "cd_Powerup:frightener:Periodically"       , OnOff
-  Option "Ghost"              , "cd_Powerup:ghost:Periodically"            , OnOff
-  Option "High jump"          , "cd_Powerup:highJump:Periodically"         , OnOff
-  Option "Infinite ammo"      , "cd_Powerup:infiniteAmmo:Periodically"     , OnOff
-  Option "Invisibility"       , "cd_Powerup:invisibility:Periodically"     , OnOff
-  Option "Invulnerability"    , "cd_Powerup:invulnerability:Periodically"  , OnOff
-  Option "IronFeet"           , "cd_Powerup:ironFeet:Periodically"         , OnOff
-  Option "LightAmp"           , "cd_Powerup:lightAmp:Periodically"         , OnOff
-  Option "Mask"               , "cd_Powerup:mask:Periodically"             , OnOff
-  Option "Minotaur"           , "cd_Powerup:minotaur:Periodically"         , OnOff
-  Option "Morph"              , "cd_Powerup:morph:Periodically"            , OnOff
-  Option "Protection"         , "cd_Powerup:protection:Periodically"       , OnOff
-  Option "Regeneration"       , "cd_Powerup:regeneration:Periodically"     , OnOff
-  Option "Scanner"            , "cd_Powerup:scanner:Periodically"          , OnOff
-  Option "Shadow"             , "cd_Powerup:shadow:Periodically"           , OnOff
-  Option "Speed"              , "cd_Powerup:speed:Periodically"            , OnOff
-  Option "Strength"           , "cd_Powerup:strength:Periodically"         , OnOff
-  Option "Targeter"           , "cd_Powerup:targeter:Periodically"         , OnOff
-  Option "Time freeze"        , "cd_Powerup:timeFreeze:Periodically"       , OnOff
-  Option "Torch"              , "cd_Powerup:torch:Periodically"            , OnOff
-  Option "Weapon level 2"     , "cd_Powerup:weaponLevel2:Periodically"     , OnOff
+  Option "Buddha"             , "cd_Powerups:buddha:Periodically"           , OnOff
+  Option "Damage"             , "cd_Powerups:damage:Periodically"           , OnOff
+  Option "Double firing speed", "cd_Powerups:doubleFiringSpeed:Periodically", OnOff
+  Option "Drain"              , "cd_Powerups:drain:Periodically"            , OnOff
+  Option "Flight"             , "cd_Powerups:flight:Periodically"           , OnOff
+  Option "Frightener"         , "cd_Powerups:frightener:Periodically"       , OnOff
+  Option "Ghost"              , "cd_Powerups:ghost:Periodically"            , OnOff
+  Option "High jump"          , "cd_Powerups:highJump:Periodically"         , OnOff
+  Option "Infinite ammo"      , "cd_Powerups:infiniteAmmo:Periodically"     , OnOff
+  Option "Invisibility"       , "cd_Powerups:invisibility:Periodically"     , OnOff
+  Option "Invulnerability"    , "cd_Powerups:invulnerability:Periodically"  , OnOff
+  Option "IronFeet"           , "cd_Powerups:ironFeet:Periodically"         , OnOff
+  Option "LightAmp"           , "cd_Powerups:lightAmp:Periodically"         , OnOff
+  Option "Mask"               , "cd_Powerups:mask:Periodically"             , OnOff
+  Option "Minotaur"           , "cd_Powerups:minotaur:Periodically"         , OnOff
+  Option "Morph"              , "cd_Powerups:morph:Periodically"            , OnOff
+  Option "Protection"         , "cd_Powerups:protection:Periodically"       , OnOff
+  Option "Regeneration"       , "cd_Powerups:regeneration:Periodically"     , OnOff
+  Option "Scanner"            , "cd_Powerups:scanner:Periodically"          , OnOff
+  Option "Shadow"             , "cd_Powerups:shadow:Periodically"           , OnOff
+  Option "Speed"              , "cd_Powerups:speed:Periodically"            , OnOff
+  Option "Strength"           , "cd_Powerups:strength:Periodically"         , OnOff
+  Option "Targeter"           , "cd_Powerups:targeter:Periodically"         , OnOff
+  Option "Time freeze"        , "cd_Powerups:timeFreeze:Periodically"       , OnOff
+  Option "Torch"              , "cd_Powerups:torch:Periodically"            , OnOff
+  Option "Weapon level 2"     , "cd_Powerups:weaponLevel2:Periodically"     , OnOff
 }
 #+end_src
 
+@@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
-class cd_Powerup : cd_EffectsBase
+class cd_Powerups : cd_EffectsBase
 {
   static void buddha           (string value) { prolong("PowerBuddha"           ); }
   static void damage           (string value) { prolong("PowerDamage"           ); }
@@ -666,17 +417,207 @@ class cd_Powerup : cd_EffectsBase
   }
 }
 #+end_src
+@@html:</details>@@
+
+** Health regeneration/degeneration
+
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_HealthRegeneration
+{
+  <<OptionMenuTitle("Health Regeneration")>>
+  <<OptionMenuNote("0 disables the option.")>>
+
+  NumberField "Amount", "cd_HealthRegeneration:amount:Periodically"
+  Option      "Type"  , "cd_HealthRegeneration:type", cd_RegenerationType
+  NumberField "Period (seconds)", "cd_HealthRegeneration:period"
+  StaticText  ""
+  NumberField "Min", "cd_HealthRegeneration:min"
+  NumberField "Max", "cd_HealthRegeneration:max"
+  StaticText  ""
+  Textfield   "Sound effect volume"    , "cd_HealthRegeneration:sound"
+  TextField   "Visual effect intensity", "cd_HealthRegeneration:visual"
+  ColorPicker "Visual effect color"    , "cd_HealthRegeneration:color"
+}
+#+end_src
+
+@@html:<details><summary>Details</summary>@@
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_HealthRegeneration : cd_EffectsBase
+{
+  static void amount(string amount)
+  {
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_HealthRegeneration:period").toInt())) return;
+
+    int type   = settings.at("cd_HealthRegeneration:type").toInt();
+    int min    = settings.at("cd_HealthRegeneration:min").toInt();
+    int max    = settings.at("cd_HealthRegeneration:max").toInt();
+    int old    = pawn().health;
+    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
+    int new    = getNew(old, target, min, max);
+
+    if (old == new) return;
+
+    pawn().a_setHealth(new);
+
+    playSound("cd_health", settings.at("cd_HealthRegeneration:sound").toDouble());
+    flashColor(settings.at("cd_HealthRegeneration:visual").toDouble(),
+               settings.at("cd_HealthRegeneration:color").toInt());
+  }
+}
+#+end_src
+
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+
+cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
+#+end_src
+@@html:</details>@@
+
+** Armor regeneration/degeneration
+
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_ArmorRegeneration
+{
+  <<OptionMenuTitle("$Armor Regeneration")>>
+  <<OptionMenuNote("0 disables the option.")>>
+
+  NumberField "Amount", "cd_ArmorRegeneration:amount:Periodically"
+  Option      "Type"  , "cd_ArmorRegeneration:type", cd_RegenerationType
+  NumberField "Period (seconds)", "cd_ArmorRegeneration:period"
+  StaticText  ""
+  NumberField "Min", "cd_ArmorRegeneration:min"
+  NumberField "Max", "cd_ArmorRegeneration:max"
+  StaticText  ""
+  TextField   "Sound effect volume"    , "cd_ArmorRegeneration:sound"
+  TextField   "Visual effect intensity", "cd_ArmorRegeneration:visual"
+  ColorPicker "Visual effect color"    , "cd_ArmorRegeneration:color"
+}
+#+end_src
+
+@@html:<details><summary>Details</summary>@@
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_ArmorRegeneration : cd_EffectsBase
+{
+  static void amount(string amount)
+  {
+    if (pawn().health <= 0) return;
+
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_ArmorRegeneration:period").toInt())) return;
+
+    int type   = settings.at("cd_ArmorRegeneration:type").toInt();
+    int min    = settings.at("cd_ArmorRegeneration:min").toInt();
+    int max    = settings.at("cd_ArmorRegeneration:max").toInt();
+    int old    = pawn().countInv('BasicArmor');
+    int target = old + amount.toInt() * (type == Regeneration ? 1 : -1);
+    int new    = getNew(old, target, min, max);
+
+    if (old == new) return;
+
+    if (type == Regeneration) pawn().giveInventory('cd_ArmorBonus', new - old);
+    else pawn().takeInventory('BasicArmor', old - new);
+
+    playSound("cd_armor", settings.at("cd_ArmorRegeneration:sound").toDouble());
+    flashColor(settings.at("cd_ArmorRegeneration:visual").toDouble(),
+               settings.at("cd_ArmorRegeneration:color").toInt());
+  }
+}
+
+class cd_ArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    armor.saveAmount    1;
+    armor.maxSaveAmount 0x7FFFFFFF;
+  }
+}
+#+end_src
+
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+
+cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
+#+end_src
+@@html:</details>@@
+
+** Ammo regeneration
+
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+
+OptionMenu cd_AmmoRegeneration
+{
+  <<OptionMenuTitle("Ammo Regeneration")>>
+  <<OptionMenuNote("0 disables the option.")>>
+
+  NumberField "Amount"           , "cd_AmmoRegeneration:amount:Periodically"
+  NumberField "Period (seconds)" , "cd_AmmoRegeneration:period"
+  Option      "Backpack required", "cd_AmmoRegeneration:backpackRequired", OnOff
+  StaticText  ""
+  TextField   "Sound effect volume"    , "cd_AmmoRegeneration:sound"
+  TextField   "Visual effect intensity", "cd_AmmoRegeneration:visual"
+  ColorPicker "Visual effect color"    , "cd_AmmoRegeneration:color"
+}
+#+end_src
+
+@@html:<details><summary>Details</summary>@@
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+
+class cd_AmmoRegeneration : cd_EffectsBase
+{
+  static void amount(string amountString)
+  {
+    let pawn = pawn();
+    if (pawn.health <= 0) return;
+
+    let settings = Dictionary.fromString(cd_settings);
+
+    if (!isMyTime(settings.at("cd_AmmoRegeneration:period").toInt())) return;
+
+    bool isBackpackRequired = settings.at("cd_AmmoRegeneration:backpackRequired").toInt();
+    if (isBackpackRequired && !isBackpackOwned(pawn)) return;
+
+    int amount = amountString.toInt();
+    for (int i = 0; i < amount; ++i)
+    {
+      let aBackpack = Inventory(Actor.spawn("Backpack", replace: ALLOW_REPLACE));
+      aBackpack.clearCounters();
+      if (!aBackpack.CallTryPickup(pawn)) aBackpack.destroy();
+    }
+
+    playSound("cd_ammo", settings.at("cd_ArmorRegeneration:sound").toDouble());
+    flashColor(settings.at("cd_AmmoRegeneration:visual").toDouble(),
+               settings.at("cd_AmmoRegeneration:color").toInt());
+  }
+
+  private static bool isBackpackOwned(PlayerPawn pawn)
+  {
+    return pawn.countInv("Backpack")
+      || pawn.countInv("BagOfHolding")
+      || pawn.countInv("AmmoSatchel");
+  }
+}
+#+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+
+cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
+#+end_src
+@@html:</details>@@
 
 * Commands
 
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Commands
 {
   <<OptionMenuTitle("Commands")>>
-  <<OptionMenuNote("$cd_CommandsNote")>>
+  <<OptionMenuNote("Resetting and restoring aren't applied if in a game.")>>
 
-  SafeCommand "$cd_ResetOptions"  , cd_reset_to_defaults
+  SafeCommand "$cd_ResetOptions"   , cd_reset_to_defaults
   StaticText  ""
   SafeCommand "$cd_BackupOptions1" , cd_backup_options1
   SafeCommand "$cd_RestoreOptions1", cd_restore_options1
@@ -689,6 +630,7 @@ OptionMenu cd_Commands
 }
 #+end_src
 
+@@html:<details><summary>Details</summary>@@
 #+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
 
 Alias cd_reset_to_defaults "cd_settings \"\""
@@ -713,25 +655,44 @@ server string cd_settings_profile3;
 #+begin_src ini :tangle build/FinalCustomDoom/language.txt
 
 [enu default]
-cd_CommandsNote = "Resetting and restoring aren't applied if in a game.";
+cd_ResetOptions    = "Reset options to defaults";
 
-cd_ResetOptions = "Reset options to defaults";
-
-cd_BackupOptions1 = "Back up options to Profile 1";
+cd_BackupOptions1  = "Back up options to Profile 1";
 cd_RestoreOptions1 = "Restore options from Profile 1 backup";
 
-cd_BackupOptions2 = "Back up options to Profile 2";
+cd_BackupOptions2  = "Back up options to Profile 2";
 cd_RestoreOptions2 = "Restore options from Profile 2 backup";
 
-cd_BackupOptions3 = "Back up options to Profile 3";
+cd_BackupOptions3  = "Back up options to Profile 3";
 cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 #+end_src
+@@html:</details>@@
 
 * Implementation details
 
 ** Menus
 
-#+begin_src prog :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+
+AddOptionMenu OptionsMenu       { Submenu "$cd_Title", cd_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$cd_Title", cd_Menu }
+
+OptionMenu cd_Menu
+{
+  Class cd_Menu
+  <<OptionMenuTitle("$cd_Title")>>
+
+  Submenu    "Player"  , cd_Player
+  Submenu    "Actors"  , cd_Actors
+  Submenu    "Powerups", cd_Powerups
+  StaticText ""
+  StaticText "Regeneration/Degeneration", White
+  Submenu    "Health"  , cd_HealthRegeneration
+  Submenu    "Armor"   , cd_ArmorRegeneration
+  Submenu    "Ammo"    , cd_AmmoRegeneration
+  StaticText ""
+  Submenu    "Commands", cd_Commands
+}
 
 OptionValue cd_RegenerationType
 {
@@ -749,9 +710,9 @@ CDLightBlue { #111111 #99CCFF }
 #+begin_src elisp :var title = "" :exports none
 (format "\
 StaticText \"========================================\", CDLightBlue
-StaticText \"%s\", CDLightBlue
+StaticText \"%s\"%s, CDLightBlue
 StaticText \"========================================\", CDLightBlue
-StaticText \"\"" title)
+StaticText \"\"" title (make-string (max 0 (- 40 (length title))) ?\s))
 #+end_src
 
 #+name: OptionMenuNote
@@ -771,17 +732,14 @@ StaticText \"\"" note)
 
 [enu default]
 cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
-cd_0asDisabled = "When option value is 0, that option is disabled.";
 cd_Regeneration = "Regeneration";
 cd_Degeneration = "Degeneration";
 
 [ru]
 cd_Weapon_damage_multiplier = "Множитель урона от оружия";
-cd_Gameplay = "Игра";
-cd_Basic_Gameplay = "Базовая игра";
 #+end_src
 
-** Project setup
+** Project setup :noexport:
 
 #+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 
@@ -1146,17 +1104,19 @@ class cd_EventHandler : StaticEventHandler
     OnPlayerStarted,
     OnActorSpawned,
     Periodically,
-    Never,
+    Direct,
   }
 
   private clearscope static int toEffectTime(string effectTime)
   {
+    if (effectTime ~== "Immediately")     return Immediately;
     if (effectTime ~== "OnPlayerStarted") return OnPlayerStarted;
     if (effectTime ~== "OnActorSpawned")  return OnActorSpawned;
     if (effectTime ~== "Periodically")    return Periodically;
-    if (effectTime ~== "Never")           return Never;
+    if (effectTime  == "")                return Direct;
 
-    return Immediately;
+    throwAbortException("unknown effect time: %s", effectTime);
+    return Direct;
   }
 
   // Returns class name, function name, value as a string, effect time.
@@ -1325,7 +1285,29 @@ class cd_EffectsBase play
 }
 #+end_src
 
-* Run
+* Extending Final Custom Doom
+
+Final Custom Doom options are set and stored not like normal GZDoom options.
+They are defined like normal Cvar options,
+but option menu items are transformed when Final Custom Doom loads.
+Item transformations:
+- TextField           -> double setting,
+- NumberField, Option -> int setting,
+- ColorPicker         -> color setting.
+Other option menu elements remain the same.
+
+TODO: make an example FCD add-on.
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+* Run :noexport:
 
 #+begin_src elisp
 (load-file "build/TestRunner/dt-scripts.el")
