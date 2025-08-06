@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+.clang-format  eol=lf
+.dir-locals.el eol=lf
+.editorconfig  eol=lf
+.gitattributes eol=lf
+.gitignore     eol=lf
+
+*.org  eol=lf txt
+*.sh   eol=lf
+*.toml eol=lf
