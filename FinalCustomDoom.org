@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-#+startup: content
 
 #+title: FinalCustomDoom v0.1.0
 
@@ -97,7 +96,27 @@ class cd_Player : cd_EffectsBase
   {
     pawn().giveInventory('cd_StartArmorBonus', value.toInt());
   }
+}
 
+class cd_StartArmorBonus : BasicArmorBonus
+{
+  Default
+  {
+    armor.saveAmount    1;
+    armor.maxSaveAmount 0x7FFFFFFF;
+  }
+
+  override void beginPlay()
+  {
+    let settings = Dictionary.fromString(cd_settings);
+    double value = settings.at("cd_Player:savePercent").toDouble();
+    if (value ~== 0) value = 100.0;
+    savePercent = value;
+  }
+}
+
+extend class cd_Player
+{
   static void maxHealth(string value)
   {
     let pawn = pawn();
@@ -142,27 +161,7 @@ class cd_Player : cd_EffectsBase
   {
     pawn().jumpZ = defaultPawn().jumpZ * as0to1Multiplier(value);
   }
-}
 
-class cd_StartArmorBonus : BasicArmorBonus
-{
-  Default
-  {
-    armor.saveAmount    1;
-    armor.maxSaveAmount 0x7FFFFFFF;
-  }
-
-  override void beginPlay()
-  {
-    let settings = Dictionary.fromString(cd_settings);
-    double value = settings.at("cd_Player:savePercent").toDouble();
-    if (value ~== 0) value = 100.0;
-    savePercent = value;
-  }
-}
-
-extend class cd_Player
-{
   static void friction(string value)
   {
     pawn().friction = defaultPawn().friction * as0to1Multiplier(value);
