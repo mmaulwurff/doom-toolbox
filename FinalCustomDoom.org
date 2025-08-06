@@ -677,7 +677,7 @@ cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 AddOptionMenu OptionsMenu       { Submenu "$cd_Title", cd_Menu }
 AddOptionMenu OptionsMenuSimple { Submenu "$cd_Title", cd_Menu }
 
-OptionMenu cd_Menu
+OptionMenu cd_Menu protected
 {
   Class cd_Menu
   <<OptionMenuTitle("$cd_Title")>>
@@ -1133,13 +1133,13 @@ class cd_EventHandler : StaticEventHandler
     {
       case 0:
       case 1: throwAbortException("no class and function in effect description");
-      case 2: return parts[0], parts[1], "", Immediately;
+      case 2: return parts[0], parts[1], "", Direct;
       case 3: return parts[0], parts[1], parts[2], toEffectTime(parts[2]);
       case 4: return parts[0], parts[1], parts[3], toEffectTime(parts[2]);
       default: throwAbortException("too much parts: %s", input);
     }
 
-    return "", "", "", Immediately;
+    return "", "", "", Direct;
   }
 
   private static void callByName(string className, string functionName, string value)
@@ -1157,10 +1157,11 @@ class cd_EventHandler : StaticEventHandler
 
   override void networkProcess(ConsoleEvent event)
   {
-    if (event.name.left(3) != "cd_") return;
-
-    let [className, functionName, value, when] = parseEffect(event.name);
-    callByName(className, functionName, value);
+    if (event.name.left(2) ~== "cd")
+    {
+      let [className, functionName, value, when] = parseEffect(event.name);
+      callByName(className, functionName, value);
+    }
   }
 
   private void applyEffects(int effectTime)
@@ -1287,16 +1288,112 @@ class cd_EffectsBase play
 
 * Extending Final Custom Doom
 
-Final Custom Doom options are set and stored not like normal GZDoom options.
-They are defined like normal Cvar options,
-but option menu items are transformed when Final Custom Doom loads.
-Item transformations:
-- TextField           -> double setting,
-- NumberField, Option -> int setting,
-- ColorPicker         -> color setting.
-Other option menu elements remain the same.
+You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD extension can be created. Basically, such extension consists of two parts: settings definition and settings implementation. Settings definition is contained in menudef lump, where settings are added to cd_Menu, possibly via a submenu. Settings implementation provides in-game effects and is written in ZScript.
 
-TODO: make an example FCD add-on.
+Settings defined in a FCD extension don't have an entry in cvarinfo lump. They are stored, reset to defaults, and backed up to profiles together with FCD settings.
+
+Important note: FCD extensions don't depend on FCD code-wise. This means that they can be loaded without errors even without FCD.
+
+Options in ~cd_Menu~ and its submenus don't behave like normal options. The differences are:
+- Several item types are transformed into Custom Doom settings:
+  - ~TextField~ -> double setting,
+  - ~NumberField~, ~Option~ -> int setting,
+  - ~ColorPicker~ -> color setting.
+- Instead of a Cvar, a command is specified in format ~"Class:Function:EffectTime"~:
+  - Class is ZScript class name that contains Function. Attention: class name must start with ~cd~.
+  - Function: ZScript function name in Class. It must take a string as a parameter, and have return type void (meaning it returns nothing).
+  - EffectTime: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~, ~Periodically~, or left out.
+- Setting labels in some item types are made directly-translatable. See the note in language.txt.
+
+See the example below.
+
+#+begin_src c :tangle build/FinalCustomDoomExtensionExample/menudef.txt
+
+// Note: naming everything related to the Custom Doom extension with "cde" prefix.
+OptionMenu cd_Menu
+{
+  Submenu "Final Custom Doom Extension", cde_Menu
+}
+
+OptionMenu cde_Menu
+{
+  Title "Final Custom Doom Extension"
+
+  StaticText  "1. Settings types example:", White
+  TextField   "Double setting" , "cde_Effects:doubleSetting:Immediately"
+  NumberField "Integer setting", "cde_Effects:intSetting:Immediately"
+  Option      "Option"         , "cde_Effects:optionSetting:Immediately", cde_Values
+  ColorPicker "Color setting"  , "cde_Effects:colorSetting:Immediately"
+  StaticText  ""
+  StaticText  "2. Settings apply times example:", White
+  TextField   "Applied immediately"    , "cde_Effects:setting1:Immediately"
+  TextField   "Applied on player start", "cde_Effects:setting2:OnPlayerStarted"
+  TextField   "Applied on actor spawn" , "cde_Effects:setting3:OnActorSpawned"
+  TextField   "Applied every second"   , "cde_Effects:setting4:Periodically"
+  // A setting that isn't applied by itself is used from other settings,
+  // see how to get its value in setting1 function.
+  TextField   "Isn't applied"          , "cde_Effects:setting5"
+}
+
+OptionValue cde_Values
+{
+  0, "Value 1"
+  1, "Value 2"
+}
+#+end_src
+
+#+begin_src c :tangle build/FinalCustomDoomExtensionExample/zscript.zs
+version 4.14.2
+
+class cde_Effects
+{
+  static void doubleSetting(string value)
+  {
+    Console.printf("Double setting is set to %f.", value.toDouble());
+  }
+
+  static void intSetting(string value)
+  {
+    Console.printf("Integer setting is set to %d.", value.toInt());
+  }
+
+  static void optionSetting(string value)
+  {
+    Console.printf("Option setting is set to %d.", value.toInt());
+  }
+
+  static void colorSetting(string value)
+  {
+    Console.printf("Color setting is set to %x.", value.toInt());
+  }
+
+  static void setting1(string value)
+  {
+    let settingsCvar = Cvar.getCvar("cd_settings");
+    let settings     = Dictionary.fromString(settingsCvar.getString());
+    let setting      = settings.at("cde_Effects:setting5").toDouble();
+
+    Console.printf("Setting 1 is applied immediately. Setting 5 is %f.", setting);
+  }
+
+  static void setting2(string value)
+  {
+    Console.printf("Setting 2 is applied on player start.");
+  }
+
+  static void setting3(string value)
+  {
+    Console.printf("Setting 3 is applied on actor spawned.");
+  }
+
+  static void setting4(string value)
+  {
+    Console.printf("Setting 4 is applied periodically.");
+  }
+
+  // Setting 5 isn't applied by itself and doesn't need a function.
+}
+#+end_src
 
 * License
 
