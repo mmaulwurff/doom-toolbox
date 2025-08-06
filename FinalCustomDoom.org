@@ -6,6 +6,8 @@
 
 Final Custom Doom provides gameplay customization. It can be used to increase or decrease the difficulty in various ways.
 
+Final Custom Doom is a successor to Ultimate Custom Doom and Custom Doom.
+
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
@@ -687,6 +689,12 @@ cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 #+end_src
 @@html:</details>@@
 :end:
+
+* Acknowledgments
+
+- Custom Doom base idea: Lud (Accensus),
+- help with developing Custom Doom: JudgeGroovy, Doctrine Dark, Zhs2, Beed28, FaggoStorm, Phantom Allies, FoxBoy, Eruanna.
+- help with developing Ultimate Custom Doom: Beed28, przemko27, DabbingSquidward, drogga (Commado Pen), Nems, HexFlareheart, kondoriyano, Spaceman333, ghost.
 
 * Implementation details
 
