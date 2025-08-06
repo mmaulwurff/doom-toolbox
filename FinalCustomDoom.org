@@ -8,40 +8,47 @@ Final Custom Doom provides gameplay customization. It can be used to increase or
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
-* Licenses :noexport:
+* License
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
-// <<GPL>>
-#+end_src
-#+begin_src ini :tangle build/FinalCustomDoom/language.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
-// <<GPL>>
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src txt :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle build/FinalCustomDoom/menudef.txt :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
+#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
+#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt :exports none
+// <<GPL>>
+#+end_src
+#+begin_src ini :tangle build/FinalCustomDoom/language.txt :exports none
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt :exports none
+// <<GPL>>
+#+end_src
+#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt :exports none
+// <<GPL>>
+#+end_src
+
+#+begin_src c :tangle build/FinalCustomDoom/zscript.zs :exports none
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs :exports none
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs :exports none
+// <<GPL>>
+#+end_src
+#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs :exports none
 // <<GPL>>
 #+end_src
 
@@ -72,6 +79,7 @@ OptionMenu cd_Player
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -175,6 +183,7 @@ extend class cd_Player
 }
 #+end_src
 @@html:</details>@@
+:end:
 
 ** Actors
 
@@ -197,6 +206,7 @@ OptionMenu cd_Actors
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -326,6 +336,7 @@ class cd_Actors : cd_EffectsBase
 }
 #+end_src
 @@html:</details>@@
+:end:
 
 ** Powerup
 
@@ -364,6 +375,7 @@ OptionMenu cd_Powerups
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -417,6 +429,7 @@ class cd_Powerups : cd_EffectsBase
 }
 #+end_src
 @@html:</details>@@
+:end:
 
 ** Health regeneration/degeneration
 
@@ -440,6 +453,7 @@ OptionMenu cd_HealthRegeneration
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -474,6 +488,7 @@ class cd_HealthRegeneration : cd_EffectsBase
 cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 #+end_src
 @@html:</details>@@
+:end:
 
 ** Armor regeneration/degeneration
 
@@ -497,6 +512,7 @@ OptionMenu cd_ArmorRegeneration
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -543,6 +559,7 @@ class cd_ArmorBonus : BasicArmorBonus
 cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 #+end_src
 @@html:</details>@@
+:end:
 
 ** Ammo regeneration
 
@@ -563,6 +580,7 @@ OptionMenu cd_AmmoRegeneration
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
 
@@ -606,6 +624,7 @@ class cd_AmmoRegeneration : cd_EffectsBase
 cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
 #+end_src
 @@html:</details>@@
+:end:
 
 * Commands
 
@@ -629,6 +648,7 @@ OptionMenu cd_Commands
 }
 #+end_src
 
+:Details:
 @@html:<details><summary>Details</summary>@@
 #+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
 
@@ -666,6 +686,7 @@ cd_BackupOptions3  = "Back up options to Profile 3";
 cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 #+end_src
 @@html:</details>@@
+:end:
 
 * Implementation details
 
@@ -1392,15 +1413,6 @@ class cde_Effects
 
   // Setting 5 isn't applied by itself and doesn't need a function.
 }
-#+end_src
-
-* License
-
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
-#+begin_src txt :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
 * Run :noexport:
