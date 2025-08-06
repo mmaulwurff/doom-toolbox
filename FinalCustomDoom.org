@@ -1308,7 +1308,7 @@ class cd_EffectsBase play
 
 * Extending Final Custom Doom
 
-You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD extension can be created. Basically, such extension consists of two parts: settings definition and settings implementation. Settings definition is contained in menudef lump, where settings are added to cd_Menu, possibly via a submenu. Settings implementation provides in-game effects and is written in ZScript.
+You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD extension can be created. Basically, such extension consists of two parts: settings definition and settings implementation. Settings definition is contained in menudef lump, where settings are added to ~cd_Menu~, possibly via a submenu. Settings implementation provides in-game effects and is written in ZScript.
 
 Settings defined in a FCD extension don't have an entry in cvarinfo lump. They are stored, reset to defaults, and backed up to profiles together with FCD settings.
 
@@ -1320,10 +1320,10 @@ Options in ~cd_Menu~ and its submenus don't behave like normal options. The diff
   - ~NumberField~, ~Option~ -> int setting,
   - ~ColorPicker~ -> color setting.
 - Instead of a Cvar, a command is specified in format ~"Class:Function:EffectTime"~:
-  - Class is ZScript class name that contains Function. Attention: class name must start with ~cd~.
-  - Function: ZScript function name in Class. It must take a string as a parameter, and have return type void (meaning it returns nothing).
-  - EffectTime: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~, ~Periodically~, or left out.
-- Setting labels in some item types are made directly-translatable. See the note in language.txt.
+  - ~Class~ is ZScript class name that contains Function. Attention: class name must start with ~cd~.
+  - ~Function~: ZScript function name in Class. It must take a string as a parameter, and have return type void (meaning it returns nothing).
+  - ~EffectTime~: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~, ~Periodically~, or left out.
+- Setting labels in some item types are made directly-translatable. See the note in language.txt in [[Menus]] section.
 
 See the example below.
 

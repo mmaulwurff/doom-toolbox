@@ -1,4 +1,4 @@
-personal_ws-1.1 en 82 
+personal_ws-1.1 en 86 
 CVar
 Cacowards
 Cvar
@@ -32,6 +32,7 @@ basename
 bool
 cd
 cp
+cvarinfo
 dir
 doomworld
 editorconfig
@@ -50,6 +51,7 @@ init
 ispell
 lhs
 localize
+menudef
 mkdir
 mkdirp
 namespace
@@ -72,6 +74,8 @@ stackoverflow
 stringp
 structs
 subdirectories
+submenu
+submenus
 titlemap
 toml
 txt
