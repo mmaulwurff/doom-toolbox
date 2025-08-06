@@ -7,6 +7,6 @@
 .gitattributes eol=lf
 .gitignore     eol=lf
 
-*.org  eol=lf txt
+*.org  eol=lf
 *.sh   eol=lf
 *.toml eol=lf
