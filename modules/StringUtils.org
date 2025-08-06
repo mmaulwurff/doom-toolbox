@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-#+startup: content
 
 #+title: StringUtils
 
@@ -438,8 +437,12 @@ NAMESPACE_Description addState(string name, State aState)
 #+begin_src c :tangle ../build/StringUtils/zscript.zs
 {
   let d = new("Description");
-  d.addState("s", players[consolePlayer].ReadyWeapon.FindState("Fire"));
-  it("description: state", Assert(d.compose() == "s: sprite: 899, frame: 0"));
+  let state = players[consolePlayer].ReadyWeapon.FindState("Fire");
+  d.addState("s", state);
+  string expected = string.format("s: sprite: %d, frame: %d",
+                                  state.sprite,
+                                  state.Frame);
+  it("description: state", Assert(d.compose() == expected));
 }
 #+end_src
 
@@ -481,7 +484,9 @@ private Array<string> mFields;
 
  "wait 2; map map01;
   wait 2; netevent test:su_Test;
-  wait 2; quit")
+  wait 2; quit"
+
+ "../")
 #+end_src
 
 * Tests end

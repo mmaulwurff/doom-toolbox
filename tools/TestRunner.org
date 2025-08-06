@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-#+startup: content
 
 #+title: TestRunner
 
@@ -52,20 +51,21 @@ Environment:
 TODO: ~sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"~
 
 #+begin_src elisp :tangle ../build/TestRunner/dt-scripts.el
-(defun dt-run-tests (mod-paths command)
+(defun dt-run-tests (mod-paths command &optional path-prefix)
   (dolist (mod-path mod-paths)
     (delete-directory mod-path t))
   (org-babel-tangle)
-  (compile (concat "gzdoom"
-                   " -noautoload"
-                   " -nosound"
-                   " -config build/TestRunner/config.ini"
-                   " -iwad " (getenv "IWAD_PATH")
-                   " -file " (getenv "CLEMATIS_PATH") " "
-                        (mapconcat 'identity mod-paths " ")
-                   " +wi_autoadvance 1"
-                   " +\"" command "\""
-                   " | grep -vf build/TestRunner/ignored.txt")))
+  (let ((prefix (if path-prefix path-prefix "")))
+    (compile (concat "gzdoom"
+                     " -noautoload"
+                     " -nosound"
+                     " -config " prefix "build/TestRunner/config.ini"
+                     " -iwad " (getenv "IWAD_PATH")
+                     " -file " (getenv "CLEMATIS_PATH") " "
+                     (mapconcat 'identity mod-paths " ")
+                     " +wi_autoadvance 1"
+                     " +\"" command "\""
+                     " | grep -vf " prefix "build/TestRunner/ignored.txt"))))
 #+end_src
 
 Example:
