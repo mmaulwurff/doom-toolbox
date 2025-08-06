@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+title: FinalCustomDoom v0.1.0
+#+title: FinalCustomDoom v1.0.0-beta
 
 Final Custom Doom provides gameplay customization. It can be used to increase or decrease the difficulty in various ways.
 
