@@ -313,12 +313,18 @@ class cd_Actors : cd_EffectsBase
     let ldlToken       = "LDLegendaryMonsterToken";
     int ldlMultiplier  = (anActor.countInv(ldlToken) > 0) ? 3 : 1;
 
-    int defStartHealth = anActor.default.spawnHealth();
-    int oldStartHealth = anActor.spawnHealth();
+    int defaultStartHealth = anActor.default.spawnHealth();
+    int oldStartHealth     = anActor.spawnHealth();
+
+    // Some mods have spawn healh as 0???
+    if (defaultStartHealth == 0) defaultStartHealth = anActor.health;
+    if (oldStartHealth     == 0) oldStartHealth     = anActor.health;
+    if (defaultStartHealth == 0 || oldStartHealth == 0) return;
+
     int oldHealth      = anActor.health;
     let relativeHealth = double(oldHealth) / oldStartHealth;
 
-    int newStartHealth = int(round(defStartHealth * multiplier * ldlMultiplier));
+    int newStartHealth = int(round(defaultStartHealth * multiplier * ldlMultiplier));
     int newHealth      = int(round(newStartHealth * relativeHealth));
 
     if (max != 0)
