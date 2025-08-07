@@ -5,7 +5,17 @@
 
 This repository contains add-ons for Doom-based game engines which support ZScript, like [[https://zdoom.org/downloads][GZDoom]].
 
+Add-ons:
 - [[file:10.5x.org][10.5x]]
 - [[file:DoomDoctor.org][DoomDoctor]]
 - [[file:FinalCustomDoom.org][Final Custom Doom]]
 - [[file:Nomina.org][Nomina]]
+
+ZScript modules:
+- [[file:modules/Hint.org][Hint]]
+- [[file:modules/StringUtils.org][StringUtils]]
+
+Documentation:
+- [[file:documentation/CodeOfConduct.org][Code of conduct]]
+- [[file:documentation/CodeStyle.org][Code style]]
+- [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
