@@ -1,4 +1,4 @@
-personal_ws-1.1 en 86 
+personal_ws-1.1 en 88 
 CVar
 Cacowards
 Cvar
@@ -64,6 +64,7 @@ progn
 pws
 randomizers
 readonly
+replacers
 rhs
 sed
 setq
@@ -76,6 +77,7 @@ structs
 subdirectories
 submenu
 submenus
+teleporters
 titlemap
 toml
 txt
