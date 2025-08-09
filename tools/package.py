@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+# Builds a .pk3 package from an .org file.
+# Meant to be run from the root project directory, like:
+# ./tools/package.py DoomDoctor.org
+#
+# Written for Python >=3.11.
+#
+# ! Warning: this script removes project-related directories inside build
+# directory.
+
+from pathlib import Path
+from re import search, MULTILINE
+from shutil import rmtree, copytree, make_archive, move
+from sys import argv
+from tangle import tangle
+
+
+if __name__ == "__main__":
+    assert len(argv) == 2, "Usage: ./tools/package.py Project.org"
+    project_file_name = argv[1]
+
+    with open(project_file_name) as project_file:
+        project_content = project_file.read()
+
+    found = search("^#\+title: (.*)$", project_content, flags=MULTILINE)
+    assert found != None, "No title found."
+
+    title = found.group(1).replace(" ", "-")
+    project_file_base_name = project_file_name.split(".")[0]
+
+    # 1. Clean build directory, package directory, and package.
+    build_directory_path = Path("build/" + project_file_base_name)
+    package_directory_path = Path("build/" + title)
+    package_path = Path("build/" + title + ".pk3")
+
+    rmtree(build_directory_path, True)
+    rmtree(package_directory_path, True)
+    package_path.unlink(True)
+
+    # 2. Tangle the source to build files.
+    # TODO: export to HTML too (through Markdown?).
+    tangle(project_file_name)
+
+    # 3. Copy build files, licenses, and documentation to package directory.
+    copytree(build_directory_path, package_directory_path)
+    copytree("LICENSES",
+             package_directory_path / "LICENSES",
+             dirs_exist_ok=True)
+    copytree("documentation",
+             package_directory_path / "documentation",
+             dirs_exist_ok=True)
+
+    archive = make_archive(package_directory_path,
+                           "zip",
+                           package_directory_path)
+    move(archive, Path(archive).with_suffix(".pk3"))

@@ -18,7 +18,7 @@
 !*.ogg
 !*.org
 !*.png
-!*.sh
+!*.py
 !*.toml
 
 # and licenses here:
