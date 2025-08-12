@@ -3,19 +3,22 @@
 
 #+title: Doom Toolbox
 
-This repository contains add-ons for Doom-based game engines which support ZScript, like [[https://zdoom.org/downloads][GZDoom]].
+Doom Toolbox is a collection of add-ons for Doom-based game engines which support ZScript, like [[https://zdoom.org/downloads][GZDoom]].
+
+Doom Toolbox is free and open source software, licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]].
 
 Add-ons:
-- [[file:10.5x.org][10.5x]]
-- [[file:DoomDoctor.org][DoomDoctor]]
-- [[file:FinalCustomDoom.org][Final Custom Doom]]
-- [[file:Nomina.org][Nomina]]
+- [[file:10.5x.org][10.5x]] - enemy number multiplier
+- [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
+- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options
+- [[file:Nomina.org][Nomina]] - enemy names helper
 
 ZScript modules:
-- [[file:modules/Hint.org][Hint]]
-- [[file:modules/StringUtils.org][StringUtils]]
+- [[file:modules/Hint.org][Hint]] - hints for menu items
+- [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
 
 Documentation:
 - [[file:documentation/CodeOfConduct.org][Code of conduct]]
 - [[file:documentation/CodeStyle.org][Code style]]
+- [[file:documentation/MadeWith.org][Made with]]
 - [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]

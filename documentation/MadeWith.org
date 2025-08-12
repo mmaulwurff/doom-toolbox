@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+#+title: Made With
+
+Doom Toolbox is made with help of the following software (besides [[https://zdoom.org/downloads][GZDoom]], obviously):
+
+- [[https://www.gnu.org/software/emacs/][GNU Emacs]] - text editor
+  - [[https://github.com/doomemacs/][Doom Emacs]] - configuration framework for GNU Emacs (_not_ specifically for Doom mods development)
+- [[https://github.com/elfmz/far2l][far2l]] - Linux port of FAR v2 - file manager
+- [[https://www.python.org/][Python]] v3.11 - programming language for scripts
+- [[https://www.audacityteam.org/][Audacity]] - audio editing app
+- [[https://www.gimp.org/][GIMP]] - image editor
+- [[https://reuse.software/][REUSE]] - open source licenses helper tool
