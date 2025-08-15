@@ -1431,7 +1431,9 @@ class cde_Effects
 
 * Run :noexport:
 
-#+begin_src elisp
-(load-file "build/TestRunner/dt-scripts.el")
-(dt-run-tests '("build/FinalCustomDoom") "wait 2; openmenu cd_menu")
+#+begin_src txt :tangle build/FinalCustomDoomTestCommands.txt
+wait 2; openmenu cd_menu
+wait 2; quit
 #+end_src
+
+src_elisp{(compile "./tools/org_test.py FinalCustomDoom.org")}

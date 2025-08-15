@@ -7,6 +7,9 @@
 # Meant to be run from the root project directory, like:
 # ./tools/package.py DoomDoctor.org
 #
+# Requirements for environment variables:
+# - PATH: has Emacs.
+#
 # Written for Python >=3.11.
 #
 # ! Warning: this script removes project-related directories inside build
@@ -16,7 +19,7 @@ from pathlib import Path
 from re import search, MULTILINE
 from shutil import rmtree, copytree, make_archive, move
 from sys import argv
-from tangle import tangle
+from org_tangle import tangle
 
 
 if __name__ == "__main__":
@@ -30,20 +33,17 @@ if __name__ == "__main__":
     assert found != None, "No title found."
 
     title = found.group(1).replace(" ", "-")
-    project_file_base_name = project_file_name.split(".")[0]
 
-    # 1. Clean build directory, package directory, and package.
-    build_directory_path = Path("build/" + project_file_base_name)
-    package_directory_path = Path("build/" + title)
-    package_path = Path("build/" + title + ".pk3")
-
-    rmtree(build_directory_path, True)
-    rmtree(package_directory_path, True)
-    package_path.unlink(True)
-
-    # 2. Tangle the source to build files.
+    # 1. Tangle the source to build files.
+    build_directory_path = tangle(project_file_name)
     # TODO: export to HTML too (through Markdown?).
-    tangle(project_file_name)
+
+    # 2. Clean package directory and package.
+    package_directory_path = Path("build/" + title)
+    rmtree(package_directory_path, True)
+
+    package_path = Path("build/" + title).with_suffix(".pk3")
+    package_path.unlink(True)
 
     # 3. Copy build files, licenses, and documentation to package directory.
     copytree(build_directory_path, package_directory_path)

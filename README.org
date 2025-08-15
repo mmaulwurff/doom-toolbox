@@ -22,3 +22,6 @@ Documentation:
 - [[file:documentation/CodeStyle.org][Code style]]
 - [[file:documentation/MadeWith.org][Made with]]
 - [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* Building
+TODO: add description for tools/org_*.py scripts.

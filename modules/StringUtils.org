@@ -20,7 +20,14 @@
 // <<GPL>>
 
 version 4.12.2
+
 #include "StringUtils.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
+// <<GPL>>
+
+version 4.12.2
 
 class su : NAMESPACE_su {}
 class Description : NAMESPACE_Description {}
@@ -58,7 +65,7 @@ static clearscope string join(Array<string> strings, string delimiter = ", ")
   return result;
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   Array<string> strings;
   it("join: empty", Assert(su.join(strings, ".") == ""));
@@ -87,7 +94,7 @@ static clearscope string repeat(string aString, int times)
   return result;
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   it("repeat: zero",  Assert(su.repeat("a",     0) == ""));
   it("repeat: one",   Assert(su.repeat("hello", 1) == "hello"));
@@ -107,7 +114,7 @@ static clearscope string boolToString(bool value)
   return value ? "true" : "false";
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   it("boolToString: true",  Assert(su.boolToString(true)  == "true"));
   it("boolToString: false", Assert(su.boolToString(false) == "false"));
@@ -137,7 +144,7 @@ Optimization opportunity: add... functions append to a private string, not an ar
 #+begin_src c
 string compose() { return NAMESPACE_su.join(mFields); }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   it("description: empty:", Assert(d.compose() == ""));
@@ -154,7 +161,7 @@ NAMESPACE_Description add(string name, string value)
   return self;
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.add("k1", "v1").add("k2", "v2");
@@ -174,7 +181,7 @@ NAMESPACE_Description addObject(string name, Object anObject)
   return add(name, className);
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   Object o;
@@ -193,7 +200,7 @@ NAMESPACE_Description addClass(string name, Class aClass)
   return add(name, aClass.getClassName());
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   string result = new("Description").addClass("c", self.getClass()).compose();
   it("description: class:", Assert(result == "c: su_Test"));
@@ -209,7 +216,7 @@ NAMESPACE_Description addBool(string name, bool value)
   return add(name, NAMESPACE_su.boolToString(value));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addBool("b", true);
@@ -226,7 +233,7 @@ NAMESPACE_Description addInt(string name, int value)
   return add(name, string.format("%d", value));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addInt("value", -19);
@@ -243,7 +250,7 @@ NAMESPACE_Description addFloat(string name, double value)
   return add(name, string.format("%.2f", value));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addFloat("value", -19.4);
@@ -275,7 +282,7 @@ NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
   return add(name, NAMESPACE_su.join(results));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addDamageFlags("d", DMG_NO_ARMOR | DMG_NO_ENHANCE);
@@ -305,7 +312,7 @@ NAMESPACE_Description addCvar(string name)
   return add(name, string.format("unknown type (%d)", aCvar.getRealType()));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addCvar("autoaim").addCvar("dmflags2");
@@ -338,7 +345,7 @@ NAMESPACE_Description addSpac(string name, int flags)
   return add(name, NAMESPACE_su.join(results));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addSpac("s", SPAC_Cross | SPAC_Death);
@@ -355,7 +362,7 @@ NAMESPACE_Description addLine(string name, Line aLine)
   return addInt(name, aLine.index());
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addLine("l", level.lines[1]);
@@ -380,7 +387,7 @@ NAMESPACE_Description addSectorPart(string name, SectorPart part)
   return add(name, string.format("unknown SECPART (%d)", part));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addSectorPart("s", SECPART_3D);
@@ -397,7 +404,7 @@ NAMESPACE_Description addSector(string name, Sector aSector)
   return addInt(name, aSector.index());
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   d.addSector("s", level.sectors[1]);
@@ -414,7 +421,7 @@ NAMESPACE_Description addVector3(string name, vector3 vector)
   return add(name, string.format("%.2f, %.2f, %.2f", vector.x, vector.y, vector.z));
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   vector3 v = (1.1, 2.2, 3.3);
@@ -434,7 +441,7 @@ NAMESPACE_Description addState(string name, State aState)
              addInt("frame", aState.Frame).compose());
 }
 #+end_src
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
   let state = players[consolePlayer].ReadyWeapon.FindState("Fire");
@@ -477,21 +484,17 @@ private Array<string> mFields;
 
 * Run tests :noexport:
 
-#+begin_src elisp
-(load-file "../build/TestRunner/dt-scripts.el")
-(dt-run-tests
- '("../build/StringUtils")
-
- "wait 2; map map01;
-  wait 2; netevent test:su_Test;
-  wait 2; quit"
-
- "../")
+#+begin_src txt :tangle ../build/StringUtilsTestCommands.txt
+wait 2; map map01;
+wait 2; netevent test:su_Test;
+wait 2; quit
 #+end_src
+
+src_elisp{(compile "../tools/org_test.py modules/StringUtils.org")}
 
 * Tests end
 
-#+begin_src c :tangle ../build/StringUtils/zscript.zs
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 EndDescribe(); }}
 #+end_src
 

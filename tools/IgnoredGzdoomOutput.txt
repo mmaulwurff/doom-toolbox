@@ -1,0 +1,45 @@
+----------------------------------------
+^$
+^Adding dehacked patch miniwad.wad:DEHACKED
+^Checking cmd-line parameters...
+^Compiled on
+^Creating window \[
+^D_CheckNetGame: Checking network game status.
+^DecalLibrary: Load decals.
+^GL Version parsed =
+^GLES choosing mode:
+^GL_MAX_TEXTURE_SIZE:
+^GL_RENDERER:
+^GL_SHADING_LANGUAGE_VERSION:
+^GL_VENDOR:
+^GL_VERSION:
+^GZDoom version g
+^G_ParseMapInfo: Load map definitions.
+^I_Init: Setting up machine state.
+^LoadActors: Load actor definitions.
+^M_Init: Init menus.
+^No bots.cfg, so no bots
+^Number of detected displays 1 .
+^P_Init: Init Playloop state.
+^ParseSBarInfo: Loading custom status bar definition.
+^ParseTeamInfo: Load team definitions.
+^Patch installed
+^R_Init: Init Doom refresh subsystem.
+^Resolution:
+^ST_Init: Init startup screen.
+^S_Init: Setting up sound.
+^S_InitData: Load sound definitions.
+^Script error, "gzdoom.pk3:menudef.txt"
+^Texman.Init: Init texture manager.
+^Unknown texture M_EPISOD
+^Using video driver x11
+^V_Init: allocate screen.
+^W_Init: Init WADfiles.
+^adding .*clematis/src, .* lumps
+^adding .*game_support.pk3, .* lumps
+^adding .*gzdoom.pk3, .* lumps
+^adding .*miniwad.wad, .* lumps
+^adding build/
+^cc$
+^player 1 of 1 \(1 nodes\)
+^script parsing took

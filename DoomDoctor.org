@@ -66,31 +66,31 @@ Notes:
 - Triggering several events at once to speed up tests. The events should not interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
-#+begin_src elisp
-(load-file "build/TestRunner/dt-scripts.el")
-(dt-run-tests
- '("build/DoomDoctor build/DoomDoctorTest")
+# TODO: fix dd_i_report -> dd_report?
 
- "  dd_logging_engine_events_enabled  true;
-    dd_logging_replace_events_enabled true;
-    dd_logging_world_events_enabled   true;
-    dd_logging_player_events_enabled  true;
-    dd_logging_process_events_enabled true;
-  wait 2;
-    dd_i_report;
-    map map01;
-  wait 2;
-    dd_force_lightning;
-    event TestConsoleEvent;
-    interfaceEvent TestInterfaceEvent 9;
-    mdk TestDamageType;
-    kill;
-  wait 5;
-    resurrect;
-    warp 60 -128 0; +use;
-  wait 3;
-    quit")
+#+begin_src txt :tangle build/DoomDoctorTestCommands.txt
+  dd_logging_engine_events_enabled  true;
+  dd_logging_replace_events_enabled true;
+  dd_logging_world_events_enabled   true;
+  dd_logging_player_events_enabled  true;
+  dd_logging_process_events_enabled true;
+wait 2;
+  dd_i_report;
+  map map01;
+wait 2;
+  dd_force_lightning;
+  event TestConsoleEvent;
+  interfaceEvent TestInterfaceEvent 9;
+  mdk TestDamageType;
+  kill;
+wait 5;
+  resurrect;
+  warp 60 -128 0; +use;
+wait 3;
+  quit
 #+end_src
+
+src_elisp{(compile "./tools/org_test.py DoomDoctor.org")}
 
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }

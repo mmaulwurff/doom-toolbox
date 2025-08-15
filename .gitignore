@@ -15,15 +15,13 @@
 
 # and these file types:
 !*.en.pws
+!*.ini
 !*.ogg
 !*.org
 !*.png
 !*.py
 !*.toml
-
-# and licenses here:
-!LICENSES/*.txt
+!*.txt
 
 # but do ignore them there:
 build/*
-packages/*
