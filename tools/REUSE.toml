@@ -16,3 +16,8 @@ SPDX-License-Identifier = "CC0-1.0"
 path = "miniwad.wad"
 SPDX-FileCopyrightText = "2001-2018 Contributors to the Freedoom project. All rights reserved."
 SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "ClematisM-v2.1.0.pk3"
+SPDX-FileCopyrightText = "2018 ZippeyKeys12, 2019 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "BSD-3-Clause"

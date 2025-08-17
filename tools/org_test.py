@@ -4,15 +4,14 @@
 # SPDX-License-Identifier: CC0-1.0
 
 # Requirements for environment variables:
-# - PATH: has Emacs and GZDoom,
-# - CLEMATIS_PATH: path to Clematis directory, example: "/home/user/src/clematis/src"
+# - PATH: has Emacs and GZDoom.
 #
 # TODO: add descriptions for Clematis an Miniwad.
 #
 # Written for Python >=3.11.
 
 from org_tangle import tangle
-from os import environ, chdir, path
+from os import chdir, path
 from pathlib import Path
 from re import search
 from shutil import which, copy
@@ -28,7 +27,6 @@ def is_ignored(line, ignored_lines):
 
 def test(project_file_name):
     assert which("gzdoom") != None, "GZDoom not in PATH environment variable"
-    assert "CLEMATIS_PATH" in environ, "CLEMATIS_PATH environment variable not set"
 
     chdir(Path(path.dirname(__file__)) / "..")
 
@@ -52,7 +50,7 @@ def test(project_file_name):
                          "-iwad",
                          "tools/miniwad.wad",
                          "-file",
-                         environ["CLEMATIS_PATH"],
+                         "tools/ClematisM-v2.1.0.pk3",
                          build_directory_path,
                          test_directory_path if test_directory_path.exists() else "",
                          "+wi_autoadvance 1",
