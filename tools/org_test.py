@@ -6,10 +6,8 @@
 # Requirements for environment variables:
 # - PATH: has Emacs and GZDoom,
 # - CLEMATIS_PATH: path to Clematis directory, example: "/home/user/src/clematis/src"
-# - IWAD_PATH: path to an IWAD, example: "/home/user/src/miniwad/miniwad.wad"
 #
 # TODO: add descriptions for Clematis an Miniwad.
-# TODO: put miniwad.wad to the repository?
 #
 # Written for Python >=3.11.
 
@@ -30,7 +28,6 @@ def is_ignored(line, ignored_lines):
 
 def test(project_file_name):
     assert which("gzdoom") != None, "GZDoom not in PATH environment variable"
-    assert "IWAD_PATH" in environ, "IWAD_PATH environment variable not set"
     assert "CLEMATIS_PATH" in environ, "CLEMATIS_PATH environment variable not set"
 
     chdir(Path(path.dirname(__file__)) / "..")
@@ -53,7 +50,7 @@ def test(project_file_name):
                          "-config",
                          "build/config.ini",
                          "-iwad",
-                         environ["IWAD_PATH"],
+                         "tools/miniwad.wad",
                          "-file",
                          environ["CLEMATIS_PATH"],
                          build_directory_path,

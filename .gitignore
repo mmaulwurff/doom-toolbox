@@ -22,6 +22,7 @@
 !*.py
 !*.toml
 !*.txt
+!*.wad
 
 # but do ignore them there:
 build/*
