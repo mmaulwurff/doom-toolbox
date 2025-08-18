@@ -22,10 +22,7 @@ from sys import argv
 from org_tangle import tangle
 
 
-if __name__ == "__main__":
-    assert len(argv) == 2, "Usage: ./tools/package.py Project.org"
-    project_file_name = argv[1]
-
+def package(project_file_name):
     with open(project_file_name) as project_file:
         project_content = project_file.read()
 
@@ -58,3 +55,7 @@ if __name__ == "__main__":
                            "zip",
                            package_directory_path)
     move(archive, Path(archive).with_suffix(".pk3"))
+
+if __name__ == "__main__":
+    assert len(argv) == 2, "Usage: ./tools/package.py Project.org"
+    package(argv[1])
