@@ -16,6 +16,8 @@ Features:
 - [[In-game enemy tag correction]]: use ~na_rename <Class> <NewName>~ console command to assign a tag to a class manually.
 - [[Tag databases]]: load ~na_data.json~ JSON lump (file) that contains class-tag pairs. See examples in tests below.
 
+  TODO: add command to export current in-game enemy tag corrections to na_data.json.
+
 * License :noexport:
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

@@ -8,10 +8,10 @@ Doom Toolbox is a collection of add-ons for Doom-based game engines which suppor
 Doom Toolbox is free and open source software, licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. For third-party resources, such as image and sound files, see ~REUSE.toml~ files in their directories for licenses.
 
 Add-ons:
-- [[file:10.5x.org][10.5x]] - enemy number multiplier
+- [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
-- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options
-- [[file:Nomina.org][Nomina]] - enemy names helper
+- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
+- [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][forum topic]])
 
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
