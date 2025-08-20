@@ -147,7 +147,7 @@ string compose() { return NAMESPACE_su.join(mFields); }
 #+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   let d = new("Description");
-  it("description: empty:", Assert(d.compose() == ""));
+  it("description: empty", Assert(d.compose() == ""));
 }
 #+end_src
 
@@ -165,7 +165,7 @@ NAMESPACE_Description add(string name, string value)
 {
   let d = new("Description");
   d.add("k1", "v1").add("k2", "v2");
-  it("description: two:", Assert(d.compose() == "k1: v1, k2: v2"));
+  it("description: two", Assert(d.compose() == "k1: v1, k2: v2"));
 }
 #+end_src
 
@@ -203,7 +203,7 @@ NAMESPACE_Description addClass(string name, Class aClass)
 #+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 {
   string result = new("Description").addClass("c", self.getClass()).compose();
-  it("description: class:", Assert(result == "c: su_Test"));
+  it("description: class", Assert(result == "c: su_Test"));
 }
 #+end_src
 
@@ -220,7 +220,7 @@ NAMESPACE_Description addBool(string name, bool value)
 {
   let d = new("Description");
   d.addBool("b", true);
-  it("description: bool:", Assert(d.compose() == "b: true"));
+  it("description: bool", Assert(d.compose() == "b: true"));
 }
 #+end_src
 
