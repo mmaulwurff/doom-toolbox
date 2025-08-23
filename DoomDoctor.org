@@ -66,8 +66,6 @@ Notes:
 - Triggering several events at once to speed up tests. The events should not interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
-# TODO: fix dd_i_report -> dd_report?
-
 #+begin_src txt :tangle build/DoomDoctorTestCommands.txt
   dd_logging_engine_events_enabled  true;
   dd_logging_replace_events_enabled true;
@@ -75,7 +73,6 @@ Notes:
   dd_logging_player_events_enabled  true;
   dd_logging_process_events_enabled true;
 wait 2;
-  dd_i_report;
   map map01;
 wait 2;
   dd_force_lightning;

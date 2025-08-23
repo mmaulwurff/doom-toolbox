@@ -35,11 +35,10 @@
 ^Using video driver x11
 ^V_Init: allocate screen.
 ^W_Init: Init WADfiles.
-^adding .*clematis/src, .* lumps
 ^adding .*game_support.pk3, .* lumps
 ^adding .*gzdoom.pk3, .* lumps
 ^adding .*miniwad.wad, .* lumps
-^adding build/
+^adding tools/ClematisM-v.*\.pk3, .* lumps
 ^cc$
 ^player 1 of 1 \(1 nodes\)
 ^script parsing took
