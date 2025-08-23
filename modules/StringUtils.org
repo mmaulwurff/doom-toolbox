@@ -12,6 +12,9 @@
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 // <<GPL>>
+
+// StringUtils module version: 1.0.0
+// StringUtils is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
 #+end_src
 
 ** Tests
@@ -43,6 +46,7 @@ class su_Test : Clematis { override void TestSuites() {
 This class acts as a namespace for free functions.
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
+
 class NAMESPACE_su { <<StringUtilsBody>> }
 #+end_src
 
@@ -52,6 +56,7 @@ Joins strings to a single string separated by delimiter.
 
 #+name: join
 #+begin_src c
+
 static clearscope string join(Array<string> strings, string delimiter = ", ")
 {
   uint nStrings = strings.size();
@@ -85,6 +90,7 @@ Repeats the specified string the specified number of times.
 
 #+name: repeat
 #+begin_src c
+
 static clearscope string repeat(string aString, int times)
 {
   // Make the specified number of spaces using padding format.
@@ -109,6 +115,7 @@ Writes out a boolean value.
 
 #+name: boolToString
 #+begin_src c
+
 static clearscope string boolToString(bool value)
 {
   return value ? "true" : "false";
@@ -133,6 +140,7 @@ static clearscope string boolToString(bool value)
 ** ~Description~
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
+
 class NAMESPACE_Description { <<DescriptionBody>> }
 #+end_src
 
@@ -142,6 +150,7 @@ Optimization opportunity: add... functions append to a private string, not an ar
 
 #+name: compose
 #+begin_src c
+
 string compose() { return NAMESPACE_su.join(mFields); }
 #+end_src
 #+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
@@ -155,6 +164,7 @@ string compose() { return NAMESPACE_su.join(mFields); }
 
 #+name: add
 #+begin_src c
+
 NAMESPACE_Description add(string name, string value)
 {
   mFields.push(name .. ": " .. value);
@@ -173,6 +183,7 @@ NAMESPACE_Description add(string name, string value)
 
 #+name: addObject
 #+begin_src c
+
 NAMESPACE_Description addObject(string name, Object anObject)
 {
   if (anObject == NULL) return add(name, "NULL");
@@ -194,6 +205,7 @@ NAMESPACE_Description addObject(string name, Object anObject)
 
 #+name: addClass
 #+begin_src c
+
 NAMESPACE_Description addClass(string name, Class aClass)
 {
   if (aClass == NULL) return add(name, "NULL");
@@ -211,6 +223,7 @@ NAMESPACE_Description addClass(string name, Class aClass)
 
 #+name: addBool
 #+begin_src c
+
 NAMESPACE_Description addBool(string name, bool value)
 {
   return add(name, NAMESPACE_su.boolToString(value));
@@ -228,6 +241,7 @@ NAMESPACE_Description addBool(string name, bool value)
 
 #+name: addInt
 #+begin_src c
+
 NAMESPACE_Description addInt(string name, int value)
 {
   return add(name, string.format("%d", value));
@@ -245,6 +259,7 @@ NAMESPACE_Description addInt(string name, int value)
 
 #+name: addFloat
 #+begin_src c
+
 NAMESPACE_Description addFloat(string name, double value)
 {
   return add(name, string.format("%.2f", value));
@@ -262,6 +277,7 @@ NAMESPACE_Description addFloat(string name, double value)
 
 #+name: addDamageFlags
 #+begin_src c
+
 NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
 {
   Array<string> results;
@@ -294,6 +310,7 @@ NAMESPACE_Description addDamageFlags(string name, EDmgFlags flags)
 
 #+name: addCvar
 #+begin_src c
+
 NAMESPACE_Description addCvar(string name)
 {
   let aCvar = Cvar.getCvar(name, players[consolePlayer]);
@@ -324,6 +341,7 @@ NAMESPACE_Description addCvar(string name)
 
 #+name: addSpac
 #+begin_src c
+
 /// SPAC - special activation types.
 NAMESPACE_Description addSpac(string name, int flags)
 {
@@ -357,6 +375,7 @@ NAMESPACE_Description addSpac(string name, int flags)
 
 #+name: addLine
 #+begin_src c
+
 NAMESPACE_Description addLine(string name, Line aLine)
 {
   return addInt(name, aLine.index());
@@ -374,6 +393,7 @@ NAMESPACE_Description addLine(string name, Line aLine)
 
 #+name: addSectorPart
 #+begin_src c
+
 NAMESPACE_Description addSectorPart(string name, SectorPart part)
 {
   switch (part)
@@ -399,6 +419,7 @@ NAMESPACE_Description addSectorPart(string name, SectorPart part)
 
 #+name: addSector
 #+begin_src c
+
 NAMESPACE_Description addSector(string name, Sector aSector)
 {
   return addInt(name, aSector.index());
@@ -416,6 +437,7 @@ NAMESPACE_Description addSector(string name, Sector aSector)
 
 #+name: addVector3
 #+begin_src c
+
 NAMESPACE_Description addVector3(string name, vector3 vector)
 {
   return add(name, string.format("%.2f, %.2f, %.2f", vector.x, vector.y, vector.z));
@@ -434,6 +456,7 @@ NAMESPACE_Description addVector3(string name, vector3 vector)
 
 #+name: addState
 #+begin_src c
+
 NAMESPACE_Description addState(string name, State aState)
 {
   return add(name, new("NAMESPACE_Description").

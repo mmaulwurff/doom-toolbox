@@ -13,7 +13,7 @@
 #
 # ! Warning: this script may remove files and directories in `build` directory.
 
-from os import chdir, path
+from os import chdir, makedirs, path
 from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
@@ -22,11 +22,14 @@ from sys import argv, exit
 
 
 def help():
-    print("Usage: ./tools/org.py COMMAND ORG_FILE [Args]\n\n"
+    print("Usage: ./tools/org.py COMMAND ORG_FILE\n\n"
           "Commands:\n"
           "- package    build .pk3 package from ORG_FILE.\n"
           "- test       run tests for ORG_FILE.\n"
-          "- tangle     convert ORG_FILE to a conventional GZDoom mod directory.")
+          "- tangle     convert ORG_FILE to a conventional GZDoom mod directory.\n"
+          "- export     export ORG_FILE module to a ZScript file with namespace.\n"
+          "\n"
+          "Export usage: ./tools/org.py export ORG_FILE NAMESPACE EXPORT_FILE\n")
 
 def is_ignored(line, ignored_lines):
     for ignored_line in ignored_lines:
@@ -109,7 +112,7 @@ def package(project_file_name):
         project_content = project_file.read()
 
     found = search("^#\+title: (.*)$", project_content, flags=MULTILINE)
-    assert found != None, "No title found."
+    assert found != None, "no title found"
 
     title = found.group(1).replace(" ", "-")
 
@@ -138,6 +141,28 @@ def package(project_file_name):
                            package_directory_path)
     move(archive, Path(archive).with_suffix(".pk3"))
 
+def export_module(module_file_name, namespace, export_file_name):
+    assert Path(module_file_name).exists(),\
+        "file {} not found".format(path.abspath(module_file_name))
+
+    build_directory_path = tangle(module_file_name)
+    module_file_base_name = path.splitext(path.basename(module_file_name))[0]
+    zscript_file_name = (build_directory_path / module_file_base_name)\
+        .with_suffix(".zs")
+
+    with open(zscript_file_name) as module_file:
+        original_contents = module_file.read()
+
+    replaced_contents = original_contents.replace("NAMESPACE_", namespace)
+
+    export_directory = path.dirname(export_file_name)
+    if not path.exists(export_directory):
+        makedirs(export_directory)
+
+    with open(export_file_name, "w") as export_file:
+        export_file.write(replaced_contents)
+
+
 if __name__ == "__main__":
     command = argv[1] if len(argv) > 1 else None
     match command:
@@ -153,6 +178,9 @@ if __name__ == "__main__":
         case "tangle":
             action = tangle
             parametersCount = 1
+        case "export":
+            action = export_module
+            parametersCount = 3
         case _:
             action = None
             parametersCount = None
@@ -165,11 +193,19 @@ if __name__ == "__main__":
                 action(argv[2])
             case 2:
                 action(argv[2], argv[3])
+            case 3:
+                action(argv[2], argv[3], argv[4])
         exit()
 
     if action == None:
         help()
     else:
-        print("Usage: ./tools/org.py {} ORG_FILE".format(command));
+        if parametersCount == 1:
+            print("Usage: ./tools/org.py {} ORG_FILE".format(command));
+        elif command == "export":
+            print("Usage: ./tools/org.py {} ORG_FILE NAMESPACE EXPORT_FILE"\
+                .format(command));
+        else:
+            assert false, "missing help for command {}".format(command)
 
     exit(-1)

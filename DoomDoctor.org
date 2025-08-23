@@ -90,7 +90,7 @@ wait 3;
   quit
 #+end_src
 
-src_elisp{(compile "./tools/org_test.py DoomDoctor.org")}
+src_elisp{(compile "./tools/org.py test DoomDoctor.org")}
 
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
@@ -127,7 +127,12 @@ class dd_LoggerTestRunner : StaticEventHandler
 
   override void OnUnregister()
   {
-    assert("all tests run", <<count-logger-tests()>> == mTest.TestsRunTotal());
+    let totalTestsCount = <<count-logger-tests()>>;
+    let executedTestsCount = mTest.TestsRunTotal();
+    bool areAllTestsExecuted = executedTestsCount == totalTestsCount;
+    assert("all tests executed", areAllTestsExecuted);
+    if (!areAllTestsExecuted)
+      Console.printf("Executed: %d, total: %d.", executedTestsCount, totalTestsCount);
 
     mTest.EndDescribe();
   }
@@ -155,7 +160,7 @@ GameInfo
 #+begin_src c :tangle build/DoomDoctor/zscript.zs :exports none
 version 4.12.2
 
-#include "zscript/StringUtils.zs"
+<<module("StringUtils")>>
 
 #include "zscript/VmAbortHandler.zs"
 #include "zscript/Troublemaker.zs"
@@ -163,23 +168,18 @@ version 4.12.2
 #+end_src
 
 [[file:modules/StringUtils.org][StringUtils]]
-#+begin_src c :tangle build/DoomDoctor/zscript/StringUtils.zs :exports none
-<<module("StringUtils")>>
-#+end_src
 
 #+name: module
 #+begin_src elisp :var module-name = "" :exports none
-(org-babel-tangle-file (concat "modules/" module-name ".org"))
-
-(string-replace "NAMESPACE_" "dd_"
-                (with-temp-buffer
-                  (insert-file-contents (format "build/%1$s/%1$s.zs" module-name))
-                  (buffer-string)))
+(shell-command
+  (format "./tools/org.py export modules/%1$s.org dd_ build/DoomDoctor/zscript/%1$s.zs"
+          module-name))
+(format "#include \"zscript/%s.zs\"" module-name)
 #+end_src
 
-Note: it would be logical to move the above code block as an Elisp function to a separate file to avoid code duplication. However, this would make tangling this file from a command line more difficult.
-
 * VM Abort Handling
+
+TODO: move VM abort handling to a module.
 
 VM abort reports:
 - system time;
