@@ -37,6 +37,7 @@ Commands:
 - ~package~ - build .pk3 package from ORG_FILE.
 - ~test~ - run tests for ORG_FILE.
 - ~tangle~ - convert ORG_FILE to a conventional GZDoom mod directory.
+- ~export ORG_FILE NAMESPACE EXPORT_FILE~ - export ORG_FILE module to a ZScript file with namespace.
 
 Example: ~./tools/org.py test modules/StringUtils.org~
 

@@ -1436,4 +1436,4 @@ wait 2; openmenu cd_menu
 wait 2; quit
 #+end_src
 
-src_elisp{(compile "./tools/org_test.py FinalCustomDoom.org")}
+src_elisp{(compile "./tools/org.py test FinalCustomDoom.org")}

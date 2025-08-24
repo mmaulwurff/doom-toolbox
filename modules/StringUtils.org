@@ -513,7 +513,7 @@ wait 2; netevent test:su_Test;
 wait 2; quit
 #+end_src
 
-src_elisp{(compile "../tools/org_test.py modules/StringUtils.org")}
+src_elisp{(compile "../tools/org.py test modules/StringUtils.org")}
 
 * Tests end
 
