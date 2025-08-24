@@ -87,7 +87,9 @@ wait 3;
   quit
 #+end_src
 
-src_elisp{(compile "./tools/org.py test DoomDoctor.org")}
+#+begin_src elisp :exports none
+(compile "./tools/org.py test DoomDoctor.org")
+#+end_src
 
 #+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }

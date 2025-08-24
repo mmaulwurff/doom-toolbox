@@ -1029,4 +1029,6 @@ netevent x5t_expect{'x5t_Revenant':'2'}; wait 10;
 netevent x5t_end; wait 2; quit
 #+end_src
 
-src_elisp{(compile "./tools/org.py test 10.5x.org")}
+#+begin_src elisp :exports none
+(compile "./tools/org.py test 10.5x.org")
+#+end_src

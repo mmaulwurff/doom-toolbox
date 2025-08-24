@@ -1436,4 +1436,6 @@ wait 2; openmenu cd_menu
 wait 2; quit
 #+end_src
 
-src_elisp{(compile "./tools/org.py test FinalCustomDoom.org")}
+#+begin_src elisp :exports none
+(compile "./tools/org.py test FinalCustomDoom.org")
+#+end_src

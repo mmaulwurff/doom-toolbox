@@ -381,4 +381,6 @@ wait 2; summon nat_NamelessToRename;
 wait 9; quit
 #+end_src
 
-src_elisp{(compile "./tools/org.py test Nomina.org")}
+#+begin_src elisp :exports none
+(compile "./tools/org.py test Nomina.org")
+#+end_src

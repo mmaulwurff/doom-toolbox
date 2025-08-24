@@ -513,7 +513,9 @@ wait 2; netevent test:su_Test;
 wait 2; quit
 #+end_src
 
-src_elisp{(compile "../tools/org.py test modules/StringUtils.org")}
+#+begin_src elisp :exports none
+(compile "../tools/org.py test modules/StringUtils.org")
+#+end_src
 
 * Tests end
 
