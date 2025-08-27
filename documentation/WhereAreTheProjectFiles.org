@@ -5,9 +5,11 @@
 
 Doom Toolbox projects are written as Emacs Org mode literate project files. Use Emacs to extract the individual files. You don't have to open the Emacs window. Use the following command line command to extract source code from a file named File.org:
 
-emacs File.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"
+~emacs File.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"~
 
 or run ~tools/tangle.py File.org~ Python script to extract the files, or ~tools/package.py~ to make a .pk3 mod package.
+
+(Note: if you are reading this file as a text file and not as HTML page, note that '~' signs are not a part of scripts)
 
 ⚠ !WARNING! Org files may contain code, and extracting the source files from it may execute it. Don't extract files from Org files from the sources you don't trust.
 
