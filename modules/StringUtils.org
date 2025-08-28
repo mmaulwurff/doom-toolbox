@@ -4,7 +4,7 @@
 
 #+title: StringUtils
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * Preamble
 
@@ -144,7 +144,8 @@ static clearscope string boolToString(bool value)
 class NAMESPACE_Description { <<DescriptionBody>> }
 #+end_src
 
-Optimization opportunity: add... functions append to a private string, not an array. Compose simply returns it.
+Optimization opportunity: add... functions append to a private string, not an array.
+Compose simply returns it.
 
 *** ~compose~
 

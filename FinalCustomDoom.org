@@ -4,7 +4,8 @@
 
 #+title: FinalCustomDoom v1.0.0-beta
 
-Final Custom Doom provides gameplay customization. It can be used to increase or decrease the difficulty in various ways.
+Final Custom Doom provides gameplay customization. It can be used to increase or
+decrease the difficulty in various ways.
 
 Final Custom Doom is a successor to Ultimate Custom Doom and Custom Doom.
 
@@ -603,7 +604,8 @@ class cd_AmmoRegeneration : cd_EffectsBase
 
     if (!isMyTime(settings.at("cd_AmmoRegeneration:period").toInt())) return;
 
-    bool isBackpackRequired = settings.at("cd_AmmoRegeneration:backpackRequired").toInt();
+    bool isBackpackRequired =
+      settings.at("cd_AmmoRegeneration:backpackRequired").toInt();
     if (isBackpackRequired && !isBackpackOwned(pawn)) return;
 
     int amount = amountString.toInt();
@@ -699,8 +701,10 @@ cd_RestoreOptions3 = "Restore options from Profile 3 backup";
 * Acknowledgments
 
 - Custom Doom base idea: Lud (Accensus),
-- help with developing Custom Doom: JudgeGroovy, Doctrine Dark, Zhs2, Beed28, FaggoStorm, Phantom Allies, FoxBoy, Eruanna.
-- help with developing Ultimate Custom Doom: Beed28, przemko27, DabbingSquidward, drogga (Commado Pen), Nems, HexFlareheart, kondoriyano, Spaceman333, ghost.
+- help with developing Custom Doom: JudgeGroovy, Doctrine Dark, Zhs2, Beed28,
+  FaggoStorm, Phantom Allies, FoxBoy, Eruanna.
+- help with developing Ultimate Custom Doom: Beed28, przemko27, DabbingSquidward,
+  drogga (Commado Pen), Nems, HexFlareheart, kondoriyano, Spaceman333, ghost.
 
 * Implementation details
 
@@ -1322,22 +1326,33 @@ class cd_EffectsBase play
 
 * Extending Final Custom Doom
 
-You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD extension can be created. Basically, such extension consists of two parts: settings definition and settings implementation. Settings definition is contained in menudef lump, where settings are added to ~cd_Menu~, possibly via a submenu. Settings implementation provides in-game effects and is written in ZScript.
+You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD
+extension can be created. Basically, such extension consists of two parts: settings
+definition and settings implementation. Settings definition is contained in menudef
+lump, where settings are added to ~cd_Menu~, possibly via a submenu. Settings
+implementation provides in-game effects and is written in ZScript.
 
-Settings defined in a FCD extension don't have an entry in cvarinfo lump. They are stored, reset to defaults, and backed up to profiles together with FCD settings.
+Settings defined in a FCD extension don't have an entry in cvarinfo lump. They are
+stored, reset to defaults, and backed up to profiles together with FCD settings.
 
-Important note: FCD extensions don't depend on FCD code-wise. This means that they can be loaded without errors even without FCD.
+Important note: FCD extensions don't depend on FCD code-wise. This means that they
+can be loaded without errors even without FCD.
 
-Options in ~cd_Menu~ and its submenus don't behave like normal options. The differences are:
+Options in ~cd_Menu~ and its submenus don't behave like normal options. The
+differences are:
 - Several item types are transformed into Custom Doom settings:
   - ~TextField~ -> double setting,
   - ~NumberField~, ~Option~ -> int setting,
   - ~ColorPicker~ -> color setting.
 - Instead of a Cvar, a command is specified in format ~"Class:Function:EffectTime"~:
-  - ~Class~ is ZScript class name that contains Function. Attention: class name must start with ~cd~.
-  - ~Function~: ZScript function name in Class. It must take a string as a parameter, and have return type void (meaning it returns nothing).
-  - ~EffectTime~: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~, ~Periodically~, or left out.
-- Setting labels in some item types are made directly-translatable. See the note in language.txt in [[Menus]] section.
+  - ~Class~ is ZScript class name that contains Function. Attention: class name must
+    start with ~cd~.
+  - ~Function~: ZScript function name in Class. It must take a string as a parameter,
+    and have return type void (meaning it returns nothing).
+  - ~EffectTime~: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~,
+    ~Periodically~, or left out.
+- Setting labels in some item types are made directly-translatable. See the note in
+  language.txt in [[Menus]] section.
 
 See the example below.
 

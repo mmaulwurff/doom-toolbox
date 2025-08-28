@@ -4,13 +4,14 @@
 
 #+title: 10.5x v0.11.1
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * Description
 
 [[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
-Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the reach of a single slider.
+Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the
+reach of a single slider.
 #+end_quote
 
 Required ZScript version:
@@ -26,18 +27,21 @@ Features:
 Options:
 - Global enemy multiplier.
 - Enemy multiplier by type (set the global multiplier to 0 and start the map).
-- Resurrection of automatically killed enemies (~x5_raise_divided~ Cvar, off by default).
+- Resurrection of automatically killed enemies (~x5_raise_divided~ Cvar, off by
+  default).
 
 Anti-features:
 - No display of remaining enemies;
 - May not work well with scripted maps;
 - Doesn't affect enemies spawned after the map is loaded;
-- Suggested max enemy amount: no, because it would limit enemy numbers disproportionately to the map size.
+- Suggested max enemy amount: no, because it would limit enemy numbers
+  disproportionately to the map size.
 
 Known issues (for multiplier > 1):
 - Tags 666 and 667 may be triggered more than once per map;
 - Close-range enemies (like demons) may stand too close to the player to be hit.
-- It may not be possible to get 100% kills in maps with single-use monster teleporters.
+- It may not be possible to get 100% kills in maps with single-use monster
+  teleporters.
 
 Acknowledgments:
 - Original idea: Cutmanmike;
@@ -521,7 +525,9 @@ class x5_WalkAbilityWatcher : Inventory
 
 * ~x5_Killer~
 
-This class kills an enemy when the enemy becomes active. Such an enemy is marked with a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is controlled by ~x5_raise_divided~ Cvar.
+This class kills an enemy when the enemy becomes active. Such an enemy is marked with
+a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is
+controlled by ~x5_raise_divided~ Cvar.
 
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
 server bool x5_raise_divided = false;

@@ -5,7 +5,7 @@
 
 #+title: DoomDoctor v1.0.0-next
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * Acknowledgments
 
@@ -62,8 +62,10 @@ SPDX-License-Identifier: GPL-3.0-only
 * Tests preamble
 
 Notes:
-- Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet. TODO: make the scripts wait until something happens.
-- Triggering several events at once to speed up tests. The events should not interfere with each other.
+- Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet.
+  TODO: make the scripts wait until something happens.
+- Triggering several events at once to speed up tests. The events should not
+  interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
 #+begin_src txt :tangle build/DoomDoctorTestCommands.txt
@@ -152,7 +154,10 @@ class dd_LoggerTestRunner : StaticEventHandler
 #+begin_src txt :tangle build/DoomDoctor/mapinfo.txt :exports none
 GameInfo
 {
-  EventHandlers = "dd_VmAbortHandler", "dd_Troublemaker", "dd_BufferedConsole", "dd_Logger"
+  EventHandlers = "dd_VmAbortHandler",
+                  "dd_Troublemaker",
+                  "dd_BufferedConsole",
+                  "dd_Logger"
 }
 #+end_src
 
@@ -182,12 +187,15 @@ TODO: move VM abort handling to a module.
 
 VM abort reports:
 - system time;
-- basic game information: map name, total time, multiplayer status, player class, skill;
+- basic game information: map name, total time, multiplayer status, player class,
+  skill;
 - game configuration: compat flags, dm flags, autoaim;
 - event handler list;
 - a request for the user to report the bug.
 
-If there are several VM abort handlers loaded, only the first one will print stuff. For this to work, all handlers must have ~VmAbortHandler~ somewhere in their class name.
+If there are several VM abort handlers loaded, only the first one will print stuff.
+For this to work, all handlers must have ~VmAbortHandler~ somewhere in their class
+name.
 
 ** Settings
 
@@ -360,7 +368,8 @@ class dd_Report
 
 * Troublemaker
 
-Troublemaker provides console commands to check if a mod can handle some unexpected events.
+Troublemaker provides console commands to check if a mod can handle some unexpected
+events.
 
 ** Console commands
 
@@ -482,17 +491,19 @@ user bool dd_logging_process_events_enabled = false;
 ** Console commands
 
 #+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+
 Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
 #+end_src
 
 ** ~dd_BufferedConsole~
 
-Prints to the engine console and saves the messages so they can be checked.
-Also prints level time.
+Prints to the engine console and saves the messages so they can be checked. Also
+prints level time.
 
 ~StaticEventHandler~ used as a Singleton.
 
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
+
 class dd_BufferedConsole : StaticEventHandler
 {
 
@@ -522,9 +533,12 @@ class dd_BufferedConsole : StaticEventHandler
 ** ~dd_Logger~
 
 Notes
-- The following events are not logged, because nothing interesting can change here: ~RenderOverlay~, ~RenderUnderlay~, ~UiTick~, ~PostUiTick~, ~InputProcess~, ~UiProcess~.
+- The following events are not logged, because nothing interesting can change here:
+  ~RenderOverlay~, ~RenderUnderlay~, ~UiTick~, ~PostUiTick~, ~InputProcess~,
+  ~UiProcess~.
 - Events cannot be destroyed, so event parameters are never NULL.
-- Most events are followed by the test code that also works as an example of what an event report contains.
+- Most events are followed by the test code that also works as an example of what an
+  event report contains.
 
 #+begin_src c :tangle build/DoomDoctor/zscript/Logger.zs
 class dd_Logger : StaticEventHandler

@@ -33,7 +33,8 @@ See [[../.clang-format]] and [[../.editorconfig]] for formatting settings.
 
 * Abbreviations
 
-Minimize the use of abbreviations. Capitalize abbreviations as single words (~Http~, ~Cvar~).
+Minimize the use of abbreviations. Capitalize abbreviations as single words (~Http~,
+~Cvar~).
 
 * Language
 

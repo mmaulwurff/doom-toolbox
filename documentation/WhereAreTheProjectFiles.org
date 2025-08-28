@@ -3,31 +3,41 @@
 
 #+title: Where Are The Project Files?
 
-Doom Toolbox projects are written as Emacs Org mode literate project files. Use Emacs to extract the individual files. You don't have to open the Emacs window. Use the following command line command to extract source code from a file named File.org:
+Doom Toolbox projects are written as Emacs Org mode literate project files. Use Emacs
+to extract the individual files. You don't have to open the Emacs window. Use the
+following command line command to extract source code from a file named File.org:
 
 ~emacs File.org --quick --batch --eval "(progn (require 'ob-tangle) (setq org-confirm-babel-evaluate nil) (org-babel-tangle))"~
 
-or run ~tools/tangle.py File.org~ Python script to extract the files, or ~tools/package.py~ to make a .pk3 mod package.
+or run ~tools/tangle.py File.org~ Python script to extract the files, or
+~tools/package.py~ to make a .pk3 mod package.
 
-(Note: if you are reading this file as a text file and not as HTML page, note that '~' signs are not a part of scripts)
+(Note: if you are reading this file as a text file and not as HTML page, note that
+'~' signs are not a part of scripts)
 
-⚠ !WARNING! Org files may contain code, and extracting the source files from it may execute it. Don't extract files from Org files from the sources you don't trust.
+⚠ !WARNING! Org files may contain code, and extracting the source files from it may
+execute it. Don't extract files from Org files from the sources you don't trust.
 
 The breakdown of the script above:
 - launch Emacs with the File.org file:
   - ~--quick~ - don't load the Emacs settings and don't show the splash screen,
-  - ~--batch~ - launch Emacs without interface, so it processes the command and exits,
+  - ~--batch~ - launch Emacs without interface, so it processes the command and
+    exits,
   - ~--eval~ - run the following Emacs Lisp commands:
     - ~progn~ - run the following command sequence;
-    - ~require 'ob-tangle~ - load the Emacs module for extracting source code from Org files;
-    - ~setq org-confirm-babel-evaluate nil~ - allow running code from Org file, which is used for macros and text generation. Running code from Org file is disabled by default;
+    - ~require 'ob-tangle~ - load the Emacs module for extracting source code from
+      Org files;
+    - ~setq org-confirm-babel-evaluate nil~ - allow running code from Org file, which
+      is used for macros and text generation. Running code from Org file is disabled
+      by default;
     - ~org-babel-tangle~ - extract source code from Org file to separate files.
 
 * Pros
 
 ** Logical code structure
 
-You can put related program components together, even if they are in different languages or file formats. Like this: conventional code structure:
+You can put related program components together, even if they are in different
+languages or file formats. Like this: conventional code structure:
 - application/file1: feature1 documentation, feature2 documentation;
 - application/file2: feature1 source code, feature2 source code;
 - tests/file3: feature1 tests, feature2 tests.
@@ -39,9 +49,12 @@ Logical code structure:
 
 ** Macros
 
-Your project's main programming language can be extended with a scripting language like Python or Emacs Lisp, which can be used to generate code. Great for boilerplate code.
+Your project's main programming language can be extended with a scripting language
+like Python or Emacs Lisp, which can be used to generate code. Great for boilerplate
+code.
 
-Features of macros in Emacs Lisp inside an Org file that I haven't found in other literal project systems:
+Features of macros in Emacs Lisp inside an Org file that I haven't found in other
+literal project systems:
 - access to the whole text of the tangled file (for whole project analysis),
 - shared environment across macro invocations (for counters).
 
@@ -51,28 +64,38 @@ To file sections, to other files, URLs.
 
 ** HTML documentation
 
-Export to HTML produces a very nicely formatted document. Also, GitHub shows .org files as a formatted HTML page, though macros and ~:noexport:~ sections are not supported.
+Export to HTML produces a very nicely formatted document. Also, GitHub shows .org
+files as a formatted HTML page, though macros and ~:noexport:~ sections are not
+supported.
 
 * Cons
 
 ** Limited text editor choice
 
-The best text editor choice for Org files is Emacs. There are plugins for some other text editors with varying support.
+The best text editor choice for Org files is Emacs. There are plugins for some other
+text editors with varying support.
 
 ** Limited project size
 
-Emacs may become less responsive with big and complex Org mode files. Projects with big feature scope will be difficult to understand as one file. But, maybe it's a good thing, and helps prevent feature creep?
+Emacs may become less responsive with big and complex Org mode files. Projects with
+big feature scope will be difficult to understand as one file. But, maybe it's a good
+thing, and helps prevent feature creep?
 
 ** Extra syntax
 
-Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file. Besides your project's main programming language syntax and formatting, you now also have to spend time formatting Org.
+Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file. Besides
+your project's main programming language syntax and formatting, you now also have to
+spend time formatting Org.
 
-Markdown has less intrusive syntax, however Org/Emacs Lisp tandem seem to be the most powerful for writing [[macros]].
+Markdown has less intrusive syntax, however Org/Emacs Lisp tandem seem to be the most
+powerful for writing [[macros]].
 
 ** Compilation error reporting
 
-The compiler reports errors and warnings with line numbers of the source files that are extracted from the Org files, not line numbers in the Org file.
+The compiler reports errors and warnings with line numbers of the source files that
+are extracted from the Org files, not line numbers in the Org file.
 
 ** Licensing mess
 
-If you want to license your project properly and apply different licenses to project source files and documentation, it's a hassle to do that.
+If you want to license your project properly and apply different licenses to project
+source files and documentation, it's a hassle to do that.
