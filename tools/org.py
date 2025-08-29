@@ -72,7 +72,8 @@ def test(project_file_name):
     build_directory_path = tangle(project_file_name)
     test_directory_path = Path(str(build_directory_path) + "Test")
 
-    copy("tools/config.ini", "build/config.ini")
+    if not Path("build/config.ini").exists():
+      copy("tools/config.ini", "build/config.ini")
 
     commands_file_path = Path(str(build_directory_path) + "TestCommands.txt")
     with open(commands_file_path) as commands_file:
