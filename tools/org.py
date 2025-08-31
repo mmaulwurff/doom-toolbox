@@ -7,7 +7,7 @@
 # - package, tangle: PATH: has Emacs.
 # - test: PATH: has Emacs and GZDoom.
 #
-# Written for Python >=3.11.
+# Written for Python >=3.13.
 #
 # Results are written to `build` directory.
 #
@@ -112,7 +112,7 @@ def package(project_file_name):
     with open(project_file_name) as project_file:
         project_content = project_file.read()
 
-    found = search("^#\+title: (.*)$", project_content, flags=MULTILINE)
+    found = search(r'"^#+title: (.*)$', project_content, flags=MULTILINE)
     assert found != None, "no title found"
 
     title = found.group(1).replace(" ", "-")
