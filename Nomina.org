@@ -5,10 +5,6 @@
 
 #+title: Nomina v2.0.0-beta
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
-* Description
-
 Nomina is a GZDoom add-on that helps with enemy names (tags).
 
 Features:
@@ -20,6 +16,10 @@ Features:
   See examples in tests below.
 
   TODO: add command to export current in-game enemy tag corrections to na_data.json.
+
+Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License :noexport:
 

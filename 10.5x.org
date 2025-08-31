@@ -4,10 +4,6 @@
 
 #+title: 10.5x v0.11.1
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
-* Description
-
 [[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
 Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the
@@ -50,6 +46,10 @@ Acknowledgments:
 - Feature suggestions: Rowsol, Accensus;
 - Translation support and Russian translation: Blueberryy;
 - Brazilian Portuguese localization: generic name guy.
+
+10.5x is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * Licenses
 

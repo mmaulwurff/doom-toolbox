@@ -1,7 +1,13 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-#+title: Doom Toolbox
+#+begin_src
+     ____                           ______            ____
+    / __ \____  ____  ____ ___     /_  __/___  ____  / / /_  ____  _  __
+   / / / / __ \/ __ \/ __ `__ \     / / / __ \/ __ \/ / __ \/ __ \| |/_/
+  / /_/ / /_/ / /_/ / / / / / /    / / / /_/ / /_/ / / /_/ / /_/ />  <
+ /_____/\____/\____/_/ /_/ /_/    /_/  \____/\____/_/_.___/\____/_/|_|
+#+end_src
 
 Doom Toolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
@@ -11,13 +17,14 @@ resources, such as image and sound files, see ~REUSE.toml~ files in their direct
 for licenses.
 
 Add-ons:
-- [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][forum topic]])
+- [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][ZDoom forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
-- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
-- [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][forum topic]])
+- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][ZDoom forum topic]])
+- [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][ZDoom forum topic]])
 
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
+- [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
 - [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
 
 Documentation:

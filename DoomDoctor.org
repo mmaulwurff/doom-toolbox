@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-#+startup: content
 
 #+title: DoomDoctor v1.0.0-next
+
+DoomDoctor contains tools for GZDoom mod debugging.
+
+DoomDoctor is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 

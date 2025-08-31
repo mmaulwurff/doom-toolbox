@@ -9,6 +9,8 @@ decrease the difficulty in various ways.
 
 Final Custom Doom is a successor to Ultimate Custom Doom and Custom Doom.
 
+Final Custom Doom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License

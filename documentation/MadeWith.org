@@ -3,14 +3,26 @@
 
 #+title: Made With
 
+* Development
+
 Doom Toolbox is made with help of the following software:
 
 - [[https://zdoom.org/downloads][GZDoom]]
 - [[https://www.python.org/][Python]]: programming language for scripts
 - [[https://www.gnu.org/software/emacs/][GNU Emacs]]: text editor
-  - [[https://github.com/doomemacs/][Doom Emacs]]: configuration framework for GNU Emacs (_not_ specifically for Doom mods development)
-- [[https://github.com/elfmz/far2l][far2l]]: Linux port of FAR v2 - file manager
+  - [[https://github.com/doomemacs/][Doom Emacs]]: configuration framework for GNU Emacs (_not_ specifically for Doom
+    mods development)
 - [[https://www.audacityteam.org/][Audacity]]: audio editing app
 - [[https://www.gimp.org/][GIMP]]: image editor
 - [[https://reuse.software/][REUSE]]: open source licenses helper tool
-- Raspberry Pi OS (Debian) Bookworm GNU/Linux
+
+* Environment
+
+- [[https://github.com/elfmz/far2l][far2l]]: Linux port of FAR v2 - file manager
+- Raspberry Pi OS (Debian) Trixie (13) GNU/Linux
+
+* Logo
+
+#+begin_src sh
+figlet -f slant 'Doom Toolbox' | lolcat --seed=666
+#+end_src
