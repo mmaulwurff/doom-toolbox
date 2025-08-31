@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: PlainTranslator
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* PlainTranslator
+
+TODO: inherit OptiomMenuItem, not OptionMenuItemStaticText
+
+#+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
+// <<GPL>>
+
+// PlainTranslator module version: 1.0.0
+// PlainTranslator is a part of Doom Toolbox:
+// https://github.com/mmaulwurff/doom-toolbox/
+//
+// In GZDoom, you have two options for putting text in your menu items:
+//
+// 1. Plain text:
+//   - in `menudef`: `StaticText "Hello, world!"`
+//
+// 2. String id:
+//   - in `menudef`: `StaticText "$HELLO_WORLD"`,
+//   - in `language`, for each desired language: `HELLO_WORLD = "Hello, world!`;"
+//
+// The first option is more readable, but such item labels aren't translated.
+// PlainTranslator makes the first option translatable too. It creates string
+// ids for plain strings automatically.
+//
+// How to use:
+//
+// 1. Write label for your menu items in plain text: `StaticText "Hello, world!"`.
+// 2. Add NAMESPACE_PlainTranslator menu item in your menu as the first item.
+// 3. Add translations in `language`, if needed. String id is derived from the
+//    plain text string: `NAMESPACE_Hello__world_ = "¡Hola Mundo!";`
+//
+// Features:
+//
+// - Automatic submenu translation: it's enough to only put Translator in the
+//   top-level menu.
+// - Supports item labels and menu titles.
+//
+// Limitations:
+//
+// - Doesn't support dynamic menus: if the number of menu item changes in
+//   runtime, the translation stops updating.
+// - Translator doesn't work if it's the last item in a menu, works best if it's
+//   the first.
+// - After the language is changed, the old string is shown for one frame.
+// - Plain text must contain only numbers, latin letters, spaces, ',', '.', '!',
+//   '?', '-'. In string id spaces and punctuation are replaced with "_".
+// - Translator takes one line.
+class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItemStaticText
+{
+  override int draw(OptionMenuDescriptor descriptor, int y, int indent, bool selected)
+  {
+    translate(descriptor);
+    return Super.draw(descriptor, y, indent, selected);
+  }
+
+  void init()
+  {
+    Super.init("");
+  }
+
+  private void translate(OptionMenuDescriptor descriptor)
+  {
+    if (!mIsInitialized)
+    {
+      mIsInitialized = true;
+      mOldLanguage = language;
+
+      mOriginalTitle = descriptor.mTitle;
+      mTitleId = makeId(descriptor.mTitle);
+
+      foreach (item : descriptor.mItems)
+      {
+        if (item is "OptionMenuItemSubmenu")
+        {
+          let submenuDescriptor =
+            OptionMenuDescriptor(MenuDescriptor.getDescriptor(item.getAction()));
+
+          if (submenuDescriptor != NULL)
+          {
+            submenuDescriptor.mItems.
+              insert(0, new("OptionMenuItemNAMESPACE_PlainTranslator"));
+          }
+        }
+
+        addLabel(item.mLabel);
+      }
+
+      replaceLabels(descriptor);
+      return;
+    }
+
+    if (language == mOldLanguage) return;
+
+    mOldLanguage = language;
+
+    replaceLabels(descriptor);
+  }
+
+  private void replaceLabels(OptionMenuDescriptor descriptor)
+  {
+    descriptor.mTitle = getLocalizedLabel(mTitleId, mOriginalTitle);
+
+    int itemsNumber = descriptor.mItems.size();
+
+    // Items number changed, cannot match items with their labels by index.
+    if (mOriginalLabels.size() != itemsNumber) return;
+
+    for (int i = 0; i < itemsNumber; ++i)
+      descriptor.mItems[i].mLabel = getLocalizedLabel(mLabelIds[i], mOriginalLabels[i]);
+  }
+
+  private void addLabel(string label)
+  {
+    mOriginalLabels.push(label);
+    mLabelIds.push(makeId(label));
+  }
+
+  private string makeId(string label)
+  {
+    static const string toReplaces[] = {" ", ",", "!", "?", "-"};
+    foreach (toReplace : toReplaces) label.replace(toReplace, "_");
+    return "NAMESPACE_" .. label;
+  }
+
+  private string getLocalizedLabel(string labelId, string originalLabel)
+  {
+    string localizedLabel = StringTable.localize(labelId, false);
+    bool localizationFound = localizedLabel != labelId;
+
+    return localizationFound ? localizedLabel : originalLabel;
+  }
+
+  private bool mIsInitialized;
+  private string mOldLanguage;
+
+  private Array<string> mOriginalLabels;
+  private Array<string> mLabelIds;
+  private string mOriginalTitle;
+  private string mTitleId;
+}
+#+end_src
+
+* License
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
