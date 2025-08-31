@@ -53,17 +53,22 @@ TODO: inherit OptiomMenuItem, not OptionMenuItemStaticText
 // - Plain text must contain only numbers, latin letters, spaces, ',', '.', '!',
 //   '?', '-'. In string id spaces and punctuation are replaced with "_".
 // - Translator takes one line.
-class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItemStaticText
+class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItem
 {
   override int draw(OptionMenuDescriptor descriptor, int y, int indent, bool selected)
   {
     translate(descriptor);
-    return Super.draw(descriptor, y, indent, selected);
+    return -1;
+  }
+
+  override bool selectable()
+  {
+    return false;
   }
 
   void init()
   {
-    Super.init("");
+    Super.init("", 'None');
   }
 
   private void translate(OptionMenuDescriptor descriptor)
