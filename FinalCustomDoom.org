@@ -694,6 +694,10 @@ cd_RestoreOptions2 = "Restore options from Profile 2 backup";
 
 cd_BackupOptions3  = "Back up options to Profile 3";
 cd_RestoreOptions3 = "Restore options from Profile 3 backup";
+
+[ru]
+cd_Player = "Игрок";
+
 #+end_src
 @@html:</details>@@
 :end:
@@ -718,6 +722,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$cd_Title", cd_Menu }
 OptionMenu cd_Menu protected
 {
   Class cd_Menu
+  cd_PlainTranslator
   <<OptionMenuTitle("$cd_Title")>>
 
   Submenu    "Player"  , cd_Player
@@ -786,6 +791,18 @@ version 4.14.2
 #include "zscript/cd_EventHandler.zs"
 #include "zscript/cd_Effects.zs"
 #include "zscript/cd_Menu.zs"
+
+<<module("PlainTranslator")>>
+#+end_src
+
+[[file:modules/PlainTranslator.org][PlainTranslator]]
+
+#+name: module
+#+begin_src elisp :var module-name = "" :exports none
+(shell-command
+  (format "./tools/org.py export modules/%1$s.org cd_ build/FinalCustomDoom/zscript/%1$s.zs"
+          module-name))
+(format "#include \"zscript/%s.zs\"" module-name)
 #+end_src
 
 #+begin_src txt :tangle build/tmp.txt :exports none
@@ -835,18 +852,12 @@ class cd_Menu : OptionMenu
       return new("cd_Option").init(item.mLabel, item.getAction(), option.mValues);
     }
 
-    if (itemClass == 'OptionMenuItemStaticText')
-    {
-      let text = OptionMenuItemStaticText(item);
-      return new("cd_Text").initDirect(item.mLabel, text.mColor);
-    }
-
     if (itemClass == 'OptionMenuItemSubmenu')
     {
       let descriptor = MenuDescriptor.getDescriptor(item.getAction());
       replaceItems(OptionMenuDescriptor(descriptor).mItems);
 
-      return new("cd_Submenu").init(item.mLabel, item.getAction());
+      return item;
     }
 
     return item;
@@ -892,48 +903,17 @@ server string cd_settings;
 
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
 
-mixin class cd_DirectlyTranslatable
-{
-  string mRawLabel;
-  string mLabelId;
-
-  void initializeTranslation(string rawLabel)
-  {
-    mRawLabel = rawLabel;
-
-    string labelWithUnderscores = mRawLabel;
-    labelWithUnderscores.replace(" ", "_");
-    mLabelId = "cd_" .. labelWithUnderscores;
-  }
-
-  string getLocalizedLabel()
-  {
-    string localizedLabel = StringTable.localize(mLabelId, false);
-    bool localizationFound = localizedLabel != mLabelId;
-
-    return localizationFound ? localizedLabel : mRawLabel;
-  }
-}
-
 class cd_NumberField : OptionMenuItemTextField
 {
   mixin cd_SettingItem;
-  mixin cd_DirectlyTranslatable;
   string mFormat;
 
   OptionMenuItem init(string label, Name command, int decimalPlaces)
   {
     mTag = command;
     mFormat = string.format("%%.%df", decimalPlaces);
-    initializeTranslation(label);
 
     return Super.init(label, '');
-  }
-
-  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
-  {
-    mLabel = getLocalizedLabel();
-    return Super.draw(desc, y, indent, selected);
   }
 
   override bool, string getString(int i)
@@ -1082,40 +1062,6 @@ class cd_ColorPickerMenu : ColorPickerMenu
     Super.onDestroy();
     setSetting(string.format("%d", Color(int(mRed), int(mGreen), int(mBlue))));
     mCvar.setInt(0);
-  }
-}
-
-class cd_Submenu : OptionMenuItemSubmenu
-{
-  mixin cd_DirectlyTranslatable;
-
-  OptionMenuItemSubmenu init(String label, Name command)
-  {
-    initializeTranslation(label);
-    return Super.init(label, command);
-  }
-
-  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
-  {
-    mLabel = getLocalizedLabel();
-    return Super.draw(desc, y, indent, selected);
-  }
-}
-
-class cd_Text : OptionMenuItemStaticText
-{
-  mixin cd_DirectlyTranslatable;
-
-  OptionMenuItemStaticText initDirect(String label, int cr)
-  {
-    initializeTranslation(label);
-    return Super.initDirect(label, cr);
-  }
-
-  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
-  {
-    mLabel = getLocalizedLabel();
-    return Super.draw(desc, y, indent, selected);
   }
 }
 #+end_src
