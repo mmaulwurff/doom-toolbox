@@ -1,0 +1,696 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: TiddlyLisp
+
+* Project setup
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript.zs
+
+version 4.14.2
+
+#include "zscript/tl_EventHandler.zs"
+#include "zscript/tl_Expression.zs"
+#include "zscript/tl_Env.zs"
+#include "zscript/tl_Globals.zs"
+#include "zscript/tl_Test.zs"
+#+end_src
+
+* Test
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript/tl_Test.zs
+
+class tl_Test
+{
+  static tl_Test from()
+  {
+    let result = new("tl_Test");
+
+    //result.add("", "");
+    result.add("0", "0");
+    result.add("1", "1");
+    //result.add("()", "()");
+    //result.add("(2)", "(2)");
+    result.add("(+ 1 2)", "3");
+    result.add("(+ (* 2 3) 4)", "10");
+    result.add("(quote 2)", "2");
+    result.add("(quote (+ 1 2))", "(+ 1 2)");
+    result.add("(atom? (+ 1 2))", "True");
+    result.add("(atom? (q (+ 1 2)))", "False");
+    result.add("(eq? 3 3)", "True");
+    result.add("(car (quote (1 2 3)))", "1");
+    result.add("(cdr (quote (1 2 3)))", "(2 3)");
+
+    return result;
+  }
+
+  private void add(string input, string expectedResult)
+  {
+    cases.push(tl_TestCase.from(input, expectedResult));
+  }
+
+  Array<tl_TestCase> cases;
+}
+
+class tl_TestCase
+{
+  static tl_TestCase from(string input, string expected)
+  {
+    let result = new("tl_TestCase");
+    result.input = input;
+    result.expected = expected;
+    return result;
+  }
+
+  string input;
+  string expected;
+}
+#+end_src
+
+* EventHandler
+
+#+begin_src prog :tangle ../build/TiddlyLisp/mapinfo.txt
+
+GameInfo { EventHandlers = "tl_EventHandler" }
+#+end_src
+
+TODO: read from command line with spaces.
+
+#+begin_src text :tangle ../build/TiddlyLisp/keyconf.txt
+
+Alias lisp "netevent lisp:%1"
+#+end_src
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript/tl_EventHandler.zs
+
+class tl_EventHandler : StaticEventHandler
+{
+  tl_Env globalEnv;
+
+  static tl_Env makeGlobalEnv()
+  {
+    let result = new("tl_Env");
+
+    result = tl_Env.from(NULL);
+
+    result.vars.insert("+", tl_Function.from("tl_Globals", "add"));
+    result.vars.insert("-", tl_Function.from("tl_Globals", "sub"));
+    result.vars.insert("*", tl_Function.from("tl_Globals", "mul"));
+    result.vars.insert("/", tl_Function.from("tl_Globals", "div"));
+
+    result.vars.insert("=", tl_Function.from("tl_Globals", "eq"));
+    result.vars.insert(">", tl_Function.from("tl_Globals", "gt"));
+    result.vars.insert("<", tl_Function.from("tl_Globals", "lt"));
+    result.vars.insert(">=", tl_Function.from("tl_Globals", "ge"));
+    result.vars.insert("<=", tl_Function.from("tl_Globals", "le"));
+
+    result.vars.insert("True", tl_Bool.from(true));
+    result.vars.insert("False", tl_Bool.from(false));
+
+    return result;
+  }
+
+  private void test()
+  {
+    let test = tl_Test.from();
+
+    foreach (aCase : test.cases)
+    {
+      Console.printf("Testing expression \"%s\"", aCase.input);
+
+      tl_Expression result = eval(parse(rawInput(aCase.input)));
+      let error = tl_Error(result);
+      if (error != NULL)
+      {
+        Console.printf("FAIL: %s", error.toString());
+        continue;
+      }
+
+      string stringResult = result.toString();
+      if (stringResult != aCase.expected)
+      {
+        Console.printf("FAIL: expected: \"%s\", got \"%s\"",
+                       aCase.expected,
+                       stringResult);
+        continue;
+      }
+    }
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (event.name.left(4) != "lisp") return;
+
+    if (globalEnv == NULL)
+      globalEnv = makeGlobalEnv();
+
+    if (event.name == "lisp-test")
+    {
+      test();
+      return;
+    }
+
+    Array<string> parts;
+    event.name.split(parts, ":");
+    if (parts.size() < 2) return;
+
+    string prompt = parts[1];
+    tl_Expression result = eval(parse(rawInput(prompt)));
+    Console.printf("%s", result.toString());
+  }
+
+  tl_Expression eval(tl_Expression expression, tl_Env env = NULL)
+  {
+    if (expression is "tl_Error") return expression;
+
+    if (env == NULL)
+      env = globalEnv;
+
+    if (expression is "tl_Symbol")
+    {
+      string key = expression.toString();
+      tl_Env foundEnv = env.find(key);
+      if (foundEnv != NULL)
+        return tl_Expression(foundEnv.vars.get(key));
+
+      return tl_Error.from(string.format("%s not found", key));
+    }
+    else if (!(expression is "tl_List"))
+    {
+      return expression;
+    }
+
+    let list = tl_List(expression);
+    if (list.expressions.size() == 0) return tl_Error.from("unexpected empty list");
+
+    let symbol = tl_Symbol(list.expressions[0]);
+
+    if (symbol != NULL)
+    {
+      if (symbol.name == "quote" || symbol.name == "q")
+      {
+        if (list.expressions.size() != 2)
+          return tl_Error.from("expected one argument for quote");
+
+        return list.expressions[1];
+      }
+
+      if (symbol.name == "atom?")
+      {
+        if (list.expressions.size() != 2)
+          return tl_Error.from("expected one argument for atom?");
+
+        let result = eval(list.expressions[1], env);
+        if (result is "tl_Error") return result;
+        return tl_Bool.from(!(result is "tl_List"));
+      }
+
+      // TODO: why built-in eq?, if there is "=" function?
+      if (symbol.name == "eq?")
+      {
+        if (list.expressions.size() != 3)
+          return tl_Error.from("expected two arguments for eq?");
+
+        let lhs = eval(list.expressions[1]);
+        if (lhs is "tl_Error") return lhs;
+
+        let rhs = eval(list.expressions[2]);
+        if (rhs is "tl_Error") return rhs;
+
+        return tl_Bool.from(!(lhs is "tl_List") && lhs.eq(rhs));
+      }
+
+      if (symbol.name == "car")
+      {
+        if (list.expressions.size() != 2)
+          return tl_Error.from("expected one argument for car");
+
+        let result = eval(list.expressions[1], env);
+        if (result is "tl_Error") return result;
+        let resultList = tl_List(result);
+
+        if (resultList == NULL) return tl_Error.from("car argument is not a list");
+        if (resultList.expressions.size() < 1)
+          return tl_Error.from("empty list for car");
+
+        return resultList.expressions[0];
+      }
+
+      if (symbol.name == "cdr")
+      {
+        if (list.expressions.size() != 2)
+          return tl_Error.from("expected one argemunt for cdr");
+
+        let result = eval(list.expressions[1], env);
+        if (result is "tl_Error") return result;
+        let resultList = tl_List(result);
+
+        if (resultList == NULL) return tl_Error.from("cdr argument is not a list");
+        if (resultList.expressions.size() < 1)
+          return tl_Error.from("empty list for cdr");
+
+        resultList.expressions.delete(0);
+        return resultList;
+      }
+    }
+
+    Array<tl_Expression> exps;
+    foreach (exp : list.expressions)
+    {
+      let result = eval(exp, env);
+      if (result is "tl_Error") return result;
+
+      exps.push(result);
+    }
+
+    let proc = exps[0];
+    exps.delete(0);
+
+    let procFunction = tl_Function(proc);
+    if (procFunction == NULL)
+      return tl_Error.from(string.format("\"%s\" is not a function", proc.toString()));
+
+    return procFunction.execute(exps);
+  }
+
+  tl_Expression parse(string input)
+  {
+    Array<string> tokens;
+    tokenize(input, tokens);
+    return readFrom(tokens);
+  }
+
+  static tl_Expression readFrom(out Array<string> tokens)
+  {
+    if (tokens.size() == 0)
+      return tl_Error.from("unexpected EOF while reading");
+
+    string token = tokens[0];
+    tokens.delete(0);
+
+    if (token == "(")
+    {
+      let list = tl_List.from();
+
+      while (tokens[0] != ")")
+      {
+        let expression = readFrom(tokens);
+        if (expression is "tl_Error") return expression;
+
+        list.expressions.push(expression);
+      }
+
+      // Pop off ")"
+      tokens.delete(0);
+      return list;
+    }
+    else if (token == ")")
+      return tl_Error.from("unexpected )");
+    else
+      return atom(token);
+  }
+
+  static string rawInput(string prompt)
+  {
+    return prompt;
+  }
+
+  static void tokenize(string input, out Array<string> tokens)
+  {
+    input.replace("(", " ( ");
+    input.replace(")", " ) ");
+    input.split(tokens, " ", TOK_SkipEmpty);
+  }
+
+  static bool isInt(string token)
+  {
+    return token == "0" || token.toInt() != 0;
+  }
+
+  static tl_Expression atom(string token)
+  {
+    // only integers are supported for now.
+    // TODO: support strings.
+    return isInt(token)
+      ? tl_Int.from(token)
+      : tl_Symbol.from(token);
+  }
+}
+#+end_src
+
+* Expressions
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript/tl_Expression.zs
+
+class tl_Expression abstract
+{
+  virtual string toString() const
+  {
+    throwAbortException("forgot to implement toString for %s", getClassName());
+    return "";
+  }
+
+  virtual bool eq(tl_Expression other) const
+  {
+    throwAbortException("forgot to implement eq for %s", getClassName());
+    return true;
+  }
+}
+
+// Not a real expression, used to report errors.
+class tl_Error : tl_Expression
+{
+  static tl_Expression from(string message)
+  {
+    let result = new("tl_Error");
+    result.message = message;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return string.format("Error: %s.", message);
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherError = tl_Error(other);
+    if (otherError == NULL) return false;
+    return message == otherError.message;
+  }
+
+  string message;
+}
+
+class tl_List : tl_Expression
+{
+  static tl_List from()
+  {
+    return new("tl_List");
+  }
+
+  override string toString() const
+  {
+    string result = "(";
+
+    foreach (expression : expressions)
+      result.appendFormat("%s ", expression.toString());
+
+    result.deleteLastCharacter();
+    result.appendFormat(")");
+    return result;
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherList = tl_List(other);
+    if (otherList == NULL) return false;
+
+    int size = expressions.size();
+    if (size != otherList.expressions.size()) return false;
+
+    for (int i = 0; i < size; ++i)
+      if (expressions[i] != otherList.expressions[i]) return false;
+
+    return true;
+  }
+
+  Array<tl_Expression> expressions;
+}
+
+// TODO: replace with rational number.
+class tl_Int : tl_Expression
+{
+  static tl_Expression from(string input)
+  {
+    let result = new("tl_Int");
+    result.value = input.toInt();
+    return result;
+  }
+
+  static tl_Expression fromInt(int value)
+  {
+    let result = new("tl_Int");
+    result.value = value;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return string.format("%d", value);
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherInt = tl_Int(other);
+    if (otherInt == NULL) return false;
+    return value == otherInt.value;
+  }
+
+  int value;
+}
+
+class tl_Symbol : tl_Expression
+{
+  static tl_Expression from(string name)
+  {
+    let result = new("tl_Symbol");
+    result.name = name;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return string.format("%s", name);
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherSymbol = tl_Symbol(other);
+    if (otherSymbol == NULL) return false;
+    return name == otherSymbol.name;
+  }
+
+  string name;
+}
+
+class tl_Function : tl_Expression
+{
+  static tl_Function from(string className, string functionName)
+  {
+    let result = new("tl_Function");
+    result.className = className;
+    result.functionName = functionName;
+    return result;
+  }
+
+  tl_Expression execute(Array<tl_Expression> exps)
+  {
+    if (exps.size() != 2)
+      throwAbortException("todo: add support for different number of parameters");
+
+    class<Object> aClass = className;
+    if (aClass == NULL)
+      throwAbortException("class %s not found", className);
+
+    let aFunction = (Function<clearscope tl_Expression(tl_Expression, tl_Expression)>)
+      (findFunction(aClass, functionName));
+
+    if (aFunction == NULL)
+      throwAbortException("function %s.%s not found", className, functionName);
+
+    return aFunction.call(exps[0], exps[1]);
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherFunction = tl_Function(other);
+    if (otherFunction == NULL) return false;
+    return className == otherFunction.className
+        && functionName == otherFunction.functionName;
+  }
+
+  string className;
+  string functionName;
+}
+
+class tl_Bool : tl_Expression
+{
+  static tl_Bool from(bool value)
+  {
+    let result = new("tl_Bool");
+    result.value = value;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return string.format("%s", value ? "True" : "False");
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherBool = tl_Bool(other);
+    if (otherBool == NULL) return false;
+    return value == otherBool.value;
+  }
+
+  bool value;
+}
+#+end_src
+
+* Env
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript/tl_Env.zs
+
+class tl_Env
+{
+  static tl_Env from(tl_Env outer)
+  {
+    let result = new("tl_Env");
+    result.outer = outer;
+    return result;
+  }
+
+  tl_Env find(string aVar)
+  {
+    if (vars.checkKey(aVar))
+      return self;
+
+    if (outer == NULL)
+      return NULL;
+
+    return outer.find(aVar);
+  }
+
+  tl_Env outer;
+  Map<string, Object> vars;
+}
+#+end_src
+
+* Globals
+
+#+begin_src c :tangle ../build/TiddlyLisp/zscript/tl_Globals.zs
+
+class tl_Globals
+{
+  static tl_Expression add(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Int.fromInt(lhsInt.value + rhsInt.value);
+
+    return tl_Error.from(string.format("add not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression sub(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Int.fromInt(lhsInt.value - rhsInt.value);
+
+    return tl_Error.from(string.format("sub not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression mul(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Int.fromInt(lhsInt.value * rhsInt.value);
+
+    return tl_Error.from(string.format("mul not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression div(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Int.fromInt(lhsInt.value / rhsInt.value);
+
+    return tl_Error.from(string.format("div not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression gt(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Bool.from(lhsInt.value > rhsInt.value);
+
+    return tl_Error.from(string.format("gt not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression lt(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Bool.from(lhsInt.value < rhsInt.value);
+
+    return tl_Error.from(string.format("lt not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression ge(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Bool.from(lhsInt.value >= rhsInt.value);
+
+    return tl_Error.from(string.format("ge not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression le(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Bool.from(lhsInt.value >= rhsInt.value);
+
+    return tl_Error.from(string.format("le not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+
+  static tl_Expression eq(tl_Expression lhs, tl_Expression rhs)
+  {
+    let lhsInt = tl_Int(lhs);
+    let rhsInt = tl_Int(rhs);
+    if (lhsInt != NULL && rhsInt != NULL)
+      return tl_Bool.from(lhsInt.value == rhsInt.value);
+
+    return tl_Error.from(string.format("eq not implemented for \"%s\" and \"%s\".",
+                                       lhs.getClassName(),
+                                       rhs.getClassName()));
+  }
+}
+#+end_src
+
+* Run
+
+#+begin_src text :tangle ../build/TiddlyLispTestCommands.txt
+wait 2; map map01; wait 2; netevent lisp-test; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "../tools/org.py test experiments/TiddlyLisp.org")
+#+end_src
