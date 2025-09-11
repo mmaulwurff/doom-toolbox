@@ -557,7 +557,7 @@ class dd_Logger : StaticEventHandler
 override void OnRegister()
 {
   if (!dd_logging_engine_events_enabled) return;
-    
+
   // To catch all changes to events.
   setOrder(int.max - 1);
 
@@ -936,7 +936,7 @@ override void PlayerEntered(PlayerEvent event)
 override void PlayerSpawned(PlayerEvent event)
 {
   loadCvars();
-  
+
   if (!dd_logging_player_events_enabled.getBool()) return;
 
   mFunctionName = "PlayerSpawned";

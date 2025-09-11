@@ -98,7 +98,7 @@ class ModTemplateEventHandler : StaticEventHandler
   override void WorldThingDestroyed(WorldEvent event) {}
   override void WorldThingDamaged(WorldEvent event) {}
   override void WorldThingGround(WorldEvent event) {}
-  
+
   override void WorldLineDamaged(WorldEvent event) {}
   override void WorldSectorDamaged(WorldEvent event) {}
   override void WorldLinePreActivated(WorldEvent event) {}
