@@ -508,7 +508,7 @@ private Array<string> mFields;
 
 * Run tests :noexport:
 
-#+begin_src txt :tangle ../build/StringUtilsTestCommands.txt
+#+begin_src text :tangle ../build/StringUtilsTestCommands.txt
 wait 2; map map01;
 wait 2; netevent test:su_Test;
 wait 2; quit
@@ -528,7 +528,7 @@ EndDescribe(); }}
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src

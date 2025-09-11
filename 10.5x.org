@@ -55,7 +55,7 @@ Acknowledgments:
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
@@ -90,7 +90,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
@@ -104,7 +104,7 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src c :tangle build/10.5x/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/10.5x/menudef.txt :exports none
+#+begin_src text :tangle build/10.5x/menudef.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src c :tangle build/10.5xTest/cvarinfo.txt :exports none
@@ -610,7 +610,7 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 
 ** ~OptionMenuItemX5Slider~
 
-#+begin_src txt :tangle build/10.5x/menudef.txt
+#+begin_src text :tangle build/10.5x/menudef.txt
 AddOptionMenu OptionsMenu
 {
   X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1
@@ -652,7 +652,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
 ** ~x5_TypeMultipliersMenu~
 
-#+begin_src txt :tangle build/10.5x/menudef.txt
+#+begin_src text :tangle build/10.5x/menudef.txt
 OptionMenu "x5_TypeMultipliers"
 {
   Class "x5_TypeMultipliersMenu"
@@ -841,7 +841,7 @@ sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 #+begin_src elisp :exports none
 (copy-directory "media/10.5x" "build/10.5x" nil t t)
 #+end_src
-#+begin_src txt :tangle build/tmp.txt :exports none
+#+begin_src text :tangle build/tmp.txt :exports none
 <<copy-media()>>
 #+end_src
 
@@ -997,7 +997,7 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 
 TODO: make multiplayer tests, maybe?
 
-#+begin_src txt :tangle build/10.5xTestCommands.txt
+#+begin_src text :tangle build/10.5xTestCommands.txt
 x5_multiplier 100; wait 2; map map01; wait 2; netevent x5t_begin; wait 2;
 
 x5t_name IntegerMultiplier;

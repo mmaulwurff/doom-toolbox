@@ -21,27 +21,27 @@ DoomDoctor is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolb
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt :exports none
+#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt :exports none
+#+begin_src text :tangle build/DoomDoctor/keyconf.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt :exports none
+#+begin_src text :tangle build/DoomDoctor/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
+#+begin_src text :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
@@ -71,7 +71,7 @@ Notes:
   interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
-#+begin_src txt :tangle build/DoomDoctorTestCommands.txt
+#+begin_src text :tangle build/DoomDoctorTestCommands.txt
   dd_logging_engine_events_enabled  true;
   dd_logging_replace_events_enabled true;
   dd_logging_world_events_enabled   true;
@@ -96,7 +96,7 @@ wait 3;
 (compile "./tools/org.py test DoomDoctor.org")
 #+end_src
 
-#+begin_src txt :tangle build/DoomDoctorTest/mapinfo.txt :exports none
+#+begin_src text :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
@@ -154,7 +154,7 @@ class dd_LoggerTestRunner : StaticEventHandler
 
 * Source code preamble
 
-#+begin_src txt :tangle build/DoomDoctor/mapinfo.txt :exports none
+#+begin_src text :tangle build/DoomDoctor/mapinfo.txt :exports none
 GameInfo
 {
   EventHandlers = "dd_VmAbortHandler",
@@ -202,13 +202,13 @@ name.
 
 ** Settings
 
-#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
 ** Console commands
 
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle build/DoomDoctor/keyconf.txt
 Alias dd_report "event dd_report"
 #+end_src
 
@@ -377,7 +377,7 @@ events.
 ** Console commands
 
 *** Commands to cause problematic events
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle build/DoomDoctor/keyconf.txt
 Alias dd_nullify_player        "netevent dd_nullify_player"
 Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
 Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
@@ -386,7 +386,7 @@ Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNo
 #+end_src
 
 *** Helper commands
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle build/DoomDoctor/keyconf.txt
 Alias dd_revive_everything     "netevent dd_revive_everything"
 Alias dd_force_lightning       "netevent dd_force_lightning"
 #+end_src
@@ -482,7 +482,7 @@ class dd_Troublemaker : EventHandler
 
 ** Settings
 
-#+begin_src txt :tangle build/DoomDoctor/cvarinfo.txt
+#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt
 server bool dd_logging_engine_events_enabled  = false;
 server bool dd_logging_replace_events_enabled = false;
 
@@ -493,7 +493,7 @@ user bool dd_logging_process_events_enabled = false;
 
 ** Console commands
 
-#+begin_src txt :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle build/DoomDoctor/keyconf.txt
 
 Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
 #+end_src

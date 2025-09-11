@@ -25,7 +25,7 @@ Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]]
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
@@ -42,24 +42,24 @@ SPDX-License-Identifier: GPL-3.0-only
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC
-#+begin_src txt :exports none
+#+begin_src text :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src txt :tangle build/Nomina/cvarinfo.txt :exports none
+#+begin_src text :tangle build/Nomina/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/Nomina/keyconf.txt :exports none
+#+begin_src text :tangle build/Nomina/keyconf.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src ini :tangle build/Nomina/language.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/Nomina/mapinfo.txt :exports none
+#+begin_src text :tangle build/Nomina/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src txt :tangle build/NominaTest/mapinfo.txt :exports none
+#+begin_src text :tangle build/NominaTest/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
@@ -76,7 +76,7 @@ version 4.14
 
 ** Event handler
 
-#+begin_src txt :tangle build/Nomina/mapinfo.txt
+#+begin_src text :tangle build/Nomina/mapinfo.txt
 GameInfo { EventHandlers = "na_EventHandler" }
 #+end_src
 
@@ -182,7 +182,7 @@ class NAT_BFG9000        : nat_Monster {}
 
 *** ~na_config~ Cvar
 
-#+begin_src txt :tangle build/Nomina/cvarinfo.txt
+#+begin_src text :tangle build/Nomina/cvarinfo.txt
 server nosave string na_config = "";
 #+end_src
 
@@ -208,7 +208,7 @@ class nat_NamelessByConfig : nat_Monster {}
 
 *** ~na_rename~ console command
 
-#+begin_src txt :tangle build/Nomina/keyconf.txt
+#+begin_src text :tangle build/Nomina/keyconf.txt
 // Limited to 10 words. For more words, use the external name data (na_data.json).
 Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
 #+end_src
@@ -317,7 +317,7 @@ class nat_NamelessByData3: nat_Monster {}
 
 * Tests
 
-#+begin_src txt :tangle build/NominaTest/mapinfo.txt
+#+begin_src text :tangle build/NominaTest/mapinfo.txt
 GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
 
@@ -377,7 +377,7 @@ class nat_EventHandler : StaticEventHandler
 
 * Run tests
 
-#+begin_src txt :tangle build/NominaTestCommands.txt
+#+begin_src text :tangle build/NominaTestCommands.txt
 wait 2; map map01;
 wait 2; na_rename nat_NamelessToRename Renamed To Several Words;
 wait 2; summon nat_NamelessToRename;
