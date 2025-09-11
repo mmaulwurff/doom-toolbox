@@ -2,11 +2,9 @@
 # SPDX-License-Identifier: CC0-1.0
 
 #+begin_src
-     ____                           ______            ____
-    / __ \____  ____  ____ ___     /_  __/___  ____  / / /_  ____  _  __
-   / / / / __ \/ __ \/ __ `__ \     / / / __ \/ __ \/ / __ \/ __ \| |/_/
-  / /_/ / /_/ / /_/ / / / / / /    / / / /_/ / /_/ / / /_/ / /_/ />  <
- /_____/\____/\____/_/ /_/ /_/    /_/  \____/\____/_/_.___/\____/_/|_|
+ █▀▄ █▀█ █▀█ █▄█   ▀█▀ █▀█ █▀█ █   █▀▄ █▀█ █ █
+ █ █ █ █ █ █ █ █    █  █ █ █ █ █   █▀▄ █ █ ▄▀▄
+ ▀▀  ▀▀▀ ▀▀▀ ▀ ▀    ▀  ▀▀▀ ▀▀▀ ▀▀▀ ▀▀  ▀▀▀ ▀ ▀
 #+end_src
 
 Doom Toolbox is a collection of add-ons for Doom-based game engines which support
@@ -32,6 +30,10 @@ Documentation:
 - [[file:documentation/CodeStyle.org][Code style]]
 - [[file:documentation/MadeWith.org][Made with]]
 - [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* Social
+
+[[https://mastodon.gamedev.place/@doomtoolbox][Mastodon page]]
 
 * Build
 
