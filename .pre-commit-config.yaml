@@ -24,3 +24,9 @@ repos:
     hooks:
     -   id: check-hooks-apply
     -   id: check-useless-excludes
+
+# https://reuse.software/
+-   repo: https://github.com/fsfe/reuse-tool
+    rev: v5.1.1
+    hooks:
+    -   id: reuse
