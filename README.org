@@ -1,11 +1,7 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-#+begin_src text
-█▀▄ █▀█ █▀█ █▄█  ▜▛ █▀█ █▀█ █▏ █▀▄ █▀█ █▁█
-█▁█ █▁█ █▁█ █▔█  ▐▌ █▁█ █▁█ █▏ █▀▄ █▁█ ▄▀▄
-▀▀▔ ▀▀▀ ▀▀▀ ▀▕█  ▝▘ ▀▀▀ ▀▀▀ ▀▀ ▀▀▔ ▀▀▀ ▀▕█
-#+end_src
+#+title: Doom Toolbox
 
 Doom Toolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
