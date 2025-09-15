@@ -19,7 +19,7 @@ TODO: add loading LispOnZscript code from a lump.
 
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
 #+begin_src text :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
@@ -81,11 +81,8 @@ class tl_Test
   {
     let result = new("tl_Test");
 
-    //result.add("", "");
     result.add("0", "0");
     result.add("1", "1");
-    //result.add("()", "()");
-    //result.add("(2)", "(2)");
     result.add("(+ 1 2)", "3");
     result.add("(+ (* 2 3) 4)", "10");
     result.add("(quote 2)", "2");
@@ -105,6 +102,10 @@ class tl_Test
     result.add("(begin (set! abc 3) abc)", "3");
     result.add("(begin (define abc 3) abc)", "3");
     result.add("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
+
+    result.add("", "Error: unexpected EOF while reading.");
+    result.add("()", "Error: unexpected empty list.");
+    result.add("(2)", "Error: \"2\" is not a function.");
 
     return result;
   }
