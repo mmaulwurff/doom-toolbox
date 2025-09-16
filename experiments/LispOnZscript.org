@@ -13,7 +13,6 @@ Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations
 
 TODO: add bindings to ZScript objects.
 TODO: add bindings to Cvars.
-TODO: add string type.
 TODO: add bindings to some ZScript types (string, vector).
 TODO: add loading LispOnZscript code from a lump.
 
@@ -102,6 +101,7 @@ class tl_Test
     result.add("(begin (set! abc 3) abc)", "3");
     result.add("(begin (define abc 3) abc)", "3");
     result.add("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
+    result.add("\"hello world\"", "\"hello world\"");
 
     result.add("", "Error: unexpected EOF while reading.");
     result.add("()", "Error: unexpected empty list.");
@@ -118,9 +118,22 @@ class tl_Test
     {
       Console.printf("Testing \"%s\", expecting \"%s\"", aCase.input, aCase.expected);
 
-      let env    = tl_Env.makeGlobalEnv();
-      let result = tl_Eval.eval(tl_Parser.parse(aCase.input), env).toString();
+      tl_Expression inputExpression = tl_Parser.parse(aCase.input);
+      if (inputExpression == NULL)
+      {
+        Console.printf("Fail: parse result is NULL");
+        continue;
+      }
 
+      let env = tl_Env.makeGlobalEnv();
+      tl_Expression resultExpression = tl_Eval.eval(inputExpression, env);
+      if (resultExpression == NULL)
+      {
+        Console.printf("Fail: eval result is NULL");
+        continue;
+      }
+
+      let result = resultExpression.toString();
       if (result == aCase.expected)
         ++successCount;
       else
@@ -225,9 +238,75 @@ class tl_Parser
 
   private static void tokenize(string input, out Array<string> tokens)
   {
-    input.replace("(", " ( ");
-    input.replace(")", " ) ");
-    input.split(tokens, " ", TOK_SkipEmpty);
+    bool isInString = false;
+    string currentToken;
+
+    uint length = input.length();
+    for (uint i = 0; i < length;)
+    {
+      let [character, next] = input.getNextCodePoint(i);
+
+      if (isInString)
+      {
+        currentToken.appendCharacter(character);
+
+        if (character == 0x22) // '"'
+        {
+          isInString = false;
+          tokens.push(currentToken);
+          currentToken = "";
+        }
+      }
+      else
+      {
+        if (isSpace(character))
+        {
+          if (currentToken.length() != 0)
+          {
+            tokens.push(currentToken);
+            currentToken = "";
+          }
+        }
+        else if (character == 0x28 || character == 0x29) // '(', ')'
+        {
+          if (currentToken.length() != 0)
+          {
+            tokens.push(currentToken);
+            currentToken = "";
+          }
+
+          tokens.push(string.format("%c", character));
+        }
+        else if (character == 0x22) // '"'
+        {
+          if (currentToken.length() != 0)
+          {
+            tokens.push(currentToken);
+            currentToken = "";
+          }
+
+          isInString = true;
+          currentToken.appendCharacter(0x22);
+        }
+        else
+        {
+          currentToken.appendCharacter(character);
+        }
+      }
+
+      i = next;
+    }
+
+    if (currentToken.length() != 0)
+      tokens.push(currentToken);
+  }
+
+  private static bool isSpace(int character)
+  {
+    return character == 0x20 // ' '
+      || character == 0x9    // '\t'
+      || character == 0xA    // '\n'
+      || character == 0xD;   // '\r'
   }
 
   private static bool isInt(string token)
@@ -237,6 +316,9 @@ class tl_Parser
 
   private static tl_Expression atom(string token)
   {
+    if (token.getNextCodePoint(0) == 0x22)
+      return tl_String.from(token);
+
     // only integers are supported for now.
     // TODO: support strings.
     return isInt(token)
@@ -263,10 +345,11 @@ class tl_Eval
     {
       string key = expression.toString();
       tl_Env foundEnv = env.find(key);
-      if (foundEnv != NULL)
-        return tl_Expression(foundEnv.vars.get(key));
+      let [value, isFound] = foundEnv.vars.checkValue(key);
+      if (isFound)
+        return tl_Expression(value);
 
-      return error(string.format("%s not found", key));
+      return error(string.format("\"%s\" not found", key));
     }
 
     let list = tl_List(expression);
@@ -748,6 +831,30 @@ class tl_Bool : tl_Expression
   }
 
   bool value;
+}
+
+class tl_String : tl_Expression
+{
+  static tl_String from(string value)
+  {
+    let result = new("tl_String");
+    result.value = value;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return value;
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherString = tl_String(other);
+    if (otherString == NULL) return false;
+    return value == otherString.value;
+  }
+
+  string value;
 }
 #+end_src
 
