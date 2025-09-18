@@ -107,6 +107,8 @@ class tl_Test
     result.add("()", "Error: unexpected empty list.");
     result.add("(2)", "Error: \"2\" is not a function.");
 
+    result.add("player", "DoomPlayer");
+
     return result;
   }
 
@@ -589,6 +591,8 @@ class tl_Eval
 
 * Expressions
 
+** Expression
+
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_Expression abstract
@@ -605,6 +609,11 @@ class tl_Expression abstract
     return true;
   }
 }
+#+end_src
+
+** Error
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 // Not a real expression, used to report errors.
 class tl_Error : tl_Expression
@@ -630,6 +639,11 @@ class tl_Error : tl_Expression
 
   string message;
 }
+#+end_src
+
+** List
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_List : tl_Expression
 {
@@ -666,6 +680,11 @@ class tl_List : tl_Expression
 
   Array<tl_Expression> expressions;
 }
+#+end_src
+
+** Number
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 // TODO: replace with double.
 class tl_Int : tl_Expression
@@ -698,6 +717,11 @@ class tl_Int : tl_Expression
 
   int value;
 }
+#+end_src
+
+** Symbol
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_Symbol : tl_Expression
 {
@@ -722,6 +746,11 @@ class tl_Symbol : tl_Expression
 
   string name;
 }
+#+end_src
+
+** Function
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_Function : tl_Expression
 {
@@ -762,6 +791,11 @@ class tl_Function : tl_Expression
   string className;
   string functionName;
 }
+#+end_src
+
+** Lambda
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_Lambda : tl_Function
 {
@@ -808,6 +842,11 @@ class tl_Lambda : tl_Function
   tl_Expression expression;
   tl_Env env;
 }
+#+end_src
+
+** Bool
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_Bool : tl_Expression
 {
@@ -832,6 +871,11 @@ class tl_Bool : tl_Expression
 
   bool value;
 }
+#+end_src
+
+** String
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
 class tl_String : tl_Expression
 {
@@ -858,6 +902,34 @@ class tl_String : tl_Expression
 }
 #+end_src
 
+** Object
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+
+class tl_Object : tl_Expression
+{
+  static tl_Object from(Object value)
+  {
+    let result = new("tl_Object");
+    result.value = value;
+    return result;
+  }
+
+  override string toString() const
+  {
+    return (value == NULL) ? "NULL" : string.format("%s", value.getClassName());
+  }
+
+  override bool eq(tl_Expression other)
+  {
+    let otherObject = tl_Object(other);
+    if (otherObject == NULL) return false;
+    return value == otherObject.value;
+  }
+
+  Object value;
+}
+#+end_src
 * Env
 
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Env.zs
@@ -883,6 +955,8 @@ class tl_Env
 
     result.vars.insert("True", tl_Bool.from(true));
     result.vars.insert("False", tl_Bool.from(false));
+
+    result.vars.insert("player", tl_Object.from(players[consolePlayer].mo));
 
     return result;
   }
