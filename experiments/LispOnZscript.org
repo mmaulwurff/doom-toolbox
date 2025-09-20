@@ -11,7 +11,6 @@ practical purpose.
 
 Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell’s equations of software]] by Michael Nielsen.
 
-TODO: add bindings to ZScript objects.
 TODO: add bindings to Cvars.
 TODO: add bindings to some ZScript types (string, vector).
 TODO: add loading LispOnZscript code from a lump.
@@ -108,6 +107,10 @@ class tl_Test
     result.add("(2)", "Error: \"2\" is not a function.");
 
     result.add("player", "DoomPlayer");
+    result.add("(getCharacterName player)", "DoomPlayer");
+    result.add("(playerNumber player)", "0");
+    result.add("(isFrozen player)", "False");
+    result.add("(isFriend player player)", "True");
 
     return result;
   }
@@ -351,7 +354,7 @@ class tl_Eval
       if (isFound)
         return tl_Expression(value);
 
-      return error(string.format("\"%s\" not found", key));
+      expression = tl_AutoFunction.from(key);
     }
 
     let list = tl_List(expression);
@@ -844,6 +847,142 @@ class tl_Lambda : tl_Function
 }
 #+end_src
 
+** AutoFunction
+
+#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+
+class tl_AutoFunction : tl_Function
+{
+  static tl_AutoFunction from(string name)
+  {
+    let result = new("tl_AutoFunction");
+    result.name = name;
+    return result;
+  }
+
+  override bool eq(tl_Expression other) const
+  {
+    let otherAutoFunction = tl_AutoFunction(other);
+    if (otherAutoFunction == NULL) return false;
+    return name == otherAutoFunction.name;
+  }
+
+  override tl_Expression execute(Array<tl_Expression> exps)
+  {
+    // todo : search in tl_Globals?
+    if (exps.size() == 0)
+      return error(string.format("cannot call \"%s\": no object", name));
+
+    let objectExpression = tl_Object(exps[0]);
+
+    if (objectExpression == NULL)
+      return error(string.format("cannot call \"%s\": \"%s\" is not an object",
+                                 name,
+                                 exps[0].toString()));
+    Object anObject = objectExpression.value;
+    let aFunction = findFunction(anObject.getClass(), name);
+
+    if (aFunction == NULL)
+      return error(string.format("cannot call \"%s\": not found in \"%s\"",
+                                 name,
+                                 anObject.getClassName()));
+
+    let result = trySignatures(aFunction, exps);
+    if (result != NULL) return result;
+
+    return error(string.format("cannot call \"%s\" with %d arguments:"
+                               " signature not supported",
+                               name,
+                               exps.size()));
+  }
+
+  private static tl_Expression trySignatures(Function<void> aFunction,
+                                             Array<tl_Expression> exps)
+  {
+    switch (exps.size())
+    {
+      // TODO: add support for static functions.
+      case 0:
+        return NULL;
+
+      case 1:
+      {
+        Actor anActor = asActor(exps[0]);
+        if (anActor != NULL) return tryActorSignatures(aFunction, anActor);
+
+        return NULL;
+      }
+
+      case 2:
+      {
+        Actor anActor1 = asActor(exps[0]);
+        Actor anActor2 = asActor(exps[1]);
+        if (anActor1 != NULL && anActor2 != NULL)
+          return tryActorActorsignatures(aFunction, anActor1, anActor2);
+
+        return NULL;
+      }
+    }
+
+    return NULL;
+  }
+
+  private static Actor asActor(tl_Expression argument)
+  {
+    let anObject = tl_Object(argument);
+    return (anObject == NULL) ? NULL : Actor(anObject.value);
+  }
+
+  private static tl_Expression tryActorSignatures(Function<void> aFunction,
+                                                  Actor anActor)
+  {
+    {
+      let casted = (Function<clearscope string(Actor)>)(aFunction);
+      if (casted != NULL) return tl_String.from(casted.call(anActor));
+    }
+    {
+      let casted = (Function<clearscope int(Actor)>)(aFunction);
+      if (casted != NULL) return tl_Int.fromInt(casted.call(anActor));
+    }
+    {
+      let casted = (Function<clearscope bool(Actor)>)(aFunction);
+      if (casted != NULL) return tl_Bool.from(casted.call(anActor));
+    }
+
+    return NULL;
+  }
+
+  private static tl_Expression tryActorStringSignatures(Function<void> aFunction,
+                                                        Actor anActor,
+                                                        string aString)
+  {
+    {
+      let casted = (Function<clearscope string(Actor, string)>)(aFunction);
+      if (casted != NULL) return tl_String.from(casted.call(anActor, aString));
+    }
+    return NULL;
+  }
+
+  private static tl_Expression tryActorActorSignatures(Function<void> aFunction,
+                                                       Actor anActor1,
+                                                       Actor anActor2)
+  {
+    {
+      let casted = (Function<clearscope bool(Actor, Actor)>)(aFunction);
+      if (casted != NULL) return tl_Bool.from(casted.call(anActor1, anActor2));
+    }
+    return NULL;
+  }
+
+  private static tl_Expression error(string message)
+  {
+    return tl_Error.from(message);
+  }
+
+  string name;
+}
+#+end_src
+
 ** Bool
 
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
@@ -930,6 +1069,7 @@ class tl_Object : tl_Expression
   Object value;
 }
 #+end_src
+
 * Env
 
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Env.zs
