@@ -28,6 +28,8 @@ Things that I haven't find ways to do to make LispOnZscript more usable:
   classes, but it's not fun.
 - Exposing ZScript enums.
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
