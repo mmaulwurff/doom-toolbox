@@ -1,4 +1,4 @@
-personal_ws-1.1 en 89 
+personal_ws-1.1 en 95 
 CVar
 Cacowards
 Cvar
@@ -7,6 +7,8 @@ Cvars
 DoomDoctor
 Elisp
 FileCopyrightText
+GL
+GLES
 GPL
 GZDoom
 Http
@@ -32,8 +34,11 @@ aspell
 basename
 bool
 cd
+cfg
+cmd
 cp
 cvarinfo
+dehacked
 dir
 doomworld
 editorconfig
@@ -47,6 +52,7 @@ gameplay
 gitattributes
 gitignore
 gmail
+gzdoom
 https
 init
 ispell

@@ -23,10 +23,10 @@ TODO: add loading LispOnZscript code from a lump.
 Things that I haven't find ways to do to make LispOnZscript more usable:
 - Exposing ZScript class attributes. Only functions can be exposed now.
 - More generic ZScript class functions exposing. At the moment their signatures must
-  be hardcoded.
+  be hard-coded.
 - Exposing ZScript structs. For example Cvar, vector. It can be done with wrapper
   classes, but it's not fun.
-- Exposing ZScript enums.
+- Exposing ZScript ~enum~ constants.
 
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
@@ -194,7 +194,7 @@ class tl_TestCase
 }
 #+end_src
 
-* EventHandler
+* Event Handler
 
 #+begin_src prog :tangle ../build/LispOnZscript/mapinfo.txt
 
@@ -870,7 +870,7 @@ class tl_Lambda : tl_Function
 }
 #+end_src
 
-** AutoFunction
+** Auto Function
 
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
 
@@ -1141,7 +1141,7 @@ class tl_Env
 }
 #+end_src
 
-* Globals
+* Global Functions
 
 #+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Globals.zs
 
