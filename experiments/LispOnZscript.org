@@ -7,13 +7,26 @@
 LispOnZscript is a toy Lisp-like language written on top of ZScript for GZDoom.
 
 LispOnZscript is an experiment, a programming exercise, and isn't suitable for any
-practical purpose.
+practical purpose. I'll be surprised if it finds any practical purpose. See [[Test]] to
+see what expressions it can evaluate at the moment, also it contains ~tl_Eval.eval~
+usage example. Search for ~TODO~ in this file to see what remains to be done to make
+LispOnZscript more usable.
+
+Key function is ~tl_Eval.eval~ function (see [[Eval]]). It takes a parsed expression
+(from ~tl_Parser.parse~, see [[Parser]]) and an environment (normally from
+~tl_Env.makeGlobalEnv~, see [[Env]]).
 
 Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell’s equations of software]] by Michael Nielsen.
 
-TODO: add bindings to Cvars.
-TODO: add bindings to some ZScript types (string, vector).
 TODO: add loading LispOnZscript code from a lump.
+
+Things that I haven't find ways to do to make LispOnZscript more usable:
+- Exposing ZScript class attributes. Only functions can be exposed now.
+- More generic ZScript class functions exposing. At the moment their signatures must
+  be hardcoded.
+- Exposing ZScript structs. For example Cvar, vector. It can be done with wrapper
+  classes, but it's not fun.
+- Exposing ZScript enums.
 
 * License
 
@@ -61,7 +74,7 @@ version 4.14.2
 #include "zscript/tl_EventHandler.zs"
 #include "zscript/tl_Test.zs"
 
-// TODO: move these to a module.
+// TODO: move these to a module?
 #include "zscript/tl_Eval.zs"
 #include "zscript/tl_Expression.zs"
 #include "zscript/tl_Env.zs"
@@ -78,6 +91,8 @@ class tl_Test
   static tl_Test from()
   {
     let result = new("tl_Test");
+
+    // Expression, expected evaluation result.
 
     result.add("0", "0");
     result.add("1", "1");
@@ -100,11 +115,16 @@ class tl_Test
     result.add("(begin (set! abc 3) abc)", "3");
     result.add("(begin (define abc 3) abc)", "3");
     result.add("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
+    result.add("(begin (define cube (lambda (x) (* x (* x x)))) (cube 2))", "8");
     result.add("\"hello world\"", "\"hello world\"");
 
-    result.add("", "Error: unexpected EOF while reading.");
-    result.add("()", "Error: unexpected empty list.");
+    result.add("",    "Error: unexpected EOF while reading.");
+    result.add("()",  "Error: unexpected empty list.");
+    result.add("(",   "Error: unmatched \"(\".");
+    result.add(")",   "Error: unexpected \")\".");
     result.add("(2)", "Error: \"2\" is not a function.");
+    result.add("(+ 1 2 3)",
+               "Error: TODO: add support for different number of parameters.");
 
     result.add("player", "DoomPlayer");
     result.add("(getCharacterName player)", "DoomPlayer");
@@ -236,7 +256,7 @@ class tl_Parser
       return list;
     }
     else if (token == ")")
-      return tl_Error.from("unexpected )");
+      return tl_Error.from("unexpected \")\"");
     else
       return atom(token);
   }
@@ -324,8 +344,7 @@ class tl_Parser
     if (token.getNextCodePoint(0) == 0x22)
       return tl_String.from(token);
 
-    // only integers are supported for now.
-    // TODO: support strings.
+    // TODO: support doubles, replace tl_Int with tl_Number.
     return isInt(token)
       ? tl_Int.from(token)
       : tl_Symbol.from(token);
@@ -341,8 +360,8 @@ class tl_Eval
 {
   static tl_Expression eval(tl_Expression expression, tl_Env env)
   {
-    if (expression == NULL) throwAbortException("NULL expression");
-    if (env == NULL) throwAbortException("NULL env");
+    if (expression == NULL) return error("NULL expression");
+    if (env == NULL) return error("NULL env");
 
     if (expression is "tl_Error") return expression;
 
@@ -768,17 +787,19 @@ class tl_Function : tl_Expression
   virtual tl_Expression execute(Array<tl_Expression> exps)
   {
     if (exps.size() != 2)
-      throwAbortException("todo: add support for different number of parameters");
+      return tl_Error.from("TODO: add support for different number of parameters");
 
     class<Object> aClass = className;
     if (aClass == NULL)
-      throwAbortException("class %s not found", className);
+      return tl_Error.from(string.format("class %s not found", className));
 
     let aFunction = (Function<clearscope tl_Expression(tl_Expression, tl_Expression)>)
       (findFunction(aClass, functionName));
 
     if (aFunction == NULL)
-      throwAbortException("function %s.%s not found", className, functionName);
+      return tl_Error.from(string.format("function %s.%s not found",
+                                         className,
+                                         functionName));
 
     return aFunction.call(exps[0], exps[1]);
   }
