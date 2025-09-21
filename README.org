@@ -21,6 +21,9 @@ ZScript modules:
 - [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
 - [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
 
+Experiments:
+- [[file:experiments/LispOnZscript.org][LispOnZscript]] - toy Lisp-like language on top of ZScript ([[https://forum.zdoom.org/viewtopic.php?t=80881][ZDoom forum topic]])
+
 Documentation:
 - [[file:documentation/CodeOfConduct.org][Code of conduct]]
 - [[file:documentation/CodeStyle.org][Code style]]
