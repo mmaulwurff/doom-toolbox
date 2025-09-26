@@ -20,7 +20,6 @@
 ** Tests
 
 #+begin_src c :tangle ../build/StringUtils/zscript.zs
-// <<GPL>>
 
 version 4.12.2
 
@@ -28,7 +27,6 @@ version 4.12.2
 #+end_src
 
 #+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
-// <<GPL>>
 
 version 4.12.2
 

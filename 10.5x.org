@@ -84,9 +84,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/10.5x/zscript/x5_WalkAbilityWatcher.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/10.5xTest/zscript.zs :exports none
-// <<GPL>>
-#+end_src
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+name: CC

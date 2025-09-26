@@ -35,9 +35,6 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src text :tangle build/DoomDoctor/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle build/DoomDoctorTest/mapinfo.txt :exports none
-// <<CC>>
-#+end_src
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+name: GPL
@@ -56,9 +53,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<GPL>>
 #+end_src
 #+begin_src c :tangle build/DoomDoctor/zscript/VmAbortHandler.zs :exports none
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs :exports none
 // <<GPL>>
 #+end_src
 
