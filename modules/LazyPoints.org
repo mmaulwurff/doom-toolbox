@@ -1,0 +1,1067 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: LazyPoints
+
+#+name: description
+#+begin_src org
+
+LazyPoints module version: 0.4.0
+LazyPoints is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
+
+Point scoring for GZDoom. Do things, get points!
+
+Scoring:
+- Damage: equal to damage amount.
+- Telefrag: equal to enemy starting health.
+- Kills: 10% of starting health of killed enemy;
+- Chain kills: 10 points for each enemy killed in 3 seconds after previous kill.
+- Secrets: 250 points.
+- Map items: 5 points.
+- Keys: 250 points.
+- Barrels: 5 points.
+- Player with 50% and more health gets kill points (with chain kill bonus)
+  multiplied by 1.5, with 100% and more - by 2.
+
+Credits:
+- Scoring system is based on ScoreDoom: https://zdoom.org/wiki/ScoreDoom;
+- Health multiplier is an idea of ZikShadow.
+
+Thanks:
+- to IKA for bug reporting.
+
+To use (besides ZScript code):
+- define cvars (mandatory):
+  <<cvarinfo>>
+
+- add event handlers in mapinfo:
+  <<mapinfo>>
+
+- add access to top scores menu (add it to a menu or add a key). Menudef:
+  <<menudef>>
+#+end_src
+
+#+name: cvarinfo
+#+begin_src c
+
+nosave string NAMESPACE_score = "";
+user   bool   NAMESPACE_show  = true;
+#+end_src
+
+#+name: mapinfo
+#+begin_src c
+
+GameInfo { EventHandlers = "NAMESPACE_Dispatcher", "NAMESPACE_StaticView" }
+#+end_src
+
+#+name: menudef
+#+begin_src c
+
+OptionMenu NAMESPACE_TopMenu
+{
+  class NAMESPACE_Top
+  Title "Top Points"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+// <<GPL>>
+
+// <<description>>
+#+end_src
+
+* License
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+#+name: GPL
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+* Source
+
+** Parameters
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// Lazy Points customization constants.
+class NAMESPACE_Parameters
+{
+
+  // This font is used for drawing score points and info on bonuses.
+  const FONT = "BigFont";
+
+  // This is a time in seconds, during which kills provide a bonus.
+  const BONUS_COUNTDOWN = 3;
+
+  // This is an offset in pixels from the top of the screen for all score info.
+  const Y_OFFSET = 10;
+
+}
+#+end_src
+
+** Dispatcher
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// This class is an entry point for Lazy Points.
+class NAMESPACE_Dispatcher : EventHandler
+{
+  override void onRegister() { _spawner = new ("NAMESPACE_Spawner").init(); }
+
+  override void playerEntered(PlayerEvent event)
+  {
+    let playerScore = new ("NAMESPACE_PlayerScore").init(event.playerNumber);
+    _playerScores.push(playerScore);
+  }
+
+  override void playerDisconnected(PlayerEvent event)
+  {
+    int playerNumber = event.playerNumber;
+    uint nPlayers    = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+    {
+      if (playerNumber == _playerScores[i].getPlayerNumber())
+      {
+        _playerScores.delete(i);
+        return;
+      }
+    }
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    if (menuActive || automapActive) return;
+
+    uint nPlayers = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+      _playerScores[i].show(event.fracTic);
+  }
+
+  override void worldThingDamaged(WorldEvent e)
+  {
+    uint nPlayers = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+      _playerScores[i].countDamage(e.thing, e.damage, e.damageType, e.damageSource);
+  }
+
+  override void worldThingDied(WorldEvent event)
+  {
+    uint nPlayers = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+      _playerScores[i].countDeath(event.thing);
+  }
+
+  override void worldTick()
+  {
+    uint nPlayers = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+      _playerScores[i].tick();
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    _spawner.spawnScoreFor(event.thing);
+  }
+
+  override void worldUnloaded(WorldEvent event)
+  {
+    uint nPlayers = _playerScores.size();
+    for (uint i = 0; i < nPlayers; ++i)
+      _playerScores[i].saveMapScore();
+  }
+
+  private NAMESPACE_Spawner _spawner;
+  private Array<NAMESPACE_PlayerScore> _playerScores;
+}
+#+end_src
+
+** Bonus View
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_BonusView
+{
+  NAMESPACE_BonusView init(NAMESPACE_TimerBonus timerBonus,
+                           NAMESPACE_HealthBonus healthBonus)
+  {
+    _timerBonus  = timerBonus;
+    _healthBonus = healthBonus;
+
+    return self;
+  }
+
+  ui int show(int y)
+  {
+    loadFont();
+
+    int lineHeight = _font.GetHeight() * CleanYFac_1;
+    y += MARGIN + lineHeight / 2;
+
+    int bonus         = _timerBonus.getBonus();
+    double multiplier = _healthBonus.getMultiplier();
+
+    if (bonus == 0 && multiplier == 1.0) return 0;
+
+    String bonusString;
+    if (bonus) bonusString.appendFormat("+%d", bonus);
+
+    if (multiplier != 1.0)
+    {
+      if (bonusString.length()) bonusString.appendFormat(" ");
+      bonusString.appendFormat("x%.1f", multiplier);
+    }
+
+    int bonusWidth = _font.StringWidth(bonusString) * CleanXFac_1;
+    int x          = (Screen.GetWidth() - bonusWidth) / 2;
+    Screen.DrawText(_font, Font.CR_Blue, x, y, bonusString, DTA_CleanNoMove_1, true);
+
+    return lineHeight * 2;
+  }
+
+  const MARGIN = 10;
+
+  mixin NAMESPACE_FontUser;
+
+  private NAMESPACE_TimerBonus _timerBonus;
+  private NAMESPACE_HealthBonus _healthBonus;
+}
+#+end_src
+
+** Counter
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_Counter
+{
+  NAMESPACE_Counter init(int playerNumber,
+                         NAMESPACE_TimerBonus timerBonus,
+                         NAMESPACE_HealthBonus healthBonus)
+  {
+    _player         = players[playerNumber];
+    _oldSecretCount = 0;
+    _timerBonus     = timerBonus;
+    _healthBonus    = healthBonus;
+
+    return self;
+  }
+
+  play void countDamage(Actor damaged, int damage, Name damageType, Actor inflictor)
+  {
+    if (damageType == "Telefrag") damage = damaged.getSpawnHealth();
+
+    if (damaged && damaged.bIsMonster && isMe(inflictor)) addPoints(damage);
+  }
+
+  play void countDeath(Actor died)
+  {
+    if (!(died && isMe(died.target))) return;
+
+    addPoints(calculatePointsFor(died));
+  }
+
+  play void countSecrets()
+  {
+    int newSecretCount = _player.SecretCount;
+    if (newSecretCount > _oldSecretCount)
+    {
+      addPoints(250);
+      _oldSecretCount = newSecretCount;
+    }
+  }
+
+  private bool isMe(Actor other) { return (other && other == _player.mo); }
+
+  private play void addPoints(int points) { _player.mo.score += points; }
+
+  private play int calculatePointsFor(Actor died)
+  {
+    int result =
+        died.bIsMonster ? (died.SpawnHealth() / 10 + _timerBonus.getBonus()) : 5;
+
+    result *= int(round(_healthBonus.getMultiplier()));
+
+    _timerBonus.registerKill();
+
+    return result;
+  }
+
+  private PlayerInfo _player;
+  private int _oldSecretCount;
+  private NAMESPACE_TimerBonus _timerBonus;
+  private NAMESPACE_HealthBonus _healthBonus;
+}
+#+end_src
+
+** Font User
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+mixin class NAMESPACE_FontUser
+{
+  private ui void loadFont()
+  {
+    if (_font == NULL) _font = Font.GetFont(NAMESPACE_Parameters.FONT);
+  }
+
+  private transient Font _font;
+}
+#+end_src
+
+** Health Bonus
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// Health Bonus is a multiplier, which value depends on player health.
+//
+// [100%, +inf) - x2
+// [ 50%, 100%) - x1.5
+// (  0%,  50%) - x1
+//
+// Credits to ZikShadow for an idea.
+class NAMESPACE_HealthBonus
+{
+  NAMESPACE_HealthBonus init(int playerNumber)
+  {
+    _player = players[playerNumber];
+
+    return self;
+  }
+
+  double getMultiplier()
+  {
+    int healthPercent = _player.health * 100 / _player.mo.GetMaxHealth();
+
+    if (healthPercent >= 100) return 2.0;
+    else if (healthPercent >= 50) return 1.5;
+
+    return 1.0;
+  }
+
+  private PlayerInfo _player;
+}
+#+end_src
+
+** MapScore
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_MapScore
+{
+  NAMESPACE_MapScore init(int playerNumber)
+  {
+    _playerNumber  = playerNumber;
+    _startingScore = players[_playerNumber].mo.score;
+
+    return self;
+  }
+
+  void save()
+  {
+    if (_playerNumber != consolePlayer) return;
+
+    int score       = players[_playerNumber].mo.score - _startingScore;
+    String checksum = Level.GetChecksum();
+
+    NAMESPACE_ScoreStorage.saveScore(checksum, score);
+  }
+
+  private int _playerNumber;
+  private int _startingScore;
+}
+#+end_src
+
+** Map Score Item
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_MapScoreItem : ScoreItem
+{
+  NAMESPACE_MapScoreItem init(int n)
+  {
+    amount = n;
+
+    return self;
+  }
+
+  Default
+  {
+    -CountItem;
+    +Inventory.Quiet;
+  }
+}
+#+end_src
+
+** Option Menu Score Item
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// This class is similar to OptionMenuItemTextField. The difference is that this
+// class doesn't use a CVar.
+//
+// Code is partially borrowed from
+// gzdoom/wadsrc/static/zscript/ui/menu/optionmenuitems.zs.
+class OptionMenuScoreItem : OptionMenuItem
+{
+
+  OptionMenuScoreItem init(String label, String name, int index, bool isLatest)
+  {
+    Super.init(label, "");
+
+    _name     = name;
+    _index    = index;
+    _enter    = NULL;
+    _isLatest = isLatest;
+
+    return self;
+  }
+
+  override int draw(OptionMenuDescriptor d, int y, int indent, bool selected)
+  {
+    if (_enter)
+    {
+      // reposition the text so that the cursor is visible when in entering mode.
+      int tLen      = Menu.OptionWidth(_name) * CleanXfac_1;
+      int newIndent = screen.GetWidth() - tLen - CursorSpace();
+
+      if (newIndent < indent)
+      {
+        indent = newIndent;
+      }
+    }
+
+    String display = _enter
+      ? (_enter.GetText() .. Menu.OptionFont().GetCursor())
+      : _name;
+
+    int unselectedColor = _isLatest ? Font.CR_BLUE : Font.CR_WHITE;
+    int selectedColor   = OptionMenuSettings.mFontColorSelection;
+    int color           = selected ? selectedColor : unselectedColor;
+
+    drawLabel(indent, y, color);
+    drawValue(indent, y, color, display);
+
+    return indent;
+  }
+
+  override bool, string getString(int i)
+  {
+    if (i == 0)
+    {
+      return true, _name;
+    }
+
+    return false, "";
+  }
+
+  override bool setString(int i, String s)
+  {
+    _name = s;
+    NAMESPACE_ScoreStorage.rename(Level.GetChecksum(), _index, _name);
+    return true;
+  }
+
+  override bool menuEvent (int mKey, bool fromController)
+  {
+    if (mKey == Menu.MKey_Enter)
+    {
+      bool b;
+      String s;
+      [b, s] = getString(0);
+      Menu.menuSound("menu/choose");
+      _enter = TextEnterMenu.openTextEnter(Menu.getCurrentMenu(),
+                                           Menu.optionFont(),
+                                           s,
+                                           -1,
+                                           fromController);
+      _enter.activateMenu();
+      return true;
+    }
+    else if (mKey == Menu.MKey_Input)
+    {
+      SetString(0, _enter.GetText());
+      _enter = NULL;
+      return true;
+    }
+    else if (mKey == Menu.MKey_Abort)
+    {
+      _enter = NULL;
+      return true;
+    }
+
+    return Super.MenuEvent(mkey, fromController);
+  }
+
+  private String _name;
+  private int    _index;
+  private bool   _isLatest;
+
+  private TextEnterMenu _enter;
+}
+#+end_src
+
+** PlayerScore
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_PlayerScore
+{
+  NAMESPACE_PlayerScore init(int playerNumber)
+  {
+    _playerNumber = playerNumber;
+
+    _timer = new ("NAMESPACE_Timer")
+                 .init(TICKS_IN_SECOND * NAMESPACE_Parameters.BONUS_COUNTDOWN);
+    _timerBonus  = new ("NAMESPACE_TimerBonus").init(_timer);
+    _healthBonus = new ("NAMESPACE_HealthBonus").init(playerNumber);
+    _counter =
+        new ("NAMESPACE_Counter").init(playerNumber, _timerBonus, _healthBonus);
+    _mapScore = new ("NAMESPACE_MapScore").init(playerNumber);
+
+    if (playerNumber == consolePlayer)
+    {
+      _view      = new ("NAMESPACE_View").init();
+      _timerView = new ("NAMESPACE_TimerView").init(_timer);
+      _bonusView = new ("NAMESPACE_BonusView").init(_timerBonus, _healthBonus);
+      _tallyView = new ("NAMESPACE_TallyView").init();
+    }
+
+    return self;
+  }
+
+  ui void show(double fracTic)
+  {
+    if (gameState == gs_TitleLevel || _view == NULL) return;
+
+    if (!isVisible()) return;
+
+    int y = NAMESPACE_Parameters.Y_OFFSET;
+
+    y += _view.show(y);
+    y += _timerView.show(y, fracTic);
+    y += _bonusView.show(y);
+    y += _tallyView.show(y);
+  }
+
+  play void countDamage(Actor damaged, int damage, Name damageType, Actor inflictor)
+  {
+    _counter.countDamage(damaged, damage, damageType, inflictor);
+  }
+
+  play void countDeath(Actor died) { _counter.countDeath(died); }
+
+  play void tick()
+  {
+    _counter.countSecrets();
+
+    _timer.update();
+    _timerBonus.update();
+  }
+
+  int getPlayerNumber() const { return _playerNumber; }
+
+  void saveMapScore() { _mapScore.save(); }
+
+  private bool isVisible()
+  {
+    if (_isVisible == NULL)
+      _isVisible = CVar.GetCVar("NAMESPACE_show", players[_playerNumber]);
+
+    return _isVisible.GetBool();
+  }
+
+  const TICKS_IN_SECOND = 35;
+
+  private int _playerNumber;
+
+  private NAMESPACE_Timer _timer;
+  private NAMESPACE_TimerBonus _timerBonus;
+  private NAMESPACE_HealthBonus _healthBonus;
+  private NAMESPACE_Counter _counter;
+  private NAMESPACE_MapScore _mapScore;
+
+  private NAMESPACE_View _view;
+  private NAMESPACE_TimerView _timerView;
+  private NAMESPACE_BonusView _bonusView;
+  private NAMESPACE_TallyView _tallyView;
+
+  transient CVar _isVisible;
+}
+#+end_src
+
+** ScoreStorage
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_ScoreStorage
+{
+  static void saveScore(String mapChecksum, int score)
+  {
+    CVar scoreCVar     = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let scoreDict      = Dictionary.FromString(scoreString);
+
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int> scores;
+    Array<bool> isLatests;
+    Array<String> names;
+
+    read(mapScoresString, scores, isLatests, names);
+
+    for (int i = 0; i < N_TOP; ++i)
+      isLatests[i] = false;
+
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      if (score > scores[i])
+      {
+        scores.insert(i, score);
+        isLatests.insert(i, true);
+        names.insert(i, "");
+        break;
+      }
+    }
+
+    String newMapScoresString = write(scores, isLatests, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+
+    String newScoreString = scoreDict.ToString();
+    scoreCVar.SetString(newScoreString);
+  }
+
+  static void rename(String mapChecksum, int index, String name)
+  {
+    CVar scoreCVar     = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let scoreDict      = Dictionary.FromString(scoreString);
+
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int> scores;
+    Array<bool> isLatests;
+    Array<String> names;
+
+    read(mapScoresString, scores, isLatests, names);
+
+    names[index] = name;
+
+    String newMapScoresString = write(scores, isLatests, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+
+    String newScoreString = scoreDict.ToString();
+    scoreCVar.SetString(newScoreString);
+  }
+
+  static void loadScores(String mapChecksum,
+                         out Array<int> scores,
+                         out Array<bool> isLatests,
+                         out Array<String> names)
+  {
+    CVar scoreCVar     = CVar.findCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.getString();
+    let scoreDict      = Dictionary.fromString(scoreString);
+
+    String mapScoresString = scoreDict.at(mapChecksum);
+
+    read(mapScoresString, scores, isLatests, names);
+  }
+
+  // Format:
+  // <score>\n<is_latest>\n<name>\n
+  // repeated N_TOP times.
+  private static void read(String scoresString,
+                           out Array<int> scores,
+                           out Array<bool> isLatests,
+                           out Array<String> names)
+  {
+    if (scoresString.Length() == 0)
+    {
+      for (int i = 0; i < N_TOP; ++i)
+      {
+        scores.Push(0);
+        isLatests.Push(0);
+        names.Push("");
+      }
+      return;
+    }
+
+    Array<String> tokens;
+    scoresString.Split(tokens, "\n");
+
+    int tokenIndex = 0;
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      scores.Push(tokens[tokenIndex++].ToInt());
+      isLatests.Push(tokens[tokenIndex++].ToInt());
+      names.Push(tokens[tokenIndex++]);
+    }
+  }
+
+  private static string
+  write(Array<int> scores, Array<bool> isLatests, Array<String> names)
+  {
+    String result;
+    for (int i = 0; i < N_TOP; ++i)
+      result.appendFormat("%d\n%d\n%s\n", scores[i], isLatests[i], names[i]);
+
+    return result;
+  }
+
+  const N_TOP = 10;
+
+  const STORAGE_CVAR_NAME = "NAMESPACE_score";
+}
+#+end_src
+
+** Spawner
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_Spawner
+{
+  NAMESPACE_Spawner init() { return self; }
+
+  play void spawnScoreFor(Actor thing)
+  {
+    if (thing && thing.bCountItem)
+    {
+      NAMESPACE_MapScoreItem(Actor.Spawn("NAMESPACE_MapScoreItem", thing.pos))
+          .init(5);
+    }
+    else if (thing is "Key")
+    {
+      NAMESPACE_MapScoreItem(Actor.Spawn("NAMESPACE_MapScoreItem", thing.pos))
+          .init(250);
+    }
+  }
+}
+#+end_src
+
+** StaticEventHandler
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_StaticView : StaticEventHandler
+{
+  override void onRegister() { _topHintView = new ("NAMESPACE_TopHintView").init(); }
+
+  override void uiTick() { _topHintView.show(); }
+
+  private NAMESPACE_TopHintView _topHintView;
+}
+#+end_src
+
+** TallyView
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_TallyView
+{
+  NAMESPACE_TallyView init() { return self; }
+
+  ui int show(int y)
+  {
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (!playerInGame[i] || i == consolePlayer) continue;
+
+      PlayerInfo player = players[i];
+      String playerString =
+          String.Format("%s: %d", player.GetUserName(), player.mo.score);
+      int playerWidth = OriginalSmallFont.StringWidth(playerString) * CleanXFac_1;
+      int x           = (Screen.GetWidth() - playerWidth) / 2;
+
+      Screen.DrawText(OriginalSmallFont, Font.CR_Blue, x, y, playerString,
+                      DTA_CleanNoMove_1, true);
+    }
+
+    int lineHeight = OriginalSmallFont.GetHeight() * CleanYFac_1;
+    return lineHeight;
+  }
+}
+#+end_src
+
+** Timer
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// This class counts down ticks.
+class NAMESPACE_Timer
+{
+  // Initializes an object with count - number of ticks to count.
+  NAMESPACE_Timer init(int count)
+  {
+    _count        = count;
+    _currentCount = 0;
+
+    return self;
+  }
+
+  void update()
+  {
+    if (_currentCount) --_currentCount;
+  }
+
+  void reset() { _currentCount = _count; }
+
+  int getCount() const { return _currentCount; }
+
+  int getMaxCount() const { return _count; }
+
+  private int _count;
+  private int _currentCount;
+}
+#+end_src
+
+** TimerBonus
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+// Timer bonus is an additive bonus. It simply provides additional points if a
+// kill is registered in limited time frame (provided by NAMESPACE_Timer).
+class NAMESPACE_TimerBonus
+{
+  NAMESPACE_TimerBonus init(NAMESPACE_Timer timer)
+  {
+    _bonus = 0;
+    _timer = timer;
+
+    return self;
+  }
+
+  void update()
+  {
+    if (!_timer.getCount()) _bonus = 0;
+  }
+
+  void registerKill()
+  {
+    _bonus = min(MAX_TIMER_BONUS, _bonus + TIMER_BONUS_STEP);
+    _timer.reset();
+  }
+
+  int getBonus() const { return _bonus; }
+
+  const MAX_TIMER_BONUS  = 500;
+  const TIMER_BONUS_STEP = 10;
+
+  private int _bonus;
+  private NAMESPACE_Timer _timer;
+}
+#+end_src
+
+** TimerView
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_TimerView
+{
+  NAMESPACE_TimerView init(NAMESPACE_Timer timer)
+  {
+    _timer = timer;
+
+    return self;
+  }
+
+  ui int show(int y, double fracTic)
+  {
+    if (_timer.GetCount() == 0) return BAR_THICKNESS;
+
+    int screenWidth  = Screen.GetWidth();
+    double ratio     = (_timer.GetCount() - fracTic) / _timer.GetMaxCount();
+    int middleWidth  = screenWidth / 2;
+    int halfBarWidth = int(round(screenWidth / 8 * ratio));
+
+    y += MARGIN;
+
+    Screen.drawThickLine(middleWidth - halfBarWidth, y, middleWidth + halfBarWidth,
+                         y, BAR_THICKNESS, BAR_COLOR);
+
+    return BAR_THICKNESS;
+  }
+
+  const BAR_THICKNESS = 2.0;
+  const BAR_COLOR     = "gray";
+  const MARGIN        = 10;
+
+  private NAMESPACE_Timer _timer;
+}
+#+end_src
+
+** Top
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_Top : OptionMenu
+{
+  override void Init(Menu parent, OptionMenuDescriptor desc)
+  {
+    Super.Init(parent, desc);
+    mDesc.mItems.Clear();
+
+    if (gameState != GS_LEVEL && gameState != GS_INTERMISSION)
+    {
+      String label = "No map detected.";
+      addLabel(label);
+      return;
+    }
+
+    String checksum = Level.GetChecksum();
+
+    Array<int> scores;
+    Array<bool> isLatests;
+    Array<String> names;
+
+    NAMESPACE_ScoreStorage.loadScores(checksum, scores, isLatests, names);
+
+    int maxLength = 0;
+    for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
+    {
+      int length = String.Format("%d", scores[i]).Length();
+      if (length > maxLength) maxLength = length;
+    }
+
+    // %% will become %. Adds spacing to string output.
+    String format = String.Format("%%d. %%%dd", maxLength);
+
+    for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
+    {
+      String label = String.Format(format, i + 1, scores[i]);
+      addCommand(label, names[i], i, isLatests[i]);
+    }
+  }
+
+  private void addLabel(String label)
+  {
+    mDesc.mItems.Push(
+        new ("OptionMenuItemStaticText").InitDirect(label, Font.CR_WHITE));
+  }
+
+  private void addCommand(String label, String name, int index, bool isLatest)
+  {
+    mDesc.mItems.Push(
+        new ("OptionMenuScoreItem").Init(label, name, index, isLatest));
+  }
+}
+#+end_src
+
+** TopHintView
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_TopHintView
+{
+
+  NAMESPACE_TopHintView init()
+  {
+    _showed = false;
+
+    return self;
+  }
+
+  void show()
+  {
+    if (gameState != GS_Intermission)
+    {
+      _showed = false;
+      return;
+    }
+
+    if (_showed) return;
+
+    _showed = true;
+
+    int key1;
+    int key2;
+    [key1, key2] = Bindings.GetKEysForCommand("NAMESPACE_top");
+
+    if (key1 == 0 && key2 == 0) return;
+
+    String keyString  = KeyBindings.NameKeys(key1, key2);
+    String hintString = String.Format("\cfPress \ct\"%s\"\cf to show score points.", keyString);
+    Console.Printf(hintString);
+  }
+
+  private bool _showed;
+}
+#+end_src
+
+** View
+
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+
+class NAMESPACE_View
+{
+  NAMESPACE_View init()
+  {
+    _player       = players[consolePlayer];
+    _interpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 1000000);
+
+    return self;
+  }
+
+  ui int show(int y)
+  {
+    loadFont();
+
+    int lineHeight = _font.getHeight() * CleanYFac_1;
+
+    if (!_player.mo) return lineHeight;
+
+    y += MARGIN + lineHeight / 2;
+
+    _interpolator.update(_player.mo.score);
+
+    String scoreString = String.Format("%d", _interpolator.getValue());
+    int scoreWidth     = _font.StringWidth(scoreString) * CleanXFac_1;
+    int x              = (Screen.GetWidth() - scoreWidth) / 2;
+    Screen.DrawText(_font, Font.CR_Blue, x, y, scoreString, DTA_CleanNoMove_1, true);
+
+    return lineHeight * 2;
+  }
+
+  const MARGIN = 10;
+
+  mixin NAMESPACE_FontUser;
+
+  private PlayerInfo _player;
+
+  private DynamicValueInterpolator _interpolator;
+}
+#+end_src
+
+* Tests
+
+#+begin_src ini :tangle ../build/LazyPointsTest/cvarinfo.txt
+<<cvarinfo>>
+#+end_src
+
+#+begin_src c :tangle ../build/LazyPointsTest/keyconf.txt
+Alias NAMESPACE_top "OpenMenu NAMESPACE_TopMenu"
+AddKeySection "Lazy Points" "NAMESPACE_keys"
+AddMenuKey    "Open Score" "NAMESPACE_top"
+#+end_src
+
+#+begin_src c :tangle ../build/LazyPointsTest/mapinfo.txt
+<<mapinfo>>
+#+end_src
+
+#+begin_src c :tangle ../build/LazyPointsTest/menudef.txt
+<<menudef>>
+#+end_src
+
+#+begin_src c :tangle ../build/LazyPoints/zscript.zs
+version 4.14.0
+#include "LazyPoints.zs"
+#+end_src
+
+#+begin_src text :tangle ../build/LazyPointsTestCommands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "../tools/org.py test modules/LazyPoints.org")
+#+end_src
