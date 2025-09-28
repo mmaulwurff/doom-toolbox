@@ -18,6 +18,7 @@ Add-ons:
 
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
+- [[file:modules/LazyPoints.org][LazyPoints]] - points scoring
 - [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
 - [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
 
