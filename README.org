@@ -6,9 +6,10 @@
 Doom Toolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
 
-Doom Toolbox is free and open source software, licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. For third-party
-resources, such as image and sound files, see ~REUSE.toml~ files in their directories
-for licenses.
+Doom Toolbox is free and open source software. Add-ons are mostly licensed under
+[[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
+tag in each .org file for details. For third-party resources, such as image and sound
+files, see ~REUSE.toml~ files in their directories for licenses.
 
 Add-ons:
 - [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][ZDoom forum topic]])
@@ -21,6 +22,7 @@ ZScript modules:
 - [[file:modules/LazyPoints.org][LazyPoints]] - points scoring
 - [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
 - [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
+- [[file:modules/libeye.org][libeye]] - level and screen projections
 
 Experiments:
 - [[file:experiments/LispOnZscript.org][LispOnZscript]] - toy Lisp-like language on top of ZScript ([[https://forum.zdoom.org/viewtopic.php?t=80881][ZDoom forum topic]])

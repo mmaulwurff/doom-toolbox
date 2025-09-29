@@ -1,0 +1,1540 @@
+# SPDX-FileCopyrightText: © 2019 KeksDose / MemeDose
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: LicenseRef-libeye
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: libeye
+
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+#+begin_src c :tangle ../build/libeye/libeye.zs
+
+// > Use this zscript library I've made to deal with screen and world projections. It
+// > allows you to:
+//
+// > 1. Find an actor's screen position (maybe to draw text over a target, like
+// >    HudMessageOnActor)
+// > 2. Click a screen location to fire a bullet in that direction
+// > 3. Determine if a location is in your view
+//
+// > in both opengl and old software render modes. You don't need to know any of the
+// > involved maths, and it runs very very fast, too.
+//
+// --- KeksDose
+
+// libeye module version: 1.0.0
+// libeye is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+
+// Original post: https://forum.zdoom.org/viewtopic.php?t=64566
+// Level and screen projections (now with resize handling)
+
+// libeye is written by KeksDose / MemeDose in 2019, and repackaged as a
+// DoomToolbox module by Alexander Kromm in 2025.
+//
+// Note on the license: the requirement to "leave this note intact" is
+// incompatible with GPLv3:
+//
+// > You may not impose any further restrictions on the exercise of the rights
+// granted or affirmed under this License.
+//
+// This note seems to be compatible with BSD licenses, barring that the license
+// for any software that includes libeye must also include the note below.
+
+//                  libeye (for projection and deprojection)
+// 				 written by KeksDose / MemeDose (May 2019)
+// 						   (updated July 2019)
+//
+// All rights etc. etc. who cares, you may reuse this as you wish and edit it, and
+// leave this note intact.
+//
+//           //
+//           //
+//         /////((
+//    @@//////////  ((
+//  ((  %////((/////   ((     ((              ((
+//    (( @@//(((///////    (((  //////////////       ((
+//      (  /////////////////////////(((((((//////////   ((
+//         @@///@@@@@@//////////(((((((((//@@@//////////    ((
+//       ((  /////  /////((((((((((((((//@@%  %%@///////////   ((
+//           //////////((((((((((((((//////((((( %%@@//////////  ((
+//         ((%%//////////@@%% @@//(((((((///    (  (((( %%/////////  (
+//         ((  ////////@@  (((  @@//(((((((///// ((    (  @@/////////
+//         ((/////////@  ((   ((  @@/(((((((/////    (( ((  @@/((((///((
+//       ((  ///((//@@ ((       ((  %@@@@@@//////////   ((((  /((((///  ((
+//       ((/////((//%%(              ////%%%@@//////////      @//((((///
+//         ////(((//            /////////   //@@/////////////////(((((//
+//      (  ////(((////(    //////////////////////@@@@////////////(((((////((
+//       ////(((((((//   ////////////////////////////   %%@@///(((((((((//  (
+//       //(((((((((///////////////////    ////////////     %%@//(((((((//// ((
+//       //(((((((((((////////////((///    ///////////////     @@//(((((((///
+//       //(((((((((((////////((     /////////((////////////  (  //(((((((///////
+//       //(((((((  ((///////(  #####  ////(       ((///////  (  @@//(((((///////
+//       //(((((((  (((//////(((  ###  ((((   #####  ((/////// ((  //(((///////@@
+//       //((((((((((((@@/////////(((((((((((((((((((((/////     ///////////%  ((
+//       //((((((((((((%%    ///////((((((((((((////////  //////////////@@%% ((
+//       @@//(((((((((/%%((   ///////////////////////  /////////////////  (((
+//      (  //(((((((((/    ((                    ///////////////////////
+//         %%//(((((((///((   ((                //////////////@///////%%
+//       ((  @@/((((((///((            ((   //////////////@@%% ///////  ((
+//         ((  /(((((((//           (    //////////////@%%     //////%((
+//           (( @@//(((////(( ((  /////(((((((///@@  (((    ///////  (
+//             (  @@(((((//  (  ////(((((((///@@%  (((( /////////%%((
+//              ((%%//(((/////////(((((((//@%%       //////////%%  ((
+//              ((////(((((///////(((((///////////////////////%  ((
+//             (  ////(((((/////(((((((((//////////((((///@@%% ((
+//              ////(((//////@//////(((((((((((((////@@@%%    (
+//           (( /////////@@%% %%@@@@@@@@@@@@@@@@@@@%%     ((
+//         ((  @@@@@%%   ((
+//         ((       (((
+//
+//
+//
+//                                     %%//%
+//                                  (  //((/  ((
+//                                  (  ///////((
+//                                  (  ///////((
+//                                     /////  ((
+//                                       //
+//                                       //
+//
+//                         ((          /////         ((
+#+end_src
+
+* libeye
+
+** GlScreen
+
+#+begin_src c :tangle ../build/libeye/libeye.zs
+
+/*	kd:
+
+	In open-gl, your screen rotates nicely and you can do mostly what you know
+	to be sane. It's all about making a rotation of your view and using what
+	you know about right triangles.
+
+	*/
+
+class NAMESPACE_GlScreen : NAMESPACE_ProjScreen {
+	protected vector3				forw_unit;
+	protected vector3				right_unit;
+	protected vector3				down_unit;
+
+	override void Reorient (vector3 world_view_pos, vector3 world_ang) {
+
+		// kd: Pitch is a weird gzd joke. It's probably to compensate looking
+		// speed and all. After that, you see what makes this fast.
+		world_ang.y = VectorAngle(
+			cos(world_ang.y),
+			sin(world_ang.y) * pixel_stretch);
+
+
+		super.Reorient(world_view_pos, world_ang);
+
+		let cosang	= cos(world_ang.x);
+		let cosvang	= cos(world_ang.y);
+		let cosrang	= cos(world_ang.z);
+		let sinang	= sin(world_ang.x);
+		let sinvang	= sin(world_ang.y);
+		let sinrang	= sin(world_ang.z);
+
+		let right_no_roll	= (
+			sinang,
+		-	cosang,
+			0);
+
+		let down_no_roll	= (
+		-	sinvang * cosang,
+		-	sinvang * sinang,
+		-	cosvang);
+
+		forw_unit = (
+			cosvang * cosang,
+			cosvang * sinang,
+		-	sinvang);
+
+		down_unit	= cosrang * down_no_roll	- sinrang * right_no_roll;
+		right_unit	= cosrang * right_no_roll	+ sinrang * down_no_roll;
+	}
+
+	// kd: Projection handling. These get called to make stuff a little faster,
+	// since you may wanna project many many times.
+	protected vector3				forw_in;
+	protected vector3				right_in;
+	protected vector3				down_in;
+
+	override void BeginProjection () {
+		forw_in		= forw_unit;
+		right_in	= right_unit / tan_fov_2.x;
+		down_in		= down_unit  / tan_fov_2.y;
+
+		forw_in.z	*= pixel_stretch;
+		right_in.z	*= pixel_stretch;
+		down_in.z	*= pixel_stretch;
+	}
+
+	override void ProjectWorldPos (vector3 world_pos) {
+		diff			= levellocals.vec3diff(view_pos, world_pos);
+		proj_pos		= (diff dot right_in, diff dot down_in);
+		depth			= diff dot forw_in;
+	}
+
+	override void ProjectActorPos (Actor mo, vector3 offset, double t) {
+		let inter_pos	= mo.prev + t * (mo.pos - mo.prev);
+		diff			= levellocals.vec3diff(view_pos, inter_pos + offset);
+		proj_pos		= (diff dot right_in, diff dot down_in);
+		depth			= diff dot forw_in;
+	}
+
+	override void ProjectActorPosPortal (Actor mo, vector3 offset, double t) {
+		let inter_pos	= mo.prev + t * levellocals.vec3diff(mo.prev, mo.pos);
+		diff			= levellocals.vec3diff(view_pos, inter_pos + offset);
+		proj_pos		= (diff dot right_in, diff dot down_in);
+		depth			= diff dot forw_in;
+	}
+
+	override vector2 ProjectToNormal () const {
+		return proj_pos / depth;
+	}
+
+	override vector2 ProjectToScreen () const {
+		let normal_pos = proj_pos / depth + (1, 1);
+
+		return 0.5 * (
+			normal_pos.x * resolution.x,
+			normal_pos.y * resolution.y);
+	}
+
+	override vector2 ProjectToCustom (
+	vector2	origin,
+	vector2	resolution) const {
+		let normal_pos = proj_pos / depth + (1, 1);
+
+		return origin + 0.5 * (
+			normal_pos.x * resolution.x,
+			normal_pos.y * resolution.y);
+	}
+
+	// kd: Same deal but backwards-ish.
+	protected vector3				forw_out;
+	protected vector3				right_out;
+	protected vector3				down_out;
+
+	override void BeginDeprojection () {
+
+		// kd: Same deal as above, but reversed. This time, we're compensating
+		// for what we rightfully assume is a projected position.
+		forw_out	= forw_unit;
+		right_out	= right_unit * tan_fov_2.x;
+		down_out	= down_unit  * tan_fov_2.y;
+
+		forw_out.z	/= pixel_stretch;
+		right_out.z /= pixel_stretch;
+		down_out.z	/= pixel_stretch;
+	}
+
+	override vector3 DeprojectNormalToDiff (
+	vector2	normal_pos,
+	double	depth) const {
+		return depth * (
+			forw_out +
+			normal_pos.x * right_out +
+			normal_pos.y * down_out);
+	}
+
+	override vector3 DeprojectScreenToDiff (
+	vector2	screen_pos,
+	double	depth) const {
+
+		// kd: Same thing...
+		let normal_pos = 2 * (
+			screen_pos.x / resolution.x,
+			screen_pos.y / resolution.y) - (1, 1);
+
+		return depth * (
+			forw_out +
+			normal_pos.x * right_out +
+			normal_pos.y * down_out);
+	}
+}
+#+end_src
+
+** SwScreen
+
+#+begin_src c :tangle ../build/libeye/libeye.zs
+
+/*	kd:
+
+	This does projection stuff in Carmack / software renderer. It's conceptually
+	simpler, but nonetheless a little tricky to understand if you're
+	used to open-gl.
+
+	*/
+
+class NAMESPACE_SwScreen : NAMESPACE_ProjScreen {
+
+	// kd: Less info necessary than for open-gl, but it's there.
+	protected vector2				right_planar_unit;
+	protected vector3				forw_planar_unit;
+
+	override void Reorient (vector3 world_view_pos, vector3 world_ang) {
+		super.Reorient(world_view_pos, world_ang);
+
+		right_planar_unit = (
+			sin(view_ang.x),
+		-	cos(view_ang.x));
+
+		forw_planar_unit = (
+		-	right_planar_unit.y,
+			right_planar_unit.x,
+			tan(view_ang.y));
+	}
+
+	// kd: Projection:
+	protected vector3				forw_planar_in;
+	protected vector2				right_planar_in;
+
+	override void BeginProjection () {
+
+		// kd: This doesn't cause any imprecisions. It also prevents two
+		// multiplications with every projection.
+		right_planar_in		= right_planar_unit / tan_fov_2.x;
+		forw_planar_in		= forw_planar_unit;
+	}
+
+	override void ProjectWorldPos (vector3 world_pos) {
+
+		// kd: Your view is flat. If you pitch up or down, imagine that all the
+		// actors move up and down in reality. That's effectively how it works.
+		// You can see this in the addition to diff.z.
+		diff		= levellocals.vec3diff(view_pos, world_pos);
+		depth		= forw_planar_in.xy dot diff.xy;
+		diff.z		+= forw_planar_in.z * depth;
+		proj_pos	= (
+			right_planar_in dot diff.xy,
+		-	pixel_stretch * diff.z / tan_fov_2.y);
+	}
+
+	override void ProjectActorPos (Actor mo, vector3 offset, double t) {
+		let inter_pos = mo.prev + t * (mo.pos - mo.prev);
+		ProjectWorldPos(inter_pos + offset);
+	}
+
+	override void ProjectActorPosPortal (Actor mo, vector3 offset, double t) {
+		let inter_pos = mo.prev + t * levellocals.vec3diff(mo.prev, mo.pos);
+		ProjectWorldPos(inter_pos + offset);
+	}
+
+	override vector2 ProjectToNormal () const {
+		return proj_pos / depth;
+	}
+
+	override vector2 ProjectToScreen () const {
+		let normal_pos = proj_pos / depth + (1, 1);
+
+		return 0.5 * (
+			normal_pos.x * resolution.x,
+			normal_pos.y * resolution.y);
+	}
+
+	override vector2 ProjectToCustom (
+	vector2	origin,
+	vector2	resolution) const {
+		let normal_pos = proj_pos / depth + (1, 1);
+
+		return origin + 0.5 * (
+			normal_pos.x * resolution.x,
+			normal_pos.y * resolution.y);
+	}
+
+	// kd: Just as simple. You again assume you are trying to reverse a
+	// projected position from the screen back into the world.
+	protected vector3				forw_planar_out;
+	protected vector3				right_planar_out;
+	protected vector3				down_planar_out;
+
+	override void BeginDeprojection () {
+		forw_planar_out.xy	= forw_planar_unit.xy;
+		forw_planar_out.z	= 0;
+		right_planar_out.xy	= tan_fov_2.x * right_planar_unit;
+		right_planar_out.z	= 0;
+		down_planar_out		= (
+			0,
+			0,
+			tan_fov_2.y / pixel_stretch);
+	}
+
+	override vector3 DeprojectNormalToDiff (
+	vector2	normal_pos,
+	double	depth) const {
+		return depth * (
+			forw_planar_out +
+			normal_pos.x * right_planar_out +
+		-	(0, 0, forw_planar_unit.z) - normal_pos.y * down_planar_out);
+	}
+
+	override vector3 DeprojectScreenToDiff (
+	vector2	screen_pos,
+	double	depth) const {
+
+		// kd: Same thing...
+		let normal_pos = 2 * (
+			screen_pos.x / resolution.x,
+			screen_pos.y / resolution.y) - (1, 1);
+
+		return depth * (
+			forw_planar_out +
+			normal_pos.x * right_planar_out +
+		-	(0, 0, forw_planar_unit.z) - normal_pos.y * down_planar_out);
+	}
+}
+#+end_src
+
+** ProjScreen
+
+#+begin_src c :tangle ../build/libeye/libeye.zs
+
+/*	kd:
+
+	Here's how to do projections and deprojections. You'd use the subclasses
+	to do anything worthwhile. You may project world to screen and backwards.
+
+	*/
+
+class NAMESPACE_ProjScreen {
+
+	// kd: Screen info
+	protected vector2				resolution;
+	protected vector2				origin;
+	protected vector2				tan_fov_2;
+	protected double				pixel_stretch;
+	protected double				aspect_ratio;
+
+	// kd: Setup calls which you'll need to call at least once.
+	void CacheResolution () {
+		CacheCustomResolution((Screen.GetWidth(), Screen.GetHeight()) );
+	}
+
+	void CacheCustomResolution (vector2 new_resolution) {
+
+		// kd: This is for convenience and converting normal <-> screen pos.
+		resolution = new_resolution;
+
+		// kd: This isn't really necessary but I kinda like it.
+		pixel_stretch = level.pixelstretch;
+
+		// kd: Get the aspect ratio. 5:4 is handled just like 4:3... I GUESS
+		// this'll do.
+		aspect_ratio = max(4.0 / 3, Screen.GetAspectRatio());
+	}
+
+	double AspectRatio () const {
+		return aspect_ratio;
+	}
+
+	// kd: Once you know you got screen info, you can call this whenever your
+	// fov changes. Like CacheFov(player.fov) will do.
+	void CacheFov (double hor_fov = 90) {
+
+		// kd: This holds: aspect ratio = tan(horizontal fov) / tan(ver fov).
+		// gzd always uses hor fov, but the fov only holds in 4:3 (in a 4:3 box
+		// in your screen centre), so we just extend it.
+		tan_fov_2.x	= tan(hor_fov / 2) * aspect_ratio / (4.0 / 3);
+		tan_fov_2.y	= tan_fov_2.x / aspect_ratio;
+	}
+
+	// kd: Also need some view info. Angle is yaw, pitch, roll in world format
+	// so positive pitch is up. Call one of the following functions.
+	protected vector3				view_ang;
+	protected vector3				view_pos;
+
+	ui void OrientForRenderOverlay (RenderEvent event) {
+		Reorient(
+			event.viewpos, (
+			event.viewangle,
+			event.viewpitch,
+			event.viewroll));
+	}
+
+	ui void OrientForRenderUnderlay (RenderEvent event) {
+		Reorient(
+			event.viewpos, (
+			event.viewangle,
+			event.viewpitch,
+			event.viewroll));
+	}
+
+	void OrientForPlayer (PlayerInfo player) {
+		Reorient(
+			player.mo.vec3offset(0, 0, player.viewheight), (
+			player.mo.angle,
+			player.mo.pitch,
+			player.mo.roll));
+	}
+
+	virtual void Reorient (vector3 world_view_pos, vector3 world_ang) {
+		view_ang = world_ang;
+		view_pos = world_view_pos;
+	}
+
+	// kd: Now we can do projections and such (position in the level, go to
+	// your screen).
+	protected double				depth;
+	protected vector2				proj_pos;
+	protected vector3				diff;
+
+	virtual void	BeginProjection	() {}
+	virtual void	ProjectWorldPos	(vector3 world_pos) {}
+	virtual void	ProjectActorPos (
+	Actor	mo,
+	vector3	offset = (0,0,0),
+	double	t = 1) {}
+
+	// kd: Portal aware version.
+	virtual void	ProjectActorPosPortal (
+	Actor	mo,
+	vector3	offset = (0,0,0),
+	double	t = 1) {}
+
+	virtual vector2	ProjectToNormal	() const { return (0, 0); }
+	virtual vector2	ProjectToScreen	() const { return (0, 0); }
+
+	virtual vector2 ProjectToCustom (
+	vector2 origin,
+	vector2 resolution) const {
+		return (0, 0);
+	}
+
+	bool IsInFront () const {
+		return 0 < depth;
+	}
+
+	bool IsInScreen () const {
+		if(	proj_pos.x < -depth || depth < proj_pos.x ||
+			proj_pos.y < -depth || depth < proj_pos.y) {
+			return false;
+		}
+
+		return true;
+	}
+
+	// kd: Deprojection (point on screen, go into the world):
+	virtual void	BeginDeprojection		() {}
+
+	virtual vector3	DeprojectNormalToDiff	(
+	vector2	normal_pos,
+	double	depth = 1) const {
+		return (0, 0, 0);
+	}
+
+	virtual vector3	DeprojectScreenToDiff	(
+	vector2	screen_pos,
+	double	depth = 1) const {
+		return (0, 0, 0);
+	}
+
+	virtual vector3 DeprojectCustomToDiff (
+	vector2	origin,
+	vector2	resolution,
+	vector2	screen_pos,
+	double	depth = 1) const {
+		return (0, 0, 0);
+	}
+
+	// kd: A normal position is in the -1 <= x, y <= 1 range on your screen.
+	// This will be your screen no matter the resolution:
+
+	/*
+
+	(-1, -1) --	---	---	(0, -1) ---	---	---	---	(1, -1)
+	|												|
+	|												|
+	|												|
+	(-1, 0)				(0, 0)					(1, 0)
+	|												|
+	|												|
+	|												|
+	(-1, 1)	---	---	---	(0, 1)	---	---	---	---	(1, 1)
+
+	*/
+
+	// So this scales such a position back into your drawing resolution.
+
+	vector2 NormalToScreen (vector2 normal_pos) const {
+		normal_pos = 0.5 * (normal_pos + (1, 1));
+		return (
+			normal_pos.x * resolution.x,
+			normal_pos.y * resolution.y);
+	}
+
+	// kd: And this brings a screen position to normal. Make sure the resolution
+	// is the same for your cursor.
+
+	vector2 ScreenToNormal (vector2 screen_pos) const {
+		screen_pos = (
+			screen_pos.x / resolution.x,
+			screen_pos.y / resolution.y);
+		return 2 * screen_pos - (1, 1);
+	}
+
+	// kd: Other interesting stuff.
+
+	vector3 Difference () const {
+		return diff;
+	}
+
+	double Distance () const {
+		return diff.length();
+	}
+}
+#+end_src
+
+** Viewport
+
+#+begin_src c :tangle ../build/libeye/libeye.zs
+
+/*	kd:
+
+	This helps repositioning the view port for stuff like screen blocks. It's a
+	little more than that, cuz it can also determine stuff like, "is this scene
+	position in the viewport?" Cuz the scene doesn't necessarily match the
+	viewport.
+
+	Well yea... see the examples. Imagine how annoying it is to even get this
+	idea to begin with.
+
+	*/
+
+struct NAMESPACE_Viewport {
+
+	private vector2					scene_origin;
+	private vector2					scene_size;
+
+	private vector2					viewport_origin;
+	private vector2					viewport_bound;
+	private vector2					viewport_size;
+
+	private double					scene_aspect;
+	private double					viewport_aspect;
+
+	private double					scale_f;
+	private vector2					scene_to_viewport;
+
+	ui void FromHud () const {
+		scene_aspect = Screen.GetAspectRatio();
+
+		vector2 hud_origin;
+		vector2 hud_size;
+
+		[hud_origin.x, hud_origin.y, hud_size.x, hud_size.y] =
+			Screen.GetViewWindow();
+
+		let window_resolution = (
+			Screen.GetWidth(),
+			Screen.GetHeight());
+
+		let window_to_normal = (
+			1.0 / window_resolution.x,
+			1.0 / window_resolution.y);
+
+		viewport_origin = (
+			window_to_normal.x * hud_origin.x,
+			window_to_normal.y * hud_origin.y);
+
+		viewport_size = (
+			window_to_normal.x * hud_size.x,
+			window_to_normal.y * hud_size.y);
+
+		viewport_aspect = hud_size.x / hud_size.y;
+
+		viewport_bound = viewport_origin + viewport_size;
+
+		// kd: The scene is what is actually rendered. It's not always the same
+		// as the viewport. When the statusbar comes into play, the scene is
+		// obscured by the viewport being too small.
+
+		// Example: Compare screenblocks 11 against screenblocks 10 in unmodded
+		// Doom. You will notice that the scaling of the 3d world is the same,
+		// but it's moved up by half the height of the statusbar.
+
+		// That makes this viewport stuff kinda really annoying to deal with.
+
+		// Also statusbar.getsomethingfromstatusbar, really really nice naming.
+
+		let statusbar_height =
+			(window_resolution.y - Statusbar.GetTopOfStatusbar()) / window_resolution.y;
+
+		scale_f = hud_size.x / window_resolution.x;
+
+		scene_aspect = Screen.GetAspectRatio();
+
+		let offset = 10 < screenblocks ? 0 : 0.5 * statusbar_height;
+
+		scene_size = (
+			scale_f,
+			scale_f);
+
+		scene_origin = viewport_origin - (0, 0.5 * (scene_size.y - viewport_size.y));
+
+		scene_to_viewport = (
+			viewport_size.x / scene_size.x,
+			viewport_size.y / scene_size.y);
+	}
+
+	// kd: Is the scene pos (normal, just like projected normal) inside the
+	// view port? If yes, it's visible in the 3d world, even through resizing.
+	bool IsInside (vector2 scene_pos) const {
+		let normal_pos = scene_origin + (
+			scene_size.x * 0.5 * (1 + scene_pos.x),
+			scene_size.y * 0.5 * (1 + scene_pos.y));
+
+		if(	normal_pos.x < viewport_origin.x || viewport_bound.x < normal_pos.x ||
+			normal_pos.y < viewport_origin.y || viewport_bound.y < normal_pos.y) {
+			return false;
+		}
+
+		return true;
+	}
+
+	// kd: Use these for drawing (and make sure the aspect ratios match).
+	vector2 SceneToCustom (vector2 scene_pos, vector2 resolution) const {
+		let normal_pos = 0.5 * (
+			(scene_pos.x + 1) * scene_size.x,
+			(scene_pos.y + 1) * scene_size.y);
+
+		return (
+			(scene_origin.x + normal_pos.x) * resolution.x,
+			(scene_origin.y + normal_pos.y) * resolution.y);
+	}
+
+	vector2 SceneToWindow (vector2 scene_pos) const {
+		return SceneToCustom(
+			scene_pos,
+			(Screen.GetWidth(), Screen.GetHeight()) );
+	}
+
+	vector2 ViewportToCustom (vector2 viewport_pos, vector2 resolution) const {
+		let normal_pos = 0.5 * (
+			(viewport_pos.x + 1) * viewport_size.x,
+			(viewport_pos.y + 1) * viewport_size.y);
+
+
+		return (
+			(viewport_origin.x + normal_pos.x) * resolution.x,
+			(viewport_origin.y + normal_pos.y) * resolution.y);
+	}
+
+	vector2 ViewportToWindow (vector2 viewport_pos) const {
+		return ViewportToCustom(
+			viewport_pos,
+			(Screen.GetWidth(), Screen.GetHeight()) );
+	}
+
+	double Scale () const {
+		return scale_f;
+	}
+}
+#+end_src
+
+* Examples
+
+#+begin_quote
+Examples included are free aiming (kinda like in Metroid Prime 3), drawing actors'
+bounding boxes and... a candle with some text over it. Just load the pk3 to test
+this. Here's an easy example:
+
+--- KeksDose
+#+end_quote
+
+#+begin_src c
+
+// Setup:
+proj.CacheResolution();
+proj.CacheFov(players [consoleplayer].fov);
+proj.OrientForRenderOverlay(event);
+proj.BeginProjection();
+
+// Now you can project as much as you like, just like this:
+proj.ProjectWorldPos(mo.vec3offset(0, 0, mo.height));
+
+if(proj.IsInFront()) {
+    let draw_pos = proj.ProjectToScreen();
+
+    Screen.DrawText(
+        smallfont,
+        Font.CR_ICE,
+        draw_pos.x,
+        draw_pos.y,
+        "achachachachach");
+}
+#+end_src
+
+** Setup
+
+#+begin_src c :tangle ../build/libeyeTest/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "ShowBox", "FreeAim", "TextCandleGl"
+  PlayerClasses = "NoTurnPlayer"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/libeyeTest/zscript.zs
+
+version 4.14.2
+
+#include "bounding_box.zs"
+#include "free_aim.zs"
+#include "no_turn_player.zs"
+#include "text_candle.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/libeye/zscript.zs
+
+version 4.14.2
+
+#include "libeye.zs"
+#+end_src
+
+** ShowBox
+
+#+begin_src c :tangle ../build/libeyeTest/bounding_box.zs
+
+/*	kd:
+
+	If you look at an actor, its bounding box will be drawn. It will also tell
+	you if the bounding box is visible on the screen, even partially. This takes
+	both gl and software into account.
+
+	,*/
+
+class ShowBox : EventHandler {
+	protected NAMESPACE_ProjScreen			proj;
+	protected NAMESPACE_GlScreen			gl_proj;
+	protected NAMESPACE_SwScreen			sw_proj;
+	protected bool					can_project;
+	protected bool					show_spaces;
+
+	protected transient Cvar		cvar_renderer;
+
+	protected Actor					target;
+
+	override void OnRegister () {
+		gl_proj			= new("NAMESPACE_GlScreen");
+		sw_proj			= new("NAMESPACE_SwScreen");
+		cvar_renderer	= Cvar.GetCvar("vid_rendermode", players [consoleplayer]);
+		PrepareProjection();
+	}
+
+	// kd: This selects the correct projector for your renderer and determines
+	// whether you can even do a projection.
+	protected void PrepareProjection () {
+		if(cvar_renderer)
+		switch(cvar_renderer.GetInt()) {
+		default:
+			proj = gl_proj;
+			break;
+		case 0:
+		case 1:
+			proj = sw_proj;
+			break;
+		}
+
+		else {
+			proj = gl_proj;
+		}
+
+		can_project	= proj != NULL;
+	}
+
+	override void WorldTick () {
+		let po = PlayerPawn(players [consoleplayer].mo);
+
+		if(!po) {
+			target = NULL;
+			return;
+		}
+
+		if(po.player.original_cmd.buttons & BT_ALTATTACK) {
+			show_spaces = true;
+		}
+
+		else {
+			show_spaces = false;
+		}
+
+		PrepareProjection();
+	}
+
+	void SetTarget (Actor mo) {
+		if(mo) {
+			target = mo;
+		}
+	}
+
+	protected NAMESPACE_Viewport			viewport;
+
+	override void RenderOverlay (RenderEvent event) {
+		let resolution = (Screen.GetWidth(), Screen.GetHeight());
+
+		viewport.FromHud();
+
+		if(show_spaces) {
+			DrawSpaceBounds(resolution);
+		}
+
+		// kd: This would cause a vm-abort.
+		if(!can_project) {
+			return;
+		}
+
+		// kd: Now you can handle both opengl and old software mode without
+		// any worry. First find the corner positions.
+		if(!target) {
+			return;
+		}
+
+		// kd: some recent gzd versions have bugged vector3 init.
+		/* vector3 offset [8] = {
+			( target.radius,  target.radius, 0)
+		,	( target.radius, -target.radius, 0)
+		,	(-target.radius, -target.radius, 0)
+		,	(-target.radius,  target.radius, 0)
+		,	( target.radius,  target.radius, target.height)
+		,	( target.radius, -target.radius, target.height)
+		,	(-target.radius, -target.radius, target.height)
+		,	(-target.radius,  target.radius, target.height)
+		}; */
+
+		double offset [8 * 3] = {
+			 target.radius,  target.radius, 0
+		,	 target.radius, -target.radius, 0
+		,	-target.radius, -target.radius, 0
+		,	-target.radius,  target.radius, 0
+		,	 target.radius,  target.radius, target.height
+		,	 target.radius, -target.radius, target.height
+		,	-target.radius, -target.radius, target.height
+		,	-target.radius,  target.radius, target.height
+		};
+
+		vector3 corner_pos [8];
+
+		for(let i = 0; i < 8; i++) {
+			let j = 3 * i;
+
+			let offset_vec	= (offset [j], offset [j + 1], offset [j + 2]);
+			corner_pos [i]	= offset_vec;
+		}
+
+		// kd: Then you project all 8.
+		vector2 screen_pos [8];
+
+		proj.CacheResolution();
+		proj.CacheFov(players [consoleplayer].fov);
+		proj.OrientForRenderOverlay(event);
+		proj.BeginProjection();
+
+		bool is_in_scene	= false;
+		bool is_visible		= false;
+
+		for(let i = 0; i < 8; i++) {
+			proj.ProjectActorPos(target, corner_pos [i], event.fractic);
+
+			let normal_pos = proj.ProjectToNormal();
+
+			screen_pos [i] = viewport.SceneToWindow(normal_pos);
+
+			// kd: If you aren't inside the actor, its box gets drawn if there's
+			// at least one visible corner. This prevents an odd looking line
+			// mess.
+			if(!proj.IsInFront()) {
+				is_visible	= false;
+				is_in_scene	= false;
+				break;
+			}
+
+			is_visible	= is_visible || viewport.IsInside(normal_pos);
+			is_in_scene	= is_in_scene || proj.IsInScreen();
+		}
+
+		// kd: Draw lines appropriately.
+		if(is_in_scene) {
+			let col		= is_visible ? 0xffffffff : 0xffff00ff;
+			let str		= is_visible ? "Is in viewport" : "Is in scene";
+			let str_col	= is_visible ? Font.CR_SAPPHIRE : Font.CR_ICE;
+
+			for(let i = 0; i < 4; i++) {
+				let j = i + 1;
+
+				if(4 <= j) {
+					j -= 4;
+				}
+
+				// kd: Square at foot level.
+				Screen.DrawLine(
+					screen_pos [i].x,
+					screen_pos [i].y,
+					screen_pos [j].x,
+					screen_pos [j].y,
+					col);
+
+				// kd: Square at top level.
+				Screen.DrawLine(
+					screen_pos [i + 4].x,
+					screen_pos [i + 4].y,
+					screen_pos [j + 4].x,
+					screen_pos [j + 4].y,
+					col);
+
+				// kd: Connecting lines.
+				Screen.DrawLine(
+					screen_pos [i].x,
+					screen_pos [i].y,
+					screen_pos [i + 4].x,
+					screen_pos [i + 4].y,
+					col);
+			}
+
+			Screen.DrawText(
+				smallfont,
+				str_col,
+				0,
+				0,
+				str);
+		}
+
+		else {
+			Screen.DrawText(
+				smallfont,
+				Font.CR_WHITE,
+				0,
+				0,
+				"Thing is out of view");
+		}
+	}
+
+	// kd: This draws rectangles where I placed the "actual" 3D world and the
+	// shifted one (play around with screenblocks to see this).
+
+	ui void DrawSpaceBounds (vector2 resolution) const {
+		let p1 = viewport.SceneToCustom((-1, -1), resolution);
+		let p2 = viewport.SceneToCustom(( 1, -1), resolution);
+		let p3 = viewport.SceneToCustom(( 1,  1), resolution);
+		let p4 = viewport.SceneToCustom((-1,  1), resolution);
+
+		let q1 = viewport.ViewportToCustom((-1, -1), resolution);
+		let q2 = viewport.ViewportToCustom(( 1, -1), resolution);
+		let q3 = viewport.ViewportToCustom(( 1,  1), resolution);
+		let q4 = viewport.ViewportToCustom((-1,  1), resolution);
+
+		Screen.DrawLine(
+			p1.x,
+			p1.y,
+			p2.x,
+			p2.y,
+			0xff00ff00);
+
+		Screen.DrawLine(
+			p2.x,
+			p2.y,
+			p3.x,
+			p3.y,
+			0xff00ff00);
+
+		Screen.DrawLine(
+			p3.x,
+			p3.y,
+			p4.x,
+			p4.y,
+			0xff00ff00);
+
+		Screen.DrawLine(
+			p4.x,
+			p4.y,
+			p1.x,
+			p1.y,
+			0xff00ff00);
+
+		Screen.DrawLine(
+			q1.x,
+			q1.y,
+			q2.x,
+			q2.y,
+			0xff00ffff);
+
+		Screen.DrawLine(
+			q2.x,
+			q2.y,
+			q3.x,
+			q3.y,
+			0xff00ffff);
+
+		Screen.DrawLine(
+			q3.x,
+			q3.y,
+			q4.x,
+			q4.y,
+			0xff00ffff);
+
+		Screen.DrawLine(
+			q4.x,
+			q4.y,
+			q1.x,
+			q1.y,
+			0xff00ffff);
+	}
+}
+#+end_src
+
+** FreeAim
+
+#+begin_quote
+
+(You shouldn't view the free aim as a complete mod. It'll cause multiplayer issues.
+It merely demonstrates it works.)
+
+--- KeksDose
+#+end_quote
+
+#+begin_src c :tangle ../build/libeyeTest/free_aim.zs
+
+/*	kd:
+
+	This allows shooting where your cursor is aimed. Keep in mind this
+	will cause a desync in multiplayer.
+
+	You can fix this by restricting the cursor to a certain fov value, like 90°
+	which would be the 4:3 box in the screen centre (assuming you didn't zoom
+	or anything).
+
+	*/
+
+class FreeAim : EventHandler {
+	const turn_bound = 0.400;
+
+	protected vector2				cursor_pos;
+	protected vector2				resolution;
+	protected vector2				window_resolution;
+	protected vector2				cursor_tl;
+	protected vector2				cursor_br;
+	protected TextureId				sprite_cursor;
+
+	protected vector2				angle;
+	protected double				min_vang;
+	protected double				max_vang;
+
+	protected NAMESPACE_ProjScreen			proj;
+	protected NAMESPACE_GlScreen			gl_proj;
+	protected NAMESPACE_SwScreen			sw_proj;
+
+	protected transient Cvar		cvar_renderer;
+	protected bool					can_project;
+
+	protected ShowBox				hitbox_view;
+	protected Actor					cursor_mo;
+	protected vector3				diff;
+
+	vector3 CursorDirection () const {
+		return diff;
+	}
+
+	override void WorldTick () {
+		PlayerInfo player	= players [consoleplayer];
+		let po				= PlayerPawn(player.mo);
+
+		if(!po) {
+			return;
+		}
+
+		// kd: Sprite size should remain the same on all resolutions, so...
+		window_resolution	= (Screen.GetWidth(), Screen.GetHeight());
+		let window_aspect	= 1.0 * Screen.GetWidth() / max(1, Screen.GetHeight());
+		resolution			= 720 * (window_aspect, 1);
+
+		// kd: Till I figure out this ui data clearscope whatever mess.
+		cursor_tl = (0, 0);
+		cursor_br = window_resolution;
+
+		HandleTurning(player, po);
+
+		// kd: Prepare for some deprojections. We'll at least find out if there
+		// is something under the cursor.
+		PrepareProjection();
+
+		if(!proj) {
+			return;
+		}
+
+		proj.CacheCustomResolution(window_resolution);
+		proj.CacheFov(player.fov);
+		proj.OrientForPlayer(player);
+		proj.BeginDeprojection();
+		diff = proj.DeprojectScreenToDiff(cursor_pos);
+
+		// kd: Find something under the cursor, maybe. Tell everybody who is
+		// interested.
+		FlineTraceData data;
+
+		// kd: Note diff isn't necessarily a unit vector. If you look straight
+		// up, it is squished by pixel stretch...
+		let cursor_ang	=  VectorAngle(diff.x, diff.y);
+		let cursor_vang	= -VectorAngle(diff.xy.length(), diff.z);
+
+		po.LineTrace(
+			cursor_ang,
+			25000.13376669,
+			cursor_vang,
+			TRF_THRUBLOCK | TRF_THRUHITSCAN,
+			offsetz: player.viewheight,
+			data: data);
+
+		cursor_mo = data.hitactor;
+
+		if(hitbox_view) {
+			hitbox_view.SetTarget(cursor_mo);
+		}
+	}
+
+	// kd: Same deal with the hitbox viewer to handle either render mode.
+	override void OnRegister () {
+		sprite_cursor	= TexMan.CheckForTexture("misla5", TexMan.type_any);
+		gl_proj			= new("NAMESPACE_GlScreen");
+		sw_proj			= new("NAMESPACE_SwScreen");
+		cvar_renderer	= Cvar.GetCvar("vid_rendermode", players [consoleplayer]);
+		PrepareProjection();
+	}
+
+	protected void PrepareProjection () {
+		if(cvar_renderer)
+		switch(cvar_renderer.GetInt()) {
+		default:
+			proj		= gl_proj;
+			min_vang	= -90;
+			max_vang	= 90;
+			break;
+		case 0:
+		case 1:
+			proj		= sw_proj;
+			min_vang	= -56;
+			max_vang	= 56;
+			break;
+		}
+
+		else {
+			proj = gl_proj;
+		}
+
+		can_project	= proj != NULL;
+	}
+
+	override void PlayerEntered (PlayerEvent event) {
+		cursor_mo	= NULL;
+		hitbox_view	= ShowBox(hitbox_view.Find("ShowBox"));
+
+		// kd: Before anything else we wanna freeze the player's angles.
+		PlayerInfo player	= players [consoleplayer];
+		let po				= PlayerPawn(player.mo);
+
+		if(po) {
+			angle = (po.angle, po.pitch);
+		}
+
+		// kd: Just make sure we got that important info...
+		WorldTick();
+		cursor_pos = 0.5 * (cursor_tl + cursor_br);
+	}
+
+	protected void HandleTurning (PlayerInfo player, PlayerPawn po) {
+		// kd: Bounds in which we don't turn.
+		let top_left		= turn_bound * (720, 720);
+		let bottom_right	= window_resolution - top_left;
+
+		// kd: Look around. Turning is faster towards the window edges.
+		let aim_speed	= (4.666, 2.666);
+		let aim_offset	= (0, 0);
+
+		if(cursor_pos.x		< top_left.x) {
+			aim_offset.x = aim_speed.x * (1 - cursor_pos.x / top_left.x);
+		}
+
+		if(bottom_right.x	< cursor_pos.x)	{
+			aim_offset.x = -aim_speed.x * (cursor_pos.x - bottom_right.x) / top_left.x;
+		}
+
+		if(cursor_pos.y		< top_left.y) {
+			aim_offset.y = -aim_speed.y * (1 - cursor_pos.y / top_left.y);
+		}
+
+		if(bottom_right.y	< cursor_pos.y)	{
+			aim_offset.y = aim_speed.y * (cursor_pos.y - bottom_right.y) / top_left.y;
+		}
+
+		// kd: Don't turn if you hold use.
+		if(player.original_cmd.buttons & BT_USE) {
+			aim_offset = (0, 0);
+		}
+
+		angle = (
+			angle.x + aim_offset.x,
+			clamp(angle.y + aim_offset.y, min_vang, max_vang));
+
+		po.A_SetAngle(angle.x, SPF_INTERPOLATE);
+		po.A_SetPitch(angle.y, SPF_INTERPOLATE);
+	}
+
+	// kd: Moves the mouse cursor.
+	override bool InputProcess (InputEvent event) {
+
+		// kd: I dunno why zs won't let me set cursor_pos directly.
+		cursor_pos.x = clamp(
+			cursor_pos.x + event.mousex,
+			cursor_tl.x,
+			cursor_br.x);
+		cursor_pos.y = clamp(
+			cursor_pos.y - 2.0 * event.mousey,
+			cursor_tl.y,
+			cursor_br.y);
+		return false;
+	}
+
+	override void RenderOverlay (RenderEvent event) {
+		let window_to_screen	= (
+			resolution.x / window_resolution.x,
+			resolution.y / window_resolution.y);
+
+		let cursor_pos = (
+			window_to_screen.x * cursor_pos.x,
+			window_to_screen.y * cursor_pos.y);
+
+		Screen.DrawTexture(
+			sprite_cursor,
+			true,
+			cursor_pos.x,
+			cursor_pos.y,
+			DTA_KEEPRATIO,		true,
+			DTA_VIRTUALWIDTHF,	resolution.x,
+			DTA_VIRTUALHEIGHTF,	resolution.y);
+	}
+}
+#+end_src
+
+** NoTurnPlayer
+
+#+begin_src c :tangle ../build/libeyeTest/no_turn_player.zs
+
+/*	kd:
+
+	This player can't turn and has a rapid fire missile mini gun thingy with
+	free aim.
+
+	*/
+
+class NoTurnPlayer : PlayerPawn {
+	default {
+		Player.DisplayName "Free aimer";
+		Player.StartItem "NoTurnGun";
+		Player.WeaponSlot 2, "NoTurnGun";
+	}
+
+	protected vector3				cursor_diff;
+
+	vector3 CursorDirection () const {
+		return cursor_diff;
+	}
+
+	override bool CheckFrozen () {
+
+		// kd: gzd is funny with view interpolation so I tell it to shut up here
+		player.cmd.yaw		= 0;
+		player.cmd.pitch	= 0;
+		player.cmd.roll		= 0;
+		player.turnticks	= 0;
+		player.cheats		|= CF_INTERPVIEW;
+		return super.CheckFrozen();
+	}
+
+	override void Tick () {
+		super.Tick();
+
+		let free_aim = FreeAim(FreeAim.Find("FreeAim"));
+
+		if(free_aim) {
+			cursor_diff = free_aim.CursorDirection();
+		}
+	}
+}
+
+class NoTurnGun : RocketLauncher {
+	default {
+		Weapon.AmmoType "";
+		Weapon.AmmoUse 0;
+	}
+
+	states {
+	fire:
+		MISG A 6 A_GunFlash("startflash");
+	hold:
+		MISG B 6 {
+			let user = NoTurnPlayer(player.mo);
+
+			if(user) {
+
+				// kd: The direction vector the projectors spit out is already
+				// kinda pointing towards where you look, so if you're gonna
+				// shoot a projectile, don't do anything with angles and
+				// fireprojectile or whatever. It'd be redundant.
+				let diff	= user.CursorDirection();
+				let mo		= Spawn(
+					"NoTurnRocket",
+					// vec3offset(0, 0, 0.5 * user.height + user.floorclip + user.attackzoffset));
+					vec3offset(0, 0, user.player.viewheight));
+
+				if(mo) {
+					A_GunFlash();
+					A_AlertMonsters();
+					A_PlaySound(mo.seesound);
+					mo.target	= user;
+					mo.vel		= diff.unit() * mo.speed;
+					mo.angle	= VectorAngle(diff.x, diff.y);
+					mo.pitch	= VectorAngle(diff.xy.length(), diff.z);
+				}
+			}
+		}
+
+		MISG B 6 A_ReFire;
+		goto ready;
+
+	startflash:
+		MISF A 6 bright A_Light1;
+		goto lightdone;
+
+	flash:
+		MISF B 3 bright A_Light1;
+		MISF CD 3 bright A_Light2;
+		goto lightdone;
+	}
+}
+
+class NoTurnRocket : DoomImpBall {
+	default {
+		Scale 0.5;
+		Speed 35;
+		Damage 7;
+		Radius 3;
+		Height 3;
+		SeeSound "weapons/rocklf";
+	}
+
+	states {
+	death:
+		MISL BCD 5 bright;
+		stop;
+	}
+}
+#+end_src
+
+** TextCandle
+
+#+begin_src c :tangle ../build/libeyeTest/text_candle.zs
+
+/*	kd:
+
+	This puts a candle with text over it in front of you, but only in opengl.
+	I made this simpler cuz the other examples are a bit overblown.
+
+	*/
+
+class TextCandleGl : EventHandler {
+	protected NAMESPACE_GlScreen			gl_proj;
+	protected bool					can_project;
+	protected Actor					mo;
+	protected String				text;
+	protected double				text_offset;
+	protected NAMESPACE_Viewport			viewport;
+	protected vector3				base_pos;
+
+	// kd: This prepares the projector and text, which we have to align
+	// ourselves. You have to new the projector, otherwise, you may get a
+	// vm-abort, if you're unfamiliar.
+	override void OnRegister () {
+		gl_proj		= new("NAMESPACE_GlScreen");
+		can_project	= gl_proj != NULL;
+
+		text		= "I'M A CANDLE";
+		text_offset	= 0.5 * smallfont.StringWidth(text);
+	}
+
+	// kd: Move the candle a bit.
+	override void WorldTick () {
+		if(mo) {
+			let ang = level.time * 360.0 / 69;
+			let pos = 200 * (cos(ang), sin(ang), 64.0 / 200);
+			mo.SetOrigin(base_pos + pos, true);
+		}
+	}
+
+	// kd: Spawn the candle somewhere in front of you (might be in a wall).
+	override void PlayerEntered (PlayerEvent event) {
+		let po = players [event.playernumber].mo;
+
+		if(!po) {
+			return;
+		}
+
+		let forw	= 100 * (cos(po.angle), sin(po.angle), 0);
+		base_pos	= po.vec3offset(forw.x, forw.y, 0);
+		mo			= Actor.Spawn("Candlestick", base_pos);
+
+		if(mo) {
+			mo.gravity = 0;
+		}
+	}
+
+	// kd: Draw the text over the candle if we can.
+	override void RenderOverlay (RenderEvent event) {
+		if(!can_project || !mo) {
+			return;
+		}
+
+		// kd: Always draw text the same size, no matter the resolution, then
+		// project the text.
+		let window_aspect	= 1.0 * Screen.GetWidth() / Screen.GetHeight();
+		let resolution		= 480 * (window_aspect, 1);
+		let t				= event.fractic;
+
+		gl_proj.CacheCustomResolution(resolution);
+		gl_proj.CacheFov(players [consoleplayer].fov);
+		gl_proj.OrientForRenderOverlay(event);
+		gl_proj.BeginProjection();
+		gl_proj.ProjectActorPosPortal(mo, (0, 0, mo.height), t);
+
+		if(gl_proj.IsInFront()) {
+			viewport.FromHud();
+
+			let draw_pos = viewport.SceneToCustom(
+				gl_proj.ProjectToNormal(),
+				resolution);
+
+			Screen.DrawText(
+				smallfont,
+				Font.CR_ICE,
+				draw_pos.x - text_offset,
+				draw_pos.y,
+				text,
+				DTA_VIRTUALWIDTHF,	resolution.x,
+				DTA_VIRTUALHEIGHTF,	resolution.y,
+				DTA_KEEPRATIO,		true);
+		}
+	}
+}
+#+end_src
+
+* Build
+
+#+begin_src text :tangle ../build/libeyeTestCommands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "../tools/org.py test modules/libeye.org")
+#+end_src
