@@ -794,17 +794,19 @@ version 4.14.2
 #include "zscript/cd_Effects.zs"
 #include "zscript/cd_Menu.zs"
 
-<<module("PlainTranslator")>>
+#include "zscript/PlainTranslator.zs"
 #+end_src
 
 [[file:modules/PlainTranslator.org][PlainTranslator]]
 
+#+begin_src c :tangle build/FinalCustomDoom/zscript/PlainTranslator.zs
+<<module("PlainTranslator")>>
+#+end_src
+
 #+name: module
 #+begin_src elisp :var module-name = "" :exports none
-(shell-command
-  (format "./tools/org.py export modules/%1$s.org cd_ build/FinalCustomDoom/zscript/%1$s.zs"
-          module-name))
-(format "#include \"zscript/%s.zs\"" module-name)
+(mapconcat #'identity (process-lines "python"
+  "./tools/org.py" "export" (format "modules/%s.org" module-name) "cd_") "\n")
 #+end_src
 
 #+begin_src text :tangle build/tmp.txt :exports none

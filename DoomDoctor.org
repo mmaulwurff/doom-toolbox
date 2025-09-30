@@ -161,21 +161,23 @@ GameInfo
 #+begin_src c :tangle build/DoomDoctor/zscript.zs :exports none
 version 4.12.2
 
-<<module("StringUtils")>>
-
 #include "zscript/VmAbortHandler.zs"
 #include "zscript/Troublemaker.zs"
 #include "zscript/Logger.zs"
+
+#include "zscript/StringUtils.zs"
 #+end_src
 
 [[file:modules/StringUtils.org][StringUtils]]
 
+#+begin_src c :tangle build/DoomDoctor/zscript/StringUtils.zs :exports none
+<<module("StringUtils")>>
+#+end_src
+
 #+name: module
 #+begin_src elisp :var module-name = "" :exports none
-(shell-command
-  (format "./tools/org.py export modules/%1$s.org dd_ build/DoomDoctor/zscript/%1$s.zs"
-          module-name))
-(format "#include \"zscript/%s.zs\"" module-name)
+(mapconcat #'identity (process-lines "python"
+  "./tools/org.py" "export" (format "modules/%s.org" module-name) "dd_") "\n")
 #+end_src
 
 * VM Abort Handling

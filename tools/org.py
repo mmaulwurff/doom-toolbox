@@ -13,7 +13,7 @@
 #
 # ! Warning: this script may remove files and directories in `build` directory.
 
-from os import chdir, makedirs, path
+from os import chdir, path
 from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
@@ -27,9 +27,9 @@ def help():
           "- package    build .pk3 package from ORG_FILE.\n"
           "- test       run tests for ORG_FILE.\n"
           "- tangle     convert ORG_FILE to a conventional GZDoom mod directory.\n"
-          "- export     export ORG_FILE module to a ZScript file with namespace.\n"
+          "- export     export ORG_FILE module with a namespace.\n"
           "\n"
-          "Export usage: ./tools/org.py export ORG_FILE NAMESPACE EXPORT_FILE\n")
+          "Export usage: ./tools/org.py export ORG_FILE NAMESPACE\n")
 
 def is_ignored(line, ignored_lines):
     for ignored_line in ignored_lines:
@@ -57,7 +57,8 @@ def tangle(project_file_name):
          "(progn "
              "(require 'ob-tangle)"
              "(setq org-confirm-babel-evaluate nil)"
-             "(org-babel-tangle))"])
+             "(org-babel-tangle))"],
+        capture_output=True)
 
     return build_directory_path
 
@@ -142,7 +143,7 @@ def package(project_file_name):
                            package_directory_path)
     move(archive, Path(archive).with_suffix(".pk3"))
 
-def export_module(module_file_name, namespace, export_file_name):
+def export_module(module_file_name, namespace):
     assert Path(module_file_name).exists(),\
         "file {} not found".format(path.abspath(module_file_name))
 
@@ -156,12 +157,7 @@ def export_module(module_file_name, namespace, export_file_name):
 
     replaced_contents = original_contents.replace("NAMESPACE_", namespace)
 
-    export_directory = path.dirname(export_file_name)
-    if not path.exists(export_directory):
-        makedirs(export_directory)
-
-    with open(export_file_name, "w") as export_file:
-        export_file.write(replaced_contents)
+    print(replaced_contents)
 
 
 if __name__ == "__main__":
@@ -181,7 +177,7 @@ if __name__ == "__main__":
             parametersCount = 1
         case "export":
             action = export_module
-            parametersCount = 3
+            parametersCount = 2
         case _:
             action = None
             parametersCount = None
@@ -194,8 +190,6 @@ if __name__ == "__main__":
                 action(argv[2])
             case 2:
                 action(argv[2], argv[3])
-            case 3:
-                action(argv[2], argv[3], argv[4])
         exit()
 
     if action == None:
