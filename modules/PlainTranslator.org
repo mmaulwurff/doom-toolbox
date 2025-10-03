@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: PlainTranslator
@@ -11,9 +11,9 @@
 TODO: inherit OptiomMenuItem, not OptionMenuItemStaticText
 
 #+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
-// <<GPL>>
+// <<license>>
 
-// PlainTranslator module version: 1.0.0
+// PlainTranslator module version: 1.1.0
 // PlainTranslator is a part of Doom Toolbox:
 // https://github.com/mmaulwurff/doom-toolbox/
 //
@@ -155,9 +155,9 @@ class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItem
 
 * License
 
-[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+#+name: license
 #+begin_src text :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
+SPDX-License-Identifier: BSD-3-Clause
 #+end_src

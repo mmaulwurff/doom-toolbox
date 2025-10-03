@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: StringUtils
@@ -11,9 +11,9 @@
 ** Source code
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
-// <<GPL>>
+// <<license>>
 
-// StringUtils module version: 1.1.0
+// StringUtils module version: 1.2.0
 // StringUtils is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
 #+end_src
 
@@ -558,9 +558,9 @@ EndDescribe(); }}
 
 * License
 
-[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+#+name: license
 #+begin_src text :exports none
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
+SPDX-License-Identifier: BSD-3-Clause
 #+end_src

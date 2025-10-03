@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: LazyPoints
@@ -7,7 +7,7 @@
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.4.0
+LazyPoints module version: 0.5.0
 LazyPoints is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -66,18 +66,18 @@ OptionMenu NAMESPACE_TopMenu
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
-// <<GPL>>
+// <<license>>
 
 // <<description>>
 #+end_src
 
 * License
 
-[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+#+name: license
 #+begin_src text :exports none
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
+SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
 * Source
