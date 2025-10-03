@@ -13,7 +13,7 @@
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 // <<GPL>>
 
-// StringUtils module version: 1.0.0
+// StringUtils module version: 1.1.0
 // StringUtils is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
 #+end_src
 
@@ -502,6 +502,40 @@ private Array<string> mFields;
 <<addVector3>>
 <<addState>>
 <<DescriptionPrivate>>
+#+end_src
+
+
+** ~AsciiTable~
+
+#+begin_src c :tangle ../build/StringUtils/StringUtils.zs
+
+class NAMESPACE_AsciiTable
+{
+  enum AsciiTable
+  {
+    CHARACTER_NULL = 0,
+    <<generate-table()>>
+  }
+}
+#+end_src
+#+name: generate-table
+#+begin_src elisp
+(defun number-to-ascii-enum (number)
+  (format "%s = %d" (string-replace "(" ""
+                    (string-replace ")" ""
+                    (string-replace "-" "_"
+                    (string-replace " " "_" (char-to-name number))))) number))
+
+(mapconcat 'number-to-ascii-enum (number-sequence 1 127) ",\n")
+#+end_src
+#+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
+{
+  it("ASCII tab",
+     Assert("\t" == string.format("%c", NAMESPACE_AsciiTable.CHARACTER_TABULATION)));
+
+  it("ASCII \n",
+     Assert("\n" == string.format("%c", NAMESPACE_AsciiTable.LINE_FEED_LF)));
+}
 #+end_src
 
 * Run tests :noexport:
