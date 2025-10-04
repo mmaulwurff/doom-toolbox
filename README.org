@@ -35,7 +35,8 @@ Documentation:
 
 * Social
 
-[[https://mastodon.gamedev.place/@doomtoolbox][Mastodon page]]
+- [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld]]
+- [[https://mastodon.gamedev.place/@doomtoolbox][Mastodon]]
 
 * Build
 
