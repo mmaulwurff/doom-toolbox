@@ -4,18 +4,13 @@
 
 #+title: PlainTranslator
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
-* PlainTranslator
-
-TODO: inherit OptiomMenuItem, not OptionMenuItemStaticText
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 #+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
 // <<license>>
 
 // PlainTranslator module version: 1.1.0
-// PlainTranslator is a part of Doom Toolbox:
-// https://github.com/mmaulwurff/doom-toolbox/
+// PlainTranslator is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 //
 // In GZDoom, you have two options for putting text in your menu items:
 //

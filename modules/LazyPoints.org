@@ -4,11 +4,13 @@
 
 #+title: LazyPoints
 
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
 #+name: description
 #+begin_src org
 
 LazyPoints module version: 0.5.0
-LazyPoints is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
+LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
 

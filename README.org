@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-#+title: Doom Toolbox
+#+title: DoomToolbox
 
-Doom Toolbox is a collection of add-ons for Doom-based game engines which support
+DoomToolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
 
-Doom Toolbox is free and open source software. Add-ons are mostly licensed under
+DoomToolbox is free and open source software. Add-ons are mostly licensed under
 [[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
 tag in each .org file for details. For third-party resources, such as image and sound
 files, see ~REUSE.toml~ files in their directories for licenses.
@@ -54,8 +54,7 @@ Commands:
 - ~package~ - build .pk3 package from ORG_FILE.
 - ~test~ - run tests for ORG_FILE.
 - ~tangle~ - convert ORG_FILE to a conventional GZDoom mod directory.
-- ~export ORG_FILE NAMESPACE EXPORT_FILE~ - export ORG_FILE module to a ZScript file
-  with namespace.
+- ~export ORG_FILE NAMESPACE~ - export ORG_FILE module with a namespace.
 
 Example: ~./tools/org.py test modules/StringUtils.org~
 

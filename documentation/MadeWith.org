@@ -5,7 +5,7 @@
 
 * Development
 
-Doom Toolbox is made with help of the following software:
+DoomToolbox is made with help of the following software:
 
 - [[https://zdoom.org/downloads][GZDoom]]
 - [[https://www.python.org/][Python]]: programming language for scripts
@@ -20,9 +20,3 @@ Doom Toolbox is made with help of the following software:
 
 - [[https://github.com/elfmz/far2l][far2l]]: Linux port of FAR v2 - file manager
 - Raspberry Pi OS (Debian) Trixie (13) GNU/Linux
-
-* Logo
-
-#+begin_src sh
-figlet -f slant 'Doom Toolbox' | lolcat --seed=666
-#+end_src

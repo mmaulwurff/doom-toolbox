@@ -4,7 +4,7 @@
 
 #+title: StringUtils
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
 * Preamble
 
@@ -14,7 +14,7 @@
 // <<license>>
 
 // StringUtils module version: 1.2.0
-// StringUtils is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
+// StringUtils is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 #+end_src
 
 ** Tests

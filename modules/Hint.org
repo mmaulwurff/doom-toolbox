@@ -4,16 +4,15 @@
 
 #+title: Hint
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
-* Hint
 #+begin_src c :tangle ../build/Hint/Hint.zs
 
 // SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 // SPDX-License-Identifier: BSD-3-Clause
 
 // Hint module version: 1.1.0
-// Hint is a part of Doom Toolbox: https://github.com/mmaulwurff/doom-toolbox/
+// Hint is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 // This class provides the Hint Option Menu item.
 // Hint is a static text that is visible only if the items above are selected.
