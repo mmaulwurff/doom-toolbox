@@ -1,0 +1,8 @@
+# https://reuse.software/
+
+version = 1
+
+[[annotations]]
+path = "tt-white.png"
+SPDX-FileCopyrightText = "© 2019 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC0-1.0"

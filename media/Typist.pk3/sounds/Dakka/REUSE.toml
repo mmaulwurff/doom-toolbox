@@ -1,0 +1,51 @@
+# https://reuse.software/
+
+version = 1
+
+# Rifle clip empty https://freesound.org/people/michorvath/sounds/427603/
+[[annotations]]
+path = "fail4.ogg"
+SPDX-FileCopyrightText = "© 2018 michorvath"
+SPDX-License-Identifier = "CC0-1.0"
+
+# .22 ricochet.mp3 https://freesound.org/people/cedarstudios/sounds/148827/
+[[annotations]]
+path = "fail4.ogg"
+SPDX-FileCopyrightText = "© 2012 cedarstudios"
+SPDX-License-Identifier = "CC0-1.0"
+
+# pistol_riccochet.ogg https://freesound.org/people/Diboz/sounds/213925/
+[[annotations]]
+path = "safe4.ogg"
+SPDX-FileCopyrightText = "© 2014 Diboz"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Victory Percussion Music Cue https://freesound.org/people/joshuaempyre/sounds/404024/
+[[annotations]]
+path = "safe4.ogg"
+SPDX-FileCopyrightText = "© 2017 joshuaempyre"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Pump Action Shotgun https://freesound.org/people/awrmacd/sounds/387190/
+[[annotations]]
+path = "typed*.ogg"
+SPDX-FileCopyrightText = "© 2017 awrmacd"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Blade Runner Blaster Sound https://freesound.org/people/Aris621/sounds/420687/
+[[annotations]]
+path = "success4.ogg"
+SPDX-FileCopyrightText = "© 2018 awrmacd"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Tension build up #02 https://freesound.org/people/tyops/sounds/448083/
+[[annotations]]
+path = "danger4.ogg"
+SPDX-FileCopyrightText = "© 2018 tyops"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Pistol Manipulation 01.wav https://freesound.org/people/GreenFireSound/sounds/348155/
+[[annotations]]
+path = "danger4.ogg"
+SPDX-FileCopyrightText = "© 2016 GreenFireSound"
+SPDX-License-Identifier = "CC0-1.0"

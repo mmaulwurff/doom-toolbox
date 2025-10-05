@@ -14,7 +14,7 @@ License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 // SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 // SPDX-License-Identifier: BSD-3-Clause
 
-// StringUtils module version: 1.2.0
+// StringUtils module version: 1.4.0
 // StringUtils is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 #+end_src
 
@@ -101,6 +101,109 @@ static clearscope string boolToString(bool value)
 {
   it("boolToString: true",  Assert(su.boolToString(true)  == "true"));
   it("boolToString: false", Assert(su.boolToString(false) == "false"));
+}
+#+end_src
+
+*** ~isWordDelimiter~
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope bool isWordDelimiter(int character)
+{
+  if (character == NAMESPACE_Ascii.HYPHEN_MINUS) return false;
+
+  if (character < NAMESPACE_Ascii.DIGIT_ZERO) return true;
+  if (NAMESPACE_Ascii.COLON <= character
+      && character <= NAMESPACE_Ascii.COMMERCIAL_AT) return true;
+  if (NAMESPACE_Ascii.LEFT_SQUARE_BRACKET <= character
+      && character <= NAMESPACE_Ascii.GRAVE_ACCENT) return true;
+  if (NAMESPACE_Ascii.LEFT_CURLY_BRACKET <= character
+      && character <= NAMESPACE_Ascii.DELETE) return true;
+
+  // Various unicode spaces.
+  if (0x2000 <= character && character <= 0x200B) return true;
+
+  static const int unicodeDelimiters[] =
+  {
+    0x0085, // next line
+    0x00A0, // non-breaking space
+    0x2028, // line separator
+    0x2029, // paragraph separator
+    0x202F, // narrow non-breaking space
+    0x205F, // medium mathematical space
+    0x3000  // ideographic space
+  };
+
+  foreach (unicodeDelimiter : unicodeDelimiters)
+    if (character == unicodeDelimiter) return true;
+
+  return false;
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  it("isWordDelimiter: space", Assert(su.isWordDelimiter(Ascii.SPACE)));
+  it("isWordDelimiter: comma", Assert(su.isWordDelimiter(Ascii.COMMA)));
+  it("isWordDelimiter: non-breaking space", Assert(su.isWordDelimiter(0x00A0)));
+
+  it("isWordDelimiter: a", Assert(!su.isWordDelimiter(Ascii.LATIN_SMALL_LETTER_A)));
+  it("isWordDelimiter: 0", Assert(!su.isWordDelimiter(Ascii.DIGIT_ZERO)));
+  it("isWordDelimiter: hyphen", Assert(!su.isWordDelimiter(Ascii.HYPHEN_MINUS)));
+}
+#+end_src
+
+*** ~splitByWords~
+
+Splits a UTF-8 text by words. Characters considered word delimiters: ASCII control
+characters, space, comma (','), period ('.'). Delimiters are not included in the
+output.
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope void splitByWords(string text, out Array<string> words)
+{
+  int length = text.length();
+  string currentWord;
+  for (int i = 0; i < length;)
+  {
+    int character;
+    [character, i] = text.getNextCodePoint(i);
+
+    if (!isWordDelimiter(character))
+    {
+      currentWord.appendCharacter(character);
+      continue;
+    }
+
+    if (currentWord.length() != 0)
+    {
+      words.push(currentWord);
+      currentWord = "";
+    }
+  }
+
+  if (currentWord.length() != 0)
+    words.push(currentWord);
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  Array<string> words;
+  su.splitByWords("", words);
+  it("split empty", Assert(words.size() == 0));
+} {
+  Array<string> words;
+  su.splitByWords("hello", words);
+  it("one word", Assert(words.size() == 1 && words[0] == "hello"));
+} {
+  Array<string> words;
+  su.splitByWords("hello-world", words);
+  it("one word with -", Assert(words.size() == 1 && words[0] == "hello-world"));
+} {
+  Array<string> words;
+  su.splitByWords(" hello   world \n ", words);
+  it("two words, many spaces",
+     Assert(words.size() == 2 && words[0] == "hello" && words[1] == "world"));
 }
 #+end_src
 
@@ -433,16 +536,25 @@ NAMESPACE_Description addState(string name, State aState)
 }
 #+end_src
 
-** ~AsciiTable~
+** ~Ascii~
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 
-class NAMESPACE_AsciiTable
+class NAMESPACE_Ascii
 {
-  enum AsciiTable
+  enum _
   {
     CHARACTER_NULL = 0,
-    <<generate-table()>>
+    <<generate-table()>>,
+    END
+  }
+
+  const FIRST_PRINTABLE = SPACE;
+  const CASE_DIFFERENCE = LATIN_SMALL_LETTER_A - LATIN_CAPITAL_LETTER_A;
+
+  static bool isControlCharacter(int code)
+  {
+    return code < NAMESPACE_Ascii.SPACE || code == NAMESPACE_Ascii.DELETE;
   }
 }
 #+end_src
@@ -458,11 +570,13 @@ class NAMESPACE_AsciiTable
 #+end_src
 #+begin_src c :noweb-ref TestsBody
 {
-  it("ASCII tab",
-     Assert("\t" == string.format("%c", NAMESPACE_AsciiTable.CHARACTER_TABULATION)));
+  it("ASCII tab", Assert("\t" == string.format("%c", Ascii.CHARACTER_TABULATION)));
+  it("ASCII \\n", Assert("\n" == string.format("%c", Ascii.LINE_FEED_LF)));
 
-  it("ASCII \\n",
-     Assert("\n" == string.format("%c", NAMESPACE_AsciiTable.LINE_FEED_LF)));
+  it("ASCII ',' is not a control character",
+     Assert(!Ascii.isControlCharacter(Ascii.COMMA)));
+  it("ASCII '\\n' is a control character",
+     Assert(Ascii.isControlCharacter(Ascii.LINE_FEED_LF)));
 }
 #+end_src
 
@@ -481,6 +595,7 @@ version 4.12.2
 
 class su : NAMESPACE_su {}
 class Description : NAMESPACE_Description {}
+class Ascii : NAMESPACE_Ascii {}
 
 class su_Test : Clematis
 {

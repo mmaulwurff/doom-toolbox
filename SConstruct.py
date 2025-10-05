@@ -25,6 +25,9 @@ DefaultEnvironment(ENV=environ.copy())
 
 # TODO: Instead of copying all LICENSES, copy only needed. Use Reuse?
 
+# TODO: fix parallel builds (-j 4). Check with moules of Typist.pk3.
+# May be a problem with cleaning, if main target is built after a module.
+
 def make_project_name(org_file):
   return path.splitext(path.basename(org_file))[0]
 
@@ -122,6 +125,10 @@ def add_dependency(project, module, namespace):
 
 add_dependency('DoomDoctor', 'StringUtils', 'dd_')
 add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
+
+add_dependency('Typist.pk3', 'libeye', 'tt_le_')
+add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
+add_dependency('Typist.pk3', 'StringUtils', 'tt_su_')
 
 Help(f"""
 Modules:

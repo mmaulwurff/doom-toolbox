@@ -1,0 +1,33 @@
+# https://reuse.software/
+
+version = 1
+
+# Wrong answer. https://freesound.org/people/SgtPepperArc360/sounds/341732/
+[[annotations]]
+path = "fail1.ogg"
+SPDX-FileCopyrightText = "© 2016 SgtPepperArc360"
+SPDX-License-Identifier = "CC-BY-NC-4.0"
+
+# UI Confirmation Alert, B4.wav https://freesound.org/people/InspectorJ/sounds/403014/
+[[annotations]]
+path = "safe1.ogg"
+SPDX-FileCopyrightText = "© 2017 InspectorJ"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Writing on keyboard Sound Effect [Typing] (1).mp3 https://freesound.org/people/kayliebenson/sounds/474241/
+[[annotations]]
+path = "typea*.ogg"
+SPDX-FileCopyrightText = "© 2019 kayliebenson"
+SPDX-License-Identifier = "CC0-1.0"
+
+# UI Confirmation Alert, A4.wav https://freesound.org/people/InspectorJ/sounds/403005/
+[[annotations]]
+path = "success1.ogg"
+SPDX-FileCopyrightText = "© 2017 InspectorJ"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# klaxon2.wav https://freesound.org/people/ryansnook/sounds/103580/
+[[annotations]]
+path = "danger1.ogg"
+SPDX-FileCopyrightText = "© 2010 ryansnook"
+SPDX-License-Identifier = "CC-BY-NC-4.0"

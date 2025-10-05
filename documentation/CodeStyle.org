@@ -6,6 +6,7 @@
 * Capitalization
 
 - classes and structs: ~CapitalizedWords~
+  - example: ~EventHandler~, ~Array~
   - exceptions: ~string~, ~vector2~, ~vector3~, ~name~
 
 - classes with prefix: ~prefix_CapitalizedWords~
@@ -39,3 +40,7 @@ Minimize the use of abbreviations. Capitalize abbreviations as single words (~Ht
 * Language
 
 See [[../.dir-locals.el]] for spellcheck settings.
+
+* Encoding
+
+ASCII or UTF-8.

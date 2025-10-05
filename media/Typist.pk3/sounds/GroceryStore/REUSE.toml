@@ -1,0 +1,45 @@
+# https://reuse.software/
+
+version = 1
+
+# Trash can falling https://freesound.org/people/Nestra/sounds/498434/
+[[annotations]]
+path = "fail5.ogg"
+SPDX-FileCopyrightText = "© 2019 Nestra"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Cash Register Purchase https://freesound.org/people/Zott820/sounds/209578/
+[[annotations]]
+path = "safe5.ogg"
+SPDX-FileCopyrightText = "© 2013 Zott820"
+SPDX-License-Identifier = "CC0-1.0"
+
+# cashRegister.wav https://freesound.org/people/Timbijnen/sounds/212848/
+[[annotations]]
+path = "typee*.ogg"
+SPDX-FileCopyrightText = "© 2014 Timbijnen"
+SPDX-License-Identifier = "CC-BY-NC-4.0"
+
+# 20080928.coins.05.wav https://freesound.org/people/dobroide/sounds/60769/
+[[annotations]]
+path = "success5.ogg"
+SPDX-FileCopyrightText = "© 2008 dobroide"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# cash register.wav https://freesound.org/people/monotraum/sounds/387992/
+[[annotations]]
+path = "success5.ogg"
+SPDX-FileCopyrightText = "© 2017 monotraum"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Large hydraulic door https://freesound.org/people/nooly/sounds/331357/
+[[annotations]]
+path = "danger5.ogg"
+SPDX-FileCopyrightText = "© 2015 nooly "
+SPDX-License-Identifier = "CC-BY-3.0"
+
+# MEDIUM COWBELL OF GOD 029.wav https://freesound.org/people/Suicidity/sounds/90997/
+[[annotations]]
+path = "danger5.ogg"
+SPDX-FileCopyrightText = "© 2010 Suicidity"
+SPDX-License-Identifier = "CC0-1.0"

@@ -1,0 +1,52 @@
+# https://reuse.software/
+
+version = 1
+
+# sneserrors.wav https://freesound.org/people/Felfa/sounds/180224/
+[[annotations]]
+path = "sneserrors.ogg"
+SPDX-FileCopyrightText = "© 2013 Felfa"
+SPDX-License-Identifier = "CC0-1.0"
+
+# TODO: replace with a sound with a license that is in SPDX
+# feeeelllgood.wav https://freesound.org/people/Matthus/sounds/41245/
+[[annotations]]
+path = "safe2.ogg"
+SPDX-FileCopyrightText = "© 2011 MakoFox"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Button Mashing https://freesound.org/people/longarms/sounds/273358/
+[[annotations]]
+path = "typeb*.ogg"
+SPDX-FileCopyrightText = "© 2015 longarms"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Shining 8 bit https://freesound.org/people/Mrthenoronha/sounds/399904/
+[[annotations]]
+path = "success2.ogg"
+SPDX-FileCopyrightText = "© 2017 Mrthenoronha"
+SPDX-License-Identifier = "CC-BY-NC-4.0"
+
+# swords.wav https://freesound.org/people/hello_flowers/sounds/37605/
+[[annotations]]
+path = "success2.ogg"
+SPDX-FileCopyrightText = "© 2007 hello_flowers"
+SPDX-License-Identifier = "CC0-1.0"
+
+# swosh.aif https://freesound.org/people/man/sounds/14609/
+[[annotations]]
+path = "success2.ogg"
+SPDX-FileCopyrightText = "© 2006 man"
+SPDX-License-Identifier = "CC-BY-3.0"
+
+# Sword Slice 05.wav https://freesound.org/people/Black%20Snow/sounds/109414/
+[[annotations]]
+path = "danger2.ogg"
+SPDX-FileCopyrightText = "© 2010 Black Snow"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Menu Interface - Confirm 004.wav https://freesound.org/people/DWOBoyle/sounds/143606/
+[[annotations]]
+path = "danger2.ogg"
+SPDX-FileCopyrightText = "© 2012 DWOBoyle"
+SPDX-License-Identifier = "CC-BY-4.0"
