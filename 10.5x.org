@@ -818,28 +818,18 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 * ZScript :noexport:
 
 #+begin_src c :tangle build/10.5x/zscript.zs
+
 version <<zscript-version>>
 
-#include "zscript/OptionMenuItemX5Slider.zs"
-#include "zscript/OptionMenuItemX5TypeSlider.zs"
-#include "zscript/x5_TypeMultipliersMenu.zs"
-
-#include "zscript/x5_EventHandler.zs"
-#include "zscript/x5_Killer.zs"
-#include "zscript/x5_Freezer.zs"
-#include "zscript/x5_WalkAbilityWatcher.zs"
+<<tools/scripts.org:include("10.5x.org", "build/10.5x/\\(zscript/.*zs\\)")>>
 #+end_src
 
 * Sprites
 
 sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 
-#+name: copy-media
-#+begin_src elisp :exports none
-(copy-directory "media/10.5x" "build/10.5x" nil t t)
-#+end_src
 #+begin_src text :tangle build/tmp.txt :exports none
-<<copy-media()>>
+<<tools/scripts.org:copy-media("10.5x")>>
 #+end_src
 
 * Tests

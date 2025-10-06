@@ -144,9 +144,6 @@ def package(project_file_name):
     move(archive, Path(archive).with_suffix(".pk3"))
 
 def export_module(module_file_name, namespace):
-    assert Path(module_file_name).exists(),\
-        "file {} not found".format(path.abspath(module_file_name))
-
     build_directory_path = tangle(module_file_name)
     module_file_base_name = path.splitext(path.basename(module_file_name))[0]
     zscript_file_name = (build_directory_path / module_file_base_name)\

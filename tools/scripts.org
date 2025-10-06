@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: BSD-3-Clause
+
+#+title: Scripts
+
+Various utility scripts for DoomToolbox development.
+
+* Include
+
+Lists includes from ~org-file~ by ~regexp~. ~regexp~ must contain a group with
+zscript file name. Exammple: ~"build/MyMod/\\(zscript/.*zs\\)"~.
+
+#+name: include
+#+begin_src elisp :var org-file="" :var regexp=""
+
+(mapconcat
+ (lambda (string) (format "#include \"%s\"" string))
+ (let ((contents (with-temp-buffer
+                   (insert-file-contents (concat "../" org-file))
+                   (buffer-string)))
+       (position 0)
+       result)
+   (while (string-match regexp contents position)
+     (cl-pushnew (match-string 1 contents) result :test #'string=)
+     (setq position (match-end 0)))
+   result)
+ "\n")
+#+end_src
+
+* Copy Media Files
+
+Copies the directory from media directory to the corresponding directory in build by
+~mod-name~.
+
+#+name: copy-media
+#+begin_src elisp :var mod-name=""
+
+(copy-directory
+ (concat "../media/" mod-name)
+ (concat "../build/" mod-name) nil t t)
+#+end_src
+
+* Import Module
+
+#+name: import-module
+#+begin_src elisp :var module-name="" :var namespace=""
+
+(mapconcat #'identity
+           (process-lines "python" "../tools/org.py"
+                          "export" (format "modules/%s.org" module-name) namespace)
+           "\n")
+#+end_src

@@ -73,15 +73,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 version 4.14.2
 
-#include "zscript/tl_EventHandler.zs"
-#include "zscript/tl_Test.zs"
-
-// TODO: move these to a module?
-#include "zscript/tl_Eval.zs"
-#include "zscript/tl_Expression.zs"
-#include "zscript/tl_Env.zs"
-#include "zscript/tl_Parser.zs"
-#include "zscript/tl_Globals.zs"
+<<../tools/scripts.org:include("experiments/LispOnZscript.org", "build/LispOnZscript/\\(zscript/.*zs\\)")>>
 #+end_src
 
 * Test
