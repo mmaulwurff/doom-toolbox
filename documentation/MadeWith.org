@@ -19,4 +19,5 @@ DoomToolbox is made with help of the following software:
 * Environment
 
 - [[https://github.com/elfmz/far2l][far2l]]: Linux port of FAR v2 - file manager
+- [[https://sw.kovidgoyal.net/kitty/][kitty]] terminal emulator
 - Raspberry Pi OS (Debian) Trixie (13) GNU/Linux
