@@ -49,6 +49,9 @@ def tangle(project_file_name):
     build_directory_path = Path("build/" + project_file_base_name)
     rmtree(build_directory_path, True)
 
+    test_directory_path = Path("build/" + project_file_base_name + "Test")
+    rmtree(test_directory_path, True)
+
     run(["emacs",
          project_file_name,
          "--quick",
