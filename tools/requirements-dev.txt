@@ -4,4 +4,5 @@
 # This is the list of Python packages requirements for DoomToolbox.
 # Usage (in this directory): `pip install -r requirements-dev.txt`
 
-pre-commit
+pre-commit == 4.3
+reuse == 5.1
