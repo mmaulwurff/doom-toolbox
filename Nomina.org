@@ -367,13 +367,26 @@ class nat_EventHandler : StaticEventHandler
 
 * Run tests
 
-#+begin_src text :tangle build/NominaTestCommands.txt
-wait 2; map map01;
-wait 2; na_rename nat_NamelessToRename Renamed To Several Words;
-wait 2; summon nat_NamelessToRename;
-wait 9; quit
+#+name: init-wait
+#+begin_src elisp
+(setq wait-delay 0)
+""
+#+end_src
+
+#+name: wait
+#+begin_src elisp :var new-delay=2
+(setq wait-delay (+ new-delay wait-delay))
+(format "wait %d" wait-delay)
+#+end_src
+
+#+begin_src text :tangle build/NominaTest/commands.txt
+<<init-wait()>>
+<<wait(2)>>; map map01
+<<wait(2)>>; na_rename nat_NamelessToRename Renamed To Several Words
+<<wait(2)>>; summon nat_NamelessToRename
+<<wait(9)>>; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "./tools/org.py test Nomina.org")
+(compile "scons -Q NominaTest")
 #+end_src

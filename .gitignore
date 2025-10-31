@@ -12,6 +12,7 @@
 !.editorconfig
 !.gitattributes
 !.gitignore
+!SConstruct
 
 # and these file types:
 !*.en.pws

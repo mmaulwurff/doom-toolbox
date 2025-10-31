@@ -791,13 +791,13 @@ cd_Weapon_damage_multiplier = "Множитель урона от оружия";
 version 4.14.2
 
 <<tools/scripts.org:include("FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
+
+#include "zscript/cd_PlainTranslator.zs"
 #+end_src
+
+Note: ~cd_PlainTranslator.zs~ must be installed externally.
 
 [[file:modules/PlainTranslator.org][PlainTranslator]]
-
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_PlainTranslator.zs
-<<tools/scripts.org:import-module("PlainTranslator", "cd_")>>
-#+end_src
 
 #+begin_src text :tangle build/tmp.txt :exports none
 <<tools/scripts.org:copy-media("FinalCustomDoom")>>
@@ -1381,11 +1381,11 @@ class cde_Effects
 
 * Run :noexport:
 
-#+begin_src text :tangle build/FinalCustomDoomTestCommands.txt
+#+begin_src text :tangle build/FinalCustomDoomTest/commands.txt
 wait 2; openmenu cd_menu
 wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "./tools/org.py test FinalCustomDoom.org")
+(compile "scons -Q FinalCustomDoomTest")
 #+end_src

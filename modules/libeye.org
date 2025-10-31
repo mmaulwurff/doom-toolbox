@@ -1531,10 +1531,11 @@ class TextCandleGl : EventHandler {
 
 * Build
 
-#+begin_src text :tangle ../build/libeyeTestCommands.txt
+#+begin_src text :tangle ../build/libeyeTest/commands.txt
+
 wait 2; map map01; wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "../tools/org.py test modules/libeye.org")
+(compile "cd ..; scons -Q libeyeTest")
 #+end_src

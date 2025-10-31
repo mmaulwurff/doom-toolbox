@@ -1060,10 +1060,11 @@ version 4.14.0
 #include "LazyPoints.zs"
 #+end_src
 
-#+begin_src text :tangle ../build/LazyPointsTestCommands.txt
+#+begin_src text :tangle ../build/LazyPointsTest/commands.txt
+
 wait 2; map map01; wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "../tools/org.py test modules/LazyPoints.org")
+(compile "cd ..; scons LazyPointsTest")
 #+end_src

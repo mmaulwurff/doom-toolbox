@@ -1,0 +1,136 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+# This is build definitions for DoomToolbox.
+# See https://scons.github.io/docs/scons-user.html for details.
+
+from os import environ, path
+from pathlib import Path
+from re import search, MULTILINE
+from shutil import copy, copytree, make_archive, move, rmtree
+from subprocess import run, PIPE, STDOUT
+
+Decider('timestamp-match')
+Default(None)
+DefaultEnvironment(ENV=environ.copy())
+
+# TODO: test on Windows.
+
+# TODO: move autoadvance to config.ini?
+#+wi_autoadvance 1\
+
+# TODO: add exit code to GZDoom "quit" CCMD.
+
+# TODO: add targets to build all packages and to run all tests.
+
+# TODO: Instead of copying all LICENSES, copy only needed. Use Reuse?
+
+def make_project_name(org_file):
+  return path.splitext(path.basename(org_file))[0]
+
+def add_main_target(org_file, target_format):
+  name = make_project_name(org_file)
+  zscript_name = target_format.format(name)
+
+  tangle = 'emacs $SOURCE --quick --batch --eval "\
+    (progn (require \'ob-tangle)\
+           (setq org-confirm-babel-evaluate nil)\
+           (org-babel-tangle))"'
+
+  def clean(target, source, env):
+    rmtree(f'build/{name}', True)
+
+  return Alias(name, Command(target=zscript_name, source=org_file, action=[clean, tangle]))
+
+def add_test_target(org_file, main_target):
+  name = make_project_name(org_file)
+  test_name = f'{name}Test'
+
+  def run_test(target, source, env):
+    args = ['gzdoom',
+            '-noautoload',
+            '-nosound',
+            '-config', 'build/config.ini',
+            '-iwad', 'tools/miniwad.wad',
+            '-file',
+              'tools/ClematisM-v2.1.0.pk3',
+              f'build/{name}',
+              f'build/{name}Test',
+            f'+exec build/{name}Test/commands.txt']
+
+    if not Path("build/config.ini").exists():
+      copy("tools/config.ini", "build/config.ini")
+
+    result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args)
+
+    with open('tools/IgnoredGzdoomOutput.txt') as lines_to_skip_file:
+      lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
+
+    def printable(line):
+      return not any([search(to_skip, line) for to_skip in lines_to_skip])
+
+    for line in filter(printable, result.stdout.splitlines()):
+      # TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
+      print(line)
+
+  return AlwaysBuild(Alias(test_name, main_target, run_test))
+
+def add_pack_target(org_file, main_target):
+  name = make_project_name(org_file)
+  pack_name = f'{name}Pack'
+  build_path = Path(f'build/{name}')
+
+  def pack(target, source, env):
+    with open(org_file) as project_file:
+      project_content = project_file.read()
+
+    found = search('^#[+]title: (.*)$', project_content, flags=MULTILINE)
+    assert found != None, 'no title found'
+
+    title = found.group(1).replace(' ', '-')
+    copytree('LICENSES', build_path/'LICENSES', dirs_exist_ok=True)
+    copytree('documentation', build_path/'documentation', dirs_exist_ok=True)
+
+    archive = make_archive(build_path, 'zip', build_path)
+    move(archive, Path(archive).with_suffix('.pk3'))
+
+  return AlwaysBuild(Alias(pack_name, main_target, pack))
+
+module_targets = []
+for org_file in Glob('modules/*.org'):
+  main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
+  test_target = add_test_target(org_file, main_target)
+  module_targets.append(f'{main_target[0]}, {test_target[0]}')
+
+project_targets = []
+for org_file in Glob('*.org') + Glob('experiments/*.org'):
+  if str(org_file) != 'README.org':
+    main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
+    test_target = add_test_target(org_file, main_target)
+    pack_target = add_pack_target(org_file, main_target)
+    project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+
+def add_dependency(project, module, namespace):
+  def export_module(target, source, env):
+    with open(target[0], 'w') as target_file:
+      with open(source[0]) as module_file:
+        target_file.write(module_file.read().replace('NAMESPACE_', namespace))
+
+  Depends(project, Command(target=f'build/{project}/zscript/{namespace}{module}.zs',
+                           source=f'build/{module}/{module}.zs',
+                           action=export_module))
+
+add_dependency('DoomDoctor', 'StringUtils', 'dd_')
+add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
+
+Help(f"""
+Modules:
+
+- {'\n- '.join(module_targets)}
+
+Projects:
+
+- {'\n- '.join(project_targets)}
+
+type 'scons <target>' to build a target.
+""", append=False)

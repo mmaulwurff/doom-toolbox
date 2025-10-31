@@ -1251,10 +1251,10 @@ class tl_Globals
 
 * Run
 
-#+begin_src text :tangle ../build/LispOnZscriptTestCommands.txt
+#+begin_src text :tangle ../build/LispOnZscriptTest/commands.txt
 wait 2; map map01; wait 2; netevent lisp-test; wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "../tools/org.py test experiments/LispOnZscript.org")
+(compile "cd ..; scons -Q LispOnZscriptTest")
 #+end_src

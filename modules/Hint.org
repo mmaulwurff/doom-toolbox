@@ -6,6 +6,8 @@
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
+* Source
+
 #+begin_src c :tangle ../build/Hint/Hint.zs
 
 // SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
@@ -61,4 +63,22 @@ class OptionMenuItemNAMESPACE_Hint : OptionMenuItemStaticText
 
   private int _nAbove;
 }
+#+end_src
+
+* Tests :noexport:
+
+#+begin_src c :tangle ../build/Hint/zscript.zs
+
+version 4.12.2
+
+#include "Hint.zs"
+#+end_src
+
+#+begin_src text :tangle ../build/HintTest/commands.txt
+
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "cd ..; scons HintTest")
 #+end_src

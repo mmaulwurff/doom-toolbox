@@ -6,8 +6,13 @@
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
+* Source
+
+License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
 #+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
-// <<license>>
+// SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
 
 // PlainTranslator module version: 1.1.0
 // PlainTranslator is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
@@ -148,11 +153,20 @@ class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItem
 }
 #+end_src
 
-* License
+* Tests :noexport:
 
-[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: BSD-3-Clause
+#+begin_src c :tangle ../build/PlainTranslator/zscript.zs
+
+version 4.12.2
+
+#include "PlainTranslator.zs"
+#+end_src
+
+#+begin_src text :tangle ../build/PlainTranslatorTest/commands.txt
+
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "cd ..; scons PlainTranslatorTest")
 #+end_src

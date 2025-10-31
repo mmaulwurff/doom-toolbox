@@ -6,3 +6,4 @@
 
 pre-commit == 4.3
 reuse == 5.1
+scons == 4.10

@@ -40,13 +40,21 @@ Copies the directory from media directory to the corresponding directory in buil
  (concat "../build/" mod-name) nil t t)
 #+end_src
 
-* Import Module
+* Waiting for file exec
 
-#+name: import-module
-#+begin_src elisp :var module-name="" :var namespace=""
+Peculiar behavior for command files executed by GZDoom with ~exec~: ~wait~ command
+from a line doesn't affect the time of execution of the next line. So, we need a
+convenient way to force command sequence. So, use ~<<wait(N)>>~ instead of ~wait N~.
+Before calling ~<<wait(N)>>~, call ~<<init-wait()>>~ once.
 
-(mapconcat #'identity
-           (process-lines "python" "../tools/org.py"
-                          "export" (format "modules/%s.org" module-name) namespace)
-           "\n")
+#+name: init-wait
+#+begin_src elisp
+(setq wait-delay 0)
+""
+#+end_src
+
+#+name: wait
+#+begin_src elisp :var new-delay=2
+(setq wait-delay (+ new-delay wait-delay))
+(format "wait %d" wait-delay)
 #+end_src
