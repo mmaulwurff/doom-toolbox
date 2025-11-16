@@ -16,6 +16,7 @@ Add-ons:
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
 - [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][ZDoom forum topic]])
 - [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][ZDoom forum topic]])
+- [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][ZDoom forum topic]])
 
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
