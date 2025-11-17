@@ -3952,115 +3952,6 @@ class tt_Math
 
 * Menu
 
-** ~ListMenuNote~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/menu/list_menu_note.zs
-
-// This class draws a note at the bottom of the screen.
-// It respects tt_show_notes CVar.
-class tt_ListMenuNote : ListMenuItem
-{
-  tt_ListMenuNote init()
-  {
-    add("\"The situation is so much better for programmers today - a cheap used PC, "
-        "a linux CD, and an internet account, and you have all the tools necessary "
-        "to work your way to any level of programming skill you want to shoot for.\"\n"
-        " - John Carmack");
-
-    add("Tip: Look for an ancient guardian beast in the code.");
-
-    add("\"Explicit is better than implicit.\"\n"
-        " - Tim Peters, The Zen of Python");
-
-    add("doomwiki.org is the Doom Wiki.");
-
-    add("\"For every complex problem there is an answer that is clear, simple, and wrong.\"\n"
-        " - H. L. Mencken");
-
-    add("#include <stdio.h>\n"
-        "int main() { printf(\"Hello, World!\"); return 0; }");
-
-    add("#include <iostream>\n"
-        "int main() { std::cout << \"Hello, World!\" << std::endl; return 0; }");
-
-    add("#!/bin/sh\n"
-        "echo \"Hello, World!\"");
-
-    add("#!python3\n"
-        "if __name__ == \"__main__\":\n"
-        "    print(\"Hello, World!\")");
-
-    add("\"Never send a human to do a machine’s job.\"\n"
-        " - Agent Smith, The Matrix");
-
-    Super.Init();
-    return self;
-  }
-
-  override void OnMenuCreated()
-  {
-    _iString = random(0, _strings.size() - 1);
-  }
-
-  override void Drawer(bool selected)
-  {
-    // unused: selected
-
-    if (!tt_show_notes)
-    {
-      return;
-    }
-
-    int    width  = (Screen.GetWidth() / CleanXFac_1) * 3 / 4;
-    let    lines  = NewSmallFont.BreakLines(_strings[_iString], width);
-    int    nLines = lines.Count();
-    double height = NewSmallFont.GetHeight();
-    double y      = Screen.GetHeight() - MARGIN - height * nLines * CleanYFac_1;
-
-    for (int i = 0; i < nLines; ++i)
-    {
-      double x = Screen.GetWidth() - MARGIN - lines.StringWidth(i) * CleanXFac_1;
-      Screen.DrawText( NewSmallFont, Font.CR_WHITE, x, y, lines.StringAt(i)
-                     , DTA_CleanNoMove_1, true
-                     );
-      y += height * CleanYFac_1;
-    }
-  }
-
-  private ui void add(String s)
-  {
-    _strings.push(s);
-  }
-
-  const MARGIN = 10;
-
-  // Must contain at least 1 string.
-  private ui Array<String> _strings;
-  private ui uint          _iString;
-}
-#+end_src
-
-** ~MenuInjector~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/menu/menu_injector.zs
-
-// This class is a part of a workaround to run ZScript code before the level is
-// started.
-// tt_MenuInjector menu item needs to be instantiated in some menu in menudef.
-// Menu itself doesn't have to be included anywhere.
-class OptionMenuItemtt_MenuInjector : OptionMenuItem
-{
-  void Init()
-  {
-    let mainDescriptor = ListMenuDescriptor(MenuDescriptor.GetDescriptor("MainMenu"));
-    let textDescriptor = ListMenuDescriptor(MenuDescriptor.GetDescriptor("MainMenuTextOnly"));
-
-    mainDescriptor.mItems.Push(new("tt_ListMenuNote").init());
-    textDescriptor.mItems.Push(new("tt_ListMenuNote").init());
-  }
-}
-#+end_src
-
 ** ~AnimatedSubmenu~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/menu/option_menu_item_animated_submenu.zs
@@ -8649,10 +8540,6 @@ server bool   tt_rc_symbols_enabled           = false;
 server bool   tt_rc_custom_enabled = false;
 server string tt_rc_custom         = "";
 
-// Menu variables //////////////////////////////////////////////////////////////
-
-server bool tt_show_notes = true;
-
 // Variables for score /////////////////////////////////////////////////////////
 
 nosave string tt_lp_score = "";
@@ -8720,7 +8607,6 @@ TT_SCORE  = "Open Score";
 TT_DISPLAY_OPTIONS_TITLE_OUT  = "Display Options";
 TT_DISPLAY_OPTIONS_TITLE_IN   = "Typist.pk3 Display Options";
 TT_TARGET_SCALE               = "Target text scale";
-TT_SHOW_NOTES                 = "Notes in Main Menu";
 TT_SCREEN_SAVER               = "Screensaver";
 
 TT_GAMEPLAY_OPTIONS_TITLE_OUT = "Gameplay Options";
@@ -8848,7 +8734,6 @@ OptionMenu tt_DisplayOptions
   Slider     "$TT_TARGET_SCALE", tt_view_scale, 1, 4, 1, 0
 
   StaticText ""
-  Option     "$TT_SHOW_NOTES"   , tt_show_notes  , OnOff
   Option     "$TT_SCREEN_SAVER" , tt_screensaver , OnOff
 }
 
@@ -8975,15 +8860,6 @@ OptionMenu tt_CommandOptions
   StaticText ""
   TextField  "$TT_RELOAD"        , tt_command_reload
   Command    "$TT_RESET_COMMAND" , tt_reset_reload_command
-}
-
-// Helper Menu /////////////////////////////////////////////////////////////////
-
-// This menu is a part of a workaround to run ZScript code before the level is
-// started.
-OptionMenu tt_MenuInjector
-{
-  tt_MenuInjector
 }
 
 // Option Values ///////////////////////////////////////////////////////////////
