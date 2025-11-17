@@ -6,6 +6,8 @@
 
 Typist.pk3 turns FPS games into typing exercises.
 
+TODO: add instructions.
+
 * PlayerHandler
 
 ** ~PlayerHandler~
@@ -171,9 +173,9 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let radarStaleMarker = tt_StaleMarkerImpl   .of(clock);
     let radarCacheDirty  = tt_TargetSourceCache .of(targetRadar, radarStaleMarker);
     let radarCache       = tt_TargetSourcePruner.of(radarCacheDirty);
-    let questionSource   = makeQuestionSource(settings, playerSource);
+    let lesson   = makeLesson(settings, playerSource);
 
-    let targetRegistry = makeTargetRegistry(radarCache, questionSource, deathReporter, clock);
+    let targetRegistry = makeTargetRegistry(radarCache, lesson, deathReporter, clock);
 
     let answerStateSource  = tt_PressedAnswerState.of();
     let targetOriginSource = makeTargetOriginSource( targetRegistry
@@ -327,57 +329,43 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     return aimer;
   }
 
+  // TODO: restore this doc.
   // Attention: see docs/adding-new-lesson.md before editing this function.
-  private static tt_QuestionSource makeQuestionSource(tt_Settings settings,
-                                                      tt_PlayerSource playerSource)
+  // TODO: make string set lessons set data?
+  private static tt_Lesson makeLesson(tt_Settings settings,
+                                      tt_PlayerSource playerSource)
   {
     let randomLessonSettings = tt_RandomCharactersLessonSettingsImpl.of(playerSource);
 
-    let randomSource   = tt_RandomCharactersLesson.of(randomLessonSettings);
-    let selectedSource = tt_SelectedQuestionSource.of(settings);
-    let gzdoomSource   = tt_StringSet.of("tt_gzdoom");
-    let cppSource      = tt_StringSet.of("tt_cpp");
-    let mathsSource    = tt_MathsLesson.of();
-    let english1000    = tt_StringSet.of("tt_1000");
-    let russian1000    = tt_StringSet.of("tt_1000_ru");
-    let customLesson   = tt_StringSet.of("typist_custom_text");
-    let nixLesson      = tt_StringSet.of("tt_nix");
+    let random      = tt_RandomCharactersLesson.of(randomLessonSettings);
+    let gzdoom      = tt_StringSet.of("tt_gzdoom");
+    let cpp         = tt_StringSet.of("tt_cpp");
+    let maths       = tt_MathsLesson.of();
+    let english1000 = tt_StringSet.of("tt_1000");
+    let russian1000 = tt_StringSet.of("tt_1000_ru");
+    let custom      = tt_StringSet.of("typist_custom_text");
+    let nix         = tt_StringSet.of("tt_nix");
 
-    let mixedLesson    = tt_MixedLesson.of(settings);
+    Array<tt_Lesson> lessonsForMixed =
+      {random, gzdoom, cpp, maths, english1000, russian1000, custom, nix};
+    let mixed = tt_MixedLesson.of(settings, lessonsForMixed);
 
-    selectedSource.add(randomSource);
-    selectedSource.add(gzdoomSource);
-    selectedSource.add(cppSource   );
-    selectedSource.add(mathsSource );
-    selectedSource.add(english1000 );
-    selectedSource.add(russian1000 );
-    selectedSource.add(mixedLesson );
-    selectedSource.add(customLesson);
-    selectedSource.add(nixLesson   );
-
-    mixedLesson.add(randomSource);
-    mixedLesson.add(gzdoomSource);
-    mixedLesson.add(cppSource   );
-    mixedLesson.add(mathsSource );
-    mixedLesson.add(english1000 );
-    mixedLesson.add(russian1000 );
-    mixedLesson.add(customLesson);
-    mixedLesson.add(nixLesson   );
-
-    return selectedSource;
+    Array<tt_Lesson> lessonsForSelection =
+      {random, gzdoom, cpp, maths, english1000, russian1000, mixed, custom, nix};
+    return tt_SelectedLesson.of(settings, lessonsForSelection);
   }
 
   private static void makeCommands(tt_PlayerSource    playerSource,
                                    tt_CommandSettings settings,
                                    out Array<tt_Activatable> activatables)
   {
-    activatables.Push(tt_Sphinx       .of());
-    activatables.Push(tt_Reloader     .of(playerSource, settings));
+    activatables.push(tt_Sphinx       .of());
+    activatables.push(tt_Reloader     .of(playerSource, settings));
 
-    activatables.Push(tt_RightDasher  .of(playerSource, settings));
-    activatables.Push(tt_LeftDasher   .of(playerSource, settings));
-    activatables.Push(tt_BackDasher   .of(playerSource, settings));
-    activatables.Push(tt_ForwardDasher.of(playerSource, settings));
+    activatables.push(tt_RightDasher  .of(playerSource, settings));
+    activatables.push(tt_LeftDasher   .of(playerSource, settings));
+    activatables.push(tt_BackDasher   .of(playerSource, settings));
+    activatables.push(tt_ForwardDasher.of(playerSource, settings));
   }
 
   private static tt_ModeSource makeModeSource(tt_KnownTargetSource knownTargetSource,
@@ -429,11 +417,11 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 
   private static tt_KnownTargetSource makeTargetRegistry(
     tt_TargetSource   targetSource,
-    tt_QuestionSource questionSource,
+    tt_Lesson lesson,
     tt_TargetSource   deathReporter,
     tt_Clock          clock)
   {
-    let registry      = tt_TargetRegistry .of(targetSource, questionSource, deathReporter);
+    let registry      = tt_TargetRegistry .of(targetSource, lesson, deathReporter);
     let staleMarker   = tt_StaleMarkerImpl.of(clock);
     let registryCache = tt_KnownTargetSourceCache.of(registry, staleMarker);
 
@@ -1104,7 +1092,7 @@ class tt_Aimers : tt_Aimer
 
   void add(tt_Aimer aimer)
   {
-    _aimers.Push(aimer);
+    _aimers.push(aimer);
   }
 
   override void aim()
@@ -2130,7 +2118,7 @@ class tt_ScreenSaver : StaticEventHandler
 {
   override void RenderOverlay(RenderEvent event)
   {
-    if (!Cvar.GetCvar("tt_screensaver", players[consolePlayer]).GetBool()) { return; }
+    if (!Cvar.getCvar("tt_screensaver", players[consolePlayer]).getBool()) { return; }
 
     if (!menuActive)
     {
@@ -3141,14 +3129,14 @@ class tt_KnownTargets
 // Deactivated targets are removed from storage.
 class tt_TargetRegistry : tt_KnownTargetSource
 {
-  static tt_TargetRegistry of(tt_TargetSource   targetSource,
-                              tt_QuestionSource questionSource,
-                              tt_TargetSource   disabledTargetSource)
+  static tt_TargetRegistry of(tt_TargetSource targetSource,
+                              tt_Lesson lesson,
+                              tt_TargetSource disabledTargetSource)
   {
     let result = new("tt_TargetRegistry");
 
     result._targetSource         = targetSource;
-    result._questionSource       = questionSource;
+    result._lesson       = lesson;
     result._disabledTargetSource = disabledTargetSource;
 
     result._registry = tt_KnownTargets.of();
@@ -3221,7 +3209,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   private tt_KnownTarget makeKnownTarget(tt_Target target) const
   {
-    let question = _questionSource.getQuestion();
+    let question = _lesson.getQuestion();
 
     if (question == NULL)
     {
@@ -3253,7 +3241,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
   }
 
   private tt_TargetSource   _targetSource;
-  private tt_QuestionSource _questionSource;
+  private tt_Lesson _lesson;
   private tt_TargetSource   _disabledTargetSource;
 
   private tt_KnownTargets _registry;
@@ -3286,7 +3274,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   env.targetSource.expect_getTargets(targets);
   env.disabledTargetSource.expect_getTargets(tt_Targets.of());
-  env.questionSource.expect_getQuestion(tt_QuestionMock.of(), 2);
+  env.lesson.expect_getQuestion(tt_QuestionMock.of(), 2);
 
   let knownTargets = env.targetRegistry.getTargets();
 
@@ -3307,7 +3295,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   env.targetSource.expect_getTargets(targets);
   env.disabledTargetSource.expect_getTargets(tt_Targets.of());
-  env.questionSource.expect_getQuestion(tt_QuestionMock.of());
+  env.lesson.expect_getQuestion(tt_QuestionMock.of());
 
   let knownTargets = env.targetRegistry.getTargets();
 
@@ -3319,7 +3307,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
   // registered.
   env.targetSource.expect_getTargets(targets);
   env.disabledTargetSource.expect_getTargets(tt_Targets.of());
-  env.questionSource.expect_getQuestion(NULL, 0);
+  env.lesson.expect_getQuestion(NULL, 0);
 
   knownTargets = env.targetRegistry.getTargets();
 
@@ -3343,7 +3331,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   env.targetSource.expect_getTargets(targets);
   env.disabledTargetSource.expect_getTargets(tt_Targets.of());
-  env.questionSource.expect_getQuestion(tt_QuestionMock.of(), 2);
+  env.lesson.expect_getQuestion(tt_QuestionMock.of(), 2);
 
   let knownTargets = env.targetRegistry.getTargets();
 
@@ -3358,7 +3346,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   env.targetSource.expect_getTargets(tt_Targets.of());
   env.disabledTargetSource.expect_getTargets(disabledTargets);
-  env.questionSource.expect_getQuestion(NULL, 0);
+  env.lesson.expect_getQuestion(NULL, 0);
 
   knownTargets = env.targetRegistry.getTargets();
 
@@ -3376,11 +3364,11 @@ class tt_TargetRegistryTestEnvironment
   static tt_TargetRegistryTestEnvironment of()
   {
     let result = new("tt_TargetRegistryTestEnvironment");
-    result.targetSource         = tt_TargetSourceMock  .of();
-    result.questionSource       = tt_QuestionSourceMock.of();
-    result.disabledTargetSource = tt_TargetSourceMock  .of();
+    result.targetSource         = tt_TargetSourceMock.of();
+    result.lesson               = tt_LessonMock.of();
+    result.disabledTargetSource = tt_TargetSourceMock.of();
     result.targetRegistry       = tt_TargetRegistry.of(result.targetSource,
-                                                       result.questionSource,
+                                                       result.lesson,
                                                        result.disabledTargetSource);
     return result;
   }
@@ -3388,12 +3376,12 @@ class tt_TargetRegistryTestEnvironment
   tt_Satisfaction getSatisfaction() const
   {
     return targetSource.getSatisfaction()
-      .add(questionSource.getSatisfaction())
+      .add(lesson.getSatisfaction())
       .add(disabledTargetSource.getSatisfaction());
   }
 
   tt_TargetSourceMock   targetSource;
-  tt_QuestionSourceMock questionSource;
+  tt_LessonMock lesson;
   tt_TargetSourceMock   disabledTargetSource;
 
   tt_KnownTargetSource  targetRegistry;
@@ -3402,13 +3390,13 @@ class tt_TargetRegistryTestEnvironment
 
 * Lesson
 
-** ~QuestionSource~
+** ~Lesson~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/question_source.zs
 
 // This class is an interface for getting Questions.
 // Different question sources are different Lessons.
-class tt_QuestionSource abstract
+class tt_Lesson abstract
 {
   abstract tt_Question getQuestion();
 }
@@ -3418,9 +3406,9 @@ class tt_QuestionSource abstract
 
 #+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
 
-class tt_QuestionSourceMock : tt_QuestionSource
+class tt_LessonMock : tt_Lesson
 {
-  static tt_QuestionSourceMock of() { return new("tt_QuestionSourceMock"); }
+  static tt_LessonMock of() { return new("tt_LessonMock"); }
 
   override tt_Question getQuestion()
   {
@@ -3452,8 +3440,8 @@ class tt_QuestionSourceMock : tt_QuestionSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/maths_lesson.zs
 
-// This class implements tt_QuestionSource by composing arithmetic tasks.
-class tt_MathsLesson : tt_QuestionSource
+// This class implements tt_Lesson by composing arithmetic tasks.
+class tt_MathsLesson : tt_Lesson
 {
   static tt_MathsLesson of()
   {
@@ -3553,27 +3541,21 @@ class tt_MathsLesson : tt_QuestionSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/mixed_lesson.zs
 
-class tt_MixedLesson : tt_QuestionSource
+class tt_MixedLesson : tt_Lesson
 {
-  static tt_MixedLesson of(tt_Settings settings)
+  static tt_MixedLesson of(tt_Settings settings, Array<tt_Lesson> lessons)
   {
     let result = new("tt_MixedLesson");
-
     result._settings = settings;
-
+    result._lessons.move(lessons);
     return result;
-  }
-
-  void add(tt_QuestionSource questionSource)
-  {
-    _lessons.Push(questionSource);
   }
 
   override tt_Question getQuestion()
   {
     readSettings();
 
-    Array<tt_QuestionSource> enabledLessons;
+    Array<tt_Lesson> enabledLessons;
 
     uint nLessons = _lessons.size();
 
@@ -3581,7 +3563,7 @@ class tt_MixedLesson : tt_QuestionSource
     {
       if (_isLessonEnabled[i])
       {
-        enabledLessons.Push(_lessons[i]);
+        enabledLessons.push(_lessons[i]);
       }
     }
 
@@ -3592,8 +3574,8 @@ class tt_MixedLesson : tt_QuestionSource
     }
 
     uint randomLessonIndex = Random(0, nEnabledLessons - 1);
-    let  questionSource    = enabledLessons[randomLessonIndex];
-    let  question          = questionSource.getQuestion();
+    let  lesson    = enabledLessons[randomLessonIndex];
+    let  question          = lesson.getQuestion();
 
     return question;
   }
@@ -3611,8 +3593,8 @@ class tt_MixedLesson : tt_QuestionSource
 
   private tt_Settings _settings;
 
-  private Array<tt_QuestionSource> _lessons;
-  private Array<bool>              _isLessonEnabled;
+  private Array<tt_Lesson> _lessons;
+  private Array<bool>      _isLessonEnabled;
 }
 #+end_src
 
@@ -3620,9 +3602,9 @@ class tt_MixedLesson : tt_QuestionSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_characters_lesson.zs
 
-// This class implements tt_QuestionSource by composing a question from groups
+// This class implements tt_Lesson by composing a question from groups
 // of characters enabled by settings.
-class tt_RandomCharactersLesson : tt_QuestionSource
+class tt_RandomCharactersLesson : tt_Lesson
 {
   static tt_RandomCharactersLesson of(tt_RandomCharactersLessonSettings settings)
   {
@@ -3715,9 +3697,9 @@ class tt_RandomCharactersLesson : tt_QuestionSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_number_source.zs
 
-// This class implements tt_QuestionSource by producing questions that contain
+// This class implements tt_Lesson by producing questions that contain
 // string composed from random numbers and should match exactly to the answers.
-class tt_RandomNumberSource : tt_QuestionSource
+class tt_RandomNumberSource : tt_Lesson
 {
   static tt_RandomNumberSource of()
   {
@@ -3743,71 +3725,65 @@ class tt_RandomNumberSource : tt_QuestionSource
 }
 #+end_src
 
-** ~SelectionQuestionSource~
+** ~SelectedLesson~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/selected_question_source.zs
 
-// This class implements tt_QuestionSource by selecting a question source
+// This class implements tt_Lesson by selecting a question source
 // according to the index from settings.
-class tt_SelectedQuestionSource : tt_QuestionSource
+class tt_SelectedLesson : tt_Lesson
 {
-  static tt_SelectedQuestionSource of(tt_Settings settings)
+  static tt_SelectedLesson of(tt_Settings settings, Array<tt_Lesson> lessons)
   {
-    let result = new("tt_SelectedQuestionSource");
-
+    let result = new("tt_SelectedLesson");
     result._settings = settings;
-
+    result._lessons.move(lessons);
     return result;
-  }
-
-  void add(tt_QuestionSource questionSource)
-  {
-    _questionSources.Push(questionSource);
   }
 
   override tt_Question getQuestion()
   {
-    int questionSourceIndex = _settings.getQuestionSourceIndex();
+    int lessonIndex = _settings.getLessonIndex();
 
-    if (questionSourceIndex >= _questionSources.size()) return NULL;
+    if (lessonIndex >= _lessons.size()) return NULL;
 
-    return _questionSources[questionSourceIndex].getQuestion();
+    return _lessons[lessonIndex].getQuestion();
   }
 
   private tt_Settings              _settings;
-  private Array<tt_QuestionSource> _questionSources;
+  private Array<tt_Lesson> _lessons;
 }
 #+end_src
 
+*** Test
+
 #+begin_src c :noweb-ref test-body
 {
-  let tag = "tt_SelectedQuestionSource: checkEmpty";
-  let env = tt_SelectedQuestionSourceTestEnvironment.of();
+  let tag = "tt_SelectedLesson: checkEmpty";
+  Array<tt_Lesson> lessons;
+  let env = tt_SelectedLessonTestEnvironment.of(lessons);
 
-  env.settings.expect_getQuestionSourceIndex(0);
+  env.settings.expect_getLessonIndex(0);
 
-  let question = env.selectedQuestionSource.getQuestion();
+  let question = env.selectedLesson.getQuestion();
 
   it(tag .. ": no sources -> NULL question", AssertNull(question));
   assertSatisfaction(env.getSatisfaction(), tag);
 }
 {
-  let tag = "tt_SelectedQuestionSource: checkTwo";
-  let env = tt_SelectedQuestionSourceTestEnvironment.of();
-
-  let questionSource1 = tt_QuestionSourceMock.of();
-  let questionSource2 = tt_QuestionSourceMock.of();
-
-  env.selectedQuestionSource.add(questionSource1);
-  env.selectedQuestionSource.add(questionSource2);
+  let tag = "tt_SelectedLesson: checkTwo";
+  let lesson1 = tt_LessonMock.of();
+  let lesson2 = tt_LessonMock.of();
+  Array<tt_Lesson> lessons = {lesson1, lesson2};
+  let env = tt_SelectedLessonTestEnvironment.of(lessons);
 
   let mockQuestion = tt_QuestionMock.of();
-  questionSource2.expect_getQuestion(mockQuestion);
-  env.settings   .expect_getQuestionSourceIndex(1);
+  lesson2.expect_getQuestion(mockQuestion);
+  env.settings   .expect_getLessonIndex(1);
 
-  let question = env.selectedQuestionSource.getQuestion();
+  let question = env.selectedLesson.getQuestion();
 
-  assertSatisfaction(questionSource2.getSatisfaction(), tag);
+  assertSatisfaction(lesson2.getSatisfaction(), tag);
   it(tag .. ": there are sources -> not NULL question",
      Assert(question == mockQuestion));
   assertSatisfaction(env.getSatisfaction(), tag);
@@ -3816,13 +3792,13 @@ class tt_SelectedQuestionSource : tt_QuestionSource
 
 #+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
 
-class tt_SelectedQuestionSourceTestEnvironment
+class tt_SelectedLessonTestEnvironment
 {
-  static tt_SelectedQuestionSourceTestEnvironment of()
+  static tt_SelectedLessonTestEnvironment of(Array<tt_Lesson> lessons)
   {
-    let result = new("tt_SelectedQuestionSourceTestEnvironment");
-    result.settings               = tt_SettingsMock.of();
-    result.selectedQuestionSource = tt_SelectedQuestionSource.of(result.settings);
+    let result = new("tt_SelectedLessonTestEnvironment");
+    result.settings       = tt_SettingsMock.of();
+    result.selectedLesson = tt_SelectedLesson.of(result.settings, lessons);
     return result;
   }
 
@@ -3832,7 +3808,7 @@ class tt_SelectedQuestionSourceTestEnvironment
   }
 
   tt_SettingsMock settings;
-  tt_SelectedQuestionSource selectedQuestionSource;
+  tt_SelectedLesson selectedLesson;
 }
 #+end_src
 
@@ -3840,9 +3816,9 @@ class tt_SelectedQuestionSourceTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/string_set.zs
 
-// This class implements tt_QuestionSource by reading a lump with words and
+// This class implements tt_Lesson by reading a lump with words and
 // randomly selecting words from this lump.
-class tt_StringSet : tt_QuestionSource
+class tt_StringSet : tt_Lesson
 {
   static tt_StringSet of(String lumpName)
   {
@@ -5309,7 +5285,7 @@ class tt_PlayerSourceMock : tt_PlayerSource
 }
 #+end_src
 
-** ~PlayerSourceImpl~
+*** ~PlayerSourceImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player/player_source_impl.zs
 
@@ -5318,26 +5294,20 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 {
   static tt_PlayerSourceImpl of(int playerNumber)
   {
-    let result = new("tt_PlayerSourceImpl");
-
+    let result           = new ("tt_PlayerSourceImpl");
     result._playerNumber = playerNumber;
-
     return result;
   }
 
-  override PlayerInfo getInfo()
-  {
-    return players[_playerNumber];
-  }
+  override PlayerInfo getInfo() { return players[_playerNumber]; }
 
-  override PlayerPawn getPawn()
-  {
-    return getInfo().mo;
-  }
+  override PlayerPawn getPawn() { return getInfo().mo; }
 
   private int _playerNumber;
 }
 #+end_src
+
+**** Test
 
 #+begin_src c :noweb-ref test-body
 {
@@ -5346,21 +5316,21 @@ class tt_PlayerSourceImpl : tt_PlayerSource
   {
     let source = tt_PlayerSourceImpl.of(playerNumber);
     let info   = source.getInfo();
+    let note   = "tt_PlayerSourceImpl: player info (%d) must be not NULL";
 
-    it(string.format("tt_PlayerSourceImpl: player info (%d) must be not NULL",
-                     playerNumber),
-       Assert(info != NULL));
+    it(string.format(note, playerNumber), Assert(info != NULL));
   }
 }
 {
   let source = tt_PlayerSourceImpl.of(consolePlayer);
   let pawn   = source.getPawn();
+  let note   = "tt_PlayerSourceImpl: must get main player (%d) actor";
 
-  it(string.format("tt_PlayerSourceImpl: must get main player (%d) actor",
-                   consolePlayer),
-     AssertNotNull(pawn));
+  it(string.format(note, consolePlayer), AssertNotNull(pawn));
 }
 {
+  let note = "tt_PlayerSourceImpl: other player (%d) must be null";
+
   // Since tests are run on single-player game, no other players must exist.
   for (int i = 1; i < MAXPLAYERS; ++i)
   {
@@ -5368,9 +5338,7 @@ class tt_PlayerSourceImpl : tt_PlayerSource
     let source       = tt_PlayerSourceImpl.of(playerNumber);
     let pawn         = source.getPawn();
 
-    it(string.format("tt_PlayerSourceImpl: other player (%d) must be null",
-                     playerNumber),
-       AssertNull(pawn));
+    it(string.format(note, playerNumber), AssertNull(pawn));
   }
 }
 #+end_src
@@ -5543,6 +5511,54 @@ class tt_QuestionMock : tt_Question
 
 * Settings
 
+** ~Cvar~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/cvar.zs
+
+// This class provides access to a user or server Cvar.
+// Accessing Cvars through this class is faster because calling Cvar.getCvar()
+// is costly. This class caches the result of Cvar.getCvar() and handles
+// loading a savegame.
+class tt_Cvar
+{
+  static tt_Cvar of(tt_PlayerSource playerSource, string name)
+  {
+    let result = new("tt_Cvar");
+
+    result._playerSource = playerSource;
+    result._name         = name;
+
+    return result;
+  }
+
+  bool   isDefined() { load(); return (_cvar != NULL);   }
+
+  string getString() { load(); return _cvar.getString(); }
+  bool   getBool()   { load(); return _cvar.getInt();    }
+  int    getInt()    { load(); return _cvar.getInt();    }
+  double getFloat()  { load(); return _cvar.getFloat();  }
+
+  private void load()
+  {
+    if (_cvar == NULL)
+    {
+      let playerInfo = _playerSource.getInfo();
+
+      _cvar = Cvar.getCvar(_name, playerInfo);
+
+      if (_cvar == NULL)
+      {
+        Console.printf("Cvar %s not found.", _name);
+      }
+    }
+  }
+
+  private tt_PlayerSource _playerSource;
+  private string          _name;
+  private transient Cvar  _cvar;
+}
+#+end_src
+
 ** ~CommandSettings~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings.zs
@@ -5696,7 +5712,7 @@ class tt_CommandSettingsMock : tt_CommandSettings
 }
 #+end_src
 
-** ~CommandSettingsImpl~
+*** ~CommandSettingsImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
 
@@ -5733,54 +5749,6 @@ class tt_CommandSettingsImpl : tt_CommandSettings
 
   private tt_Cvar _reloadCommandCvar;
   private tt_Cvar _commandPrefixCvar;
-}
-#+end_src
-
-** ~Cvar~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/cvar.zs
-
-// This class provides access to a user or server Cvar.
-// Accessing Cvars through this class is faster because calling Cvar.GetCvar()
-// is costly. This class caches the result of Cvar.GetCvar() and handles
-// loading a savegame.
-class tt_Cvar
-{
-  static tt_Cvar of(tt_PlayerSource playerSource, string name)
-  {
-    let result = new("tt_Cvar");
-
-    result._playerSource = playerSource;
-    result._name         = name;
-
-    return result;
-  }
-
-  bool   isDefined() { load(); return (_cvar != NULL);   }
-
-  string getString() { load(); return _cvar.GetString(); }
-  bool   getBool()   { load(); return _cvar.GetInt();    }
-  int    getInt()    { load(); return _cvar.GetInt();    }
-  double getFloat()  { load(); return _cvar.GetFloat();  }
-
-  private void load()
-  {
-    if (_cvar == NULL)
-    {
-      let playerInfo = _playerSource.getInfo();
-
-      _cvar = Cvar.GetCvar(_name, playerInfo);
-
-      if (_cvar == NULL)
-      {
-        Console.Printf("Cvar %s not found.", _name);
-      }
-    }
-  }
-
-  private tt_PlayerSource _playerSource;
-  private string          _name;
-  private transient Cvar  _cvar;
 }
 #+end_src
 
@@ -5955,7 +5923,7 @@ class tt_RandomCharactersLessonSettingsMock : tt_RandomCharactersLessonSettings
 }
 #+end_src
 
-** ~RandomCharactersLessonSettingsImpl~
+*** ~RandomCharactersLessonSettingsImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings_impl.zs
 
@@ -6011,7 +5979,7 @@ class tt_Settings abstract
 
   abstract bool isAutoAimEnabled();
 
-  abstract int getQuestionSourceIndex();
+  abstract int getLessonIndex();
 
   abstract bool getLessonEnabled(uint i);
 
@@ -6061,22 +6029,22 @@ class tt_SettingsMock : tt_Settings
   private int _mock_isAutoAimEnabled_expected;
   private int _mock_isAutoAimEnabled_called;
 
-  override int getQuestionSourceIndex()
+  override int getLessonIndex()
   {
-    ++_mock_getQuestionSourceIndex_called;
-    return _mock_getQuestionSourceIndex;
+    ++_mock_getLessonIndex_called;
+    return _mock_getLessonIndex;
   }
 
-  void expect_getQuestionSourceIndex(int value, int expected = 1)
+  void expect_getLessonIndex(int value, int expected = 1)
   {
-    _mock_getQuestionSourceIndex = value;
-    _mock_getQuestionSourceIndex_expected = expected;
-    _mock_getQuestionSourceIndex_called = 0;
+    _mock_getLessonIndex = value;
+    _mock_getLessonIndex_expected = expected;
+    _mock_getLessonIndex_called = 0;
   }
 
-  private int _mock_getQuestionSourceIndex;
-  private int _mock_getQuestionSourceIndex_expected;
-  private int _mock_getQuestionSourceIndex_called;
+  private int _mock_getLessonIndex;
+  private int _mock_getLessonIndex_expected;
+  private int _mock_getLessonIndex_called;
 
   override bool getLessonEnabled(uint i)
   {
@@ -6119,9 +6087,9 @@ class tt_SettingsMock : tt_Settings
             _mock_isFastConfirmation_expected == _mock_isFastConfirmation_called)
       .push(getClassName() .. ": getLessonEnabled",
             _mock_getLessonEnabled_expected == _mock_getLessonEnabled_called)
-      .push(getClassName() .. "getQuestionSourceIndex",
-            _mock_getQuestionSourceIndex_expected ==
-            _mock_getQuestionSourceIndex_called)
+      .push(getClassName() .. "getLessonIndex",
+            _mock_getLessonIndex_expected ==
+            _mock_getLessonIndex_called)
       .push(getClassName() .. ": isAutoAimEnabled",
             _mock_isAutoAimEnabled_expected == _mock_isAutoAimEnabled_called)
       .push(getClassName() .. ": getScale",
@@ -6130,35 +6098,46 @@ class tt_SettingsMock : tt_Settings
 }
 #+end_src
 
-** ~SettingsImpl~
+*** ~SettingsImpl~
+
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// TODO: add protection against 0.
+// Do not set this variable to 0.
+user int tt_view_scale = 1;
+#+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/settings_impl.zs
 
 // This class implements tt_Settings by reading values from user CVars.
 class tt_SettingsImpl : tt_Settings
+
 {
   static tt_SettingsImpl of(tt_PlayerSource playerSource)
   {
-    let result = new("tt_SettingsImpl");
+    let result = new ("tt_SettingsImpl");
 
-    result._scaleCvar               = tt_Cvar.of(playerSource, "tt_view_scale"     );
-    result._autoaimCvar             = tt_Cvar.of(playerSource, "autoaim"           );
-    result._questionSourceIndexCvar = tt_Cvar.of(playerSource, "tt_question_source");
-    result._isFastConfirmationCvar  = tt_Cvar.of(playerSource, "tt_confirm_type"   );
+    result._scaleCvar              = tt_Cvar.of(playerSource, "tt_view_scale");
+    result._autoaimCvar            = tt_Cvar.of(playerSource, "autoaim");
+    result._lessonIndexCvar        = tt_Cvar.of(playerSource, "tt_question_source");
+    result._isFastConfirmationCvar = tt_Cvar.of(playerSource, "tt_confirm_type");
 
     for (uint i = 0; i < N_IS_LESSON_ENABLED_CVARS; ++i)
     {
       string cvarName = string.format("tt_is_lesson_enabled_%d", i);
-      result._isLessonEnabledCvars.Push(tt_Cvar.of(playerSource, cvarName));
+      result._isLessonEnabledCvars.push(tt_Cvar.of(playerSource, cvarName));
     }
 
     return result;
   }
 
-  override int  getScale()               { return _scaleCvar.getInt();               }
-  override bool isAutoAimEnabled()       { return (_autoaimCvar.getFloat() > 34.5);  }
-  override int  getQuestionSourceIndex() { return _questionSourceIndexCvar.getInt(); }
-  override bool isFastConfirmation()     { return _isFastConfirmationCvar.getInt();  }
+  override int getScale() { return _scaleCvar.getInt(); }
+
+  override bool isAutoAimEnabled() { return (_autoaimCvar.getFloat() > 34.5); }
+
+  override int getLessonIndex() { return _lessonIndexCvar.getInt(); }
+
+  override bool isFastConfirmation() { return _isFastConfirmationCvar.getInt(); }
 
   override bool getLessonEnabled(uint index)
   {
@@ -6169,12 +6148,14 @@ class tt_SettingsImpl : tt_Settings
 
   private tt_Cvar _scaleCvar;
   private tt_Cvar _autoaimCvar;
-  private tt_Cvar _questionSourceIndexCvar;
+  private tt_Cvar _lessonIndexCvar;
   private tt_Cvar _isFastConfirmationCvar;
 
   private Array<tt_Cvar> _isLessonEnabledCvars;
 }
 #+end_src
+
+*** Test
 
 #+begin_src c :noweb-ref test-body
 {
@@ -6189,8 +6170,7 @@ class tt_SettingsImpl : tt_Settings
   scale = settings.getScale();
 
   assertSatisfaction(playerSource.getSatisfaction(), tag);
-  it(tag .. ": scale is more than zero",
-     AssertEval(scale, ">", 0));
+  it(tag .. ": scale is more than zero", AssertEval(scale, ">", 0));
 }
 {
   let tag = "tt_SettingsImpl: testIsAutoaimEnabled";
@@ -6206,16 +6186,16 @@ class tt_SettingsImpl : tt_Settings
   assertSatisfaction(playerSource.getSatisfaction(), tag);
 }
 {
-  let tag = "tt_SettingsImpl: testGetQuestionSource";
+  let tag = "tt_SettingsImpl: testGetLesson";
   let playerSource = tt_PlayerSourceMock.of();
   let settings     = tt_SettingsImpl.of(playerSource);
 
   playerSource.expect_getInfo(players[consolePlayer]);
 
-  int questionSourceIndex = settings.getQuestionSourceIndex();
+  int lessonIndex = settings.getLessonIndex();
 
   it(tag .. ": question source index is reasonable",
-     AssertEval(questionSourceIndex, ">=", 0));
+     AssertEval(lessonIndex, ">=", 0));
   assertSatisfaction(playerSource.getSatisfaction(), tag);
 }
 #+end_src
@@ -6296,7 +6276,7 @@ class tt_SoundSettingsMock : tt_SoundSettings
 }
 #+end_src
 
-** ~SoundSettingsImpl~
+*** ~SoundSettingsImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings_impl.zs
 
@@ -6314,9 +6294,9 @@ class tt_SoundSettingsImpl : tt_SoundSettings
     return result;
   }
 
-  override bool isEnabled()       { return _enabledCvar       . GetBool(); }
-  override bool isTypingEnabled() { return _typingEnabledCvar . GetBool(); }
-  override int  getTheme()        { return _soundThemeCvar    . GetInt (); }
+  override bool isEnabled()       { return _enabledCvar       . getBool(); }
+  override bool isTypingEnabled() { return _typingEnabledCvar . getBool(); }
+  override int  getTheme()        { return _soundThemeCvar    . getInt (); }
 
   private tt_Cvar _soundThemeCvar;
   private tt_Cvar _enabledCvar;
@@ -6520,7 +6500,7 @@ class tt_Strings
 
   void add(String str)
   {
-    _strings.Push(str);
+    _strings.push(str);
   }
 
   private Array<String> _strings;
@@ -8052,7 +8032,7 @@ class tt_Views : tt_View
 
   void add(tt_View view)
   {
-    _views.Push(view);
+    _views.push(view);
   }
 
   override void draw(RenderEvent event)
@@ -8752,7 +8732,7 @@ OptionMenu tt_LessonOptions
 {
   Title      "$TT_LESSON_OPTIONS_TITLE_IN"
 
-  Option     "$TT_QUESTION_SOURCE", tt_question_source, tt_QuestionSourceValues
+  Option     "$TT_QUESTION_SOURCE", tt_question_source, tt_LessonValues
 
   StaticText ""
   Submenu    "$TT_MIXED_LESSON_TITLE", tt_MixedLesson
@@ -8865,7 +8845,7 @@ OptionMenu tt_CommandOptions
 // Option Values ///////////////////////////////////////////////////////////////
 
 // See docs/adding-new-lesson.md.
-OptionValue tt_QuestionSourceValues
+OptionValue tt_LessonValues
 {
   0 , "$TT_LESSON_RANDOM"
   1 , "$TT_LESSON_GZDOOM"
