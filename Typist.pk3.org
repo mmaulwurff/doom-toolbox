@@ -8,6 +8,8 @@ Typist.pk3 turns FPS games into typing exercises.
 
 TODO: add instructions.
 
+TODO: multiplayer: add special generator for random().
+
 * PlayerHandler
 
 ** ~PlayerHandler~
@@ -2054,6 +2056,7 @@ class tt_EventHandler : EventHandler
     self.RequireMouse = true;
 
     int playerNumber = event.PlayerNumber;
+    // TODO: multiplayer: initialize other players
     if (playerNumber != consolePlayer)  return;
     if (gameState != GS_Level && gameState != GS_StartUp) return;
 
@@ -2534,6 +2537,13 @@ class tt_FirerImpl : tt_Firer
 * Game Tweaks
 
 ** ~GameTweaks~
+
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Buddha
+
+server bool tt_buddha_enabled = true;
+#+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/game_tweaks.zs
 
@@ -5596,6 +5606,28 @@ class tt_CommandSettingsMock : tt_CommandSettings
 
 *** ~CommandSettingsImpl~
 
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Command settings
+
+user string tt_command_prefix = "/";
+
+user string tt_command_reload        = "rl";
+user string tt_command_forward_dash  = "df";
+user string tt_command_backward_dash = "db";
+user string tt_command_right_dash    = "dr";
+user string tt_command_left_dash     = "dl";
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/keyconf.txt
+
+Alias tt_reset_right_dash_command    "resetcvar tt_command_right_dash"
+Alias tt_reset_forward_dash_command  "resetcvar tt_command_forward_dash"
+Alias tt_reset_backward_dash_command "resetcvar tt_command_backward_dash"
+Alias tt_reset_left_dash_command     "resetcvar tt_command_left_dash"
+Alias tt_reset_reload_command        "resetcvar tt_command_reload"
+#+end_src
+
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
 
 // This class implements tt_CommandSettings interface by reading the Cvars.
@@ -5605,29 +5637,28 @@ class tt_CommandSettingsImpl : tt_CommandSettings
   {
     let result = new("tt_CommandSettingsImpl");
 
-    result._rightDashCommandCvar    = tt_Cvar.of(playerSource, "tt_command_right_dash"   );
-    result._leftDashCommandCvar     = tt_Cvar.of(playerSource, "tt_command_left_dash"    );
-    result._forwardDashCommandCvar  = tt_Cvar.of(playerSource, "tt_command_forward_dash" );
-    result._backwardDashCommandCvar = tt_Cvar.of(playerSource, "tt_command_backward_dash");
-
-    result._reloadCommandCvar       = tt_Cvar.of(playerSource, "tt_command_reload");
-    result._commandPrefixCvar       = tt_Cvar.of(playerSource, "tt_command_prefix");
+    result._rightDashCvar    = tt_Cvar.of(playerSource, "tt_command_right_dash"   );
+    result._leftDashCvar     = tt_Cvar.of(playerSource, "tt_command_left_dash"    );
+    result._forwardDashCvar  = tt_Cvar.of(playerSource, "tt_command_forward_dash" );
+    result._backwardDashCvar = tt_Cvar.of(playerSource, "tt_command_backward_dash");
+    result._reloadCommandCvar = tt_Cvar.of(playerSource, "tt_command_reload");
+    result._commandPrefixCvar = tt_Cvar.of(playerSource, "tt_command_prefix");
 
     return result;
   }
 
-  override string getForwardDashCommand()  { return _forwardDashCommandCvar .getString(); }
-  override string getBackwardDashCommand() { return _backwardDashCommandCvar.getString(); }
-  override string getLeftDashCommand()     { return _leftDashCommandCvar    .getString(); }
-  override string getRightDashCommand()    { return _rightDashCommandCvar   .getString(); }
+  override string getForwardDashCommand()  { return _forwardDashCvar .getString(); }
+  override string getBackwardDashCommand() { return _backwardDashCvar.getString(); }
+  override string getLeftDashCommand()     { return _leftDashCvar    .getString(); }
+  override string getRightDashCommand()    { return _rightDashCvar   .getString(); }
 
-  override string getReloadCommand()       { return _reloadCommandCvar.getString(); }
-  override string getCommandPrefix()       { return _commandPrefixCvar.getString(); }
+  override string getReloadCommand() { return _reloadCommandCvar.getString(); }
+  override string getCommandPrefix() { return _commandPrefixCvar.getString(); }
 
-  private tt_Cvar _rightDashCommandCvar;
-  private tt_Cvar _leftDashCommandCvar;
-  private tt_Cvar _forwardDashCommandCvar;
-  private tt_Cvar _backwardDashCommandCvar;
+  private tt_Cvar _rightDashCvar;
+  private tt_Cvar _leftDashCvar;
+  private tt_Cvar _forwardDashCvar;
+  private tt_Cvar _backwardDashCvar;
 
   private tt_Cvar _reloadCommandCvar;
   private tt_Cvar _commandPrefixCvar;
@@ -5807,6 +5838,22 @@ class tt_RandomCharactersLessonSettingsMock : tt_RandomCharactersLessonSettings
 
 *** ~RandomCharactersLessonSettingsImpl~
 
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Random Character Lesson configuration ///////////////////////////////////////
+
+server int    tt_rc_length = 3;
+
+server bool   tt_rc_uppercase_letters_enabled = false;
+server bool   tt_rc_lowercase_letters_enabled = true;
+server bool   tt_rc_numbers_enabled           = false;
+server bool   tt_rc_punctuation_enabled       = false;
+server bool   tt_rc_symbols_enabled           = false;
+
+server bool   tt_rc_custom_enabled = false;
+server string tt_rc_custom         = "";
+#+end_src
+
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings_impl.zs
 
 // This class implements tt_RandomCharactersLessonSettings by returning Cvar
@@ -5984,9 +6031,31 @@ class tt_SettingsMock : tt_Settings
 
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 
+// General settings
+
 // TODO: add protection against 0.
 // Do not set this variable to 0.
 user int tt_view_scale = 1;
+
+// Attention! Do not set values which are not in the list in menudef.txt.
+user int tt_question_source = 4;
+
+// 0: by Enter or Space
+// 1: Automatic, as soon as an answer matches.
+user int tt_confirm_type = 0;
+
+// Mixed Lesson configuration //////////////////////////////////////////////////
+
+server bool tt_is_lesson_enabled_0 = false;
+server bool tt_is_lesson_enabled_1 = false;
+server bool tt_is_lesson_enabled_2 = false;
+server bool tt_is_lesson_enabled_3 = false;
+server bool tt_is_lesson_enabled_4 = false;
+server bool tt_is_lesson_enabled_5 = false;
+server bool tt_is_lesson_enabled_6 = false;
+server bool tt_is_lesson_enabled_7 = false;
+server bool tt_is_lesson_enabled_8 = false;
+server bool tt_is_lesson_enabled_9 = false;
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/settings_impl.zs
@@ -6159,6 +6228,15 @@ class tt_SoundSettingsMock : tt_SoundSettings
 #+end_src
 
 *** ~SoundSettingsImpl~
+
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Sound settings //////////////////////////////////////////////////////////////
+
+user bool tt_sound_enabled = true;
+user int  tt_sound_theme = 1;
+user bool tt_sound_typing_enabled = true;
+#+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings_impl.zs
 
@@ -8353,70 +8431,6 @@ class tt_WorldChangers : tt_WorldChanger
 }
 #+end_src
 
-* Cvarinfo
-
-#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
-
-// Attention! Do not set values which are not in the list in menudef.txt.
-user int tt_question_source = 4;
-
-// Game variables //////////////////////////////////////////////////////////////
-
-server bool   tt_buddha_enabled = true;
-user   string tt_command_prefix = "/";
-
-// 0: by Enter or Space
-// 1: Automatic, as soon as an answer matches.
-user   int    tt_confirm_type   = 0;
-
-// Mixed Lesson configuration //////////////////////////////////////////////////
-
-server bool tt_is_lesson_enabled_0 = false;
-server bool tt_is_lesson_enabled_1 = false;
-server bool tt_is_lesson_enabled_2 = false;
-server bool tt_is_lesson_enabled_3 = false;
-server bool tt_is_lesson_enabled_4 = false;
-server bool tt_is_lesson_enabled_5 = false;
-server bool tt_is_lesson_enabled_6 = false;
-server bool tt_is_lesson_enabled_7 = false;
-server bool tt_is_lesson_enabled_8 = false;
-server bool tt_is_lesson_enabled_9 = false;
-
-// Random Character Lesson configuration ///////////////////////////////////////
-
-server int    tt_rc_length = 3;
-
-server bool   tt_rc_uppercase_letters_enabled = false;
-server bool   tt_rc_lowercase_letters_enabled = true;
-server bool   tt_rc_numbers_enabled           = false;
-server bool   tt_rc_punctuation_enabled       = false;
-server bool   tt_rc_symbols_enabled           = false;
-
-server bool   tt_rc_custom_enabled = false;
-server string tt_rc_custom         = "";
-
-// Variables for score /////////////////////////////////////////////////////////
-
-nosave string tt_lp_score = "";
-
-user bool tt_lp_show = true;
-
-// Sound settings //////////////////////////////////////////////////////////////
-
-user bool tt_sound_enabled = true;
-user int  tt_sound_theme = 1;
-user bool tt_sound_typing_enabled = true;
-
-// Commands ////////////////////////////////////////////////////////////////////
-
-// Note that default values must correspond to keyconf command definitions.
-user string tt_command_forward_dash  = "df";
-user string tt_command_backward_dash = "db";
-user string tt_command_right_dash    = "dr";
-user string tt_command_left_dash     = "dl";
-user string tt_command_reload        = "rl";
-#+end_src
-
 * Keyconf
 
 #+begin_src c :tangle build/Typist.pk3/keyconf.txt
@@ -8426,14 +8440,6 @@ user string tt_command_reload        = "rl";
 Alias tt_unlock_mode   "netevent tt_unlock_mode"
 Alias tt_force_combat  "netevent tt_force_combat"
 Alias tt_reset_targets "netevent tt_reset_targets"
-
-// TODO: replace with native cvar resetting
-// Note that default values must correspond to cvarinfo definitions.
-Alias tt_reset_right_dash_command    "tt_command_right_dash    dr"
-Alias tt_reset_forward_dash_command  "tt_command_forward_dash  df"
-Alias tt_reset_backward_dash_command "tt_command_backward_dash db"
-Alias tt_reset_left_dash_command     "tt_command_left_dash     dl"
-Alias tt_reset_reload_command        "tt_command_reload        rl"
 
 Alias zc_top "openMenu tt_lp_TopMenu"
 
@@ -8865,6 +8871,14 @@ GameInfo
 }
 #+end_src
 
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Variables for score /////////////////////////////////////////////////////////
+
+nosave string tt_lp_score = "";
+user   bool   tt_lp_show  = true;
+#+end_src
+
 * Tests
 
 #+begin_src c :tangle build/Typist.pk3Test/zscript.zs
@@ -8948,16 +8962,14 @@ class tt_Satisfaction
 }
 #+end_src
 
-* Run
+* Run :noexport:
 
 Note: ~sv_fastweapons~ is for ~tt_FirerImpl~ test.
 
 #+begin_src text :tangle build/Typist.pk3Test/commands.txt
-wait 2; map map01; sv_fastweapons 2
-wait 4; netevent test:tt_Test
-wait 6; quit
+wait 2; map map01; sv_fastweapons 2; wait 2; netevent test:tt_Test; wait 2; quit
 #+end_src
 
-#+begin_src elisp :exports none
+#+begin_src elisp
 (compile "scons -Q Typist.pk3Test")
 #+end_src
