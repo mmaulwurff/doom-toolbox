@@ -5957,8 +5957,6 @@ class tt_SettingsMock : tt_Settings
 
 // General settings
 
-// TODO: add protection against 0.
-// Do not set this variable to 0.
 user int tt_view_scale = 1;
 
 // Attention! Do not set values which are not in the list in menudef.txt.
@@ -6006,7 +6004,7 @@ class tt_SettingsImpl : tt_Settings
     return result;
   }
 
-  override int getScale() { return _scaleCvar.getInt(); }
+  override int getScale() { return max(1, _scaleCvar.getInt()); }
 
   override bool isAutoAimEnabled() { return (_autoaimCvar.getFloat() > 34.5); }
 
