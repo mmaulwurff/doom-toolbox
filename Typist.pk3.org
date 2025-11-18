@@ -2106,124 +2106,6 @@ class tt_EventHandler : EventHandler
 }
 #+end_src
 
-** ~ScreenSaver~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/event_handler/screen_saver.zs
-
-// This class provides a screen saver for GZDoom.
-//
-// Appearance: Matrix-style green running numbers.
-// Screen saver activates after 3 minutes in the menu.
-class tt_ScreenSaver : StaticEventHandler
-{
-  override void RenderOverlay(RenderEvent event)
-  {
-    if (!Cvar.getCvar("tt_screensaver", players[consolePlayer]).getBool()) { return; }
-
-    if (!menuActive)
-    {
-      _idle = 0;
-      return;
-    }
-
-    ++_idle;
-
-    if (_idle < TIMEOUT) { return; }
-
-    ++_throttle;
-
-    int screenWidth  = Screen.GetWidth();
-    int screenHeight = Screen.GetHeight();
-
-    if (!_initialized)
-    {
-      for (int i = 0; i < N_HEADS; ++i)
-      {
-        _heads[i] = (random(0, screenWidth - 1), random(0, screenHeight - 1));
-      }
-
-      resetChars();
-
-      _initialized = true;
-    }
-
-    Screen.Dim(GREEN, 0.1, 0, 0, screenWidth, screenHeight);
-
-    Font fnt         = NewSmallFont;
-    int  fntHeight   = fnt.GetHeight();
-    bool isShiftTime = (_throttle % REFRESH_RATE) == 0;
-    bool isCharTime  = (_throttle % Char_RATE   ) == 0;
-
-    for (int i = 0; i < N_HEADS; ++i)
-    {
-      double alpha = 1;
-
-      for (int j = 0; j < TAIL_LENGTH; ++j)
-      {
-        double offset = j * fntHeight;
-        int    index  = i * TAIL_LENGTH + j;
-
-        int  ch       = _chars    [index];
-        bool flippedX = _flippedXs[index];
-        bool flippedY = _flippedYs[index];
-
-        Screen.DrawChar( fnt, Font.CR_GREEN, _heads[i].x, _heads[i].y - offset, ch
-                       , DTA_Alpha, alpha
-                       , DTA_FlipX, flippedX
-                       , DTA_FlipY, flippedY
-                       );
-
-        alpha -= ALPHA_STEP;
-      }
-
-      if (isCharTime)
-      {
-        resetChars();
-      }
-
-      if (isShiftTime)
-      {
-        _heads[i].y += fntHeight * 0.2;
-        if (_heads[i].y - TAIL_LENGTH * fntHeight > screenHeight)
-        {
-          _heads[i].x = random(0, screenWidth - 1);
-          _heads[i].y = 0;
-        }
-      }
-    }
-  }
-
-  private ui void resetChars()
-  {
-    for (int i = 0; i < N_CHARS; ++i)
-    {
-      // https://en.wikipedia.org/wiki/Half-width_kana
-      // https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
-      _chars    [i] = random(0xFF01, 0xFF9D);
-      _flippedXs[i] = random(0, 1);
-      _flippedYs[i] = random(0, 1);
-    }
-  }
-
-  const N_HEADS      = 30;
-  const TAIL_LENGTH  = 15;
-  const ALPHA_STEP   = 1.0 / TAIL_LENGTH;
-  const N_CHARS      = N_HEADS * TAIL_LENGTH;
-  const REFRESH_RATE = TICRATE / 8;
-  const CHAR_RATE    = TICRATE / 4;
-  const TIMEOUT      = TICRATE * 60 * 3; // 3 minutes
-  const GREEN        = "008800";
-
-  ui int     _idle;
-  ui int     _throttle;
-  ui bool    _initialized;
-  ui vector2 _heads[N_HEADS];
-  ui int     _chars    [N_CHARS];
-  ui bool    _flippedXs[N_CHARS];
-  ui bool    _flippedYs[N_CHARS];
-}
-#+end_src
-
 * Event Reporters
 
 ** ~AnswerReporter~
@@ -8475,13 +8357,6 @@ class tt_WorldChangers : tt_WorldChanger
 
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 
-// View variables //////////////////////////////////////////////////////////////
-
-// Do not set this variable to 0.
-user int tt_view_scale = 1;
-
-user bool tt_screensaver = true;
-
 // Attention! Do not set values which are not in the list in menudef.txt.
 user int tt_question_source = 4;
 
@@ -8587,7 +8462,6 @@ TT_SCORE  = "Open Score";
 TT_DISPLAY_OPTIONS_TITLE_OUT  = "Display Options";
 TT_DISPLAY_OPTIONS_TITLE_IN   = "Typist.pk3 Display Options";
 TT_TARGET_SCALE               = "Target text scale";
-TT_SCREEN_SAVER               = "Screensaver";
 
 TT_GAMEPLAY_OPTIONS_TITLE_OUT = "Gameplay Options";
 TT_GAMEPLAY_OPTIONS_TITLE_IN  = "Typist.pk3 Gameplay Options";
@@ -8712,9 +8586,6 @@ OptionMenu tt_DisplayOptions
   Title      "$TT_DISPLAY_OPTIONS_TITLE_IN"
 
   Slider     "$TT_TARGET_SCALE", tt_view_scale, 1, 4, 1, 0
-
-  StaticText ""
-  Option     "$TT_SCREEN_SAVER" , tt_screensaver , OnOff
 }
 
 OptionMenu tt_GameplayOptions
@@ -8990,7 +8861,6 @@ GameInfo
   EventHandlers =
     "tt_lp_Dispatcher",
     "tt_lp_StaticView",
-    "tt_ScreenSaver",
     "tt_EventHandler"
 }
 #+end_src
