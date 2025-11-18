@@ -5619,15 +5619,6 @@ user string tt_command_right_dash    = "dr";
 user string tt_command_left_dash     = "dl";
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/keyconf.txt
-
-Alias tt_reset_right_dash_command    "resetcvar tt_command_right_dash"
-Alias tt_reset_forward_dash_command  "resetcvar tt_command_forward_dash"
-Alias tt_reset_backward_dash_command "resetcvar tt_command_backward_dash"
-Alias tt_reset_left_dash_command     "resetcvar tt_command_left_dash"
-Alias tt_reset_reload_command        "resetcvar tt_command_reload"
-#+end_src
-
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
 
 // This class implements tt_CommandSettings interface by reading the Cvars.
@@ -8431,27 +8422,6 @@ class tt_WorldChangers : tt_WorldChanger
 }
 #+end_src
 
-* Keyconf
-
-#+begin_src c :tangle build/Typist.pk3/keyconf.txt
-
-// Aliases /////////////////////////////////////////////////////////////////////
-
-Alias tt_unlock_mode   "netevent tt_unlock_mode"
-Alias tt_force_combat  "netevent tt_force_combat"
-Alias tt_reset_targets "netevent tt_reset_targets"
-
-Alias zc_top "openMenu tt_lp_TopMenu"
-
-// Keys ////////////////////////////////////////////////////////////////////////
-
-AddKeySection "$TT_TITLE" tt_keys
-
-AddMenuKey "$TT_UNLOCK" tt_unlock_mode
-AddMenuKey "$TT_COMBAT" tt_force_combat
-AddMenuKey "$TT_SCORE"  zc_top
-#+end_src
-
 * Language
 
 #+begin_src ini :tangle build/Typist.pk3/language.txt
@@ -8555,7 +8525,9 @@ TT_RELOAD        = "Reload";
 TT_RESET_COMMAND = "Reset to default";
 #+end_src
 
-* Menudef
+* Options Menu
+
+** Options
 
 TODO: rewrite with PlainTranslator.
 
@@ -8719,6 +8691,19 @@ OptionMenu tt_CommandOptions
   Command    "$TT_RESET_COMMAND" , tt_reset_reload_command
 }
 
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/keyconf.txt
+
+Alias tt_reset_right_dash_command    "resetcvar tt_command_right_dash"
+Alias tt_reset_forward_dash_command  "resetcvar tt_command_forward_dash"
+Alias tt_reset_backward_dash_command "resetcvar tt_command_backward_dash"
+Alias tt_reset_left_dash_command     "resetcvar tt_command_left_dash"
+Alias tt_reset_reload_command        "resetcvar tt_command_reload"
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/menudef.txt
+
 // Option Values ///////////////////////////////////////////////////////////////
 
 // See docs/adding-new-lesson.md.
@@ -8769,6 +8754,22 @@ OptionMenu tt_lp_TopMenu
 
 // TODO: artefact?
 // Sound settings //////////////////////////////////////////////////////////////
+#+end_src
+
+** Keys
+
+#+begin_src c :tangle build/Typist.pk3/keyconf.txt
+
+Alias tt_unlock_mode   "netevent tt_unlock_mode"
+Alias tt_force_combat  "netevent tt_force_combat"
+Alias tt_reset_targets "netevent tt_reset_targets"
+
+Alias zc_top "openMenu tt_lp_TopMenu"
+
+AddKeySection "$TT_TITLE" tt_keys
+AddMenuKey "$TT_UNLOCK" tt_unlock_mode
+AddMenuKey "$TT_COMBAT" tt_force_combat
+AddMenuKey "$TT_SCORE"  zc_top
 #+end_src
 
 * Sndinfo
