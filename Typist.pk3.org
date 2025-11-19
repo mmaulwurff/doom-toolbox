@@ -10,6 +10,9 @@ TODO: add instructions.
 
 TODO: multiplayer: add special generator for random().
 
+TODO: passthrough Activatable: when activated, allows one ui event through (do not
+capture one key press and release). Leave Combat mode enabled.
+
 * PlayerHandler
 
 ** ~PlayerHandler~
@@ -20,6 +23,9 @@ TODO: multiplayer: add special generator for random().
 class tt_PlayerHandler abstract
 {
   abstract void processKey(tt_Character character);
+
+  /// Type is from InputEvent.EGenericEvent.
+  abstract void processInput(int type);
 
   play abstract void tick();
 
@@ -46,6 +52,11 @@ class tt_PlayerHandlerMock : tt_PlayerHandler
   override void processKey(tt_Character character)
   {
     ++_mock_processKey_called;
+  }
+
+  override void processInput(int type)
+  {
+    throwAbortException("implement this!");
   }
 
   void expect_processKey(int expected = 1)
@@ -165,106 +176,109 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let modeReporter     = tt_SoundModeReporter    .of(soundPlayer);
     let keyPressReporter = tt_SoundKeyPressReporter.of(soundPlayer, soundSettings);
 
-    let manualModeSource = tt_SettableMode     .of();
-    let playerInput      = tt_PlayerInput      .of(manualModeSource, keyPressReporter);
-    let deathReporter    = tt_DeathReporter    .of();
-    let settings         = tt_SettingsImpl     .of(playerSource);
+    let manualModeSource = tt_SettableMode .of();
+    let playerInput      = tt_PlayerInput  .of(manualModeSource, keyPressReporter);
+    let deathReporter    = tt_DeathReporter.of();
+    let settings         = tt_SettingsImpl .of(playerSource);
 
     let originSource     = tt_PlayerOriginSource.of(playerSource);
     let targetRadar      = tt_TargetRadar       .of(originSource);
     let radarStaleMarker = tt_StaleMarkerImpl   .of(clock);
     let radarCacheDirty  = tt_TargetSourceCache .of(targetRadar, radarStaleMarker);
     let radarCache       = tt_TargetSourcePruner.of(radarCacheDirty);
-    let lesson   = makeLesson(settings, playerSource);
+    let lesson           = makeLesson(settings, playerSource);
 
     let targetRegistry = makeTargetRegistry(radarCache, lesson, deathReporter, clock);
 
-    let answerStateSource  = tt_PressedAnswerState.of();
-    let targetOriginSource = makeTargetOriginSource( targetRegistry
-                                                   , playerInput
-                                                   , playerSource
-                                                   , clock
-                                                   , answerStateSource
-                                                   , answerReporter
-                                                   , settings
-                                                   );
+    let answerStateSource = tt_PressedAnswerState.of();
 
-    let aimer              = makeAimer(targetOriginSource, playerSource, settings);
-    let firer              = tt_FirerImpl.of(playerSource);
-    let damager            = tt_Gunner   .of(targetOriginSource, aimer, firer);
+    let pressMatcher = tt_QuestionAnswerMatcher
+      .of(targetRegistry, playerInput, playerSource, answerStateSource);
+
+    let hastyMatcher = tt_HastyQuestionAnswerMatcher
+      .of(targetRegistry, playerInput, playerSource, answerReporter);
+
+    let targetOriginSource = tt_OriginSourceCache
+      .of(tt_SelectableOriginSource.of(hastyMatcher, pressMatcher, settings),
+          tt_StaleMarkerImpl.of(clock));
+
+    Array<tt_Aimer> aimers = {
+      tt_HorizontalAimer.of(targetOriginSource, playerSource),
+      tt_VerticalAimer.of(targetOriginSource, playerSource, settings)
+    };
+    let aimer = tt_Aimers.of(aimers);
 
     let projector        = tt_Projector           .of(targetRegistry, playerSource);
     let visibilityFilter = tt_VisibilityFilter    .of(projector, playerSource);
     let widgetRegistry   = tt_TargetWidgetRegistry.of(visibilityFilter);
     let widgetSorter     = tt_SorterByDistance    .of(widgetRegistry, originSource);
 
-    let commandSettings = tt_CommandSettingsImpl.of(playerSource);
-    Array<tt_Activatable> commands;
-    makeCommands(playerSource, commandSettings, commands);
-    let commandDispatcher = tt_CommandDispatcher.of( playerInput
-                                                   , commands
-                                                   , commandSettings
-                                                   , answerReporter
-                                                   , answerStateSource
-                                                   , settings
-                                                   );
+    let modeSource = makeModeSource(targetRegistry,
+                                    playerSource,
+                                    manualModeSource,
+                                    modeReporter,
+                                    clock,
+                                    radarCache);
 
-    let modeSource = makeModeSource( targetRegistry
-                                   , playerSource
-                                   , manualModeSource
-                                   , modeReporter
-                                   , clock
-                                   , radarCache
-                                   );
+    let inputManager = tt_PassThroughInputManager
+      .of(tt_InputByModeManager.of(modeSource, playerInput));
+
+    let commandSettings = tt_CommandSettingsImpl.of(playerSource);
+    Array<tt_Activatable> commands =
+    {
+      tt_Sphinx       .of(),
+      tt_Reloader     .of(playerSource, commandSettings),
+
+      //tt_RightDasher  .of(playerSource, commandSettings),
+      //tt_LeftDasher   .of(playerSource, commandSettings),
+      //tt_BackDasher   .of(playerSource, commandSettings),
+      //tt_ForwardDasher.of(playerSource, commandSettings),
+
+      tt_PassThrough.of(inputManager)
+    };
+
+    let commandDispatcher = tt_CommandDispatcher.of(playerInput,
+                                                    commands,
+                                                    commandSettings,
+                                                    answerReporter,
+                                                    answerStateSource,
+                                                    settings);
 
     let oldModeSource         = tt_SettableMode.of();
-    let inputBlockAfterCombat = tt_InputBlockAfterCombat.of(playerInput, modeSource, oldModeSource);
+    let inputBlockAfterCombat = tt_InputBlockAfterCombat
+      .of(playerInput, modeSource, oldModeSource);
 
-    let views         = tt_Views.of();
-    let targetOverlay = tt_TargetOverlay.of( widgetSorter
-                                           , playerInput
-                                           , settings
-                                           , modeSource
-                                           );
-    let infoPanel     = tt_InfoPanel.of( modeSource
-                                       , playerInput
-                                       , commandDispatcher
-                                       , targetRegistry
-                                       , settings
-                                       , playerSource
-                                       );
-    let conditionalView = tt_ConditionalView.of(views);
-    views.add(targetOverlay);
-    views.add(infoPanel);
 
-    let inputManager = tt_InputByModeManager.of(modeSource, playerInput);
+    let infoPanel = tt_InfoPanel.of(modeSource,
+                                    playerInput,
+                                    commandDispatcher,
+                                    targetRegistry,
+                                    settings,
+                                    playerSource);
 
-    let projectileSpeedController = tt_ProjectileSpeedController.of(originSource, playerSource);
-    let enemySpeedController      = tt_EnemySpeedController     .of(radarCache);
-
-    let answerResetter = tt_AnswerResetter.of(answerStateSource, playerInput);
-    let matchWatcher   = tt_MatchWatcher.of(answerStateSource, answerReporter, targetOriginSource);
+    Array<tt_View> views = {
+      tt_TargetOverlay.of(widgetSorter, playerInput, settings, modeSource),
+      infoPanel
+    };
 
     Array<tt_WorldChanger> worldChangers = {
-      damager,
-      projectileSpeedController,
-      enemySpeedController,
-      answerResetter,
-      matchWatcher
+      tt_Gunner.of(targetOriginSource, aimer, tt_FirerImpl.of(playerSource)),
+      tt_ProjectileSpeedController.of(originSource, playerSource),
+      tt_EnemySpeedController.of(radarCache),
+      tt_AnswerResetter.of(answerStateSource, playerInput),
+      tt_MatchWatcher.of(answerStateSource, answerReporter, targetOriginSource)
     };
-    let worldChanger = tt_WorldChangers.of(worldChangers);
 
     Array<tt_KeyProcessor> keyProcessors = {inputBlockAfterCombat, answerStateSource};
-    let keyProcessor = tt_KeyProcessors.of(keyProcessors);
 
     // Initialize attributes
 
     let result = new("tt_PlayerSupervisor");
 
-    result._keyProcessor       = keyProcessor;
+    result._keyProcessor       = tt_KeyProcessors.of(keyProcessors);
     result._deathReporter      = deathReporter;
     result._targetRegistry     = targetRegistry;
-    result._view               = conditionalView;
+    result._view               = tt_ConditionalView.of(tt_Views.of(views));
     result._modeSource         = modeSource;
     result._targetWidgetSource = projector;
     result._commandDispatcher  = commandDispatcher;
@@ -272,7 +286,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     result._inputManager       = inputManager;
     result._oldModeSource      = oldModeSource;
     result._inputBlockAfterCombat = inputBlockAfterCombat;
-    result._worldChanger       = worldChanger;
+    result._worldChanger       = tt_WorldChangers.of(worldChangers);
 
     return result;
   }
@@ -280,6 +294,11 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   override void processKey(tt_Character character)
   {
     _keyProcessor.processKey(character);
+  }
+
+  override void processInput(int type)
+  {
+    _inputManager.processInput(type);
   }
 
   override void tick()
@@ -318,19 +337,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     _view.draw(event);
   }
 
-  private static tt_Aimer makeAimer(tt_OriginSource targetOriginSource,
-                                    tt_PlayerSource playerSource,
-                                    tt_Settings     settings)
-  {
-    let horizontalAimer = tt_HorizontalAimer.of(targetOriginSource, playerSource);
-    let verticalAimer = tt_VerticalAimer.of(targetOriginSource, playerSource, settings);
-    let aimer         = tt_Aimers.of();
-    aimer.add(horizontalAimer);
-    aimer.add(verticalAimer);
-
-    return aimer;
-  }
-
   // TODO: restore this doc.
   // Attention: see docs/adding-new-lesson.md before editing this function.
   // TODO: make string set lessons set data?
@@ -357,19 +363,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     return tt_SelectedLesson.of(settings, lessonsForSelection);
   }
 
-  private static void makeCommands(tt_PlayerSource    playerSource,
-                                   tt_CommandSettings settings,
-                                   out Array<tt_Activatable> activatables)
-  {
-    activatables.push(tt_Sphinx       .of());
-    activatables.push(tt_Reloader     .of(playerSource, settings));
-
-    activatables.push(tt_RightDasher  .of(playerSource, settings));
-    activatables.push(tt_LeftDasher   .of(playerSource, settings));
-    activatables.push(tt_BackDasher   .of(playerSource, settings));
-    activatables.push(tt_ForwardDasher.of(playerSource, settings));
-  }
-
   private static tt_ModeSource makeModeSource(tt_KnownTargetSource knownTargetSource,
                                               tt_PlayerSource      playerSource,
                                               tt_ModeSource        manualModeSource,
@@ -377,11 +370,12 @@ class tt_PlayerSupervisor : tt_PlayerHandler
                                               tt_Clock             clock,
                                               tt_TargetSource      targetSource)
   {
-    let autoModeSource          = tt_AutoModeSource.of(knownTargetSource,
-                                                       playerSource);
-    let delayedCombatModeSource = tt_DelayedCombatModeSource.of(clock,
-                                                                autoModeSource,
-                                                                targetSource);
+    let autoModeSource = tt_AutoModeSource
+      .of(knownTargetSource, playerSource);
+
+    let delayedCombatModeSource = tt_DelayedCombatModeSource
+      .of(clock, autoModeSource, targetSource);
+
     Array<tt_ModeSource> modeSources =
       {manualModeSource, delayedCombatModeSource, autoModeSource};
 
@@ -389,32 +383,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let reporter = tt_ReportedModeSource.of(modeReporter, cascade);
 
     return reporter;
-  }
-
-  private static tt_OriginSource makeTargetOriginSource(
-    tt_KnownTargetSource targetSource,
-    tt_AnswerSource      answerSource,
-    tt_PlayerSource      playerSource,
-    tt_Clock             clock,
-    tt_AnswerStateSource answerStateSource,
-    tt_AnswerReporter    answerReporter,
-    tt_Settings          settings)
-  {
-    let pressMatcher = tt_QuestionAnswerMatcher.of( targetSource
-                                                  , answerSource
-                                                  , playerSource
-                                                  , answerStateSource
-                                                  );
-    let hastyMatcher = tt_HastyQuestionAnswerMatcher.of( targetSource
-                                                       , answerSource
-                                                       , playerSource
-                                                       , answerReporter
-                                                       );
-    let selector    = tt_SelectableOriginSource.of(hastyMatcher, pressMatcher, settings);
-    let staleMarker = tt_StaleMarkerImpl  .of(clock);
-    let result      = tt_OriginSourceCache.of(selector, staleMarker);
-
-    return result;
   }
 
   private static tt_KnownTargetSource makeTargetRegistry(
@@ -438,7 +406,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   private tt_TargetWidgetSource _targetWidgetSource;
   private tt_CommandDispatcher  _commandDispatcher;
   private tt_ModeStorage        _manualModeSource;
-  private tt_InputManager       _inputManager;
+  private tt_PassThroughInputManager _inputManager;
   private tt_SettableMode       _oldModeSource;
   private tt_InputBlockAfterCombat _inputBlockAfterCombat;
   private tt_WorldChanger       _worldChanger;
@@ -532,12 +500,53 @@ class tt_ActivatableMock : tt_Activatable
 }
 #+end_src
 
+** ~VisibleActivatable~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/activatable/pass_through.zs
+
+class tt_VisibleActivatable : tt_Activatable abstract
+{
+  override bool isVisible()
+  {
+    return true;
+  }
+}
+#+end_src
+
+** ~PassThrough~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/activatable/pass_through.zs
+
+class tt_PassThrough : tt_VisibleActivatable
+{
+  static tt_PassThrough of(tt_PassThroughInputManager passThroughInputManager)
+  {
+    let result = new("tt_PassThrough");
+    result._inputManager = passThroughInputManager;
+    return result;
+  }
+
+  override void activate()
+  {
+    _inputManager.setPassThrough();
+  }
+
+  override tt_Strings getCommands()
+  {
+    return tt_Strings.ofOne("pass");
+  }
+
+  private tt_PassThroughInputManager _inputManager;
+}
+
+#+end_src
+
 ** ~Dasher~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/dasher.zs
 
 // This class implements tt_Activatable by performing a dash.
-class tt_Dasher : tt_Activatable abstract
+class tt_Dasher : tt_VisibleActivatable abstract
 {
   abstract double getDashAngle() const;
 
@@ -545,11 +554,6 @@ class tt_Dasher : tt_Activatable abstract
   {
     let pawn = _playerSource.getPawn();
     pawn.Thrust(SPEED, pawn.Angle + getDashAngle());
-  }
-
-  override bool isVisible()
-  {
-    return true;
   }
 
   const SPEED = 18;
@@ -719,7 +723,7 @@ class tt_RightDasher : tt_Dasher
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/command_dispatcher.zs
 
 // This class contains Activatables and activates() ones with commands matching answer.
-class tt_CommandDispatcher : tt_Activatable
+class tt_CommandDispatcher : tt_VisibleActivatable
 {
   static tt_CommandDispatcher of(tt_AnswerSource       answerSource,
                                  Array<tt_Activatable> activatables,
@@ -743,15 +747,13 @@ class tt_CommandDispatcher : tt_Activatable
   override void activate()
   {
     let answerState = _answerStateSource.getAnswerState();
-    if (!answerState.isReady() && !_globalSettings.isFastConfirmation()) { return; }
+    if (!answerState.isReady() && !_globalSettings.isFastConfirmation()) return;
 
     let answer       = _answerSource.getAnswer();
     let answerString = answer.getString();
 
-    uint nActivatables = _activatables.size();
-    for (uint i = 0; i < nActivatables; ++i)
+    foreach (activatable : _activatables)
     {
-      let  activatable = _activatables[i];
       bool isActivated = tryActivate(activatable, answerString);
 
       if (isActivated)
@@ -768,12 +770,9 @@ class tt_CommandDispatcher : tt_Activatable
   {
     let result = tt_Strings.of();
 
-    uint nActivatables = _activatables.size();
-    for (uint i = 0; i < nActivatables; ++i)
+    foreach (activatable : _activatables)
     {
-      let activatable = _activatables[i];
-
-      if (!activatable.isVisible()) { continue; }
+      if (!activatable.isVisible()) continue;
 
       let commands = activatable.getCommands();
 
@@ -788,11 +787,6 @@ class tt_CommandDispatcher : tt_Activatable
     }
 
     return result;
-  }
-
-  override bool isVisible()
-  {
-    return true;
   }
 
   private play bool tryActivate(tt_Activatable activatable, string answer)
@@ -816,12 +810,9 @@ class tt_CommandDispatcher : tt_Activatable
     return false;
   }
 
-  private string makePrefixedCommand(String command)
+  private string makePrefixedCommand(string command)
   {
-    string prefix          = _settings.getCommandPrefix();
-    string prefixedCommand = string.format("%s%s", prefix, command);
-
-    return prefixedCommand;
+    return _settings.getCommandPrefix() .. command;
   }
 
   private tt_AnswerSource       _answerSource;
@@ -1086,15 +1077,11 @@ class tt_AimerMock : tt_Aimer
 // This class implements tt_Aimer interface by aiming several Aimers.
 class tt_Aimers : tt_Aimer
 {
-  static tt_Aimers of()
+  static tt_Aimers of(Array<tt_Aimer> aimers)
   {
     let result = new("tt_Aimers");
+    result._aimers.move(aimers);
     return result;
-  }
-
-  void add(tt_Aimer aimer)
-  {
-    _aimers.push(aimer);
   }
 
   override void aim()
@@ -1113,12 +1100,10 @@ class tt_Aimers : tt_Aimer
 
 #+begin_src c :noweb-ref test-body
 {
-  let aimers = tt_Aimers.of();
   let aimer1 = tt_AimerMock.of();
   let aimer2 = tt_AimerMock.of();
-
-  aimers.add(aimer1);
-  aimers.add(aimer2);
+  Array<tt_Aimer> aimersArray = {aimer1, aimer2};
+  let aimers = tt_Aimers.of(aimersArray);
 
   aimer1.expect_aim();
   aimer2.expect_aim();
@@ -2051,6 +2036,12 @@ class tt_EventHandler : EventHandler
     return false;
   }
 
+  override bool inputProcess(InputEvent event)
+  {
+    _playerHandler.processInput(event.type);
+    return false;
+  }
+
   override void playerEntered(PlayerEvent event)
   {
     self.RequireMouse = true;
@@ -2632,7 +2623,8 @@ class tt_Buddha : PowerBuddha
 // Input is reset when the game mode is changed.
 class tt_InputByModeManager : tt_InputManager
 {
-  static tt_InputByModeManager of(tt_ModeSource modeSource, tt_PlayerInput playerInput)
+  static tt_InputByModeManager of(tt_ModeSource modeSource,
+                                  tt_PlayerInput playerInput)
   {
     let result = new("tt_InputByModeManager");
 
@@ -2668,6 +2660,69 @@ class tt_InputByModeManager : tt_InputManager
   private tt_PlayerInput _playerInput;
 
   private int _oldMode;
+}
+#+end_src
+
+** ~PassThroughInputManager~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/pass_through_input_manager.zs
+
+// Doesn't capture keys when pass throug is set, otherwise acts as base.
+class tt_PassThroughInputManager : tt_InputManager
+{
+  static tt_PassThroughInputManager of(tt_InputManager base)
+  {
+    let result = new("tt_PassThroughInputManager");
+    result._base = base;
+    result._passThrough = PassThroughDisabled;
+    return result;
+  }
+
+  override void manageInput()
+  {
+    _base.manageInput();
+  }
+
+  override bool isCapturingKeys()
+  {
+    if (_passThrough != PassThroughDisabled) return false;
+
+    return _base.isCapturingKeys();
+  }
+
+  void setPassThrough()
+  {
+    _passThrough = WaitingForKeyDown;
+  }
+
+  void processInput(int type)
+  {
+    switch (_passThrough)
+    {
+      case PassThroughDisabled:
+        return;
+
+      case WaitingForKeyDown:
+        if (type == InputEvent.Type_KeyDown)
+          _passThrough = WaitingForKeyUp;
+        return;
+
+      case WaitingForKeyUp:
+        if (type == InputEvent.Type_KeyUp)
+          _passThrough = PassThroughDisabled;
+        return;
+    }
+  }
+
+  private tt_InputManager _base;
+  private int _passThrough;
+
+  enum _
+  {
+    PassThroughDisabled,
+    WaitingForKeyDown,
+    WaitingForKeyUp
+  }
 }
 #+end_src
 
@@ -2767,25 +2822,20 @@ class tt_KeyProcessorMock : tt_KeyProcessor
 #+begin_src c :tangle build/Typist.pk3/zscript/key_processor/key_processors.zs
 
 // This class implements tt_KeyProcessor interface by calling several instances
-// of tt_KeyProcessor
+// of tt_KeyProcessor.
 class tt_KeyProcessors : tt_KeyProcessor
 {
   static tt_KeyProcessors of(Array<tt_KeyProcessor> keyProcessors)
   {
     let result = new("tt_KeyProcessors");
-
-    result._keyProcessors.Copy(keyProcessors);
-
+    result._keyProcessors.copy(keyProcessors);
     return result;
   }
 
   override void processKey(tt_Character character)
   {
-    uint nProcessors = _keyProcessors.size();
-    for (uint i = 0; i < nProcessors; ++i)
-    {
-      _keyProcessors[i].processKey(character);
-    }
+    foreach (keyProcessor : _keyProcessors)
+      keyProcessor.processKey(character);
   }
 
   private Array<tt_KeyProcessor> _keyProcessors;
@@ -7906,15 +7956,11 @@ class tt_ViewMock : tt_View
 // This class implements View by allowing several Views to be drawn.
 class tt_Views : tt_View
 {
-  static tt_Views of()
+  static tt_Views of(Array<tt_View> views)
   {
     let result = new("tt_Views");
+    result._views.move(views);
     return result;
-  }
-
-  void add(tt_View view)
-  {
-    _views.push(view);
   }
 
   override void draw(RenderEvent event)
