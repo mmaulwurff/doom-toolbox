@@ -8007,12 +8007,8 @@ TT_UNLOCK = "Unlock Game Mode";
 TT_COMBAT = "Force Combat Mode";
 TT_SCORE  = "Open Score";
 
-TT_DISPLAY_OPTIONS_TITLE_OUT  = "Display Options";
-TT_DISPLAY_OPTIONS_TITLE_IN   = "Typist.pk3 Display Options";
 TT_TARGET_SCALE               = "Target text scale";
 
-TT_GAMEPLAY_OPTIONS_TITLE_OUT = "Gameplay Options";
-TT_GAMEPLAY_OPTIONS_TITLE_IN  = "Typist.pk3 Gameplay Options";
 TT_QUESTION_SOURCE            = "Lesson";
 TT_APPLY                      = "Apply";
 TT_QUESTION_SOURCE_NOTE       = "Or existing targets will retain question from the previous Lesson.";
@@ -8089,8 +8085,6 @@ TODO: rewrite with PlainTranslator.
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
 
-// Main Menu ///////////////////////////////////////////////////////////////////
-
 AddOptionMenu OptionsMenu
 {
   tt_AnimatedSubmenu "$TT_TITLE", tt_Options
@@ -8103,8 +8097,7 @@ OptionMenu tt_Options
   Submenu    "$TT_CONTROLS_TITLE_OUT"         , tt_Controls
 
   StaticText ""
-  Submenu    "$TT_DISPLAY_OPTIONS_TITLE_OUT"  , tt_DisplayOptions
-  Submenu    "$TT_GAMEPLAY_OPTIONS_TITLE_OUT" , tt_GameplayOptions
+  Submenu    "General Options"                , tt_GeneralOptions
   Submenu    "$TT_LESSON_OPTIONS_TITLE_OUT"   , tt_LessonOptions
   Submenu    "$TT_SOUND_OPTIONS_TITLE_OUT"    , tt_SoundOptions
 
@@ -8112,24 +8105,38 @@ OptionMenu tt_Options
   Submenu    "$TT_ACKNOWLEDGMENTS_TITLE"      , tt_Acknowledgments
 }
 
-// Submenus ////////////////////////////////////////////////////////////////////
-
-OptionMenu tt_DisplayOptions
+OptionMenu tt_GeneralOptions
 {
-  Title      "$TT_DISPLAY_OPTIONS_TITLE_IN"
+  Title      "Typist.pk3 General Options"
 
-  Slider     "$TT_TARGET_SCALE", tt_view_scale, 1, 4, 1, 0
-}
-
-OptionMenu tt_GameplayOptions
-{
-  Title      "$TT_GAMEPLAY_OPTIONS_TITLE_IN"
-
+  StaticText ""
   Option     "$TT_CONFIRMATION", tt_confirm_type, tt_ConfirmationTypes
+
+  StaticText ""
+  Slider     "$TT_TARGET_SCALE", tt_view_scale, 1, 4, 1, 0
+
+  StaticText ""
+  StaticText "Reduce distractions"
 
   StaticText ""
   Option     "$TT_BUDDHA_ENABLED", tt_buddha_enabled, OnOff
   StaticText "$TT_BUDDHA_NOTE"
+
+  StaticText ""
+  Option     "Infinite ammo",      sv_infiniteammo, OnOff
+
+  StaticText ""
+  Option     "HUD",          screenblocks, tt_HudValues
+  Option     "Show score",   tt_lp_show, OnOff
+  Slider     "Pain flash",   blood_fade_scalar,  0, 1.0, 0.1
+  Slider     "Pickup flash", pickup_fade_scalar, 0, 1.0, 0.1
+}
+
+OptionValue tt_HudValues
+{
+  10, "Standard"
+  11, "Alternative"
+  12, "No HUD"
 }
 
 OptionMenu tt_LessonOptions
@@ -8225,8 +8232,6 @@ OptionMenu tt_RandomLesson
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
 
-// Option Values ///////////////////////////////////////////////////////////////
-
 // See docs/adding-new-lesson.md.
 OptionValue tt_LessonValues
 {
@@ -8255,16 +8260,12 @@ OptionValue tt_SoundThemes
   5, "Grocery Store"
 }
 
-// Score Menu //////////////////////////////////////////////////////////////////
-
+// Score Menu
 OptionMenu tt_lp_TopMenu
 {
   class tt_lp_Top
   Title "Top Points"
 }
-
-// TODO: artefact?
-// Sound settings //////////////////////////////////////////////////////////////
 #+end_src
 
 ** Keys
