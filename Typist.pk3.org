@@ -493,24 +493,11 @@ class tt_ActivatableMock : tt_Activatable
 }
 #+end_src
 
-** ~VisibleActivatable~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/pass_through.zs
-
-class tt_VisibleActivatable : tt_Activatable abstract
-{
-  override bool isVisible()
-  {
-    return true;
-  }
-}
-#+end_src
-
 ** ~PassThrough~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/pass_through.zs
 
-class tt_PassThrough : tt_VisibleActivatable
+class tt_PassThrough : tt_Activatable
 {
   static tt_PassThrough of(tt_PassThroughInputManager passThroughInputManager)
   {
@@ -529,6 +516,11 @@ class tt_PassThrough : tt_VisibleActivatable
     return tt_Strings.ofOne("pass");
   }
 
+  override bool isVisible()
+  {
+    return true;
+  }
+
   private tt_PassThroughInputManager _inputManager;
 }
 
@@ -539,7 +531,7 @@ class tt_PassThrough : tt_VisibleActivatable
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/command_dispatcher.zs
 
 // This class contains Activatables and activates() ones with commands matching answer.
-class tt_CommandDispatcher : tt_VisibleActivatable
+class tt_CommandDispatcher : tt_Activatable
 {
   static tt_CommandDispatcher of(tt_AnswerSource       answerSource,
                                  Array<tt_Activatable> activatables,
@@ -603,6 +595,11 @@ class tt_CommandDispatcher : tt_VisibleActivatable
     }
 
     return result;
+  }
+
+  override bool isVisible()
+  {
+    return true;
   }
 
   private play bool tryActivate(tt_Activatable activatable, string answer)
