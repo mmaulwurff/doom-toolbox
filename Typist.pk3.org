@@ -24,7 +24,7 @@ class tt_PlayerHandler abstract
 {
   abstract void processKey(tt_Character character);
 
-  /// Type is from InputEvent.EGenericEvent.
+  // Type is from InputEvent.EGenericEvent.
   abstract void processInput(int type);
 
   play abstract void tick();
@@ -227,12 +227,11 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     Array<tt_Activatable> commands =
     {
       tt_Sphinx.of(),
-      tt_PassThrough.of(inputManager)
+      tt_PassThrough.of(inputManager, commandSettings)
     };
 
     let commandDispatcher = tt_CommandDispatcher.of(playerInput,
                                                     commands,
-                                                    commandSettings,
                                                     answerReporter,
                                                     answerStateSource,
                                                     settings);
@@ -499,10 +498,12 @@ class tt_ActivatableMock : tt_Activatable
 
 class tt_PassThrough : tt_Activatable
 {
-  static tt_PassThrough of(tt_PassThroughInputManager passThroughInputManager)
+  static tt_PassThrough of(tt_PassThroughInputManager passThroughInputManager,
+                           tt_CommandSettings settings)
   {
     let result = new("tt_PassThrough");
     result._inputManager = passThroughInputManager;
+    result._settings     = settings;
     return result;
   }
 
@@ -513,7 +514,7 @@ class tt_PassThrough : tt_Activatable
 
   override tt_Strings getCommands()
   {
-    return tt_Strings.ofOne("pass");
+    return tt_Strings.ofOne(_settings.getPassThroughCommand());
   }
 
   override bool isVisible()
@@ -522,6 +523,7 @@ class tt_PassThrough : tt_Activatable
   }
 
   private tt_PassThroughInputManager _inputManager;
+  private tt_CommandSettings _settings;
 }
 
 #+end_src
@@ -535,7 +537,6 @@ class tt_CommandDispatcher : tt_Activatable
 {
   static tt_CommandDispatcher of(tt_AnswerSource       answerSource,
                                  Array<tt_Activatable> activatables,
-                                 tt_CommandSettings    settings,
                                  tt_AnswerReporter     answerReporter,
                                  tt_AnswerStateSource  answerStateSource,
                                  tt_Settings           globalSettings)
@@ -544,7 +545,6 @@ class tt_CommandDispatcher : tt_Activatable
 
     result._answerSource      = answerSource;
     result._activatables.Copy(activatables);
-    result._settings          = settings;
     result._answerReporter    = answerReporter;
     result._answerStateSource = answerStateSource;
     result._globalSettings    = globalSettings;
@@ -586,12 +586,7 @@ class tt_CommandDispatcher : tt_Activatable
 
       uint nCommands = commands.size();
       for (uint c = 0; c < nCommands; ++c)
-      {
-        string command         = commands.at(c);
-        string prefixedCommand = makePrefixedCommand(command);
-
-        result.add(prefixedCommand);
-      }
+        result.add(commands.at(c));
     }
 
     return result;
@@ -609,9 +604,8 @@ class tt_CommandDispatcher : tt_Activatable
     uint nCommands = commands.size();
     for (uint c = 0; c < nCommands; ++c)
     {
-      string command         = commands.at(c);
-      string prefixedCommand = makePrefixedCommand(command);
-      bool   isMatching      = (prefixedCommand == answer);
+      string command    = commands.at(c);
+      bool   isMatching = (command == answer);
 
       if (isMatching)
       {
@@ -623,14 +617,8 @@ class tt_CommandDispatcher : tt_Activatable
     return false;
   }
 
-  private string makePrefixedCommand(string command)
-  {
-    return _settings.getCommandPrefix() .. command;
-  }
-
   private tt_AnswerSource       _answerSource;
   private Array<tt_Activatable> _activatables;
-  private tt_CommandSettings    _settings;
   private tt_AnswerReporter     _answerReporter;
   private tt_AnswerStateSource  _answerStateSource;
   private tt_Settings           _globalSettings;
@@ -658,7 +646,6 @@ class tt_CommandDispatcher : tt_Activatable
   env.answerStateSource
     .expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
   env.answerStateSource.expect_reset();
-  env.settings.expect_getCommandPrefix("");
   env.answerSource.expect_reset();
 
   env.commandDispatcher.activate();
@@ -679,7 +666,6 @@ class tt_CommandDispatcher : tt_Activatable
   env.activatable2.expect_getCommands(commands2);
   env.activatable1.expect_isVisible(true);
   env.activatable2.expect_isVisible(true);
-  env.settings.expect_getCommandPrefix("", 4);
 
   let allCommands = env.commandDispatcher.getCommands();
   let size        = allCommands.size();
@@ -710,13 +696,11 @@ class tt_CommandDispatcherTestEnvironment
     result.activatable2      = tt_ActivatableMock.of();
     Array<tt_Activatable> activatables = {result.activatable1, result.activatable2};
     result.answerSource      = tt_AnswerSourceMock     .of();
-    result.settings          = tt_CommandSettingsMock  .of();
     result.answerReporter    = tt_AnswerReporterMock   .of();
     result.answerStateSource = tt_AnswerStateSourceMock.of();
     result.globalSettings    = tt_SettingsMock         .of();
     result.commandDispatcher = tt_CommandDispatcher.of(result.answerSource,
                                                        activatables,
-                                                       result.settings,
                                                        result.answerReporter,
                                                        result.answerStateSource,
                                                        result.globalSettings);
@@ -728,7 +712,6 @@ class tt_CommandDispatcherTestEnvironment
     return activatable1.getSatisfaction()
       .add(activatable2.getSatisfaction())
       .add(answerSource.getSatisfaction())
-      .add(settings.getSatisfaction())
       .add(answerReporter.getSatisfaction())
       .add(answerStateSource.getSatisfaction())
       .add(globalSettings.getSatisfaction());
@@ -737,7 +720,6 @@ class tt_CommandDispatcherTestEnvironment
   tt_ActivatableMock activatable1;
   tt_ActivatableMock activatable2;
   tt_AnswerSourceMock answerSource;
-  tt_CommandSettingsMock settings;
   tt_AnswerReporterMock answerReporter;
   tt_AnswerStateSourceMock answerStateSource;
   tt_SettingsMock globalSettings;
@@ -5196,7 +5178,7 @@ class tt_Cvar
 // This interface provides access to Typist.pk3 Commands settings.
 class tt_CommandSettings abstract
 {
-  abstract string getCommandPrefix();
+  abstract string getPassThroughCommand();
 }
 #+end_src
 
@@ -5208,30 +5190,16 @@ class tt_CommandSettingsMock : tt_CommandSettings
 {
   static tt_CommandSettingsMock of() { return new("tt_CommandSettingsMock"); }
 
-  override string getCommandPrefix()
+  override string getPassThroughCommand()
   {
-    ++_mock_getCommandPrefix_called;
-    return _mock_getCommandPrefix;
-  }
-
-  void expect_getCommandPrefix(String value, int expected = 1)
-  {
-    _mock_getCommandPrefix = value;
-    _mock_getCommandPrefix_expected = expected;
-    _mock_getCommandPrefix_called = 0;
+    throwAbortException("implement this!");
+    return "";
   }
 
   tt_Satisfaction getSatisfaction() const
   {
-    let aName = getClassName();
-    return tt_Satisfaction.of()
-      .push(aName .. ": getCommandPrefix",
-            _mock_getCommandPrefix_expected == _mock_getCommandPrefix_called);
+    return tt_Satisfaction.of();
   }
-
-  private string _mock_getCommandPrefix;
-  private int _mock_getCommandPrefix_expected;
-  private int _mock_getCommandPrefix_called;
 }
 #+end_src
 
@@ -5241,9 +5209,7 @@ class tt_CommandSettingsMock : tt_CommandSettings
 
 // Command settings
 
-user string tt_command_prefix = "/";
-
-user string tt_command_reload        = "rl";
+user string tt_command_pass_through = "/pass";
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
@@ -5254,15 +5220,17 @@ class tt_CommandSettingsImpl : tt_CommandSettings
   static tt_CommandSettingsImpl of(tt_PlayerSource playerSource)
   {
     let result = new("tt_CommandSettingsImpl");
-
-    result._commandPrefixCvar = tt_Cvar.of(playerSource, "tt_command_prefix");
-
+    result._commandPassThroughCvar = tt_Cvar.of(playerSource,
+                                                "tt_command_pass_through");
     return result;
   }
 
-  override string getCommandPrefix() { return _commandPrefixCvar.getString(); }
+  override string getPassThroughCommand()
+  {
+    return _commandPassThroughCvar.getString();
+  }
 
-  private tt_Cvar _commandPrefixCvar;
+  private tt_Cvar _commandPassThroughCvar;
 }
 #+end_src
 
@@ -8111,16 +8079,6 @@ TT_SOUND_TYPING_ENABLED = "Typing sound";
 TT_ACKNOWLEDGMENTS_TITLE = "Acknowledgments";
 TT_ACKNOWLEDGMENTS_TITLE_FULL = "Typist.pk3 Acknowledgments";
 TT_ACKNOWLEDGMENTS_TEXT = "\cfCredits\c-\n\n- libeye (Level and screen projections): KeksDose\n- Clematis: ZippeyKeys12 (Zain Aamer)\n- miniwad.wad: fraggle\n- 1000 basic English words: Wikipedia\n- Frequency dictionary of the modern Russian language: Wikipedia\n- Sound design: Captain J\n\n\cfThanks\c-\n\n- LGR for Sega's Typing of the Dead: A Zombie-Slaying Education video\n- Marrub for ZScript documentation\n- Accensus for inviting me into Discord server and for bug reports\n- kadu522 for support\n- dard22 for bug reports\n- Jarewill for bug reports\n\n(see details in the Readme.md file inside the pk3)\n";
-
-// Commands menu ///////////////////////////////////////////////////////////////
-
-TT_COMMANDS_TITLE_OUT  = "Command Options";
-TT_COMMANDS_TITLE_IN   = "Typist.pk3 Command Options";
-
-TT_COMMAND_PREFIX      = "Command prefix";
-TT_COMMAND_PREFIX_NOTE = "It's inadvisable to select a prefix that may occur in a lesson.";
-
-TT_RESET_COMMAND = "Reset to default";
 #+end_src
 
 * Options Menu
@@ -8148,7 +8106,6 @@ OptionMenu tt_Options
   Submenu    "$TT_DISPLAY_OPTIONS_TITLE_OUT"  , tt_DisplayOptions
   Submenu    "$TT_GAMEPLAY_OPTIONS_TITLE_OUT" , tt_GameplayOptions
   Submenu    "$TT_LESSON_OPTIONS_TITLE_OUT"   , tt_LessonOptions
-  Submenu    "$TT_COMMANDS_TITLE_OUT"         , tt_CommandOptions
   Submenu    "$TT_SOUND_OPTIONS_TITLE_OUT"    , tt_SoundOptions
 
   StaticText ""
@@ -8201,6 +8158,10 @@ OptionMenu tt_Controls
   Control    "$TT_COMBAT", tt_force_combat
 
   StaticText ""
+  TextField  "Pass Through command", tt_command_pass_through
+  StaticText "Allows a single action key to be pressed without exiting Combat mode."
+
+  StaticText ""
   Control    "$TT_SCORE", zc_top
 }
 
@@ -8224,6 +8185,7 @@ OptionMenu tt_MixedLesson
 {
   Title "$TT_MIXED_LESSON_TITLE_FULL"
 
+  // TODO: add this doc.
   // See docs/adding-new-lesson.md.
   Option "$TT_LESSON_RANDOM"  , tt_is_lesson_enabled_0 , OnOff
   Option "$TT_LESSON_GZDOOM"  , tt_is_lesson_enabled_1 , OnOff
@@ -8259,16 +8221,6 @@ OptionMenu tt_RandomLesson
   Option     "$TT_RANDOM_LESSON_CUSTOM"       , tt_rc_custom_enabled , OnOff
   TextField  "$TT_RANDOM_LESSON_CUSTOM_CHARS" , tt_rc_custom
 }
-
-OptionMenu tt_CommandOptions
-{
-  Title      "$TT_COMMANDS_TITLE_IN"
-
-  StaticText ""
-  Option     "$TT_COMMAND_PREFIX", tt_command_prefix, tt_CommandPrefixValues
-  StaticText "$TT_COMMAND_PREFIX_NOTE"
-}
-
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
@@ -8287,16 +8239,6 @@ OptionValue tt_LessonValues
   6 , "$TT_MIXED_LESSON"
   7 , "$TT_CUSTOM_TEXT"
   8 , "$TT_NIX_LESSON"
-}
-
-OptionString tt_CommandPrefixValues
-{
-  "/" , "/"
-  ":" , ":"
-  "~" , "~"
-  "@" , "@"
-  "." , "."
-  "-" , "-"
 }
 
 OptionValue tt_ConfirmationTypes
