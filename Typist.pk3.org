@@ -226,14 +226,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let commandSettings = tt_CommandSettingsImpl.of(playerSource);
     Array<tt_Activatable> commands =
     {
-      tt_Sphinx       .of(),
-      tt_Reloader     .of(playerSource, commandSettings),
-
-      //tt_RightDasher  .of(playerSource, commandSettings),
-      //tt_LeftDasher   .of(playerSource, commandSettings),
-      //tt_BackDasher   .of(playerSource, commandSettings),
-      //tt_ForwardDasher.of(playerSource, commandSettings),
-
+      tt_Sphinx.of(),
       tt_PassThrough.of(inputManager)
     };
 
@@ -541,183 +534,6 @@ class tt_PassThrough : tt_VisibleActivatable
 
 #+end_src
 
-** ~Dasher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/dasher.zs
-
-// This class implements tt_Activatable by performing a dash.
-class tt_Dasher : tt_VisibleActivatable abstract
-{
-  abstract double getDashAngle() const;
-
-  override void activate()
-  {
-    let pawn = _playerSource.getPawn();
-    pawn.Thrust(SPEED, pawn.Angle + getDashAngle());
-  }
-
-  const SPEED = 18;
-
-  protected tt_PlayerSource _playerSource;
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_DasherMock : tt_Dasher
-{
-  static tt_DasherMock of() { return new("tt_DasherMock"); }
-
-  override double getDashAngle()
-  {
-    ++_mock_getDashAngle_called;
-    return _mock_getDashAngle;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return NULL;
-  }
-
-  void expect_getDashAngle(double value, int expected = 1)
-  {
-    _mock_getDashAngle = value;
-    _mock_getDashAngle_expected = expected;
-    _mock_getDashAngle_called = 0;
-  }
-
-  private double _mock_getDashAngle;
-  private int _mock_getDashAngle_expected;
-  private int _mock_getDashAngle_called;
-}
-#+end_src
-
-** ~ForwardDasher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/forward_dasher.zs
-
-// This class implements tt_Dasher by specifying dash angle.
-class tt_ForwardDasher : tt_Dasher
-{
-  static tt_ForwardDasher of(tt_PlayerSource playerSource, tt_CommandSettings settings)
-  {
-    let result = new("tt_ForwardDasher");
-
-    result._playerSource = playerSource;
-    result._settings     = settings;
-
-    return result;
-  }
-
-  override double getDashAngle()
-  {
-    return 0;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return tt_Strings.ofOne(_settings.getForwardDashCommand());
-  }
-
-  private tt_CommandSettings _settings;
-}
-#+end_src
-
-** ~BackDasher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/back_dasher.zs
-
-// This class implements tt_Dasher by specifying dash angle.
-class tt_BackDasher : tt_Dasher
-{
-  static tt_BackDasher of(tt_PlayerSource playerSource, tt_CommandSettings settings)
-  {
-    let result = new("tt_BackDasher");
-
-    result._playerSource = playerSource;
-    result._settings     = settings;
-
-    return result;
-  }
-
-  override double getDashAngle()
-  {
-    return 180;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return tt_Strings.ofOne(_settings.getBackwardDashCommand());
-  }
-
-  private tt_CommandSettings _settings;
-}
-#+end_src
-
-** ~LeftDasher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/left_dasher.zs
-
-// This class implements tt_Dasher by specifying dash angle.
-class tt_LeftDasher : tt_Dasher
-{
-  static tt_LeftDasher of(tt_PlayerSource playerSource, tt_CommandSettings settings)
-  {
-    let result = new("tt_LeftDasher");
-
-    result._playerSource = playerSource;
-    result._settings     = settings;
-
-    return result;
-  }
-
-  override double getDashAngle()
-  {
-    return 90;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return tt_Strings.ofOne(_settings.getLeftDashCommand());
-  }
-
-  private tt_CommandSettings _settings;
-}
-#+end_src
-
-** ~RightDasher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/right_dasher.zs
-
-// This class implements tt_Dasher by specifying dash angle.
-class tt_RightDasher : tt_Dasher
-{
-  static tt_RightDasher of(tt_PlayerSource playerSource, tt_CommandSettings settings)
-  {
-    let result = new("tt_RightDasher");
-
-    result._playerSource = playerSource;
-    result._settings     = settings;
-
-    return result;
-  }
-
-  override double getDashAngle()
-  {
-    return -90;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return tt_Strings.ofOne(_settings.getRightDashCommand());
-  }
-
-  private tt_CommandSettings _settings;
-}
-#+end_src
-
 ** ~CommandDispatcher~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/command_dispatcher.zs
@@ -929,64 +745,6 @@ class tt_CommandDispatcherTestEnvironment
   tt_AnswerStateSourceMock answerStateSource;
   tt_SettingsMock globalSettings;
   tt_CommandDispatcher commandDispatcher;
-}
-#+end_src
-
-** ~Reloader~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/reloader.zs
-
-// This class implements tt_Activatable by reloading the weapon.
-// This command is not visible when the weapon doesn't have the Reload state.
-class tt_Reloader : tt_Activatable
-{
-  static tt_Reloader of(tt_PlayerSource playerSource, tt_CommandSettings settings)
-  {
-    let result = new("tt_Reloader");
-
-    result._playerSource = playerSource;
-    result._settings     = settings;
-
-    return result;
-  }
-
-  override void activate()
-  {
-    let playerInfo = _playerSource.getInfo();
-    let weapon     = playerInfo.readyWeapon;
-
-    if (weapon == NULL) return;
-
-    let  reloadState = weapon.FindState('Reload');
-    bool canReload   = (reloadState != NULL) && (playerInfo.WeaponState & WF_WeaponReloadOk);
-
-    if (canReload)
-    {
-      playerInfo.cmd.buttons |= BT_RELOAD;
-      playerInfo.SetPsprite(PSP_WEAPON, reloadState);
-    }
-  }
-
-  override bool isVisible()
-  {
-    let playerInfo = _playerSource.getInfo();
-    let weapon     = playerInfo.readyWeapon;
-
-    if (weapon == NULL) return false;
-
-    let  reloadState    = weapon.FindState('Reload');
-    bool hasReloadState = (reloadState != NULL);
-
-    return hasReloadState;
-  }
-
-  override tt_Strings getCommands()
-  {
-    return tt_Strings.ofOne(_settings.getReloadCommand());
-  }
-
-  private tt_PlayerSource    _playerSource;
-  private tt_CommandSettings _settings;
 }
 #+end_src
 
@@ -5441,16 +5199,6 @@ class tt_Cvar
 // This interface provides access to Typist.pk3 Commands settings.
 class tt_CommandSettings abstract
 {
-  abstract string getForwardDashCommand();
-
-  abstract string getBackwardDashCommand();
-
-  abstract string getLeftDashCommand();
-
-  abstract string getRightDashCommand();
-
-  abstract string getReloadCommand();
-
   abstract string getCommandPrefix();
 }
 #+end_src
@@ -5462,91 +5210,6 @@ class tt_CommandSettings abstract
 class tt_CommandSettingsMock : tt_CommandSettings
 {
   static tt_CommandSettingsMock of() { return new("tt_CommandSettingsMock"); }
-
-  override string getForwardDashCommand()
-  {
-    ++_mock_getForwardDashCommand_called;
-    return _mock_getForwardDashCommand;
-  }
-
-  void expect_getForwardDashCommand(String value, int expected = 1)
-  {
-    _mock_getForwardDashCommand = value;
-    _mock_getForwardDashCommand_expected = expected;
-    _mock_getForwardDashCommand_called = 0;
-  }
-
-  private string _mock_getForwardDashCommand;
-  private int _mock_getForwardDashCommand_expected;
-  private int _mock_getForwardDashCommand_called;
-
-  override string getBackwardDashCommand()
-  {
-    ++_mock_getBackwardDashCommand_called;
-    return _mock_getBackwardDashCommand;
-  }
-
-  void expect_getBackwardDashCommand(String value, int expected = 1)
-  {
-    _mock_getBackwardDashCommand = value;
-    _mock_getBackwardDashCommand_expected = expected;
-    _mock_getBackwardDashCommand_called = 0;
-  }
-
-  private string _mock_getBackwardDashCommand;
-  private int _mock_getBackwardDashCommand_expected;
-  private int _mock_getBackwardDashCommand_called;
-
-  override string getLeftDashCommand()
-  {
-    ++_mock_getLeftDashCommand_called;
-    return _mock_getLeftDashCommand;
-  }
-
-  void expect_getLeftDashCommand(String value, int expected = 1)
-  {
-    _mock_getLeftDashCommand = value;
-    _mock_getLeftDashCommand_expected = expected;
-    _mock_getLeftDashCommand_called = 0;
-  }
-
-  private string _mock_getLeftDashCommand;
-  private int _mock_getLeftDashCommand_expected;
-  private int _mock_getLeftDashCommand_called;
-
-  override string getRightDashCommand()
-  {
-    ++_mock_getRightDashCommand_called;
-    return _mock_getRightDashCommand;
-  }
-
-  void expect_getRightDashCommand(String value, int expected = 1)
-  {
-    _mock_getRightDashCommand = value;
-    _mock_getRightDashCommand_expected = expected;
-    _mock_getRightDashCommand_called = 0;
-  }
-
-  private string _mock_getRightDashCommand;
-  private int _mock_getRightDashCommand_expected;
-  private int _mock_getRightDashCommand_called;
-
-  override string getReloadCommand()
-  {
-    ++_mock_getReloadCommand_called;
-    return _mock_getReloadCommand;
-  }
-
-  void expect_getReloadCommand(String value, int expected = 1)
-  {
-    _mock_getReloadCommand = value;
-    _mock_getReloadCommand_expected = expected;
-    _mock_getReloadCommand_called = 0;
-  }
-
-  private string _mock_getReloadCommand;
-  private int _mock_getReloadCommand_expected;
-  private int _mock_getReloadCommand_called;
 
   override string getCommandPrefix()
   {
@@ -5565,18 +5228,6 @@ class tt_CommandSettingsMock : tt_CommandSettings
   {
     let aName = getClassName();
     return tt_Satisfaction.of()
-      .push(aName .. ": getForwardDashCommand",
-            _mock_getForwardDashCommand_expected ==
-            _mock_getForwardDashCommand_called)
-      .push(aName .. ": getBackwardDashCommand",
-            _mock_getBackwardDashCommand_expected ==
-            _mock_getBackwardDashCommand_called)
-      .push(aName .. ": getLeftDashCommand",
-            _mock_getLeftDashCommand_expected == _mock_getLeftDashCommand_called)
-      .push(aName .. ": getRightDashCommand",
-            _mock_getRightDashCommand_expected == _mock_getRightDashCommand_called)
-      .push(aName .. ": getReloadCommand",
-            _mock_getReloadCommand_expected == _mock_getReloadCommand_called)
       .push(aName .. ": getCommandPrefix",
             _mock_getCommandPrefix_expected == _mock_getCommandPrefix_called);
   }
@@ -5596,10 +5247,6 @@ class tt_CommandSettingsMock : tt_CommandSettings
 user string tt_command_prefix = "/";
 
 user string tt_command_reload        = "rl";
-user string tt_command_forward_dash  = "df";
-user string tt_command_backward_dash = "db";
-user string tt_command_right_dash    = "dr";
-user string tt_command_left_dash     = "dl";
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
@@ -5611,30 +5258,13 @@ class tt_CommandSettingsImpl : tt_CommandSettings
   {
     let result = new("tt_CommandSettingsImpl");
 
-    result._rightDashCvar    = tt_Cvar.of(playerSource, "tt_command_right_dash"   );
-    result._leftDashCvar     = tt_Cvar.of(playerSource, "tt_command_left_dash"    );
-    result._forwardDashCvar  = tt_Cvar.of(playerSource, "tt_command_forward_dash" );
-    result._backwardDashCvar = tt_Cvar.of(playerSource, "tt_command_backward_dash");
-    result._reloadCommandCvar = tt_Cvar.of(playerSource, "tt_command_reload");
     result._commandPrefixCvar = tt_Cvar.of(playerSource, "tt_command_prefix");
 
     return result;
   }
 
-  override string getForwardDashCommand()  { return _forwardDashCvar .getString(); }
-  override string getBackwardDashCommand() { return _backwardDashCvar.getString(); }
-  override string getLeftDashCommand()     { return _leftDashCvar    .getString(); }
-  override string getRightDashCommand()    { return _rightDashCvar   .getString(); }
-
-  override string getReloadCommand() { return _reloadCommandCvar.getString(); }
   override string getCommandPrefix() { return _commandPrefixCvar.getString(); }
 
-  private tt_Cvar _rightDashCvar;
-  private tt_Cvar _leftDashCvar;
-  private tt_Cvar _forwardDashCvar;
-  private tt_Cvar _backwardDashCvar;
-
-  private tt_Cvar _reloadCommandCvar;
   private tt_Cvar _commandPrefixCvar;
 }
 #+end_src
@@ -8493,12 +8123,6 @@ TT_COMMANDS_TITLE_IN   = "Typist.pk3 Command Options";
 TT_COMMAND_PREFIX      = "Command prefix";
 TT_COMMAND_PREFIX_NOTE = "It's inadvisable to select a prefix that may occur in a lesson.";
 
-TT_FORWARD_DASH  = "Dash forward";
-TT_BACKWARD_DASH = "Dash backward";
-TT_RIGHT_DASH    = "Dash right";
-TT_LEFT_DASH     = "Dash left";
-TT_RELOAD        = "Reload";
-
 TT_RESET_COMMAND = "Reset to default";
 #+end_src
 
@@ -8646,37 +8270,8 @@ OptionMenu tt_CommandOptions
   StaticText ""
   Option     "$TT_COMMAND_PREFIX", tt_command_prefix, tt_CommandPrefixValues
   StaticText "$TT_COMMAND_PREFIX_NOTE"
-
-  StaticText ""
-  TextField  "$TT_FORWARD_DASH"  , tt_command_forward_dash
-  Command    "$TT_RESET_COMMAND" , tt_reset_forward_dash_command
-
-  StaticText ""
-  TextField  "$TT_BACKWARD_DASH" , tt_command_backward_dash
-  Command    "$TT_RESET_COMMAND" , tt_reset_backward_dash_command
-
-  StaticText ""
-  TextField  "$TT_LEFT_DASH"     , tt_command_left_dash
-  Command    "$TT_RESET_COMMAND" , tt_reset_left_dash_command
-
-  StaticText ""
-  TextField  "$TT_RIGHT_DASH"    , tt_command_right_dash
-  Command    "$TT_RESET_COMMAND" , tt_reset_right_dash_command
-
-  StaticText ""
-  TextField  "$TT_RELOAD"        , tt_command_reload
-  Command    "$TT_RESET_COMMAND" , tt_reset_reload_command
 }
 
-#+end_src
-
-#+begin_src c :tangle build/Typist.pk3/keyconf.txt
-
-Alias tt_reset_right_dash_command    "resetcvar tt_command_right_dash"
-Alias tt_reset_forward_dash_command  "resetcvar tt_command_forward_dash"
-Alias tt_reset_backward_dash_command "resetcvar tt_command_backward_dash"
-Alias tt_reset_left_dash_command     "resetcvar tt_command_left_dash"
-Alias tt_reset_reload_command        "resetcvar tt_command_reload"
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
