@@ -221,7 +221,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let commandSettings = tt_CommandSettingsImpl.of(playerSource);
     Array<tt_Activatable> commands =
     {
-      tt_Sphinx.of(),
       tt_PassThrough.of(inputManager, commandSettings)
     };
 
@@ -719,43 +718,6 @@ class tt_CommandDispatcherTestEnvironment
   tt_AnswerStateSourceMock answerStateSource;
   tt_SettingsMock globalSettings;
   tt_CommandDispatcher commandDispatcher;
-}
-#+end_src
-
-** ~Sphinx~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/sphinx.zs
-
-// Kills all monsters on the level.
-class tt_Sphinx : tt_Activatable
-{
-  static tt_Sphinx of()
-  {
-    let result = new("tt_Sphinx");
-    return result;
-  }
-
-  override void activate()
-  {
-    ThinkerIterator i = ThinkerIterator.Create("Actor");
-    Actor a;
-    while (a = Actor(i.Next()))
-    {
-      if (a.bIsMonster) { a.A_Die(); }
-    }
-  }
-
-  override tt_Strings getCommands()
-  {
-    let strings = tt_Strings.of();
-    strings.add("Sphinx_of_black_quartz,_judge_my_vow.");
-    return strings;
-  }
-
-  override bool isVisible()
-  {
-    return false;
-  }
 }
 #+end_src
 
