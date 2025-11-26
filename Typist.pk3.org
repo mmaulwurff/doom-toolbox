@@ -8,11 +8,6 @@ Typist.pk3 turns FPS games into typing exercises.
 
 TODO: add instructions.
 
-TODO: multiplayer: add special generator for random().
-
-TODO: passthrough Activatable: when activated, allows one ui event through (do not
-capture one key press and release). Leave Combat mode enabled.
-
 * PlayerHandler
 
 ** ~PlayerHandler~
@@ -3130,7 +3125,7 @@ class tt_MathsLesson : tt_Lesson
 
   override tt_Question getQuestion()
   {
-    int operation = random(Addition, Division);
+    int operation = random[typist](Addition, Division);
 
     switch (operation)
     {
@@ -3146,8 +3141,8 @@ class tt_MathsLesson : tt_Lesson
 
   private tt_Question makeAdditionQuestion()
   {
-    int leftAddend  = random(11, 49);
-    int rightAddend = random(11, 50);
+    int leftAddend  = random[typist](11, 49);
+    int rightAddend = random[typist](11, 50);
     int sum         = leftAddend + rightAddend;
 
     string description = string.format("%d + %d", leftAddend,  rightAddend);
@@ -3159,8 +3154,8 @@ class tt_MathsLesson : tt_Lesson
 
   private tt_Question makeSubtractionQuestion()
   {
-    int minuend    = random(50, 99);
-    int subtrahend = random(11, 50);
+    int minuend    = random[typist](50, 99);
+    int subtrahend = random[typist](11, 50);
     int difference = minuend - subtrahend;
 
     string description = string.format("%d - %d", minuend, subtrahend);
@@ -3172,8 +3167,8 @@ class tt_MathsLesson : tt_Lesson
 
   private tt_Question makeMultiplicationQuestion()
   {
-    int multiplicand = random(2, 9);
-    int multiplier   = random(2, 9);
+    int multiplicand = random[typist](2, 9);
+    int multiplier   = random[typist](2, 9);
     int product      = multiplicand * multiplier;
 
     string description = string.format("%d * %d", multiplicand, multiplier);
@@ -3185,8 +3180,8 @@ class tt_MathsLesson : tt_Lesson
 
   private tt_Question makeDivisionQuestion()
   {
-    int quotient = random(2, 9);
-    int divisor  = random(2, 9);
+    int quotient = random[typist](2, 9);
+    int divisor  = random[typist](2, 9);
     int dividend = quotient * divisor;
 
     string description = string.format("%d / %d", dividend, divisor);
@@ -3252,7 +3247,7 @@ class tt_MixedLesson : tt_Lesson
       return NULL;
     }
 
-    uint randomLessonIndex = Random(0, nEnabledLessons - 1);
+    uint randomLessonIndex = random[typist](0, nEnabledLessons - 1);
     let  lesson    = enabledLessons[randomLessonIndex];
     let  question          = lesson.getQuestion();
 
@@ -3340,7 +3335,7 @@ class tt_RandomCharactersLesson : tt_Lesson
 
     for (int i = 0; i < number; ++i)
     {
-      int randomIndex = Random(0, lastCharacter);
+      int randomIndex = random[typist](0, lastCharacter);
       int character   = getCodePointAt(characters, randomIndex);
 
       picked.AppendFormat("%c", character);
@@ -3393,7 +3388,7 @@ class tt_RandomNumberSource : tt_Lesson
 
     for (int i = 0; i < stringLength; ++i)
     {
-      int number = Random(tt_su_Ascii.DIGIT_ZERO, tt_su_Ascii.DIGIT_NINE);
+      int number = random[typist](tt_su_Ascii.DIGIT_ZERO, tt_su_Ascii.DIGIT_NINE);
       str.AppendFormat("%c", number);
     }
 
@@ -3528,7 +3523,7 @@ class tt_StringSet : tt_Lesson
       return NULL;
     }
 
-    int    wordIndex = random(0, nWords - 1);
+    int    wordIndex = random[typist](0, nWords - 1);
     string word      = _words[wordIndex];
     let    question  = tt_Match.of(word, word);
 
