@@ -14,7 +14,7 @@ TODO: add instructions.
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player_handler/player_handler.zs
 
-// This class handles the game for one player.
+// Handles the game for one player.
 class tt_PlayerHandler abstract
 {
   abstract void processKey(tt_Character character);
@@ -156,7 +156,7 @@ class tt_PlayerHandlerMock : tt_PlayerHandler
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player_handler/player_supervisor.zs
 
-// This class handles Typist.pk3 features for one player.
+// Handles Typist.pk3 features for one player.
 class tt_PlayerSupervisor : tt_PlayerHandler
 {
   static tt_PlayerSupervisor of(int playerNumber)
@@ -196,12 +196,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let targetOriginSource = tt_OriginSourceCache
       .of(tt_SelectableOriginSource.of(hastyMatcher, pressMatcher, settings),
           tt_StaleMarkerImpl.of(clock));
-
-    Array<tt_Aimer> aimers = {
-      tt_HorizontalAimer.of(targetOriginSource, playerSource),
-      tt_VerticalAimer.of(targetOriginSource, playerSource, settings)
-    };
-    let aimer = tt_Aimers.of(aimers);
 
     let projector        = tt_Projector           .of(targetRegistry, playerSource);
     let visibilityFilter = tt_VisibilityFilter    .of(projector, playerSource);
@@ -247,8 +241,14 @@ class tt_PlayerSupervisor : tt_PlayerHandler
       infoPanel
     };
 
+    Array<tt_WorldChanger> gunnerParts = {
+      tt_HorizontalAimer.of(targetOriginSource, playerSource),
+      tt_VerticalAimer.of(targetOriginSource, playerSource, settings),
+      tt_Firer.of(playerSource)
+    };
+
     Array<tt_WorldChanger> worldChangers = {
-      tt_Gunner.of(targetOriginSource, aimer, tt_FirerImpl.of(playerSource)),
+      tt_Gunner.of(targetOriginSource, tt_WorldChangers.of(gunnerParts)),
       tt_ProjectileSpeedController.of(originSource, playerSource),
       tt_EnemySpeedController.of(radarCache),
       tt_AnswerResetter.of(answerStateSource, playerInput),
@@ -373,7 +373,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 
   private static tt_KnownTargetSource makeTargetRegistry(
     tt_TargetSource   targetSource,
-    tt_Lesson lesson,
+    tt_Lesson         lesson,
     tt_TargetSource   deathReporter,
     tt_Clock          clock)
   {
@@ -526,7 +526,7 @@ class tt_PassThrough : tt_Activatable
 
 #+begin_src c :tangle build/Typist.pk3/zscript/activatable/command_dispatcher.zs
 
-// This class contains Activatables and activates() ones with commands matching answer.
+// Contains Activatables and activates() ones with commands matching answer.
 class tt_CommandDispatcher : tt_Activatable
 {
   static tt_CommandDispatcher of(tt_AnswerSource       answerSource,
@@ -723,99 +723,13 @@ class tt_CommandDispatcherTestEnvironment
 
 * Aimer
 
-** ~Aimer~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/aimer.zs
-
-// This class is an interface for aiming.
-class tt_Aimer abstract
-{
-  play abstract void aim();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_AimerMock : tt_Aimer
-{
-  static tt_AimerMock of() { return new("tt_AimerMock"); }
-
-  override void aim()
-  {
-    ++_mock_aim_called;
-  }
-
-  void expect_aim(int expected = 1)
-  {
-    _mock_aim_expected = expected;
-    _mock_aim_called = 0;
-  }
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": aim", _mock_aim_expected == _mock_aim_called);
-  }
-
-  private int _mock_aim_expected;
-  private int _mock_aim_called;
-}
-#+end_src
-
-** ~Aimers~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/aimers.zs
-
-// This class implements tt_Aimer interface by aiming several Aimers.
-class tt_Aimers : tt_Aimer
-{
-  static tt_Aimers of(Array<tt_Aimer> aimers)
-  {
-    let result = new("tt_Aimers");
-    result._aimers.move(aimers);
-    return result;
-  }
-
-  override void aim()
-  {
-    uint nAimers = _aimers.size();
-    for (uint i = 0; i < nAimers; ++i)
-    {
-      let aimer = _aimers[i];
-      aimer.aim();
-    }
-  }
-
-  private Array<tt_Aimer> _aimers;
-}
-#+end_src
-
-#+begin_src c :noweb-ref test-body
-{
-  let aimer1 = tt_AimerMock.of();
-  let aimer2 = tt_AimerMock.of();
-  Array<tt_Aimer> aimersArray = {aimer1, aimer2};
-  let aimers = tt_Aimers.of(aimersArray);
-
-  aimer1.expect_aim();
-  aimer2.expect_aim();
-
-  aimers.aim();
-
-  assertSatisfaction(aimer1.getSatisfaction(), "tt_Aimer: aimer1");
-  assertSatisfaction(aimer2.getSatisfaction(), "tt_Aimer: aimer2");
-}
-#+end_src
-
 ** ~HorizontalAimer~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/aimer/horizontal_aimer.zs
 
-// This class implements Aimer interface by rotating the player.
+// Implements tt_WorldChanger interface by rotating the player.
 // This implementation only aims horizontally. Hope for the vertical autoaim!
-class tt_HorizontalAimer : tt_Aimer
+class tt_HorizontalAimer : tt_WorldChanger
 {
   static tt_HorizontalAimer of(tt_OriginSource targetOriginSource, tt_PlayerSource playerSource)
   {
@@ -827,7 +741,7 @@ class tt_HorizontalAimer : tt_Aimer
     return result;
   }
 
-  override void aim()
+  override void changeWorld()
   {
     let targetOrigin = _targetOriginSource.getOrigin();
     if (targetOrigin == NULL) { return; }
@@ -882,7 +796,7 @@ class tt_HorizontalAimer : tt_Aimer
     // Just for a visual check.
     spawn("DoomImp", targetOrigin.getVector());
 
-    aimer.aim();
+    aimer.changeWorld();
 
     let message = string.format("%s: pawn is oriented at the target, angle: %f",
                                 tag,
@@ -900,10 +814,9 @@ class tt_HorizontalAimer : tt_Aimer
 
 #+begin_src c :tangle build/Typist.pk3/zscript/aimer/vertical_aimer.zs
 
-// This class implements Aimer interface by adjusting the player pitch
-// (horizontal angle).
-// If autoaim is enabled, no pitch adjustment is done.
-class tt_VerticalAimer : tt_Aimer
+// Implements tt_WorldChanger interface by adjusting the player pitch
+// (horizontal angle). If autoaim is enabled, no pitch adjustment is done.
+class tt_VerticalAimer : tt_WorldChanger
 {
   static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
                              tt_PlayerSource playerSource,
@@ -918,7 +831,7 @@ class tt_VerticalAimer : tt_Aimer
     return result;
   }
 
-  override void aim()
+  override void changeWorld()
   {
     if (!isAutoaimEnabled())
     {
@@ -972,7 +885,7 @@ class tt_VerticalAimer : tt_Aimer
   playerSource      .expect_getPawn(pawn);
   settings          .expect_isAutoaimEnabled(false);
 
-  aimer.aim();
+  aimer.changeWorld();
 
   assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
   assertSatisfaction(playerSource.getSatisfaction(), tag);
@@ -986,7 +899,7 @@ class tt_VerticalAimer : tt_Aimer
 
 #+begin_src c :tangle build/Typist.pk3/zscript/answer/answer.zs
 
-// This class represents an answer to a tt_Question.
+// Represents an answer to a tt_Question.
 // See tt_Question.
 class tt_Answer
 {
@@ -1088,7 +1001,7 @@ class tt_AnswerSourceMock : tt_AnswerSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/answer/input_block_after_combat.zs
 
-// This class implements tt_AnswerSource by taking another tt_AnswerSource,
+// Implements tt_AnswerSource by taking another tt_AnswerSource,
 // and only passing keys to it if a key was pressed down after the game mode
 // has changed to Combat.
 class tt_InputBlockAfterCombat : tt_AnswerSource
@@ -1151,7 +1064,7 @@ class tt_InputBlockAfterCombat : tt_AnswerSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/answer/player_input.zs
 
-// This class implements tt_AnswerSource by receiving player key inputs and
+// Implements tt_AnswerSource by receiving player key inputs and
 // composing an answer from them.
 class tt_PlayerInput : tt_AnswerSource
 {
@@ -1320,16 +1233,14 @@ class tt_PlayerInputTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/answer_state/answer_state.zs
 
-// This class represents Answer state.
+// Represents Answer state.
 // See tt_Answer class.
 class tt_AnswerState
 {
   static tt_AnswerState of(int state)
   {
     let result = new("tt_AnswerState");
-
     result._state = state;
-
     return result;
   }
 
@@ -1429,7 +1340,7 @@ class tt_AnswerStateSourceMock : tt_AnswerStateSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/answer_state/pressed_answer_state.zs
 
-// This class implements tt_AnswerState by observing Enter and Space keys.
+// Implements tt_AnswerState by observing Enter and Space keys.
 //
 // The state is:
 // - Preparing when no Enter or Space key is pressed.
@@ -1479,7 +1390,7 @@ class tt_PressedAnswerState : tt_AnswerStateSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/character/character.zs
 
-// This class represents a character.
+// Represents a character.
 class tt_Character
 {
   static tt_Character of(int type, int code, bool isCtrl)
@@ -1599,7 +1510,7 @@ class tt_Character
 
 #+begin_src c :tangle build/Typist.pk3/zscript/clock/clock.zs
 
-// This class provides access to time.
+// Provides access to time.
 class tt_Clock abstract
 {
   // Provides access to getting points in time.
@@ -1608,7 +1519,7 @@ class tt_Clock abstract
 
   // Provides a way to determine how many ticks passed since a moment in time.
   // moment: a moment in time, received from getNow().
-  // Returns a number of ticks since @a moment.
+  // Returns a number of ticks since  moment.
   abstract int since(int moment);
 }
 #+end_src
@@ -1670,7 +1581,7 @@ class tt_ClockMock : tt_Clock
 
 #+begin_src c :tangle build/Typist.pk3/zscript/clock/total_clock.zs
 
-// This class implements tt_Clock by getting total time since game start.
+// Implements tt_Clock by getting total time since game start.
 class tt_TotalClock : tt_Clock
 {
   static tt_TotalClock of()
@@ -1800,7 +1711,7 @@ class tt_EventHandler : EventHandler
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/answer_reporter.zs
 
-// This class is an interface for reporting answer matching events.
+// Interface for reporting answer matching events.
 class tt_AnswerReporter abstract
 {
   abstract void reportMatch();
@@ -1860,7 +1771,7 @@ class tt_AnswerReporterMock : tt_AnswerReporter
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/key_press_reporter.zs
 
-// This class is an interface for reporting key press events.
+// Interface for reporting key press events.
 class tt_KeyPressReporter abstract
 {
   abstract void report();
@@ -1902,7 +1813,7 @@ class tt_KeyPressReporterMock : tt_KeyPressReporter
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/mode_reporter.zs
 
-// This class is an interface for reporting mode change events.
+// Interface for reporting mode change events.
 class tt_ModeReporter abstract
 {
   abstract void report(int mode);
@@ -1944,7 +1855,7 @@ class tt_ModeReporterMock : tt_ModeReporter
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/player_sound_player.zs
 
-// This class implements tt_SoundPlayer by playing sounds for a player.
+// Implements tt_SoundPlayer by playing sounds for a player.
 // The sounds won't play if they are disabled in settings.
 class tt_PlayerSoundPlayer : tt_SoundPlayer
 {
@@ -1986,7 +1897,7 @@ class tt_PlayerSoundPlayer : tt_SoundPlayer
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_answer_reporter.zs
 
-// This class implements tt_AnswerReporter by playing a sound.
+// Implements tt_AnswerReporter by playing a sound.
 class tt_SoundAnswerReporter : tt_AnswerReporter
 {
   static tt_SoundAnswerReporter of(tt_SoundPlayer soundPlayer)
@@ -2014,7 +1925,7 @@ class tt_SoundAnswerReporter : tt_AnswerReporter
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_key_press_reporter.zs
 
-// This class implements tt_KeyPressReporter by playing a sound.
+// Implements tt_KeyPressReporter by playing a sound.
 // The sound won't play if it's disabled in settings.
 class tt_SoundKeyPressReporter : tt_KeyPressReporter
 {
@@ -2045,8 +1956,7 @@ class tt_SoundKeyPressReporter : tt_KeyPressReporter
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_mode_reporter.zs
 
-// This class implements tt_ModeReporter by playing the corresponding sound for
-// each mode.
+// Implements tt_ModeReporter by playing the corresponding sound for each mode.
 class tt_SoundModeReporter : tt_ModeReporter
 {
   static tt_SoundModeReporter of(tt_SoundPlayer soundPlayer)
@@ -2110,63 +2020,21 @@ class tt_SoundPlayerMock : tt_SoundPlayer
 
 * Firer
 
-** ~Firer~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/firer/firer.zs
-
-// This is an interface for firing at target.
-class tt_Firer abstract
-{
-  play abstract void fire();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_FirerMock : tt_Firer
-{
-  static tt_FirerMock of() { return new("tt_FirerMock"); }
-
-  override void fire()
-  {
-    ++_mock_fire_called;
-  }
-
-  void expect_fire(int expected = 1)
-  {
-    _mock_fire_expected = expected;
-    _mock_fire_called = 0;
-  }
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": fire", _mock_fire_expected == _mock_fire_called);
-  }
-
-  private int _mock_fire_expected;
-  private int _mock_fire_called;
-}
-#+end_src
-
 ** ~FirerImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/firer/firer_impl.zs
 
-class tt_FirerImpl : tt_Firer
+// Implements tt_WorldChanger by making the player pawn fire a shot.
+class tt_Firer : tt_WorldChanger
 {
-  static tt_FirerImpl of(tt_PlayerSource playerSource)
+  static tt_Firer of(tt_PlayerSource playerSource)
   {
-    let result = new("tt_FirerImpl");
-
+    let result = new("tt_Firer");
     result._playerSource = playerSource;
-
     return result;
   }
 
-  override void fire()
+  override void changeWorld()
   {
     let  playerInfo = _playerSource.getInfo();
     bool isReady    = isWeaponReady(playerInfo);
@@ -2197,9 +2065,9 @@ class tt_FirerImpl : tt_Firer
 
 #+begin_src c :noweb-ref test-body
 {
-  let        tag          = "tt_FirerImpl";
+  let        tag          = "tt_Firer";
   let        playerSource = tt_PlayerSourceMock.of();
-  let        firer        = tt_FirerImpl.of(playerSource);
+  let        firer        = tt_Firer.of(playerSource);
   PlayerInfo info         = players[consolePlayer];
   let        pawn         = info.mo;
 
@@ -2209,7 +2077,7 @@ class tt_FirerImpl : tt_Firer
   int nBullets = pawn.countInv("Clip");
   it(tag .. ": must be 50 bullets before firing", AssertEval(nBullets, "==", 50));
 
-  firer.fire();
+  firer.changeWorld();
 
   assertSatisfaction(playerSource.getSatisfaction(), tag);
 
@@ -2232,7 +2100,7 @@ server bool tt_buddha_enabled = true;
 
 #+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/game_tweaks.zs
 
-// This class handles game tweaks.
+// Handles game tweaks.
 class tt_GameTweaks play
 {
   static void tweakPlayer(PlayerInfo player)
@@ -2313,7 +2181,7 @@ class tt_Buddha : PowerBuddha
 
 #+begin_src c :tangle build/Typist.pk3/zscript/input_manager/input_by_mode_manager.zs
 
-// This class implements tt_InputManager by examining the current and old Typist mode.
+// Implements tt_InputManager by examining the current and old Typist mode.
 // Input is reset when the game mode is changed.
 class tt_InputByModeManager : tt_InputManager
 {
@@ -2424,7 +2292,7 @@ class tt_PassThroughInputManager : tt_InputManager
 
 #+begin_src c :tangle build/Typist.pk3/zscript/input_manager/input_manager.zs
 
-// This class helps managing user input.
+// Helps managing user input.
 class tt_InputManager abstract
 {
   abstract void manageInput();
@@ -2515,7 +2383,7 @@ class tt_KeyProcessorMock : tt_KeyProcessor
 
 #+begin_src c :tangle build/Typist.pk3/zscript/key_processor/key_processors.zs
 
-// This class implements tt_KeyProcessor interface by calling several instances
+// Implements tt_KeyProcessor interface by calling several instances
 // of tt_KeyProcessor.
 class tt_KeyProcessors : tt_KeyProcessor
 {
@@ -2542,7 +2410,7 @@ class tt_KeyProcessors : tt_KeyProcessor
 
 #+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_target.zs
 
-// This class represents a target that already has been seen and registered.
+// Represents a target that already has been seen and registered.
 class tt_KnownTarget
 {
   static tt_KnownTarget of(tt_Target target, tt_Question question)
@@ -2637,7 +2505,7 @@ class tt_KnownTargetSourceMock : tt_KnownTargetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_target_source_cache.zs
 
-// This class implements tt_KnownTargetSource by reading other
+// Implements tt_KnownTargetSource by reading other
 // tt_KnownTargetSource only if the data is stale.
 class tt_KnownTargetSourceCache : tt_KnownTargetSource
 {
@@ -2683,7 +2551,7 @@ class tt_KnownTargetSourceCache : tt_KnownTargetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_targets.zs
 
-// This class represents a list of known targets.
+// Represents a list of known targets.
 class tt_KnownTargets
 {
   static tt_KnownTargets of()
@@ -2759,7 +2627,7 @@ class tt_KnownTargets
 
 #+begin_src c :tangle build/Typist.pk3/zscript/known_target/target_registry.zs
 
-// This class implements tt_KnownTargetSource by reading from targets from
+// Implements tt_KnownTargetSource by reading from targets from
 // tt_TargetSource, assigning them questions, and storing them.
 //
 // Deactivated targets are removed from storage.
@@ -3030,7 +2898,7 @@ class tt_TargetRegistryTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/question_source.zs
 
-// This class is an interface for getting Questions.
+// Interface for getting Questions.
 // Different question sources are different Lessons.
 class tt_Lesson abstract
 {
@@ -3076,7 +2944,7 @@ class tt_LessonMock : tt_Lesson
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/maths_lesson.zs
 
-// This class implements tt_Lesson by composing arithmetic tasks.
+// Implements tt_Lesson by composing arithmetic tasks.
 class tt_MathsLesson : tt_Lesson
 {
   static tt_MathsLesson of()
@@ -3238,7 +3106,7 @@ class tt_MixedLesson : tt_Lesson
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_characters_lesson.zs
 
-// This class implements tt_Lesson by composing a question from groups
+// Implements tt_Lesson by composing a question from groups
 // of characters enabled by settings.
 class tt_RandomCharactersLesson : tt_Lesson
 {
@@ -3288,7 +3156,7 @@ class tt_RandomCharactersLesson : tt_Lesson
     return characters;
   }
 
-  // This function expects that @a characters consists of ASCII characters only.
+  // This function expects that characters consist of ASCII characters only.
   // This function is guaranteed to return non-empty strings.
   private static string pick(String characters, int number)
   {
@@ -3333,7 +3201,7 @@ class tt_RandomCharactersLesson : tt_Lesson
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_number_source.zs
 
-// This class implements tt_Lesson by producing questions that contain
+// Implements tt_Lesson by producing questions that contain
 // string composed from random numbers and should match exactly to the answers.
 class tt_RandomNumberSource : tt_Lesson
 {
@@ -3365,7 +3233,7 @@ class tt_RandomNumberSource : tt_Lesson
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/selected_question_source.zs
 
-// This class implements tt_Lesson by selecting a question source
+// Implements tt_Lesson by selecting a question source
 // according to the index from settings.
 class tt_SelectedLesson : tt_Lesson
 {
@@ -3452,7 +3320,7 @@ class tt_SelectedLessonTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/string_set.zs
 
-// This class implements tt_Lesson by reading a lump with words and
+// Implements tt_Lesson by reading a lump with words and
 // randomly selecting words from this lump.
 class tt_StringSet : tt_Lesson
 {
@@ -3537,7 +3405,7 @@ class tt_StringSet : tt_Lesson
 
 #+begin_src c :tangle build/Typist.pk3/zscript/math/math.zs
 
-// This class is a namespace for math-related functions.
+// Namespace for math-related functions.
 class tt_Math
 {
   static bool isInEffectiveRange(Vector3 p1, Vector3 p2)
@@ -3568,8 +3436,7 @@ class tt_Math
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/auto_mode_source.zs
 
-// This class implements tt_ModeSource by examining the specified
-// tt_KnownTargetSource.
+// Implements tt_ModeSource by examining the specified tt_KnownTargetSource.
 class tt_AutoModeSource : tt_ModeSource
 {
   static tt_AutoModeSource of(tt_KnownTargetSource knownTargetSource,
@@ -3609,10 +3476,11 @@ class tt_AutoModeSource : tt_ModeSource
     return mode;
   }
 
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(tt_Target target, PlayerPawn pawn) const
   {
     let  targetActor = target.getActor();
-    bool visible     = pawn.IsVisible(targetActor, ALL_AROUND);
+    bool visible     = pawn.isVisible(targetActor, ALL_AROUND);
 
     return visible;
   }
@@ -3713,9 +3581,8 @@ class tt_AutoModeSourceTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/delayed_combat_mode_source.zs
 
-// This class implements tt_ModeSource by reading other tt_ModeSource, and
-// switching to Exploration mode only if some time has passed or there is no
-// enemies around.
+// Implements tt_ModeSource by reading other tt_ModeSource, and switching to
+// Exploration mode only if some time has passed or there is no enemies around.
 class tt_DelayedCombatModeSource : tt_ModeSource
 {
   static tt_DelayedCombatModeSource of(tt_Clock        clock,
@@ -3934,7 +3801,7 @@ class tt_DelayedCombatModeSourceTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/mode.zs
 
-// This class represents the mode in which Typist operates.
+// Represents the mode in which Typist operates.
 class tt_Mode
 {
   enum Modes
@@ -3951,31 +3818,23 @@ class tt_Mode
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/mode_cascade.zs
 
-// This class implements ModeSource by taking the first mode from ModeSources
+// Implements ModeSource by taking the first mode from ModeSources
 // list that is not NONE.
 class tt_ModeCascade : tt_ModeSource
 {
   static tt_ModeCascade of(Array<tt_ModeSource> modeSources)
   {
     let result = new("tt_ModeCascade");
-
     result._modeSources.copy(modeSources);
-
     return result;
   }
 
   override int getMode()
   {
-    uint nSources = _modeSources.size();
-    for (uint i = 0; i < nSources; ++i)
+    foreach (source : _modeSources)
     {
-      let source = _modeSources[i];
-      int mode   = source.getMode();
-
-      if (mode != tt_Mode.None)
-      {
-        return mode;
-      }
+      int mode = source.getMode();
+      if (mode != tt_Mode.None) return mode;
     }
 
     return tt_Mode.None;
@@ -4121,7 +3980,7 @@ class tt_ModeStorageMock : tt_ModeStorage
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/reported_mode_source.zs
 
-// This class implements tt_ModeSource by reading other mode source, and
+// Implements tt_ModeSource by reading other mode source, and
 // reporting an event when the mode has changed.
 class tt_ReportedModeSource : tt_ModeSource
 {
@@ -4234,7 +4093,7 @@ class tt_ReportedModeSourceTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/settable_mode.zs
 
-// This class implements ModeStorage by simply storing the mode that was set.
+// Implements ModeStorage by simply storing the mode that was set.
 class tt_SettableMode : tt_ModeStorage
 {
   static tt_SettableMode of()
@@ -4278,15 +4137,14 @@ class tt_SettableMode : tt_ModeStorage
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/hasty_question_answer_matcher.zs
 
-// This class implements OriginSource by finding an origin for a known target
+// Implements OriginSource by finding an origin for a known target
 // that fits to for the answer.
 class tt_HastyQuestionAnswerMatcher : tt_OriginSource
 {
-  static tt_HastyQuestionAnswerMatcher of( tt_KnownTargetSource knownTargetSource
-                                  , tt_AnswerSource      answerSource
-                                  , tt_PlayerSource      playerSource
-                                  , tt_AnswerReporter    reporter
-                                  )
+  static tt_HastyQuestionAnswerMatcher of(tt_KnownTargetSource knownTargetSource,
+                                          tt_AnswerSource      answerSource,
+                                          tt_PlayerSource      playerSource,
+                                          tt_AnswerReporter    reporter)
   {
     let result = new("tt_HastyQuestionAnswerMatcher");
 
@@ -4319,7 +4177,8 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
   }
 
   private tt_Origin findMatchedTarget(tt_KnownTargets targets,
-                                      tt_Answer answer, Actor pawn)
+                                      tt_Answer answer,
+                                      Actor pawn)
   {
     uint nTargets = targets.size();
     for (uint i = 0; i < nTargets; ++i)
@@ -4339,6 +4198,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
     return NULL;
   }
 
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(tt_KnownTarget target, Actor pawn) const
   {
     let  targetActor = target.getTarget().getActor();
@@ -4360,16 +4220,14 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/origin.zs
 
-// This class represents a point in space.
+// Represents a point in space.
 // Note that the Origin position cannot change once set.
 class tt_Origin
 {
   static tt_Origin of(Vector3 pos)
   {
     let result = new("tt_Origin");
-
     result._pos = pos;
-
     return result;
   }
 
@@ -4433,8 +4291,7 @@ class tt_OriginSourceMock : tt_OriginSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/origin_source_cache.zs
 
-// This class implements tt_OriginSource by reading other tt_OriginSource
-// only if origin is stale.
+// Implements OriginSource by reading other OriginSource only if origin is stale.
 class tt_OriginSourceCache : tt_OriginSource
 {
   static tt_OriginSourceCache of(tt_OriginSource originSource,
@@ -4471,8 +4328,7 @@ class tt_OriginSourceCache : tt_OriginSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/player_origin_source.zs
 
-// This class implements tt_OriginSource.
-// It takes the center of the player pawn.
+// Implements tt_OriginSource by providing the center of the player pawn.
 class tt_PlayerOriginSource : tt_OriginSource
 {
   static tt_PlayerOriginSource of(tt_PlayerSource playerSource)
@@ -4527,10 +4383,8 @@ class tt_PlayerOriginSource : tt_OriginSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/question_answer_matcher.zs
 
-// This class implements OriginSource by finding an origin for a known target
-// that fits to for the answer.
-//
-// This class searches far matching target only if answer state is Ready.
+// Implements OriginSource by finding an origin for a known target that fits to
+// for the answer. Searches far matching target only if answer state is Ready.
 class tt_QuestionAnswerMatcher : tt_OriginSource
 {
   static tt_QuestionAnswerMatcher of(tt_KnownTargetSource knownTargetSource,
@@ -4586,6 +4440,7 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
     return NULL;
   }
 
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(tt_KnownTarget target, Actor pawn) const
   {
     let  targetActor = target.getTarget().getActor();
@@ -4754,16 +4609,15 @@ class tt_QuestionAnswerMatcherTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/selectable_origin_source.zs
 
-// This class implements tt_OriginSource by selecting one of the two supplied
+// Implements OriginSource by selecting one of the two supplied
 // origin sources based on a certain value from tt_Settings.
 class tt_SelectableOriginSource : tt_OriginSource
 {
-  static tt_SelectableOriginSource of( tt_OriginSource source1
-                              , tt_OriginSource source2
-                              , tt_Settings     settings
-                              )
+  static tt_SelectableOriginSource of(tt_OriginSource source1,
+                                      tt_OriginSource source2,
+                                      tt_Settings     settings)
   {
-    let result = new("tt_SelectableOriginSource");;
+    let result = new("tt_SelectableOriginSource");
 
     result._source1 = source1;
     result._source2 = source2;
@@ -4776,8 +4630,7 @@ class tt_SelectableOriginSource : tt_OriginSource
   {
     return _settings.isFastConfirmation()
       ? _source1.getOrigin()
-      : _source2.getOrigin()
-      ;
+      : _source2.getOrigin() ;
   }
 
   private tt_OriginSource _source1;
@@ -4792,7 +4645,7 @@ class tt_SelectableOriginSource : tt_OriginSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player/player_source.zs
 
-// This class is an interface for getting player info and player pawn.
+// Interface for getting player info and player pawn.
 class tt_PlayerSource abstract
 {
   abstract PlayerInfo getInfo();
@@ -4858,7 +4711,7 @@ class tt_PlayerSourceMock : tt_PlayerSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player/player_source_impl.zs
 
-// This class implements tt_PlayerSource by returning player by player number.
+// Implements tt_PlayerSource by returning player by player number.
 class tt_PlayerSourceImpl : tt_PlayerSource
 {
   static tt_PlayerSourceImpl of(int playerNumber)
@@ -4918,9 +4771,8 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/question/match.zs
 
-// This class implements tt_Question.
-// The answer is right for this kind of question if it matches the string
-// contained in this question.
+// Implements tt_Question. The answer is right for this kind of question if it
+// matches the string contained in this question.
 class tt_Match : tt_Question
 {
   static tt_Match of(String question, string description)
@@ -5084,10 +4936,9 @@ class tt_QuestionMock : tt_Question
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/cvar.zs
 
-// This class provides access to a user or server Cvar.
-// Accessing Cvars through this class is faster because calling Cvar.getCvar()
-// is costly. This class caches the result of Cvar.getCvar() and handles
-// loading a savegame.
+// Provides access to a user or server Cvar. Accessing Cvars through this class
+// is faster because calling Cvar.getCvar() is costly. Caches the result of
+// Cvar.getCvar() and handles loading a savegame.
 class tt_Cvar
 {
   static tt_Cvar of(tt_PlayerSource playerSource, string name)
@@ -5171,7 +5022,7 @@ user string tt_command_pass_through = "/pass";
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
 
-// This class implements tt_CommandSettings interface by reading the Cvars.
+// Implements tt_CommandSettings interface by reading the Cvars.
 class tt_CommandSettingsImpl : tt_CommandSettings
 {
   static tt_CommandSettingsImpl of(tt_PlayerSource playerSource)
@@ -5195,7 +5046,7 @@ class tt_CommandSettingsImpl : tt_CommandSettings
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings.zs
 
-// This class represents settings for tt_RandomCharactersLesson.
+// Represents settings for tt_RandomCharactersLesson.
 class tt_RandomCharactersLessonSettings abstract
 {
   abstract int getLessonLength();
@@ -5382,8 +5233,7 @@ server string tt_rc_custom         = "";
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings_impl.zs
 
-// This class implements tt_RandomCharactersLessonSettings by returning Cvar
-// contents.
+// Implements tt_RandomCharactersLessonSettings by returning Cvar contents.
 // Cvars are cached.
 class tt_RandomCharactersLessonSettingsImpl : tt_RandomCharactersLessonSettings
 {
@@ -5584,7 +5434,7 @@ server bool tt_is_lesson_enabled_9 = false;
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/settings_impl.zs
 
-// This class implements tt_Settings by reading values from user CVars.
+// Implements tt_Settings by reading values from user CVars.
 class tt_SettingsImpl : tt_Settings
 
 {
@@ -5679,7 +5529,7 @@ class tt_SettingsImpl : tt_Settings
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings.zs
 
-// This class provides access to Typist.pk3 sound settings.
+// Provides access to Typist.pk3 sound settings.
 class tt_SoundSettings abstract
 {
   abstract bool isEnabled();
@@ -5764,7 +5614,7 @@ user bool tt_sound_typing_enabled = true;
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings_impl.zs
 
-// This class implements tt_SoundSettings by reading CVars.
+// Implements tt_SoundSettings by reading CVars.
 class tt_SoundSettingsImpl : tt_SoundSettings
 {
   static tt_SoundSettingsImpl of(tt_PlayerSource playerSource)
@@ -5798,8 +5648,8 @@ class tt_SoundSettingsImpl : tt_SoundSettings
 class tt_StaleMarker abstract
 {
   // Update stale status.
-  // @attention calling this function may change the state of tt_StaleMarker.
-  // @returns true if this instance is currently stale.
+  // Attention! Calling this function may change the state of tt_StaleMarker.
+  // Returns true if this instance is currently stale.
   abstract bool isStale();
 }
 #+end_src
@@ -5835,12 +5685,12 @@ class tt_StaleMarkerMock : tt_StaleMarker
 
 #+begin_src c :tangle build/Typist.pk3/zscript/stale_marker/stale_marker_impl.zs
 
-// This class implements tt_StaleMarker by observing a tt_Clock.
+// Implements tt_StaleMarker by observing a tt_Clock.
 class tt_StaleMarkerImpl : tt_StaleMarker
 {
   // Creates an instance of tt_StaleMarkerImpl.
-  // @param clock       dependency, a clock to be observed.
-  // @param updateTicks in how much ticks this marker becomes stale.
+  // clock: dependency, a clock to be observed.
+  // updateTicks: in how much ticks this marker becomes stale.
   static tt_StaleMarkerImpl of(tt_Clock clock, int updateTicks = 1)
   {
     let result = new("tt_StaleMarkerImpl");
@@ -5946,7 +5796,7 @@ class tt_StaleMarkerImplTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/strings/strings.zs
 
-// This class represents a set of strings.
+// Represents a set of strings.
 class tt_Strings
 {
   static tt_Strings of()
@@ -5958,9 +5808,7 @@ class tt_Strings
   static tt_Strings ofOne(String s)
   {
     let result = new("tt_Strings");
-
     result.add(s);
-
     return result;
   }
 
@@ -6018,7 +5866,7 @@ class tt_Strings
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/death_reporter.zs
 
-// This class implements tt_TargetSource by collecting reports of
+// Implements tt_TargetSource by collecting reports of
 // dead things as a list of DisabledTargets.
 class tt_DeathReporter : tt_TargetSource
 {
@@ -6073,7 +5921,7 @@ class tt_DeathReporter : tt_TargetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/target.zs
 
-// This class represents an attack target.
+// Represents an attack target.
 class tt_Target
 {
   static tt_Target of(Actor a)
@@ -6114,7 +5962,7 @@ class tt_Target
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/target_radar.zs
 
-// This class implements tt_TargetSource by scanning the world around the
+// Implements tt_TargetSource by scanning the world around the
 // supplied origin for actors suitable to be targets.
 class tt_TargetRadar : tt_TargetSource
 {
@@ -6317,7 +6165,7 @@ class tt_TargetSourceMock : tt_TargetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/target_source_cache.zs
 
-// This class implements tt_TargetSource by calling other tt_TargetSource only
+// Implements tt_TargetSource by calling other tt_TargetSource only
 // if previously received target is stale.
 class tt_TargetSourceCache : tt_TargetSource
 {
@@ -6353,7 +6201,7 @@ class tt_TargetSourceCache : tt_TargetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/target_source_pruner.zs
 
-// This class implements tt_TargetSource by pruning other tt_TargetSource from
+// Implements tt_TargetSource by pruning other tt_TargetSource from
 // targets with null actors.
 class tt_TargetSourcePruner : tt_TargetSource
 {
@@ -6430,7 +6278,7 @@ class tt_Targets
   }
 
   // Searches for a target with a particular id.
-  // @returns index on success, the total number of targets on failure.
+  // Returns index on success, the total number of targets on failure.
   private uint find(tt_Target target) const
   {
     uint nTargets = size();
@@ -6451,7 +6299,7 @@ class tt_Targets
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/projector.zs
 
-// This class implements TargetWidgetSource by accumulating Target Widgets.
+// Implements TargetWidgetSource by accumulating Target Widgets.
 // Attention: this class has no tests. Modifications must be checked manually.
 class tt_Projector : tt_TargetWidgetSource
 {
@@ -6513,7 +6361,7 @@ class tt_Projector : tt_TargetWidgetSource
   }
 
   // Calculates the screen position (draw position).
-  // @returns screen position and success flag.
+  // Returns screen position and success flag.
   private ui Vector2, bool makeDrawPos(Vector3 targetPos, tt_le_Viewport viewport)
   {
     _projection.ProjectWorldPos(targetPos);
@@ -6562,7 +6410,7 @@ class tt_Projector : tt_TargetWidgetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/sorter_by_distance.zs
 
-// This class implements TargetWidgetSource by taking another TargetWidgetSource
+// Implements TargetWidgetSource by taking another TargetWidgetSource
 // and sorting the widgets from it by a distance to origin from OriginSource.
 //
 // Sorting algorithm: merge sort
@@ -6789,7 +6637,7 @@ class tt_SorterByDistanceTest
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widget.zs
 
-// This class represents a target displayed on the screen.
+// Represents a target displayed on the screen.
 class tt_TargetWidget
 {
   static tt_TargetWidget of(tt_KnownTarget target, Vector2 position)
@@ -6834,7 +6682,7 @@ class tt_TargetWidget
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widget_registry.zs
 
-// This class implements TargetWidgetSource by storing target widgets, getting
+// Implements TargetWidgetSource by storing target widgets, getting
 // new widgets from the source, and updating the coordinates of the widgets that
 // are already registered.
 class tt_TargetWidgetRegistry : tt_TargetWidgetSource
@@ -6894,7 +6742,7 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
 class tt_TargetWidgetSource abstract
 {
   // Get a list of target widgets.
-  // @returns a list of target widgets.
+  // Returns a list of target widgets.
   ui abstract tt_TargetWidgets getWidgets(RenderEvent event);
 }
 #+end_src
@@ -6930,7 +6778,7 @@ class tt_TargetWidgetSourceMock : tt_TargetWidgetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widgets.zs
 
-// This class represents a list of target widgets.
+// Represents a list of target widgets.
 class tt_TargetWidgets
 {
   static tt_TargetWidgets of()
@@ -6953,12 +6801,9 @@ class tt_TargetWidgets
 
   tt_TargetWidget find(tt_Target id) const
   {
-    uint nWidgets = size();
-    for (uint i = 0; i < nWidgets; ++i)
-    {
-      let widget = _widgets[i];
-      if (widget.getTarget().getTarget().isEqual(id)) { return widget; }
-    }
+    foreach (widget : _widgets)
+      if (widget.getTarget().getTarget().isEqual(id)) return widget;
+
     return NULL;
   }
 
@@ -7004,7 +6849,7 @@ class tt_TargetWidgets
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/visibility_filter.zs
 
-// This class implements TargetWidgetSource by taking target widgets from
+// Implements TargetWidgetSource by taking target widgets from
 // source and removing widgets that represent targets not visible by the player.
 class tt_VisibilityFilter : tt_TargetWidgetSource
 {
@@ -7043,6 +6888,7 @@ class tt_VisibilityFilter : tt_TargetWidgetSource
     return result;
   }
 
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(tt_TargetWidget widget, PlayerPawn pawn) const
   {
     let  targetActor = widget.getTarget().getTarget().getActor();
@@ -7064,7 +6910,7 @@ class tt_VisibilityFilter : tt_TargetWidgetSource
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/conditional_view.zs
 
-// This class implements a view by taking another view, and calling draw()
+// Implements a view by taking another view, and calling draw()
 // only if conditions are met.
 //
 // The list of conditions:
@@ -7072,7 +6918,7 @@ class tt_VisibilityFilter : tt_TargetWidgetSource
 // - there are monsters on the level
 // - automap is closed
 //
-// @attention this class reads data from global scope.
+// Attention! This class reads data from global scope.
 class tt_ConditionalView : tt_View
 {
   static tt_ConditionalView of(tt_View view)
@@ -7121,8 +6967,8 @@ class tt_ConditionalView : tt_View
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/drawing.zs
 
-// This class is a namespace for common drawing functions.
-class tt_Drawing
+// Namespace for common drawing functions.
+class tt_Drawing ui
 {
   static int getWidthForTarget(String question, string answer, tt_Settings settings)
   {
@@ -7294,7 +7140,7 @@ class tt_Drawing
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/info_panel.zs
 
-// This class implements View by collecting and displaying various information:
+// Implements View by collecting and displaying various information:
 // - game mode
 // - list of commands
 // - current input string
@@ -7390,9 +7236,10 @@ class tt_InfoPanel : tt_View
     }
   }
 
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(Actor player, Actor other) const
   {
-    return player.IsVisible(other, ALL_AROUND);
+    return player.isVisible(other, ALL_AROUND);
   }
 
   const Y_START = 10;
@@ -7417,8 +7264,7 @@ class tt_InfoPanel : tt_View
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/target_overlay.zs
 
-// This class implement tt_View by getting a list of Target Widgets and drawing
-// them.
+// Implement tt_View by getting a list of Target Widgets and drawing them.
 class tt_TargetOverlay : tt_View
 {
   static tt_TargetOverlay of( tt_TargetWidgetSource targetWidgetSource
@@ -7505,7 +7351,7 @@ class tt_ViewMock : tt_View
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/views.zs
 
-// This class implements View by allowing several Views to be drawn.
+// Implements View by allowing several Views to be drawn.
 class tt_Views : tt_View
 {
   static tt_Views of(Array<tt_View> views)
@@ -7517,13 +7363,8 @@ class tt_Views : tt_View
 
   override void draw(RenderEvent event)
   {
-    uint nViews = _views.size();
-    for (uint i = 0; i < nViews; ++i)
-    {
-      let view = _views[i];
-
+    foreach (view : _views)
       view.draw(event);
-    }
   }
 
   private Array<tt_View> _views;
@@ -7538,9 +7379,8 @@ class tt_Views : tt_View
 
 class tt_AnswerResetter : tt_WorldChanger
 {
-  static tt_AnswerResetter of( tt_AnswerStateSource answerStateSource
-                      , tt_AnswerSource      answerSource
-                      )
+  static tt_AnswerResetter of(tt_AnswerStateSource answerStateSource,
+                              tt_AnswerSource      answerSource)
   {
     let result = new("tt_AnswerResetter");
 
@@ -7574,15 +7414,13 @@ class tt_AnswerResetter : tt_WorldChanger
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/enemy_speed_controller.zs
 
-// This class implements tt_WorldChanger by slowing down enemies.
+// Implements tt_WorldChanger by slowing down enemies.
 class tt_EnemySpeedController : tt_WorldChanger
 {
   static tt_EnemySpeedController of(tt_TargetSource targetSource)
   {
     let result = new("tt_EnemySpeedController");
-
     result._targetSource = targetSource;
-
     return result;
   }
 
@@ -7623,35 +7461,26 @@ class tt_EnemySpeedController : tt_WorldChanger
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/gunner.zs
 
-// This class implements tt_WorldChanger by aiming and firing at target, if any.
-//
-// It fires at the origin received from the OriginSource with the help of Aimer
-// and Firer classes.
+// Implements tt_WorldChanger by calling other tt_WorldChanger if there is some
+// tt_Origin.
 class tt_Gunner : tt_WorldChanger
 {
-  static tt_Gunner of(tt_OriginSource originSource, tt_Aimer aimer, tt_Firer firer)
+  static tt_Gunner of(tt_OriginSource originSource,
+                      tt_WorldChanger changer)
   {
     let result = new("tt_Gunner");
-
     result._originSource = originSource;
-    result._aimer        = aimer;
-    result._firer        = firer;
-
+    result._changer      = changer;
     return result;
   }
 
   override void changeWorld()
   {
-    let origin = _originSource.getOrigin();
-    if (origin == NULL) { return; }
-
-    _aimer.aim();
-    _firer.fire();
+    if (_originSource.getOrigin() != NULL) _changer.changeWorld();
   }
 
   private tt_OriginSource _originSource;
-  private tt_Aimer        _aimer;
-  private tt_Firer        _firer;
+  private tt_WorldChanger _changer;
 }
 #+end_src
 
@@ -7673,8 +7502,7 @@ class tt_Gunner : tt_WorldChanger
   let origin = tt_Origin.of((0, 0, 0));
 
   env.originSource.expect_getOrigin(origin);
-  env.aimer.expect_aim();
-  env.firer.expect_fire();
+  env.changer.expect_changeWorld();
 
   env.gunner.changeWorld();
 
@@ -7690,23 +7518,20 @@ class tt_GunnerTestEnvironment
   {
     let result = new("tt_GunnerTestEnvironment");
     result.originSource = tt_OriginSourceMock.of();
-    result.aimer        = tt_AimerMock.of();
-    result.firer        = tt_FirerMock.of();
+    result.changer      = tt_WorldChangerMock.of();
 
-    result.gunner = tt_Gunner.of(result.originSource, result.aimer, result.firer);
+    result.gunner = tt_Gunner.of(result.originSource, result.changer);
     return result;
   }
 
   tt_Satisfaction getSatisfaction() const
   {
     return originSource.getSatisfaction()
-      .add(aimer.getSatisfaction())
-      .add(firer.getSatisfaction());
+      .add(changer.getSatisfaction());
   }
 
   tt_OriginSourceMock originSource;
-  tt_AimerMock        aimer;
-  tt_FirerMock        firer;
+  tt_WorldChangerMock changer;
   tt_Gunner           gunner;
 }
 
@@ -7716,16 +7541,15 @@ class tt_GunnerTestEnvironment
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/match_watcher.zs
 
-// This class watches for answer state source and reports match or not match
+// Watches for answer state source and reports match or not match
 // when the state changes from Preparing to Ready.
 //
 // Match is determined by tt_OriginSource result being not NULL.
 class tt_MatchWatcher : tt_WorldChanger
 {
-  static tt_MatchWatcher of( tt_AnswerStateSource answerStateSource
-                    , tt_AnswerReporter    answerReporter
-                    , tt_OriginSource      originSource
-                    )
+  static tt_MatchWatcher of(tt_AnswerStateSource answerStateSource,
+                            tt_AnswerReporter    answerReporter,
+                            tt_OriginSource      originSource)
   {
     let result = new("tt_MatchWatcher");
 
@@ -7768,8 +7592,7 @@ class tt_MatchWatcher : tt_WorldChanger
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/projectile_speed_controller.zs
 
-// This class implements tt_WorldChanger by slowing down projectiles that
-// fly towards the player.
+// Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
 //
 // When a projectile is no longer flying towards the player, its speed is
 // restored.
@@ -7788,19 +7611,11 @@ class tt_ProjectileSpeedController : tt_WorldChanger
 
   override void changeWorld()
   {
-    let origin   = _playerOriginSource.getOrigin().getVector();
-    let iterator = ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT);
-    let pawn     = _playerSource.getPawn();
+    let origin       = _playerOriginSource.getOrigin().getVector();
+    let playerRadius = _playerSource.getPawn().radius;
 
-    double playerRadius = pawn.radius;
-
-    for (Actor a; a = Actor(iterator.Next());)
-    {
-      if (a.bMissile)
-      {
-        controlProjectile(a, origin, playerRadius);
-      }
-    }
+    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
+      if (a.bMissile) controlProjectile(a, origin, playerRadius);
   }
 
   private play void controlProjectile(Actor a,
@@ -7858,7 +7673,7 @@ class tt_ProjectileSpeedController : tt_WorldChanger
     a.A_ScaleVelocity(VELOCITY_SCALE_FACTOR);
   }
 
-  // Note: this method assumes that @a a contains tt_VelocityStorage inventory item.
+  // Note: this method assumes that actor contains tt_VelocityStorage inventory item.
   private play void restoreVelocity(Actor a)
   {
     let storage = tt_VelocityStorage(a.FindInventory("tt_VelocityStorage"));
@@ -7916,6 +7731,13 @@ class tt_WorldChangerMock : tt_WorldChanger
     _mock_changeWorld_called = 0;
   }
 
+  tt_Satisfaction getSatisfaction()
+  {
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": changeWorld",
+            _mock_changeWorld_expected == _mock_changeWorld_called);
+  }
+
   private int _mock_changeWorld_expected;
   private int _mock_changeWorld_called;
 }
@@ -7925,29 +7747,23 @@ class tt_WorldChangerMock : tt_WorldChanger
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/world_changers.zs
 
-// This class implements tt_WorldChanger by executing several instances of
-// tt_WorldChanger.
+// Implements tt_WorldChanger by executing several instances of tt_WorldChanger.
 class tt_WorldChangers : tt_WorldChanger
 {
-  static tt_WorldChangers of(Array<tt_WorldChanger> worldChangers)
+  static tt_WorldChangers of(Array<tt_WorldChanger> changers)
   {
     let result = new("tt_WorldChangers");
-
-    result._worldChangers.Move(worldChangers);
-
+    result._changers.move(changers);
     return result;
   }
 
   override void changeWorld()
   {
-    uint nChangers = _worldChangers.size();
-    for (uint i = 0; i < nChangers; ++i)
-    {
-      _worldChangers[i].changeWorld();
-    }
+    foreach (changer : _changers)
+      changer.changeWorld();
   }
 
-  private Array<tt_WorldChanger> _worldChangers;
+  private Array<tt_WorldChanger> _changers;
 }
 #+end_src
 
@@ -8315,7 +8131,7 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 // Do not randomize pitch shift value.
 $pitchshiftrange 0
 
-// 1. Default sound theme ////////////////////////////////////////////////////@@
+// 1. Default sound theme //////////////////////////////////////////////////////
 
 tt/combat1    "sounds/Default/danger1.ogg"
 tt/explore1   "sounds/Default/safe1.ogg"
@@ -8499,7 +8315,7 @@ class tt_Satisfaction
 
 * Run :noexport:
 
-Note: ~sv_fastweapons~ is for ~tt_FirerImpl~ test.
+Note: ~sv_fastweapons~ is for ~tt_Firer~ test.
 
 #+begin_src text :tangle build/Typist.pk3Test/commands.txt
 wait 2; map map01; sv_fastweapons 2; wait 2; netevent test:tt_Test; wait 2; quit
