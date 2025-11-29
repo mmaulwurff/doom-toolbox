@@ -17,12 +17,14 @@ TODO: add instructions.
 // Handles the game for one player.
 class tt_PlayerHandler abstract
 {
+  abstract void reset(int playerNumber);
+
   abstract void processKey(tt_Character character);
 
   // Type is from InputEvent.EGenericEvent.
   abstract void processInput(int type);
 
-  play abstract void tick();
+  abstract void tick();
 
   abstract void reportDead(Actor dead);
 
@@ -43,6 +45,8 @@ class tt_PlayerHandler abstract
 class tt_PlayerHandlerMock : tt_PlayerHandler
 {
   static tt_PlayerHandlerMock of() { return new("tt_PlayerHandlerMock"); }
+
+  override void reset(int playerNumber) { throwAbortException("implement this!"); }
 
   override void processKey(tt_Character character)
   {
@@ -161,6 +165,13 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 {
   static tt_PlayerSupervisor of(int playerNumber)
   {
+    let result = new("tt_PlayerSupervisor");
+    result.reset(playerNumber);
+    return result;
+  }
+
+  override void reset(int playerNumber)
+  {
     let playerSource     = tt_PlayerSourceImpl.of(playerNumber);
     let clock            = tt_TotalClock      .of();
 
@@ -241,40 +252,28 @@ class tt_PlayerSupervisor : tt_PlayerHandler
       infoPanel
     };
 
-    Array<tt_WorldChanger> gunnerParts = {
-      tt_HorizontalAimer.of(targetOriginSource, playerSource),
-      tt_VerticalAimer.of(targetOriginSource, playerSource, settings),
-      tt_Firer.of(playerSource)
-    };
+    let targetSender = tt_TargetOriginSender.of(targetOriginSource);
 
-    Array<tt_WorldChanger> worldChangers = {
-      tt_Gunner.of(targetOriginSource, tt_WorldChangers.of(gunnerParts)),
-      tt_ProjectileSpeedController.of(originSource, playerSource),
-      tt_EnemySpeedController.of(radarCache),
+    Array<tt_Effect> effects = {
+      tt_Gunner.of(targetOriginSource, targetSender),
       tt_AnswerResetter.of(answerStateSource, playerInput),
       tt_MatchWatcher.of(answerStateSource, answerReporter, targetOriginSource)
     };
 
     Array<tt_KeyProcessor> keyProcessors = {inputBlockAfterCombat, answerStateSource};
 
-    // Initialize attributes
-
-    let result = new("tt_PlayerSupervisor");
-
-    result._keyProcessor       = tt_KeyProcessors.of(keyProcessors);
-    result._deathReporter      = deathReporter;
-    result._targetRegistry     = targetRegistry;
-    result._view               = tt_ConditionalView.of(tt_Views.of(views));
-    result._modeSource         = modeSource;
-    result._targetWidgetSource = projector;
-    result._commandDispatcher  = commandDispatcher;
-    result._manualModeSource   = manualModeSource;
-    result._inputManager       = inputManager;
-    result._oldModeSource      = oldModeSource;
-    result._inputBlockAfterCombat = inputBlockAfterCombat;
-    result._worldChanger       = tt_WorldChangers.of(worldChangers);
-
-    return result;
+    _keyProcessor       = tt_KeyProcessors.of(keyProcessors);
+    _deathReporter      = deathReporter;
+    _targetRegistry     = targetRegistry;
+    _view               = tt_ConditionalView.of(tt_Views.of(views));
+    _modeSource         = modeSource;
+    _targetWidgetSource = projector;
+    _commandDispatcher  = commandDispatcher;
+    _manualModeSource   = manualModeSource;
+    _inputManager       = inputManager;
+    _oldModeSource      = oldModeSource;
+    _inputBlockAfterCombat = inputBlockAfterCombat;
+    _effects            = tt_Effects.of(effects);
   }
 
   override void processKey(tt_Character character)
@@ -295,7 +294,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     _inputBlockAfterCombat.update();
     _oldModeSource.setMode(_modeSource.getMode());
 
-    _worldChanger.changeWorld();
+    _effects.doEffect();
   }
 
   override void reportDead(Actor dead)
@@ -395,7 +394,62 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   private tt_PassThroughInputManager _inputManager;
   private tt_SettableMode       _oldModeSource;
   private tt_InputBlockAfterCombat _inputBlockAfterCombat;
-  private tt_WorldChanger       _worldChanger;
+  private tt_Effect             _effects;
+}
+#+end_src
+
+* Server
+
+#+begin_src c :tangle build/Typist.pk3/zscript/server/server.zs
+
+class tt_Server
+{
+  static tt_Server of()
+  {
+    let result = new("tt_Server");
+    result._globalChangers = tt_WorldChangers.ofNone();
+    return result;
+  }
+
+  void addPlayer(int playerNumber)
+  {
+    let playerSource       = tt_PlayerSourceImpl    .of(playerNumber);
+    let originSource       = tt_PlayerOriginSource  .of(playerSource);
+    let targetOriginSource = tt_ExternalOriginSource.of();
+    let settings           = tt_SettingsImpl        .of(playerSource);
+    let targetRadar        = tt_TargetRadar         .of(originSource);
+    let radarStaleMarker   = tt_StaleMarkerImpl     .of(tt_TotalClock.of());
+    let radarCacheDirty    = tt_TargetSourceCache   .of(targetRadar, radarStaleMarker);
+    let radarCache         = tt_TargetSourcePruner  .of(radarCacheDirty);
+
+    Array<tt_WorldChanger> targetChangers = {
+      tt_HorizontalAimer.of(targetOriginSource, playerSource),
+      tt_VerticalAimer.of(targetOriginSource, playerSource, settings),
+      tt_Firer.of(playerSource)
+    };
+
+    _targetSources[playerNumber]  = targetOriginSource;
+    _targetChangers[playerNumber] = tt_WorldChangers.of(targetChangers);
+
+    Array<tt_WorldChanger> globalChangers = {
+      tt_ProjectileSpeedController.of(originSource, playerSource),
+      tt_EnemySpeedController.of(radarCache, playerSource)
+    };
+
+    _globalChangers.add(tt_WorldChangers.of(globalChangers));
+  }
+
+  play void react(int playerNumber, vector3 targetOrigin)
+  {
+    _targetSources[playerNumber].setOrigin(tt_Origin.of(targetOrigin));
+    _targetChangers[playerNumber].changeWorld();
+  }
+
+  play void tick() { _globalChangers.changeWorld(); }
+
+  tt_ExternalOriginSource _targetSources[MAXPLAYERS];
+  tt_WorldChanger         _targetChangers[MAXPLAYERS];
+  tt_WorldChangers        _globalChangers;
 }
 #+end_src
 
@@ -409,7 +463,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 // way the target is damaged. Such elements can be considered generic targets.
 class tt_Activatable abstract
 {
-  play abstract void activate();
+  abstract void activate();
 
   abstract tt_Strings getCommands();
 
@@ -591,7 +645,7 @@ class tt_CommandDispatcher : tt_Activatable
     return true;
   }
 
-  private play bool tryActivate(tt_Activatable activatable, string answer)
+  private bool tryActivate(tt_Activatable activatable, string answer)
   {
     let commands = activatable.getCommands();
 
@@ -1630,6 +1684,7 @@ class tt_EventHandler : EventHandler
   override void worldTick()
   {
     _playerHandler.tick();
+    _server.tick();
     self.IsUiProcessor = _playerHandler.isCapturingKeys();
   }
 
@@ -1649,16 +1704,19 @@ class tt_EventHandler : EventHandler
 
   override void playerEntered(PlayerEvent event)
   {
-    self.RequireMouse = true;
-
-    int playerNumber = event.PlayerNumber;
-    // TODO: multiplayer: initialize other players
-    if (playerNumber != consolePlayer)  return;
     if (gameState != GS_Level && gameState != GS_StartUp) return;
 
-    initPlayer(playerNumber);
+    self.RequireMouse = true;
 
+    if (_server == NULL) _server = tt_Server.of();
+
+    int playerNumber = event.playerNumber;
+
+    _server.addPlayer(playerNumber);
     tt_GameTweaks.tweakPlayer(players[playerNumber]);
+
+    if (playerNumber == consolePlayer)
+      _playerHandler = tt_PlayerSupervisor.of(consolePlayer);
   }
 
   override void worldThingDied(WorldEvent event)
@@ -1670,9 +1728,7 @@ class tt_EventHandler : EventHandler
   {
     bool isTitlemap = (level.mapName ~== "TITLEMAP");
     if (isTitlemap)
-    {
       destroy();
-    }
   }
 
   override void worldUnloaded(WorldEvent event)
@@ -1685,7 +1741,7 @@ class tt_EventHandler : EventHandler
     _playerHandler.draw(event);
   }
 
-  override void networkProcess(ConsoleEvent event)
+  override void consoleProcess(ConsoleEvent event)
   {
     string command = event.Name;
 
@@ -1693,15 +1749,23 @@ class tt_EventHandler : EventHandler
 
     if      (command == "tt_unlock_mode"  ) _playerHandler.unlockMode();
     else if (command == "tt_force_combat" ) _playerHandler.forceCombat();
-    else if (command == "tt_reset_targets") initPlayer(consolePlayer);
+    else if (command == "tt_reset_targets") _playerHandler.reset(consolePlayer);
   }
 
-  void initPlayer(int playerNumber)
+  override void networkCommandProcess(NetworkCommand command)
   {
-    _playerHandler = tt_PlayerSupervisor.of(playerNumber);
+    if (command.command == "tt_target")
+    {
+      double x = command.readDouble();
+      double y = command.readDouble();
+      double z = command.readDouble();
+
+      _server.react(command.player, (x, y, z));
+    }
   }
 
   private tt_PlayerHandler _playerHandler;
+  private tt_Server        _server;
 }
 #+end_src
 
@@ -2106,7 +2170,7 @@ class tt_GameTweaks play
   static void tweakPlayer(PlayerInfo player)
   {
     let pawn = player.mo;
-    if (pawn == NULL) { return; }
+    if (pawn == NULL) return;
 
     makeInvulnerable(pawn);
     increaseDamage(pawn);
@@ -2115,47 +2179,33 @@ class tt_GameTweaks play
     disableSeekingMissiles(pawn);
   }
 
+  // Still lose health down to 1 point.
   static private void makeInvulnerable(PlayerPawn pawn)
   {
     if (tt_buddha_enabled)
-    {
-      // Still lose health down to 1 point.
-      pawn.GiveInventory("tt_Buddha", 1);
-    }
+      pawn.giveInventory("tt_Buddha", 1);
   }
 
   static private void increaseDamage(PlayerPawn pawn)
   {
-    let    default        = getDefaultPawn(pawn);
-    double originalDamage = default.DamageMultiply;
-
-    pawn.DamageMultiply = originalDamage * 10;
+    double originalDamage = getDefaultByType(pawn.getClass()).damageMultiply;
+    pawn.damageMultiply = originalDamage * 10;
   }
 
   static private void decreaseIncomingDamage(PlayerPawn pawn)
   {
-    let    default        = getDefaultPawn(pawn);
-    double originalFactor = default.DamageFactor;
-
-    pawn.DamageFactor = originalFactor / 2;
+    double originalFactor = getDefaultByType(pawn.getClass()).damageFactor;
+    pawn.damageFactor = originalFactor / 2;
   }
 
   static private void protectFromSelfDamage(PlayerPawn pawn)
   {
-    pawn.SelfDamageFactor = 0;
+    pawn.selfDamageFactor = 0;
   }
 
   static private void disableSeekingMissiles(PlayerPawn pawn)
   {
     pawn.bCantSeek = true;
-  }
-
-  static private readonly<PlayerPawn> getDefaultPawn(PlayerPawn pawn)
-  {
-    class<PlayerPawn>    type    = pawn.GetClassName();
-    readonly<PlayerPawn> default = getDefaultByType(type);
-
-    return default;
   }
 }
 #+end_src
@@ -4639,6 +4689,33 @@ class tt_SelectableOriginSource : tt_OriginSource
 }
 #+end_src
 
+** ~ExternalOriginSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/origin_source_cache.zs
+
+// Implements tt_OriginSource by receiving the source from elsewhere.
+class tt_ExternalOriginSource : tt_OriginSource
+{
+  static tt_ExternalOriginSource of()
+  {
+    let result = new("tt_ExternalOriginSource");
+    return result;
+  }
+
+  override tt_Origin getOrigin()
+  {
+    return _origin;
+  }
+
+  void setOrigin(tt_Origin origin)
+  {
+    _origin = origin;
+  }
+
+  private tt_Origin _origin;
+}
+#+end_src
+
 * Player
 
 ** ~PlayerSource~
@@ -4651,6 +4728,8 @@ class tt_PlayerSource abstract
   abstract PlayerInfo getInfo();
 
   abstract PlayerPawn getPawn();
+
+  abstract int getNumber();
 }
 #+end_src
 
@@ -4692,7 +4771,13 @@ class tt_PlayerSourceMock : tt_PlayerSource
     _mock_getPawn_called = 0;
   }
 
- tt_Satisfaction getSatisfaction()
+  override int getNumber()
+  {
+    throwAbortException("implement this!");
+    return 0;
+  }
+
+  tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
       .push(getClassName() .. ": getInfo",
@@ -4724,6 +4809,8 @@ class tt_PlayerSourceImpl : tt_PlayerSource
   override PlayerInfo getInfo() { return players[_playerNumber]; }
 
   override PlayerPawn getPawn() { return getInfo().mo; }
+
+  override int getNumber() { return _playerNumber; }
 
   private int _playerNumber;
 }
@@ -7373,334 +7460,6 @@ class tt_Views : tt_View
 
 * World Changer
 
-** ~AnswerResetter~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/answer_resetter.zs
-
-class tt_AnswerResetter : tt_WorldChanger
-{
-  static tt_AnswerResetter of(tt_AnswerStateSource answerStateSource,
-                              tt_AnswerSource      answerSource)
-  {
-    let result = new("tt_AnswerResetter");
-
-    result._answerStateSource = answerStateSource;
-    result._answerSource      = answerSource;
-    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
-
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let newAnswerState = _answerStateSource.getAnswerState();
-    if (!_oldAnswerState.isFinished() && newAnswerState.isFinished())
-    {
-      _answerStateSource.reset();
-      _answerSource.reset();
-    }
-
-    _oldAnswerState = newAnswerState;
-  }
-
-  private tt_AnswerStateSource _answerStateSource;
-  private tt_AnswerSource      _answerSource;
-
-  private tt_AnswerState _oldAnswerState;
-}
-#+end_src
-
-** ~EnemySpeedController~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/enemy_speed_controller.zs
-
-// Implements tt_WorldChanger by slowing down enemies.
-class tt_EnemySpeedController : tt_WorldChanger
-{
-  static tt_EnemySpeedController of(tt_TargetSource targetSource)
-  {
-    let result = new("tt_EnemySpeedController");
-    result._targetSource = targetSource;
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let  targets  = _targetSource.getTargets();
-    uint nTargets = targets.size();
-
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      let enemy = targets.at(i).getActor();
-      if (!isSlowedDown(enemy))
-      {
-        slowDown(enemy);
-      }
-    }
-  }
-
-  private play bool isSlowedDown(Actor a)
-  {
-    return (a.CountInv("tt_VelocityStorage") != 0);
-  }
-
-  private play void slowDown(Actor a)
-  {
-    // Storage acts just as a marker here.
-    a.AddInventory(tt_VelocityStorage(Actor.spawn("tt_VelocityStorage")));
-    a.Speed *= VELOCITY_SCALE_FACTOR;
-  }
-
-  const VELOCITY_SCALE_FACTOR = 0.2;
-
-  private tt_TargetSource _targetSource;
-}
-#+end_src
-
-** ~Gunner~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/gunner.zs
-
-// Implements tt_WorldChanger by calling other tt_WorldChanger if there is some
-// tt_Origin.
-class tt_Gunner : tt_WorldChanger
-{
-  static tt_Gunner of(tt_OriginSource originSource,
-                      tt_WorldChanger changer)
-  {
-    let result = new("tt_Gunner");
-    result._originSource = originSource;
-    result._changer      = changer;
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    if (_originSource.getOrigin() != NULL) _changer.changeWorld();
-  }
-
-  private tt_OriginSource _originSource;
-  private tt_WorldChanger _changer;
-}
-#+end_src
-
-#+begin_src c :noweb-ref test-body
-{
-  let tag = "tt_Gunner: null origin";
-  let env = tt_GunnerTestEnvironment.of();
-
-  env.originSource.expect_getOrigin(NULL);
-
-  env.gunner.changeWorld();
-
-  assertSatisfaction(env.getSatisfaction(), tag);
-}
-{
-  let tag = "tt_Gunner: valid origin";
-  let env = tt_GunnerTestEnvironment.of();
-
-  let origin = tt_Origin.of((0, 0, 0));
-
-  env.originSource.expect_getOrigin(origin);
-  env.changer.expect_changeWorld();
-
-  env.gunner.changeWorld();
-
-  assertSatisfaction(env.getSatisfaction(), tag);
-}
-#+end_src
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
-
-class tt_GunnerTestEnvironment
-{
-  static tt_GunnerTestEnvironment of()
-  {
-    let result = new("tt_GunnerTestEnvironment");
-    result.originSource = tt_OriginSourceMock.of();
-    result.changer      = tt_WorldChangerMock.of();
-
-    result.gunner = tt_Gunner.of(result.originSource, result.changer);
-    return result;
-  }
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return originSource.getSatisfaction()
-      .add(changer.getSatisfaction());
-  }
-
-  tt_OriginSourceMock originSource;
-  tt_WorldChangerMock changer;
-  tt_Gunner           gunner;
-}
-
-#+end_src
-
-** ~MatchWatcher~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/match_watcher.zs
-
-// Watches for answer state source and reports match or not match
-// when the state changes from Preparing to Ready.
-//
-// Match is determined by tt_OriginSource result being not NULL.
-class tt_MatchWatcher : tt_WorldChanger
-{
-  static tt_MatchWatcher of(tt_AnswerStateSource answerStateSource,
-                            tt_AnswerReporter    answerReporter,
-                            tt_OriginSource      originSource)
-  {
-    let result = new("tt_MatchWatcher");
-
-    result._answerStateSource = answerStateSource;
-    result._answerReporter    = answerReporter;
-    result._originSource      = originSource;
-    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
-
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let newAnswerState = _answerStateSource.getAnswerState();
-    if (!_oldAnswerState.isReady() && newAnswerState.isReady())
-    {
-      let isMatched = (_originSource.getOrigin() != NULL);
-      if (isMatched)
-      {
-        _answerReporter.reportMatch();
-      }
-      else
-      {
-        _answerReporter.reportNotMatch();
-      }
-    }
-
-    _oldAnswerState = newAnswerState;
-  }
-
-  private tt_AnswerStateSource _answerStateSource;
-  private tt_AnswerReporter    _answerReporter;
-  private tt_OriginSource      _originSource;
-
-  private tt_AnswerState _oldAnswerState;
-}
-#+end_src
-
-** ~ProjectileSpeedController~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/projectile_speed_controller.zs
-
-// Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
-//
-// When a projectile is no longer flying towards the player, its speed is
-// restored.
-class tt_ProjectileSpeedController : tt_WorldChanger
-{
-  static tt_ProjectileSpeedController of(tt_OriginSource playerOriginSource,
-                                         tt_PlayerSource playerSource)
-  {
-    let result = new("tt_ProjectileSpeedController");
-
-    result._playerOriginSource = playerOriginSource;
-    result._playerSource = playerSource;
-
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let origin       = _playerOriginSource.getOrigin().getVector();
-    let playerRadius = _playerSource.getPawn().radius;
-
-    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
-      if (a.bMissile) controlProjectile(a, origin, playerRadius);
-  }
-
-  private play void controlProjectile(Actor a,
-                                      Vector3 playerOrigin,
-                                      double playerRadius)
-  {
-    bool isInRange = tt_Math.isInEffectiveRange(a.pos, playerOrigin);
-
-    if (isInRange && isMovingTowardsPlayer(a, playerOrigin, playerRadius))
-    {
-      if (!isSlowedDown(a))
-      {
-        slowDown(a);
-      }
-    }
-    else if (isSlowedDown(a))
-    {
-      restoreVelocity(a);
-    }
-  }
-
-  private play bool isMovingTowardsPlayer(Actor projectile,
-                                          Vector3 playerPos,
-                                          double playerRadius)
-  {
-    Vector3 vel = projectile.vel;
-    if (vel == (0, 0, 0)) { return false; } // doesn't move
-
-    double oldDistance = (projectile.pos - vel - playerPos).length();
-    double distance    = (projectile.pos -       playerPos).length();
-
-    if (distance > oldDistance) { return false; } // moves from player
-
-    // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-    Vector3 x10             = projectile.pos - playerPos;
-    Vector3 prod            = tt_Math.crossProduct(vel, x10);
-    double  lineDistance    = prod.length() / vel.length();
-    double  hitDistance     = playerRadius + projectile.radius;
-    bool    willTouchPlayer = (hitDistance >= lineDistance);
-
-    return willTouchPlayer;
-  }
-
-  private play bool isSlowedDown(Actor a)
-  {
-    return (a.CountInv("tt_VelocityStorage") != 0);
-  }
-
-  private play void slowDown(Actor a)
-  {
-    let storage = tt_VelocityStorage(Actor.spawn("tt_VelocityStorage"));
-    storage.velocity = a.vel;
-    a.AddInventory(storage);
-
-    a.A_ScaleVelocity(VELOCITY_SCALE_FACTOR);
-  }
-
-  // Note: this method assumes that actor contains tt_VelocityStorage inventory item.
-  private play void restoreVelocity(Actor a)
-  {
-    let storage = tt_VelocityStorage(a.FindInventory("tt_VelocityStorage"));
-    a.vel = storage.velocity;
-
-    a.RemoveInventory(storage);
-    storage.Destroy();
-  }
-
-  const VELOCITY_SCALE_FACTOR = 0.1;
-
-  private tt_OriginSource _playerOriginSource;
-  private tt_PlayerSource _playerSource;
-}
-#+end_src
-
-** ~VelocityStorage~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/velocity_storage.zs
-
-// This is a helper class that allows storing the velocity.
-class tt_VelocityStorage : Inventory
-{
-  Vector3 velocity;
-}
-#+end_src
-
 ** ~WorldChanger~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/world_changer/world_changer.zs
@@ -7757,6 +7516,10 @@ class tt_WorldChangers : tt_WorldChanger
     return result;
   }
 
+  static tt_WorldChangers ofNone() { return new("tt_WorldChangers"); }
+
+  void add(tt_WorldChanger changer) { _changers.push(changer); }
+
   override void changeWorld()
   {
     foreach (changer : _changers)
@@ -7764,6 +7527,444 @@ class tt_WorldChangers : tt_WorldChanger
   }
 
   private Array<tt_WorldChanger> _changers;
+}
+#+end_src
+
+** ~EnemySpeedController~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/enemy_speed_controller.zs
+
+// Implements tt_WorldChanger by slowing down enemies.
+class tt_EnemySpeedController : tt_WorldChanger
+{
+  static tt_EnemySpeedController of(tt_TargetSource targetSource,
+                                    tt_PlayerSource playerSource)
+  {
+    let result = new("tt_EnemySpeedController");
+    result._targetSource = targetSource;
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let  targets  = _targetSource.getTargets();
+    uint nTargets = targets.size();
+    int  player   = _playerSource.getNumber();
+
+    for (uint i = 0; i < nTargets; ++i)
+    {
+      let enemy = targets.at(i).getActor();
+      if (!tt_VelocityStorage.isSlowedDown(enemy, player))
+        tt_VelocityStorage.slowDown(enemy, player);
+    }
+  }
+
+  private tt_TargetSource _targetSource;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+** ~ProjectileSpeedController~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/projectile_speed_controller.zs
+
+// Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
+//
+// When a projectile is no longer flying towards the player, its speed is
+// restored.
+class tt_ProjectileSpeedController : tt_WorldChanger
+{
+  static tt_ProjectileSpeedController of(tt_OriginSource playerOriginSource,
+                                         tt_PlayerSource playerSource)
+  {
+    let result = new("tt_ProjectileSpeedController");
+    result._playerOriginSource = playerOriginSource;
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let origin       = _playerOriginSource.getOrigin().getVector();
+    let playerRadius = _playerSource.getPawn().radius;
+    int player       = _playerSource.getNumber();
+
+    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
+      if (a.bMissile) controlProjectile(a, origin, playerRadius, player);
+  }
+
+  private play void controlProjectile(Actor a,
+                                      Vector3 playerOrigin,
+                                      double playerRadius,
+                                      int player)
+  {
+    bool isInRange = tt_Math.isInEffectiveRange(a.pos, playerOrigin);
+
+    if (isInRange && isMovingTowardsPlayer(a, playerOrigin, playerRadius))
+    {
+      if (!tt_VelocityStorage.isSlowedDown(a, player))
+        tt_VelocityStorage.slowDown(a, player);
+    }
+    else if (tt_VelocityStorage.isSlowedDown(a, player))
+    {
+      tt_VelocityStorage.restoreVelocity(a, player);
+    }
+  }
+
+  private play bool isMovingTowardsPlayer(Actor projectile,
+                                          Vector3 playerPos,
+                                          double playerRadius)
+  {
+    Vector3 vel = projectile.vel;
+    if (vel == (0, 0, 0)) { return false; } // doesn't move
+
+    double oldDistance = (projectile.pos - vel - playerPos).length();
+    double distance    = (projectile.pos -       playerPos).length();
+
+    if (distance > oldDistance) { return false; } // moves from player
+
+    // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+    Vector3 x10             = projectile.pos - playerPos;
+    Vector3 prod            = tt_Math.crossProduct(vel, x10);
+    double  lineDistance    = prod.length() / vel.length();
+    double  hitDistance     = playerRadius + projectile.radius;
+    bool    willTouchPlayer = (hitDistance >= lineDistance);
+
+    return willTouchPlayer;
+  }
+
+  private tt_OriginSource _playerOriginSource;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+** ~VelocityStorage~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/velocity_storage.zs
+
+// This is a helper class that allows storing the velocity.
+// TODO: rewrite with a Behavior?
+class tt_VelocityStorage : Inventory
+{
+  static bool isSlowedDown(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+    if (storage == NULL) return false;
+
+    return storage._byWhichPlayer[byPlayer];
+  }
+
+  static void slowDown(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+
+    if (storage != NULL)
+    {
+      storage._byWhichPlayer[byPlayer] = true;
+      return;
+    }
+
+    storage = tt_VelocityStorage(Actor.spawn("tt_VelocityStorage"));
+    storage._velocity = other.vel;
+    storage._speed    = other.speed;
+
+    other.addInventory(storage);
+
+    other.vel   *= VELOCITY_SCALE_FACTOR;
+    other.speed *= VELOCITY_SCALE_FACTOR;
+  }
+
+  static void restoreVelocity(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+
+    storage._byWhichPlayer[byPlayer] = false;
+
+    if (storage.countByPlayers() == 0)
+    {
+      other.vel   = storage._velocity;
+      other.speed = storage._speed;
+
+      other.removeInventory(storage);
+      storage.destroy();
+    }
+  }
+
+  private int countByPlayers()
+  {
+    int result = 0;
+    foreach (byPlayer : _byWhichPlayer)
+      result += byPlayer;
+    return result;
+  }
+
+  // TODO: make velocity scale factor configurable for projectiles and enemies.
+  // for actors it was 0.2.
+  const VELOCITY_SCALE_FACTOR = 0.1;
+
+  private vector3 _velocity;
+  private double  _speed;
+  private bool[MAXPLAYERS] _byWhichPlayer;
+}
+#+end_src
+
+* Effect
+
+** ~Effect~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/effect.zs
+
+// Interface for any non-play effects.
+class tt_Effect abstract
+{
+  abstract void doEffect();
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_EffectMock : tt_Effect
+{
+  static tt_EffectMock of() { return new("tt_EffectMock"); }
+
+  override void doEffect()
+  {
+    ++_mock_doEffect_called;
+  }
+
+  void expect_doEffect(int expected = 1)
+  {
+    _mock_doEffect_expected = expected;
+    _mock_doEffect_called = 0;
+  }
+
+  tt_Satisfaction getSatisfaction()
+  {
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": doEffect",
+            _mock_doEffect_expected == _mock_doEffect_called);
+  }
+
+  private int _mock_doEffect_expected;
+  private int _mock_doEffect_called;
+}
+#+end_src
+
+*** ~Effects~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/effect.zs
+
+class tt_Effects : tt_Effect
+{
+  static tt_Effects of(Array<tt_Effect> effects)
+  {
+    let result = new("tt_Effects");
+    result._effects.move(effects);
+    return result;
+  }
+
+  override void doEffect()
+  {
+    foreach (effect : _effects)
+      effect.doEffect();
+  }
+
+  private Array<tt_Effect> _effects;
+}
+#+end_src
+
+*** ~Gunner~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/gunner.zs
+
+// Implements tt_Effect by calling other tt_Effect if there is some tt_Origin.
+class tt_Gunner : tt_Effect
+{
+  static tt_Gunner of(tt_OriginSource originSource, tt_Effect effect)
+  {
+    let result = new("tt_Gunner");
+    result._originSource = originSource;
+    result._effect       = effect;
+    return result;
+  }
+
+  override void doEffect()
+  {
+    if (_originSource.getOrigin() != NULL) _effect.doEffect();
+  }
+
+  private tt_OriginSource _originSource;
+  private tt_Effect       _effect;
+}
+#+end_src
+
+**** Tests
+
+#+begin_src c :noweb-ref test-body
+{
+  let tag = "tt_Gunner: null origin";
+  let env = tt_GunnerTestEnvironment.of();
+
+  env.originSource.expect_getOrigin(NULL);
+
+  env.gunner.doEffect();
+
+  assertSatisfaction(env.getSatisfaction(), tag);
+}
+{
+  let tag = "tt_Gunner: valid origin";
+  let env = tt_GunnerTestEnvironment.of();
+
+  let origin = tt_Origin.of((0, 0, 0));
+
+  env.originSource.expect_getOrigin(origin);
+  env.effect.expect_doEffect();
+
+  env.gunner.doEffect();
+
+  assertSatisfaction(env.getSatisfaction(), tag);
+}
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
+
+class tt_GunnerTestEnvironment
+{
+  static tt_GunnerTestEnvironment of()
+  {
+    let result = new("tt_GunnerTestEnvironment");
+    result.originSource = tt_OriginSourceMock.of();
+    result.effect       = tt_EffectMock.of();
+    result.gunner       = tt_Gunner.of(result.originSource, result.effect);
+    return result;
+  }
+
+  tt_Satisfaction getSatisfaction() const
+  {
+    return originSource.getSatisfaction()
+      .add(effect.getSatisfaction());
+  }
+
+  tt_OriginSourceMock originSource;
+  tt_EffectMock       effect;
+  tt_Gunner           gunner;
+}
+#+end_src
+
+** ~AnswerResetter~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/answer_resetter.zs
+
+class tt_AnswerResetter : tt_Effect
+{
+  static tt_AnswerResetter of(tt_AnswerStateSource answerStateSource,
+                              tt_AnswerSource      answerSource)
+  {
+    let result = new("tt_AnswerResetter");
+
+    result._answerStateSource = answerStateSource;
+    result._answerSource      = answerSource;
+    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
+
+    return result;
+  }
+
+  override void doEffect()
+  {
+    let newAnswerState = _answerStateSource.getAnswerState();
+    if (!_oldAnswerState.isFinished() && newAnswerState.isFinished())
+    {
+      _answerStateSource.reset();
+      _answerSource.reset();
+    }
+
+    _oldAnswerState = newAnswerState;
+  }
+
+  private tt_AnswerStateSource _answerStateSource;
+  private tt_AnswerSource      _answerSource;
+
+  private tt_AnswerState _oldAnswerState;
+}
+#+end_src
+
+** ~MatchWatcher~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/match_watcher.zs
+
+// Watches for answer state source and reports match or not match
+// when the state changes from Preparing to Ready.
+//
+// Match is determined by tt_OriginSource result being not NULL.
+class tt_MatchWatcher : tt_Effect
+{
+  static tt_MatchWatcher of(tt_AnswerStateSource answerStateSource,
+                            tt_AnswerReporter    answerReporter,
+                            tt_OriginSource      originSource)
+  {
+    let result = new("tt_MatchWatcher");
+
+    result._answerStateSource = answerStateSource;
+    result._answerReporter    = answerReporter;
+    result._originSource      = originSource;
+    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
+
+    return result;
+  }
+
+  override void doEffect()
+  {
+    let newAnswerState = _answerStateSource.getAnswerState();
+    if (!_oldAnswerState.isReady() && newAnswerState.isReady())
+    {
+      let isMatched = (_originSource.getOrigin() != NULL);
+      if (isMatched)
+      {
+        _answerReporter.reportMatch();
+      }
+      else
+      {
+        _answerReporter.reportNotMatch();
+      }
+    }
+
+    _oldAnswerState = newAnswerState;
+  }
+
+  private tt_AnswerStateSource _answerStateSource;
+  private tt_AnswerReporter    _answerReporter;
+  private tt_OriginSource      _originSource;
+
+  private tt_AnswerState _oldAnswerState;
+}
+#+end_src
+
+** ~TargetOriginSender~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/target_origin_sender.zs
+
+class tt_TargetOriginSender : tt_Effect
+{
+  static tt_TargetOriginSender of(tt_OriginSource targetOriginSource)
+  {
+    let result = new("tt_TargetOriginSender");
+    result._targetOriginSource = targetOriginSource;
+    return result;
+  }
+
+  override void doEffect()
+  {
+    vector3 origin = _targetOriginSource.getOrigin().getVector();
+    EventHandler.sendNetworkCommand("tt_target",
+                                    NET_DOUBLE, origin.x,
+                                    NET_DOUBLE, origin.y,
+                                    NET_DOUBLE, origin.z);
+  }
+
+  private tt_OriginSource _targetOriginSource;
 }
 #+end_src
 
@@ -8045,9 +8246,9 @@ OptionMenu tt_lp_TopMenu
 
 #+begin_src c :tangle build/Typist.pk3/keyconf.txt
 
-Alias tt_unlock_mode   "netevent tt_unlock_mode"
-Alias tt_force_combat  "netevent tt_force_combat"
-Alias tt_reset_targets "netevent tt_reset_targets"
+Alias tt_unlock_mode   "event tt_unlock_mode"
+Alias tt_force_combat  "event tt_force_combat"
+Alias tt_reset_targets "event tt_reset_targets"
 
 Alias zc_top "openMenu tt_lp_TopMenu"
 
