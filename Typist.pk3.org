@@ -3529,10 +3529,7 @@ class tt_AutoModeSource : tt_ModeSource
   // Play-const hack: Actor.isVisible(...) is not const, but should be.
   private play bool isVisible(tt_Target target, PlayerPawn pawn) const
   {
-    let  targetActor = target.getActor();
-    bool visible     = pawn.isVisible(targetActor, ALL_AROUND);
-
-    return visible;
+    return pawn.isVisible(target.getActor(), ALL_AROUND);
   }
 
   const ALL_AROUND = 1; // true
@@ -6993,6 +6990,65 @@ class tt_VisibilityFilter : tt_TargetWidgetSource
 
 * View
 
+** ~View~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/view/view.zs
+
+// This interface represents a view - something that displays something.
+class tt_View abstract
+{
+  ui abstract void draw(RenderEvent event);
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_ViewMock : tt_View
+{
+  static tt_ViewMock of() { return new("tt_ViewMock"); }
+
+  override void draw(RenderEvent event)
+  {
+    ++_mock_draw_called;
+  }
+
+  void expect_draw(int expected = 1)
+  {
+    _mock_draw_expected = expected;
+    _mock_draw_called = 0;
+  }
+
+  private int _mock_draw_expected;
+  private int _mock_draw_called;
+}
+#+end_src
+
+** ~Views~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/view/views.zs
+
+// Implements View by allowing several Views to be drawn.
+class tt_Views : tt_View
+{
+  static tt_Views of(Array<tt_View> views)
+  {
+    let result = new("tt_Views");
+    result._views.move(views);
+    return result;
+  }
+
+  override void draw(RenderEvent event)
+  {
+    foreach (view : _views)
+      view.draw(event);
+  }
+
+  private Array<tt_View> _views;
+}
+#+end_src
+
 ** ~ConditionalView~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/view/conditional_view.zs
@@ -7011,9 +7067,7 @@ class tt_ConditionalView : tt_View
   static tt_ConditionalView of(tt_View view)
   {
     let result = new("tt_ConditionalView");
-
     result._view = view;
-
     return result;
   }
 
@@ -7021,12 +7075,8 @@ class tt_ConditionalView : tt_View
   {
     bool areConditionsMet = !isInMenu()
                          && !isLevelClear()
-                         && !isAutomapOpen()
-                          ;
-    if (areConditionsMet)
-    {
-      _view.draw(event);
-    }
+                         && !isAutomapOpen();
+    if (areConditionsMet) _view.draw(event);
   }
 
   private ui bool isInMenu()
@@ -7234,13 +7284,12 @@ class tt_Drawing ui
 // - several targets
 class tt_InfoPanel : tt_View
 {
-  static tt_InfoPanel of( tt_ModeSource        modeSource
-                 , tt_AnswerSource      answerSource
-                 , tt_Activatable       activatable
-                 , tt_KnownTargetSource knownTargetSource
-                 , tt_Settings          settings
-                 , tt_PlayerSource      playerSource
-                 )
+  static tt_InfoPanel of(tt_ModeSource        modeSource,
+                         tt_AnswerSource      answerSource,
+                         tt_Activatable       activatable,
+                         tt_KnownTargetSource knownTargetSource,
+                         tt_Settings          settings,
+                         tt_PlayerSource      playerSource)
   {
     let result = new("tt_InfoPanel");
 
@@ -7254,7 +7303,7 @@ class tt_InfoPanel : tt_View
     return result;
   }
 
-  override void draw(RenderEvent event)
+  override void draw(RenderEvent _)
   {
     int     screenWidth = Screen.GetWidth();
     int     xStart      = screenWidth / 2;
@@ -7264,7 +7313,7 @@ class tt_InfoPanel : tt_View
     drawCommands(position);
   }
 
-  private ui void drawTargets(Vector2 xy)
+  private ui void drawTargets(vector2 xy)
   {
     int scale       = _settings.getScale();
     int screenWidth = Screen.GetWidth();
@@ -7281,14 +7330,16 @@ class tt_InfoPanel : tt_View
     {
       let target = targets.at(i);
 
-      if (!isVisible(player, target.getTarget().getActor())) { continue; }
+      if (!isVisible(player, target.getTarget().getActor())) continue;
 
       let    question       = target.getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
-      int    targetWidth    = tt_Drawing.getWidthForTarget(questionString, hintedAnswer, _settings);
+      int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
+                                                           hintedAnswer,
+                                                           _settings);
 
-      if (x + targetWidth > screenWidth) { return; }
+      if (x + targetWidth > screenWidth) return;
 
       Vector2 position = (x, y);
       tt_Drawing.drawTarget(position, questionString, hintedAnswer, _settings, NOT_CENTERED, color);
@@ -7299,25 +7350,30 @@ class tt_InfoPanel : tt_View
 
   private ui void drawCommands(Vector2 xy)
   {
-    int scale        = _settings.getScale();
+    int  scale       = _settings.getScale();
     let  commands    = _activatable.getCommands();
     int  screenWidth = Screen.GetWidth();
     uint nCommands   = commands.size();
     int  x           = int(xy.x - HORIZONTAL_MARGIN);
     int  y           = int(xy.y + (VERTICAL_MARGIN * scale));
-    let answer       = _answerSource.getAnswer().getString();
-    int mode         = _modeSource.getMode();
-    int color        = tt_Drawing.getColorForMode(mode);
+    let  answer      = _answerSource.getAnswer().getString();
+    int  mode        = _modeSource.getMode();
+    int  color       = tt_Drawing.getColorForMode(mode);
 
     for (uint i = 0; i < nCommands; ++i)
     {
       let command     = commands.at(i);
       int targetWidth = tt_Drawing.getWidthForTarget(command, answer, _settings);
 
-      if (x - targetWidth < 0) { return; }
+      if (x - targetWidth < 0) return;
 
       Vector2 position = (x - targetWidth, y);
-      tt_Drawing.drawTarget(position, command, answer, _settings, NOT_CENTERED, color);
+      tt_Drawing.drawTarget(position,
+                            command,
+                            answer,
+                            _settings,
+                            NOT_CENTERED,
+                            color);
 
       x -= targetWidth + 2;
     }
@@ -7354,11 +7410,10 @@ class tt_InfoPanel : tt_View
 // Implement tt_View by getting a list of Target Widgets and drawing them.
 class tt_TargetOverlay : tt_View
 {
-  static tt_TargetOverlay of( tt_TargetWidgetSource targetWidgetSource
-                     , tt_AnswerSource       answerSource
-                     , tt_Settings           settings
-                     , tt_ModeSource         modeSource
-                     )
+  static tt_TargetOverlay of(tt_TargetWidgetSource targetWidgetSource,
+                             tt_AnswerSource       answerSource,
+                             tt_Settings           settings,
+                             tt_ModeSource         modeSource)
   {
     let result = new("tt_TargetOverlay");
 
@@ -7386,7 +7441,12 @@ class tt_TargetOverlay : tt_View
       string hintedAnswer   = question.getHintFor(answer);
       let    position       = widget.getPosition();
 
-      tt_Drawing.drawTarget(position, questionString, hintedAnswer, _settings, CENTERED, color);
+      tt_Drawing.drawTarget(position,
+                            questionString,
+                            hintedAnswer,
+                            _settings,
+                            CENTERED,
+                            color);
     }
   }
 
@@ -7396,65 +7456,6 @@ class tt_TargetOverlay : tt_View
   private tt_AnswerSource       _answerSource;
   private tt_Settings           _settings;
   private tt_ModeSource         _modeSource;
-}
-#+end_src
-
-** ~View~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/view/view.zs
-
-// This interface represents a view - something that displays something.
-class tt_View abstract
-{
-  ui abstract void draw(RenderEvent event);
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_ViewMock : tt_View
-{
-  static tt_ViewMock of() { return new("tt_ViewMock"); }
-
-  override void draw(RenderEvent event)
-  {
-    ++_mock_draw_called;
-  }
-
-  void expect_draw(int expected = 1)
-  {
-    _mock_draw_expected = expected;
-    _mock_draw_called = 0;
-  }
-
-  private int _mock_draw_expected;
-  private int _mock_draw_called;
-}
-#+end_src
-
-** ~Views~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/view/views.zs
-
-// Implements View by allowing several Views to be drawn.
-class tt_Views : tt_View
-{
-  static tt_Views of(Array<tt_View> views)
-  {
-    let result = new("tt_Views");
-    result._views.move(views);
-    return result;
-  }
-
-  override void draw(RenderEvent event)
-  {
-    foreach (view : _views)
-      view.draw(event);
-  }
-
-  private Array<tt_View> _views;
 }
 #+end_src
 
