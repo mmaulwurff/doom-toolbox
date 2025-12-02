@@ -4905,7 +4905,7 @@ class tt_Match : tt_Question
       [matchedCode, nextMatchedCharPos] = matched.GetNextCodePoint(matchedCharPos);
 
       bool   isCharSame = (originCode == matchedCode);
-      string colorCode  = (isCharSame ? "q" : "g"); // dark green, red
+      string colorCode  = (isCharSame ? "j" : "g"); // white, red
 
       result.appendFormat("\c%s%c", colorCode, matchedCode);
 
@@ -7214,7 +7214,7 @@ class tt_Drawing ui
                )
   {
     Screen.DrawText( fnt
-                   , Font.CR_Yellow
+                   , Font.CR_WHITE
                    , x
                    , y
                    , "$" .. question
@@ -7223,7 +7223,7 @@ class tt_Drawing ui
                    , DTA_VirtualHeight , screenHeight
                    );
     Screen.DrawText( fnt
-                   , Font.CR_DarkGreen
+                   , Font.CR_WHITE
                    , x
                    , y + height + FRAME * 2
                    , "$" .. answer
@@ -7246,7 +7246,7 @@ class tt_Drawing ui
   const BACKGROUND_ALPHA = 0.2;
 
   const COMBAT_COLOR  = 0xFF0000;
-  const EXPLORE_COLOR = 0x0000FF;
+  const EXPLORE_COLOR = 0x999999;
 }
 #+end_src
 
