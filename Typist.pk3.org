@@ -249,6 +249,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 
     Array<tt_View> views = {
       tt_TargetOverlay.of(widgetSorter, playerInput, settings, modeSource),
+      tt_Frame.of(modeSource),
       infoPanel
     };
 
@@ -3851,7 +3852,7 @@ class tt_DelayedCombatModeSourceTestEnvironment
 // Represents the mode in which Typist operates.
 class tt_Mode
 {
-  enum Modes
+  enum _
   {
     Unknown, // Should never be used. Only for detecting uninitialized variables.
     Combat,  // Typist is focused on destroying the targets.
@@ -7046,6 +7047,96 @@ class tt_Views : tt_View
   }
 
   private Array<tt_View> _views;
+}
+#+end_src
+
+** ~Frame~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/view/frame.zs
+class tt_Frame : tt_View
+{
+  static tt_Frame of(tt_ModeSource modeSource)
+  {
+    let result = new("tt_Frame");
+    result._modeSource = modeSource;
+    result._alphaInterpolator = tt_DoubleInterpolator.of();
+    return result;
+  }
+
+  override void draw(RenderEvent event)
+  {
+    double destination = (_modeSource.getMode() == tt_Mode.Combat) ? 1.0 : 0.0;
+
+    _alphaInterpolator.reset(destination, 0.1);
+    // TODO: untie from framerate?
+    _alphaInterpolator.update();
+
+    double alpha = _alphaInterpolator.getValue();
+
+    if (alpha ~== 0.0) return;
+
+    let frameTexture = TexMan.checkForTexture("tt-frame", TexMan.Type_Any);
+    int screenWidth  = Screen.getWidth();
+    int screenHeight = Screen.getHeight();
+    int frameWidth   = screenWidth / 32;
+
+    Screen.drawTexture( frameTexture
+                      , NOT_ANIMATED
+                      , 0
+                      , 0
+                      , DTA_DestWidth     , frameWidth
+                      , DTA_DestHeight    , screenHeight
+                      , DTA_KeepRatio     , true
+                      , DTA_VirtualWidth  , screenWidth
+                      , DTA_VirtualHeight , screenHeight
+                      , DTA_Alpha         , alpha
+                      );
+
+    Screen.drawTexture( frameTexture
+                      , NOT_ANIMATED
+                      , screenWidth - frameWidth
+                      , 0
+                      , DTA_FlipX         , true
+                      , DTA_DestWidth     , frameWidth
+                      , DTA_DestHeight    , screenHeight
+                      , DTA_KeepRatio     , true
+                      , DTA_VirtualWidth  , screenWidth
+                      , DTA_VirtualHeight , screenHeight
+                      , DTA_Alpha         , alpha
+                      );
+  }
+
+  const NOT_ANIMATED = 0; // false
+
+  private tt_ModeSource _modeSource;
+  private tt_DoubleInterpolator _alphaInterpolator;
+}
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/zscript/interpolator/double_interpolator.zs
+
+class tt_DoubleInterpolator
+{
+  static tt_DoubleInterpolator of() { return new("tt_DoubleInterpolator"); }
+
+  ui void update()
+  {
+    _currentValue = (_destination > _currentValue)
+      ? min(_destination, _currentValue + _step)
+      : max(_destination, _currentValue - _step);
+  }
+
+  ui double getValue() const { return _currentValue; }
+
+  ui void reset(double destination, double step)
+  {
+    _destination = destination;
+    _step = step;
+  }
+
+  private ui double _destination;
+  private ui double _currentValue;
+  private ui double _step;
 }
 #+end_src
 
