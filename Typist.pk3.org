@@ -7058,7 +7058,6 @@ class tt_Views : tt_View
 //
 // The list of conditions:
 // - not in a menu
-// - there are monsters on the level
 // - automap is closed
 //
 // Attention! This class reads data from global scope.
@@ -7073,27 +7072,7 @@ class tt_ConditionalView : tt_View
 
   override void draw(RenderEvent event)
   {
-    bool areConditionsMet = !isInMenu()
-                         && !isLevelClear()
-                         && !isAutomapOpen();
-    if (areConditionsMet) _view.draw(event);
-  }
-
-  private ui bool isInMenu()
-  {
-    return menuActive;
-  }
-
-  private ui bool isLevelClear()
-  {
-    int  nMonsters = level.total_monsters - level.killed_monsters;
-    bool isClear   = (nMonsters == 0);
-    return isClear;
-  }
-
-  private ui bool isAutomapOpen()
-  {
-    return automapActive;
+    if (!menuActive && !automapActive) _view.draw(event);
   }
 
   private tt_View _view;
