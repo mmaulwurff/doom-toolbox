@@ -12,7 +12,7 @@ TODO: add instructions.
 
 ** ~PlayerHandler~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/player_handler/player_handler.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/player_handler/tt_player_handler.zs
 
 // Handles the game for one player.
 class tt_PlayerHandler abstract
@@ -158,7 +158,7 @@ class tt_PlayerHandlerMock : tt_PlayerHandler
 
 ** ~PlayerSupervisor~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/player_handler/player_supervisor.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/player_handler/tt_player_supervisor.zs
 
 // Handles Typist.pk3 features for one player.
 class tt_PlayerSupervisor : tt_PlayerHandler
@@ -401,7 +401,7 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 
 * Server
 
-#+begin_src c :tangle build/Typist.pk3/zscript/server/server.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/server/tt_server.zs
 
 class tt_Server
 {
@@ -458,7 +458,7 @@ class tt_Server
 
 ** ~Activatable~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/activatable.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/activatable/tt_activatable.zs
 
 // This interface represents a game element that can be activated by the same
 // way the target is damaged. Such elements can be considered generic targets.
@@ -543,7 +543,7 @@ class tt_ActivatableMock : tt_Activatable
 
 ** ~PassThrough~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/pass_through.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/activatable/tt_pass_through.zs
 
 class tt_PassThrough : tt_Activatable
 {
@@ -579,7 +579,7 @@ class tt_PassThrough : tt_Activatable
 
 ** ~CommandDispatcher~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/activatable/command_dispatcher.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/activatable/tt_command_dispatcher.zs
 
 // Contains Activatables and activates() ones with commands matching answer.
 class tt_CommandDispatcher : tt_Activatable
@@ -780,7 +780,7 @@ class tt_CommandDispatcherTestEnvironment
 
 ** ~HorizontalAimer~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/horizontal_aimer.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_horizontal_aimer.zs
 
 // Implements tt_WorldChanger interface by rotating the player.
 // This implementation only aims horizontally. Hope for the vertical autoaim!
@@ -867,7 +867,7 @@ class tt_HorizontalAimer : tt_WorldChanger
 
 ** ~VerticalAimer~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/vertical_aimer.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_vertical_aimer.zs
 
 // Implements tt_WorldChanger interface by adjusting the player pitch
 // (horizontal angle). If autoaim is enabled, no pitch adjustment is done.
@@ -952,7 +952,7 @@ class tt_VerticalAimer : tt_WorldChanger
 
 ** ~Answer~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer/answer.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer/tt_answer.zs
 
 // Represents an answer to a tt_Question.
 // See tt_Question.
@@ -988,7 +988,7 @@ class tt_Answer
 
 ** ~AnswerSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer/answer_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer/tt_answer_source.zs
 
 // This interface represents a source of answers.
 class tt_AnswerSource : tt_KeyProcessor abstract
@@ -1054,7 +1054,7 @@ class tt_AnswerSourceMock : tt_AnswerSource
 
 ** ~InputBlockAfterCombat~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer/input_block_after_combat.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer/tt_input_block_after_combat.zs
 
 // Implements tt_AnswerSource by taking another tt_AnswerSource,
 // and only passing keys to it if a key was pressed down after the game mode
@@ -1117,7 +1117,7 @@ class tt_InputBlockAfterCombat : tt_AnswerSource
 
 ** ~PlayerInput~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer/player_input.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer/tt_player_input.zs
 
 // Implements tt_AnswerSource by receiving player key inputs and
 // composing an answer from them.
@@ -1286,7 +1286,7 @@ class tt_PlayerInputTestEnvironment
 
 ** ~AnswerState~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/answer_state.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/tt_answer_state.zs
 
 // Represents Answer state.
 // See tt_Answer class.
@@ -1328,7 +1328,7 @@ class tt_AnswerState
 
 ** ~AnswerStateSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/answer_state_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/tt_answer_state_source.zs
 
 // This interface provides access to tt_AnswerState.
 class tt_AnswerStateSource : tt_KeyProcessor abstract
@@ -1393,7 +1393,7 @@ class tt_AnswerStateSourceMock : tt_AnswerStateSource
 
 ** ~PressedAnswerState~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/pressed_answer_state.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/answer_state/tt_pressed_answer_state.zs
 
 // Implements tt_AnswerState by observing Enter and Space keys.
 //
@@ -1443,7 +1443,7 @@ class tt_PressedAnswerState : tt_AnswerStateSource
 
 ** ~Character~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/character/character.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/character/tt_character.zs
 
 // Represents a character.
 class tt_Character
@@ -1563,7 +1563,7 @@ class tt_Character
 
 ** ~Clock~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/clock/clock.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/clock/tt_clock.zs
 
 // Provides access to time.
 class tt_Clock abstract
@@ -1634,7 +1634,7 @@ class tt_ClockMock : tt_Clock
 
 ** ~TotalClock~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/clock/total_clock.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/clock/tt_total_clock.zs
 
 // Implements tt_Clock by getting total time since game start.
 class tt_TotalClock : tt_Clock
@@ -1677,7 +1677,7 @@ class tt_TotalClock : tt_Clock
 
 ** ~EventHandler~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_handler/event_handler.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_handler/tt_event_handler.zs
 
 // Entry point for Typist.pk3.
 class tt_EventHandler : EventHandler
@@ -1774,7 +1774,7 @@ class tt_EventHandler : EventHandler
 
 ** ~AnswerReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/answer_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_answer_reporter.zs
 
 // Interface for reporting answer matching events.
 class tt_AnswerReporter abstract
@@ -1834,7 +1834,7 @@ class tt_AnswerReporterMock : tt_AnswerReporter
 
 ** ~KeyPressReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/key_press_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_key_press_reporter.zs
 
 // Interface for reporting key press events.
 class tt_KeyPressReporter abstract
@@ -1876,7 +1876,7 @@ class tt_KeyPressReporterMock : tt_KeyPressReporter
 
 ** ~ModeReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/mode_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_mode_reporter.zs
 
 // Interface for reporting mode change events.
 class tt_ModeReporter abstract
@@ -1918,7 +1918,7 @@ class tt_ModeReporterMock : tt_ModeReporter
 
 ** ~PlayerSoundPlayer~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/player_sound_player.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_player_sound_player.zs
 
 // Implements tt_SoundPlayer by playing sounds for a player.
 // The sounds won't play if they are disabled in settings.
@@ -1960,7 +1960,7 @@ class tt_PlayerSoundPlayer : tt_SoundPlayer
 
 ** ~SoundAnswerReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_answer_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_answer_reporter.zs
 
 // Implements tt_AnswerReporter by playing a sound.
 class tt_SoundAnswerReporter : tt_AnswerReporter
@@ -1988,7 +1988,7 @@ class tt_SoundAnswerReporter : tt_AnswerReporter
 
 ** ~SoundKeyPressReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_key_press_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_key_press_reporter.zs
 
 // Implements tt_KeyPressReporter by playing a sound.
 // The sound won't play if it's disabled in settings.
@@ -2019,7 +2019,7 @@ class tt_SoundKeyPressReporter : tt_KeyPressReporter
 
 ** ~SoundModeReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_mode_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_mode_reporter.zs
 
 // Implements tt_ModeReporter by playing the corresponding sound for each mode.
 class tt_SoundModeReporter : tt_ModeReporter
@@ -2050,7 +2050,7 @@ class tt_SoundModeReporter : tt_ModeReporter
 
 ** ~SoundPlayer~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/sound_player.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_player.zs
 
 // This is an interface for playing sounds.
 class tt_SoundPlayer abstract
@@ -2087,7 +2087,7 @@ class tt_SoundPlayerMock : tt_SoundPlayer
 
 ** ~FirerImpl~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/firer/firer_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/firer/tt_firer.zs
 
 // Implements tt_WorldChanger by making the player pawn fire a shot.
 class tt_Firer : tt_WorldChanger
@@ -2163,7 +2163,7 @@ class tt_Firer : tt_WorldChanger
 server bool tt_buddha_enabled = true;
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/game_tweaks.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/tt_game_tweaks.zs
 
 // Handles game tweaks.
 class tt_GameTweaks play
@@ -2213,7 +2213,7 @@ class tt_GameTweaks play
 
 ** ~Buddha~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/buddha/buddha.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/buddha/tt_buddha.zs
 
 class tt_Buddha : PowerBuddha
 {
@@ -2230,7 +2230,7 @@ class tt_Buddha : PowerBuddha
 
 ** ~InputByModeManager~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/input_by_mode_manager.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/tt_input_by_mode_manager.zs
 
 // Implements tt_InputManager by examining the current and old Typist mode.
 // Input is reset when the game mode is changed.
@@ -2278,7 +2278,7 @@ class tt_InputByModeManager : tt_InputManager
 
 ** ~PassThroughInputManager~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/pass_through_input_manager.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/tt_pass_through_input_manager.zs
 
 // Doesn't capture keys when pass throug is set, otherwise acts as base.
 class tt_PassThroughInputManager : tt_InputManager
@@ -2341,7 +2341,7 @@ class tt_PassThroughInputManager : tt_InputManager
 
 ** ~InputManager~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/input_manager.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/input_manager/tt_input_manager.zs
 
 // Helps managing user input.
 class tt_InputManager abstract
@@ -2397,7 +2397,7 @@ class tt_InputManagerMock : tt_InputManager
 
 ** ~KeyProcessor~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/key_processor/key_processor.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/key_processor/tt_key_processor.zs
 
 // This interface represents an entity that processes input keys.
 class tt_KeyProcessor abstract
@@ -2432,7 +2432,7 @@ class tt_KeyProcessorMock : tt_KeyProcessor
 
 ** ~KeyProcessors~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/key_processor/key_processors.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/key_processor/tt_key_processors.zs
 
 // Implements tt_KeyProcessor interface by calling several instances
 // of tt_KeyProcessor.
@@ -2459,7 +2459,7 @@ class tt_KeyProcessors : tt_KeyProcessor
 
 ** ~KnownTarget~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_target.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_target.zs
 
 // Represents a target that already has been seen and registered.
 class tt_KnownTarget
@@ -2485,7 +2485,7 @@ class tt_KnownTarget
 
 ** ~KnownTargetSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_target_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_target_source.zs
 
 // This interface represents a source of known targets.
 // See tt_KnownTarget.
@@ -2554,7 +2554,7 @@ class tt_KnownTargetSourceMock : tt_KnownTargetSource
 
 ** ~KnownTargetSourceCache~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_target_source_cache.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_target_source_cache.zs
 
 // Implements tt_KnownTargetSource by reading other
 // tt_KnownTargetSource only if the data is stale.
@@ -2600,7 +2600,7 @@ class tt_KnownTargetSourceCache : tt_KnownTargetSource
 
 ** ~KnownTargets~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/known_targets.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_targets.zs
 
 // Represents a list of known targets.
 class tt_KnownTargets
@@ -2676,7 +2676,7 @@ class tt_KnownTargets
 
 ** ~TargetRegistry~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/target_registry.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_target_registry.zs
 
 // Implements tt_KnownTargetSource by reading from targets from
 // tt_TargetSource, assigning them questions, and storing them.
@@ -2947,7 +2947,7 @@ class tt_TargetRegistryTestEnvironment
 
 ** ~Lesson~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/question_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_question_source.zs
 
 // Interface for getting Questions.
 // Different question sources are different Lessons.
@@ -2993,7 +2993,7 @@ class tt_LessonMock : tt_Lesson
 
 ** ~MathsLesson~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/maths_lesson.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_maths_lesson.zs
 
 // Implements tt_Lesson by composing arithmetic tasks.
 class tt_MathsLesson : tt_Lesson
@@ -3094,7 +3094,7 @@ class tt_MathsLesson : tt_Lesson
 
 ** ~MixedLesson~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/mixed_lesson.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_mixed_lesson.zs
 
 class tt_MixedLesson : tt_Lesson
 {
@@ -3155,7 +3155,7 @@ class tt_MixedLesson : tt_Lesson
 
 ** ~RandomCharactersLesson~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_characters_lesson.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_random_characters_lesson.zs
 
 // Implements tt_Lesson by composing a question from groups
 // of characters enabled by settings.
@@ -3250,7 +3250,7 @@ class tt_RandomCharactersLesson : tt_Lesson
 
 ** ~RandomNumberSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/random_number_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_random_number_source.zs
 
 // Implements tt_Lesson by producing questions that contain
 // string composed from random numbers and should match exactly to the answers.
@@ -3282,7 +3282,7 @@ class tt_RandomNumberSource : tt_Lesson
 
 ** ~SelectedLesson~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/selected_question_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_selected_question_source.zs
 
 // Implements tt_Lesson by selecting a question source
 // according to the index from settings.
@@ -3369,7 +3369,7 @@ class tt_SelectedLessonTestEnvironment
 
 ** ~StringSet~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/string_set.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_string_set.zs
 
 // Implements tt_Lesson by reading a lump with words and
 // randomly selecting words from this lump.
@@ -3454,7 +3454,7 @@ class tt_StringSet : tt_Lesson
 
 * Math
 
-#+begin_src c :tangle build/Typist.pk3/zscript/math/math.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/math/tt_math.zs
 
 // Namespace for math-related functions.
 class tt_Math
@@ -3485,7 +3485,7 @@ class tt_Math
 
 ** ~AutoModeSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/auto_mode_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_auto_mode_source.zs
 
 // Implements tt_ModeSource by examining the specified tt_KnownTargetSource.
 class tt_AutoModeSource : tt_ModeSource
@@ -3627,7 +3627,7 @@ class tt_AutoModeSourceTestEnvironment
 
 ** ~DelayedCombatModeSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/delayed_combat_mode_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_delayed_combat_mode_source.zs
 
 // Implements tt_ModeSource by reading other tt_ModeSource, and switching to
 // Exploration mode only if some time has passed or there is no enemies around.
@@ -3847,7 +3847,7 @@ class tt_DelayedCombatModeSourceTestEnvironment
 
 ** ~Mode~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/mode.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode.zs
 
 // Represents the mode in which Typist operates.
 class tt_Mode
@@ -3864,7 +3864,7 @@ class tt_Mode
 
 ** ~ModeCascade~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/mode_cascade.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_cascade.zs
 
 // Implements ModeSource by taking the first mode from ModeSources
 // list that is not NONE.
@@ -3936,7 +3936,7 @@ class tt_ModeCascade : tt_ModeSource
 
 ** ~ModeSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/mode_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_source.zs
 
 // This interface represents a source of modes.
 // See: tt_Mode.
@@ -3982,7 +3982,7 @@ class tt_ModeSourceMock : tt_ModeSource
 
 ** ~ModeStorage~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/mode_storage.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_storage.zs
 
 // This is an interface for storing and retrieving mode.
 class tt_ModeStorage : tt_ModeSource abstract
@@ -4026,7 +4026,7 @@ class tt_ModeStorageMock : tt_ModeStorage
 
 ** ~ReportedModeSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/reported_mode_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_reported_mode_source.zs
 
 // Implements tt_ModeSource by reading other mode source, and
 // reporting an event when the mode has changed.
@@ -4139,7 +4139,7 @@ class tt_ReportedModeSourceTestEnvironment
 
 ** ~SettableMode~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/settable_mode.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_settable_mode.zs
 
 // Implements ModeStorage by simply storing the mode that was set.
 class tt_SettableMode : tt_ModeStorage
@@ -4183,7 +4183,7 @@ class tt_SettableMode : tt_ModeStorage
 
 ** ~HastyQuestionAnswerMatcher~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/hasty_question_answer_matcher.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_hasty_question_answer_matcher.zs
 
 // Implements OriginSource by finding an origin for a known target
 // that fits to for the answer.
@@ -4266,7 +4266,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
 
 ** ~Origin~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/origin.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin.zs
 
 // Represents a point in space.
 // Note that the Origin position cannot change once set.
@@ -4290,7 +4290,7 @@ class tt_Origin
 
 ** ~OriginSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/origin_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin_source.zs
 
 // This interface represents a source of origins.
 class tt_OriginSource abstract
@@ -4337,7 +4337,7 @@ class tt_OriginSourceMock : tt_OriginSource
 
 ** ~OriginSourceCache~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/origin_source_cache.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin_source_cache.zs
 
 // Implements OriginSource by reading other OriginSource only if origin is stale.
 class tt_OriginSourceCache : tt_OriginSource
@@ -4374,7 +4374,7 @@ class tt_OriginSourceCache : tt_OriginSource
 
 ** ~PlayerOriginSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/player_origin_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_player_origin_source.zs
 
 // Implements tt_OriginSource by providing the center of the player pawn.
 class tt_PlayerOriginSource : tt_OriginSource
@@ -4429,7 +4429,7 @@ class tt_PlayerOriginSource : tt_OriginSource
 
 ** ~QuestionAnswerMatcher~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/question_answer_matcher.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_question_answer_matcher.zs
 
 // Implements OriginSource by finding an origin for a known target that fits to
 // for the answer. Searches far matching target only if answer state is Ready.
@@ -4655,7 +4655,7 @@ class tt_QuestionAnswerMatcherTestEnvironment
 
 ** ~SelectableOriginSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/selectable_origin_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_selectable_origin_source.zs
 
 // Implements OriginSource by selecting one of the two supplied
 // origin sources based on a certain value from tt_Settings.
@@ -4689,7 +4689,7 @@ class tt_SelectableOriginSource : tt_OriginSource
 
 ** ~ExternalOriginSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/origin_source_cache.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin_source_cache.zs
 
 // Implements tt_OriginSource by receiving the source from elsewhere.
 class tt_ExternalOriginSource : tt_OriginSource
@@ -4718,7 +4718,7 @@ class tt_ExternalOriginSource : tt_OriginSource
 
 ** ~PlayerSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/player/player_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/player/tt_player_source.zs
 
 // Interface for getting player info and player pawn.
 class tt_PlayerSource abstract
@@ -4792,7 +4792,7 @@ class tt_PlayerSourceMock : tt_PlayerSource
 
 *** ~PlayerSourceImpl~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/player/player_source_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/player/tt_player_source_impl.zs
 
 // Implements tt_PlayerSource by returning player by player number.
 class tt_PlayerSourceImpl : tt_PlayerSource
@@ -4854,7 +4854,7 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 
 ** ~Match~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/question/match.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/question/tt_match.zs
 
 // Implements tt_Question. The answer is right for this kind of question if it
 // matches the string contained in this question.
@@ -4929,7 +4929,7 @@ class tt_Match : tt_Question
 
 ** ~Question~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/question/question.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/question/tt_question.zs
 
 // This interface represents a question.
 class tt_Question abstract
@@ -5018,7 +5018,7 @@ class tt_QuestionMock : tt_Question
 
 ** ~Cvar~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/cvar.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_cvar.zs
 
 // Provides access to a user or server Cvar. Accessing Cvars through this class
 // is faster because calling Cvar.getCvar() is costly. Caches the result of
@@ -5065,7 +5065,7 @@ class tt_Cvar
 
 ** ~CommandSettings~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_command_settings.zs
 
 // This interface provides access to Typist.pk3 Commands settings.
 class tt_CommandSettings abstract
@@ -5104,7 +5104,7 @@ class tt_CommandSettingsMock : tt_CommandSettings
 user string tt_command_pass_through = "/pass";
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/command_settings_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_command_settings_impl.zs
 
 // Implements tt_CommandSettings interface by reading the Cvars.
 class tt_CommandSettingsImpl : tt_CommandSettings
@@ -5128,7 +5128,7 @@ class tt_CommandSettingsImpl : tt_CommandSettings
 
 ** ~RandomCharactersLessonSettings~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_random_characters_lesson_settings.zs
 
 // Represents settings for tt_RandomCharactersLesson.
 class tt_RandomCharactersLessonSettings abstract
@@ -5315,7 +5315,7 @@ server bool   tt_rc_custom_enabled = false;
 server string tt_rc_custom         = "";
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/random_characters_lesson_settings_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_random_characters_lesson_settings_impl.zs
 
 // Implements tt_RandomCharactersLessonSettings by returning Cvar contents.
 // Cvars are cached.
@@ -5359,7 +5359,7 @@ class tt_RandomCharactersLessonSettingsImpl : tt_RandomCharactersLessonSettings
 
 ** ~Settings~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/settings.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_settings.zs
 
 // This interface provides access to Typist.pk3 settings.
 class tt_Settings abstract
@@ -5516,7 +5516,7 @@ server bool tt_is_lesson_enabled_8 = false;
 server bool tt_is_lesson_enabled_9 = false;
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/settings_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_settings_impl.zs
 
 // Implements tt_Settings by reading values from user CVars.
 class tt_SettingsImpl : tt_Settings
@@ -5611,7 +5611,7 @@ class tt_SettingsImpl : tt_Settings
 
 ** ~SoundSettings~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_sound_settings.zs
 
 // Provides access to Typist.pk3 sound settings.
 class tt_SoundSettings abstract
@@ -5696,7 +5696,7 @@ user int  tt_sound_theme = 1;
 user bool tt_sound_typing_enabled = true;
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/settings/sound_settings_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_sound_settings_impl.zs
 
 // Implements tt_SoundSettings by reading CVars.
 class tt_SoundSettingsImpl : tt_SoundSettings
@@ -5726,7 +5726,7 @@ class tt_SoundSettingsImpl : tt_SoundSettings
 
 ** ~StaleMarker~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/stale_marker/stale_marker.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/stale_marker/tt_stale_marker.zs
 
 // This interface provides information when its instance becomes stale.
 class tt_StaleMarker abstract
@@ -5767,7 +5767,7 @@ class tt_StaleMarkerMock : tt_StaleMarker
 
 ** ~StaleMarkerImpl~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/stale_marker/stale_marker_impl.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/stale_marker/tt_stale_marker_impl.zs
 
 // Implements tt_StaleMarker by observing a tt_Clock.
 class tt_StaleMarkerImpl : tt_StaleMarker
@@ -5878,7 +5878,7 @@ class tt_StaleMarkerImplTestEnvironment
 
 ** ~Strings~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/strings/strings.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/strings/tt_strings.zs
 
 // Represents a set of strings.
 class tt_Strings
@@ -5948,7 +5948,7 @@ class tt_Strings
 
 ** ~DeathReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/death_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_death_reporter.zs
 
 // Implements tt_TargetSource by collecting reports of
 // dead things as a list of DisabledTargets.
@@ -6003,7 +6003,7 @@ class tt_DeathReporter : tt_TargetSource
 
 ** ~Target~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/target.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target.zs
 
 // Represents an attack target.
 class tt_Target
@@ -6044,7 +6044,7 @@ class tt_Target
 
 ** ~TargetRadar~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/target_radar.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_radar.zs
 
 // Implements tt_TargetSource by scanning the world around the
 // supplied origin for actors suitable to be targets.
@@ -6201,7 +6201,7 @@ class tt_TargetRadarTestEnvironment
 
 ** ~TargetSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/target_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_source.zs
 
 // This interface represents a source of targets.
 // See: tt_Target.
@@ -6247,7 +6247,7 @@ class tt_TargetSourceMock : tt_TargetSource
 
 ** ~TargetSourceCache~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/target_source_cache.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_source_cache.zs
 
 // Implements tt_TargetSource by calling other tt_TargetSource only
 // if previously received target is stale.
@@ -6283,7 +6283,7 @@ class tt_TargetSourceCache : tt_TargetSource
 
 ** ~TargetSourcePruner~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/target_source_pruner.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_source_pruner.zs
 
 // Implements tt_TargetSource by pruning other tt_TargetSource from
 // targets with null actors.
@@ -6321,7 +6321,7 @@ class tt_TargetSourcePruner : tt_TargetSource
 
 ** ~Targets~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/targets.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_targets.zs
 
 // Represent a list of Targets.
 class tt_Targets
@@ -6381,7 +6381,7 @@ class tt_Targets
 
 ** ~Projector~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/projector.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_projector.zs
 
 // Implements TargetWidgetSource by accumulating Target Widgets.
 // Attention: this class has no tests. Modifications must be checked manually.
@@ -6492,7 +6492,7 @@ class tt_Projector : tt_TargetWidgetSource
 
 ** ~SorterByDistance~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/sorter_by_distance.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_sorter_by_distance.zs
 
 // Implements TargetWidgetSource by taking another TargetWidgetSource
 // and sorting the widgets from it by a distance to origin from OriginSource.
@@ -6719,7 +6719,7 @@ class tt_SorterByDistanceTest
 
 ** ~TargetWidget~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widget.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget.zs
 
 // Represents a target displayed on the screen.
 class tt_TargetWidget
@@ -6764,7 +6764,7 @@ class tt_TargetWidget
 
 ** ~TargetWidgetRegistry~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widget_registry.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget_registry.zs
 
 // Implements TargetWidgetSource by storing target widgets, getting
 // new widgets from the source, and updating the coordinates of the widgets that
@@ -6820,7 +6820,7 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
 
 ** ~TargetWidgetSource~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widget_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget_source.zs
 
 // This interface provides a source of target widgets.
 class tt_TargetWidgetSource abstract
@@ -6860,7 +6860,7 @@ class tt_TargetWidgetSourceMock : tt_TargetWidgetSource
 
 ** ~TargetWidget~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/target_widgets.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widgets.zs
 
 // Represents a list of target widgets.
 class tt_TargetWidgets
@@ -6931,7 +6931,7 @@ class tt_TargetWidgets
 
 ** ~VisibilityFilter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/visibility_filter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_visibility_filter.zs
 
 // Implements TargetWidgetSource by taking target widgets from
 // source and removing widgets that represent targets not visible by the player.
@@ -7032,7 +7032,7 @@ class tt_RgbColors
 
 ** ~View~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/view.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_view.zs
 
 // This interface represents a view - something that displays something.
 class tt_View abstract
@@ -7067,7 +7067,7 @@ class tt_ViewMock : tt_View
 
 ** ~Views~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/views.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_views.zs
 
 // Implements View by allowing several Views to be drawn.
 class tt_Views : tt_View
@@ -7091,7 +7091,7 @@ class tt_Views : tt_View
 
 ** ~Frame~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/frame.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_frame.zs
 class tt_Frame : tt_View
 {
   static tt_Frame of(tt_ModeSource modeSource)
@@ -7152,7 +7152,7 @@ class tt_Frame : tt_View
 }
 #+end_src
 
-#+begin_src c :tangle build/Typist.pk3/zscript/interpolator/double_interpolator.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/interpolator/tt_double_interpolator.zs
 
 class tt_DoubleInterpolator
 {
@@ -7181,7 +7181,7 @@ class tt_DoubleInterpolator
 
 ** ~ConditionalView~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/conditional_view.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_conditional_view.zs
 
 // Implements a view by taking another view, and calling draw()
 // only if conditions are met.
@@ -7211,7 +7211,7 @@ class tt_ConditionalView : tt_View
 
 ** ~Drawing~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/drawing.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_drawing.zs
 
 // Namespace for common drawing functions.
 class tt_Drawing ui
@@ -7385,7 +7385,7 @@ class tt_Drawing ui
 
 ** ~InfoPanel~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/info_panel.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_info_panel.zs
 
 // Implements View by collecting and displaying various information:
 // - game mode
@@ -7520,7 +7520,7 @@ class tt_InfoPanel : tt_View
 
 ** ~TargetOverlay~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/view/target_overlay.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_target_overlay.zs
 
 // Implement tt_View by getting a list of Target Widgets and drawing them.
 class tt_TargetOverlay : tt_View
@@ -7579,7 +7579,7 @@ class tt_TargetOverlay : tt_View
 
 ** ~WorldChanger~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/world_changer.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changer.zs
 
 // This interface represents entities that change the world state.
 class tt_WorldChanger abstract
@@ -7621,7 +7621,7 @@ class tt_WorldChangerMock : tt_WorldChanger
 
 ** ~WorldChangers~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/world_changers.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changers.zs
 
 // Implements tt_WorldChanger by executing several instances of tt_WorldChanger.
 class tt_WorldChangers : tt_WorldChanger
@@ -7649,7 +7649,7 @@ class tt_WorldChangers : tt_WorldChanger
 
 ** ~EnemySpeedController~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/enemy_speed_controller.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_enemy_speed_controller.zs
 
 // Implements tt_WorldChanger by slowing down enemies.
 class tt_EnemySpeedController : tt_WorldChanger
@@ -7684,7 +7684,7 @@ class tt_EnemySpeedController : tt_WorldChanger
 
 ** ~ProjectileSpeedController~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/projectile_speed_controller.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_projectile_speed_controller.zs
 
 // Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
 //
@@ -7758,7 +7758,7 @@ class tt_ProjectileSpeedController : tt_WorldChanger
 
 ** ~VelocityStorage~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/velocity_storage.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_velocity_storage.zs
 
 // This is a helper class that allows storing the velocity.
 // TODO: rewrite with a Behavior?
@@ -7830,7 +7830,7 @@ class tt_VelocityStorage : Inventory
 
 ** ~Effect~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/effect.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_effect.zs
 
 // Interface for any non-play effects.
 class tt_Effect abstract
@@ -7872,7 +7872,7 @@ class tt_EffectMock : tt_Effect
 
 *** ~Effects~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/effect.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_effect.zs
 
 class tt_Effects : tt_Effect
 {
@@ -7895,7 +7895,7 @@ class tt_Effects : tt_Effect
 
 *** ~Gunner~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/gunner.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_gunner.zs
 
 // Implements tt_Effect by calling other tt_Effect if there is some tt_Origin.
 class tt_Gunner : tt_Effect
@@ -7973,7 +7973,7 @@ class tt_GunnerTestEnvironment
 
 ** ~AnswerResetter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/answer_resetter.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_answer_resetter.zs
 
 class tt_AnswerResetter : tt_Effect
 {
@@ -8010,7 +8010,7 @@ class tt_AnswerResetter : tt_Effect
 
 ** ~MatchWatcher~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/match_watcher.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_match_watcher.zs
 
 // Watches for answer state source and reports match or not match
 // when the state changes from Preparing to Ready.
@@ -8061,7 +8061,7 @@ class tt_MatchWatcher : tt_Effect
 
 ** ~TargetOriginSender~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/effect/target_origin_sender.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/effect/tt_target_origin_sender.zs
 
 class tt_TargetOriginSender : tt_Effect
 {
@@ -8377,7 +8377,7 @@ AddMenuKey "$TT_SCORE"  zc_top
 
 ** ~AnimatedSubmenu~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/menu/option_menu_item_animated_submenu.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/menu/tt_option_menu_item_animated_submenu.zs
 
 class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 {
@@ -8518,7 +8518,6 @@ $volume tt/click5 0.2
 
 version 4.14.2
 
-// TODO: add "tt_" to all files to reduce file name clash risk.
 <<tools/scripts.org:include("Typist.pk3.org", "build/Typist.pk3/\\(zscript/.*zs\\)")>>
 #include "tt_colors.zs"
 
