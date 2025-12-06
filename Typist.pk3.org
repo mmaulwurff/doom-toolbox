@@ -4886,38 +4886,37 @@ class tt_Match : tt_Question
     return getColoredMatch(_question, answer.getString());
   }
 
-  private string getColoredMatch(String origin, string matched)
+  private static string getColoredMatch(string origin, string matched)
   {
     string result;
 
-    int originLength   = origin .CodePointCount();
-    int matchedLength  = matched.CodePointCount();
-    int nChars         = min(originLength, matchedLength);
-    int originCharPos  = 0;
-    int matchedCharPos = 0;
+    int originLength  = origin .codePointCount();
+    int matchedLength = matched.codePointCount();
+    int nChars        = min(originLength, matchedLength);
+    int originPos     = 0;
+    int matchedPos    = 0;
 
     for (int i = 0; i < nChars; ++i)
     {
-      int nextOriginCharPos;
-      int nextMatchedCharPos;
-      int originCode;
-      int matchedCode;
-      [originCode,  nextOriginCharPos ] = origin .GetNextCodePoint(originCharPos );
-      [matchedCode, nextMatchedCharPos] = matched.GetNextCodePoint(matchedCharPos);
+      let [originCode,  nextOriginPos ] = origin .getNextCodePoint(originPos );
+      let [matchedCode, nextMatchedPos] = matched.getNextCodePoint(matchedPos);
 
-      bool   isCharSame = (originCode == matchedCode);
-      string colorCode  = (isCharSame ? "j" : "g"); // white, red
+      int colorCode = (originCode == matchedCode)
+        ? tt_su_Ascii.HYPHEN_MINUS // Use the base color.
+        : tt_TextColorCodes.WrongAnswer;
 
-      result.appendFormat("\c%s%c", colorCode, matchedCode);
+      result.appendFormat("\c%c%c", colorCode, matchedCode);
 
-      originCharPos  = nextOriginCharPos;
-      matchedCharPos = nextMatchedCharPos;
+      originPos  = nextOriginPos;
+      matchedPos = nextMatchedPos;
     }
 
+    // Everything that is beyond origin is wrong.
     if (matchedLength > originLength)
     {
-      // everything that is beyond origin is wrong.
-      result.appendFormat("\cg%s", matched.Mid(matchedCharPos));
+      result.appendFormat("\c%c%s",
+                          tt_TextColorCodes.WrongAnswer,
+                          matched.mid(matchedPos));
     }
 
     return result;
@@ -6989,6 +6988,46 @@ class tt_VisibilityFilter : tt_TargetWidgetSource
 }
 #+end_src
 
+* Colors
+
+Colors can be set externally:
+- Copy ~tt_colors.zs~,
+- In the copy, set new colors,
+- Load the copy after Typist.pk3 (~-file Typist.pk3 tt_colors.zs~).
+
+#+begin_src c :tangle build/Typist.pk3/tt_colors.zs
+
+class tt_TextColors
+{
+  enum _
+  {
+    Base = Font.CR_WHITE,
+  }
+}
+
+// See https://zdoom.org/wiki/Print#Colors for possible colors.
+class tt_TextColorCodes
+{
+  enum _
+  {
+    WrongAnswer = tt_su_Ascii.LATIN_SMALL_LETTER_G, // red
+  }
+}
+
+class tt_RgbColors
+{
+  enum _
+  {
+    Dim      = 0x000000, // Dims the background for text boxes.
+
+    Question = 0xF4AF31, // Base color for question boxes.
+
+    AnswerCombat      = 0xFF0000, // Base color for answer boxes in Combat mode.
+    AnswerExploration = 0x999999, // Base color for answer boxes in Exploration mode.
+  }
+}
+#+end_src
+
 * View
 
 ** ~View~
@@ -7212,7 +7251,9 @@ class tt_Drawing ui
 
   static int getColorForMode(int mode)
   {
-    return (mode == tt_Mode.Combat) ? COMBAT_COLOR : EXPLORE_COLOR;
+    return (mode == tt_Mode.Combat)
+      ? tt_RgbColors.AnswerCombat
+      : tt_RgbColors.AnswerExploration;
   }
 
   private static int makeBorderWidth(int width)
@@ -7234,7 +7275,14 @@ class tt_Drawing ui
     // The color is specified with DTA_FillColor.
     let dummyTexture = TexMan.CheckForTexture("tt-white", TexMan.Type_Any);
 
-    drawBox(dummyTexture, x, y, width, lineHeight, screenWidth, screenHeight, RGB_GOLD);
+    drawBox(dummyTexture,
+            x,
+            y,
+            width,
+            lineHeight,
+            screenWidth,
+            screenHeight,
+            tt_RgbColors.Question);
 
     int lowerY = y + lineHeight + FRAME * 2;
     drawBox(dummyTexture, x, lowerY, width, lineHeight, screenWidth, screenHeight, color);
@@ -7285,7 +7333,7 @@ class tt_Drawing ui
                         , backgroundY
                         , DTA_DestWidth     , backgroundWidth
                         , DTA_DestHeight    , backgroundHeight
-                        , DTA_FillColor     , RGB_BLACK
+                        , DTA_FillColor     , tt_RgbColors.Dim
                         , DTA_KeepRatio     , true
                         , DTA_VirtualWidth  , screenWidth
                         , DTA_VirtualHeight , screenHeight
@@ -7305,7 +7353,7 @@ class tt_Drawing ui
                )
   {
     Screen.DrawText( fnt
-                   , Font.CR_WHITE
+                   , tt_TextColors.Base
                    , x
                    , y
                    , "$" .. question
@@ -7314,7 +7362,7 @@ class tt_Drawing ui
                    , DTA_VirtualHeight , screenHeight
                    );
     Screen.DrawText( fnt
-                   , Font.CR_WHITE
+                   , tt_TextColors.Base
                    , x
                    , y + height + FRAME * 2
                    , "$" .. answer
@@ -7330,14 +7378,8 @@ class tt_Drawing ui
 
   const NOT_ANIMATED = 0; // false
 
-  const RGB_BLACK    = 0x000000;
-  const RGB_GOLD     = 0xF4AF31;
-
   const BORDER_ALPHA     = 0.2;
   const BACKGROUND_ALPHA = 0.2;
-
-  const COMBAT_COLOR  = 0xFF0000;
-  const EXPLORE_COLOR = 0x999999;
 }
 #+end_src
 
@@ -8476,7 +8518,9 @@ $volume tt/click5 0.2
 
 version 4.14.2
 
+// TODO: add "tt_" to all files to reduce file name clash risk.
 <<tools/scripts.org:include("Typist.pk3.org", "build/Typist.pk3/\\(zscript/.*zs\\)")>>
+#include "tt_colors.zs"
 
 #include "zscript/tt_le_libeye.zs"
 #include "zscript/tt_lp_LazyPoints.zs"
