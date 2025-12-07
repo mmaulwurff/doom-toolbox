@@ -961,9 +961,7 @@ class tt_Answer
   static tt_Answer of(String answer = "")
   {
     let result = new("tt_Answer");
-
     result._answer = answer;
-
     return result;
   }
 
@@ -972,14 +970,14 @@ class tt_Answer
     return _answer;
   }
 
-  void append(String character)
+  void append(string character)
   {
     _answer = _answer .. character;
   }
 
   void deleteLastCharacter()
   {
-    _answer.DeleteLastCharacter();
+    _answer.deleteLastCharacter();
   }
 
   private string _answer;
@@ -2950,7 +2948,6 @@ class tt_TargetRegistryTestEnvironment
 #+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_question_source.zs
 
 // Interface for getting Questions.
-// Different question sources are different Lessons.
 class tt_Lesson abstract
 {
   abstract tt_Question getQuestion();
@@ -3085,10 +3082,9 @@ class tt_MathsLesson : tt_Lesson
 #+begin_src c :noweb-ref test-body
 {
   let question = tt_MathsLesson.of().getQuestion();
-  let answer   = tt_Answer.of(question.getDescription());
 
   it("tt_MathsLesson: question isn't equal to the answer",
-    AssertFalse(question.isRight(answer)));
+    AssertFalse(question.isRight(question.getDescription())));
 }
 #+end_src
 
@@ -4228,13 +4224,14 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
                                       tt_Answer answer,
                                       Actor pawn)
   {
+    string answerString = answer.getString();
     uint nTargets = targets.size();
     for (uint i = 0; i < nTargets; ++i)
     {
       let target   = targets.at(i);
       let question = target.getQuestion();
 
-      if (!question.isRight(answer) || !isVisible(target, pawn))
+      if (!question.isRight(answerString) || !isVisible(target, pawn))
       {
         continue;
       }
@@ -4470,13 +4467,14 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
   private tt_Origin findMatchedTarget(tt_KnownTargets targets,
                                       tt_Answer answer, Actor pawn)
   {
+    string answerString = answer.getString();
     uint nTargets = targets.size();
     for (uint i = 0; i < nTargets; ++i)
     {
       let target   = targets.at(i);
       let question = target.getQuestion();
 
-      if (!question.isRight(answer) || !isVisible(target, pawn))
+      if (!question.isRight(answerString) || !isVisible(target, pawn))
       {
         continue;
       }
@@ -4852,6 +4850,93 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 
 * Question
 
+** ~Question~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/question/tt_question.zs
+
+// This interface represents a question.
+class tt_Question abstract
+{
+  abstract bool isRight(string answer);
+
+  abstract string getDescription();
+
+  abstract string getHintFor(string answer);
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_QuestionMock : tt_Question
+{
+  static tt_QuestionMock of() { return new("tt_QuestionMock"); }
+
+  override bool isRight(string answer)
+  {
+    ++_mock_isRight_called;
+    return _mock_isRight;
+  }
+
+  void expect_isRight(bool value, int expected = 1)
+  {
+    _mock_isRight = value;
+    _mock_isRight_expected = expected;
+    _mock_isRight_called = 0;
+  }
+
+  private bool _mock_isRight;
+  private int _mock_isRight_expected;
+  private int _mock_isRight_called;
+
+  override string getDescription()
+  {
+    ++_mock_getDescription_called;
+    return _mock_getDescription;
+  }
+
+  void expect_getDescription(String value, int expected = 1)
+  {
+    _mock_getDescription = value;
+    _mock_getDescription_expected = expected;
+    _mock_getDescription_called = 0;
+  }
+
+  private string _mock_getDescription;
+  private int _mock_getDescription_expected;
+  private int _mock_getDescription_called;
+
+  override string getHintFor(string answer)
+  {
+    ++_mock_getHintFor_called;
+    return _mock_getHintFor;
+  }
+
+  void expect_getHintFor(String value, int expected = 1)
+  {
+    _mock_getHintFor = value;
+    _mock_getHintFor_expected = expected;
+    _mock_getHintFor_called = 0;
+  }
+
+  tt_Satisfaction getSatisfaction() const
+  {
+    return tt_Satisfaction.of()
+      .push(getClassName() .. "isRight",
+            _mock_isRight_expected == _mock_isRight_called)
+      .push(getClassName() .. "getDescription",
+            _mock_getDescription_expected == _mock_getDescription_called)
+      .push(getClassName() .. "getHintFor",
+            _mock_getHintFor_expected == _mock_getHintFor_called);
+  }
+
+  private string _mock_getHintFor;
+  private int _mock_getHintFor_expected;
+  private int _mock_getHintFor_called;
+}
+#+end_src
+
 ** ~Match~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/question/tt_match.zs
@@ -4860,20 +4945,17 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 // matches the string contained in this question.
 class tt_Match : tt_Question
 {
-  static tt_Match of(String question, string description)
+  static tt_Match of(string answer, string description)
   {
     let result = new("tt_Match");
-
-    result._question    = question;
+    result._answer      = answer;
     result._description = description;
-
     return result;
   }
 
-  override bool isRight(tt_Answer answer)
+  override bool isRight(string answer)
   {
-    bool isEqual = (_question == answer.getString());
-    return isEqual;
+    return (_answer == answer);
   }
 
   override string getDescription()
@@ -4881,9 +4963,9 @@ class tt_Match : tt_Question
     return _description;
   }
 
-  override string getHintFor(tt_Answer answer)
+  override string getHintFor(string answer)
   {
-    return getColoredMatch(_question, answer.getString());
+    return getColoredMatch(_answer, answer);
   }
 
   private static string getColoredMatch(string origin, string matched)
@@ -4922,95 +5004,8 @@ class tt_Match : tt_Question
     return result;
   }
 
-  private string _question;
+  private string _answer;
   private string _description;
-}
-#+end_src
-
-** ~Question~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/question/tt_question.zs
-
-// This interface represents a question.
-class tt_Question abstract
-{
-  abstract bool isRight(tt_Answer answer);
-
-  abstract string getDescription();
-
-  abstract string getHintFor(tt_Answer answer);
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_QuestionMock : tt_Question
-{
-  static tt_QuestionMock of() { return new("tt_QuestionMock"); }
-
-  override bool isRight(tt_Answer answer)
-  {
-    ++_mock_isRight_called;
-    return _mock_isRight;
-  }
-
-  void expect_isRight(bool value, int expected = 1)
-  {
-    _mock_isRight = value;
-    _mock_isRight_expected = expected;
-    _mock_isRight_called = 0;
-  }
-
-  private bool _mock_isRight;
-  private int _mock_isRight_expected;
-  private int _mock_isRight_called;
-
-  override string getDescription()
-  {
-    ++_mock_getDescription_called;
-    return _mock_getDescription;
-  }
-
-  void expect_getDescription(String value, int expected = 1)
-  {
-    _mock_getDescription = value;
-    _mock_getDescription_expected = expected;
-    _mock_getDescription_called = 0;
-  }
-
-  private string _mock_getDescription;
-  private int _mock_getDescription_expected;
-  private int _mock_getDescription_called;
-
-  override string getHintFor(tt_Answer answer)
-  {
-    ++_mock_getHintFor_called;
-    return _mock_getHintFor;
-  }
-
-  void expect_getHintFor(String value, int expected = 1)
-  {
-    _mock_getHintFor = value;
-    _mock_getHintFor_expected = expected;
-    _mock_getHintFor_called = 0;
-  }
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. "isRight",
-            _mock_isRight_expected == _mock_isRight_called)
-      .push(getClassName() .. "getDescription",
-            _mock_getDescription_expected == _mock_getDescription_called)
-      .push(getClassName() .. "getHintFor",
-            _mock_getHintFor_expected == _mock_getHintFor_called);
-  }
-
-  private string _mock_getHintFor;
-  private int _mock_getHintFor_expected;
-  private int _mock_getHintFor_called;
 }
 #+end_src
 
@@ -7430,7 +7425,7 @@ class tt_InfoPanel : tt_View
     int x           = int(xy.x + HORIZONTAL_MARGIN);
     int y           = int(xy.y + (VERTICAL_MARGIN * scale));
     let targets     = _targetSource.getTargets();
-    let answer      = _answerSource.getAnswer();
+    let answer      = _answerSource.getAnswer().getString();
     let nTargets    = targets.size();
     let player      = _playerSource.getPawn();
     int mode        = _modeSource.getMode();
@@ -7543,7 +7538,7 @@ class tt_TargetOverlay : tt_View
   override void draw(RenderEvent event)
   {
     let widgets = _targetWidgetSource.getWidgets(event);
-    let answer  = _answerSource.getAnswer();
+    let answer  = _answerSource.getAnswer().getString();
     int mode    = _modeSource.getMode();
     int color   = tt_Drawing.getColorForMode(mode);
     int scale   = _settings.getScale();
