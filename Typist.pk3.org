@@ -7472,15 +7472,17 @@ class tt_InfoPanel : tt_View
 
     for (uint i = 0; i < nCommands; ++i)
     {
-      let command     = commands.at(i);
-      int targetWidth = tt_Drawing.getWidthForTarget(command, answer, scale);
+      let command      = commands.at(i);
+      let question     = tt_Match.of(command, command);
+      let hintedAnswer = question.getHintFor(answer);
+      int targetWidth  = tt_Drawing.getWidthForTarget(command, hintedAnswer, scale);
 
       if (x - targetWidth < 0) return;
 
       vector2 position = (x - targetWidth, y);
       tt_Drawing.drawTarget(position,
                             command,
-                            answer,
+                            hintedAnswer,
                             scale,
                             NOT_CENTERED,
                             color);
