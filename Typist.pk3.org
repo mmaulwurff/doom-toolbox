@@ -7209,8 +7209,15 @@ class tt_ConditionalView : tt_View
 #+begin_src c :tangle build/Typist.pk3/zscript/view/tt_drawing.zs
 
 // Namespace for common drawing functions.
+// TODO: clean up this mess.
 class tt_Drawing ui
 {
+  enum _
+  {
+    NOT_CENTERED = 0,
+    CENTERED = 1
+  }
+
   static int getWidthForTarget(String question, string answer, int scale)
   {
     Font fnt         = NewSmallFont;
@@ -7410,28 +7417,58 @@ class tt_InfoPanel : tt_View
 
   override void draw(RenderEvent _)
   {
-    int     screenWidth = Screen.GetWidth();
-    int     xStart      = screenWidth / 2;
-    Vector2 position    = (xStart, Y_START);
+    int     xStart   = Screen.getWidth() / 2;
+    vector2 position = (xStart, Y_START);
 
-    drawTargets (position);
     drawCommands(position);
+    // TODO: make y shift more robust:
+    drawTargets (position + (0, NewSmallFont.getHeight() * 3));
   }
 
   private ui void drawTargets(vector2 xy)
   {
-    int scale       = _settings.getScale();
-    int screenWidth = Screen.GetWidth();
-    int x           = int(xy.x + HORIZONTAL_MARGIN);
-    int y           = int(xy.y + (VERTICAL_MARGIN * scale));
     let targets     = _targetSource.getTargets();
-    let answer      = _answerSource.getAnswer().getString();
-    let nTargets    = targets.size();
-    let player      = _playerSource.getPawn();
-    int mode        = _modeSource.getMode();
-    int color       = tt_Drawing.getColorForMode(mode);
+    let targetCount = targets.size();
+    if (targetCount == 0) return;
 
-    for (uint i = 0; i < nTargets; ++i)
+    int scale       = _settings.getScale();
+    int screenWidth = Screen.getWidth();
+    int y           = int(xy.y + (VERTICAL_MARGIN * scale));
+    let answer      = _answerSource.getAnswer().getString();
+    let player      = _playerSource.getPawn();
+    int color       = tt_Drawing.getColorForMode(_modeSource.getMode());
+
+    // 1. Find the first visible target.
+    uint firstVisibleTargetIndex = findFirstVisibleTarget(player, targets);
+    if (firstVisibleTargetIndex == targetCount) return;
+
+    int xRight;
+    int xLeft;
+    // 2. Draw the first target in the center.
+    {
+      let    target         = targets.at(firstVisibleTargetIndex);
+      let    question       = target.getQuestion();
+      string questionString = question.getDescription();
+      string hintedAnswer   = question.getHintFor(answer);
+      int    halfScreen     = screenWidth / 2;
+      tt_Drawing.drawTarget((halfScreen, y),
+                            questionString,
+                            hintedAnswer,
+                            scale,
+                            tt_Drawing.CENTERED,
+                            color);
+
+      // TODO: make drawTarget return target width?
+      int targetWidth = tt_Drawing.getWidthForTarget(questionString,
+                                                     hintedAnswer,
+                                                     scale);
+      xRight = halfScreen + targetWidth / 2 + HORIZONTAL_MARGIN + tt_Drawing.FRAME;
+      xLeft  = halfScreen - targetWidth / 2 - HORIZONTAL_MARGIN + tt_Drawing.FRAME;
+    }
+
+    // 2. Draw the targets to the right while there is space.
+    uint i = firstVisibleTargetIndex + 1;
+    for (; i < targetCount; ++i)
     {
       let target = targets.at(i);
 
@@ -7444,20 +7481,56 @@ class tt_InfoPanel : tt_View
                                                            hintedAnswer,
                                                            scale);
 
-      if (x + targetWidth > screenWidth) return;
+      if (xRight + targetWidth > screenWidth) break;
 
-      vector2 position = (x, y);
-      tt_Drawing.drawTarget(position,
+      tt_Drawing.drawTarget((xRight, y),
                             questionString,
                             hintedAnswer,
                             scale,
-                            NOT_CENTERED,
+                            tt_Drawing.NOT_CENTERED,
                             color);
 
-      x += targetWidth + 2;
+      xRight += targetWidth + HORIZONTAL_MARGIN;
+    }
+
+    // 3. Draw the targets to the left while there is space.
+    for (; i < targetCount; ++i)
+    {
+      let target = targets.at(i);
+
+      if (!isVisible(player, target.getTarget().getActor())) continue;
+
+      let    question       = target.getQuestion();
+      string questionString = question.getDescription();
+      string hintedAnswer   = question.getHintFor(answer);
+      int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
+                                                           hintedAnswer,
+                                                           scale);
+
+      if (xLeft - targetWidth < 0) break;
+
+      tt_Drawing.drawTarget((xLeft - targetWidth, y),
+                            questionString,
+                            hintedAnswer,
+                            scale,
+                            tt_Drawing.NOT_CENTERED,
+                            color);
+
+      xLeft -= targetWidth + HORIZONTAL_MARGIN;
     }
   }
 
+  private ui uint findFirstVisibleTarget(PlayerPawn player, tt_KnownTargets targets)
+  {
+    let targetCount = targets.size();
+
+    for (uint i = 0; i < targetCount; ++i)
+      if (isVisible(player, targets.at(i).getTarget().getActor())) return i;
+
+    return targetCount;
+  }
+
+  // TODO: make centered
   private ui void drawCommands(vector2 xy)
   {
     int  scale       = _settings.getScale();
@@ -7487,7 +7560,7 @@ class tt_InfoPanel : tt_View
                             NOT_CENTERED,
                             color);
 
-      x -= targetWidth + 2;
+      x -= targetWidth + HORIZONTAL_MARGIN;
     }
   }
 
@@ -7499,7 +7572,7 @@ class tt_InfoPanel : tt_View
 
   const Y_START = 10;
 
-  const HORIZONTAL_MARGIN = 10;
+  const HORIZONTAL_MARGIN = 2;
   const VERTICAL_MARGIN   = 20;
 
   const NOT_CENTERED = 0; // false
