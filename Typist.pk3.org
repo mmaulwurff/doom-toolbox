@@ -7364,35 +7364,28 @@ class tt_InfoPanel : tt_View
 
   override void draw(RenderEvent _)
   {
-    int     xStart   = Screen.getWidth() / 2;
-    vector2 position = (xStart, Y_START);
-
-    drawCommands(position);
-    // TODO: make y shift more robust:
-    drawTargets (position + (0, NewSmallFont.getHeight() * 3));
-  }
-
-  private ui void drawTargets(vector2 xy)
-  {
-    let targets     = _targetSource.getTargets();
-    let targetCount = targets.size();
-    if (targetCount == 0) return;
+    let targets      = _targetSource.getTargets();
+    let targetCount  = targets.size();
+    let commands     = _activatable.getCommands();
+    let commandCount = commands.size();
+    if (targetCount == 0 && commandCount == 0) return;
 
     int scale       = _settings.getScale();
     int screenWidth = Screen.getWidth();
-    int y           = int(xy.y + (VERTICAL_MARGIN * scale));
+    int halfScreen  = screenWidth / 2;
+    int y           = int(Y_START + (VERTICAL_MARGIN * scale));
     let answer      = _answerSource.getAnswer().getString();
     int color       = tt_Drawing.getColorForMode(_modeSource.getMode());
 
-    int xRight;
-    int xLeft;
+    int xRight = halfScreen;
+    int xLeft  = halfScreen;
+
     // 1. Draw the first target in the center.
+    if (targetCount > 0)
     {
-      let    target         = targets.at(0);
-      let    question       = target.getQuestion();
+      let    question       = targets.at(0).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
-      int    halfScreen     = screenWidth / 2;
       tt_Drawing.drawTarget((halfScreen, y),
                             questionString,
                             hintedAnswer,
@@ -7404,17 +7397,15 @@ class tt_InfoPanel : tt_View
       int targetWidth = tt_Drawing.getWidthForTarget(questionString,
                                                      hintedAnswer,
                                                      scale);
-      xRight = halfScreen + targetWidth / 2 + HORIZONTAL_MARGIN + tt_Drawing.FRAME;
-      xLeft  = halfScreen - targetWidth / 2 - HORIZONTAL_MARGIN + tt_Drawing.FRAME;
+      xRight += targetWidth / 2 + HORIZONTAL_MARGIN + tt_Drawing.FRAME;
+      xLeft  -= targetWidth / 2 + HORIZONTAL_MARGIN - tt_Drawing.FRAME;
     }
 
     // 2. Draw the targets to the right while there is space.
     uint i = 1;
     for (; i < targetCount; ++i)
     {
-      let target = targets.at(i);
-
-      let    question       = target.getQuestion();
+      let    question       = targets.at(i).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
       int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
@@ -7433,12 +7424,32 @@ class tt_InfoPanel : tt_View
       xRight += targetWidth + HORIZONTAL_MARGIN;
     }
 
-    // 3. Draw the targets to the left while there is space.
+    // 3. Draw the commands to the left while there is space.
+    for (uint c = 0; c < commandCount; ++c)
+    {
+      let  command      = commands.at(c);
+      let  question     = tt_Match.of(command, command);
+      let  hintedAnswer = question.getHintFor(answer);
+      int  targetWidth  = tt_Drawing.getWidthForTarget(command, hintedAnswer, scale);
+      bool isCentered   = targetCount == 0 && c == 0;
+      let  position     = isCentered ? (halfScreen, y) : (xLeft - targetWidth, y);
+
+      if (xLeft - targetWidth < 0) break;
+
+      tt_Drawing.drawTarget(position,
+                            command,
+                            hintedAnswer,
+                            scale,
+                            isCentered,
+                            color);
+
+      xLeft -= targetWidth + HORIZONTAL_MARGIN;
+    }
+
+    // 4. Draw the remaining targets to the left while there is space.
     for (; i < targetCount; ++i)
     {
-      let target = targets.at(i);
-
-      let    question       = target.getQuestion();
+      let    question       = targets.at(i).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
       int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
@@ -7458,46 +7469,10 @@ class tt_InfoPanel : tt_View
     }
   }
 
-  // TODO: make centered
-  private ui void drawCommands(vector2 xy)
-  {
-    int  scale       = _settings.getScale();
-    let  commands    = _activatable.getCommands();
-    int  screenWidth = Screen.GetWidth();
-    uint nCommands   = commands.size();
-    int  x           = int(xy.x - HORIZONTAL_MARGIN);
-    int  y           = int(xy.y + (VERTICAL_MARGIN * scale));
-    let  answer      = _answerSource.getAnswer().getString();
-    int  mode        = _modeSource.getMode();
-    int  color       = tt_Drawing.getColorForMode(mode);
-
-    for (uint i = 0; i < nCommands; ++i)
-    {
-      let command      = commands.at(i);
-      let question     = tt_Match.of(command, command);
-      let hintedAnswer = question.getHintFor(answer);
-      int targetWidth  = tt_Drawing.getWidthForTarget(command, hintedAnswer, scale);
-
-      if (x - targetWidth < 0) return;
-
-      vector2 position = (x - targetWidth, y);
-      tt_Drawing.drawTarget(position,
-                            command,
-                            hintedAnswer,
-                            scale,
-                            NOT_CENTERED,
-                            color);
-
-      x -= targetWidth + HORIZONTAL_MARGIN;
-    }
-  }
-
   const Y_START = 10;
 
   const HORIZONTAL_MARGIN = 2;
   const VERTICAL_MARGIN   = 20;
-
-  const NOT_CENTERED = 0; // false
 
   private tt_ModeSource        _modeSource;
   private tt_AnswerSource      _answerSource;
