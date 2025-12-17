@@ -214,11 +214,16 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let widgetRegistry = tt_TargetWidgetRegistry.of(projector);
     let widgetSorter   = tt_SorterByDistance    .of(widgetRegistry, originSource);
 
-    let modeSource = makeModeSource(visibleTargetSource,
-                                    manualModeSource,
-                                    modeReporter,
-                                    clock,
-                                    radarCache);
+    let autoModeSource = tt_AutoModeSource.of(visibleTargetSource);
+    Array<tt_ModeSource> modeSources = {
+      tt_AutomapModeSource.of(),
+      manualModeSource,
+      tt_DelayedCombatModeSource.of(clock, autoModeSource, radarCache),
+      autoModeSource
+    };
+
+    let modeSource = tt_ReportedModeSource.of(modeReporter,
+                                              tt_ModeCascade.of(modeSources));
 
     let inputManager = tt_PassThroughInputManager
       .of(tt_InputByModeManager.of(modeSource, playerInput));
@@ -345,26 +350,6 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     Array<tt_Lesson> lessonsForSelection =
       {random, gzdoom, cpp, maths, english1000, russian1000, mixed, custom, nix};
     return tt_SelectedLesson.of(settings, lessonsForSelection);
-  }
-
-  private static tt_ModeSource makeModeSource(tt_KnownTargetSource knownTargetSource,
-                                              tt_ModeSource        manualModeSource,
-                                              tt_ModeReporter      modeReporter,
-                                              tt_Clock             clock,
-                                              tt_TargetSource      targetSource)
-  {
-    let autoModeSource = tt_AutoModeSource.of(knownTargetSource);
-
-    let delayedCombatModeSource = tt_DelayedCombatModeSource
-      .of(clock, autoModeSource, targetSource);
-
-    Array<tt_ModeSource> modeSources =
-      {manualModeSource, delayedCombatModeSource, autoModeSource};
-
-    let cascade  = tt_ModeCascade.of(modeSources);
-    let reporter = tt_ReportedModeSource.of(modeReporter, cascade);
-
-    return reporter;
   }
 
   private static tt_KnownTargetSource makeTargetRegistry(
@@ -3626,6 +3611,69 @@ class tt_Math
 
 * Mode
 
+** ~Mode~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode.zs
+
+// Represents the mode in which Typist operates.
+class tt_Mode
+{
+  enum _
+  {
+    Unknown, // Should never be used. Only for detecting uninitialized variables.
+    Combat,  // Typist is focused on destroying the targets.
+    Explore, // Typist is focused on movement and exploration.
+    None,    // None of the above.
+  }
+}
+#+end_src
+
+** ~ModeSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_source.zs
+
+// This interface represents a source of modes.
+// See: tt_Mode.
+class tt_ModeSource abstract
+{
+  abstract int getMode();
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_ModeSourceMock : tt_ModeSource
+{
+  static tt_ModeSourceMock of() { return new("tt_ModeSourceMock"); }
+
+  override int getMode()
+  {
+    ++_mock_getMode_called;
+    return _mock_getMode;
+  }
+
+  void expect_getMode(int value, int expected = 1)
+  {
+    _mock_getMode = value;
+    _mock_getMode_expected = expected;
+    _mock_getMode_called = 0;
+  }
+
+  tt_Satisfaction getSatisfaction() const
+  {
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": getMode",
+            _mock_getMode_expected == _mock_getMode_called);
+  }
+
+  private int _mock_getMode;
+  private int _mock_getMode_expected;
+  private int _mock_getMode_called;
+}
+#+end_src
+
 ** ~AutoModeSource~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_auto_mode_source.zs
@@ -3898,23 +3946,6 @@ class tt_DelayedCombatModeSourceTestEnvironment
 }
 #+end_src
 
-** ~Mode~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode.zs
-
-// Represents the mode in which Typist operates.
-class tt_Mode
-{
-  enum _
-  {
-    Unknown, // Should never be used. Only for detecting uninitialized variables.
-    Combat,  // Typist is focused on destroying the targets.
-    Explore, // Typist is focused on movement and exploration.
-    None,    // None of the above.
-  }
-}
-#+end_src
-
 ** ~ModeCascade~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_cascade.zs
@@ -3926,7 +3957,7 @@ class tt_ModeCascade : tt_ModeSource
   static tt_ModeCascade of(Array<tt_ModeSource> modeSources)
   {
     let result = new("tt_ModeCascade");
-    result._modeSources.copy(modeSources);
+    result._modeSources.move(modeSources);
     return result;
   }
 
@@ -3958,14 +3989,12 @@ class tt_ModeCascade : tt_ModeSource
 {
   let source1 = tt_ModeSourceMock.of();
   let source2 = tt_ModeSourceMock.of();
-  Array<tt_ModeSource> sources = {source1, source2};
-
-  let cascade = tt_ModeCascade.of(sources);
 
   source1.expect_getMode(tt_Mode.Explore);
   source2.expect_getMode(tt_Mode.Combat);
 
-  int mode = cascade.getMode();
+  Array<tt_ModeSource> sources = {source1, source2};
+  int mode = tt_ModeCascade.of(sources).getMode();
 
   it("tt_ModeCascade: check cascade first: Must be the first mode",
      AssertEval(mode, "==", tt_Mode.Explore));
@@ -3973,63 +4002,15 @@ class tt_ModeCascade : tt_ModeSource
 {
   let source1 = tt_ModeSourceMock.of();
   let source2 = tt_ModeSourceMock.of();
-  Array<tt_ModeSource> sources = {source1, source2};
-
-  let cascade = tt_ModeCascade.of(sources);
 
   source1.expect_getMode(tt_Mode.None);
   source2.expect_getMode(tt_Mode.Combat);
 
-  int mode = cascade.getMode();
+  Array<tt_ModeSource> sources = {source1, source2};
+  int mode = tt_ModeCascade.of(sources).getMode();
 
   it("tt_ModeCascade: check cascade second: Must be the second mode",
      AssertEval(mode, "==", tt_Mode.Combat));
-}
-#+end_src
-
-** ~ModeSource~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_mode_source.zs
-
-// This interface represents a source of modes.
-// See: tt_Mode.
-class tt_ModeSource abstract
-{
-  abstract int getMode();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_ModeSourceMock : tt_ModeSource
-{
-  static tt_ModeSourceMock of() { return new("tt_ModeSourceMock"); }
-
-  override int getMode()
-  {
-    ++_mock_getMode_called;
-    return _mock_getMode;
-  }
-
-  void expect_getMode(int value, int expected = 1)
-  {
-    _mock_getMode = value;
-    _mock_getMode_expected = expected;
-    _mock_getMode_called = 0;
-  }
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": getMode",
-            _mock_getMode_expected == _mock_getMode_called);
-  }
-
-  private int _mock_getMode;
-  private int _mock_getMode_expected;
-  private int _mock_getMode_called;
 }
 #+end_src
 
@@ -4229,6 +4210,25 @@ class tt_SettableMode : tt_ModeStorage
   int after = settableMode.getMode();
 
   it("tt_SettableMode: mode must be the same", AssertEval(before, "==", after));
+}
+#+end_src
+
+** ~AutomapModeSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/mode/tt_automap_mode_source.zs
+
+// Implements tt_ModeSource by choosing Explore mode on the automap.
+class tt_AutomapModeSource : tt_ModeSource
+{
+  static tt_AutomapModeSource of()
+  {
+    return new("tt_AutomapModeSource");
+  }
+
+  override int getMode()
+  {
+    return automapActive ? tt_Mode.Explore : tt_Mode.None;
+  }
 }
 #+end_src
 
