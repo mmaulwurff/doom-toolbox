@@ -198,23 +198,23 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 
     let answerStateSource = tt_PressedAnswerState.of();
 
+    let visibleTargetSource = tt_VisibleKnownTargetSource.of(targetRegistry,
+                                                             playerSource);
     let pressMatcher = tt_QuestionAnswerMatcher
-      .of(targetRegistry, playerInput, playerSource, answerStateSource);
+      .of(visibleTargetSource, playerInput, answerStateSource);
 
     let hastyMatcher = tt_HastyQuestionAnswerMatcher
-      .of(targetRegistry, playerInput, playerSource, answerReporter);
+      .of(visibleTargetSource, playerInput, answerReporter);
 
     let targetOriginSource = tt_OriginSourceCache
       .of(tt_SelectableOriginSource.of(hastyMatcher, pressMatcher, settings),
           tt_StaleMarkerImpl.of(clock));
 
-    let projector        = tt_Projector           .of(targetRegistry, playerSource);
-    let visibilityFilter = tt_VisibilityFilter    .of(projector, playerSource);
-    let widgetRegistry   = tt_TargetWidgetRegistry.of(visibilityFilter);
-    let widgetSorter     = tt_SorterByDistance    .of(widgetRegistry, originSource);
+    let projector      = tt_Projector           .of(visibleTargetSource, playerSource);
+    let widgetRegistry = tt_TargetWidgetRegistry.of(projector);
+    let widgetSorter   = tt_SorterByDistance    .of(widgetRegistry, originSource);
 
-    let modeSource = makeModeSource(targetRegistry,
-                                    playerSource,
+    let modeSource = makeModeSource(visibleTargetSource,
                                     manualModeSource,
                                     modeReporter,
                                     clock,
@@ -239,13 +239,11 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     let inputBlockAfterCombat = tt_InputBlockAfterCombat
       .of(playerInput, modeSource, oldModeSource);
 
-
     let infoPanel = tt_InfoPanel.of(modeSource,
                                     playerInput,
                                     commandDispatcher,
-                                    targetRegistry,
-                                    settings,
-                                    playerSource);
+                                    visibleTargetSource,
+                                    settings);
 
     Array<tt_View> views = {
       tt_TargetOverlay.of(widgetSorter, playerInput, settings, modeSource),
@@ -350,14 +348,12 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   }
 
   private static tt_ModeSource makeModeSource(tt_KnownTargetSource knownTargetSource,
-                                              tt_PlayerSource      playerSource,
                                               tt_ModeSource        manualModeSource,
                                               tt_ModeReporter      modeReporter,
                                               tt_Clock             clock,
                                               tt_TargetSource      targetSource)
   {
-    let autoModeSource = tt_AutoModeSource
-      .of(knownTargetSource, playerSource);
+    let autoModeSource = tt_AutoModeSource.of(knownTargetSource);
 
     let delayedCombatModeSource = tt_DelayedCombatModeSource
       .of(clock, autoModeSource, targetSource);
@@ -2481,6 +2477,81 @@ class tt_KnownTarget
 }
 #+end_src
 
+** ~KnownTargets~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_targets.zs
+
+// Represents a list of known targets.
+class tt_KnownTargets
+{
+  static tt_KnownTargets of()
+  {
+    return new("tt_KnownTargets");
+  }
+
+  // Returns a target in this list.
+  tt_KnownTarget at(uint index) const
+  {
+    return _targets[index];
+  }
+
+  // Returns a number of targets in this list.
+  uint size() const
+  {
+    return _targets.size();
+  }
+
+  // Returns true if this target list contains a target with the specified id.
+  bool contains(tt_Target target) const
+  {
+    return (find(target) != size());
+  }
+
+  tt_KnownTarget findTarget(tt_Target target) const
+  {
+    uint index = find(target);
+    return (index == size()) ? NULL : at(index);
+  }
+
+  // Adds a target to this list.
+  void add(tt_KnownTarget target)
+  {
+    _targets.push(target);
+  }
+
+  void addMany(tt_KnownTargets targets)
+  {
+    uint nTargets = targets.size();
+    for (uint i = 0; i < nTargets; ++i)
+    {
+      _targets.push(targets.at(i));
+    }
+  }
+
+  // Removes a target from the list.
+  // If the target is not in the list, does nothing.
+  void remove(tt_Target target)
+  {
+    uint index = find(target);
+    if (index != size()) { _targets.Delete(index); }
+  }
+
+  // Searches for a target with a particular id.
+  // Returns index on success, the total number of targets on failure.
+  private uint find(tt_Target target) const
+  {
+    uint nTargets = size();
+    for (uint i = 0; i < nTargets; ++i)
+    {
+      if (_targets[i].getTarget().isEqual(target)) { return i; }
+    }
+    return nTargets;
+  }
+
+  private Array<tt_KnownTarget> _targets;
+}
+#+end_src
+
 ** ~KnownTargetSource~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_target_source.zs
@@ -2593,82 +2664,6 @@ class tt_KnownTargetSourceCache : tt_KnownTargetSource
   private tt_StaleMarker       _staleMarker;
 
   private tt_KnownTargets _targets;
-}
-#+end_src
-
-** ~KnownTargets~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_known_targets.zs
-
-// Represents a list of known targets.
-class tt_KnownTargets
-{
-  static tt_KnownTargets of()
-  {
-    let result = new("tt_KnownTargets");
-    return result;
-  }
-
-  // Returns a target in this list.
-  tt_KnownTarget at(uint index) const
-  {
-    return _targets[index];
-  }
-
-  // Returns a number of targets in this list.
-  uint size() const
-  {
-    return _targets.size();
-  }
-
-  // Returns true if this target list contains a target with the specified id.
-  bool contains(tt_Target target) const
-  {
-    return (find(target) != size());
-  }
-
-  tt_KnownTarget findTarget(tt_Target target) const
-  {
-    uint index = find(target);
-    return (index == size()) ? NULL : at(index);
-  }
-
-  // Adds a target to this list.
-  void add(tt_KnownTarget target)
-  {
-    _targets.push(target);
-  }
-
-  void addMany(tt_KnownTargets targets)
-  {
-    uint nTargets = targets.size();
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      _targets.push(targets.at(i));
-    }
-  }
-
-  // Removes a target from the list.
-  // If the target is not in the list, does nothing.
-  void remove(tt_Target target)
-  {
-    uint index = find(target);
-    if (index != size()) { _targets.Delete(index); }
-  }
-
-  // Searches for a target with a particular id.
-  // Returns index on success, the total number of targets on failure.
-  private uint find(tt_Target target) const
-  {
-    uint nTargets = size();
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      if (_targets[i].getTarget().isEqual(target)) { return i; }
-    }
-    return nTargets;
-  }
-
-  private Array<tt_KnownTarget> _targets;
 }
 #+end_src
 
@@ -2938,6 +2933,158 @@ class tt_TargetRegistryTestEnvironment
   tt_TargetSourceMock   disabledTargetSource;
 
   tt_KnownTargetSource  targetRegistry;
+}
+#+end_src
+
+** ~VisibleKnownTargetSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/known_target/tt_visible_known_target_source.zs
+
+// Implements tt_KnownTargetSource by providing only targets visible to player.
+// Doesn't cache.
+class tt_VisibleKnownTargetSource : tt_KnownTargetSource
+{
+  static tt_VisibleKnownTargetSource of(tt_KnownTargetSource base,
+                                        tt_PlayerSource playerSource)
+  {
+    let result = new("tt_VisibleKnownTargetSource");
+    result._base = base;
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override tt_KnownTargets getTargets() const
+  {
+    let result = tt_KnownTargets.of();
+    if (_base.isEmpty()) return result;
+
+    let  pawn        = _playerSource.getPawn();
+    let  baseTargets = _base.getTargets();
+    uint targetCount = baseTargets.size();
+
+    for (uint i = 0; i < targetCount; ++i)
+    {
+      let target = baseTargets.at(i);
+      if (isVisible(target, pawn)) result.add(target);
+    }
+
+    return result;
+  }
+
+  override bool isEmpty() const
+  {
+    if (_base.isEmpty()) return true;
+
+    let  pawn        = _playerSource.getPawn();
+    let  baseTargets = _base.getTargets();
+    uint targetCount = baseTargets.size();
+    for (uint i = 0; i < targetCount; ++i)
+      if (isVisible(baseTargets.at(i), pawn)) return false;
+
+    return true;
+  }
+
+  // Play-const hack: Actor.isVisible(...) is not const, but should be.
+  private play bool isVisible(tt_KnownTarget target, Actor pawn) const
+  {
+    return pawn.isVisible(target.getTarget().getActor(), ALL_AROUND);
+  }
+
+  const ALL_AROUND = 1; // true
+
+  private tt_KnownTargetSource _base;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+*** Tests
+
+#+begin_src c :noweb-ref test-body
+{
+  let tag = "tt_VisibleKnownTargetSource: no targets";
+  let env = tt_VisibleKnownTargetSourceTestEnvironment.of();
+
+  env.baseSource.expect_isEmpty(true, 2);
+
+  bool isEmpty = env.source.isEmpty();
+  let  targets = env.source.getTargets();
+
+  it(tag .. "-> empty", Assert(isEmpty));
+  it(tag .. "-> no targets", AssertEval(targets.size(), "==", 0));
+  assertSatisfaction(env.getSatisfaction(), tag);
+}
+{
+  let tag = "tt_VisibleKnownTargetSource: visible targets";
+  let env = tt_VisibleKnownTargetSourceTestEnvironment.of();
+
+  let knownTargets = tt_KnownTargets.of();
+  let target       = tt_Target.of(spawn("Demon", (0, 0, 0)));
+  let question     = tt_QuestionMock.of();
+  let knownTarget  = tt_KnownTarget.of(target, question);
+  knownTargets.add(knownTarget);
+
+  env.baseSource  .expect_isEmpty(false, 2);
+  env.baseSource  .expect_getTargets(knownTargets, 2);
+  env.playerSource.expect_getPawn(players[consolePlayer].mo, 2);
+
+  bool isEmpty = env.source.isEmpty();
+  let  targets = env.source.getTargets();
+
+  it(tag .. "-> not empty", Assert(!isEmpty));
+  it(tag .. "-> targets", AssertEval(targets.size(), "==", 1));
+
+  assertSatisfaction(env.getSatisfaction(), tag);
+
+  cleanUpSpawned();
+}
+{
+  let tag = "tt_VisibleKnownTargetSource: invisible targets";
+  let env = tt_VisibleKnownTargetSourceTestEnvironment.of();
+
+  let knownTargets = tt_KnownTargets.of();
+  let target       = tt_Target.of(spawn("Demon", (9999999, 0, 0)));
+  let question     = tt_QuestionMock.of();
+  let knownTarget  = tt_KnownTarget.of(target, question);
+  knownTargets.add(knownTarget);
+
+  env.baseSource  .expect_isEmpty(false, 2);
+  env.baseSource  .expect_getTargets(knownTargets, 2);
+  env.playerSource.expect_getPawn(players[consolePlayer].mo, 2);
+
+  bool isEmpty = env.source.isEmpty();
+  let  targets = env.source.getTargets();
+
+  it(tag .. "-> empty", Assert(isEmpty));
+  it(tag .. "-> no targets", AssertEval(targets.size(), "==", 0));
+
+  assertSatisfaction(env.getSatisfaction(), tag);
+
+  cleanUpSpawned();
+}
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
+
+class tt_VisibleKnownTargetSourceTestEnvironment
+{
+  static tt_VisibleKnownTargetSourceTestEnvironment of()
+  {
+    let result = new("tt_VisibleKnownTargetSourceTestEnvironment");
+    result.baseSource   = tt_KnownTargetSourceMock.of();
+    result.playerSource = tt_PlayerSourceMock.of();
+    result.source       = tt_VisibleKnownTargetSource.of(result.baseSource,
+                                                         result.playerSource);
+    return result;
+  }
+
+  tt_Satisfaction getSatisfaction() const
+  {
+    return baseSource.getSatisfaction().add(playerSource.getSatisfaction());
+  }
+
+  tt_KnownTargetSourceMock    baseSource;
+  tt_PlayerSourceMock         playerSource;
+  tt_VisibleKnownTargetSource source;
 }
 #+end_src
 
@@ -3486,138 +3633,48 @@ class tt_Math
 // Implements tt_ModeSource by examining the specified tt_KnownTargetSource.
 class tt_AutoModeSource : tt_ModeSource
 {
-  static tt_AutoModeSource of(tt_KnownTargetSource knownTargetSource,
-                              tt_PlayerSource playerSource)
+  static tt_AutoModeSource of(tt_KnownTargetSource knownTargetSource)
   {
     let result = new("tt_AutoModeSource");
-
     result._knownTargetSource = knownTargetSource;
-    result._playerSource      = playerSource;
-
     return result;
   }
 
   override int getMode()
   {
-    if (_knownTargetSource.isEmpty())
-    {
-      return tt_Mode.Explore;
-    }
-
-    bool isAtLeastOneVisible = false;
-    let  pawn = _playerSource.getPawn();
-
-    let  targets  = _knownTargetSource.getTargets();
-    uint nTargets = targets.size();
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      let target = targets.at(i).getTarget();
-      if (isVisible(target, pawn))
-      {
-        isAtLeastOneVisible = true;
-      }
-    }
-
-    int mode = (isAtLeastOneVisible ? tt_Mode.Combat : tt_Mode.Explore);
-
-    return mode;
+    return _knownTargetSource.isEmpty() ? tt_Mode.Explore : tt_Mode.Combat;
   }
-
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
-  private play bool isVisible(tt_Target target, PlayerPawn pawn) const
-  {
-    return pawn.isVisible(target.getActor(), ALL_AROUND);
-  }
-
-  const ALL_AROUND = 1; // true
 
   private tt_KnownTargetSource _knownTargetSource;
-  private tt_PlayerSource      _playerSource;
 }
 #+end_src
+
+*** Tests
 
 #+begin_src c :noweb-ref test-body
 {
-  let tag = "tt_AutoModeSource: checkTargetsAreVisible";
-  let env = tt_AutoModeSourceTestEnvironment.of();
+  let tag = "tt_AutoModeSource: no targets";
+  let knownTargetSource = tt_KnownTargetSourceMock.of();
+  let autoModeSource    = tt_AutoModeSource.of(knownTargetSource);
 
-  env.knownTargetSource.expect_isEmpty(true);
+  knownTargetSource.expect_isEmpty(true);
 
-  int mode = env.autoModeSource.getMode();
+  int mode = autoModeSource.getMode();
 
   it(tag .. ": no targets -> Explore", AssertEval(mode, "==", tt_Mode.Explore));
-  assertSatisfaction(env.getSatisfaction(), tag);
+  assertSatisfaction(knownTargetSource.getSatisfaction(), tag);
 }
 {
-  let tag = "tt_AutoModeSource: checkTargetsAreVisible";
-  let env = tt_AutoModeSourceTestEnvironment.of();
+  let tag = "tt_AutoModeSource: targets";
+  let knownTargetSource = tt_KnownTargetSourceMock.of();
+  let autoModeSource    = tt_AutoModeSource.of(knownTargetSource);
 
-  let knownTargets = tt_KnownTargets.of();
-  let target       = tt_Target.of(spawn("Demon", (0, 0, 0)));
-  let question     = tt_QuestionMock.of();
-  let knownTarget  = tt_KnownTarget.of(target, question);
-  knownTargets.add(knownTarget);
+  knownTargetSource.expect_isEmpty(false);
 
-  env.knownTargetSource.expect_isEmpty(false);
-  env.knownTargetSource.expect_getTargets(knownTargets);
-  env.playerSource     .expect_getPawn(players[consolePlayer].mo);
+  int mode = autoModeSource.getMode();
 
-  int mode = env.autoModeSource.getMode();
-
-  it(tag .. ": there are visible targets -> Combat",
-     AssertEval(mode, "==", tt_Mode.Combat));
-
-  assertSatisfaction(env.getSatisfaction(), tag);
-
-  cleanUpSpawned();
-}
-{
-  let tag = "tt_AutoModeSource: checkTargetsAreInvisible";
-  let env = tt_AutoModeSourceTestEnvironment.of();
-
-  let knownTargets = tt_KnownTargets.of();
-  let target       = tt_Target.of(spawn("Demon", (9999999, 0, 0)));
-  let question     = tt_QuestionMock.of();
-  let knownTarget  = tt_KnownTarget.of(target, question);
-  knownTargets.add(knownTarget);
-
-  env.knownTargetSource.expect_isEmpty(false);
-  env.knownTargetSource.expect_getTargets(knownTargets);
-  env.playerSource     .expect_getPawn(players[consolePlayer].mo);
-
-  int mode = env.autoModeSource.getMode();
-
-  it(tag .. ": There are no visible targets -> Explore",
-     AssertEval(mode, "==", tt_Mode.Explore));
-
-  assertSatisfaction(env.getSatisfaction(), tag);
-
-  cleanUpSpawned();
-}
-#+end_src
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
-
-class tt_AutoModeSourceTestEnvironment
-{
-  static tt_AutoModeSourceTestEnvironment of()
-  {
-    let result = new("tt_AutoModeSourceTestEnvironment");
-    result.knownTargetSource = tt_KnownTargetSourceMock.of();
-    result.playerSource      = tt_PlayerSourceMock.of();
-    result.autoModeSource    =
-      tt_AutoModeSource.of(result.knownTargetSource, result.playerSource);
-    return result;
-  }
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return knownTargetSource.getSatisfaction().add(playerSource.getSatisfaction());
-  }
-
-  tt_KnownTargetSourceMock knownTargetSource;
-  tt_PlayerSourceMock      playerSource;
-  tt_AutoModeSource        autoModeSource;
+  it(tag .. ": targets -> Combat", AssertEval(mode, "==", tt_Mode.Combat));
+  assertSatisfaction(knownTargetSource.getSatisfaction(), tag);
 }
 #+end_src
 
@@ -4187,16 +4244,12 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
 {
   static tt_HastyQuestionAnswerMatcher of(tt_KnownTargetSource knownTargetSource,
                                           tt_AnswerSource      answerSource,
-                                          tt_PlayerSource      playerSource,
                                           tt_AnswerReporter    reporter)
   {
     let result = new("tt_HastyQuestionAnswerMatcher");
-
     result._knownTargetSource = knownTargetSource;
     result._answerSource      = answerSource;
-    result._playerSource      = playerSource;
     result._reporter          = reporter;
-
     return result;
   }
 
@@ -4208,8 +4261,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
     let answer = _answerSource.getAnswer();
     if (answer == NULL) { return NULL; }
 
-    let pawn   = _playerSource.getPawn();
-    let result = findMatchedTarget(targets, answer, pawn);
+    let result = findMatchedTarget(targets, answer);
 
     if (result != NULL)
     {
@@ -4220,9 +4272,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
     return result;
   }
 
-  private tt_Origin findMatchedTarget(tt_KnownTargets targets,
-                                      tt_Answer answer,
-                                      Actor pawn)
+  private tt_Origin findMatchedTarget(tt_KnownTargets targets, tt_Answer answer)
   {
     string answerString = answer.getString();
     uint nTargets = targets.size();
@@ -4231,10 +4281,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
       let target   = targets.at(i);
       let question = target.getQuestion();
 
-      if (!question.isRight(answerString) || !isVisible(target, pawn))
-      {
-        continue;
-      }
+      if (!question.isRight(answerString)) continue;
 
       let result = target.getTarget().getPosition();
       return result;
@@ -4243,20 +4290,8 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
     return NULL;
   }
 
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
-  private play bool isVisible(tt_KnownTarget target, Actor pawn) const
-  {
-    let  targetActor = target.getTarget().getActor();
-    bool visible     = pawn.IsVisible(targetActor, ALL_AROUND);
-
-    return visible;
-  }
-
-  const ALL_AROUND = 1; // true
-
   private tt_KnownTargetSource _knownTargetSource;
   private tt_AnswerSource      _answerSource;
-  private tt_PlayerSource      _playerSource;
   private tt_AnswerReporter    _reporter;
 }
 #+end_src
@@ -4434,16 +4469,12 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
 {
   static tt_QuestionAnswerMatcher of(tt_KnownTargetSource knownTargetSource,
                                      tt_AnswerSource      answerSource,
-                                     tt_PlayerSource      playerSource,
                                      tt_AnswerStateSource answerStateSource)
   {
     let result = new("tt_QuestionAnswerMatcher");
-
     result._knownTargetSource = knownTargetSource;
     result._answerSource      = answerSource;
-    result._playerSource      = playerSource;
     result._answerStateSource = answerStateSource;
-
     return result;
   }
 
@@ -4458,14 +4489,12 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
     let answerState = _answerStateSource.getAnswerState();
     if (!answerState.isReady()) { return NULL; }
 
-    let pawn   = _playerSource.getPawn();
-    let result = findMatchedTarget(targets, answer, pawn);
+    let result = findMatchedTarget(targets, answer);
 
     return result;
   }
 
-  private tt_Origin findMatchedTarget(tt_KnownTargets targets,
-                                      tt_Answer answer, Actor pawn)
+  private tt_Origin findMatchedTarget(tt_KnownTargets targets, tt_Answer answer)
   {
     string answerString = answer.getString();
     uint nTargets = targets.size();
@@ -4474,10 +4503,7 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
       let target   = targets.at(i);
       let question = target.getQuestion();
 
-      if (!question.isRight(answerString) || !isVisible(target, pawn))
-      {
-        continue;
-      }
+      if (!question.isRight(answerString)) continue;
 
       let result = target.getTarget().getPosition();
       return result;
@@ -4486,20 +4512,8 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
     return NULL;
   }
 
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
-  private play bool isVisible(tt_KnownTarget target, Actor pawn) const
-  {
-    let  targetActor = target.getTarget().getActor();
-    bool visible     = pawn.IsVisible(targetActor, ALL_AROUND);
-
-    return visible;
-  }
-
-  const ALL_AROUND = 1; // true
-
   private tt_KnownTargetSource _knownTargetSource;
   private tt_AnswerSource      _answerSource;
-  private tt_PlayerSource      _playerSource;
   private tt_AnswerStateSource _answerStateSource;
 }
 #+end_src
@@ -4580,7 +4594,6 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
   let answer = tt_Answer.of("abc");
   env.answerSource.expect_getAnswer(answer);
   env.stateSource.expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
-  env.playerSource.expect_getPawn(players[consolePlayer].mo);
 
   let origin = env.matcher.getOrigin();
 
@@ -4605,7 +4618,6 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
   let answer = tt_Answer.of("abc");
   env.answerSource.expect_getAnswer(answer);
   env.stateSource.expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
-  env.playerSource.expect_getPawn(players[consolePlayer].mo);
 
   let origin = env.matcher.getOrigin();
 
@@ -4625,12 +4637,10 @@ class tt_QuestionAnswerMatcherTestEnvironment
     let result = new("tt_QuestionAnswerMatcherTestEnvironment");
     result.targetSource = tt_KnownTargetSourceMock.of();
     result.answerSource = tt_AnswerSourceMock.of();
-    result.playerSource = tt_PlayerSourceMock.of();
     result.stateSource  = tt_AnswerStateSourceMock.of();
 
     result.matcher = tt_QuestionAnswerMatcher.of(result.targetSource,
                                                  result.answerSource,
-                                                 result.playerSource,
                                                  result.stateSource);
     return result;
   }
@@ -4639,13 +4649,11 @@ class tt_QuestionAnswerMatcherTestEnvironment
   {
     return targetSource.getSatisfaction()
       .add(answerSource.getSatisfaction())
-      .add(playerSource.getSatisfaction())
       .add(stateSource.getSatisfaction());
   }
 
   tt_KnownTargetSourceMock targetSource;
   tt_AnswerSourceMock      answerSource;
-  tt_PlayerSourceMock      playerSource;
   tt_AnswerStateSourceMock stateSource;
   tt_QuestionAnswerMatcher matcher;
 }
@@ -6924,65 +6932,6 @@ class tt_TargetWidgets
 }
 #+end_src
 
-** ~VisibilityFilter~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_visibility_filter.zs
-
-// Implements TargetWidgetSource by taking target widgets from
-// source and removing widgets that represent targets not visible by the player.
-class tt_VisibilityFilter : tt_TargetWidgetSource
-{
-  static tt_VisibilityFilter of(tt_TargetWidgetSource widgetSource,
-                                tt_PlayerSource playerSource)
-  {
-    let result = new("tt_VisibilityFilter");
-
-    result._widgetSource = widgetSource;
-    result._playerSource = playerSource;
-
-    return result;
-  }
-
-  override tt_TargetWidgets getWidgets(RenderEvent event)
-  {
-    let pawn = _playerSource.getPawn();
-    if (pawn == NULL) { return NULL; }
-
-    let widgets = _widgetSource.getWidgets(event);
-    if (widgets == NULL) { return NULL; }
-
-    tt_TargetWidgets result = tt_TargetWidgets.of();
-
-    uint nWidgets = widgets.size();
-    for (uint i = 0; i < nWidgets; ++i)
-    {
-      let widget = widgets.at(i);
-
-      if (isVisible(widget, pawn))
-      {
-        result.add(widget);
-      }
-    }
-
-    return result;
-  }
-
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
-  private play bool isVisible(tt_TargetWidget widget, PlayerPawn pawn) const
-  {
-    let  targetActor = widget.getTarget().getTarget().getActor();
-    bool visible     = pawn.IsVisible(targetActor, false);
-
-    return visible;
-  }
-
-  const DISTANCE = 4000.0;
-
-  private tt_TargetWidgetSource _widgetSource;
-  private tt_PlayerSource       _playerSource;
-}
-#+end_src
-
 * Colors
 
 Colors can be set externally:
@@ -7400,8 +7349,7 @@ class tt_InfoPanel : tt_View
                          tt_AnswerSource      answerSource,
                          tt_Activatable       activatable,
                          tt_KnownTargetSource knownTargetSource,
-                         tt_Settings          settings,
-                         tt_PlayerSource      playerSource)
+                         tt_Settings          settings)
   {
     let result = new("tt_InfoPanel");
 
@@ -7410,7 +7358,6 @@ class tt_InfoPanel : tt_View
     result._activatable  = activatable;
     result._targetSource = knownTargetSource;
     result._settings     = settings;
-    result._playerSource = playerSource;
 
     return result;
   }
@@ -7435,18 +7382,13 @@ class tt_InfoPanel : tt_View
     int screenWidth = Screen.getWidth();
     int y           = int(xy.y + (VERTICAL_MARGIN * scale));
     let answer      = _answerSource.getAnswer().getString();
-    let player      = _playerSource.getPawn();
     int color       = tt_Drawing.getColorForMode(_modeSource.getMode());
-
-    // 1. Find the first visible target.
-    uint firstVisibleTargetIndex = findFirstVisibleTarget(player, targets);
-    if (firstVisibleTargetIndex == targetCount) return;
 
     int xRight;
     int xLeft;
-    // 2. Draw the first target in the center.
+    // 1. Draw the first target in the center.
     {
-      let    target         = targets.at(firstVisibleTargetIndex);
+      let    target         = targets.at(0);
       let    question       = target.getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
@@ -7467,12 +7409,10 @@ class tt_InfoPanel : tt_View
     }
 
     // 2. Draw the targets to the right while there is space.
-    uint i = firstVisibleTargetIndex + 1;
+    uint i = 1;
     for (; i < targetCount; ++i)
     {
       let target = targets.at(i);
-
-      if (!isVisible(player, target.getTarget().getActor())) continue;
 
       let    question       = target.getQuestion();
       string questionString = question.getDescription();
@@ -7498,8 +7438,6 @@ class tt_InfoPanel : tt_View
     {
       let target = targets.at(i);
 
-      if (!isVisible(player, target.getTarget().getActor())) continue;
-
       let    question       = target.getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
@@ -7518,16 +7456,6 @@ class tt_InfoPanel : tt_View
 
       xLeft -= targetWidth + HORIZONTAL_MARGIN;
     }
-  }
-
-  private ui uint findFirstVisibleTarget(PlayerPawn player, tt_KnownTargets targets)
-  {
-    let targetCount = targets.size();
-
-    for (uint i = 0; i < targetCount; ++i)
-      if (isVisible(player, targets.at(i).getTarget().getActor())) return i;
-
-    return targetCount;
   }
 
   // TODO: make centered
@@ -7564,12 +7492,6 @@ class tt_InfoPanel : tt_View
     }
   }
 
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
-  private play bool isVisible(Actor player, Actor other) const
-  {
-    return player.isVisible(other, ALL_AROUND);
-  }
-
   const Y_START = 10;
 
   const HORIZONTAL_MARGIN = 2;
@@ -7577,14 +7499,11 @@ class tt_InfoPanel : tt_View
 
   const NOT_CENTERED = 0; // false
 
-  const ALL_AROUND = 1; // true
-
   private tt_ModeSource        _modeSource;
   private tt_AnswerSource      _answerSource;
   private tt_Activatable       _activatable;
   private tt_KnownTargetSource _targetSource;
   private tt_Settings          _settings;
-  private tt_PlayerSource      _playerSource;
 }
 #+end_src
 
