@@ -334,22 +334,17 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   {
     let randomLessonSettings = tt_RandomCharactersLessonSettingsImpl.of(playerSource);
 
-    let random      = tt_RandomCharactersLesson.of(randomLessonSettings);
-    let gzdoom      = tt_StringSet.of("tt_gzdoom");
-    let cpp         = tt_StringSet.of("tt_cpp");
-    let maths       = tt_MathsLesson.of();
-    let english1000 = tt_StringSet.of("tt_1000");
-    let russian1000 = tt_StringSet.of("tt_1000_ru");
-    let custom      = tt_StringSet.of("typist_custom_text");
-    let nix         = tt_StringSet.of("tt_nix");
-
-    Array<tt_Lesson> lessonsForMixed =
-      {random, gzdoom, cpp, maths, english1000, russian1000, custom, nix};
-    let mixed = tt_MixedLesson.of(settings, lessonsForMixed);
-
-    Array<tt_Lesson> lessonsForSelection =
-      {random, gzdoom, cpp, maths, english1000, russian1000, mixed, custom, nix};
-    return tt_SelectedLesson.of(settings, lessonsForSelection);
+    Array<tt_Lesson> lessonsForMixed = {
+      tt_RandomCharactersLesson.of(randomLessonSettings),
+      tt_StringSet.of("tt_gzdoom"),
+      tt_StringSet.of("tt_cpp"),
+      tt_MathsLesson.of(),
+      tt_StringSet.of("tt_1000"),
+      tt_StringSet.of("tt_1000_ru"),
+      tt_StringSet.of("typist_custom_text"),
+      tt_StringSet.of("tt_nix")
+    };
+    return tt_MixedLesson.of(settings, lessonsForMixed);
   }
 
   private static tt_KnownTargetSource makeTargetRegistry(
@@ -3236,48 +3231,22 @@ class tt_MixedLesson : tt_Lesson
 
   override tt_Question getQuestion()
   {
-    readSettings();
-
     Array<tt_Lesson> enabledLessons;
 
     uint nLessons = _lessons.size();
-
     for (uint i = 0; i < nLessons; ++i)
-    {
-      if (_isLessonEnabled[i])
-      {
-        enabledLessons.push(_lessons[i]);
-      }
-    }
+      if (_settings.getLessonEnabled(i)) enabledLessons.push(_lessons[i]);
 
     uint nEnabledLessons = enabledLessons.size();
-    if (nEnabledLessons == 0)
-    {
-      return NULL;
-    }
+    if (nEnabledLessons == 0) return NULL;
 
     uint randomLessonIndex = random[typist](0, nEnabledLessons - 1);
-    let  lesson    = enabledLessons[randomLessonIndex];
-    let  question          = lesson.getQuestion();
 
-    return question;
-  }
-
-  private void readSettings()
-  {
-    uint nLessons = _lessons.size();
-    _isLessonEnabled.Resize(nLessons);
-
-    for (uint i = 0; i < nLessons; ++i)
-    {
-      _isLessonEnabled[i] = _settings.getLessonEnabled(i);
-    }
+    return enabledLessons[randomLessonIndex].getQuestion();
   }
 
   private tt_Settings _settings;
-
   private Array<tt_Lesson> _lessons;
-  private Array<bool>      _isLessonEnabled;
 }
 #+end_src
 
@@ -3405,93 +3374,6 @@ class tt_RandomNumberSource : tt_Lesson
 
     return question;
   }
-}
-#+end_src
-
-** ~SelectedLesson~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/lesson/tt_selected_question_source.zs
-
-// Implements tt_Lesson by selecting a question source
-// according to the index from settings.
-class tt_SelectedLesson : tt_Lesson
-{
-  static tt_SelectedLesson of(tt_Settings settings, Array<tt_Lesson> lessons)
-  {
-    let result = new("tt_SelectedLesson");
-    result._settings = settings;
-    result._lessons.move(lessons);
-    return result;
-  }
-
-  override tt_Question getQuestion()
-  {
-    int lessonIndex = _settings.getLessonIndex();
-
-    if (lessonIndex >= _lessons.size()) return NULL;
-
-    return _lessons[lessonIndex].getQuestion();
-  }
-
-  private tt_Settings              _settings;
-  private Array<tt_Lesson> _lessons;
-}
-#+end_src
-
-*** Test
-
-#+begin_src c :noweb-ref test-body
-{
-  let tag = "tt_SelectedLesson: checkEmpty";
-  Array<tt_Lesson> lessons;
-  let env = tt_SelectedLessonTestEnvironment.of(lessons);
-
-  env.settings.expect_getLessonIndex(0);
-
-  let question = env.selectedLesson.getQuestion();
-
-  it(tag .. ": no sources -> NULL question", AssertNull(question));
-  assertSatisfaction(env.getSatisfaction(), tag);
-}
-{
-  let tag = "tt_SelectedLesson: checkTwo";
-  let lesson1 = tt_LessonMock.of();
-  let lesson2 = tt_LessonMock.of();
-  Array<tt_Lesson> lessons = {lesson1, lesson2};
-  let env = tt_SelectedLessonTestEnvironment.of(lessons);
-
-  let mockQuestion = tt_QuestionMock.of();
-  lesson2.expect_getQuestion(mockQuestion);
-  env.settings   .expect_getLessonIndex(1);
-
-  let question = env.selectedLesson.getQuestion();
-
-  assertSatisfaction(lesson2.getSatisfaction(), tag);
-  it(tag .. ": there are sources -> not NULL question",
-     Assert(question == mockQuestion));
-  assertSatisfaction(env.getSatisfaction(), tag);
-}
-#+end_src
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/environments.zs
-
-class tt_SelectedLessonTestEnvironment
-{
-  static tt_SelectedLessonTestEnvironment of(Array<tt_Lesson> lessons)
-  {
-    let result = new("tt_SelectedLessonTestEnvironment");
-    result.settings       = tt_SettingsMock.of();
-    result.selectedLesson = tt_SelectedLesson.of(result.settings, lessons);
-    return result;
-  }
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return settings.getSatisfaction();
-  }
-
-  tt_SettingsMock settings;
-  tt_SelectedLesson selectedLesson;
 }
 #+end_src
 
@@ -5371,8 +5253,6 @@ class tt_Settings abstract
 
   abstract bool isAutoAimEnabled();
 
-  abstract int getLessonIndex();
-
   abstract bool getLessonEnabled(uint i);
 
   abstract bool isFastConfirmation();
@@ -5421,23 +5301,6 @@ class tt_SettingsMock : tt_Settings
   private int _mock_isAutoAimEnabled_expected;
   private int _mock_isAutoAimEnabled_called;
 
-  override int getLessonIndex()
-  {
-    ++_mock_getLessonIndex_called;
-    return _mock_getLessonIndex;
-  }
-
-  void expect_getLessonIndex(int value, int expected = 1)
-  {
-    _mock_getLessonIndex = value;
-    _mock_getLessonIndex_expected = expected;
-    _mock_getLessonIndex_called = 0;
-  }
-
-  private int _mock_getLessonIndex;
-  private int _mock_getLessonIndex_expected;
-  private int _mock_getLessonIndex_called;
-
   override bool getLessonEnabled(uint i)
   {
     ++_mock_getLessonEnabled_called;
@@ -5479,9 +5342,6 @@ class tt_SettingsMock : tt_Settings
             _mock_isFastConfirmation_expected == _mock_isFastConfirmation_called)
       .push(getClassName() .. ": getLessonEnabled",
             _mock_getLessonEnabled_expected == _mock_getLessonEnabled_called)
-      .push(getClassName() .. "getLessonIndex",
-            _mock_getLessonIndex_expected ==
-            _mock_getLessonIndex_called)
       .push(getClassName() .. ": isAutoAimEnabled",
             _mock_isAutoAimEnabled_expected == _mock_isAutoAimEnabled_called)
       .push(getClassName() .. ": getScale",
@@ -5497,9 +5357,6 @@ class tt_SettingsMock : tt_Settings
 // General settings
 
 user int tt_view_scale = 1;
-
-// Attention! Do not set values which are not in the list in menudef.txt.
-user int tt_question_source = 4;
 
 // 0: by Enter or Space
 // 1: Automatic, as soon as an answer matches.
@@ -5531,7 +5388,6 @@ class tt_SettingsImpl : tt_Settings
 
     result._scaleCvar              = tt_Cvar.of(playerSource, "tt_view_scale");
     result._autoaimCvar            = tt_Cvar.of(playerSource, "autoaim");
-    result._lessonIndexCvar        = tt_Cvar.of(playerSource, "tt_question_source");
     result._isFastConfirmationCvar = tt_Cvar.of(playerSource, "tt_confirm_type");
 
     for (uint i = 0; i < N_IS_LESSON_ENABLED_CVARS; ++i)
@@ -5547,8 +5403,6 @@ class tt_SettingsImpl : tt_Settings
 
   override bool isAutoAimEnabled() { return (_autoaimCvar.getFloat() > 34.5); }
 
-  override int getLessonIndex() { return _lessonIndexCvar.getInt(); }
-
   override bool isFastConfirmation() { return _isFastConfirmationCvar.getInt(); }
 
   override bool getLessonEnabled(uint index)
@@ -5560,7 +5414,6 @@ class tt_SettingsImpl : tt_Settings
 
   private tt_Cvar _scaleCvar;
   private tt_Cvar _autoaimCvar;
-  private tt_Cvar _lessonIndexCvar;
   private tt_Cvar _isFastConfirmationCvar;
 
   private Array<tt_Cvar> _isLessonEnabledCvars;
@@ -5595,19 +5448,6 @@ class tt_SettingsImpl : tt_Settings
   // second call must not get player info again.
   isAutoaimEnabled = settings.isAutoaimEnabled();
 
-  assertSatisfaction(playerSource.getSatisfaction(), tag);
-}
-{
-  let tag = "tt_SettingsImpl: testGetLesson";
-  let playerSource = tt_PlayerSourceMock.of();
-  let settings     = tt_SettingsImpl.of(playerSource);
-
-  playerSource.expect_getInfo(players[consolePlayer]);
-
-  int lessonIndex = settings.getLessonIndex();
-
-  it(tag .. ": question source index is reasonable",
-     AssertEval(lessonIndex, ">=", 0));
   assertSatisfaction(playerSource.getSatisfaction(), tag);
 }
 #+end_src
@@ -8089,11 +7929,6 @@ TT_LESSON_MATH    = "Arithmetic";
 TT_LESSON_1000    = "1000 Basic English Words";
 TT_LESSON_1000_RU = "1000 Basic Russian Words";
 
-TT_MIXED_LESSON            = "Mixed";
-TT_MIXED_LESSON_TITLE      = "Mixed Lesson configuration";
-TT_MIXED_LESSON_TITLE_FULL = "Typist.pk3 Mixed Lesson configuration";
-TT_MIXED_LESSON_NOTE       = "Please enable at least one lesson.";
-
 TT_CUSTOM_TEXT = "Custom Text";
 
 TT_CUSTOM_LESSON_HELP_TEXT = "\cfHow to set up Custom Text lesson\c-\
@@ -8198,10 +8033,22 @@ OptionMenu tt_LessonOptions
 {
   Title      "$TT_LESSON_OPTIONS_TITLE_IN"
 
-  Option     "$TT_QUESTION_SOURCE", tt_question_source, tt_LessonValues
+  // TODO: add this doc.
+  // See docs/adding-new-lesson.md.
+  Option "$TT_LESSON_RANDOM"  , tt_is_lesson_enabled_0 , OnOff
+  Option "$TT_LESSON_GZDOOM"  , tt_is_lesson_enabled_1 , OnOff
+  Option "$TT_LESSON_CPP"     , tt_is_lesson_enabled_2 , OnOff
+  Option "$TT_LESSON_MATH"    , tt_is_lesson_enabled_3 , OnOff
+  Option "$TT_LESSON_1000"    , tt_is_lesson_enabled_4 , OnOff
+  Option "$TT_LESSON_1000_RU" , tt_is_lesson_enabled_5 , OnOff
+  Option "$TT_CUSTOM_TEXT"    , tt_is_lesson_enabled_6 , OnOff
+  Option "$TT_NIX_LESSON"     , tt_is_lesson_enabled_7 , OnOff
 
   StaticText ""
-  Submenu    "$TT_MIXED_LESSON_TITLE", tt_MixedLesson
+  // TODO: add a fallback lesson so this is not needed.
+  StaticText "Please enable at least one lesson."
+
+  StaticText ""
   Submenu    "$TT_RANDOM_LESSON_TITLE", tt_RandomLesson
 
   StaticText ""
@@ -8243,29 +8090,6 @@ OptionMenu tt_Acknowledgments
   StaticText "$TT_ACKNOWLEDGMENTS_TEXT"
 }
 
-OptionMenu tt_MixedLesson
-{
-  Title "$TT_MIXED_LESSON_TITLE_FULL"
-
-  // TODO: add this doc.
-  // See docs/adding-new-lesson.md.
-  Option "$TT_LESSON_RANDOM"  , tt_is_lesson_enabled_0 , OnOff
-  Option "$TT_LESSON_GZDOOM"  , tt_is_lesson_enabled_1 , OnOff
-  Option "$TT_LESSON_CPP"     , tt_is_lesson_enabled_2 , OnOff
-  Option "$TT_LESSON_MATH"    , tt_is_lesson_enabled_3 , OnOff
-  Option "$TT_LESSON_1000"    , tt_is_lesson_enabled_4 , OnOff
-  Option "$TT_LESSON_1000_RU" , tt_is_lesson_enabled_5 , OnOff
-  Option "$TT_CUSTOM_TEXT"    , tt_is_lesson_enabled_6 , OnOff
-  Option "$TT_NIX_LESSON"     , tt_is_lesson_enabled_7 , OnOff
-
-  StaticText ""
-  StaticText "$TT_MIXED_LESSON_NOTE"
-
-  StaticText ""
-  Command    "$TT_APPLY", tt_reset_targets
-  StaticText "$TT_QUESTION_SOURCE_NOTE"
-}
-
 OptionMenu tt_RandomLesson
 {
   Title  "$TT_RANDOM_LESSON_TITLE_FULL"
@@ -8286,20 +8110,6 @@ OptionMenu tt_RandomLesson
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
-
-// See docs/adding-new-lesson.md.
-OptionValue tt_LessonValues
-{
-  0 , "$TT_LESSON_RANDOM"
-  1 , "$TT_LESSON_GZDOOM"
-  2 , "$TT_LESSON_CPP"
-  3 , "$TT_LESSON_MATH"
-  4 , "$TT_LESSON_1000"
-  5 , "$TT_LESSON_1000_RU"
-  6 , "$TT_MIXED_LESSON"
-  7 , "$TT_CUSTOM_TEXT"
-  8 , "$TT_NIX_LESSON"
-}
 
 OptionValue tt_ConfirmationTypes
 {
