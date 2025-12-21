@@ -46,113 +46,15 @@ class tt_PlayerHandlerMock : tt_PlayerHandler
 {
   static tt_PlayerHandlerMock of() { return new("tt_PlayerHandlerMock"); }
 
-  override void reset(int playerNumber) { throwAbortException("implement this!"); }
-
-  override void processKey(tt_Character character)
-  {
-    ++_mock_processKey_called;
-  }
-
-  override void processInput(int type)
-  {
-    throwAbortException("implement this!");
-  }
-
-  void expect_processKey(int expected = 1)
-  {
-    _mock_processKey_expected = expected;
-    _mock_processKey_called = 0;
-  }
-
-  private int _mock_processKey_expected;
-  private int _mock_processKey_called;
-
-  override void tick()
-  {
-    ++_mock_tick_called;
-  }
-
-  void expect_tick(int expected = 1)
-  {
-    _mock_tick_expected = expected;
-    _mock_tick_called = 0;
-  }
-
-  private int _mock_tick_expected;
-  private int _mock_tick_called;
-
-  override void reportDead(Actor dead)
-  {
-    ++_mock_reportDead_called;
-  }
-
-  void expect_reportDead(int expected = 1)
-  {
-    _mock_reportDead_expected = expected;
-    _mock_reportDead_called = 0;
-  }
-
-  private int _mock_reportDead_expected;
-  private int _mock_reportDead_called;
-
-  override bool isCapturingKeys()
-  {
-    ++_mock_isCapturingKeys_called;
-    return _mock_isCapturingKeys;
-  }
-
-  void expect_isCapturingKeys(bool value, int expected = 1)
-  {
-    _mock_isCapturingKeys = value;
-    _mock_isCapturingKeys_expected = expected;
-    _mock_isCapturingKeys_called = 0;
-  }
-
-  private bool _mock_isCapturingKeys;
-  private int _mock_isCapturingKeys_expected;
-  private int _mock_isCapturingKeys_called;
-
-  override void unlockMode()
-  {
-    ++_mock_unlockMode_called;
-  }
-
-  void expect_unlockMode(int expected = 1)
-  {
-    _mock_unlockMode_expected = expected;
-    _mock_unlockMode_called = 0;
-  }
-
-  private int _mock_unlockMode_expected;
-  private int _mock_unlockMode_called;
-
-  override void forceCombat()
-  {
-    ++_mock_forceCombat_called;
-  }
-
-  void expect_forceCombat(int expected = 1)
-  {
-    _mock_forceCombat_expected = expected;
-    _mock_forceCombat_called = 0;
-  }
-
-  private int _mock_forceCombat_expected;
-  private int _mock_forceCombat_called;
-
-  override void draw(RenderEvent event)
-  {
-    ++_mock_draw_called;
-  }
-
-  void expect_draw(int expected = 1)
-  {
-    _mock_draw_expected = expected;
-    _mock_draw_called = 0;
-  }
-
-  private int _mock_draw_expected;
-  private int _mock_draw_called;
+  <<mock-method("void", "reset", "int playerNumber")>>
+  <<mock-method("void", "processKey", "tt_Character character")>>
+  <<mock-method("void", "processInput", "int type")>>
+  <<mock-method("void", "tick")>>
+  <<mock-method("void", "reportDead", "Actor dead")>>
+  <<mock-method("bool", "isCapturingKeys")>>
+  <<mock-method("void", "unlockMode")>>
+  <<mock-method("void", "forceCombat")>>
+  <<mock-method("void", "draw", "RenderEvent event")>>
 }
 #+end_src
 
@@ -473,64 +375,17 @@ class tt_ActivatableMock : tt_Activatable
 {
   static tt_ActivatableMock of() { return new("tt_ActivatableMock"); }
 
-  override void activate()
-  {
-    ++_mock_activate_called;
-  }
-
-  void expect_activate(int expected = 1)
-  {
-    _mock_activate_expected = expected;
-    _mock_activate_called = 0;
-  }
-
-  private int _mock_activate_expected;
-  private int _mock_activate_called;
-
-  override tt_Strings getCommands()
-  {
-    ++_mock_getCommands_called;
-    return _mock_getCommands;
-  }
-
-  void expect_getCommands(tt_Strings value, int expected = 1)
-  {
-    _mock_getCommands = value;
-    _mock_getCommands_expected = expected;
-    _mock_getCommands_called = 0;
-  }
-
-  private tt_Strings _mock_getCommands;
-  private int _mock_getCommands_expected;
-  private int _mock_getCommands_called;
-
-  override bool isVisible()
-  {
-    ++_mock_isVisible_called;
-    return _mock_isVisible;
-  }
-
-  void expect_isVisible(bool value, int expected = 1)
-  {
-    _mock_isVisible = value;
-    _mock_isVisible_expected = expected;
-    _mock_isVisible_called = 0;
-  }
+  <<mock-method("void", "activate")>>
+  <<mock-method("tt_Strings", "getCommands")>>
+  <<mock-method("bool", "isVisible")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. "activate",
-            _mock_activate_expected == _mock_activate_called)
-      .push(getClassName() .. "getCommands",
-            _mock_getCommands_expected == _mock_getCommands_called)
-      .push(getClassName() .. "isVisible",
-            _mock_isVisible_expected == _mock_isVisible_called);
+      .push(getClassName() .. "activate",    isSatisfied_activate())
+      .push(getClassName() .. "getCommands", isSatisfied_getCommands())
+      .push(getClassName() .. "isVisible",   isSatisfied_isVisible());
   }
-
-  private bool _mock_isVisible;
-  private int _mock_isVisible_expected;
-  private int _mock_isVisible_called;
 }
 #+end_src
 
@@ -994,47 +849,17 @@ class tt_AnswerSourceMock : tt_AnswerSource
 {
   static tt_AnswerSourceMock of() { return new("tt_AnswerSourceMock"); }
 
-  override tt_Answer getAnswer()
-  {
-    ++_mock_getAnswer_called;
-    return _mock_getAnswer;
-  }
-
-  void expect_getAnswer(tt_Answer value, int expected = 1)
-  {
-    _mock_getAnswer = value;
-    _mock_getAnswer_expected = expected;
-    _mock_getAnswer_called = 0;
-  }
-
-  private tt_Answer _mock_getAnswer;
-  private int _mock_getAnswer_expected;
-  private int _mock_getAnswer_called;
-
-  override void reset()
-  {
-    ++_mock_reset_called;
-  }
-
-  void expect_reset(int expected = 1)
-  {
-    _mock_reset_expected = expected;
-    _mock_reset_called = 0;
-  }
+  <<mock-method("tt_Answer", "getAnswer")>>
+  <<mock-method("void", "reset")>>
+  <<mock-method("void", "processKey", "tt_Character character")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getAnswer",
-            _mock_getAnswer_expected == _mock_getAnswer_called)
-      .push(getClassName() .. ": reset",
-            _mock_reset_expected == _mock_reset_called);
+      .push(getClassName() .. ": getAnswer",  isSatisfied_getAnswer())
+      .push(getClassName() .. ": reset",      isSatisfied_reset())
+      .push(getClassName() .. ": processKey", isSatisfied_processKey());
   }
-
-  override void processKey(tt_Character character) {}
-
-  private int _mock_reset_expected;
-  private int _mock_reset_called;
 }
 #+end_src
 
@@ -1333,47 +1158,17 @@ class tt_AnswerStateSourceMock : tt_AnswerStateSource
 {
   static tt_AnswerStateSourceMock of() { return new("tt_AnswerStateSourceMock"); }
 
-  override tt_AnswerState getAnswerState()
-  {
-    ++_mock_getAnswerState_called;
-    return _mock_getAnswerState;
-  }
-
-  void expect_getAnswerState(tt_AnswerState value, int expected = 1)
-  {
-    _mock_getAnswerState = value;
-    _mock_getAnswerState_expected = expected;
-    _mock_getAnswerState_called = 0;
-  }
-
-  private tt_AnswerState _mock_getAnswerState;
-  private int _mock_getAnswerState_expected;
-  private int _mock_getAnswerState_called;
-
-  override void reset()
-  {
-    ++_mock_reset_called;
-  }
-
-  void expect_reset(int expected = 1)
-  {
-    _mock_reset_expected = expected;
-    _mock_reset_called = 0;
-  }
+  <<mock-method("tt_AnswerState", "getAnswerState")>>
+  <<mock-method("void", "reset")>>
+  <<mock-method("void", "processKey", "tt_Character character")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getAnswerState",
-            _mock_getAnswerState_expected == _mock_getAnswerState_called)
-      .push(getClassName() .. " : reset",
-            _mock_reset_expected == _mock_reset_called);
+      .push(getClassName() .. ": getAnswerState", isSatisfied_getAnswerState())
+      .push(getClassName() .. ": reset",          isSatisfied_reset())
+      .push(getClassName() .. ": processKey",     isSatisfied_processKey());
   }
-
-  override void processKey(tt_Character character) {}
-
-  private int _mock_reset_expected;
-  private int _mock_reset_called;
 }
 #+end_src
 
@@ -1573,48 +1368,15 @@ class tt_ClockMock : tt_Clock
 {
   static tt_ClockMock of() { return new("tt_ClockMock"); }
 
-  override int getNow()
-  {
-    ++_mock_getNow_called;
-    return _mock_getNow;
-  }
-
-  void expect_getNow(int value, int expected = 1)
-  {
-    _mock_getNow = value;
-    _mock_getNow_expected = expected;
-    _mock_getNow_called = 0;
-  }
-
-  private int _mock_getNow;
-  private int _mock_getNow_expected;
-  private int _mock_getNow_called;
-
-  override int since(int moment)
-  {
-    ++_mock_since_called;
-    return _mock_since;
-  }
-
-  void expect_since(int value, int expected = 1)
-  {
-    _mock_since = value;
-    _mock_since_expected = expected;
-    _mock_since_called = 0;
-  }
+  <<mock-method("int", "getNow")>>
+  <<mock-method("int", "since", "int moment")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getNow",
-            _mock_getNow_expected == _mock_getNow_called)
-      .push(getClassName() .. ": since",
-            _mock_since_expected == _mock_since_called);
+      .push(getClassName() .. ": getNow", isSatisfied_getNow())
+      .push(getClassName() .. ": since",  isSatisfied_since());
   }
-
-  private int _mock_since;
-  private int _mock_since_expected;
-  private int _mock_since_called;
 }
 #+end_src
 
@@ -1779,42 +1541,15 @@ class tt_AnswerReporterMock : tt_AnswerReporter
 {
   static tt_AnswerReporterMock of() { return new("tt_AnswerReporterMock"); }
 
-  override void reportMatch()
-  {
-    ++_mock_reportMatch_called;
-  }
-
-  void expect_reportMatch(int expected = 1)
-  {
-    _mock_reportMatch_expected = expected;
-    _mock_reportMatch_called = 0;
-  }
-
-  private int _mock_reportMatch_expected;
-  private int _mock_reportMatch_called;
-
-  override void reportNotMatch()
-  {
-    ++_mock_reportNotMatch_called;
-  }
-
-  void expect_reportNotMatch(int expected = 1)
-  {
-    _mock_reportNotMatch_expected = expected;
-    _mock_reportNotMatch_called = 0;
-  }
+  <<mock-method("void", "reportMatch")>>
+  <<mock-method("void", "reportNotMatch")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. "reportMatch",
-            _mock_reportMatch_expected == _mock_reportMatch_called)
-      .push(getClassName() .. "reportNotMatch",
-            _mock_reportNotMatch_expected == _mock_reportNotMatch_called);
+      .push(getClassName() .. ": reportMatch",    isSatisfied_reportMatch())
+      .push(getClassName() .. ": reportNotMatch", isSatisfied_reportNotMatch());
   }
-
-  private int _mock_reportNotMatch_expected;
-  private int _mock_reportNotMatch_called;
 }
 #+end_src
 
@@ -1837,26 +1572,13 @@ class tt_KeyPressReporterMock : tt_KeyPressReporter
 {
   static tt_KeyPressReporterMock of() { return new("tt_KeyPressReporterMock"); }
 
-  override void report()
-  {
-    ++_mock_report_called;
-  }
-
-  void expect_report(int expected = 1)
-  {
-    _mock_report_expected = expected;
-    _mock_report_called = 0;
-  }
+  <<mock-method("void", "report")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": report",
-            _mock_report_expected == _mock_report_called);
+      .push(getClassName() .. ": report", isSatisfied_report());
   }
-
-  private int _mock_report_expected;
-  private int _mock_report_called;
 }
 #+end_src
 
@@ -1879,26 +1601,13 @@ class tt_ModeReporterMock : tt_ModeReporter
 {
   static tt_ModeReporterMock of() { return new("tt_ModeReporterMock"); }
 
-  override void report(int mode)
-  {
-    ++_mock_report_called;
-  }
-
-  void expect_report(int expected = 1)
-  {
-    _mock_report_expected = expected;
-    _mock_report_called = 0;
-  }
+  <<mock-method("void", "report", "int mode")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": report",
-            _mock_report_expected == _mock_report_called);
+      .push(getClassName() .. ": report", isSatisfied_report());
   }
-
-  private int _mock_report_expected;
-  private int _mock_report_called;
 }
 #+end_src
 
@@ -2050,19 +1759,13 @@ class tt_SoundPlayerMock : tt_SoundPlayer
 {
   static tt_SoundPlayerMock of() { return new("tt_SoundPlayerMock"); }
 
-  override void playSound(String soundId)
-  {
-    ++_mock_playSound_called;
-  }
+  <<mock-method("void", "playSound", "string soundId")>>
 
-  void expect_playSound(int expected = 1)
+  tt_Satisfaction getSatisfaction() const
   {
-    _mock_playSound_expected = expected;
-    _mock_playSound_called = 0;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": playSound", isSatisfied_playSound());
   }
-
-  private int _mock_playSound_expected;
-  private int _mock_playSound_called;
 }
 #+end_src
 
@@ -2342,36 +2045,15 @@ class tt_InputManagerMock : tt_InputManager
 {
   static tt_InputManagerMock of() { return new("tt_InputManagerMock"); }
 
-  override void manageInput()
+  <<mock-method("void", "manageInput")>>
+  <<mock-method("bool", "isCapturingKeys")>>
+
+  tt_Satisfaction getSatisfaction() const
   {
-    ++_mock_manageInput_called;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": playSound", isSatisfied_manageInput())
+      .push(getClassName() .. ": isCapturingKeys", isSatisfied_isCapturingKeys());
   }
-
-  void expect_manageInput(int expected = 1)
-  {
-    _mock_manageInput_expected = expected;
-    _mock_manageInput_called = 0;
-  }
-
-  private int _mock_manageInput_expected;
-  private int _mock_manageInput_called;
-
-  override bool isCapturingKeys()
-  {
-    ++_mock_isCapturingKeys_called;
-    return _mock_isCapturingKeys;
-  }
-
-  void expect_isCapturingKeys(bool value, int expected = 1)
-  {
-    _mock_isCapturingKeys = value;
-    _mock_isCapturingKeys_expected = expected;
-    _mock_isCapturingKeys_called = 0;
-  }
-
-  private bool _mock_isCapturingKeys;
-  private int _mock_isCapturingKeys_expected;
-  private int _mock_isCapturingKeys_called;
 }
 #+end_src
 
@@ -2396,19 +2078,13 @@ class tt_KeyProcessorMock : tt_KeyProcessor
 {
   static tt_KeyProcessorMock of() { return new("tt_KeyProcessorMock"); }
 
-  override void processKey(tt_Character character)
-  {
-    ++_mock_processKey_called;
-  }
+  <<mock-method("void", "processKey", "tt_Character character")>>
 
-  void expect_processKey(int expected = 1)
+  tt_Satisfaction getSatisfaction() const
   {
-    _mock_processKey_expected = expected;
-    _mock_processKey_called = 0;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": processKey", isSatisfied_processKey());
   }
-
-  private int _mock_processKey_expected;
-  private int _mock_processKey_called;
 }
 #+end_src
 
@@ -2564,48 +2240,15 @@ class tt_KnownTargetSourceMock : tt_KnownTargetSource
 {
   static tt_KnownTargetSourceMock of() { return new("tt_KnownTargetSourceMock"); }
 
-  override tt_KnownTargets getTargets()
-  {
-    ++_mock_getTargets_called;
-    return _mock_getTargets;
-  }
-
-  void expect_getTargets(tt_KnownTargets value, int expected = 1)
-  {
-    _mock_getTargets = value;
-    _mock_getTargets_expected = expected;
-    _mock_getTargets_called = 0;
-  }
-
-  private tt_KnownTargets _mock_getTargets;
-  private int _mock_getTargets_expected;
-  private int _mock_getTargets_called;
-
-  override bool isEmpty()
-  {
-    ++_mock_isEmpty_called;
-    return _mock_isEmpty;
-  }
-
-  void expect_isEmpty(bool value, int expected = 1)
-  {
-    _mock_isEmpty = value;
-    _mock_isEmpty_expected = expected;
-    _mock_isEmpty_called = 0;
-  }
+  <<mock-method("tt_KnownTargets", "getTargets")>>
+  <<mock-method("bool", "isEmpty")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": isEmpty",
-            _mock_isEmpty_expected == _mock_isEmpty_called)
-      .push(getClassName() .. ": getTargets",
-            _mock_getTargets_expected == _mock_getTargets_called);
+      .push(getClassName() .. ": isEmpty",    isSatisfied_isEmpty())
+      .push(getClassName() .. ": getTargets", isSatisfied_getTargets());
   }
-
-  private bool _mock_isEmpty;
-  private int _mock_isEmpty_expected;
-  private int _mock_isEmpty_called;
 }
 #+end_src
 
@@ -3097,29 +2740,13 @@ class tt_LessonMock : tt_Lesson
 {
   static tt_LessonMock of() { return new("tt_LessonMock"); }
 
-  override tt_Question getQuestion()
-  {
-    ++_mock_getQuestion_called;
-    return _mock_getQuestion;
-  }
-
-  void expect_getQuestion(tt_Question value, int expected = 1)
-  {
-    _mock_getQuestion = value;
-    _mock_getQuestion_expected = expected;
-    _mock_getQuestion_called = 0;
-  }
+  <<mock-method("tt_Question", "getQuestion")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. "getQuestion",
-            _mock_getQuestion_expected == _mock_getQuestion_called);
+      .push(getClassName() .. "getQuestion", isSatisfied_getQuestion());
   }
-
-  private tt_Question _mock_getQuestion;
-  private int _mock_getQuestion_expected;
-  private int _mock_getQuestion_called;
 }
 #+end_src
 
@@ -3538,29 +3165,13 @@ class tt_ModeSourceMock : tt_ModeSource
 {
   static tt_ModeSourceMock of() { return new("tt_ModeSourceMock"); }
 
-  override int getMode()
-  {
-    ++_mock_getMode_called;
-    return _mock_getMode;
-  }
-
-  void expect_getMode(int value, int expected = 1)
-  {
-    _mock_getMode = value;
-    _mock_getMode_expected = expected;
-    _mock_getMode_called = 0;
-  }
+  <<mock-method("int", "getMode")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getMode",
-            _mock_getMode_expected == _mock_getMode_called);
+      .push(getClassName() .. ": getMode", isSatisfied_getMode());
   }
-
-  private int _mock_getMode;
-  private int _mock_getMode_expected;
-  private int _mock_getMode_called;
 }
 #+end_src
 
@@ -3923,28 +3534,15 @@ class tt_ModeStorageMock : tt_ModeStorage
 {
   static tt_ModeStorageMock of() { return new("tt_ModeStorageMock"); }
 
-  override void setMode(int mode)
-  {
-    ++_mock_setMode_called;
-  }
-
-  void expect_setMode(int expected = 1)
-  {
-    _mock_setMode_expected = expected;
-    _mock_setMode_called = 0;
-  }
+  <<mock-method("void", "setMode", "int mode")>>
+  <<mock-method("int", "getMode")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": setMode",
-            _mock_setMode_expected == _mock_setMode_called);
+      .push(getClassName() .. ": setMode", isSatisfied_setMode())
+      .push(getClassName() .. ": getMode", isSatisfied_getMode());
   }
-
-  override int getMode() { return tt_Mode.None; }
-
-  private int _mock_setMode_expected;
-  private int _mock_setMode_called;
 }
 #+end_src
 
@@ -4231,29 +3829,13 @@ class tt_OriginSourceMock : tt_OriginSource
 {
   static tt_OriginSourceMock of() { return new("tt_OriginSourceMock"); }
 
-  override tt_Origin getOrigin()
-  {
-    ++_mock_getOrigin_called;
-    return _mock_getOrigin;
-  }
-
-  void expect_getOrigin(tt_Origin value, int expected = 1)
-  {
-    _mock_getOrigin = value;
-    _mock_getOrigin_expected = expected;
-    _mock_getOrigin_called = 0;
-  }
+  <<mock-method("tt_Origin", "getOrigin")>>
 
   tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getOrigin",
-            _mock_getOrigin_expected == _mock_getOrigin_called);
+      .push(getClassName() .. ": getOrigin", isSatisfied_getOrigin());
   }
-
-  private tt_Origin _mock_getOrigin;
-  private int _mock_getOrigin_expected;
-  private int _mock_getOrigin_called;
 }
 #+end_src
 
@@ -4633,54 +4215,17 @@ class tt_PlayerSourceMock : tt_PlayerSource
 {
   static tt_PlayerSourceMock of() { return new("tt_PlayerSourceMock"); }
 
-  override PlayerInfo getInfo()
-  {
-    ++_mock_getInfo_called;
-    return _mock_getInfo;
-  }
-
-  void expect_getInfo(PlayerInfo value, int expected = 1)
-  {
-    _mock_getInfo = value;
-    _mock_getInfo_expected = expected;
-    _mock_getInfo_called = 0;
-  }
-
-  private PlayerInfo _mock_getInfo;
-  private int _mock_getInfo_expected;
-  private int _mock_getInfo_called;
-
-  override PlayerPawn getPawn()
-  {
-    ++_mock_getPawn_called;
-    return _mock_getPawn;
-  }
-
-  void expect_getPawn(PlayerPawn value, int expected = 1)
-  {
-    _mock_getPawn = value;
-    _mock_getPawn_expected = expected;
-    _mock_getPawn_called = 0;
-  }
-
-  override int getNumber()
-  {
-    throwAbortException("implement this!");
-    return 0;
-  }
+  <<mock-method("PlayerInfo", "getInfo")>>
+  <<mock-method("PlayerPawn", "getPawn")>>
+  <<mock-method("int", "getNumber")>>
 
   tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getInfo",
-            _mock_getInfo_expected == _mock_getInfo_called)
-      .push(getClassName() .. ": getPawn",
-            _mock_getPawn_expected == _mock_getPawn_called);
+      .push(getClassName() .. ": getInfo",   isSatisfied_getInfo())
+      .push(getClassName() .. ": getPawn",   isSatisfied_getPawn())
+      .push(getClassName() .. ": getNumber", isSatisfied_getNumber());
   }
-
-  private PlayerPawn _mock_getPawn;
-  private int _mock_getPawn_expected;
-  private int _mock_getPawn_called;
 }
 #+end_src
 
@@ -4769,67 +4314,17 @@ class tt_QuestionMock : tt_Question
 {
   static tt_QuestionMock of() { return new("tt_QuestionMock"); }
 
-  override bool isRight(string answer)
-  {
-    ++_mock_isRight_called;
-    return _mock_isRight;
-  }
-
-  void expect_isRight(bool value, int expected = 1)
-  {
-    _mock_isRight = value;
-    _mock_isRight_expected = expected;
-    _mock_isRight_called = 0;
-  }
-
-  private bool _mock_isRight;
-  private int _mock_isRight_expected;
-  private int _mock_isRight_called;
-
-  override string getDescription()
-  {
-    ++_mock_getDescription_called;
-    return _mock_getDescription;
-  }
-
-  void expect_getDescription(String value, int expected = 1)
-  {
-    _mock_getDescription = value;
-    _mock_getDescription_expected = expected;
-    _mock_getDescription_called = 0;
-  }
-
-  private string _mock_getDescription;
-  private int _mock_getDescription_expected;
-  private int _mock_getDescription_called;
-
-  override string getHintFor(string answer)
-  {
-    ++_mock_getHintFor_called;
-    return _mock_getHintFor;
-  }
-
-  void expect_getHintFor(String value, int expected = 1)
-  {
-    _mock_getHintFor = value;
-    _mock_getHintFor_expected = expected;
-    _mock_getHintFor_called = 0;
-  }
+  <<mock-method("bool", "isRight", "string answer")>>
+  <<mock-method("string", "getDescription")>>
+  <<mock-method("string", "getHintFor", "string answer")>>
 
   tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. "isRight",
-            _mock_isRight_expected == _mock_isRight_called)
-      .push(getClassName() .. "getDescription",
-            _mock_getDescription_expected == _mock_getDescription_called)
-      .push(getClassName() .. "getHintFor",
-            _mock_getHintFor_expected == _mock_getHintFor_called);
+      .push(getClassName() .. ": isRight",        isSatisfied_isRight())
+      .push(getClassName() .. ": getDescription", isSatisfied_getDescription())
+      .push(getClassName() .. ": getHintFor",     isSatisfied_getHintFor());
   }
-
-  private string _mock_getHintFor;
-  private int _mock_getHintFor_expected;
-  private int _mock_getHintFor_called;
 }
 #+end_src
 
@@ -5183,141 +4678,31 @@ class tt_RandomCharactersLessonSettingsMock : tt_RandomCharactersLessonSettings
 {
   static tt_RandomCharactersLessonSettingsMock of() { return new("tt_RandomCharactersLessonSettingsMock"); }
 
-  override int getLessonLength()
+  <<mock-method("int",    "getLessonLength")>>
+  <<mock-method("bool",   "isUppercaseLettersEnabled")>>
+  <<mock-method("bool",   "isLowercaseLettersEnabled")>>
+  <<mock-method("bool",   "isNumbersEnabled")>>
+  <<mock-method("bool",   "isPunctuationEnabled")>>
+  <<mock-method("bool",   "isSymbolsEnabled")>>
+  <<mock-method("bool",   "isCustomCharactersEnabled")>>
+  <<mock-method("string", "getCustomCharacters")>>
+
+  tt_Satisfaction getSatisfaction()
   {
-    ++_mock_getLessonLength_called;
-    return _mock_getLessonLength;
+    string myName = getClassName();
+    return tt_Satisfaction.of()
+      .push(myName .. ": getLessonLength", isSatisfied_getLessonLength())
+      .push(myName .. ": isUppercaseLettersEnabled",
+            isSatisfied_isUppercaseLettersEnabled())
+      .push(myName .. ": isLowercaseLettersEnabled",
+            isSatisfied_isLowercaseLettersEnabled())
+      .push(myName .. ": isNumbersEnabled", isSatisfied_isNumbersEnabled())
+      .push(myName .. ": isPunctuationEnabled", isSatisfied_isPunctuationEnabled())
+      .push(myName .. ": isSymbolsEnabled", isSatisfied_isSymbolsEnabled())
+      .push(myName .. ": isCustomCharactersEnabled",
+            isSatisfied_isCustomCharactersEnabled())
+      .push(myName .. ": getCustomCharacters", isSatisfied_getCustomCharacters());
   }
-
-  void expect_getLessonLength(int value, int expected = 1)
-  {
-    _mock_getLessonLength = value;
-    _mock_getLessonLength_expected = expected;
-    _mock_getLessonLength_called = 0;
-  }
-
-  private int _mock_getLessonLength;
-  private int _mock_getLessonLength_expected;
-  private int _mock_getLessonLength_called;
-
-  override bool isUppercaseLettersEnabled()
-  {
-    ++_mock_isUppercaseLettersEnabled_called;
-    return _mock_isUppercaseLettersEnabled;
-  }
-
-  void expect_isUppercaseLettersEnabled(bool value, int expected = 1)
-  {
-    _mock_isUppercaseLettersEnabled = value;
-    _mock_isUppercaseLettersEnabled_expected = expected;
-    _mock_isUppercaseLettersEnabled_called = 0;
-  }
-
-  private bool _mock_isUppercaseLettersEnabled;
-  private int _mock_isUppercaseLettersEnabled_expected;
-  private int _mock_isUppercaseLettersEnabled_called;
-
-  override bool isLowercaseLettersEnabled()
-  {
-    ++_mock_isLowercaseLettersEnabled_called;
-    return _mock_isLowercaseLettersEnabled;
-  }
-
-  void expect_isLowercaseLettersEnabled(bool value, int expected = 1)
-  {
-    _mock_isLowercaseLettersEnabled = value;
-    _mock_isLowercaseLettersEnabled_expected = expected;
-    _mock_isLowercaseLettersEnabled_called = 0;
-  }
-
-  private bool _mock_isLowercaseLettersEnabled;
-  private int _mock_isLowercaseLettersEnabled_expected;
-  private int _mock_isLowercaseLettersEnabled_called;
-
-  override bool isNumbersEnabled()
-  {
-    ++_mock_isNumbersEnabled_called;
-    return _mock_isNumbersEnabled;
-  }
-
-  void expect_isNumbersEnabled(bool value, int expected = 1)
-  {
-    _mock_isNumbersEnabled = value;
-    _mock_isNumbersEnabled_expected = expected;
-    _mock_isNumbersEnabled_called = 0;
-  }
-
-  private bool _mock_isNumbersEnabled;
-  private int _mock_isNumbersEnabled_expected;
-  private int _mock_isNumbersEnabled_called;
-
-  override bool isPunctuationEnabled()
-  {
-    ++_mock_isPunctuationEnabled_called;
-    return _mock_isPunctuationEnabled;
-  }
-
-  void expect_isPunctuationEnabled(bool value, int expected = 1)
-  {
-    _mock_isPunctuationEnabled = value;
-    _mock_isPunctuationEnabled_expected = expected;
-    _mock_isPunctuationEnabled_called = 0;
-  }
-
-  private bool _mock_isPunctuationEnabled;
-  private int _mock_isPunctuationEnabled_expected;
-  private int _mock_isPunctuationEnabled_called;
-
-  override bool isSymbolsEnabled()
-  {
-    ++_mock_isSymbolsEnabled_called;
-    return _mock_isSymbolsEnabled;
-  }
-
-  void expect_isSymbolsEnabled(bool value, int expected = 1)
-  {
-    _mock_isSymbolsEnabled = value;
-    _mock_isSymbolsEnabled_expected = expected;
-    _mock_isSymbolsEnabled_called = 0;
-  }
-
-  private bool _mock_isSymbolsEnabled;
-  private int _mock_isSymbolsEnabled_expected;
-  private int _mock_isSymbolsEnabled_called;
-
-  override bool isCustomCharactersEnabled()
-  {
-    ++_mock_isCustomCharactersEnabled_called;
-    return _mock_isCustomCharactersEnabled;
-  }
-
-  void expect_isCustomCharactersEnabled(bool value, int expected = 1)
-  {
-    _mock_isCustomCharactersEnabled = value;
-    _mock_isCustomCharactersEnabled_expected = expected;
-    _mock_isCustomCharactersEnabled_called = 0;
-  }
-
-  private bool _mock_isCustomCharactersEnabled;
-  private int _mock_isCustomCharactersEnabled_expected;
-  private int _mock_isCustomCharactersEnabled_called;
-
-  override string getCustomCharacters()
-  {
-    ++_mock_getCustomCharacters_called;
-    return _mock_getCustomCharacters;
-  }
-
-  void expect_getCustomCharacters(String value, int expected = 1)
-  {
-    _mock_getCustomCharacters = value;
-    _mock_getCustomCharacters_expected = expected;
-    _mock_getCustomCharacters_called = 0;
-  }
-
-  private string _mock_getCustomCharacters;
-  private int _mock_getCustomCharacters_expected;
-  private int _mock_getCustomCharacters_called;
 }
 #+end_src
 
@@ -5405,28 +4790,12 @@ class tt_MixedLessonSettingsMock : tt_MixedLessonSettings
     return new("tt_MixedLessonSettingsMock");
   }
 
-  override bool getLessonEnabled(uint i)
-  {
-    ++_mock_getLessonEnabled_called;
-    return _mock_getLessonEnabled;
-  }
-
-  void expect_getLessonEnabled(bool value, int expected = 1)
-  {
-    _mock_getLessonEnabled = value;
-    _mock_getLessonEnabled_expected = expected;
-    _mock_getLessonEnabled_called = 0;
-  }
-
-  private bool _mock_getLessonEnabled;
-  private int _mock_getLessonEnabled_expected;
-  private int _mock_getLessonEnabled_called;
+  <<mock-method("bool", "getLessonEnabled", "uint i")>>
 
   tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getLessonEnabled",
-            _mock_getLessonEnabled_expected == _mock_getLessonEnabled_called);
+      .push(getClassName() .. ": getLessonEnabled", isSatisfied_getLessonEnabled());
   }
 }
 #+end_src
@@ -5501,22 +4870,13 @@ class tt_StaleMarkerMock : tt_StaleMarker
 {
   static tt_StaleMarkerMock of() { return new("tt_StaleMarkerMock"); }
 
-  override bool isStale()
-  {
-    ++_mock_isStale_called;
-    return _mock_isStale;
-  }
+  <<mock-method("bool", "isStale")>>
 
-  void expect_isStale(bool value, int expected = 1)
+  tt_Satisfaction getSatisfaction()
   {
-    _mock_isStale = value;
-    _mock_isStale_expected = expected;
-    _mock_isStale_called = 0;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": isStale", isSatisfied_isStale());
   }
-
-  private bool _mock_isStale;
-  private int _mock_isStale_expected;
-  private int _mock_isStale_called;
 }
 #+end_src
 
@@ -5974,29 +5334,13 @@ class tt_TargetSourceMock : tt_TargetSource
 {
   static tt_TargetSourceMock of() { return new("tt_TargetSourceMock"); }
 
-  override tt_Targets getTargets()
-  {
-    ++_mock_getTargets_called;
-    return _mock_getTargets;
-  }
+  <<mock-method("tt_Targets", "getTargets")>>
 
-  void expect_getTargets(tt_Targets value, int expected = 1)
-  {
-    _mock_getTargets = value;
-    _mock_getTargets_expected = expected;
-    _mock_getTargets_called = 0;
-  }
-
-  tt_Satisfaction getSatisfaction()
+  tt_Satisfaction getSatisfaction() const
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": getTargets",
-            _mock_getTargets_expected == _mock_getTargets_called);
+      .push(getClassName() .. ": getTargets", isSatisfied_getTargets());
   }
-
-  private tt_Targets _mock_getTargets;
-  private int _mock_getTargets_expected;
-  private int _mock_getTargets_called;
 }
 #+end_src
 
@@ -6594,22 +5938,13 @@ class tt_TargetWidgetSourceMock : tt_TargetWidgetSource
 {
   static tt_TargetWidgetSourceMock of() { return new("tt_TargetWidgetSourceMock"); }
 
-  override tt_TargetWidgets getWidgets(RenderEvent event)
-  {
-    ++_mock_getWidgets_called;
-    return _mock_getWidgets;
-  }
+  <<mock-method("tt_TargetWidgets", "getWidgets", "RenderEvent event")>>
 
-  void expect_getWidgets(tt_TargetWidgets value, int expected = 1)
+  tt_Satisfaction getSatisfaction() const
   {
-    _mock_getWidgets = value;
-    _mock_getWidgets_expected = expected;
-    _mock_getWidgets_called = 0;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": getWidgets", isSatisfied_getWidgets());
   }
-
-  private tt_TargetWidgets _mock_getWidgets;
-  private int _mock_getWidgets_expected;
-  private int _mock_getWidgets_called;
 }
 #+end_src
 
@@ -6745,19 +6080,13 @@ class tt_ViewMock : tt_View
 {
   static tt_ViewMock of() { return new("tt_ViewMock"); }
 
-  override void draw(RenderEvent event)
-  {
-    ++_mock_draw_called;
-  }
+  <<mock-method("void", "draw", "RenderEvent event")>>
 
-  void expect_draw(int expected = 1)
+  tt_Satisfaction getSatisfaction() const
   {
-    _mock_draw_expected = expected;
-    _mock_draw_called = 0;
+    return tt_Satisfaction.of()
+      .push(getClassName() .. ": draw", isSatisfied_draw());
   }
-
-  private int _mock_draw_expected;
-  private int _mock_draw_called;
 }
 #+end_src
 
@@ -7312,26 +6641,13 @@ class tt_WorldChangerMock : tt_WorldChanger
 {
   static tt_WorldChangerMock of() { return new("tt_WorldChangerMock"); }
 
-  override void changeWorld()
-  {
-    ++_mock_changeWorld_called;
-  }
-
-  void expect_changeWorld(int expected = 1)
-  {
-    _mock_changeWorld_expected = expected;
-    _mock_changeWorld_called = 0;
-  }
+  <<mock-method("void", "changeWorld")>>
 
   tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": changeWorld",
-            _mock_changeWorld_expected == _mock_changeWorld_called);
+      .push(getClassName() .. ": changeWorld", isSatisfied_changeWorld());
   }
-
-  private int _mock_changeWorld_expected;
-  private int _mock_changeWorld_called;
 }
 #+end_src
 
@@ -7563,26 +6879,13 @@ class tt_EffectMock : tt_Effect
 {
   static tt_EffectMock of() { return new("tt_EffectMock"); }
 
-  override void doEffect()
-  {
-    ++_mock_doEffect_called;
-  }
-
-  void expect_doEffect(int expected = 1)
-  {
-    _mock_doEffect_expected = expected;
-    _mock_doEffect_called = 0;
-  }
+  <<mock-method("void", "doEffect")>>
 
   tt_Satisfaction getSatisfaction()
   {
     return tt_Satisfaction.of()
-      .push(getClassName() .. ": doEffect",
-            _mock_doEffect_expected == _mock_doEffect_called);
+      .push(getClassName() .. ": doEffect", isSatisfied_doEffect());
   }
-
-  private int _mock_doEffect_expected;
-  private int _mock_doEffect_called;
 }
 #+end_src
 
@@ -8308,17 +7611,18 @@ class tt_Satisfaction
 #+end_src
 
 #+name: mock-method
-#+begin_src elisp :var return-type="" function-name="" :exports none
-(format "\
-override %1$s %2$s()
+#+begin_src elisp :var return-type="" function-name="" parameters="" :exports none
+(setq isVoid (string-equal return-type "void"))
+(format (concat "\
+override %1$s %2$s(%3$s)
 {
   ++_mock_%2$s_called;
-  return _mock_%2$s;
+  " (if isVoid "" "return _mock_%2$s;") "
 }
 
-void expect_%2$s(%1$s value, int expected = 1)
+void expect_%2$s(" (if isVoid "" "%1$s value, ") "int expected = 1)
 {
-  _mock_%2$s          = value;
+  " (if isVoid "" "_mock_%2$s = value;") "
   _mock_%2$s_expected = expected;
   _mock_%2$s_called   = 0;
 }
@@ -8332,10 +7636,10 @@ private bool isSatisfied_%2$s()
   return result;
 }
 
-private %1$s _mock_%2$s;
-private int  _mock_%2$s_expected;
-private int  _mock_%2$s_called;
-" return-type function-name)
+" (if isVoid "" "private %1$s _mock_%2$s;") "
+private int _mock_%2$s_expected;
+private int _mock_%2$s_called;
+") return-type function-name parameters)
 #+end_src
 
 * Run :noexport:
