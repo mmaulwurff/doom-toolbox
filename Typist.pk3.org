@@ -2898,7 +2898,11 @@ class tt_MixedLesson : tt_Lesson
       if (lesson.isEnabled()) _enabledLessons.push(lesson.lesson());
 
     uint nEnabledLessons = _enabledLessons.size();
-    if (nEnabledLessons == 0) return NULL;
+    if (nEnabledLessons == 0)
+    {
+      Console.printf("All lessons disabled");
+      return tt_FallbackQuestion.of();
+    }
 
     uint randomLessonIndex = random[typist](0, nEnabledLessons - 1);
 
@@ -2932,9 +2936,14 @@ class tt_RandomCharactersLesson : tt_Lesson
     string characters = composeCharacterRange();
     int    length     = _settings.getLessonLength();
     string picked     = pick(characters, length);
-    let    question   = tt_Match.of(picked, picked);
 
-    return question;
+    if (picked.length() == 0)
+    {
+      Console.printf("Random characters lesson: no characters enabled");
+      return tt_FallbackQuestion.of();
+    }
+
+    return tt_Match.of(picked, picked);
   }
 
   // This function is guaranteed to return non-empty strings.
@@ -2942,11 +2951,11 @@ class tt_RandomCharactersLesson : tt_Lesson
   {
     string characters;
 
-    if (_settings.isUppercaseLettersEnabled()) { characters.AppendFormat("%s", UPPERCASE_LETTERS); }
-    if (_settings.isLowercaseLettersEnabled()) { characters.AppendFormat("%s", LOWERCASE_LETTERS); }
-    if (_settings.isNumbersEnabled         ()) { characters.AppendFormat("%s", NUMBERS          ); }
-    if (_settings.isPunctuationEnabled     ()) { characters.AppendFormat("%s", PUNCTUATION      ); }
-    if (_settings.isSymbolsEnabled         ())
+    if (_settings.isUppercaseLettersEnabled()) characters.appendFormat("%s", UPPERCASE_LETTERS);
+    if (_settings.isLowercaseLettersEnabled()) characters.appendFormat("%s", LOWERCASE_LETTERS);
+    if (_settings.isNumbersEnabled()) characters.appendFormat("%s", NUMBERS);
+    if (_settings.isPunctuationEnabled()) characters.appendFormat("%s", PUNCTUATION);
+    if (_settings.isSymbolsEnabled())
     {
       // GZDoom cannot handle "\\" in a string, so add it manually.
       characters.AppendFormat("%s%c", SYMBOLS, tt_su_Ascii.REVERSE_SOLIDUS);
@@ -2956,19 +2965,15 @@ class tt_RandomCharactersLesson : tt_Lesson
       characters.AppendFormat("%s", _settings.getCustomCharacters());
     }
 
-    if (characters.Length() == 0)
-    {
-      characters = "?";
-    }
-
     return characters;
   }
 
-  // This function expects that characters consist of ASCII characters only.
   // This function is guaranteed to return non-empty strings.
-  private static string pick(String characters, int number)
+  private static string pick(string characters, int number)
   {
-    string picked;
+    if (characters.length() == 0) return "";
+
+    string result;
     int    lastCharacter = characters.CodePointCount() - 1;
 
     for (int i = 0; i < number; ++i)
@@ -2976,10 +2981,10 @@ class tt_RandomCharactersLesson : tt_Lesson
       int randomIndex = random[typist](0, lastCharacter);
       int character   = getCodePointAt(characters, randomIndex);
 
-      picked.AppendFormat("%c", character);
+      result.appendFormat("%c", character);
     }
 
-    return picked;
+    return result;
   }
 
   // Attention! O(n)
@@ -3071,7 +3076,7 @@ class tt_StringSet : tt_Lesson
       Console.printf("%s: getQuestion: no words in lump %s.",
                      getClassName(),
                      _lumpName);
-      return NULL;
+      return tt_FallbackQuestion.of();
     }
 
     int    wordIndex = random[typist](0, nWords - 1);
@@ -3082,7 +3087,6 @@ class tt_StringSet : tt_Lesson
   }
 
   // Removes too short words, removes duplicates.
-  // Guarantees that the result has at least one word.
   private static void filterWords(Array<String> input, out Array<String> result)
   {
     // Use map to remove duplicates.
@@ -3096,9 +3100,6 @@ class tt_StringSet : tt_Lesson
 
     foreach (word, value : wordSet)
       result.push(word);
-
-    if (result.size() == 0)
-      result.push("<no words found>");
   }
 
   private string        _lumpName;
@@ -4350,6 +4351,25 @@ class tt_QuestionMock : tt_Question
       .push(getClassName() .. ": getDescription", isSatisfied_getDescription())
       .push(getClassName() .. ": getHintFor",     isSatisfied_getHintFor());
   }
+}
+#+end_src
+
+** ~FallbackQuestion~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/question/tt_question.zs
+
+class tt_FallbackQuestion : tt_Question
+{
+  static tt_FallbackQuestion of() { return new("tt_FallbackQuestion"); }
+
+  override bool isRight(string answer) { return false; }
+
+  override string getDescription()
+  {
+    return StringTable.localize("TT_FALLBACK_QUESTION");
+  }
+
+  override string getHintFor(string answer) { return getDescription(); }
 }
 #+end_src
 
@@ -7112,6 +7132,9 @@ TT_SOUND_OPTIONS_TITLE_IN  = "Typist.pk3 Sound Options";
 TT_SOUND_THEME          = "Sound theme";
 TT_SOUND_ENABLED        = "Sound effects";
 TT_SOUND_TYPING_ENABLED = "Typing sound";
+
+// Helper string
+TT_FALLBACK_QUESTION = "<empty lesson>";
 #+end_src
 
 * Options Menu
@@ -7181,10 +7204,6 @@ OptionMenu tt_LessonOptions
   Option     "$TT_LESSON_RANDOM" , tt_is_random_enabled  , OnOff
   Option     "$TT_LESSON_MATH"   , tt_is_maths_enabled   , OnOff
   Option     "$TT_CUSTOM_TEXT"   , tt_is_custom_enabled  , OnOff
-
-  StaticText ""
-  // TODO: add a fallback lesson so this is not needed.
-  StaticText "Please enable at least one lesson."
 
   StaticText ""
   Submenu    "$TT_RANDOM_LESSON_TITLE", tt_RandomLesson
