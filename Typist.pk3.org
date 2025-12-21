@@ -4711,14 +4711,14 @@ class tt_RandomCharactersLessonSettingsMock : tt_RandomCharactersLessonSettings
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 
 // Random Character Lesson configuration
-server int    tt_rc_length = 3;
-server bool   tt_rc_uppercase_letters_enabled = false;
-server bool   tt_rc_lowercase_letters_enabled = true;
-server bool   tt_rc_numbers_enabled           = false;
-server bool   tt_rc_punctuation_enabled       = false;
-server bool   tt_rc_symbols_enabled           = false;
-server bool   tt_rc_custom_enabled            = false;
-server string tt_rc_custom = "";
+user int    tt_rc_length = 3;
+user bool   tt_rc_uppercase_letters_enabled = false;
+user bool   tt_rc_lowercase_letters_enabled = true;
+user bool   tt_rc_numbers_enabled           = false;
+user bool   tt_rc_punctuation_enabled       = false;
+user bool   tt_rc_symbols_enabled           = false;
+user bool   tt_rc_custom_enabled            = false;
+user string tt_rc_custom = "";
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_random_characters_lesson_settings_impl.zs
@@ -4805,16 +4805,16 @@ class tt_MixedLessonSettingsMock : tt_MixedLessonSettings
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 
 // Mixed Lesson configuration
-server bool tt_is_lesson_enabled_0 = false;
-server bool tt_is_lesson_enabled_1 = false;
-server bool tt_is_lesson_enabled_2 = false;
-server bool tt_is_lesson_enabled_3 = false;
-server bool tt_is_lesson_enabled_4 = false;
-server bool tt_is_lesson_enabled_5 = false;
-server bool tt_is_lesson_enabled_6 = false;
-server bool tt_is_lesson_enabled_7 = false;
-server bool tt_is_lesson_enabled_8 = false;
-server bool tt_is_lesson_enabled_9 = false;
+user bool tt_is_lesson_enabled_0 = false;
+user bool tt_is_lesson_enabled_1 = false;
+user bool tt_is_lesson_enabled_2 = false;
+user bool tt_is_lesson_enabled_3 = false;
+user bool tt_is_lesson_enabled_4 = false;
+user bool tt_is_lesson_enabled_5 = false;
+user bool tt_is_lesson_enabled_6 = false;
+user bool tt_is_lesson_enabled_7 = false;
+user bool tt_is_lesson_enabled_8 = false;
+user bool tt_is_lesson_enabled_9 = false;
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_setting.zs
