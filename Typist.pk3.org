@@ -250,14 +250,10 @@ class tt_PlayerSupervisor : tt_PlayerHandler
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 
 // Mixed Lesson configuration
-user bool tt_is_random_characters_enabled = false;
-user bool tt_is_gzdoom_enabled = false;
-user bool tt_is_cpp_enabled = false;
-user bool tt_is_maths_enabled = false;
 user bool tt_is_english_enabled = true;
-user bool tt_is_russian_enabled = false;
-user bool tt_is_custom_enabled = false;
-user bool tt_is_unix_enabled = false;
+user bool tt_is_random_enabled  = false;
+user bool tt_is_maths_enabled   = false;
+user bool tt_is_custom_enabled  = false;
 #+end_src
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player_handler/tt_player_supervisor.zs
@@ -267,30 +263,14 @@ user bool tt_is_unix_enabled = false;
     let randomLessonSettings = tt_RandomCharactersLessonSettingsImpl.of(playerSource);
 
     Array<tt_SwitchableLesson> lessons = {
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_random_characters_enabled"),
-            tt_RandomCharactersLesson.of(randomLessonSettings)),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_gzdoom_enabled"),
-            tt_StringSet.of("tt_gzdoom")),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_cpp_enabled"),
-            tt_StringSet.of("tt_cpp")),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_maths_enabled"),
-            tt_MathsLesson.of()),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_english_enabled"),
-            tt_StringSet.of("tt_1000")),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_russian_enabled"),
-            tt_StringSet.of("tt_1000_ru")),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_custom_enabled"),
-            tt_StringSet.of("typist_custom_text")),
-      tt_SwitchableLesson
-        .of(tt_BoolCvar.of(playerSource, "tt_is_unix_enabled"),
-            tt_StringSet.of("tt_nix"))
+      tt_SwitchableLesson.of(tt_BoolCvar.of(playerSource, "tt_is_random_enabled"),
+                             tt_RandomCharactersLesson.of(randomLessonSettings)),
+      tt_SwitchableLesson.of(tt_BoolCvar.of(playerSource, "tt_is_maths_enabled"),
+                             tt_MathsLesson.of()),
+      tt_SwitchableLesson.of(tt_BoolCvar.of(playerSource, "tt_is_english_enabled"),
+                             tt_StringSet.of("tt_1000")),
+      tt_SwitchableLesson.of(tt_BoolCvar.of(playerSource, "tt_is_custom_enabled"),
+                             tt_StringSet.of("typist_custom_text"))
     };
 
     return tt_MixedLesson.of(lessons);
@@ -7100,14 +7080,8 @@ TT_BUDDHA_NOTE    = "Applies on new level start.";
 TT_LESSON_OPTIONS_TITLE_OUT = "Lesson Options";
 TT_LESSON_OPTIONS_TITLE_IN  = "Typist.pk3 Lesson Options";
 
-TT_LESSON_LETTERS = "Random Letters";
-TT_LESSON_NUMBERS = "Random Numbers";
-TT_LESSON_GZDOOM  = "GZDoom Dev";
-TT_LESSON_CPP     = "C++";
-TT_LESSON_MATH    = "Arithmetic";
-TT_LESSON_1000    = "1000 Basic English Words";
-TT_LESSON_1000_RU = "1000 Basic Russian Words";
-
+TT_LESSON_MATH = "Arithmetic";
+TT_LESSON_1000 = "1000 Basic English Words";
 TT_CUSTOM_TEXT = "Custom Text";
 
 TT_CUSTOM_LESSON_HELP_TEXT = "\cfHow to set up Custom Text lesson\c-\
@@ -7138,12 +7112,6 @@ TT_SOUND_OPTIONS_TITLE_IN  = "Typist.pk3 Sound Options";
 TT_SOUND_THEME          = "Sound theme";
 TT_SOUND_ENABLED        = "Sound effects";
 TT_SOUND_TYPING_ENABLED = "Typing sound";
-
-// Acknowledgments /////////////////////////////////////////////////////////////
-
-TT_ACKNOWLEDGMENTS_TITLE = "Acknowledgments";
-TT_ACKNOWLEDGMENTS_TITLE_FULL = "Typist.pk3 Acknowledgments";
-TT_ACKNOWLEDGMENTS_TEXT = "\cfCredits\c-\n\n- libeye (Level and screen projections): KeksDose\n- Clematis: ZippeyKeys12 (Zain Aamer)\n- miniwad.wad: fraggle\n- 1000 basic English words: Wikipedia\n- Frequency dictionary of the modern Russian language: Wikipedia\n- Sound design: Captain J\n\n\cfThanks\c-\n\n- LGR for Sega's Typing of the Dead: A Zombie-Slaying Education video\n- Marrub for ZScript documentation\n- Accensus for inviting me into Discord server and for bug reports\n- kadu522 for support\n- dard22 for bug reports\n- Jarewill for bug reports\n\n(see details in the Readme.md file inside the pk3)\n";
 #+end_src
 
 * Options Menu
@@ -7169,9 +7137,6 @@ OptionMenu tt_Options
   Submenu    "General Options"                , tt_GeneralOptions
   Submenu    "$TT_LESSON_OPTIONS_TITLE_OUT"   , tt_LessonOptions
   Submenu    "$TT_SOUND_OPTIONS_TITLE_OUT"    , tt_SoundOptions
-
-  StaticText ""
-  Submenu    "$TT_ACKNOWLEDGMENTS_TITLE"      , tt_Acknowledgments
 }
 
 OptionMenu tt_GeneralOptions
@@ -7212,16 +7177,10 @@ OptionMenu tt_LessonOptions
 {
   Title      "$TT_LESSON_OPTIONS_TITLE_IN"
 
-  // TODO: add this doc.
-  // See docs/adding-new-lesson.md.
-  Option "$TT_LESSON_RANDOM"  , tt_is_random_characters_enabled, OnOff
-  Option "$TT_LESSON_GZDOOM"  , tt_is_gzdoom_enabled, OnOff
-  Option "$TT_LESSON_CPP"     , tt_is_cpp_enabled, OnOff
-  Option "$TT_LESSON_MATH"    , tt_is_maths_enabled, OnOff
-  Option "$TT_LESSON_1000"    , tt_is_english_enabled, OnOff
-  Option "$TT_LESSON_1000_RU" , tt_is_russian_enabled, OnOff
-  Option "$TT_CUSTOM_TEXT"    , tt_is_custom_enabled, OnOff
-  Option "$TT_NIX_LESSON"     , tt_is_unix_enabled, OnOff
+  Option     "$TT_LESSON_1000"   , tt_is_english_enabled , OnOff
+  Option     "$TT_LESSON_RANDOM" , tt_is_random_enabled  , OnOff
+  Option     "$TT_LESSON_MATH"   , tt_is_maths_enabled   , OnOff
+  Option     "$TT_CUSTOM_TEXT"   , tt_is_custom_enabled  , OnOff
 
   StaticText ""
   // TODO: add a fallback lesson so this is not needed.
@@ -7260,13 +7219,6 @@ OptionMenu tt_SoundOptions
   Option "$TT_SOUND_ENABLED"        , tt_sound_enabled        , OnOff
   Option "$TT_SOUND_TYPING_ENABLED" , tt_sound_typing_enabled , OnOff
   Option "$TT_SOUND_THEME"          , tt_sound_theme          , tt_SoundThemes
-}
-
-OptionMenu tt_Acknowledgments
-{
-  Title "$TT_ACKNOWLEDGMENTS_TITLE_FULL"
-
-  StaticText "$TT_ACKNOWLEDGMENTS_TEXT"
 }
 
 OptionMenu tt_RandomLesson

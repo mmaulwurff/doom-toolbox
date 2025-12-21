@@ -2,32 +2,9 @@
 
 version = 1
 
-
-# Frequency dictionary of the modern Russian language
-# https://en.wiktionary.org/wiki/Appendix:Frequency_dictionary_of_the_modern_Russian_language_(the_Russian_National_Corpus)/1
-[[annotations]]
-path = "tt_1000_ru.txt"
-SPDX-FileCopyrightText = ["© 2009 O. N. Lyashevskaya, S. A. Sharov", "© 2017-2024 Wikipedia contributors"]
-SPDX-License-Identifier = "CC-BY-SA-4.0"
-
 # 1000 basic English words
 # https://en.wiktionary.org/wiki/Appendix:1000_basic_English_words
 [[annotations]]
 path = "tt_1000.txt"
 SPDX-FileCopyrightText = "© 2004-2024 Wikipedia contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
-
-[[annotations]]
-path = "tt_cpp.txt"
-SPDX-FileCopyrightText = "© 2019 Alexander Kromm <mmaulwurff@gmail.com>"
-SPDX-License-Identifier = "CC0-1.0"
-
-[[annotations]]
-path = "tt_gzdoom.txt"
-SPDX-FileCopyrightText = "© 2019 Alexander Kromm <mmaulwurff@gmail.com>"
-SPDX-License-Identifier = "CC0-1.0"
-
-[[annotations]]
-path = "tt_nix.txt"
-SPDX-FileCopyrightText = "© 2019 Alexander Kromm <mmaulwurff@gmail.com>"
-SPDX-License-Identifier = "CC0-1.0"
