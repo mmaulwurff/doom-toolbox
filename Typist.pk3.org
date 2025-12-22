@@ -38,26 +38,6 @@ class tt_PlayerHandler abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_PlayerHandlerMock : tt_PlayerHandler
-{
-  static tt_PlayerHandlerMock of() { return new("tt_PlayerHandlerMock"); }
-
-  <<mock-method("void", "reset", "int playerNumber")>>
-  <<mock-method("void", "processKey", "tt_Character character")>>
-  <<mock-method("void", "processInput", "int type")>>
-  <<mock-method("void", "tick")>>
-  <<mock-method("void", "reportDead", "Actor dead")>>
-  <<mock-method("bool", "isCapturingKeys")>>
-  <<mock-method("void", "unlockMode")>>
-  <<mock-method("void", "forceCombat")>>
-  <<mock-method("void", "draw", "RenderEvent event")>>
-}
-#+end_src
-
 ** ~PlayerSupervisor~
 
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
@@ -1761,24 +1741,6 @@ class tt_SoundPlayer abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_SoundPlayerMock : tt_SoundPlayer
-{
-  static tt_SoundPlayerMock of() { return new("tt_SoundPlayerMock"); }
-
-  <<mock-method("void", "playSound", "string soundId")>>
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": playSound", isSatisfied_playSound());
-  }
-}
-#+end_src
-
 * Firer
 
 ** ~FirerImpl~
@@ -2047,26 +2009,6 @@ class tt_InputManager abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_InputManagerMock : tt_InputManager
-{
-  static tt_InputManagerMock of() { return new("tt_InputManagerMock"); }
-
-  <<mock-method("void", "manageInput")>>
-  <<mock-method("bool", "isCapturingKeys")>>
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": playSound", isSatisfied_manageInput())
-      .push(getClassName() .. ": isCapturingKeys", isSatisfied_isCapturingKeys());
-  }
-}
-#+end_src
-
 * Key Processor
 
 ** ~KeyProcessor~
@@ -2077,24 +2019,6 @@ class tt_InputManagerMock : tt_InputManager
 class tt_KeyProcessor abstract
 {
   abstract void processKey(tt_Character character);
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_KeyProcessorMock : tt_KeyProcessor
-{
-  static tt_KeyProcessorMock of() { return new("tt_KeyProcessorMock"); }
-
-  <<mock-method("void", "processKey", "tt_Character character")>>
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": processKey", isSatisfied_processKey());
-  }
 }
 #+end_src
 
@@ -2925,9 +2849,7 @@ class tt_RandomCharactersLesson : tt_Lesson
   static tt_RandomCharactersLesson of(tt_RandomCharactersLessonSettings settings)
   {
     let result = new("tt_RandomCharactersLesson");
-
     result._settings = settings;
-
     return result;
   }
 
@@ -4491,26 +4413,6 @@ class tt_IntSetting abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_IntSettingMock : tt_IntSetting
-{
-  static tt_IntSettingMock of() { return new("tt_IntSettingMock"); }
-
-  <<mock-method("bool", "isDefined")>>
-  <<mock-method("int",  "get")>>
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": isDefined", isSatisfied_isDefined())
-      .push(getClassName() .. ": get",       isSatisfied_get());
-  }
-}
-#+end_src
-
 ** ~FloatSetting~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/settings/tt_setting.zs
@@ -4552,26 +4454,6 @@ class tt_StringSetting abstract
   abstract bool isDefined();
 
   abstract string get();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_StringSettingMock : tt_StringSetting
-{
-  static tt_StringSettingMock of() { return new("tt_StringSettingMock"); }
-
-  <<mock-method("bool",   "isDefined")>>
-  <<mock-method("string", "get")>>
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": isDefined", isSatisfied_isDefined())
-      .push(getClassName() .. ": get", isSatisfied_get());
-  }
 }
 #+end_src
 
@@ -4715,42 +4597,6 @@ class tt_RandomCharactersLessonSettings abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_RandomCharactersLessonSettingsMock : tt_RandomCharactersLessonSettings
-{
-  static tt_RandomCharactersLessonSettingsMock of() { return new("tt_RandomCharactersLessonSettingsMock"); }
-
-  <<mock-method("int",    "getLessonLength")>>
-  <<mock-method("bool",   "isUppercaseLettersEnabled")>>
-  <<mock-method("bool",   "isLowercaseLettersEnabled")>>
-  <<mock-method("bool",   "isNumbersEnabled")>>
-  <<mock-method("bool",   "isPunctuationEnabled")>>
-  <<mock-method("bool",   "isSymbolsEnabled")>>
-  <<mock-method("bool",   "isCustomCharactersEnabled")>>
-  <<mock-method("string", "getCustomCharacters")>>
-
-  tt_Satisfaction getSatisfaction()
-  {
-    string myName = getClassName();
-    return tt_Satisfaction.of()
-      .push(myName .. ": getLessonLength", isSatisfied_getLessonLength())
-      .push(myName .. ": isUppercaseLettersEnabled",
-            isSatisfied_isUppercaseLettersEnabled())
-      .push(myName .. ": isLowercaseLettersEnabled",
-            isSatisfied_isLowercaseLettersEnabled())
-      .push(myName .. ": isNumbersEnabled", isSatisfied_isNumbersEnabled())
-      .push(myName .. ": isPunctuationEnabled", isSatisfied_isPunctuationEnabled())
-      .push(myName .. ": isSymbolsEnabled", isSatisfied_isSymbolsEnabled())
-      .push(myName .. ": isCustomCharactersEnabled",
-            isSatisfied_isCustomCharactersEnabled())
-      .push(myName .. ": getCustomCharacters", isSatisfied_getCustomCharacters());
-  }
-}
-#+end_src
-
 *** ~RandomCharactersLessonSettingsImpl~
 
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
@@ -4827,24 +4673,6 @@ class tt_StaleMarker abstract
   // Attention! Calling this function may change the state of tt_StaleMarker.
   // Returns true if this instance is currently stale.
   abstract bool isStale();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_StaleMarkerMock : tt_StaleMarker
-{
-  static tt_StaleMarkerMock of() { return new("tt_StaleMarkerMock"); }
-
-  <<mock-method("bool", "isStale")>>
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": isStale", isSatisfied_isStale());
-  }
 }
 #+end_src
 
@@ -5898,24 +5726,6 @@ class tt_TargetWidgetSource abstract
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_TargetWidgetSourceMock : tt_TargetWidgetSource
-{
-  static tt_TargetWidgetSourceMock of() { return new("tt_TargetWidgetSourceMock"); }
-
-  <<mock-method("tt_TargetWidgets", "getWidgets", "RenderEvent event")>>
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": getWidgets", isSatisfied_getWidgets());
-  }
-}
-#+end_src
-
 ** ~TargetWidget~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widgets.zs
@@ -6037,24 +5847,6 @@ class tt_RgbColors
 class tt_View abstract
 {
   ui abstract void draw(RenderEvent event);
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_ViewMock : tt_View
-{
-  static tt_ViewMock of() { return new("tt_ViewMock"); }
-
-  <<mock-method("void", "draw", "RenderEvent event")>>
-
-  tt_Satisfaction getSatisfaction() const
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": draw", isSatisfied_draw());
-  }
 }
 #+end_src
 
@@ -6598,24 +6390,6 @@ class tt_TargetOverlay : tt_View
 class tt_WorldChanger abstract
 {
   play abstract void changeWorld();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_WorldChangerMock : tt_WorldChanger
-{
-  static tt_WorldChangerMock of() { return new("tt_WorldChangerMock"); }
-
-  <<mock-method("void", "changeWorld")>>
-
-  tt_Satisfaction getSatisfaction()
-  {
-    return tt_Satisfaction.of()
-      .push(getClassName() .. ": changeWorld", isSatisfied_changeWorld());
-  }
 }
 #+end_src
 
