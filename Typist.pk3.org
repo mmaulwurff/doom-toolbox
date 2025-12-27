@@ -8,6 +8,174 @@ Typist.pk3 turns FPS games into typing exercises.
 
 TODO: add instructions.
 
+* EventHandler
+
+** ~EventHandler~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/event_handler/tt_event_handler.zs
+
+// Entry point for Typist.pk3.
+class tt_EventHandler : EventHandler
+{
+  override void worldTick()
+  {
+    _playerHandler.tick();
+    _server.tick();
+    self.IsUiProcessor = _playerHandler.isCapturingKeys();
+  }
+
+  override bool uiProcess(UiEvent event)
+  {
+    let character = tt_Character.of(event.type, event.keyChar, event.isCtrl);
+    _playerHandler.processKey(character);
+
+    return false;
+  }
+
+  override bool inputProcess(InputEvent event)
+  {
+    _playerHandler.processInput(event.type);
+    return false;
+  }
+
+  override void playerEntered(PlayerEvent event)
+  {
+    if (gameState != GS_Level && gameState != GS_StartUp) return;
+
+    self.RequireMouse = true;
+
+    if (_server == NULL) _server = tt_Server.of();
+
+    int playerNumber = event.playerNumber;
+
+    _server.addPlayer(playerNumber);
+    tt_GameTweaks.tweakPlayer(players[playerNumber]);
+
+    if (playerNumber == consolePlayer)
+      _playerHandler = tt_PlayerSupervisor.of(consolePlayer);
+  }
+
+  override void worldThingDied(WorldEvent event)
+  {
+    _playerHandler.reportDead(event.Thing);
+  }
+
+  override void worldLoaded(WorldEvent event)
+  {
+    bool isTitlemap = (level.mapName ~== "TITLEMAP");
+    if (isTitlemap)
+      destroy();
+  }
+
+  override void worldUnloaded(WorldEvent event)
+  {
+    self.IsUiProcessor = false;
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    _playerHandler.draw(event);
+  }
+
+  override void consoleProcess(ConsoleEvent event)
+  {
+    string command = event.Name;
+
+    if (command.left(3) != "tt_") return;
+
+    if      (command == "tt_unlock_mode"  ) _playerHandler.unlockMode();
+    else if (command == "tt_force_combat" ) _playerHandler.forceCombat();
+    else if (command == "tt_reset_targets") _playerHandler.reset(consolePlayer);
+  }
+
+  override void networkCommandProcess(NetworkCommand command)
+  {
+    if (command.command == "tt_target")
+    {
+      double x = command.readDouble();
+      double y = command.readDouble();
+      double z = command.readDouble();
+
+      _server.react(command.player, (x, y, z));
+    }
+  }
+
+  private tt_PlayerHandler _playerHandler;
+  private tt_Server        _server;
+}
+#+end_src
+
+** ~GameTweaks~
+
+#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
+
+// Buddha
+server bool tt_buddha_enabled = true;
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/tt_game_tweaks.zs
+
+// Handles game tweaks.
+class tt_GameTweaks play
+{
+  static void tweakPlayer(PlayerInfo player)
+  {
+    let pawn = player.mo;
+    if (pawn == NULL) return;
+
+    makeInvulnerable(pawn);
+    increaseDamage(pawn);
+    decreaseIncomingDamage(pawn);
+    protectFromSelfDamage(pawn);
+    disableSeekingMissiles(pawn);
+  }
+
+  // Still lose health down to 1 point.
+  static private void makeInvulnerable(PlayerPawn pawn)
+  {
+    if (tt_buddha_enabled)
+      pawn.giveInventory("tt_Buddha", 1);
+  }
+
+  static private void increaseDamage(PlayerPawn pawn)
+  {
+    double originalDamage = getDefaultByType(pawn.getClass()).damageMultiply;
+    pawn.damageMultiply = originalDamage * 10;
+  }
+
+  static private void decreaseIncomingDamage(PlayerPawn pawn)
+  {
+    double originalFactor = getDefaultByType(pawn.getClass()).damageFactor;
+    pawn.damageFactor = originalFactor / 2;
+  }
+
+  static private void protectFromSelfDamage(PlayerPawn pawn)
+  {
+    pawn.selfDamageFactor = 0;
+  }
+
+  static private void disableSeekingMissiles(PlayerPawn pawn)
+  {
+    pawn.bCantSeek = true;
+  }
+}
+#+end_src
+
+** ~Buddha~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/buddha/tt_buddha.zs
+
+class tt_Buddha : PowerBuddha
+{
+  Default
+  {
+    // https://zdoom.org/wiki/Powerup_properties
+    Powerup.Duration 0x7FFFFFFD;
+    +INVENTORY.UNDROPPABLE;
+  }
+}
+#+end_src
+
 * PlayerHandler
 
 ** ~PlayerHandler~
@@ -286,6 +454,8 @@ user bool tt_is_custom_enabled  = false;
 
 * Server
 
+** ~Server~
+
 #+begin_src c :tangle build/Typist.pk3/zscript/server/tt_server.zs
 
 class tt_Server
@@ -336,6 +506,457 @@ class tt_Server
   tt_ExternalOriginSource _targetSources[MAXPLAYERS];
   tt_WorldChanger         _targetChangers[MAXPLAYERS];
   tt_WorldChangers        _globalChangers;
+}
+#+end_src
+
+* World Changer
+
+** ~WorldChanger~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changer.zs
+
+// This interface represents entities that change the world state.
+class tt_WorldChanger abstract
+{
+  play abstract void changeWorld();
+}
+#+end_src
+
+** ~WorldChangers~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changers.zs
+
+// Implements tt_WorldChanger by executing several instances of tt_WorldChanger.
+class tt_WorldChangers : tt_WorldChanger
+{
+  static tt_WorldChangers of(Array<tt_WorldChanger> changers)
+  {
+    let result = new("tt_WorldChangers");
+    result._changers.move(changers);
+    return result;
+  }
+
+  static tt_WorldChangers ofNone() { return new("tt_WorldChangers"); }
+
+  void add(tt_WorldChanger changer) { _changers.push(changer); }
+
+  override void changeWorld()
+  {
+    foreach (changer : _changers)
+      changer.changeWorld();
+  }
+
+  private Array<tt_WorldChanger> _changers;
+}
+#+end_src
+
+** ~EnemySpeedController~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_enemy_speed_controller.zs
+
+// Implements tt_WorldChanger by slowing down enemies.
+class tt_EnemySpeedController : tt_WorldChanger
+{
+  static tt_EnemySpeedController of(tt_TargetSource targetSource,
+                                    tt_PlayerSource playerSource)
+  {
+    let result = new("tt_EnemySpeedController");
+    result._targetSource = targetSource;
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let  targets  = _targetSource.getTargets();
+    uint nTargets = targets.size();
+    int  player   = _playerSource.getNumber();
+
+    for (uint i = 0; i < nTargets; ++i)
+    {
+      let enemy = targets.at(i).getActor();
+      if (!tt_VelocityStorage.isSlowedDown(enemy, player))
+        tt_VelocityStorage.slowDown(enemy, player);
+    }
+  }
+
+  private tt_TargetSource _targetSource;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+** ~ProjectileSpeedController~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_projectile_speed_controller.zs
+
+// Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
+//
+// When a projectile is no longer flying towards the player, its speed is
+// restored.
+class tt_ProjectileSpeedController : tt_WorldChanger
+{
+  static tt_ProjectileSpeedController of(tt_OriginSource playerOriginSource,
+                                         tt_PlayerSource playerSource)
+  {
+    let result = new("tt_ProjectileSpeedController");
+    result._playerOriginSource = playerOriginSource;
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let origin       = _playerOriginSource.getOrigin().getVector();
+    let playerRadius = _playerSource.getPawn().radius;
+    int player       = _playerSource.getNumber();
+
+    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
+      if (a.bMissile) controlProjectile(a, origin, playerRadius, player);
+  }
+
+  private play void controlProjectile(Actor a,
+                                      Vector3 playerOrigin,
+                                      double playerRadius,
+                                      int player)
+  {
+    bool isInRange = tt_Math.isInEffectiveRange(a.pos, playerOrigin);
+
+    if (isInRange && isMovingTowardsPlayer(a, playerOrigin, playerRadius))
+    {
+      if (!tt_VelocityStorage.isSlowedDown(a, player))
+        tt_VelocityStorage.slowDown(a, player);
+    }
+    else if (tt_VelocityStorage.isSlowedDown(a, player))
+    {
+      tt_VelocityStorage.restoreVelocity(a, player);
+    }
+  }
+
+  private play bool isMovingTowardsPlayer(Actor projectile,
+                                          Vector3 playerPos,
+                                          double playerRadius)
+  {
+    Vector3 vel = projectile.vel;
+    if (vel == (0, 0, 0)) { return false; } // doesn't move
+
+    double oldDistance = (projectile.pos - vel - playerPos).length();
+    double distance    = (projectile.pos -       playerPos).length();
+
+    if (distance > oldDistance) { return false; } // moves from player
+
+    // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+    Vector3 x10             = projectile.pos - playerPos;
+    Vector3 prod            = tt_Math.crossProduct(vel, x10);
+    double  lineDistance    = prod.length() / vel.length();
+    double  hitDistance     = playerRadius + projectile.radius;
+    bool    willTouchPlayer = (hitDistance >= lineDistance);
+
+    return willTouchPlayer;
+  }
+
+  private tt_OriginSource _playerOriginSource;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+** ~VelocityStorage~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_velocity_storage.zs
+
+// This is a helper class that allows storing the velocity.
+// TODO: rewrite with a Behavior?
+class tt_VelocityStorage : Inventory
+{
+  static bool isSlowedDown(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+    if (storage == NULL) return false;
+
+    return storage._byWhichPlayer[byPlayer];
+  }
+
+  static void slowDown(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+
+    if (storage != NULL)
+    {
+      storage._byWhichPlayer[byPlayer] = true;
+      return;
+    }
+
+    storage = tt_VelocityStorage(Actor.spawn("tt_VelocityStorage"));
+    storage._velocity = other.vel;
+    storage._speed    = other.speed;
+
+    other.addInventory(storage);
+
+    other.vel   *= VELOCITY_SCALE_FACTOR;
+    other.speed *= VELOCITY_SCALE_FACTOR;
+  }
+
+  static void restoreVelocity(Actor other, int byPlayer)
+  {
+    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
+
+    storage._byWhichPlayer[byPlayer] = false;
+
+    if (storage.countByPlayers() == 0)
+    {
+      other.vel   = storage._velocity;
+      other.speed = storage._speed;
+
+      other.removeInventory(storage);
+      storage.destroy();
+    }
+  }
+
+  private int countByPlayers()
+  {
+    int result = 0;
+    foreach (byPlayer : _byWhichPlayer)
+      result += byPlayer;
+    return result;
+  }
+
+  // TODO: make velocity scale factor configurable for projectiles and enemies.
+  // for actors it was 0.2.
+  const VELOCITY_SCALE_FACTOR = 0.1;
+
+  private vector3 _velocity;
+  private double  _speed;
+  private bool[MAXPLAYERS] _byWhichPlayer;
+}
+#+end_src
+
+** ~HorizontalAimer~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_horizontal_aimer.zs
+
+// Implements tt_WorldChanger interface by rotating the player.
+class tt_HorizontalAimer : tt_WorldChanger
+{
+  static tt_HorizontalAimer of(tt_OriginSource targetOriginSource, tt_PlayerSource playerSource)
+  {
+    let result = new("tt_HorizontalAimer");
+
+    result._targetOriginSource = targetOriginSource;
+    result._playerSource       = playerSource;
+
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let targetOrigin = _targetOriginSource.getOrigin();
+    if (targetOrigin == NULL) { return; }
+
+    let pawn = _playerSource.getPawn();
+    if (pawn == NULL) { return; }
+
+    Vector3 myPosition    = pawn.pos;
+    Vector3 otherPosition = targetOrigin.getVector();
+    double  angle         = AngleTo(myPosition.XY, otherPosition.XY);
+
+    pawn.A_SetAngle(angle, SPF_INTERPOLATE);
+  }
+
+  private static double AngleTo(Vector2 myPosition, Vector2 otherPosition)
+  {
+    Vector2 xy = otherPosition - myPosition;
+    return VectorAngle(xy.x, xy.y);
+  }
+
+  private tt_OriginSource _targetOriginSource;
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+#+begin_src c :noweb-ref test-body
+{
+  let tag = "tt_HorizontalAimer";
+
+  Array<tt_Origin> targetPositions;
+  Array<double>    angles;
+
+  targetPositions.push(tt_Origin.of(( 100,  100, 0))); angles.push(  45);
+  targetPositions.push(tt_Origin.of((-100, -100, 0))); angles.push(-135);
+  targetPositions.push(tt_Origin.of((   0,    0, 0))); angles.push(   0);
+
+  players[consolePlayer].mo.SetOrigin((0, 0, 0), false);
+
+  int nTargetPositions = targetPositions.size();
+  for (int i = 0; i < nTargetPositions; ++i)
+  {
+    let    originSource  = tt_OriginSourceMock.of();
+    let    playerSource  = tt_PlayerSourceMock.of();
+    let    aimer         = tt_HorizontalAimer.of(originSource, playerSource);
+    let    targetOrigin  = targetPositions[i];
+    let    pawn          = players[consolePlayer].mo;
+    double angle         = angles[i];
+
+    originSource.expect_getOrigin(targetOrigin);
+    playerSource.expect_getPawn(pawn);
+
+    // Just for a visual check.
+    spawn("DoomImp", targetOrigin.getVector());
+
+    aimer.changeWorld();
+
+    let message = string.format("%s: pawn is oriented at the target, angle: %f",
+                                tag,
+                                angle);
+    it(message, AssertEval(pawn.angle, "~==", angles[i]));
+    assertSatisfaction(originSource.getSatisfaction(), tag);
+    assertSatisfaction(playerSource.getSatisfaction(), tag);
+
+    cleanUpSpawned();
+  }
+}
+#+end_src
+
+** ~VerticalAimer~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_vertical_aimer.zs
+
+// Implements tt_WorldChanger interface by adjusting the player pitch
+// (horizontal angle). If autoaim is enabled, no pitch adjustment is done.
+class tt_VerticalAimer : tt_WorldChanger
+{
+  static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
+                             tt_PlayerSource playerSource,
+                             tt_FloatSetting autoAimSetting)
+  {
+    let result = new("tt_VerticalAimer");
+    result._targetOriginSource = targetOriginSource;
+    result._playerSource       = playerSource;
+    result._autoAimSetting     = autoAimSetting;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    if (!isAutoAimEnabled()) setPitch();
+  }
+
+  private play bool isAutoAimEnabled()
+  {
+    return _autoAimSetting.getFloat() > 34.5;
+  }
+
+  private play void setPitch()
+  {
+    let targetOrigin = _targetOriginSource.getOrigin();
+    if (targetOrigin == NULL) { return; }
+
+    let pawn = _playerSource.getPawn();
+    if (pawn == NULL) { return; }
+
+    Vector3 myPosition = pawn.pos;
+    myPosition.z += pawn.Height / 2 + pawn.AttackZOffset;
+
+    Vector3 otherPosition = targetOrigin.getVector();
+    Vector3 diff          = myPosition - otherPosition;
+    double  angle         = Atan2(diff.z, sqrt(diff.x * diff.x + diff.y * diff.y));
+
+    pawn.A_SetPitch(angle, SPF_INTERPOLATE);
+  }
+
+  private tt_OriginSource _targetOriginSource;
+  private tt_PlayerSource _playerSource;
+  private tt_FloatSetting _autoAimSetting;
+}
+#+end_src
+
+#+begin_src c :noweb-ref test-body
+{
+  let tag = "tt_VerticalAimer";
+  let targetOriginSource = tt_OriginSourceMock.of();
+  let playerSource       = tt_PlayerSourceMock.of();
+  let autoAimSetting     = tt_FloatSettingMock.of();
+
+  let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, autoAimSetting);
+
+  let targetOrigin = tt_Origin.of((550, 500, 500));
+  let pawn         = players[consolePlayer].mo;
+  pawn.SetOrigin((0, 0, 0), false);
+
+  targetOriginSource.expect_getOrigin(targetOrigin);
+  playerSource      .expect_getPawn(pawn);
+  autoAimSetting    .expect_getFloat(0);
+
+  aimer.changeWorld();
+
+  assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
+  assertSatisfaction(playerSource.getSatisfaction(), tag);
+  assertSatisfaction(autoAimSetting.getSatisfaction(), tag);
+}
+#+end_src
+
+** ~FirerImpl~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/firer/tt_firer.zs
+
+// Implements tt_WorldChanger by making the player pawn fire a shot.
+class tt_Firer : tt_WorldChanger
+{
+  static tt_Firer of(tt_PlayerSource playerSource)
+  {
+    let result = new("tt_Firer");
+    result._playerSource = playerSource;
+    return result;
+  }
+
+  override void changeWorld()
+  {
+    let  playerInfo = _playerSource.getInfo();
+    bool isReady    = isWeaponReady(playerInfo);
+
+    if (isReady)
+    {
+      let   pawn = _playerSource.getPawn();
+      State stat = NULL;
+      playerInfo.cmd.buttons |= BT_ATTACK;
+      pawn.FireWeapon(stat);
+    }
+  }
+
+  private static bool isWeaponReady(PlayerInfo player)
+  {
+    bool isReady = (player.WeaponState & WF_WEAPONREADY)
+      || (player.WeaponState & WF_WEAPONREADYALT)
+      || player.attackDown;
+
+    return isReady;
+  }
+
+  private tt_PlayerSource _playerSource;
+}
+#+end_src
+
+*** Test
+
+#+begin_src c :noweb-ref test-body
+{
+  let        tag          = "tt_Firer";
+  let        playerSource = tt_PlayerSourceMock.of();
+  let        firer        = tt_Firer.of(playerSource);
+  PlayerInfo info         = players[consolePlayer];
+  let        pawn         = info.mo;
+
+  playerSource.expect_getInfo(info);
+  playerSource.expect_getPawn(pawn);
+
+  int nBullets = pawn.countInv("Clip");
+  it(tag .. ": must be 50 bullets before firing", AssertEval(nBullets, "==", 50));
+
+  firer.changeWorld();
+
+  assertSatisfaction(playerSource.getSatisfaction(), tag);
+
+  // Note: this relies on sv_fastweapons 2.
+  nBullets = pawn.countInv("Clip");
+  it(tag .. ": must spend 1 bullet after firing", AssertEval(nBullets, "==", 49));
 }
 #+end_src
 
@@ -604,172 +1225,6 @@ class tt_CommandDispatcherTestEnvironment
   tt_AnswerStateSourceMock answerStateSource;
   tt_BoolSettingMock  fastConfirmation;
   tt_CommandDispatcher commandDispatcher;
-}
-#+end_src
-
-* Aimer
-
-** ~HorizontalAimer~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_horizontal_aimer.zs
-
-// Implements tt_WorldChanger interface by rotating the player.
-class tt_HorizontalAimer : tt_WorldChanger
-{
-  static tt_HorizontalAimer of(tt_OriginSource targetOriginSource, tt_PlayerSource playerSource)
-  {
-    let result = new("tt_HorizontalAimer");
-
-    result._targetOriginSource = targetOriginSource;
-    result._playerSource       = playerSource;
-
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let targetOrigin = _targetOriginSource.getOrigin();
-    if (targetOrigin == NULL) { return; }
-
-    let pawn = _playerSource.getPawn();
-    if (pawn == NULL) { return; }
-
-    Vector3 myPosition    = pawn.pos;
-    Vector3 otherPosition = targetOrigin.getVector();
-    double  angle         = AngleTo(myPosition.XY, otherPosition.XY);
-
-    pawn.A_SetAngle(angle, SPF_INTERPOLATE);
-  }
-
-  private static double AngleTo(Vector2 myPosition, Vector2 otherPosition)
-  {
-    Vector2 xy = otherPosition - myPosition;
-    return VectorAngle(xy.x, xy.y);
-  }
-
-  private tt_OriginSource _targetOriginSource;
-  private tt_PlayerSource _playerSource;
-}
-#+end_src
-
-#+begin_src c :noweb-ref test-body
-{
-  let tag = "tt_HorizontalAimer";
-
-  Array<tt_Origin> targetPositions;
-  Array<double>    angles;
-
-  targetPositions.push(tt_Origin.of(( 100,  100, 0))); angles.push(  45);
-  targetPositions.push(tt_Origin.of((-100, -100, 0))); angles.push(-135);
-  targetPositions.push(tt_Origin.of((   0,    0, 0))); angles.push(   0);
-
-  players[consolePlayer].mo.SetOrigin((0, 0, 0), false);
-
-  int nTargetPositions = targetPositions.size();
-  for (int i = 0; i < nTargetPositions; ++i)
-  {
-    let    originSource  = tt_OriginSourceMock.of();
-    let    playerSource  = tt_PlayerSourceMock.of();
-    let    aimer         = tt_HorizontalAimer.of(originSource, playerSource);
-    let    targetOrigin  = targetPositions[i];
-    let    pawn          = players[consolePlayer].mo;
-    double angle         = angles[i];
-
-    originSource.expect_getOrigin(targetOrigin);
-    playerSource.expect_getPawn(pawn);
-
-    // Just for a visual check.
-    spawn("DoomImp", targetOrigin.getVector());
-
-    aimer.changeWorld();
-
-    let message = string.format("%s: pawn is oriented at the target, angle: %f",
-                                tag,
-                                angle);
-    it(message, AssertEval(pawn.angle, "~==", angles[i]));
-    assertSatisfaction(originSource.getSatisfaction(), tag);
-    assertSatisfaction(playerSource.getSatisfaction(), tag);
-
-    cleanUpSpawned();
-  }
-}
-#+end_src
-
-** ~VerticalAimer~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/aimer/tt_vertical_aimer.zs
-
-// Implements tt_WorldChanger interface by adjusting the player pitch
-// (horizontal angle). If autoaim is enabled, no pitch adjustment is done.
-class tt_VerticalAimer : tt_WorldChanger
-{
-  static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
-                             tt_PlayerSource playerSource,
-                             tt_FloatSetting autoAimSetting)
-  {
-    let result = new("tt_VerticalAimer");
-    result._targetOriginSource = targetOriginSource;
-    result._playerSource       = playerSource;
-    result._autoAimSetting     = autoAimSetting;
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    if (!isAutoAimEnabled()) setPitch();
-  }
-
-  private play bool isAutoAimEnabled()
-  {
-    return _autoAimSetting.getFloat() > 34.5;
-  }
-
-  private play void setPitch()
-  {
-    let targetOrigin = _targetOriginSource.getOrigin();
-    if (targetOrigin == NULL) { return; }
-
-    let pawn = _playerSource.getPawn();
-    if (pawn == NULL) { return; }
-
-    Vector3 myPosition = pawn.pos;
-    myPosition.z += pawn.Height / 2 + pawn.AttackZOffset;
-
-    Vector3 otherPosition = targetOrigin.getVector();
-    Vector3 diff          = myPosition - otherPosition;
-    double  angle         = Atan2(diff.z, sqrt(diff.x * diff.x + diff.y * diff.y));
-
-    pawn.A_SetPitch(angle, SPF_INTERPOLATE);
-  }
-
-  private tt_OriginSource _targetOriginSource;
-  private tt_PlayerSource _playerSource;
-  private tt_FloatSetting _autoAimSetting;
-}
-#+end_src
-
-#+begin_src c :noweb-ref test-body
-{
-  let tag = "tt_VerticalAimer";
-  let targetOriginSource = tt_OriginSourceMock.of();
-  let playerSource       = tt_PlayerSourceMock.of();
-  let autoAimSetting     = tt_FloatSettingMock.of();
-
-  let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, autoAimSetting);
-
-  let targetOrigin = tt_Origin.of((550, 500, 500));
-  let pawn         = players[consolePlayer].mo;
-  pawn.SetOrigin((0, 0, 0), false);
-
-  targetOriginSource.expect_getOrigin(targetOrigin);
-  playerSource      .expect_getPawn(pawn);
-  autoAimSetting    .expect_getFloat(0);
-
-  aimer.changeWorld();
-
-  assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
-  assertSatisfaction(playerSource.getSatisfaction(), tag);
-  assertSatisfaction(autoAimSetting.getSatisfaction(), tag);
 }
 #+end_src
 
@@ -1266,6 +1721,8 @@ class tt_Character
 }
 #+end_src
 
+*** Tests
+
 #+begin_src c :noweb-ref test-body
 {
   int TYPE_CHAR = UiEvent.Type_Char;
@@ -1383,103 +1840,6 @@ class tt_TotalClock : tt_Clock
 }
 #+end_src
 
-* EventHandler
-
-** ~EventHandler~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/event_handler/tt_event_handler.zs
-
-// Entry point for Typist.pk3.
-class tt_EventHandler : EventHandler
-{
-  override void worldTick()
-  {
-    _playerHandler.tick();
-    _server.tick();
-    self.IsUiProcessor = _playerHandler.isCapturingKeys();
-  }
-
-  override bool uiProcess(UiEvent event)
-  {
-    let character = tt_Character.of(event.type, event.keyChar, event.isCtrl);
-    _playerHandler.processKey(character);
-
-    return false;
-  }
-
-  override bool inputProcess(InputEvent event)
-  {
-    _playerHandler.processInput(event.type);
-    return false;
-  }
-
-  override void playerEntered(PlayerEvent event)
-  {
-    if (gameState != GS_Level && gameState != GS_StartUp) return;
-
-    self.RequireMouse = true;
-
-    if (_server == NULL) _server = tt_Server.of();
-
-    int playerNumber = event.playerNumber;
-
-    _server.addPlayer(playerNumber);
-    tt_GameTweaks.tweakPlayer(players[playerNumber]);
-
-    if (playerNumber == consolePlayer)
-      _playerHandler = tt_PlayerSupervisor.of(consolePlayer);
-  }
-
-  override void worldThingDied(WorldEvent event)
-  {
-    _playerHandler.reportDead(event.Thing);
-  }
-
-  override void worldLoaded(WorldEvent event)
-  {
-    bool isTitlemap = (level.mapName ~== "TITLEMAP");
-    if (isTitlemap)
-      destroy();
-  }
-
-  override void worldUnloaded(WorldEvent event)
-  {
-    self.IsUiProcessor = false;
-  }
-
-  override void renderOverlay(RenderEvent event)
-  {
-    _playerHandler.draw(event);
-  }
-
-  override void consoleProcess(ConsoleEvent event)
-  {
-    string command = event.Name;
-
-    if (command.left(3) != "tt_") return;
-
-    if      (command == "tt_unlock_mode"  ) _playerHandler.unlockMode();
-    else if (command == "tt_force_combat" ) _playerHandler.forceCombat();
-    else if (command == "tt_reset_targets") _playerHandler.reset(consolePlayer);
-  }
-
-  override void networkCommandProcess(NetworkCommand command)
-  {
-    if (command.command == "tt_target")
-    {
-      double x = command.readDouble();
-      double y = command.readDouble();
-      double z = command.readDouble();
-
-      _server.react(command.player, (x, y, z));
-    }
-  }
-
-  private tt_PlayerHandler _playerHandler;
-  private tt_Server        _server;
-}
-#+end_src
-
 * Event Reporters
 
 ** ~AnswerReporter~
@@ -1509,6 +1869,34 @@ class tt_AnswerReporterMock : tt_AnswerReporter
 }
 #+end_src
 
+** ~SoundAnswerReporter~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_answer_reporter.zs
+
+// Implements tt_AnswerReporter by playing a sound.
+class tt_SoundAnswerReporter : tt_AnswerReporter
+{
+  static tt_SoundAnswerReporter of(tt_SoundPlayer soundPlayer)
+  {
+    let result = new("tt_SoundAnswerReporter");
+    result._soundPlayer = soundPlayer;
+    return result;
+  }
+
+  override void reportMatch()
+  {
+    _soundPlayer.playSound("tt/match");
+  }
+
+  override void reportNotMatch()
+  {
+    _soundPlayer.playSound("tt/not-match");
+  }
+
+  private tt_SoundPlayer _soundPlayer;
+}
+#+end_src
+
 ** ~KeyPressReporter~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_key_press_reporter.zs
@@ -1533,6 +1921,33 @@ class tt_KeyPressReporterMock : tt_KeyPressReporter
 }
 #+end_src
 
+** ~SoundKeyPressReporter~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_key_press_reporter.zs
+
+// Implements tt_KeyPressReporter by playing a sound.
+// The sound won't play if it's disabled in settings.
+class tt_SoundKeyPressReporter : tt_KeyPressReporter
+{
+  static tt_SoundKeyPressReporter of(tt_SoundPlayer soundPlayer,
+                                     tt_BoolSetting isEnabledSetting)
+  {
+    let result = new("tt_SoundKeyPressReporter");
+    result._soundPlayer      = soundPlayer;
+    result._isEnabledSetting = isEnabledSetting;
+    return result;
+  }
+
+  override void report()
+  {
+    if (_isEnabledSetting.get()) _soundPlayer.playSound("tt/click");
+  }
+
+  private tt_SoundPlayer _soundPlayer;
+  private tt_BoolSetting _isEnabledSetting;
+}
+#+end_src
+
 ** ~ModeReporter~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_mode_reporter.zs
@@ -1554,6 +1969,48 @@ class tt_ModeReporterMock : tt_ModeReporter
 
   mixin tt_Mock;
   <<mock-method("void", "report", "int mode")>>
+}
+#+end_src
+
+** ~SoundModeReporter~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_mode_reporter.zs
+
+// Implements tt_ModeReporter by playing the corresponding sound for each mode.
+class tt_SoundModeReporter : tt_ModeReporter
+{
+  static tt_SoundModeReporter of(tt_SoundPlayer soundPlayer)
+  {
+    let result = new("tt_SoundModeReporter");
+    result._soundPlayer = soundPlayer;
+    return result;
+  }
+
+  override void report(int mode)
+  {
+    switch (mode)
+    {
+    case tt_Mode.Unknown:
+      Console.printf("%s: report: unknown mode!", getClassName());
+      break;
+    case tt_Mode.Combat:  _soundPlayer.playSound("tt/combat");  break;
+    case tt_Mode.Explore: _soundPlayer.playSound("tt/explore"); break;
+    case tt_Mode.None:    break;
+    }
+  }
+
+  private tt_SoundPlayer _soundPlayer;
+}
+#+end_src
+
+** ~SoundPlayer~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_player.zs
+
+// This is an interface for playing sounds.
+class tt_SoundPlayer abstract
+{
+  abstract void playSound(String soundId);
 }
 #+end_src
 
@@ -1600,243 +2057,76 @@ class tt_PlayerSoundPlayer : tt_SoundPlayer
 }
 #+end_src
 
-** ~SoundAnswerReporter~
+** Sndinfo
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_answer_reporter.zs
+#+begin_src c :tangle build/Typist.pk3/sndinf.txt
 
-// Implements tt_AnswerReporter by playing a sound.
-class tt_SoundAnswerReporter : tt_AnswerReporter
-{
-  static tt_SoundAnswerReporter of(tt_SoundPlayer soundPlayer)
-  {
-    let result = new("tt_SoundAnswerReporter");
-    result._soundPlayer = soundPlayer;
-    return result;
-  }
+// Global Typist sound settings ////////////////////////////////////////////////
 
-  override void reportMatch()
-  {
-    _soundPlayer.playSound("tt/match");
-  }
+// Do not randomize pitch shift value.
+$pitchshiftrange 0
 
-  override void reportNotMatch()
-  {
-    _soundPlayer.playSound("tt/not-match");
-  }
+// 1. Default sound theme //////////////////////////////////////////////////////
 
-  private tt_SoundPlayer _soundPlayer;
-}
-#+end_src
+tt/combat1    "sounds/Default/danger1.ogg"
+tt/explore1   "sounds/Default/safe1.ogg"
+tt/click1-1   "sounds/Default/typea1.ogg"
+tt/click1-2   "sounds/Default/typea2.ogg"
+tt/click1-3   "sounds/Default/typea3.ogg"
+tt/click1-4   "sounds/Default/typea4.ogg"
+tt/click1-5   "sounds/Default/typea5.ogg"
+tt/match1     "sounds/Default/success1.ogg"
+tt/not-match1 "sounds/Default/fail1.ogg"
 
-** ~SoundKeyPressReporter~
+$random tt/click1 { tt/click1-1 tt/click1-2 tt/click1-3 tt/click1-4 tt/click1-5 }
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_key_press_reporter.zs
+$volume tt/combat1  0.4
+$volume tt/explore1 0.6
+$volume tt/match1   0.4
 
-// Implements tt_KeyPressReporter by playing a sound.
-// The sound won't play if it's disabled in settings.
-class tt_SoundKeyPressReporter : tt_KeyPressReporter
-{
-  static tt_SoundKeyPressReporter of(tt_SoundPlayer soundPlayer,
-                                     tt_BoolSetting isEnabledSetting)
-  {
-    let result = new("tt_SoundKeyPressReporter");
-    result._soundPlayer      = soundPlayer;
-    result._isEnabledSetting = isEnabledSetting;
-    return result;
-  }
+// 2. SNES sound theme /////////////////////////////////////////////////////////
 
-  override void report()
-  {
-    if (_isEnabledSetting.get()) _soundPlayer.playSound("tt/click");
-  }
+tt/combat2    "sounds/SNES/danger2.ogg"
+tt/explore2   "sounds/SNES/safe2.ogg"
+tt/click2-1   "sounds/SNES/typeb1.ogg"
+tt/click2-2   "sounds/SNES/typeb2.ogg"
+tt/click2-3   "sounds/SNES/typeb3.ogg"
+tt/click2-4   "sounds/SNES/typeb4.ogg"
+tt/click2-5   "sounds/SNES/typeb5.ogg"
+tt/match2     "sounds/SNES/success2.ogg"
+tt/not-match2 "sounds/SNES/sneserrors.ogg"
 
-  private tt_SoundPlayer _soundPlayer;
-  private tt_BoolSetting _isEnabledSetting;
-}
-#+end_src
+$random tt/click2 { tt/click2-1 tt/click2-2 tt/click2-3 tt/click2-4 tt/click2-5 }
 
-** ~SoundModeReporter~
+// 4. Dakka sound theme ////////////////////////////////////////////////////////
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_mode_reporter.zs
+tt/combat4    "sounds/Dakka/danger4.ogg"
+tt/explore4   "sounds/Dakka/safe4.ogg"
+tt/click4-1   "sounds/Dakka/typed1.ogg"
+tt/click4-2   "sounds/Dakka/typed2.ogg"
+tt/click4-3   "sounds/Dakka/typed3.ogg"
+tt/click4-4   "sounds/Dakka/typed4.ogg"
+tt/click4-5   "sounds/Dakka/typed5.ogg"
+tt/match4     "sounds/Dakka/success4.ogg"
+tt/not-match4 "sounds/Dakka/fail4.ogg"
 
-// Implements tt_ModeReporter by playing the corresponding sound for each mode.
-class tt_SoundModeReporter : tt_ModeReporter
-{
-  static tt_SoundModeReporter of(tt_SoundPlayer soundPlayer)
-  {
-    let result = new("tt_SoundModeReporter");
-    result._soundPlayer = soundPlayer;
-    return result;
-  }
+$random tt/click4 { tt/click4-1 tt/click4-2 tt/click4-3 tt/click4-4 tt/click4-5 }
 
-  override void report(int mode)
-  {
-    switch (mode)
-    {
-    case tt_Mode.Unknown:
-      Console.printf("%s: report: unknown mode!", getClassName());
-      break;
-    case tt_Mode.Combat:  _soundPlayer.playSound("tt/combat");  break;
-    case tt_Mode.Explore: _soundPlayer.playSound("tt/explore"); break;
-    case tt_Mode.None:    break;
-    }
-  }
+// 5. GroceryStore sound theme /////////////////////////////////////////////////
 
-  private tt_SoundPlayer _soundPlayer;
-}
-#+end_src
+tt/combat5    "sounds/GroceryStore/danger5.ogg"
+tt/explore5   "sounds/GroceryStore/safe5.ogg"
+tt/click5-1   "sounds/GroceryStore/typee1.ogg"
+tt/click5-2   "sounds/GroceryStore/typee2.ogg"
+tt/click5-3   "sounds/GroceryStore/typee3.ogg"
+tt/click5-4   "sounds/GroceryStore/typee4.ogg"
+tt/click5-5   "sounds/GroceryStore/typee5.ogg"
+tt/match5     "sounds/GroceryStore/success5.ogg"
+tt/not-match5 "sounds/GroceryStore/fail5.ogg"
 
-** ~SoundPlayer~
+$random tt/click5 { tt/click5-1 tt/click5-2 tt/click5-3 tt/click5-4 tt/click5-5 }
 
-#+begin_src c :tangle build/Typist.pk3/zscript/event_reporters/tt_sound_player.zs
-
-// This is an interface for playing sounds.
-class tt_SoundPlayer abstract
-{
-  abstract void playSound(String soundId);
-}
-#+end_src
-
-* Firer
-
-** ~FirerImpl~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/firer/tt_firer.zs
-
-// Implements tt_WorldChanger by making the player pawn fire a shot.
-class tt_Firer : tt_WorldChanger
-{
-  static tt_Firer of(tt_PlayerSource playerSource)
-  {
-    let result = new("tt_Firer");
-    result._playerSource = playerSource;
-    return result;
-  }
-
-  override void changeWorld()
-  {
-    let  playerInfo = _playerSource.getInfo();
-    bool isReady    = isWeaponReady(playerInfo);
-
-    if (isReady)
-    {
-      let   pawn = _playerSource.getPawn();
-      State stat = NULL;
-      playerInfo.cmd.buttons |= BT_ATTACK;
-      pawn.FireWeapon(stat);
-    }
-  }
-
-  private static bool isWeaponReady(PlayerInfo player)
-  {
-    bool isReady = (player.WeaponState & WF_WEAPONREADY)
-      || (player.WeaponState & WF_WEAPONREADYALT)
-      || player.attackDown;
-
-    return isReady;
-  }
-
-  private tt_PlayerSource _playerSource;
-}
-#+end_src
-
-*** Test
-
-#+begin_src c :noweb-ref test-body
-{
-  let        tag          = "tt_Firer";
-  let        playerSource = tt_PlayerSourceMock.of();
-  let        firer        = tt_Firer.of(playerSource);
-  PlayerInfo info         = players[consolePlayer];
-  let        pawn         = info.mo;
-
-  playerSource.expect_getInfo(info);
-  playerSource.expect_getPawn(pawn);
-
-  int nBullets = pawn.countInv("Clip");
-  it(tag .. ": must be 50 bullets before firing", AssertEval(nBullets, "==", 50));
-
-  firer.changeWorld();
-
-  assertSatisfaction(playerSource.getSatisfaction(), tag);
-
-  // Note: this relies on sv_fastweapons 2.
-  nBullets = pawn.countInv("Clip");
-  it(tag .. ": must spend 1 bullet after firing", AssertEval(nBullets, "==", 49));
-}
-#+end_src
-
-* Game Tweaks
-
-** ~GameTweaks~
-
-#+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
-
-// Buddha
-server bool tt_buddha_enabled = true;
-#+end_src
-
-#+begin_src c :tangle build/Typist.pk3/zscript/game_tweaks/tt_game_tweaks.zs
-
-// Handles game tweaks.
-class tt_GameTweaks play
-{
-  static void tweakPlayer(PlayerInfo player)
-  {
-    let pawn = player.mo;
-    if (pawn == NULL) return;
-
-    makeInvulnerable(pawn);
-    increaseDamage(pawn);
-    decreaseIncomingDamage(pawn);
-    protectFromSelfDamage(pawn);
-    disableSeekingMissiles(pawn);
-  }
-
-  // Still lose health down to 1 point.
-  static private void makeInvulnerable(PlayerPawn pawn)
-  {
-    if (tt_buddha_enabled)
-      pawn.giveInventory("tt_Buddha", 1);
-  }
-
-  static private void increaseDamage(PlayerPawn pawn)
-  {
-    double originalDamage = getDefaultByType(pawn.getClass()).damageMultiply;
-    pawn.damageMultiply = originalDamage * 10;
-  }
-
-  static private void decreaseIncomingDamage(PlayerPawn pawn)
-  {
-    double originalFactor = getDefaultByType(pawn.getClass()).damageFactor;
-    pawn.damageFactor = originalFactor / 2;
-  }
-
-  static private void protectFromSelfDamage(PlayerPawn pawn)
-  {
-    pawn.selfDamageFactor = 0;
-  }
-
-  static private void disableSeekingMissiles(PlayerPawn pawn)
-  {
-    pawn.bCantSeek = true;
-  }
-}
-#+end_src
-
-** ~Buddha~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/buddha/tt_buddha.zs
-
-class tt_Buddha : PowerBuddha
-{
-  Default
-  {
-    // https://zdoom.org/wiki/Powerup_properties
-    Powerup.Duration 0x7FFFFFFD;
-    +INVENTORY.UNDROPPABLE;
-  }
-}
+$volume tt/click5 0.2
 #+end_src
 
 * Input Manager
@@ -3604,6 +3894,56 @@ class tt_AutomapModeSource : tt_ModeSource
 
 * Origin
 
+** ~Origin~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin.zs
+
+// Represents a point in space.
+// Note that the Origin position cannot change once set.
+class tt_Origin
+{
+  static tt_Origin of(Vector3 pos)
+  {
+    let result = new("tt_Origin");
+    result._pos = pos;
+    return result;
+  }
+
+  Vector3 getVector() const
+  {
+    return _pos;
+  }
+
+  private Vector3 _pos;
+}
+#+end_src
+
+** ~OriginSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin_source.zs
+
+// This interface represents a source of origins.
+class tt_OriginSource abstract
+{
+  // Returns the origin (coordinate in 3D space).
+  // Getting the origin doesn't change it.
+  abstract tt_Origin getOrigin();
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_OriginSourceMock : tt_OriginSource
+{
+  static tt_OriginSourceMock of() { return new("tt_OriginSourceMock"); }
+
+  mixin tt_Mock;
+  <<mock-method("tt_Origin", "getOrigin")>>
+}
+#+end_src
+
 ** ~HastyQuestionAnswerMatcher~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_hasty_question_answer_matcher.zs
@@ -3663,56 +4003,6 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
   private tt_KnownTargetSource _knownTargetSource;
   private tt_AnswerSource      _answerSource;
   private tt_AnswerReporter    _reporter;
-}
-#+end_src
-
-** ~Origin~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin.zs
-
-// Represents a point in space.
-// Note that the Origin position cannot change once set.
-class tt_Origin
-{
-  static tt_Origin of(Vector3 pos)
-  {
-    let result = new("tt_Origin");
-    result._pos = pos;
-    return result;
-  }
-
-  Vector3 getVector() const
-  {
-    return _pos;
-  }
-
-  private Vector3 _pos;
-}
-#+end_src
-
-** ~OriginSource~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/origin/tt_origin_source.zs
-
-// This interface represents a source of origins.
-class tt_OriginSource abstract
-{
-  // Returns the origin (coordinate in 3D space).
-  // Getting the origin doesn't change it.
-  abstract tt_Origin getOrigin();
-}
-#+end_src
-
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_OriginSourceMock : tt_OriginSource
-{
-  static tt_OriginSourceMock of() { return new("tt_OriginSourceMock"); }
-
-  mixin tt_Mock;
-  <<mock-method("tt_Origin", "getOrigin")>>
 }
 #+end_src
 
@@ -4099,7 +4389,7 @@ class tt_PlayerSourceMock : tt_PlayerSource
 }
 #+end_src
 
-*** ~PlayerSourceImpl~
+** ~PlayerSourceImpl~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/player/tt_player_source_impl.zs
 
@@ -4123,7 +4413,7 @@ class tt_PlayerSourceImpl : tt_PlayerSource
 }
 #+end_src
 
-**** Test
+*** Test
 
 #+begin_src c :noweb-ref test-body
 {
@@ -4630,6 +4920,8 @@ class tt_StaleMarkerImpl : tt_StaleMarker
 }
 #+end_src
 
+*** Tests
+
 #+begin_src c :noweb-ref test-body
 {
   let tag = "tt_StaleMarker: checkFirstRead";
@@ -4760,61 +5052,6 @@ class tt_Strings
 
 * Target
 
-** ~DeathReporter~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_death_reporter.zs
-
-// Implements tt_TargetSource by collecting reports of
-// dead things as a list of DisabledTargets.
-class tt_DeathReporter : tt_TargetSource
-{
-  static tt_DeathReporter of()
-  {
-    let result = new("tt_DeathReporter");
-
-    result._targets = tt_Targets.of();
-
-    return result;
-  }
-
-  void reportDead(Actor thing)
-  {
-    let newDisabled = tt_Target.of(thing);
-    _targets.add(newDisabled);
-  }
-
-  override tt_Targets getTargets()
-  {
-    let result = _targets;
-    _targets = tt_Targets.of();
-    return result;
-  }
-
-  private tt_Targets _targets;
-}
-#+end_src
-
-#+begin_src c :noweb-ref test-body
-{
-  let _deathReporter = tt_DeathReporter.of();
-  let targetsBefore  = _deathReporter.getTargets();
-  it("tt_DeathReporter: No targets before reporting",
-    AssertEval(targetsBefore.size(), "==", 0));
-
-  let something = spawn("DoomImp", (0, 0, 0));
-  _deathReporter.reportDead(something);
-  let targetsAfter = _deathReporter.getTargets();
-  it("tt_DeathReporter: Single target after reporting",
-    AssertEval(targetsAfter.size(), "==", 1));
-
-  let targetsAfterAfter = _deathReporter.getTargets();
-  it("tt_DeathReporter: No new targets",
-    AssertEval(targetsAfterAfter.size(), "==", 0));
-
-  cleanUpSpawned();
-}
-#+end_src
-
 ** ~Target~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target.zs
@@ -4853,6 +5090,68 @@ class tt_Target
   }
 
   private Actor _actor;
+}
+#+end_src
+
+** ~Targets~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_targets.zs
+
+// Represent a list of Targets.
+class tt_Targets
+{
+  static tt_Targets of() { return new("tt_Targets"); }
+
+  // Returns a target in this list.
+  tt_Target at(uint index) const { return _targets[index]; }
+
+  // Returns a number of targets in this list.
+  uint size() const { return _targets.size(); }
+
+  // Returns true if this target list contains a target with the specified id.
+  bool contains(tt_Target target) const { return find(target) != size(); }
+
+  bool isEmpty() const { return (size() == 0); }
+
+  // Adds a target to this list.
+  void add(tt_Target target) { _targets.push(target); }
+
+  // Searches for a target with a particular id.
+  // Returns index on success, the total number of targets on failure.
+  private uint find(tt_Target target) const
+  {
+    uint nTargets = size();
+    for (uint i = 0; i < nTargets; ++i)
+      if (_targets[i].isEqual(target)) return i;
+    return nTargets;
+  }
+
+  private Array<tt_Target> _targets;
+}
+#+end_src
+
+** ~TargetSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_source.zs
+
+// This interface represents a source of targets.
+// See: tt_Target.
+class tt_TargetSource abstract
+{
+  abstract tt_Targets getTargets();
+}
+#+end_src
+
+*** Mock
+
+#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
+
+class tt_TargetSourceMock : tt_TargetSource
+{
+  static tt_TargetSourceMock of() { return new("tt_TargetSourceMock"); }
+
+  mixin tt_Mock;
+  <<mock-method("tt_Targets", "getTargets")>>
 }
 #+end_src
 
@@ -5013,28 +5312,58 @@ class tt_TargetRadarTestEnvironment
 }
 #+end_src
 
-** ~TargetSource~
+** ~DeathReporter~
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_target_source.zs
+#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_death_reporter.zs
 
-// This interface represents a source of targets.
-// See: tt_Target.
-class tt_TargetSource abstract
+// Implements tt_TargetSource by collecting reports of
+// dead things as a list of DisabledTargets.
+class tt_DeathReporter : tt_TargetSource
 {
-  abstract tt_Targets getTargets();
+  static tt_DeathReporter of()
+  {
+    let result = new("tt_DeathReporter");
+
+    result._targets = tt_Targets.of();
+
+    return result;
+  }
+
+  void reportDead(Actor thing)
+  {
+    let newDisabled = tt_Target.of(thing);
+    _targets.add(newDisabled);
+  }
+
+  override tt_Targets getTargets()
+  {
+    let result = _targets;
+    _targets = tt_Targets.of();
+    return result;
+  }
+
+  private tt_Targets _targets;
 }
 #+end_src
 
-*** Mock
-
-#+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
-
-class tt_TargetSourceMock : tt_TargetSource
+#+begin_src c :noweb-ref test-body
 {
-  static tt_TargetSourceMock of() { return new("tt_TargetSourceMock"); }
+  let _deathReporter = tt_DeathReporter.of();
+  let targetsBefore  = _deathReporter.getTargets();
+  it("tt_DeathReporter: No targets before reporting",
+    AssertEval(targetsBefore.size(), "==", 0));
 
-  mixin tt_Mock;
-  <<mock-method("tt_Targets", "getTargets")>>
+  let something = spawn("DoomImp", (0, 0, 0));
+  _deathReporter.reportDead(something);
+  let targetsAfter = _deathReporter.getTargets();
+  it("tt_DeathReporter: Single target after reporting",
+    AssertEval(targetsAfter.size(), "==", 1));
+
+  let targetsAfterAfter = _deathReporter.getTargets();
+  it("tt_DeathReporter: No new targets",
+    AssertEval(targetsAfterAfter.size(), "==", 0));
+
+  cleanUpSpawned();
 }
 #+end_src
 
@@ -5112,65 +5441,114 @@ class tt_TargetSourcePruner : tt_TargetSource
 }
 #+end_src
 
-** ~Targets~
+* Target Widget
 
-#+begin_src c :tangle build/Typist.pk3/zscript/target/tt_targets.zs
+** ~TargetWidget~
 
-// Represent a list of Targets.
-class tt_Targets
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget.zs
+
+// Represents a target displayed on the screen.
+class tt_TargetWidget
 {
-  static tt_Targets of()
+  static tt_TargetWidget of(tt_KnownTarget target, Vector2 position)
   {
-    let result = new("tt_Targets");
+    let result = new("tt_TargetWidget");
+
+    result._target   = target;
+    result._position = position;
+
     return result;
   }
 
-  // Returns a target in this list.
-  tt_Target at(uint index) const
+  tt_KnownTarget getTarget() const
   {
-    return _targets[index];
+    return _target;
   }
 
-  // Returns a number of targets in this list.
-  uint size() const
+  Vector2 getPosition() const
   {
-    return _targets.size();
+    return _position;
   }
 
-  // Returns true if this target list contains a target with the specified id.
-  bool contains(tt_Target target) const
+  double getDistanceTo(Vector3 other)
   {
-    return find(target) != size();
+    let worldPosition = _target.getTarget().getPosition().getVector();
+    let distance      = (worldPosition - other).Length();
+
+    return distance;
   }
 
-  bool isEmpty() const
+  void setPosition(Vector2 position)
   {
-    return (size() == 0);
+    _position = position;
   }
 
-  // Adds a target to this list.
-  void add(tt_Target target)
-  {
-    _targets.push(target);
-  }
-
-  // Searches for a target with a particular id.
-  // Returns index on success, the total number of targets on failure.
-  private uint find(tt_Target target) const
-  {
-    uint nTargets = size();
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      if (_targets[i].isEqual(target)) { return i; }
-    }
-    return nTargets;
-  }
-
-  private Array<tt_Target> _targets;
+  private tt_KnownTarget _target;
+  private Vector2        _position;
 }
 #+end_src
 
-* Target Widget
+** ~TargetWidgets~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widgets.zs
+
+// Represents a list of target widgets.
+class tt_TargetWidgets
+{
+  static tt_TargetWidgets of() { return new("tt_TargetWidgets"); }
+
+  // Returns a target in this list.
+  tt_TargetWidget at(uint index) const { return _widgets[index]; }
+
+  // Returns a number of targets in this list.
+  uint size() const { return _widgets.size(); }
+
+  tt_TargetWidget find(tt_Target id) const
+  {
+    foreach (widget : _widgets)
+      if (widget.getTarget().getTarget().isEqual(id)) return widget;
+
+    return NULL;
+  }
+
+  bool containsWidget(tt_TargetWidget widget) const
+  {
+    foreach (widgetItem : _widgets)
+      if (widget == widgetItem) return true;
+
+    return false;
+  }
+
+  tt_TargetWidgets copy() const
+  {
+    let result = tt_TargetWidgets.of();
+    result._widgets.Reserve(size());
+    result._widgets.Copy(_widgets);
+
+    return result;
+  }
+
+  // Adds a target to this list.
+  void add(tt_TargetWidget widget) { _widgets.push(widget); }
+
+  void set(uint i, tt_TargetWidget widget)  { _widgets[i] = widget; }
+
+  private Array<tt_TargetWidget> _widgets;
+}
+#+end_src
+
+** ~TargetWidgetSource~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget_source.zs
+
+// This interface provides a source of target widgets.
+class tt_TargetWidgetSource abstract
+{
+  // Get a list of target widgets.
+  // Returns a list of target widgets.
+  ui abstract tt_TargetWidgets getWidgets(RenderEvent event);
+}
+#+end_src
 
 ** ~Projector~
 
@@ -5510,51 +5888,6 @@ class tt_SorterByDistanceTest
 }
 #+end_src
 
-** ~TargetWidget~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget.zs
-
-// Represents a target displayed on the screen.
-class tt_TargetWidget
-{
-  static tt_TargetWidget of(tt_KnownTarget target, Vector2 position)
-  {
-    let result = new("tt_TargetWidget");
-
-    result._target   = target;
-    result._position = position;
-
-    return result;
-  }
-
-  tt_KnownTarget getTarget() const
-  {
-    return _target;
-  }
-
-  Vector2 getPosition() const
-  {
-    return _position;
-  }
-
-  double getDistanceTo(Vector3 other)
-  {
-    let worldPosition = _target.getTarget().getPosition().getVector();
-    let distance      = (worldPosition - other).Length();
-
-    return distance;
-  }
-
-  void setPosition(Vector2 position)
-  {
-    _position = position;
-  }
-
-  private tt_KnownTarget _target;
-  private Vector2        _position;
-}
-#+end_src
-
 ** ~TargetWidgetRegistry~
 
 #+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget_registry.zs
@@ -5608,90 +5941,6 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
 
   private tt_TargetWidgetSource _source;
   private tt_TargetWidgets      _registry;
-}
-#+end_src
-
-** ~TargetWidgetSource~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widget_source.zs
-
-// This interface provides a source of target widgets.
-class tt_TargetWidgetSource abstract
-{
-  // Get a list of target widgets.
-  // Returns a list of target widgets.
-  ui abstract tt_TargetWidgets getWidgets(RenderEvent event);
-}
-#+end_src
-
-** ~TargetWidget~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/target_widget/tt_target_widgets.zs
-
-// Represents a list of target widgets.
-class tt_TargetWidgets
-{
-  static tt_TargetWidgets of()
-  {
-    let result = new("tt_TargetWidgets");
-    return result;
-  }
-
-  // Returns a target in this list.
-  tt_TargetWidget at(uint index) const
-  {
-    return _widgets[index];
-  }
-
-  // Returns a number of targets in this list.
-  uint size() const
-  {
-    return _widgets.size();
-  }
-
-  tt_TargetWidget find(tt_Target id) const
-  {
-    foreach (widget : _widgets)
-      if (widget.getTarget().getTarget().isEqual(id)) return widget;
-
-    return NULL;
-  }
-
-  bool containsWidget(tt_TargetWidget widget) const
-  {
-    uint nWidgets = size();
-    for (uint i = 0; i < nWidgets; ++i)
-    {
-      if (widget == at(i))
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  tt_TargetWidgets copy() const
-  {
-    let result = tt_TargetWidgets.of();
-    result._widgets.Reserve(size());
-    result._widgets.Copy(_widgets);
-
-    return result;
-  }
-
-  // Adds a target to this list.
-  void add(tt_TargetWidget widget)
-  {
-    _widgets.push(widget);
-  }
-
-  void set(uint i, tt_TargetWidget widget)
-  {
-    _widgets[i] = widget;
-  }
-
-  private Array<tt_TargetWidget> _widgets;
 }
 #+end_src
 
@@ -5889,187 +6138,6 @@ class tt_ConditionalView : tt_View
   }
 
   private tt_View _view;
-}
-#+end_src
-
-** ~Drawing~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_drawing.zs
-
-// Namespace for common drawing functions.
-// TODO: clean up this mess.
-class tt_Drawing ui
-{
-  enum _
-  {
-    NOT_CENTERED = 0,
-    CENTERED = 1
-  }
-
-  static int getWidthForTarget(String question, string answer, int scale)
-  {
-    Font fnt         = NewSmallFont;
-    int  width       = max(fnt.StringWidth(question), fnt.StringWidth(answer));
-    int  borderWidth = makeBorderWidth(width) * scale;
-    return borderWidth;
-  }
-
-  static void drawTarget(vector2 pos,
-                         string  question,
-                         string  answer,
-                         int     scale,
-                         bool    isCentered,
-                         int     color)
-  {
-    Font fnt          = NewSmallFont;
-    int  screenWidth  = Screen.GetWidth()  / scale;
-    int  screenHeight = Screen.GetHeight() / scale;
-
-    let  position = pos / scale;
-    int  height   = fnt.GetHeight();
-    int  width    = max(fnt.StringWidth(question), fnt.StringWidth(answer));
-
-    double xStart = isCentered
-                  ? (position.x - width / 2)
-                  : position.x;
-    int x = int(Clamp(xStart,     FRAME, screenWidth  - FRAME - width         ));
-    int y = int(Clamp(position.y, FRAME, screenHeight - FRAME * 3 - height * 2));
-
-    drawBoxes(x, y, width, height, screenWidth, screenHeight, color);
-    drawText(x, y, height, fnt, question, answer, screenWidth, screenHeight);
-  }
-
-  static int getColorForMode(int mode)
-  {
-    return (mode == tt_Mode.Combat)
-      ? tt_RgbColors.AnswerCombat
-      : tt_RgbColors.AnswerExploration;
-  }
-
-  private static int makeBorderWidth(int width)
-  {
-    int borderWidth  = FRAME * 2 + width;
-    return borderWidth;
-  }
-
-  private static void drawBoxes(int x,
-                                int y,
-                                int width,
-                                int lineHeight,
-                                int screenWidth,
-                                int screenHeight,
-                                int color)
-  {
-    // TODO: replace with null?
-    // Texture is necessary for drawing, but in fact it isn't used.
-    // The color is specified with DTA_FillColor.
-    let dummyTexture = TexMan.CheckForTexture("tt-white", TexMan.Type_Any);
-
-    drawBox(dummyTexture,
-            x,
-            y,
-            width,
-            lineHeight,
-            screenWidth,
-            screenHeight,
-            tt_RgbColors.Question);
-
-    int lowerY = y + lineHeight + FRAME * 2;
-    drawBox(dummyTexture, x, lowerY, width, lineHeight, screenWidth, screenHeight, color);
-  }
-
-  private static void drawBox( TextureID tex
-              , int x
-              , int y
-              , int width
-              , int lineHeight
-              , int screenWidth
-              , int screenHeight
-              , int color
-              )
-  {
-    // TODO: replace drawTexture with drawShapeFill
-    // Screen.drawShapeFill(Color col, double amount, Shape2D s)
-
-    { // border
-      int borderX      = x - FRAME;
-      int borderY      = y - FRAME;
-      int borderWidth  = makeBorderWidth(width);
-      int borderHeight = FRAME * 2 + lineHeight;
-
-      Screen.DrawTexture( tex
-                        , NOT_ANIMATED
-                        , borderX
-                        , borderY
-                        , DTA_DestWidth     , borderWidth
-                        , DTA_DestHeight    , borderHeight
-                        , DTA_FillColor     , color
-                        , DTA_KeepRatio     , true
-                        , DTA_VirtualWidth  , screenWidth
-                        , DTA_VirtualHeight , screenHeight
-                        , DTA_Alpha         , BORDER_ALPHA
-                        );
-    }
-
-    { // background
-      int backgroundX      = x - PADDING;
-      int backgroundY      = y - PADDING;
-      int backgroundWidth  = PADDING * 2 + width;
-      int backgroundHeight = PADDING * 2 + lineHeight;
-
-      Screen.DrawTexture( tex
-                        , NOT_ANIMATED
-                        , backgroundX
-                        , backgroundY
-                        , DTA_DestWidth     , backgroundWidth
-                        , DTA_DestHeight    , backgroundHeight
-                        , DTA_FillColor     , tt_RgbColors.Dim
-                        , DTA_KeepRatio     , true
-                        , DTA_VirtualWidth  , screenWidth
-                        , DTA_VirtualHeight , screenHeight
-                        , DTA_Alpha         , BACKGROUND_ALPHA
-                        );
-    }
-  }
-
-  private static void drawText( int    x
-               , int    y
-               , int    height
-               , Font   fnt
-               , string question
-               , string answer
-               , int    screenWidth
-               , int    screenHeight
-               )
-  {
-    Screen.DrawText( fnt
-                   , tt_TextColors.Base
-                   , x
-                   , y
-                   , "$" .. question
-                   , DTA_KeepRatio     , true
-                   , DTA_VirtualWidth  , screenWidth
-                   , DTA_VirtualHeight , screenHeight
-                   );
-    Screen.DrawText( fnt
-                   , tt_TextColors.Base
-                   , x
-                   , y + height + FRAME * 2
-                   , "$" .. answer
-                   , DTA_KeepRatio     , true
-                   , DTA_VirtualWidth  , screenWidth
-                   , DTA_VirtualHeight , screenHeight
-                   );
-  }
-
-  const BORDER       = 1;
-  const PADDING      = 2;
-  const FRAME        = BORDER + PADDING;
-
-  const NOT_ANIMATED = 0; // false
-
-  const BORDER_ALPHA     = 0.2;
-  const BACKGROUND_ALPHA = 0.2;
 }
 #+end_src
 
@@ -6278,223 +6346,184 @@ class tt_TargetOverlay : tt_View
 }
 #+end_src
 
-* World Changer
+** ~Drawing~
 
-** ~WorldChanger~
+#+begin_src c :tangle build/Typist.pk3/zscript/view/tt_drawing.zs
 
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changer.zs
-
-// This interface represents entities that change the world state.
-class tt_WorldChanger abstract
+// Namespace for common drawing functions.
+// TODO: clean up this mess.
+class tt_Drawing ui
 {
-  play abstract void changeWorld();
-}
-#+end_src
-
-** ~WorldChangers~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changers.zs
-
-// Implements tt_WorldChanger by executing several instances of tt_WorldChanger.
-class tt_WorldChangers : tt_WorldChanger
-{
-  static tt_WorldChangers of(Array<tt_WorldChanger> changers)
+  enum _
   {
-    let result = new("tt_WorldChangers");
-    result._changers.move(changers);
-    return result;
+    NOT_CENTERED = 0,
+    CENTERED = 1
   }
 
-  static tt_WorldChangers ofNone() { return new("tt_WorldChangers"); }
-
-  void add(tt_WorldChanger changer) { _changers.push(changer); }
-
-  override void changeWorld()
+  static int getWidthForTarget(String question, string answer, int scale)
   {
-    foreach (changer : _changers)
-      changer.changeWorld();
+    Font fnt         = NewSmallFont;
+    int  width       = max(fnt.StringWidth(question), fnt.StringWidth(answer));
+    int  borderWidth = makeBorderWidth(width) * scale;
+    return borderWidth;
   }
 
-  private Array<tt_WorldChanger> _changers;
-}
-#+end_src
-
-** ~EnemySpeedController~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_enemy_speed_controller.zs
-
-// Implements tt_WorldChanger by slowing down enemies.
-class tt_EnemySpeedController : tt_WorldChanger
-{
-  static tt_EnemySpeedController of(tt_TargetSource targetSource,
-                                    tt_PlayerSource playerSource)
+  static void drawTarget(vector2 pos,
+                         string  question,
+                         string  answer,
+                         int     scale,
+                         bool    isCentered,
+                         int     color)
   {
-    let result = new("tt_EnemySpeedController");
-    result._targetSource = targetSource;
-    result._playerSource = playerSource;
-    return result;
+    Font fnt          = NewSmallFont;
+    int  screenWidth  = Screen.GetWidth()  / scale;
+    int  screenHeight = Screen.GetHeight() / scale;
+
+    let  position = pos / scale;
+    int  height   = fnt.GetHeight();
+    int  width    = max(fnt.StringWidth(question), fnt.StringWidth(answer));
+
+    double xStart = isCentered
+                  ? (position.x - width / 2)
+                  : position.x;
+    int x = int(Clamp(xStart,     FRAME, screenWidth  - FRAME - width         ));
+    int y = int(Clamp(position.y, FRAME, screenHeight - FRAME * 3 - height * 2));
+
+    drawBoxes(x, y, width, height, screenWidth, screenHeight, color);
+    drawText(x, y, height, fnt, question, answer, screenWidth, screenHeight);
   }
 
-  override void changeWorld()
+  static int getColorForMode(int mode)
   {
-    let  targets  = _targetSource.getTargets();
-    uint nTargets = targets.size();
-    int  player   = _playerSource.getNumber();
+    return (mode == tt_Mode.Combat)
+      ? tt_RgbColors.AnswerCombat
+      : tt_RgbColors.AnswerExploration;
+  }
 
-    for (uint i = 0; i < nTargets; ++i)
-    {
-      let enemy = targets.at(i).getActor();
-      if (!tt_VelocityStorage.isSlowedDown(enemy, player))
-        tt_VelocityStorage.slowDown(enemy, player);
+  private static int makeBorderWidth(int width)
+  {
+    int borderWidth  = FRAME * 2 + width;
+    return borderWidth;
+  }
+
+  private static void drawBoxes(int x,
+                                int y,
+                                int width,
+                                int lineHeight,
+                                int screenWidth,
+                                int screenHeight,
+                                int color)
+  {
+    // TODO: replace with null?
+    // Texture is necessary for drawing, but in fact it isn't used.
+    // The color is specified with DTA_FillColor.
+    let dummyTexture = TexMan.CheckForTexture("tt-white", TexMan.Type_Any);
+
+    drawBox(dummyTexture,
+            x,
+            y,
+            width,
+            lineHeight,
+            screenWidth,
+            screenHeight,
+            tt_RgbColors.Question);
+
+    int lowerY = y + lineHeight + FRAME * 2;
+    drawBox(dummyTexture, x, lowerY, width, lineHeight, screenWidth, screenHeight, color);
+  }
+
+  private static void drawBox( TextureID tex
+              , int x
+              , int y
+              , int width
+              , int lineHeight
+              , int screenWidth
+              , int screenHeight
+              , int color
+              )
+  {
+    // TODO: replace drawTexture with drawShapeFill
+    // Screen.drawShapeFill(Color col, double amount, Shape2D s)
+
+    { // border
+      int borderX      = x - FRAME;
+      int borderY      = y - FRAME;
+      int borderWidth  = makeBorderWidth(width);
+      int borderHeight = FRAME * 2 + lineHeight;
+
+      Screen.DrawTexture( tex
+                        , NOT_ANIMATED
+                        , borderX
+                        , borderY
+                        , DTA_DestWidth     , borderWidth
+                        , DTA_DestHeight    , borderHeight
+                        , DTA_FillColor     , color
+                        , DTA_KeepRatio     , true
+                        , DTA_VirtualWidth  , screenWidth
+                        , DTA_VirtualHeight , screenHeight
+                        , DTA_Alpha         , BORDER_ALPHA
+                        );
+    }
+
+    { // background
+      int backgroundX      = x - PADDING;
+      int backgroundY      = y - PADDING;
+      int backgroundWidth  = PADDING * 2 + width;
+      int backgroundHeight = PADDING * 2 + lineHeight;
+
+      Screen.DrawTexture( tex
+                        , NOT_ANIMATED
+                        , backgroundX
+                        , backgroundY
+                        , DTA_DestWidth     , backgroundWidth
+                        , DTA_DestHeight    , backgroundHeight
+                        , DTA_FillColor     , tt_RgbColors.Dim
+                        , DTA_KeepRatio     , true
+                        , DTA_VirtualWidth  , screenWidth
+                        , DTA_VirtualHeight , screenHeight
+                        , DTA_Alpha         , BACKGROUND_ALPHA
+                        );
     }
   }
 
-  private tt_TargetSource _targetSource;
-  private tt_PlayerSource _playerSource;
-}
-#+end_src
-
-** ~ProjectileSpeedController~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_projectile_speed_controller.zs
-
-// Implements tt_WorldChanger by slowing down projectiles that fly towards the player.
-//
-// When a projectile is no longer flying towards the player, its speed is
-// restored.
-class tt_ProjectileSpeedController : tt_WorldChanger
-{
-  static tt_ProjectileSpeedController of(tt_OriginSource playerOriginSource,
-                                         tt_PlayerSource playerSource)
+  private static void drawText( int    x
+               , int    y
+               , int    height
+               , Font   fnt
+               , string question
+               , string answer
+               , int    screenWidth
+               , int    screenHeight
+               )
   {
-    let result = new("tt_ProjectileSpeedController");
-    result._playerOriginSource = playerOriginSource;
-    result._playerSource = playerSource;
-    return result;
+    Screen.DrawText( fnt
+                   , tt_TextColors.Base
+                   , x
+                   , y
+                   , "$" .. question
+                   , DTA_KeepRatio     , true
+                   , DTA_VirtualWidth  , screenWidth
+                   , DTA_VirtualHeight , screenHeight
+                   );
+    Screen.DrawText( fnt
+                   , tt_TextColors.Base
+                   , x
+                   , y + height + FRAME * 2
+                   , "$" .. answer
+                   , DTA_KeepRatio     , true
+                   , DTA_VirtualWidth  , screenWidth
+                   , DTA_VirtualHeight , screenHeight
+                   );
   }
 
-  override void changeWorld()
-  {
-    let origin       = _playerOriginSource.getOrigin().getVector();
-    let playerRadius = _playerSource.getPawn().radius;
-    int player       = _playerSource.getNumber();
+  const BORDER       = 1;
+  const PADDING      = 2;
+  const FRAME        = BORDER + PADDING;
 
-    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
-      if (a.bMissile) controlProjectile(a, origin, playerRadius, player);
-  }
+  const NOT_ANIMATED = 0; // false
 
-  private play void controlProjectile(Actor a,
-                                      Vector3 playerOrigin,
-                                      double playerRadius,
-                                      int player)
-  {
-    bool isInRange = tt_Math.isInEffectiveRange(a.pos, playerOrigin);
-
-    if (isInRange && isMovingTowardsPlayer(a, playerOrigin, playerRadius))
-    {
-      if (!tt_VelocityStorage.isSlowedDown(a, player))
-        tt_VelocityStorage.slowDown(a, player);
-    }
-    else if (tt_VelocityStorage.isSlowedDown(a, player))
-    {
-      tt_VelocityStorage.restoreVelocity(a, player);
-    }
-  }
-
-  private play bool isMovingTowardsPlayer(Actor projectile,
-                                          Vector3 playerPos,
-                                          double playerRadius)
-  {
-    Vector3 vel = projectile.vel;
-    if (vel == (0, 0, 0)) { return false; } // doesn't move
-
-    double oldDistance = (projectile.pos - vel - playerPos).length();
-    double distance    = (projectile.pos -       playerPos).length();
-
-    if (distance > oldDistance) { return false; } // moves from player
-
-    // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-    Vector3 x10             = projectile.pos - playerPos;
-    Vector3 prod            = tt_Math.crossProduct(vel, x10);
-    double  lineDistance    = prod.length() / vel.length();
-    double  hitDistance     = playerRadius + projectile.radius;
-    bool    willTouchPlayer = (hitDistance >= lineDistance);
-
-    return willTouchPlayer;
-  }
-
-  private tt_OriginSource _playerOriginSource;
-  private tt_PlayerSource _playerSource;
-}
-#+end_src
-
-** ~VelocityStorage~
-
-#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_velocity_storage.zs
-
-// This is a helper class that allows storing the velocity.
-// TODO: rewrite with a Behavior?
-class tt_VelocityStorage : Inventory
-{
-  static bool isSlowedDown(Actor other, int byPlayer)
-  {
-    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
-    if (storage == NULL) return false;
-
-    return storage._byWhichPlayer[byPlayer];
-  }
-
-  static void slowDown(Actor other, int byPlayer)
-  {
-    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
-
-    if (storage != NULL)
-    {
-      storage._byWhichPlayer[byPlayer] = true;
-      return;
-    }
-
-    storage = tt_VelocityStorage(Actor.spawn("tt_VelocityStorage"));
-    storage._velocity = other.vel;
-    storage._speed    = other.speed;
-
-    other.addInventory(storage);
-
-    other.vel   *= VELOCITY_SCALE_FACTOR;
-    other.speed *= VELOCITY_SCALE_FACTOR;
-  }
-
-  static void restoreVelocity(Actor other, int byPlayer)
-  {
-    let storage = tt_VelocityStorage(other.findInventory("tt_VelocityStorage"));
-
-    storage._byWhichPlayer[byPlayer] = false;
-
-    if (storage.countByPlayers() == 0)
-    {
-      other.vel   = storage._velocity;
-      other.speed = storage._speed;
-
-      other.removeInventory(storage);
-      storage.destroy();
-    }
-  }
-
-  private int countByPlayers()
-  {
-    int result = 0;
-    foreach (byPlayer : _byWhichPlayer)
-      result += byPlayer;
-    return result;
-  }
-
-  // TODO: make velocity scale factor configurable for projectiles and enemies.
-  // for actors it was 0.2.
-  const VELOCITY_SCALE_FACTOR = 0.1;
-
-  private vector3 _velocity;
-  private double  _speed;
-  private bool[MAXPLAYERS] _byWhichPlayer;
+  const BORDER_ALPHA     = 0.2;
+  const BACKGROUND_ALPHA = 0.2;
 }
 #+end_src
 
@@ -6739,71 +6768,6 @@ class tt_TargetOriginSender : tt_Effect
 }
 #+end_src
 
-* Language
-
-#+begin_src ini :tangle build/Typist.pk3/language.txt
-[enu default]
-
-// Menus ///////////////////////////////////////////////////////////////////////
-
-TT_TITLE = "Typist.pk3 v0.7.4";
-
-TT_UNLOCK = "Unlock Game Mode";
-TT_COMBAT = "Force Combat Mode";
-TT_SCORE  = "Open Score";
-
-TT_TARGET_SCALE               = "Target text scale";
-
-TT_QUESTION_SOURCE            = "Lesson";
-TT_APPLY                      = "Apply";
-TT_QUESTION_SOURCE_NOTE       = "Or existing targets will retain question from the previous Lesson.";
-
-TT_CONTROLS_TITLE_OUT         = "Controls";
-TT_CONTROLS_TITLE_IN          = "Typist.pk3 Controls";
-
-TT_BUDDHA_ENABLED = "Player cannot die";
-TT_BUDDHA_NOTE    = "Applies on new level start.";
-
-TT_LESSON_OPTIONS_TITLE_OUT = "Lesson Options";
-TT_LESSON_OPTIONS_TITLE_IN  = "Typist.pk3 Lesson Options";
-
-TT_LESSON_MATH = "Arithmetic";
-TT_LESSON_1000 = "1000 Basic English Words";
-TT_CUSTOM_TEXT = "Custom Text";
-
-TT_CUSTOM_LESSON_HELP_TEXT = "\cfHow to set up Custom Text lesson\c-\
-\
-1. Find any text or book in ASCII .txt file (UTF-8 may also work).\
-2. Rename text file to `typist_custom_text.txt`.\
-3. Load `typist_custom_text.txt` with GZDoom alongside Typist.pk3.\
-4. Select Custom Text in Typist options menu.";
-
-TT_NIX_LESSON = "*nix Command Line";
-
-TT_LESSON_RANDOM              = "Random Characters";
-TT_RANDOM_LESSON_TITLE        = "Random Characters Lesson Configuration";
-TT_RANDOM_LESSON_LENGTH       = "Length";
-TT_RANDOM_LESSON_UPPERCASE    = "A-Z";
-TT_RANDOM_LESSON_LOWERCASE    = "a-z";
-TT_RANDOM_LESSON_NUMBERS      = "0-9";
-TT_RANDOM_LESSON_PUNCTUATION  = "Punctuation";
-TT_RANDOM_LESSON_SYMBOLS      = "Other characters";
-TT_RANDOM_LESSON_CUSTOM       = "Custom string";
-TT_RANDOM_LESSON_CUSTOM_CHARS = "Custom string:";
-
-// Sound menus /////////////////////////////////////////////////////////////////
-
-TT_SOUND_OPTIONS_TITLE_OUT = "Sound Options";
-TT_SOUND_OPTIONS_TITLE_IN  = "Typist.pk3 Sound Options";
-
-TT_SOUND_THEME          = "Sound theme";
-TT_SOUND_ENABLED        = "Sound effects";
-TT_SOUND_TYPING_ENABLED = "Typing sound";
-
-// Helper string
-TT_FALLBACK_QUESTION = "<empty lesson>";
-#+end_src
-
 * Options Menu
 
 ** Options
@@ -7025,76 +6989,69 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 }
 #+end_src
 
-* Sndinfo
+** Language
 
-#+begin_src c :tangle build/Typist.pk3/sndinf.txt
+#+begin_src ini :tangle build/Typist.pk3/language.txt
+[enu default]
 
-// Global Typist sound settings ////////////////////////////////////////////////
+// Menus ///////////////////////////////////////////////////////////////////////
 
-// Do not randomize pitch shift value.
-$pitchshiftrange 0
+TT_TITLE = "Typist.pk3 v0.7.4";
 
-// 1. Default sound theme //////////////////////////////////////////////////////
+TT_UNLOCK = "Unlock Game Mode";
+TT_COMBAT = "Force Combat Mode";
+TT_SCORE  = "Open Score";
 
-tt/combat1    "sounds/Default/danger1.ogg"
-tt/explore1   "sounds/Default/safe1.ogg"
-tt/click1-1   "sounds/Default/typea1.ogg"
-tt/click1-2   "sounds/Default/typea2.ogg"
-tt/click1-3   "sounds/Default/typea3.ogg"
-tt/click1-4   "sounds/Default/typea4.ogg"
-tt/click1-5   "sounds/Default/typea5.ogg"
-tt/match1     "sounds/Default/success1.ogg"
-tt/not-match1 "sounds/Default/fail1.ogg"
+TT_TARGET_SCALE               = "Target text scale";
 
-$random tt/click1 { tt/click1-1 tt/click1-2 tt/click1-3 tt/click1-4 tt/click1-5 }
+TT_QUESTION_SOURCE            = "Lesson";
+TT_APPLY                      = "Apply";
+TT_QUESTION_SOURCE_NOTE       = "Or existing targets will retain question from the previous Lesson.";
 
-$volume tt/combat1  0.4
-$volume tt/explore1 0.6
-$volume tt/match1   0.4
+TT_CONTROLS_TITLE_OUT         = "Controls";
+TT_CONTROLS_TITLE_IN          = "Typist.pk3 Controls";
 
-// 2. SNES sound theme /////////////////////////////////////////////////////////
+TT_BUDDHA_ENABLED = "Player cannot die";
+TT_BUDDHA_NOTE    = "Applies on new level start.";
 
-tt/combat2    "sounds/SNES/danger2.ogg"
-tt/explore2   "sounds/SNES/safe2.ogg"
-tt/click2-1   "sounds/SNES/typeb1.ogg"
-tt/click2-2   "sounds/SNES/typeb2.ogg"
-tt/click2-3   "sounds/SNES/typeb3.ogg"
-tt/click2-4   "sounds/SNES/typeb4.ogg"
-tt/click2-5   "sounds/SNES/typeb5.ogg"
-tt/match2     "sounds/SNES/success2.ogg"
-tt/not-match2 "sounds/SNES/sneserrors.ogg"
+TT_LESSON_OPTIONS_TITLE_OUT = "Lesson Options";
+TT_LESSON_OPTIONS_TITLE_IN  = "Typist.pk3 Lesson Options";
 
-$random tt/click2 { tt/click2-1 tt/click2-2 tt/click2-3 tt/click2-4 tt/click2-5 }
+TT_LESSON_MATH = "Arithmetic";
+TT_LESSON_1000 = "1000 Basic English Words";
+TT_CUSTOM_TEXT = "Custom Text";
 
-// 4. Dakka sound theme ////////////////////////////////////////////////////////
+TT_CUSTOM_LESSON_HELP_TEXT = "\cfHow to set up Custom Text lesson\c-\
+\
+1. Find any text or book in ASCII .txt file (UTF-8 may also work).\
+2. Rename text file to `typist_custom_text.txt`.\
+3. Load `typist_custom_text.txt` with GZDoom alongside Typist.pk3.\
+4. Select Custom Text in Typist options menu.";
 
-tt/combat4    "sounds/Dakka/danger4.ogg"
-tt/explore4   "sounds/Dakka/safe4.ogg"
-tt/click4-1   "sounds/Dakka/typed1.ogg"
-tt/click4-2   "sounds/Dakka/typed2.ogg"
-tt/click4-3   "sounds/Dakka/typed3.ogg"
-tt/click4-4   "sounds/Dakka/typed4.ogg"
-tt/click4-5   "sounds/Dakka/typed5.ogg"
-tt/match4     "sounds/Dakka/success4.ogg"
-tt/not-match4 "sounds/Dakka/fail4.ogg"
+TT_NIX_LESSON = "*nix Command Line";
 
-$random tt/click4 { tt/click4-1 tt/click4-2 tt/click4-3 tt/click4-4 tt/click4-5 }
+TT_LESSON_RANDOM              = "Random Characters";
+TT_RANDOM_LESSON_TITLE        = "Random Characters Lesson Configuration";
+TT_RANDOM_LESSON_LENGTH       = "Length";
+TT_RANDOM_LESSON_UPPERCASE    = "A-Z";
+TT_RANDOM_LESSON_LOWERCASE    = "a-z";
+TT_RANDOM_LESSON_NUMBERS      = "0-9";
+TT_RANDOM_LESSON_PUNCTUATION  = "Punctuation";
+TT_RANDOM_LESSON_SYMBOLS      = "Other characters";
+TT_RANDOM_LESSON_CUSTOM       = "Custom string";
+TT_RANDOM_LESSON_CUSTOM_CHARS = "Custom string:";
 
-// 5. GroceryStore sound theme /////////////////////////////////////////////////
+// Sound menus /////////////////////////////////////////////////////////////////
 
-tt/combat5    "sounds/GroceryStore/danger5.ogg"
-tt/explore5   "sounds/GroceryStore/safe5.ogg"
-tt/click5-1   "sounds/GroceryStore/typee1.ogg"
-tt/click5-2   "sounds/GroceryStore/typee2.ogg"
-tt/click5-3   "sounds/GroceryStore/typee3.ogg"
-tt/click5-4   "sounds/GroceryStore/typee4.ogg"
-tt/click5-5   "sounds/GroceryStore/typee5.ogg"
-tt/match5     "sounds/GroceryStore/success5.ogg"
-tt/not-match5 "sounds/GroceryStore/fail5.ogg"
+TT_SOUND_OPTIONS_TITLE_OUT = "Sound Options";
+TT_SOUND_OPTIONS_TITLE_IN  = "Typist.pk3 Sound Options";
 
-$random tt/click5 { tt/click5-1 tt/click5-2 tt/click5-3 tt/click5-4 tt/click5-5 }
+TT_SOUND_THEME          = "Sound theme";
+TT_SOUND_ENABLED        = "Sound effects";
+TT_SOUND_TYPING_ENABLED = "Typing sound";
 
-$volume tt/click5 0.2
+// Helper string
+TT_FALLBACK_QUESTION = "<empty lesson>";
 #+end_src
 
 * Mod setup
@@ -7303,7 +7260,7 @@ private tt_Expectation _mock_%2$s_expectation;
 ") return-type function-name parameters)
 #+end_src
 
-* Run :noexport:
+* Run Tests :noexport:
 
 Note: ~sv_fastweapons~ is for ~tt_Firer~ test.
 
