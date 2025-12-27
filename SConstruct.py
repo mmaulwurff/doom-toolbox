@@ -118,13 +118,20 @@ for org_file in Glob('modules/*.org'):
   module_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 project_targets = []
-for org_file in Glob('*.org') + Glob('experiments/*.org'):
+for org_file in Glob('*.org'):
   if str(org_file) != 'README.org':
     main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
     test_target = add_test_target(org_file, main_target)
     pack_target = add_pack_target(org_file, main_target)
     Depends(pk3_all, pack_target)
     project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+
+experiment_targets = []
+for org_file in Glob('experiments/*.org'):
+  if str(org_file) != 'README.org':
+    main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
+    test_target = add_test_target(org_file, main_target)
+    experiment_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 def add_dependency(project, module, namespace):
   def export_module(target, source, env):
@@ -151,6 +158,10 @@ Modules:
 Projects:
 
 - {'\n- '.join(project_targets)}
+
+Experiments:
+
+- {'\n- '.join(experiment_targets)}
 
 General targets:
 
