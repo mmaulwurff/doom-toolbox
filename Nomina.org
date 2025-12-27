@@ -3,7 +3,8 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 #+startup: content
 
-#+title: Nomina v2.0.0-beta
+#+title: Nomina
+# #+version: v2.0.0-beta
 
 Nomina is a GZDoom add-on that helps with enemy names (tags).
 

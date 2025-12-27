@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+title: Typist.pk3 v0.7.4
+#+title: Typist.pk3
+# #+version: v0.7.4
 
 Typist.pk3 turns FPS games into typing exercises.
 

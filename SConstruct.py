@@ -10,6 +10,8 @@ from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree
 from subprocess import run, PIPE, STDOUT
 
+import hashlib
+
 Decider('timestamp-match')
 Default(None)
 DefaultEnvironment(ENV=environ.copy())
@@ -87,14 +89,19 @@ def add_pack_target(org_file, main_target):
     with open(org_file) as project_file:
       project_content = project_file.read()
 
-    found = search('^#[+]title: (.*)$', project_content, flags=MULTILINE)
-    assert found != None, 'no title found'
+    def make_short_hash():
+      h = hashlib.new('sha1')
+      h.update(project_content.encode('utf-8'))
+      return h.hexdigest()[:8]
 
-    title = found.group(1).replace(' ', '-')
+    foundVersion = search('^#[+]version: *(.*)$', project_content, flags=MULTILINE)
+    version = foundVersion.group(1) if foundVersion != None else make_short_hash()
+
     copytree('LICENSES', build_path/'LICENSES', dirs_exist_ok=True)
     copytree('documentation', build_path/'documentation', dirs_exist_ok=True)
+    copy(org_file, build_path/org_file)
 
-    archive = make_archive(build_path, 'zip', build_path)
+    archive = make_archive(Path(str(build_path) + '-' + version), 'zip', build_path)
     move(archive, Path(archive).with_suffix('.pk3'))
 
   return AlwaysBuild(Alias(pack_name, main_target, pack))

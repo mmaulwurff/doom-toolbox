@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+title: 10.5x v0.11.1
+#+title: 10.5x
+# #+version: v0.11.1
 
 [[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
