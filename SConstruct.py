@@ -30,6 +30,9 @@ DefaultEnvironment(ENV=environ.copy())
 # TODO: fix parallel builds (-j 4). Check with moules of Typist.pk3.
 # May be a problem with cleaning, if main target is built after a module.
 
+def noop(target, source, env):
+  pass
+
 def make_project_name(org_file):
   return path.splitext(path.basename(org_file))[0]
 
@@ -80,9 +83,11 @@ def add_test_target(org_file, main_target):
 
   return AlwaysBuild(Alias(test_name, main_target, run_test))
 
+pk3_all = Alias("Pk3All", None, noop)
+
 def add_pack_target(org_file, main_target):
   name = make_project_name(org_file)
-  pack_name = f'{name}Pack'
+  pack_name = f'{name}.pk3'
   build_path = Path(f'build/{name}')
 
   def pack(target, source, env):
@@ -118,6 +123,7 @@ for org_file in Glob('*.org') + Glob('experiments/*.org'):
     main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
     test_target = add_test_target(org_file, main_target)
     pack_target = add_pack_target(org_file, main_target)
+    Depends(pk3_all, pack_target)
     project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
 
 def add_dependency(project, module, namespace):
@@ -146,5 +152,9 @@ Projects:
 
 - {'\n- '.join(project_targets)}
 
-type 'scons <target>' to build a target.
+General targets:
+
+- Pk3All: build packages for all mods
+
+Type 'scons <target>' to build a target.
 """, append=False)
