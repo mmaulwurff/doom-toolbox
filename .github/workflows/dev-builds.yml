@@ -22,8 +22,8 @@ jobs:
 
       - name: Set up Emacs
         run: |
-          apt-get update
-          apt-get install emacs-nox
+          sudo apt-get update
+          sudo apt-get install emacs-nox
 
       - name: Set up Python
         uses: actions/setup-python@v3
