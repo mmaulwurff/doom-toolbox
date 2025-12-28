@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+# GitHub Action for dev builds
+# https://docs.github.com/en/actions
+
+name: dev-builds
+
+on:
+  push:
+    branches: [ $default-branch ]
+    pull_request: [ $default-branch ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Emacs
+        run: |
+          apt-get update
+          apt-get install emacs-nox
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.13"
+
+      - name: Set up requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt;
+
+      - name: Build
+        run: |
+          scons Pk3All
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dists
+          path: |
+            build/*.pk3
+            !build/Typist.pk3

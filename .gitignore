@@ -26,6 +26,7 @@
 !*.txt
 !*.wad
 !*.yaml
+!*.yml
 
 # but do ignore them there:
 build/*
