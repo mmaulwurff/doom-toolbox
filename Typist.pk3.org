@@ -616,7 +616,7 @@ class tt_ProjectileSpeedController : tt_WorldChanger
   }
 
   private play void controlProjectile(Actor a,
-                                      Vector3 playerOrigin,
+                                      vector3 playerOrigin,
                                       double playerRadius,
                                       int player)
   {
@@ -634,10 +634,10 @@ class tt_ProjectileSpeedController : tt_WorldChanger
   }
 
   private play bool isMovingTowardsPlayer(Actor projectile,
-                                          Vector3 playerPos,
+                                          vector3 playerPos,
                                           double playerRadius)
   {
-    Vector3 vel = projectile.vel;
+    vector3 vel = projectile.vel;
     if (vel == (0, 0, 0)) { return false; } // doesn't move
 
     double oldDistance = (projectile.pos - vel - playerPos).length();
@@ -646,8 +646,8 @@ class tt_ProjectileSpeedController : tt_WorldChanger
     if (distance > oldDistance) { return false; } // moves from player
 
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-    Vector3 x10             = projectile.pos - playerPos;
-    Vector3 prod            = tt_Math.crossProduct(vel, x10);
+    vector3 x10             = projectile.pos - playerPos;
+    vector3 prod            = tt_Math.crossProduct(vel, x10);
     double  lineDistance    = prod.length() / vel.length();
     double  hitDistance     = playerRadius + projectile.radius;
     bool    willTouchPlayer = (hitDistance >= lineDistance);
@@ -755,17 +755,17 @@ class tt_HorizontalAimer : tt_WorldChanger
     let pawn = _playerSource.getPawn();
     if (pawn == NULL) { return; }
 
-    Vector3 myPosition    = pawn.pos;
-    Vector3 otherPosition = targetOrigin.getVector();
+    vector3 myPosition    = pawn.pos;
+    vector3 otherPosition = targetOrigin.getVector();
     double  angle         = AngleTo(myPosition.XY, otherPosition.XY);
 
     pawn.A_SetAngle(angle, SPF_INTERPOLATE);
   }
 
-  private static double AngleTo(Vector2 myPosition, Vector2 otherPosition)
+  private static double AngleTo(vector2 myPosition, vector2 otherPosition)
   {
-    Vector2 xy = otherPosition - myPosition;
-    return VectorAngle(xy.x, xy.y);
+    vector2 xy = otherPosition - myPosition;
+    return vectorAngle(xy.x, xy.y);
   }
 
   private tt_OriginSource _targetOriginSource;
@@ -853,11 +853,11 @@ class tt_VerticalAimer : tt_WorldChanger
     let pawn = _playerSource.getPawn();
     if (pawn == NULL) { return; }
 
-    Vector3 myPosition = pawn.pos;
+    vector3 myPosition = pawn.pos;
     myPosition.z += pawn.Height / 2 + pawn.AttackZOffset;
 
-    Vector3 otherPosition = targetOrigin.getVector();
-    Vector3 diff          = myPosition - otherPosition;
+    vector3 otherPosition = targetOrigin.getVector();
+    vector3 diff          = myPosition - otherPosition;
     double  angle         = Atan2(diff.z, sqrt(diff.x * diff.x + diff.y * diff.y));
 
     pawn.A_SetPitch(angle, SPF_INTERPOLATE);
@@ -3288,7 +3288,7 @@ class tt_StringSet : tt_Lesson
 // Namespace for math-related functions.
 class tt_Math
 {
-  static bool isInEffectiveRange(Vector3 p1, Vector3 p2)
+  static bool isInEffectiveRange(vector3 p1, vector3 p2)
   {
     double distance = (p1 - p2).length();
     bool   inRange  = distance < MAX_DISTANCE;
@@ -3296,9 +3296,9 @@ class tt_Math
     return inRange;
   }
 
-  static Vector3 crossProduct(Vector3 u, Vector3 v)
+  static vector3 crossProduct(vector3 u, vector3 v)
   {
-    Vector3 result;
+    vector3 result;
     result.x = u.y * v.z - u.z * v.y;
     result.y = u.z * v.x - u.x * v.z;
     result.z = u.x * v.y - u.y * v.x;
@@ -3903,19 +3903,16 @@ class tt_AutomapModeSource : tt_ModeSource
 // Note that the Origin position cannot change once set.
 class tt_Origin
 {
-  static tt_Origin of(Vector3 pos)
+  static tt_Origin of(vector3 pos)
   {
     let result = new("tt_Origin");
     result._pos = pos;
     return result;
   }
 
-  Vector3 getVector() const
-  {
-    return _pos;
-  }
+  vector3 getVector() const { return _pos; }
 
-  private Vector3 _pos;
+  private vector3 _pos;
 }
 #+end_src
 
@@ -5072,7 +5069,7 @@ class tt_Target
   // Get position in game space of this target.
   tt_Origin getPosition() const
   {
-    Vector3 position = _actor.pos;
+    vector3 position = _actor.pos;
     position.z += _actor.height / 2;
 
     let result = tt_Origin.of(position);
@@ -5451,7 +5448,7 @@ class tt_TargetSourcePruner : tt_TargetSource
 // Represents a target displayed on the screen.
 class tt_TargetWidget
 {
-  static tt_TargetWidget of(tt_KnownTarget target, Vector2 position)
+  static tt_TargetWidget of(tt_KnownTarget target, vector2 position)
   {
     let result = new("tt_TargetWidget");
 
@@ -5466,12 +5463,12 @@ class tt_TargetWidget
     return _target;
   }
 
-  Vector2 getPosition() const
+  vector2 getPosition() const
   {
     return _position;
   }
 
-  double getDistanceTo(Vector3 other)
+  double getDistanceTo(vector3 other)
   {
     let worldPosition = _target.getTarget().getPosition().getVector();
     let distance      = (worldPosition - other).Length();
@@ -5479,13 +5476,13 @@ class tt_TargetWidget
     return distance;
   }
 
-  void setPosition(Vector2 position)
+  void setPosition(vector2 position)
   {
     _position = position;
   }
 
   private tt_KnownTarget _target;
-  private Vector2        _position;
+  private vector2        _position;
 }
 #+end_src
 
@@ -5601,8 +5598,8 @@ class tt_Projector : tt_TargetWidgetSource
         continue;
       }
 
-      Vector3 targetPos = target.getTarget().getPosition().getVector();
-      Vector2 position;
+      vector3 targetPos = target.getTarget().getPosition().getVector();
+      vector2 position;
       bool    isPositionSuccessful;
       [position, isPositionSuccessful] = makeDrawPos(targetPos, viewport);
 
@@ -5618,7 +5615,7 @@ class tt_Projector : tt_TargetWidgetSource
 
   // Calculates the screen position (draw position).
   // Returns screen position and success flag.
-  private ui Vector2, bool makeDrawPos(Vector3 targetPos, tt_le_Viewport viewport)
+  private ui vector2, bool makeDrawPos(vector3 targetPos, tt_le_Viewport viewport)
   {
     _projection.ProjectWorldPos(targetPos);
 
@@ -5627,7 +5624,7 @@ class tt_Projector : tt_TargetWidgetSource
       return (0, 0), false;
     }
 
-    Vector2 drawPos = viewport.SceneToWindow(_projection.ProjectToNormal());
+    vector2 drawPos = viewport.SceneToWindow(_projection.ProjectToNormal());
 
     return drawPos, true;
   }
@@ -5693,7 +5690,7 @@ class tt_SorterByDistance : tt_TargetWidgetSource
     return sorted;
   }
 
-  static tt_TargetWidgets sort(tt_TargetWidgets widgets, Vector3 origin)
+  static tt_TargetWidgets sort(tt_TargetWidgets widgets, vector3 origin)
   {
     let result    = widgets;
     let workplace = widgets.copy();
@@ -5707,7 +5704,7 @@ class tt_SorterByDistance : tt_TargetWidgetSource
                                         uint             begin,
                                         uint             end,
                                         tt_TargetWidgets A,
-                                        Vector3          origin)
+                                        vector3          origin)
   {
     if ((end - begin) < 2) // if run size == 1 consider it sorted
     {
@@ -5730,7 +5727,7 @@ class tt_SorterByDistance : tt_TargetWidgetSource
                                    uint             middle,
                                    uint             end,
                                    tt_TargetWidgets B,
-                                   Vector3          origin)
+                                   vector3          origin)
   {
     uint i = begin;
     uint j = middle;
