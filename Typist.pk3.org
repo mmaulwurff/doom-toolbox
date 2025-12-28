@@ -9,7 +9,7 @@ Typist.pk3 turns FPS games into typing exercises.
 
 TODO: add instructions.
 
-* EventHandler
+* Event Handler
 
 ** ~EventHandler~
 
@@ -177,7 +177,7 @@ class tt_Buddha : PowerBuddha
 }
 #+end_src
 
-* PlayerHandler
+* Player Handler
 
 ** ~PlayerHandler~
 
@@ -2058,9 +2058,9 @@ class tt_PlayerSoundPlayer : tt_SoundPlayer
 }
 #+end_src
 
-** Sndinfo
+** Sounds
 
-#+begin_src c :tangle build/Typist.pk3/sndinf.txt
+#+begin_src c :tangle build/Typist.pk3/sndinfo.txt
 
 // Global Typist sound settings ////////////////////////////////////////////////
 
@@ -6773,7 +6773,7 @@ class tt_TargetOriginSender : tt_Effect
 
 ** Options
 
-TODO: rewrite with PlainTranslator.
+TODO: rewrite with ~PlainTranslator~.
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
 
