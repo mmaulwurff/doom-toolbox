@@ -22,8 +22,7 @@ jobs:
 
       - name: Set up Emacs
         run: |
-          sudo apt-get update
-          sudo apt-get install emacs-nox
+          sudo snap install emacs --classic
 
       - name: Set up Python
         uses: actions/setup-python@v3
