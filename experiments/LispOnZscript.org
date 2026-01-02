@@ -7,12 +7,12 @@
 LispOnZscript is a toy Lisp-like language written on top of ZScript for GZDoom.
 
 LispOnZscript is an experiment, a programming exercise, and isn't suitable for any
-practical purpose. I'll be surprised if it finds any practical purpose. See [[file:./LispOnZscript.org::*Test][Test]] to
+practical purpose. I'll be surprised if it finds any practical purpose. See [[Test][Test]] to
 see what expressions it can evaluate at the moment, also it contains ~tl_Eval.eval~
 usage example. Search for ~TODO~ in this file to see what remains to be done to make
 LispOnZscript more usable.
 
-Key function is ~tl_Eval.eval~ function (see [[file:./LispOnZscript.org::*Eval][Eval]]). It takes a parsed expression
+Key function is ~tl_Eval.eval~ function (see [[Eval][Eval]]). It takes a parsed expression
 (from ~tl_Parser.parse~, see [[file:./LispOnZscript.org::*Parser][Parser]]) and an environment (normally from
 ~tl_Env.makeGlobalEnv~, see [[file:./LispOnZscript.org::*Env][Env]]).
 

@@ -4,18 +4,6 @@
 # This is build definitions for DoomToolbox.
 # See https://scons.github.io/docs/scons-user.html for details.
 
-from os import environ, makedirs, path
-from pathlib import Path
-from re import search, MULTILINE
-from shutil import copy, copytree, make_archive, move, rmtree
-from subprocess import run, PIPE, STDOUT
-
-import hashlib
-
-Decider('timestamp-match')
-Default(None)
-DefaultEnvironment(ENV=environ.copy())
-
 # TODO: test on Windows.
 
 # TODO: move autoadvance to config.ini?
@@ -30,12 +18,44 @@ DefaultEnvironment(ENV=environ.copy())
 # TODO: fix parallel builds (-j 4). Check with moules of Typist.pk3.
 # May be a problem with cleaning, if main target is built after a module.
 
+from os import environ, makedirs, path
+from pathlib import Path
+from re import search, MULTILINE
+from shutil import copy, copytree, make_archive, move, rmtree
+from subprocess import run, PIPE, STDOUT
+
+import hashlib
+
+
+# General setup
+Decider('timestamp-match')
+Default(None)
+DefaultEnvironment(ENV=environ.copy())
+
+
+# Common functions
 def noop(target, source, env):
   pass
 
 def make_project_name(org_file):
   return path.splitext(path.basename(org_file))[0]
 
+def make_export(source):
+  htmlize_path = path.abspath('tools/htmlize.el')
+  rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
+  css_path = rel + 'tools/org-adwaita.css'
+  return f'emacs {source} --quick --batch -l {htmlize_path} --eval "\
+    (progn\
+      (require \'htmlize)\
+      (setq org-confirm-babel-evaluate nil)\
+      (setq org-html-htmlize-output-type \'css)\
+      (setq org-html-validation-link nil)\
+      (setq org-html-head-extra \
+        \\"<link rel=\"stylesheet\" type=\"text/css\" href=\"{css_path}\"/>\\")\
+      (org-html-export-to-html))"'
+
+
+# Target setup functions
 def add_main_target(org_file, target_format):
   name = make_project_name(org_file)
   zscript_name = target_format.format(name)
@@ -54,21 +74,12 @@ def add_html_target(org_file, main_target):
   name = make_project_name(org_file)
   html_name = f'{name}Html'
 
-  export = f'emacs {org_file} --quick --batch -l tools/htmlize.el --eval "\
-    (progn\
-      (require \'htmlize)\
-      (setq org-confirm-babel-evaluate nil)\
-      (setq org-html-htmlize-output-type \'css)\
-      (setq org-html-head-extra \
-        \\"<link rel=\"stylesheet\" type=\"text/css\" href=\"tools/org-adwaita.css\"/>\\")\
-      (org-html-export-to-html))"'
-
   def putHtml(target, source, env):
     move(f'{name}.html', f'build/{name}/{name}.html')
     makedirs(f'build/{name}/tools/')
     copy('tools/org-adwaita.css', f'build/{name}/tools/org-adwaita.css')
 
-  return AlwaysBuild(Alias(html_name, main_target, [export, putHtml]))
+  return AlwaysBuild(Alias(html_name, main_target, [make_export(org_file), putHtml]))
 
 def add_test_target(org_file, main_target):
   name = make_project_name(org_file)
@@ -103,8 +114,6 @@ def add_test_target(org_file, main_target):
 
   return AlwaysBuild(Alias(test_name, main_target, run_test))
 
-pk3_all = Alias("Pk3All", None, noop)
-
 def add_pack_target(org_file, main_target):
   name = make_project_name(org_file)
   pack_name = f'{name}.pk3'
@@ -131,6 +140,10 @@ def add_pack_target(org_file, main_target):
 
   return AlwaysBuild(Alias(pack_name, main_target, pack))
 
+
+# Targets
+pk3_all = Alias("Pk3All", None, noop)
+
 module_targets = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
@@ -155,6 +168,15 @@ for org_file in Glob('experiments/*.org'):
     test_target = add_test_target(org_file, main_target)
     experiment_targets.append(f'{main_target[0]}, {test_target[0]}')
 
+html_all = Alias("HtmlAll", None, noop)
+for org_file in Glob('*/*.org'):
+  html_name = f'{path.splitext(org_file)[0]}.html'
+  Depends(html_all, Command(target=html_name,
+                            source=org_file,
+                            action=make_export(org_file)))
+
+
+# Dependencies
 def add_dependency(project, module, namespace):
   def export_module(target, source, env):
     with open(target[0], 'w') as target_file:
@@ -172,6 +194,8 @@ add_dependency('Typist.pk3', 'libeye', 'tt_le_')
 add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
 add_dependency('Typist.pk3', 'StringUtils', 'tt_su_')
 
+
+# Help
 Help(f"""
 Modules:
 

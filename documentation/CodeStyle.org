@@ -30,7 +30,8 @@
 
 * Formatting
 
-See [[../.clang-format]], [[../.editorconfig]], and [[../.pre-commit-config.yaml]] for formatting settings.
+See [[../.clang-format]], [[../.editorconfig]], and [[../.pre-commit-config.yaml]] for formatting
+settings.
 
 * Abbreviations
 
