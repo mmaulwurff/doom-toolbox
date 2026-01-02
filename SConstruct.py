@@ -44,14 +44,14 @@ def make_export(source):
   htmlize_path = path.abspath('tools/htmlize.el')
   rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
   css_path = rel + 'tools/org-adwaita.css'
+  css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
   return f'emacs {source} --quick --batch -l {htmlize_path} --eval "\
     (progn\
       (require \'htmlize)\
       (setq org-confirm-babel-evaluate nil)\
       (setq org-html-htmlize-output-type \'css)\
       (setq org-html-validation-link nil)\
-      (setq org-html-head-extra \
-        \\"<link rel=\"stylesheet\" type=\"text/css\" href=\"{css_path}\"/>\\")\
+      (setq org-html-head-extra \\"{css_link}\\")\
       (org-html-export-to-html))"'
 
 
@@ -169,7 +169,7 @@ for org_file in Glob('experiments/*.org'):
     experiment_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 html_all = Alias("HtmlAll", None, noop)
-for org_file in Glob('*/*.org'):
+for org_file in Glob('*/*.org') + Glob('*.org'):
   html_name = f'{path.splitext(org_file)[0]}.html'
   Depends(html_all, Command(target=html_name,
                             source=org_file,
