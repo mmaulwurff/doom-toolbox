@@ -4,7 +4,7 @@
 # This is build definitions for DoomToolbox.
 # See https://scons.github.io/docs/scons-user.html for details.
 
-from os import environ, path
+from os import environ, makedirs, path
 from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree
@@ -49,6 +49,26 @@ def add_main_target(org_file, target_format):
     rmtree(f'build/{name}', True)
 
   return Alias(name, Command(target=zscript_name, source=org_file, action=[clean, tangle]))
+
+def add_html_target(org_file, main_target):
+  name = make_project_name(org_file)
+  html_name = f'{name}Html'
+
+  export = f'emacs {org_file} --quick --batch -l tools/htmlize.el --eval "\
+    (progn\
+      (require \'htmlize)\
+      (setq org-confirm-babel-evaluate nil)\
+      (setq org-html-htmlize-output-type \'css)\
+      (setq org-html-head-extra \
+        \\"<link rel=\"stylesheet\" type=\"text/css\" href=\"tools/org-adwaita.css\"/>\\")\
+      (org-html-export-to-html))"'
+
+  def putHtml(target, source, env):
+    move(f'{name}.html', f'build/{name}/{name}.html')
+    makedirs(f'build/{name}/tools/')
+    copy('tools/org-adwaita.css', f'build/{name}/tools/org-adwaita.css')
+
+  return AlwaysBuild(Alias(html_name, main_target, [export, putHtml]))
 
 def add_test_target(org_file, main_target):
   name = make_project_name(org_file)
@@ -121,10 +141,12 @@ project_targets = []
 for org_file in Glob('*.org'):
   if str(org_file) != 'README.org':
     main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
+    html_target = add_html_target(org_file, main_target)
     test_target = add_test_target(org_file, main_target)
-    pack_target = add_pack_target(org_file, main_target)
+    pack_target = add_pack_target(org_file, html_target)
     Depends(pk3_all, pack_target)
-    project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+    project_targets.append(
+      f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}')
 
 experiment_targets = []
 for org_file in Glob('experiments/*.org'):

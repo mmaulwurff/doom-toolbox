@@ -987,13 +987,13 @@ class x5t_RevenantReplacer : Actor replaces Revenant
 TODO: make multiplayer tests, maybe?
 
 #+name: init-wait
-#+begin_src elisp
+#+begin_src elisp :exports none
 (setq wait-delay 0)
 ""
 #+end_src
 
 #+name: wait
-#+begin_src elisp :var new-delay=2
+#+begin_src elisp :var new-delay=2 :exports none
 (setq wait-delay (+ new-delay wait-delay))
 (format "wait %d" wait-delay)
 #+end_src
