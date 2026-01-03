@@ -23,7 +23,7 @@ jobs:
       - name: Get Emacs version
         id: get-emacs-version
         run: |
-          echo "VERSION=$(snap info emacs | grep latest/stable | base64)" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$(snap info emacs | grep latest/stable | base64 -w 0)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Emacs
         id: cache-emacs
