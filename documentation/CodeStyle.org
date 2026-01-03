@@ -20,7 +20,7 @@
 - class members: ~mCapitalizedWords~
   - exceptions: ~camelCase~ if a class is plain data
 
-- local variables: ~camelCase~
+- local variables and parameters: ~camelCase~
 
 - states: ~CapitalizedWords~
 

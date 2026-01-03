@@ -45,14 +45,13 @@ def make_export(source):
   rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
   css_path = rel + 'tools/org-adwaita.css'
   css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
-  return f'emacs {source} --quick --batch -l {htmlize_path} --eval "\
-    (progn\
-      (require \'htmlize)\
-      (setq org-confirm-babel-evaluate nil)\
-      (setq org-html-htmlize-output-type \'css)\
-      (setq org-html-validation-link nil)\
-      (setq org-html-head-extra \\"{css_link}\\")\
-      (org-html-export-to-html))"'
+  return f'emacs {source} --quick --batch --load {htmlize_path} --eval "\
+    (progn (require \'htmlize)\
+           (setq org-confirm-babel-evaluate nil)\
+           (setq org-html-htmlize-output-type \'css)\
+           (setq org-html-validation-link nil)\
+           (setq org-html-head-extra \\"{css_link}\\")\
+           (org-html-export-to-html))"'
 
 
 # Target setup functions
@@ -76,7 +75,7 @@ def add_html_target(org_file, main_target):
 
   def putHtml(target, source, env):
     move(f'{name}.html', f'build/{name}/{name}.html')
-    makedirs(f'build/{name}/tools/')
+    makedirs(f'build/{name}/tools/', exist_ok=True)
     copy('tools/org-adwaita.css', f'build/{name}/tools/org-adwaita.css')
 
   return AlwaysBuild(Alias(html_name, main_target, [make_export(org_file), putHtml]))
@@ -140,6 +139,9 @@ def add_pack_target(org_file, main_target):
 
   return AlwaysBuild(Alias(pack_name, main_target, pack))
 
+def make_index(target, source, env):
+  copy('README.html', 'index.html')
+
 
 # Targets
 pk3_all = Alias("Pk3All", None, noop)
@@ -168,7 +170,7 @@ for org_file in Glob('experiments/*.org'):
     test_target = add_test_target(org_file, main_target)
     experiment_targets.append(f'{main_target[0]}, {test_target[0]}')
 
-html_all = Alias("HtmlAll", None, noop)
+html_all = Alias("HtmlAll", None, make_index)
 for org_file in Glob('*/*.org') + Glob('*.org'):
   html_name = f'{path.splitext(org_file)[0]}.html'
   Depends(html_all, Command(target=html_name,

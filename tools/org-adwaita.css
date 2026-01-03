@@ -5,6 +5,9 @@
   Generated on Emacs 30.1 with `org-html-htmlize-generate-css`.
   Original file: adwaita-theme.el, Author: William Stevenson <yhvh2000@gmail.com>.
   SPDX tags above are derived from the original file.
+
+  Manual changes:
+  - added style for `a` and `a:visited`.
   -->
 
 <style type="text/css">
@@ -12,6 +15,16 @@
       body {
         color: #2E3436;
         background-color: #EDEDED;
+      }
+      a {
+        /* link */
+        color: #0066CC;
+        text-decoration: underline;
+      }
+      a:visited {
+        /* link-visited */
+        color: purple;
+        text-decoration: underline;
       }
       .org-Xfold-hideshow-folded {
         /* +fold-hideshow-folded-face */

@@ -34,6 +34,8 @@ Documentation:
 - [[file:documentation/MadeWith.org][Made with]]
 - [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
+HTML pages for Doom Toolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]].
+
 * Social
 
 - [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld]]
