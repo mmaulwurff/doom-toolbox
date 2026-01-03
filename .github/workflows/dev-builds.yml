@@ -23,14 +23,14 @@ jobs:
       - name: Get Emacs version
         id: get-emacs-version
         run: |
-          echo "VERSION=$(sudo snap info emacs | grep latest/stable | base64 -w 0)" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$(snap info emacs | grep latest/stable | base64 -w 0)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Emacs
         id: cache-emacs
         uses: actions/cache@v4
         with:
           path: /snap/emacs
-          key: ${{ runner.os }}-${{ steps.get-emacs-version.outputs.EMACS_VERSION }}
+          key: ${{ runner.os }}-${{ steps.get-emacs-version.outputs.VERSION }}
 
       - name: Set up Emacs
         run: |
