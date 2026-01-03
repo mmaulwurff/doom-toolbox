@@ -34,7 +34,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
+      - name: Get Emacs version
+        id: get-emacs-version
+        run: |
+          echo "VERSION=$(snap info emacs | grep latest/stable | base64 -w 0)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Emacs
+        id: cache-emacs
+        uses: actions/cache@v4
+        with:
+          path: /snap/emacs
+          key: ${{ runner.os }}-${{ steps.get-emacs-version.outputs.VERSION }}
+
       - name: Set up Emacs
         run: |
           sudo snap install emacs --classic
@@ -54,10 +66,10 @@ jobs:
       - name: Export to HTML
         run: |
           scons HtmlAll
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
