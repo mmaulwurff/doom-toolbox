@@ -96,7 +96,7 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src c :tangle build/10.5x/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src ini :tangle build/10.5x/language.txt :exports none
+#+begin_src c :tangle build/10.5x/language.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src c :tangle build/10.5x/mapinfo.txt :exports none
@@ -588,7 +588,7 @@ class x5_Killer : Actor
 
 * ~language~
 
-#+begin_src ini :tangle build/10.5x/language.txt
+#+begin_src c :tangle build/10.5x/language.txt
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
 [enu default]

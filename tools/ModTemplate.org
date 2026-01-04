@@ -38,7 +38,7 @@ DefaultBind g +hello
 
 * Language - user-visible strings
 
-#+begin_src ini :tangle ../build/ModTemplate/language.txt
+#+begin_src c :tangle ../build/ModTemplate/language.txt
 // <<CC>>
 
 [enu default]

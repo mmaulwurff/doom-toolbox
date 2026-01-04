@@ -35,7 +35,7 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt :exports none
 // <<GPL>>
 #+end_src
-#+begin_src ini :tangle build/FinalCustomDoom/language.txt :exports none
+#+begin_src c :tangle build/FinalCustomDoom/language.txt :exports none
 // <<GPL>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt :exports none
@@ -684,7 +684,7 @@ server string cd_settings_profile2;
 server string cd_settings_profile3;
 #+end_src
 
-#+begin_src ini :tangle build/FinalCustomDoom/language.txt
+#+begin_src c :tangle build/FinalCustomDoom/language.txt
 
 [enu default]
 cd_ResetOptions    = "Reset options to defaults";
@@ -768,7 +768,7 @@ StaticText \"%s\", CDLightBlue
 StaticText \"\"" note)
 #+end_src
 
-#+begin_src ini :tangle build/FinalCustomDoom/language.txt
+#+begin_src c :tangle build/FinalCustomDoom/language.txt
 
 // Translation note: most FCD menu items have their strings written in plain English
 // and not as $, but are still translatable, for example:

@@ -177,6 +177,10 @@ for org_file in Glob('*/*.org') + Glob('*.org'):
                             source=org_file,
                             action=make_export(org_file)))
 
+AlwaysBuild(Alias("LintAll", None,
+                  [f'emacs {org_file} --quick --batch --eval "(print (org-lint))"'
+                   for org_file in Glob('*/*.org') + Glob('*.org')]))
+
 
 # Dependencies
 def add_dependency(project, module, namespace):
@@ -214,6 +218,7 @@ Experiments:
 General targets:
 
 - Pk3All: build packages for all mods
+- LintAll: run org-lint for all Org files
 
 Type 'scons <target>' to build a target.
 """, append=False)

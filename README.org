@@ -7,7 +7,7 @@ DoomToolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
 
 DoomToolbox is free and open source software. Add-ons are mostly licensed under
-[[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
+[[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
 tag in each .org file for details. For third-party resources, such as image and sound
 files, see ~REUSE.toml~ files in their directories for licenses.
 

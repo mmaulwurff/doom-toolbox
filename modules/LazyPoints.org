@@ -1037,7 +1037,7 @@ class NAMESPACE_View
 
 * Tests
 
-#+begin_src ini :tangle ../build/LazyPointsTest/cvarinfo.txt
+#+begin_src c :tangle ../build/LazyPointsTest/cvarinfo.txt
 <<cvarinfo>>
 #+end_src
 

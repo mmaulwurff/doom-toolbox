@@ -6989,7 +6989,7 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 
 ** Language
 
-#+begin_src ini :tangle build/Typist.pk3/language.txt
+#+begin_src c :tangle build/Typist.pk3/language.txt
 [enu default]
 
 // Menus ///////////////////////////////////////////////////////////////////////

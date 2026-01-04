@@ -43,7 +43,7 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src text :tangle build/Nomina/keyconf.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src ini :tangle build/Nomina/language.txt :exports none
+#+begin_src c :tangle build/Nomina/language.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src text :tangle build/Nomina/mapinfo.txt :exports none
@@ -203,7 +203,7 @@ class nat_NamelessByConfig : nat_Monster {}
 Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
 #+end_src
 
-#+begin_src ini :tangle build/Nomina/language.txt
+#+begin_src c :tangle build/Nomina/language.txt
 [enu default]
 NA_USAGE = "Usage";
 
