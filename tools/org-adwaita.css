@@ -16,16 +16,6 @@
         color: #2E3436;
         background-color: #EDEDED;
       }
-      a {
-        /* link */
-        color: #0066CC;
-        text-decoration: underline;
-      }
-      a:visited {
-        /* link-visited */
-        color: purple;
-        text-decoration: underline;
-      }
       .org-Xfold-hideshow-folded {
         /* +fold-hideshow-folded-face */
         color: #204A87;
@@ -3741,12 +3731,13 @@
       }
 
       a {
-        color: inherit;
-        background-color: inherit;
-        font: inherit;
-        text-decoration: inherit;
+        /* link */
+        color: #0066CC;
+        text-decoration: underline;
       }
-      a:hover {
+      a:visited {
+        /* link-visited */
+        color: purple;
         text-decoration: underline;
       }
     -->

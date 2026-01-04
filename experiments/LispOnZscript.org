@@ -13,8 +13,8 @@ usage example. Search for ~TODO~ in this file to see what remains to be done to 
 LispOnZscript more usable.
 
 Key function is ~tl_Eval.eval~ function (see [[Eval][Eval]]). It takes a parsed expression
-(from ~tl_Parser.parse~, see [[file:./LispOnZscript.org::*Parser][Parser]]) and an environment (normally from
-~tl_Env.makeGlobalEnv~, see [[file:./LispOnZscript.org::*Env][Env]]).
+(from ~tl_Parser.parse~, see [[Parser]]) and an environment (normally from
+~tl_Env.makeGlobalEnv~, see [[Env]]).
 
 Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell’s equations of software]] by Michael Nielsen.
 

@@ -57,17 +57,17 @@ Optional: Org mode extension for your preferred text editor, if it's not Emacs. 
 mode files can be edited as plain text, but an extension should add convenience
 features such as syntax highlighting.
 
-See what can be built with command ~scons -h~. It should show three types of build
-targets: <Project>, <Project>Test, and <Project>Pack.
-- <Project> makes a project directory from the .org file. Such a directory can be
-  loaded by the engine.
-- <Project>Test tests the project. Some projects have only stubs for tests.
-- <Project>Pack makes a .pk3 package for the project. Library projects don't have
-  this target.
+See what can be built with command:
+#+begin_src sh :exports both :results output verbatim
+scons --help
+#+end_src
 
-Example: ~scons FinalCustomDoomPack~
+Example:
+#+begin_example
+scons FinalCustomDoom.pk3
+#+end_example
 
-All commands requires that ~PATH~ environment variable has Emacs, tests also require
+All commands require that ~PATH~ environment variable has Emacs, tests also require
 GZDoom in ~PATH~. All commands put their results in directory ~build~, and may remove
 files and directories there.
 
