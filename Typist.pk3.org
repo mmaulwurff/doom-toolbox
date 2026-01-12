@@ -56,6 +56,16 @@ class tt_EventHandler : EventHandler
       _playerHandler = tt_PlayerSupervisor.of(consolePlayer);
   }
 
+  override void playerDied(PlayerEvent event)
+  {
+    _playerHandler.setMode(tt_Mode.Explore);
+  }
+
+  override void playerRespawned(PlayerEvent event)
+  {
+    _playerHandler.setMode(tt_Mode.None);
+  }
+
   override void worldThingDied(WorldEvent event)
   {
     _playerHandler.reportDead(event.Thing);
@@ -84,8 +94,8 @@ class tt_EventHandler : EventHandler
 
     if (command.left(3) != "tt_") return;
 
-    if      (command == "tt_unlock_mode"  ) _playerHandler.unlockMode();
-    else if (command == "tt_force_combat" ) _playerHandler.forceCombat();
+    if      (command == "tt_unlock_mode"  ) _playerHandler.setMode(tt_Mode.None);
+    else if (command == "tt_force_combat" ) _playerHandler.setMode(tt_Mode.Combat);
     else if (command == "tt_reset_targets") _playerHandler.reset(consolePlayer);
   }
 
@@ -199,9 +209,8 @@ class tt_PlayerHandler abstract
 
   abstract bool isCapturingKeys();
 
-  abstract void unlockMode();
-
-  abstract void forceCombat();
+  // Mode is from tt_Mode.
+  abstract void setMode(int mode);
 
   ui abstract void draw(RenderEvent event);
 }
@@ -380,14 +389,9 @@ class tt_PlayerSupervisor : tt_PlayerHandler
     return _inputManager.isCapturingKeys();
   }
 
-  override void unlockMode()
+  override void setMode(int mode)
   {
-    _manualModeSource.setMode(tt_Mode.None);
-  }
-
-  override void forceCombat()
-  {
-    _manualModeSource.setMode(tt_Mode.Combat);
+    _manualModeSource.setMode(mode);
   }
 
   override void draw(RenderEvent event)
