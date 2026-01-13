@@ -6814,6 +6814,7 @@ OptionMenu tt_GeneralOptions
 
   StaticText ""
   Option     "Infinite ammo",      sv_infiniteammo, OnOff
+  Option     "Enemy infighting",   infighting, tt_InfightingValues
 
   StaticText ""
   Option     "HUD",          screenblocks, tt_HudValues
@@ -6827,6 +6828,13 @@ OptionValue tt_HudValues
   10, "Standard"
   11, "Alternative"
   12, "No HUD"
+}
+
+OptionValue tt_InfightingValues
+{
+  -1, "Never"
+   0, "Sometimes (normal)"
+   1, "Always"
 }
 
 OptionMenu tt_LessonOptions
