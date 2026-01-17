@@ -64,9 +64,9 @@ jobs:
           nix-shell tools/shell.nix --command "scons Pk3All"
 
       - name: Upload distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: release-dists
+          name: doom-toolbox
           path: |
             build/*.pk3
             !build/Typist.pk3
@@ -79,15 +79,15 @@ jobs:
         run: |
           nix-shell tools/shell.nix --command "scons HtmlAll"
 
-      - name: Setup Pages
+      - name: Configure pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload pages
+        uses: actions/upload-pages-artifact@v4
         with:
           # Upload entire repository
           path: '.'
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy pages to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

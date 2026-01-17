@@ -1,4 +1,4 @@
-personal_ws-1.1 en 95 
+personal_ws-1.1 en 103 
 CVar
 Cacowards
 Cvar
@@ -11,6 +11,7 @@ GL
 GLES
 GPL
 GZDoom
+HtmlAll
 Http
 IWAD
 JSON
@@ -39,6 +40,7 @@ cmd
 cp
 cvarinfo
 dehacked
+dev
 dir
 doomworld
 editorconfig
@@ -53,6 +55,7 @@ gitattributes
 gitignore
 gmail
 gzdoom
+hashFiles
 https
 init
 ispell
@@ -62,9 +65,12 @@ menudef
 mkdir
 mkdirp
 namespace
+nixos
+nixpkgs
 noweb
 ogg
 ons
+os
 png
 pos
 progn
@@ -73,6 +79,7 @@ randomizers
 readonly
 replacers
 rhs
+scons
 sed
 setq
 shotgunners
@@ -89,6 +96,7 @@ titlemap
 toml
 txt
 tzip
+ubuntu
 uint
 usr
 vel
