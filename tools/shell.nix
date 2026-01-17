@@ -14,4 +14,9 @@ pkgs.mkShellNoCC {
     emacs-nox
     gzdoom
   ];
+
+  shellHook = ''
+    which emacs
+    which emacs-nox
+  '';
 }
