@@ -21,7 +21,7 @@
 from os import environ, makedirs, path
 from pathlib import Path
 from re import search, MULTILINE
-from shutil import copy, copytree, make_archive, move, rmtree
+from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import run, PIPE, STDOUT
 
 import hashlib
@@ -32,6 +32,8 @@ Decider('timestamp-match')
 Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
+emacs = which('emacs-nox') or which('emacs')
+assert emacs != None
 
 # Common functions
 def noop(target, source, env):
@@ -45,7 +47,7 @@ def make_export(source):
   rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
   css_path = rel + 'tools/org-adwaita.css'
   css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
-  return f'emacs {source} --quick --batch --load {htmlize_path} --eval "\
+  return f'{emacs} {source} --quick --batch --load {htmlize_path} --eval "\
     (progn (require \'htmlize)\
            (setq org-confirm-babel-evaluate nil)\
            (setq org-html-htmlize-output-type \'css)\
@@ -59,7 +61,7 @@ def add_main_target(org_file, target_format):
   name = make_project_name(org_file)
   zscript_name = target_format.format(name)
 
-  tangle = 'emacs $SOURCE --quick --batch --eval "\
+  tangle = f'{emacs} $SOURCE --quick --batch --eval "\
     (progn (require \'ob-tangle)\
            (setq org-confirm-babel-evaluate nil)\
            (org-babel-tangle))"'
@@ -178,7 +180,7 @@ for org_file in Glob('*/*.org') + Glob('*.org'):
                             action=make_export(org_file)))
 
 AlwaysBuild(Alias("LintAll", None,
-                  [f'emacs {org_file} --quick --batch --eval "(print (org-lint))"'
+                  [f'{emacs} {org_file} --quick --batch --eval "(print (org-lint))"'
                    for org_file in Glob('*/*.org') + Glob('*.org')]))
 
 
