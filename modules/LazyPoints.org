@@ -176,6 +176,7 @@ class NAMESPACE_Dispatcher : EventHandler
   }
 
   private NAMESPACE_Spawner _spawner;
+  // TODO: make it for consolePlayer only.
   private Array<NAMESPACE_PlayerScore> _playerScores;
 }
 #+end_src
