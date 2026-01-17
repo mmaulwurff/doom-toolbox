@@ -18,6 +18,7 @@
 !*.el
 !*.en.pws
 !*.ini
+!*.nix
 !*.ogg
 !*.org
 !*.pk3
