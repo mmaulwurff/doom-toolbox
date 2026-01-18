@@ -7098,7 +7098,25 @@ GameInfo
 // Variables for score
 nosave string tt_lp_score = "";
 user   bool   tt_lp_show  = true;
-server string tt_lp_parameters_class = "tt_lp_Parameters";
+server string tt_lp_parameters_class = "tt_lp_TypistParameters";
+#+end_src
+
+#+begin_src c :tangle build/Typist.pk3/zscript/tt_lp_LazyPointsParameters.zs
+// Lazy Points customization.
+class tt_lp_TypistParameters : tt_lp_Parameters
+{
+  // This font is used for drawing score points and info on bonuses.
+  override Font getFont() const { return Font.getFont("BigFont"); }
+
+  // This is a time in seconds, during which kills provide a bonus.
+  override int getBonusCountdown() const { return 3; }
+
+  // This is an offset in pixels from the top of the screen for all score info.
+  override int getYOffset() const { return 10; }
+
+  // Tells if score points are given for picking up items.
+  override bool isPickupBonusEnabled() const { return false; }
+}
 #+end_src
 
 * Tests

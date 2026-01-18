@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.6.0
+LazyPoints module version: 0.6.1
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -97,6 +97,9 @@ class NAMESPACE_Parameters
 
   // This is an offset in pixels from the top of the screen for all score info.
   virtual int getYOffset() const { return 10; }
+
+  // Tells if score points are given for picking up items.
+  virtual bool isPickupBonusEnabled() const { return true; }
 }
 #+end_src
 
@@ -165,8 +168,8 @@ class NAMESPACE_Dispatcher : EventHandler
 
   override void worldThingSpawned(WorldEvent event)
   {
-    // TODO: make this optional.
-    _spawner.spawnScoreFor(event.thing);
+    if (_parameters.isPickupBonusEnabled())
+      _spawner.spawnScoreFor(event.thing);
   }
 
   override void worldUnloaded(WorldEvent event)
