@@ -7098,6 +7098,7 @@ GameInfo
 // Variables for score
 nosave string tt_lp_score = "";
 user   bool   tt_lp_show  = true;
+server string tt_lp_parameters_class = "tt_lp_Parameters";
 #+end_src
 
 * Tests

@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
 
 #+title: LazyPoints
 
@@ -9,10 +12,13 @@
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.5.0
+LazyPoints module version: 0.6.0
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
+
+License:
+<<license>>
 
 Scoring:
 - Damage: equal to damage amount.
@@ -34,7 +40,7 @@ Thanks:
 - to IKA for bug reporting.
 
 To use (besides ZScript code):
-- define cvars (mandatory):
+- define cvars:
   <<cvarinfo>>
 
 - add event handlers in mapinfo:
@@ -49,6 +55,7 @@ To use (besides ZScript code):
 
 nosave string NAMESPACE_score = "";
 user   bool   NAMESPACE_show  = true;
+server string NAMESPACE_parameters_class = "NAMESPACE_Parameters";
 #+end_src
 
 #+name: mapinfo
@@ -73,34 +80,23 @@ OptionMenu NAMESPACE_TopMenu
 // <<description>>
 #+end_src
 
-* License
-
-[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: BSD-3-Clause
-#+end_src
-
 * Source
 
 ** Parameters
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-// Lazy Points customization constants.
+// Lazy Points customization.
 class NAMESPACE_Parameters
 {
-
   // This font is used for drawing score points and info on bonuses.
-  const FONT = "BigFont";
+  virtual Font getFont() const { return Font.getFont("BigFont"); }
 
   // This is a time in seconds, during which kills provide a bonus.
-  const BONUS_COUNTDOWN = 3;
+  virtual int getBonusCountdown() const { return 3; }
 
   // This is an offset in pixels from the top of the screen for all score info.
-  const Y_OFFSET = 10;
-
+  virtual int getYOffset() const { return 10; }
 }
 #+end_src
 
@@ -115,7 +111,11 @@ class NAMESPACE_Dispatcher : EventHandler
 
   override void playerEntered(PlayerEvent event)
   {
-    let playerScore = new ("NAMESPACE_PlayerScore").init(event.playerNumber);
+    if (_parameters == NULL)
+      _parameters = NAMESPACE_Parameters(new(NAMESPACE_parameters_class));
+
+    let playerScore =
+      new("NAMESPACE_PlayerScore").init(event.playerNumber, _parameters);
     _playerScores.push(playerScore);
   }
 
@@ -165,6 +165,7 @@ class NAMESPACE_Dispatcher : EventHandler
 
   override void worldThingSpawned(WorldEvent event)
   {
+    // TODO: make this optional.
     _spawner.spawnScoreFor(event.thing);
   }
 
@@ -178,6 +179,7 @@ class NAMESPACE_Dispatcher : EventHandler
   private NAMESPACE_Spawner _spawner;
   // TODO: make it for consolePlayer only.
   private Array<NAMESPACE_PlayerScore> _playerScores;
+  private NAMESPACE_Parameters _parameters;
 }
 #+end_src
 
@@ -188,10 +190,12 @@ class NAMESPACE_Dispatcher : EventHandler
 class NAMESPACE_BonusView
 {
   NAMESPACE_BonusView init(NAMESPACE_TimerBonus timerBonus,
-                           NAMESPACE_HealthBonus healthBonus)
+                           NAMESPACE_HealthBonus healthBonus,
+                           NAMESPACE_Parameters parameters)
   {
     _timerBonus  = timerBonus;
     _healthBonus = healthBonus;
+    _parameters  = parameters;
 
     return self;
   }
@@ -306,10 +310,11 @@ mixin class NAMESPACE_FontUser
 {
   private ui void loadFont()
   {
-    if (_font == NULL) _font = Font.GetFont(NAMESPACE_Parameters.FONT);
+    if (_font == NULL) _font = _parameters.getFont();
   }
 
   private transient Font _font;
+  private NAMESPACE_Parameters _parameters;
 }
 #+end_src
 
@@ -511,12 +516,12 @@ class OptionMenuScoreItem : OptionMenuItem
 
 class NAMESPACE_PlayerScore
 {
-  NAMESPACE_PlayerScore init(int playerNumber)
+  NAMESPACE_PlayerScore init(int playerNumber, NAMESPACE_Parameters parameters)
   {
     _playerNumber = playerNumber;
+    _parameters   = parameters;
 
-    _timer = new ("NAMESPACE_Timer")
-                 .init(TICKS_IN_SECOND * NAMESPACE_Parameters.BONUS_COUNTDOWN);
+    _timer = new ("NAMESPACE_Timer").init(TICRATE * parameters.getBonusCountdown());
     _timerBonus  = new ("NAMESPACE_TimerBonus").init(_timer);
     _healthBonus = new ("NAMESPACE_HealthBonus").init(playerNumber);
     _counter =
@@ -525,10 +530,11 @@ class NAMESPACE_PlayerScore
 
     if (playerNumber == consolePlayer)
     {
-      _view      = new ("NAMESPACE_View").init();
+      _view      = new ("NAMESPACE_View").init(parameters);
       _timerView = new ("NAMESPACE_TimerView").init(_timer);
-      _bonusView = new ("NAMESPACE_BonusView").init(_timerBonus, _healthBonus);
-      _tallyView = new ("NAMESPACE_TallyView").init();
+      _bonusView = new ("NAMESPACE_BonusView").init(_timerBonus,
+                                                    _healthBonus,
+                                                    parameters);
     }
 
     return self;
@@ -540,12 +546,11 @@ class NAMESPACE_PlayerScore
 
     if (!isVisible()) return;
 
-    int y = NAMESPACE_Parameters.Y_OFFSET;
+    int y = _parameters.getYOffset();
 
     y += _view.show(y);
     y += _timerView.show(y, fracTic);
     y += _bonusView.show(y);
-    y += _tallyView.show(y);
   }
 
   play void countDamage(Actor damaged, int damage, Name damageType, Actor inflictor)
@@ -575,9 +580,8 @@ class NAMESPACE_PlayerScore
     return _isVisible.GetBool();
   }
 
-  const TICKS_IN_SECOND = 35;
-
   private int _playerNumber;
+  private NAMESPACE_Parameters _parameters;
 
   private NAMESPACE_Timer _timer;
   private NAMESPACE_TimerBonus _timerBonus;
@@ -588,7 +592,6 @@ class NAMESPACE_PlayerScore
   private NAMESPACE_View _view;
   private NAMESPACE_TimerView _timerView;
   private NAMESPACE_BonusView _bonusView;
-  private NAMESPACE_TallyView _tallyView;
 
   transient CVar _isVisible;
 }
@@ -754,36 +757,6 @@ class NAMESPACE_StaticView : StaticEventHandler
   override void uiTick() { _topHintView.show(); }
 
   private NAMESPACE_TopHintView _topHintView;
-}
-#+end_src
-
-** TallyView
-
-#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
-
-class NAMESPACE_TallyView
-{
-  NAMESPACE_TallyView init() { return self; }
-
-  ui int show(int y)
-  {
-    for (int i = 0; i < MAXPLAYERS; ++i)
-    {
-      if (!playerInGame[i] || i == consolePlayer) continue;
-
-      PlayerInfo player = players[i];
-      String playerString =
-          String.Format("%s: %d", player.GetUserName(), player.mo.score);
-      int playerWidth = OriginalSmallFont.StringWidth(playerString) * CleanXFac_1;
-      int x           = (Screen.GetWidth() - playerWidth) / 2;
-
-      Screen.DrawText(OriginalSmallFont, Font.CR_Blue, x, y, playerString,
-                      DTA_CleanNoMove_1, true);
-    }
-
-    int lineHeight = OriginalSmallFont.GetHeight() * CleanYFac_1;
-    return lineHeight;
-  }
 }
 #+end_src
 
@@ -998,10 +971,11 @@ class NAMESPACE_TopHintView
 
 class NAMESPACE_View
 {
-  NAMESPACE_View init()
+  NAMESPACE_View init(NAMESPACE_Parameters parameters)
   {
     _player       = players[consolePlayer];
     _interpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 1000000);
+    _parameters   = parameters;
 
     return self;
   }
@@ -1057,7 +1031,7 @@ AddMenuKey    "Open Score" "NAMESPACE_top"
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPoints/zscript.zs
-version 4.14.0
+version 4.14
 #include "LazyPoints.zs"
 #+end_src
 
