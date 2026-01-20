@@ -36,6 +36,8 @@ Documentation:
 
 HTML pages for Doom Toolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]].
 
+Code is available on [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
+
 * Social
 
 - [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld]]
