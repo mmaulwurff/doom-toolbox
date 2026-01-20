@@ -111,6 +111,8 @@ class tt_EventHandler : EventHandler
     }
   }
 
+  int getMode() const { return _playerHandler.getMode(); }
+
   private tt_PlayerHandler _playerHandler;
   private tt_Server        _server;
 }
@@ -211,6 +213,9 @@ class tt_PlayerHandler abstract
 
   // Mode is from tt_Mode.
   abstract void setMode(int mode);
+
+  // Mode is from tt_Mode.
+  abstract int getMode() const;
 
   ui abstract void draw(RenderEvent event);
 }
@@ -393,6 +398,8 @@ class tt_PlayerSupervisor : tt_PlayerHandler
   {
     _manualModeSource.setMode(mode);
   }
+
+  override int getMode() const { return _modeSource.getMode(); }
 
   override void draw(RenderEvent event)
   {
@@ -7101,21 +7108,26 @@ user   bool   tt_lp_show  = true;
 server string tt_lp_parameters_class = "tt_lp_TypistParameters";
 #+end_src
 
+See [[file:modules/LazyPoints.org::*Parameters][LazyPoints Parameters documentation]].
+
 #+begin_src c :tangle build/Typist.pk3/zscript/tt_lp_LazyPointsParameters.zs
-// Lazy Points customization.
+
+// LazyPoints customization.
 class tt_lp_TypistParameters : tt_lp_Parameters
 {
-  // This font is used for drawing score points and info on bonuses.
   override Font getFont() const { return Font.getFont("BigFont"); }
 
-  // This is a time in seconds, during which kills provide a bonus.
   override int getBonusCountdown() const { return 3; }
 
-  // This is an offset in pixels from the top of the screen for all score info.
   override int getYOffset() const { return 10; }
 
-  // Tells if score points are given for picking up items.
   override bool isPickupBonusEnabled() const { return false; }
+
+  override bool isScoringEnabledNow() const
+  {
+    let eventHandler = tt_EventHandler(EventHandler.find("tt_EventHandler"));
+    return eventHandler.getMode() == tt_Mode.Combat;
+  }
 }
 #+end_src
 

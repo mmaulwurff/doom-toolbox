@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.6.1
+LazyPoints module version: 0.6.2
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -86,7 +86,7 @@ OptionMenu NAMESPACE_TopMenu
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-// Lazy Points customization.
+// LazyPoints customization.
 class NAMESPACE_Parameters
 {
   // This font is used for drawing score points and info on bonuses.
@@ -100,6 +100,9 @@ class NAMESPACE_Parameters
 
   // Tells if score points are given for picking up items.
   virtual bool isPickupBonusEnabled() const { return true; }
+
+  // Tells if score points are given now.
+  virtual bool isScoringEnabledNow() const { return true; }
 }
 #+end_src
 
@@ -107,7 +110,7 @@ class NAMESPACE_Parameters
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-// This class is an entry point for Lazy Points.
+// This class is an entry point for LazyPoints.
 class NAMESPACE_Dispatcher : EventHandler
 {
   override void onRegister() { _spawner = new ("NAMESPACE_Spawner").init(); }
@@ -248,12 +251,14 @@ class NAMESPACE_Counter
 {
   NAMESPACE_Counter init(int playerNumber,
                          NAMESPACE_TimerBonus timerBonus,
-                         NAMESPACE_HealthBonus healthBonus)
+                         NAMESPACE_HealthBonus healthBonus,
+                         NAMESPACE_Parameters parameters)
   {
     _player         = players[playerNumber];
     _oldSecretCount = 0;
     _timerBonus     = timerBonus;
     _healthBonus    = healthBonus;
+    _parameters     = parameters;
 
     return self;
   }
@@ -284,7 +289,11 @@ class NAMESPACE_Counter
 
   private bool isMe(Actor other) { return (other && other == _player.mo); }
 
-  private play void addPoints(int points) { _player.mo.score += points; }
+  private play void addPoints(int points)
+  {
+    if (_parameters.isScoringEnabledNow())
+      _player.mo.score += points;
+  }
 
   private play int calculatePointsFor(Actor died)
   {
@@ -302,6 +311,7 @@ class NAMESPACE_Counter
   private int _oldSecretCount;
   private NAMESPACE_TimerBonus _timerBonus;
   private NAMESPACE_HealthBonus _healthBonus;
+  private NAMESPACE_Parameters _parameters;
 }
 #+end_src
 
@@ -527,8 +537,10 @@ class NAMESPACE_PlayerScore
     _timer = new ("NAMESPACE_Timer").init(TICRATE * parameters.getBonusCountdown());
     _timerBonus  = new ("NAMESPACE_TimerBonus").init(_timer);
     _healthBonus = new ("NAMESPACE_HealthBonus").init(playerNumber);
-    _counter =
-        new ("NAMESPACE_Counter").init(playerNumber, _timerBonus, _healthBonus);
+    _counter = new("NAMESPACE_Counter").init(playerNumber,
+                                             _timerBonus,
+                                             _healthBonus,
+                                             parameters);
     _mapScore = new ("NAMESPACE_MapScore").init(playerNumber);
 
     if (playerNumber == consolePlayer)
@@ -1021,7 +1033,7 @@ class NAMESPACE_View
 
 #+begin_src c :tangle ../build/LazyPointsTest/keyconf.txt
 Alias NAMESPACE_top "OpenMenu NAMESPACE_TopMenu"
-AddKeySection "Lazy Points" "NAMESPACE_keys"
+AddKeySection "LazyPoints" "NAMESPACE_keys"
 AddMenuKey    "Open Score" "NAMESPACE_top"
 #+end_src
 
