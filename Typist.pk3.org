@@ -56,6 +56,11 @@ class tt_EventHandler : EventHandler
       _playerHandler = tt_PlayerSupervisor.of(consolePlayer);
   }
 
+  override void playerDisconnected(PlayerEvent event)
+  {
+    _server.removePlayer(event.playerNumber);
+  }
+
   override void playerDied(PlayerEvent event)
   {
     _playerHandler.setMode(tt_Mode.Explore);
@@ -475,7 +480,7 @@ class tt_Server
   static tt_Server of()
   {
     let result = new("tt_Server");
-    result._globalChangers = tt_WorldChangers.ofNone();
+    result._globalChangers = tt_PlayerWorldChangers.of();
     return result;
   }
 
@@ -504,8 +509,10 @@ class tt_Server
       tt_EnemySpeedController.of(radarCache, playerSource)
     };
 
-    _globalChangers.add(tt_WorldChangers.of(globalChangers));
+    _globalChangers.add(playerNumber, tt_WorldChangers.of(globalChangers));
   }
+
+  void removePlayer(int playerNumber) { _globalChangers.remove(playerNumber); }
 
   play void react(int playerNumber, vector3 targetOrigin)
   {
@@ -517,7 +524,7 @@ class tt_Server
 
   tt_ExternalOriginSource _targetSources[MAXPLAYERS];
   tt_WorldChanger         _targetChangers[MAXPLAYERS];
-  tt_WorldChangers        _globalChangers;
+  tt_PlayerWorldChangers  _globalChangers;
 }
 #+end_src
 
@@ -548,8 +555,6 @@ class tt_WorldChangers : tt_WorldChanger
     return result;
   }
 
-  static tt_WorldChangers ofNone() { return new("tt_WorldChangers"); }
-
   void add(tt_WorldChanger changer) { _changers.push(changer); }
 
   override void changeWorld()
@@ -559,6 +564,35 @@ class tt_WorldChangers : tt_WorldChanger
   }
 
   private Array<tt_WorldChanger> _changers;
+}
+#+end_src
+
+** ~PlayerWorldChangers~
+
+#+begin_src c :tangle build/Typist.pk3/zscript/world_changer/tt_world_changers.zs
+
+// Implements tt_WorldChanger by executing not-NULL world changers.
+class tt_PlayerWorldChangers : tt_WorldChanger
+{
+  static tt_PlayerWorldChangers of() { return new("tt_PlayerWorldChangers"); }
+
+  void add(int playerNumber, tt_WorldChanger changer)
+  {
+    _changers[playerNumber] = changer;
+  }
+
+  void remove(int playerNumber)
+  {
+    _changers[playerNumber] = NULL;
+  }
+
+  override void changeWorld()
+  {
+    foreach (changer : _changers)
+      if (changer != NULL) changer.changeWorld();
+  }
+
+  private tt_WorldChanger _changers[MAXPLAYERS];
 }
 #+end_src
 
