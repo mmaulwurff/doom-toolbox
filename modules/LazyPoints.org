@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.6.2
+LazyPoints module version: 0.6.3
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -120,53 +120,49 @@ class NAMESPACE_Dispatcher : EventHandler
     if (_parameters == NULL)
       _parameters = NAMESPACE_Parameters(new(NAMESPACE_parameters_class));
 
-    let playerScore =
-      new("NAMESPACE_PlayerScore").init(event.playerNumber, _parameters);
-    _playerScores.push(playerScore);
-  }
+    if (_mapScore == NULL)
+      _mapScore = new ("NAMESPACE_MapScore").init();
 
-  override void playerDisconnected(PlayerEvent event)
-  {
-    int playerNumber = event.playerNumber;
-    uint nPlayers    = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-    {
-      if (playerNumber == _playerScores[i].getPlayerNumber())
-      {
-        _playerScores.delete(i);
-        return;
-      }
-    }
+    _playerScores[event.playerNumber] =
+      new("NAMESPACE_PlayerScore").init(event.playerNumber, _parameters);
   }
 
   override void renderOverlay(RenderEvent event)
   {
     if (menuActive || automapActive) return;
 
-    uint nPlayers = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-      _playerScores[i].show(event.fracTic);
+    _playerScores[consolePlayer].show(event.fracTic);
   }
 
-  override void worldThingDamaged(WorldEvent e)
+  override void worldThingDamaged(WorldEvent event)
   {
-    uint nPlayers = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-      _playerScores[i].countDamage(e.thing, e.damage, e.damageType, e.damageSource);
+    if (event.inflictor == NULL) return;
+
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL && players[i].mo == event.damageSource)
+        _playerScores[i].countDamage(event.thing, event.damage, event.damageType);
+    }
   }
 
   override void worldThingDied(WorldEvent event)
   {
-    uint nPlayers = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-      _playerScores[i].countDeath(event.thing);
+    if (event.inflictor == NULL) return;
+
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL && players[i].mo == event.damageSource)
+        _playerScores[i].countDeath(event.thing);
+    }
   }
 
   override void worldTick()
   {
-    uint nPlayers = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-      _playerScores[i].tick();
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL)
+        _playerScores[i].tick();
+    }
   }
 
   override void worldThingSpawned(WorldEvent event)
@@ -177,15 +173,13 @@ class NAMESPACE_Dispatcher : EventHandler
 
   override void worldUnloaded(WorldEvent event)
   {
-    uint nPlayers = _playerScores.size();
-    for (uint i = 0; i < nPlayers; ++i)
-      _playerScores[i].saveMapScore();
+    _mapScore.save();
   }
 
   private NAMESPACE_Spawner _spawner;
-  // TODO: make it for consolePlayer only.
-  private Array<NAMESPACE_PlayerScore> _playerScores;
+  private NAMESPACE_PlayerScore _playerScores[MAXPLAYERS];
   private NAMESPACE_Parameters _parameters;
+  private NAMESPACE_MapScore _mapScore;
 }
 #+end_src
 
@@ -263,18 +257,16 @@ class NAMESPACE_Counter
     return self;
   }
 
-  play void countDamage(Actor damaged, int damage, Name damageType, Actor inflictor)
+  play void countDamage(Actor damaged, int damage, Name damageType)
   {
     if (damageType == "Telefrag") damage = damaged.getSpawnHealth();
-
-    if (damaged && damaged.bIsMonster && isMe(inflictor)) addPoints(damage);
+    if (damaged && damaged.bIsMonster) addPoints(damage);
   }
 
   play void countDeath(Actor died)
   {
-    if (!(died && isMe(died.target))) return;
-
     addPoints(calculatePointsFor(died));
+    _timerBonus.registerKill();
   }
 
   play void countSecrets()
@@ -287,8 +279,6 @@ class NAMESPACE_Counter
     }
   }
 
-  private bool isMe(Actor other) { return (other && other == _player.mo); }
-
   private play void addPoints(int points)
   {
     if (_parameters.isScoringEnabledNow())
@@ -298,11 +288,8 @@ class NAMESPACE_Counter
   private play int calculatePointsFor(Actor died)
   {
     int result =
-        died.bIsMonster ? (died.SpawnHealth() / 10 + _timerBonus.getBonus()) : 5;
-
-    result *= int(round(_healthBonus.getMultiplier()));
-
-    _timerBonus.registerKill();
+      (died.bIsMonster ? (died.SpawnHealth() / 10 + _timerBonus.getBonus()) : 5) *
+      int(round(_healthBonus.getMultiplier()));
 
     return result;
   }
@@ -371,25 +358,20 @@ class NAMESPACE_HealthBonus
 
 class NAMESPACE_MapScore
 {
-  NAMESPACE_MapScore init(int playerNumber)
+  NAMESPACE_MapScore init()
   {
-    _playerNumber  = playerNumber;
-    _startingScore = players[_playerNumber].mo.score;
-
+    _startingScore = players[consolePlayer].mo.score;
     return self;
   }
 
   void save()
   {
-    if (_playerNumber != consolePlayer) return;
-
-    int score       = players[_playerNumber].mo.score - _startingScore;
-    String checksum = Level.GetChecksum();
+    int score       = players[consolePlayer].mo.score - _startingScore;
+    string checksum = Level.getChecksum();
 
     NAMESPACE_ScoreStorage.saveScore(checksum, score);
   }
 
-  private int _playerNumber;
   private int _startingScore;
 }
 #+end_src
@@ -541,7 +523,6 @@ class NAMESPACE_PlayerScore
                                              _timerBonus,
                                              _healthBonus,
                                              parameters);
-    _mapScore = new ("NAMESPACE_MapScore").init(playerNumber);
 
     if (playerNumber == consolePlayer)
     {
@@ -568,9 +549,9 @@ class NAMESPACE_PlayerScore
     y += _bonusView.show(y);
   }
 
-  play void countDamage(Actor damaged, int damage, Name damageType, Actor inflictor)
+  play void countDamage(Actor damaged, int damage, Name damageType)
   {
-    _counter.countDamage(damaged, damage, damageType, inflictor);
+    _counter.countDamage(damaged, damage, damageType);
   }
 
   play void countDeath(Actor died) { _counter.countDeath(died); }
@@ -584,8 +565,6 @@ class NAMESPACE_PlayerScore
   }
 
   int getPlayerNumber() const { return _playerNumber; }
-
-  void saveMapScore() { _mapScore.save(); }
 
   private bool isVisible()
   {
@@ -602,7 +581,6 @@ class NAMESPACE_PlayerScore
   private NAMESPACE_TimerBonus _timerBonus;
   private NAMESPACE_HealthBonus _healthBonus;
   private NAMESPACE_Counter _counter;
-  private NAMESPACE_MapScore _mapScore;
 
   private NAMESPACE_View _view;
   private NAMESPACE_TimerView _timerView;
@@ -1056,5 +1034,5 @@ wait 2; map map01; wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
-(compile "cd ..; scons LazyPointsTest")
+(compile "cd ..; scons -Q LazyPointsTest")
 #+end_src
