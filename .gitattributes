@@ -2,11 +2,21 @@
 # SPDX-License-Identifier: CC0-1.0
 
 .clang-format  eol=lf
-.dir-locals.el eol=lf
 .editorconfig  eol=lf
 .gitattributes eol=lf
 .gitignore     eol=lf
 
+*.css  eol=lf
+*.el   eol=lf
+*.ini  eol=lf
+*.nix  eol=lf
 *.org  eol=lf
+*.py   eol=lf
 *.sh   eol=lf
 *.toml eol=lf
+*.txt  eol=lf
+*.yaml eol=lf
+
+*.css -linguist-detectable
+*.el  -linguist-detectable
+*.org -linguist-documentation
