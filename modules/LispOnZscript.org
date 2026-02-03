@@ -95,6 +95,7 @@ class tl_Test
     result.add("(begin (define cube (lambda (x) (* x (* x x)))) (cube 2))", "8");
     result.add("\"hello world\"", "\"hello world\"");
     result.add("(+ \"hello\" \" world\")", "\"hello world\"");
+    result.add("\"️♥\"", "\"️♥\"");
 
     result.add("",    "Error: unexpected EOF while reading.");
     result.add("()",  "Error: unexpected empty list.");
