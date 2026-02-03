@@ -94,6 +94,7 @@ class tl_Test
     result.add("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
     result.add("(begin (define cube (lambda (x) (* x (* x x)))) (cube 2))", "8");
     result.add("\"hello world\"", "\"hello world\"");
+    result.add("(+ \"hello\" \" world\")", "\"hello world\"");
 
     result.add("",    "Error: unexpected EOF while reading.");
     result.add("()",  "Error: unexpected empty list.");
@@ -104,7 +105,7 @@ class tl_Test
                "Error: TODO: add support for different number of parameters.");
 
     result.add("player", "DoomPlayer");
-    result.add("(getCharacterName player)", "DoomPlayer");
+    result.add("(getCharacterName player)", "\"DoomPlayer\"");
     result.add("(playerNumber player)", "0");
     result.add("(isFrozen player)", "False");
     result.add("(isFriend player player)", "True");
@@ -321,7 +322,7 @@ class tl_Parser
   private static tl_Expression atom(string token)
   {
     if (token.getNextCodePoint(0) == 0x22)
-      return tl_String.from(token);
+      return tl_String.from(token.mid(1, token.length() - 2));
 
     // TODO: support doubles, replace tl_Int with tl_Number.
     return isInt(token)
@@ -1027,7 +1028,7 @@ class tl_String : tl_Expression
 
   override string toString() const
   {
-    return value;
+    return "\"" .. value .. "\"";
   }
 
   override bool eq(tl_Expression other) const
@@ -1130,6 +1131,11 @@ class tl_Globals
     let rhsInt = tl_Int(rhs);
     if (lhsInt != NULL && rhsInt != NULL)
       return tl_Int.fromInt(lhsInt.value + rhsInt.value);
+
+    let lhsString = tl_String(lhs);
+    let rhsString = tl_String(rhs);
+    if (lhsString != NULL && rhsString != NULL)
+      return tl_String.from(lhsString.value .. rhsString.value);
 
     return tl_Error.from(string.format("add not implemented for \"%s\" and \"%s\".",
                                        lhs.getClassName(),
