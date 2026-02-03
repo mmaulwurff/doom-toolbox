@@ -165,13 +165,6 @@ for org_file in Glob('*.org'):
     project_targets.append(
       f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}')
 
-experiment_targets = []
-for org_file in Glob('experiments/*.org'):
-  if str(org_file) != 'README.org':
-    main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
-    test_target = add_test_target(org_file, main_target)
-    experiment_targets.append(f'{main_target[0]}, {test_target[0]}')
-
 html_all = Alias("HtmlAll", None, make_index)
 for org_file in Glob('*/*.org') + Glob('*.org'):
   html_name = f'{path.splitext(org_file)[0]}.html'
@@ -212,10 +205,6 @@ Modules:
 Projects:
 
 - {'\n- '.join(project_targets)}
-
-Experiments:
-
-- {'\n- '.join(experiment_targets)}
 
 General targets:
 

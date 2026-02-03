@@ -1,20 +1,31 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+title: LispOnZscript v0.0.1
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+title: LispOnZscript
+
+[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+#+name: description
+#+begin_src org
+
+LispOnZscript module version: v0.0.1
+LispOnZscript is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 LispOnZscript is a toy Lisp-like language written on top of ZScript for GZDoom.
 
-LispOnZscript is an experiment, a programming exercise, and isn't suitable for any
-practical purpose. I'll be surprised if it finds any practical purpose. See [[Test][Test]] to
-see what expressions it can evaluate at the moment, also it contains ~tl_Eval.eval~
-usage example. Search for ~TODO~ in this file to see what remains to be done to make
-LispOnZscript more usable.
+LispOnZscript is an experiment, a programming exercise, and isn't suitable for
+any practical purpose. I'll be surprised if it finds any practical purpose. See
+tests to see what expressions it can evaluate at the moment, also it contains
+~tl_Eval.eval~ usage example. Search for ~TODO~ in this file to see what remains
+to be done to make LispOnZscript more usable.
 
-Key function is ~tl_Eval.eval~ function (see [[Eval][Eval]]). It takes a parsed expression
-(from ~tl_Parser.parse~, see [[Parser]]) and an environment (normally from
-~tl_Env.makeGlobalEnv~, see [[Env]]).
+Key function is ~tl_Eval.eval~ function. It takes a parsed expression (from
+~tl_Parser.parse~) and an environment (normally from ~tl_Env.makeGlobalEnv~).
 
 Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell’s equations of software]] by Michael Nielsen.
 
@@ -27,58 +38,30 @@ Things that I haven't find ways to do to make LispOnZscript more usable:
 - Exposing ZScript structs. For example Cvar, vector. It can be done with wrapper
   classes, but it's not fun.
 - Exposing ZScript ~enum~ constants.
-
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+#+end_src
 
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
-
-#+begin_src c :tangle ../build/LispOnZscript/zscript.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Test.zs
-// <<GPL>>
-#+end_src
-#+begin_src prog :tangle ../build/LispOnZscript/mapinfo.txt
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_EventHandler.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Parser.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Eval.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Env.zs
-// <<GPL>>
-#+end_src
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Globals.zs
-// <<GPL>>
-#+end_src
 
 * Project setup
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript.zs
+#+begin_src c :tangle ../build/LispOnZscript/LispOnZscript.zs
 
-version 4.14.2
+// <<license>>
 
-<<../tools/scripts.org:include("experiments/LispOnZscript.org", "build/LispOnZscript/\\(zscript/.*zs\\)")>>
+// <<description>>
+
+<<source>>
 #+end_src
 
 * Test
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Test.zs
+#+begin_src c :tangle ../build/LispOnZscript/zscript.zs
+
+// <<license>>
+
+version 4.14.2
 
 class tl_Test
 {
@@ -186,16 +169,18 @@ class tl_TestCase
 }
 #+end_src
 
-* Event Handler
+#+begin_src c :tangle ../build/LispOnZscript/mapinfo.txt
 
-#+begin_src prog :tangle ../build/LispOnZscript/mapinfo.txt
+// <<license>>
 
-GameInfo { EventHandlers = "tl_EventHandler" }
+GameInfo { EventHandlers = "tl_TestEventHandler" }
 #+end_src
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_EventHandler.zs
+#+begin_src c :tangle ../build/LispOnZscript/zscript.zs
 
-class tl_EventHandler : StaticEventHandler
+#include "LispOnZscript.zs"
+
+class tl_TestEventHandler : StaticEventHandler
 {
   override void networkProcess(ConsoleEvent event)
   {
@@ -211,7 +196,7 @@ class tl_EventHandler : StaticEventHandler
 
 * Parser
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Parser.zs
+#+begin_src c :noweb-ref source
 
 class tl_Parser
 {
@@ -348,7 +333,7 @@ class tl_Parser
 
 * Eval
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Eval.zs
+#+begin_src c :noweb-ref source
 
 class tl_Eval
 {
@@ -609,7 +594,7 @@ class tl_Eval
 
 ** Expression
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Expression abstract
 {
@@ -629,7 +614,7 @@ class tl_Expression abstract
 
 ** Error
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 // Not a real expression, used to report errors.
 class tl_Error : tl_Expression
@@ -659,7 +644,7 @@ class tl_Error : tl_Expression
 
 ** List
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_List : tl_Expression
 {
@@ -700,7 +685,7 @@ class tl_List : tl_Expression
 
 ** Number
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 // TODO: replace with double.
 class tl_Int : tl_Expression
@@ -737,7 +722,7 @@ class tl_Int : tl_Expression
 
 ** Symbol
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Symbol : tl_Expression
 {
@@ -766,7 +751,7 @@ class tl_Symbol : tl_Expression
 
 ** Function
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Function : tl_Expression
 {
@@ -813,7 +798,7 @@ class tl_Function : tl_Expression
 
 ** Lambda
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Lambda : tl_Function
 {
@@ -864,7 +849,7 @@ class tl_Lambda : tl_Function
 
 ** Auto Function
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_AutoFunction : tl_Function
 {
@@ -1000,7 +985,7 @@ class tl_AutoFunction : tl_Function
 
 ** Bool
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Bool : tl_Expression
 {
@@ -1029,7 +1014,7 @@ class tl_Bool : tl_Expression
 
 ** String
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_String : tl_Expression
 {
@@ -1058,7 +1043,7 @@ class tl_String : tl_Expression
 
 ** Object
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Expression.zs
+#+begin_src c :noweb-ref source
 
 class tl_Object : tl_Expression
 {
@@ -1087,7 +1072,7 @@ class tl_Object : tl_Expression
 
 * Env
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Env.zs
+#+begin_src c :noweb-ref source
 
 class tl_Env
 {
@@ -1135,7 +1120,7 @@ class tl_Env
 
 * Global Functions
 
-#+begin_src c :tangle ../build/LispOnZscript/zscript/tl_Globals.zs
+#+begin_src c :noweb-ref source
 
 class tl_Globals
 {
