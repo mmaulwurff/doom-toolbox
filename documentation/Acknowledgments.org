@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-License-Identifier: CC0-1.0
+
+#+title: Acknowledgments
+
+Many people helped development of Doom Toolbox or projects that have become parts of
+it, directly or indirectly. These people have submitted bug reports, feature
+suggestions, code contributions, or helped in other ways, like providing examples and
+documentation.
+
+If you are missing from this list, or want your name removed, please let me (m8f)
+know!
+
+The order is alphabetical.
+
+* Thanks
+
+- Arkezuli
+- Beed28
+- Blueberryy
+- Captain J
+- Colerx
+- DabbingSquidward
+- dard22
+- drogga (Commado Pen)
+- generic name guy
+- ghost
+- HexFlareheart
+- IKA
+- Jarewill
+- Jimmy
+- kadu522
+- kondoriyano
+- murka
+- Nems
+- Nightsentinel
+- Paul Fioravanti
+- Proydoha
+- przemko27
+- Rowsol
+- Spaceman333
+- SphericalCube
+- Star-X555
+- StroggVorbis
+- Tapwave
+- The Zombie Killer
+- ZikShadow
+
+* Special Thanks
+
+- [[https://zdoom.org/w/index.php][ZDoom Wiki]] contributors
+- Accensus: [[https://forum.zdoom.org/viewtopic.php?t=51446][Custom Doom]], Dictionary testing
+- Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
+- fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]
+- Graf Zahl: GZDoom
+- KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566][libeye]], the concept of VM abort handler
+- Marrub: ZScript [[https://github.com/zdoom-docs/stable][documentation]]
+- ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606][Clematis]]

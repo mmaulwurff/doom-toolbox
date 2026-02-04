@@ -27,6 +27,7 @@ ZScript modules:
 - [[file:modules/libeye.org][libeye]] - level and screen projections
 
 Documentation:
+- [[file:documentation/Acknowledgments.org][Acknowledgments]]
 - [[file:documentation/CodeOfConduct.org][Code of conduct]]
 - [[file:documentation/CodeStyle.org][Code style]]
 - [[file:documentation/MadeWith.org][Made with]]

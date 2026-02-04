@@ -40,14 +40,6 @@ Known issues (for multiplier > 1):
 - It may not be possible to get 100% kills in maps with single-use monster
   teleporters.
 
-Acknowledgments:
-- Original idea: Cutmanmike;
-- Code used as a reference: The Zombie Killer;
-- Bug reporting: Jimmy, Nems, murka, Arkezuli, Nightsentinel, Rowsol, StroggVorbis;
-- Feature suggestions: Rowsol, Accensus;
-- Translation support and Russian translation: Blueberryy;
-- Brazilian Portuguese localization: generic name guy.
-
 10.5x is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:

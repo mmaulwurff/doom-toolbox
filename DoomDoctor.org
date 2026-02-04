@@ -11,13 +11,6 @@ DoomDoctor is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolb
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
-* Acknowledgments
-
-- Thanks to KeksDose for the concept of VM abort handler.
-- Thanks to Colerx for bug reports.
-- Thanks to Accensus for feature suggestions.
-- Thanks to ZippeyKeys12 for Clematis.
-
 * Licenses
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
