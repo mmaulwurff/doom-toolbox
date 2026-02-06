@@ -6555,7 +6555,7 @@ class tt_Drawing ui
     int  width    = max(fnt.StringWidth(question), fnt.StringWidth(answer));
 
     double xStart = isCentered
-                  ? (position.x - width / 2)
+                  ? (position.x - width / 2 - BORDER)
                   : position.x;
     int x = int(Clamp(xStart,     FRAME, screenWidth  - FRAME - width         ));
     int y = int(Clamp(position.y, FRAME, screenHeight - FRAME * 3 - height * 2));
