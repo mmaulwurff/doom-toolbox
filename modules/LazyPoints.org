@@ -13,7 +13,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.6.3
+LazyPoints module version: 0.6.4
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -148,11 +148,9 @@ class NAMESPACE_Dispatcher : EventHandler
 
   override void worldThingDied(WorldEvent event)
   {
-    if (event.inflictor == NULL) return;
-
     for (int i = 0; i < MAXPLAYERS; ++i)
     {
-      if (_playerScores[i] != NULL && players[i].mo == event.damageSource)
+      if (_playerScores[i] != NULL && players[i].mo == event.thing.target)
         _playerScores[i].countDeath(event.thing);
     }
   }
