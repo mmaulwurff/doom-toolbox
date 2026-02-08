@@ -3,6 +3,8 @@
 
 #+title: DoomToolbox
 
+* About
+
 DoomToolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][GZDoom]].
 
@@ -33,9 +35,10 @@ Documentation:
 - [[file:documentation/MadeWith.org][Made with]]
 - [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
-HTML pages for Doom Toolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]].
+HTML pages for Doom Toolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]]. The source code is available on
+[[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
 
-Code is available on [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
+This project doesn't use any AI tools.
 
 * Social
 
