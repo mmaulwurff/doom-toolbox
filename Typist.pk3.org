@@ -6205,7 +6205,9 @@ class tt_Frame : tt_View
     return result;
   }
 
-  override void draw(RenderEvent event)
+  static int getWidth() { return Screen.getWidth() / 64; }
+
+  override void draw(RenderEvent _)
   {
     double destination = (_modeSource.getMode() == tt_Mode.Combat) ? 1.0 : 0.0;
 
@@ -6217,38 +6219,22 @@ class tt_Frame : tt_View
 
     if (alpha ~== 0.0) return;
 
-    let frameTexture = TexMan.checkForTexture("tt-frame", TexMan.Type_Any);
-    int screenWidth  = Screen.getWidth();
-    int screenHeight = Screen.getHeight();
-    int frameWidth   = screenWidth / 32;
+    int   screenWidth  = Screen.getWidth();
+    int   screenHeight = Screen.getHeight();
+    int   width        = getWidth();
+    int   height       = width;
+    Color white        = "FFFFFF";
 
-    Screen.drawTexture( frameTexture
-                      , NOT_ANIMATED
-                      , 0
-                      , 0
-                      , DTA_DestWidth     , frameWidth
-                      , DTA_DestHeight    , screenHeight
-                      , DTA_KeepRatio     , true
-                      , DTA_VirtualWidth  , screenWidth
-                      , DTA_VirtualHeight , screenHeight
-                      , DTA_Alpha         , alpha
-                      );
-
-    Screen.drawTexture( frameTexture
-                      , NOT_ANIMATED
-                      , screenWidth - frameWidth
-                      , 0
-                      , DTA_FlipX         , true
-                      , DTA_DestWidth     , frameWidth
-                      , DTA_DestHeight    , screenHeight
-                      , DTA_KeepRatio     , true
-                      , DTA_VirtualWidth  , screenWidth
-                      , DTA_VirtualHeight , screenHeight
-                      , DTA_Alpha         , alpha
-                      );
+    Screen.dim(white, alpha, 0, 0, width, screenHeight);
+    Screen.dim(white, alpha, width, 0, screenWidth - width * 2, height);
+    Screen.dim(white, alpha, screenWidth - width, 0, width, screenHeight);
+    Screen.dim(white,
+               alpha,
+               width,
+               screenHeight - height,
+               screenWidth - width * 2,
+               height);
   }
-
-  const NOT_ANIMATED = 0; // false
 
   private tt_ModeSource _modeSource;
   private tt_DoubleInterpolator _alphaInterpolator;
@@ -6352,7 +6338,8 @@ class tt_InfoPanel : tt_View
     int screenWidth  = Screen.getWidth();
     int halfScreen   = screenWidth / 2;
     int scaledMargin = MARGIN * scale;
-    int y            = scaledMargin;
+    int frameWidth   = tt_Frame.getWidth();
+    int y            = scaledMargin + frameWidth;
     let answer       = _answerSource.getAnswer().getString();
     int color        = tt_Drawing.getColorForMode(_modeSource.getMode());
 
@@ -6393,7 +6380,7 @@ class tt_InfoPanel : tt_View
                                                     hintedAnswer,
                                                     scale);
 
-      if (xRight + width > screenWidth) break;
+      if (xRight + width > screenWidth - frameWidth) break;
 
       tt_Drawing.drawTarget(xRight,
                             y,
@@ -6417,7 +6404,7 @@ class tt_InfoPanel : tt_View
       bool isCentered     = targetCount == 0 && c == 0;
       let  x              = isCentered ? halfScreen - width / 2 : xLeft - width;
 
-      if (x < 0) break;
+      if (x < frameWidth) break;
 
       tt_Drawing.drawTarget(x,
                             y,
@@ -6441,7 +6428,7 @@ class tt_InfoPanel : tt_View
                                                     hintedAnswer,
                                                     scale);
 
-      if (xLeft - width < 0) break;
+      if (xLeft - width < frameWidth) break;
 
       tt_Drawing.drawTarget(xLeft - width,
                             y,
@@ -6497,6 +6484,7 @@ class tt_TargetOverlay : tt_View
     int scale   = _scaleSetting.get();
     int screenWidth  = Screen.getWidth();
     int screenHeight = Screen.getHeight();
+    int frameWidth   = tt_Frame.getWidth();
 
     uint nWidgets = widgets.size();
     for (uint i = 0; i < nWidgets; ++i)
@@ -6510,8 +6498,12 @@ class tt_TargetOverlay : tt_View
                                                   hintedAnswer,
                                                   scale);
 
-      int x = int(clamp(position.x - width / 2, 0, screenWidth  - width));
-      int y = int(clamp(position.y - height,    0, screenHeight - height * 2));
+      int x = int(clamp(position.x - width / 2,
+                        frameWidth,
+                        screenWidth  - width - frameWidth));
+      int y = int(clamp(position.y - height,
+                        frameWidth,
+                        screenHeight - height * 2 - frameWidth));
 
       tt_Drawing.drawTarget(x,
                             y,
