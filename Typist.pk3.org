@@ -6348,15 +6348,16 @@ class tt_InfoPanel : tt_View
     let commandCount = commands.size();
     if (targetCount == 0 && commandCount == 0) return;
 
-    int scale       = _scaleSetting.get();
-    int screenWidth = Screen.getWidth();
-    int halfScreen  = screenWidth / 2;
-    int y           = int(Y_START + (VERTICAL_MARGIN * scale));
-    let answer      = _answerSource.getAnswer().getString();
-    int color       = tt_Drawing.getColorForMode(_modeSource.getMode());
+    int scale        = _scaleSetting.get();
+    int screenWidth  = Screen.getWidth();
+    int halfScreen   = screenWidth / 2;
+    int scaledMargin = MARGIN * scale;
+    int y            = Y_START + scaledMargin;
+    let answer       = _answerSource.getAnswer().getString();
+    int color        = tt_Drawing.getColorForMode(_modeSource.getMode());
 
-    int xRight = halfScreen;
     int xLeft  = halfScreen;
+    int xRight = halfScreen;
 
     // 1. Draw the first target in the center.
     if (targetCount > 0)
@@ -6364,19 +6365,21 @@ class tt_InfoPanel : tt_View
       let    question       = targets.at(0).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
-      tt_Drawing.drawTarget((halfScreen, y),
+      let [width, height]   = tt_Drawing.getBoxSize(questionString,
+                                                    hintedAnswer,
+                                                    scale);
+
+      tt_Drawing.drawTarget(halfScreen - width / 2,
+                            y,
+                            width,
+                            height,
                             questionString,
                             hintedAnswer,
                             scale,
-                            tt_Drawing.CENTERED,
                             color);
 
-      // TODO: make drawTarget return target width?
-      int targetWidth = tt_Drawing.getWidthForTarget(questionString,
-                                                     hintedAnswer,
-                                                     scale);
-      xRight += targetWidth / 2 + HORIZONTAL_MARGIN + tt_Drawing.FRAME;
-      xLeft  -= targetWidth / 2 + HORIZONTAL_MARGIN - tt_Drawing.FRAME;
+      xLeft  = halfScreen - width / 2 - scaledMargin;
+      xRight = xLeft + width + scaledMargin * 2;
     }
 
     // 2. Draw the targets to the right while there is space.
@@ -6386,42 +6389,46 @@ class tt_InfoPanel : tt_View
       let    question       = targets.at(i).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
-      int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
-                                                           hintedAnswer,
-                                                           scale);
+      let [width, height]   = tt_Drawing.getBoxSize(questionString,
+                                                    hintedAnswer,
+                                                    scale);
 
-      if (xRight + targetWidth > screenWidth) break;
+      if (xRight + width > screenWidth) break;
 
-      tt_Drawing.drawTarget((xRight, y),
+      tt_Drawing.drawTarget(xRight,
+                            y,
+                            width,
+                            height,
                             questionString,
                             hintedAnswer,
                             scale,
-                            tt_Drawing.NOT_CENTERED,
                             color);
 
-      xRight += targetWidth + HORIZONTAL_MARGIN;
+      xRight += width + scaledMargin;
     }
 
     // 3. Draw the commands to the left while there is space.
     for (uint c = 0; c < commandCount; ++c)
     {
-      let  command      = commands.at(c);
-      let  question     = tt_Match.of(command, command);
-      let  hintedAnswer = question.getHintFor(answer);
-      int  targetWidth  = tt_Drawing.getWidthForTarget(command, hintedAnswer, scale);
-      bool isCentered   = targetCount == 0 && c == 0;
-      let  position     = isCentered ? (halfScreen, y) : (xLeft - targetWidth, y);
+      let  command        = commands.at(c);
+      let  question       = tt_Match.of(command, command);
+      let  hintedAnswer   = question.getHintFor(answer);
+      let [width, height] = tt_Drawing.getBoxSize(command, hintedAnswer, scale);
+      bool isCentered     = targetCount == 0 && c == 0;
+      let  x              = isCentered ? halfScreen - width / 2 : xLeft - width;
 
-      if (xLeft - targetWidth < 0) break;
+      if (x < 0) break;
 
-      tt_Drawing.drawTarget(position,
+      tt_Drawing.drawTarget(x,
+                            y,
+                            width,
+                            height,
                             command,
                             hintedAnswer,
                             scale,
-                            isCentered,
                             color);
 
-      xLeft -= targetWidth + HORIZONTAL_MARGIN;
+      xLeft -= width + scaledMargin;
     }
 
     // 4. Draw the remaining targets to the left while there is space.
@@ -6430,25 +6437,28 @@ class tt_InfoPanel : tt_View
       let    question       = targets.at(i).getQuestion();
       string questionString = question.getDescription();
       string hintedAnswer   = question.getHintFor(answer);
-      int    targetWidth    = tt_Drawing.getWidthForTarget(questionString,
-                                                           hintedAnswer,
-                                                           scale);
+      let [width, height]   = tt_Drawing.getBoxSize(questionString,
+                                                    hintedAnswer,
+                                                    scale);
 
-      if (xLeft - targetWidth < 0) break;
+      if (xLeft - width < 0) break;
 
-      tt_Drawing.drawTarget((xLeft - targetWidth, y),
+      tt_Drawing.drawTarget(xLeft - width,
+                            y,
+                            width,
+                            height,
                             questionString,
                             hintedAnswer,
                             scale,
-                            tt_Drawing.NOT_CENTERED,
                             color);
 
-      xLeft -= targetWidth + HORIZONTAL_MARGIN;
+      xLeft -= width + scaledMargin;
     }
   }
 
   const Y_START = 10;
 
+  const MARGIN = 2;
   const HORIZONTAL_MARGIN = 2;
   const VERTICAL_MARGIN   = 20;
 
@@ -6489,26 +6499,34 @@ class tt_TargetOverlay : tt_View
     int mode    = _modeSource.getMode();
     int color   = tt_Drawing.getColorForMode(mode);
     int scale   = _scaleSetting.get();
+    int screenWidth  = Screen.getWidth();
+    int screenHeight = Screen.getHeight();
 
     uint nWidgets = widgets.size();
     for (uint i = 0; i < nWidgets; ++i)
     {
-      let    widget         = widgets.at(i);
-      let    question       = widget.getTarget().getQuestion();
-      string questionString = question.getDescription();
-      string hintedAnswer   = question.getHintFor(answer);
-      let    position       = widget.getPosition();
+      let widget          = widgets.at(i);
+      let question        = widget.getTarget().getQuestion();
+      let questionString  = question.getDescription();
+      let hintedAnswer    = question.getHintFor(answer);
+      let position        = widget.getPosition();
+      let [width, height] = tt_Drawing.getBoxSize(questionString,
+                                                  hintedAnswer,
+                                                  scale);
 
-      tt_Drawing.drawTarget(position,
+      int x = int(clamp(position.x - width / 2, 0, screenWidth  - width));
+      int y = int(clamp(position.y - height,    0, screenHeight - height * 2));
+
+      tt_Drawing.drawTarget(x,
+                            y,
+                            width,
+                            height,
                             questionString,
                             hintedAnswer,
                             scale,
-                            CENTERED,
                             color);
     }
   }
-
-  const CENTERED = 1; // true
 
   private tt_TargetWidgetSource _targetWidgetSource;
   private tt_AnswerSource       _answerSource;
@@ -6522,48 +6540,8 @@ class tt_TargetOverlay : tt_View
 #+begin_src c :tangle build/Typist.pk3/zscript/tt_view.zs
 
 // Namespace for common drawing functions.
-// TODO: clean up this mess.
 class tt_Drawing ui
 {
-  enum _
-  {
-    NOT_CENTERED = 0,
-    CENTERED = 1
-  }
-
-  static int getWidthForTarget(String question, string answer, int scale)
-  {
-    Font fnt         = NewSmallFont;
-    int  width       = max(fnt.StringWidth(question), fnt.StringWidth(answer));
-    int  borderWidth = makeBorderWidth(width) * scale;
-    return borderWidth;
-  }
-
-  static void drawTarget(vector2 pos,
-                         string  question,
-                         string  answer,
-                         int     scale,
-                         bool    isCentered,
-                         int     color)
-  {
-    Font fnt          = NewSmallFont;
-    int  screenWidth  = Screen.GetWidth()  / scale;
-    int  screenHeight = Screen.GetHeight() / scale;
-
-    let  position = pos / scale;
-    int  height   = fnt.GetHeight();
-    int  width    = max(fnt.StringWidth(question), fnt.StringWidth(answer));
-
-    double xStart = isCentered
-                  ? (position.x - width / 2 - BORDER)
-                  : position.x;
-    int x = int(Clamp(xStart,     FRAME, screenWidth  - FRAME - width         ));
-    int y = int(Clamp(position.y, FRAME, screenHeight - FRAME * 3 - height * 2));
-
-    drawBoxes(x, y, width, height, screenWidth, screenHeight, color);
-    drawText(x, y, height, fnt, question, answer, screenWidth, screenHeight);
-  }
-
   static int getColorForMode(int mode)
   {
     return (mode == tt_Mode.Combat)
@@ -6571,130 +6549,60 @@ class tt_Drawing ui
       : tt_RgbColors.AnswerExploration;
   }
 
-  private static int makeBorderWidth(int width)
+  static int, int getBoxSize(string question, string answer, int scale)
   {
-    int borderWidth  = FRAME * 2 + width;
-    return borderWidth;
+    // One extra BORDER for width: stringWidth tends to underestimate the width.
+    let aFont  = NewSmallFont;
+    int height = scale * (BORDER * 4 + aFont.getHeight());
+    int width  = scale * (BORDER * 5 + max(aFont.stringWidth(question),
+                                           aFont.stringWidth(answer)));
+    return width, height;
   }
 
-  private static void drawBoxes(int x,
-                                int y,
-                                int width,
-                                int lineHeight,
-                                int screenWidth,
-                                int screenHeight,
-                                int color)
+  static void drawTarget(int    x,
+                         int    y,
+                         int    width,
+                         int    height, // Box height, target is two boxes.
+                         string question,
+                         string answer,
+                         int    scale,
+                         Color  answerColor)
   {
-    // TODO: replace with null?
-    // Texture is necessary for drawing, but in fact it isn't used.
-    // The color is specified with DTA_FillColor.
-    let dummyTexture = TexMan.CheckForTexture("tt-white", TexMan.Type_Any);
-
-    drawBox(dummyTexture,
-            x,
-            y,
-            width,
-            lineHeight,
-            screenWidth,
-            screenHeight,
-            tt_RgbColors.Question);
-
-    int lowerY = y + lineHeight + FRAME * 2;
-    drawBox(dummyTexture, x, lowerY, width, lineHeight, screenWidth, screenHeight, color);
+    drawBox(x, y, width, height, question, scale, tt_RgbColors.Question);
+    drawBox(x, y + height, width, height, answer, scale, answerColor);
   }
 
-  private static void drawBox( TextureID tex
-              , int x
-              , int y
-              , int width
-              , int lineHeight
-              , int screenWidth
-              , int screenHeight
-              , int color
-              )
+  private static void drawBox(int    x,
+                              int    y,
+                              int    width,
+                              int    height,
+                              string text,
+                              int    scale,
+                              Color  aColor)
   {
-    // TODO: replace drawTexture with drawShapeFill
-    // Screen.drawShapeFill(Color col, double amount, Shape2D s)
+    int scaledBorder = BORDER * scale;
+    Color backgroundColor = Color(aColor.r / 2, aColor.g / 2, aColor.b / 2);
 
-    { // border
-      int borderX      = x - FRAME;
-      int borderY      = y - FRAME;
-      int borderWidth  = makeBorderWidth(width);
-      int borderHeight = FRAME * 2 + lineHeight;
+    Screen.dim(aColor, ALPHA, x, y, width, height);
+    Screen.dim(backgroundColor,
+               ALPHA,
+               x + scaledBorder,
+               y + scaledBorder,
+               width  - scaledBorder * 2,
+               height - scaledBorder * 2,
+               STYLE_Subtract);
 
-      Screen.DrawTexture( tex
-                        , NOT_ANIMATED
-                        , borderX
-                        , borderY
-                        , DTA_DestWidth     , borderWidth
-                        , DTA_DestHeight    , borderHeight
-                        , DTA_FillColor     , color
-                        , DTA_KeepRatio     , true
-                        , DTA_VirtualWidth  , screenWidth
-                        , DTA_VirtualHeight , screenHeight
-                        , DTA_Alpha         , BORDER_ALPHA
-                        );
-    }
-
-    { // background
-      int backgroundX      = x - PADDING;
-      int backgroundY      = y - PADDING;
-      int backgroundWidth  = PADDING * 2 + width;
-      int backgroundHeight = PADDING * 2 + lineHeight;
-
-      Screen.DrawTexture( tex
-                        , NOT_ANIMATED
-                        , backgroundX
-                        , backgroundY
-                        , DTA_DestWidth     , backgroundWidth
-                        , DTA_DestHeight    , backgroundHeight
-                        , DTA_FillColor     , tt_RgbColors.Dim
-                        , DTA_KeepRatio     , true
-                        , DTA_VirtualWidth  , screenWidth
-                        , DTA_VirtualHeight , screenHeight
-                        , DTA_Alpha         , BACKGROUND_ALPHA
-                        );
-    }
+    Screen.drawText(NewSmallFont,
+                    tt_TextColors.Base,
+                    x + scaledBorder * 2,
+                    y + scaledBorder * 2,
+                    text,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale);
   }
 
-  private static void drawText( int    x
-               , int    y
-               , int    height
-               , Font   fnt
-               , string question
-               , string answer
-               , int    screenWidth
-               , int    screenHeight
-               )
-  {
-    Screen.DrawText( fnt
-                   , tt_TextColors.Base
-                   , x
-                   , y
-                   , "$" .. question
-                   , DTA_KeepRatio     , true
-                   , DTA_VirtualWidth  , screenWidth
-                   , DTA_VirtualHeight , screenHeight
-                   );
-    Screen.DrawText( fnt
-                   , tt_TextColors.Base
-                   , x
-                   , y + height + FRAME * 2
-                   , "$" .. answer
-                   , DTA_KeepRatio     , true
-                   , DTA_VirtualWidth  , screenWidth
-                   , DTA_VirtualHeight , screenHeight
-                   );
-  }
-
-  const BORDER       = 1;
-  const PADDING      = 2;
-  const FRAME        = BORDER + PADDING;
-
-  const NOT_ANIMATED = 0; // false
-
-  const BORDER_ALPHA     = 0.2;
-  const BACKGROUND_ALPHA = 0.2;
+  const BORDER = 2;
+  const ALPHA  = 0.2;
 }
 #+end_src
 
