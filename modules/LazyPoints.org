@@ -13,7 +13,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+name: description
 #+begin_src org
 
-LazyPoints module version: 0.6.4
+LazyPoints module version: 0.6.5
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
 Point scoring for GZDoom. Do things, get points!
@@ -33,12 +33,7 @@ Scoring:
 - Player with 50% and more health gets kill points (with chain kill bonus)
   multiplied by 1.5, with 100% and more - by 2.
 
-Credits:
-- Scoring system is based on ScoreDoom: https://zdoom.org/wiki/ScoreDoom;
-- Health multiplier is an idea of ZikShadow.
-
-Thanks:
-- to IKA for bug reporting.
+Scoring system is based on ScoreDoom: https://zdoom.org/wiki/ScoreDoom.
 
 To use (besides ZScript code):
 - define cvars:
@@ -97,7 +92,10 @@ class NAMESPACE_Parameters
   virtual int getBonusCountdown() const { return 3; }
 
   // This is an offset in pixels from the top of the screen for all score info.
-  virtual int getYOffset() const { return 10; }
+  virtual ui int getYOffset() const { return 10; }
+
+  // Scale multiplier for all score info.
+  virtual ui int getScale() const { return 1; }
 
   // Tells if score points are given for picking up items.
   virtual bool isPickupBonusEnabled() const { return true; }
@@ -199,12 +197,12 @@ class NAMESPACE_BonusView
     return self;
   }
 
-  ui int show(int y)
+  ui int show(int y, int scale)
   {
     loadFont();
 
-    int lineHeight = _font.GetHeight() * CleanYFac_1;
-    y += MARGIN + lineHeight / 2;
+    int lineHeight = _font.GetHeight();
+    y += MARGIN;
 
     int bonus         = _timerBonus.getBonus();
     double multiplier = _healthBonus.getMultiplier();
@@ -220,11 +218,17 @@ class NAMESPACE_BonusView
       bonusString.appendFormat("x%.1f", multiplier);
     }
 
-    int bonusWidth = _font.StringWidth(bonusString) * CleanXFac_1;
+    int bonusWidth = _font.StringWidth(bonusString) * scale;
     int x          = (Screen.GetWidth() - bonusWidth) / 2;
-    Screen.DrawText(_font, Font.CR_Blue, x, y, bonusString, DTA_CleanNoMove_1, true);
+    Screen.drawText(_font,
+                    Font.CR_Blue,
+                    x,
+                    y,
+                    bonusString,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale);
 
-    return lineHeight * 2;
+    return lineHeight * 2 * scale;
   }
 
   const MARGIN = 10;
@@ -542,10 +546,11 @@ class NAMESPACE_PlayerScore
     if (!isVisible()) return;
 
     int y = _parameters.getYOffset();
+    int scale = _parameters.getScale();
 
-    y += _view.show(y);
-    y += _timerView.show(y, fracTic);
-    y += _bonusView.show(y);
+    y += _view.show(y, scale);
+    y += _timerView.show(y, scale, fracTic);
+    y += _bonusView.show(y, scale);
   }
 
   play void countDamage(Actor damaged, int damage, Name damageType)
@@ -834,24 +839,30 @@ class NAMESPACE_TimerView
     return self;
   }
 
-  ui int show(int y, double fracTic)
+  ui int show(int y, int scale, double fracTic)
   {
-    if (_timer.GetCount() == 0) return BAR_THICKNESS;
+    int scaledThickness = BAR_THICKNESS * scale;
+
+    if (_timer.getCount() == 0) return scaledThickness * 2;
 
     int screenWidth  = Screen.GetWidth();
-    double ratio     = (_timer.GetCount() - fracTic) / _timer.GetMaxCount();
+    double ratio     = (_timer.getCount() - fracTic) / _timer.GetMaxCount();
     int middleWidth  = screenWidth / 2;
     int halfBarWidth = int(round(screenWidth / 8 * ratio));
 
     y += MARGIN;
 
-    Screen.drawThickLine(middleWidth - halfBarWidth, y, middleWidth + halfBarWidth,
-                         y, BAR_THICKNESS, BAR_COLOR);
+    Screen.drawThickLine(middleWidth - halfBarWidth,
+                         y,
+                         middleWidth + halfBarWidth,
+                         y,
+                         scaledThickness,
+                         BAR_COLOR);
 
-    return BAR_THICKNESS;
+    return scaledThickness * 2;
   }
 
-  const BAR_THICKNESS = 2.0;
+  const BAR_THICKNESS = 3;
   const BAR_COLOR     = "gray";
   const MARGIN        = 10;
 
@@ -972,24 +983,30 @@ class NAMESPACE_View
     return self;
   }
 
-  ui int show(int y)
+  ui int show(int y, int scale)
   {
     loadFont();
 
-    int lineHeight = _font.getHeight() * CleanYFac_1;
+    int lineHeight = _font.getHeight();
 
-    if (!_player.mo) return lineHeight;
+    if (!_player.mo) return lineHeight * scale;
 
-    y += MARGIN + lineHeight / 2;
+    y += MARGIN;
 
     _interpolator.update(_player.mo.score);
 
-    String scoreString = String.Format("%d", _interpolator.getValue());
-    int scoreWidth     = _font.StringWidth(scoreString) * CleanXFac_1;
-    int x              = (Screen.GetWidth() - scoreWidth) / 2;
-    Screen.DrawText(_font, Font.CR_Blue, x, y, scoreString, DTA_CleanNoMove_1, true);
+    let scoreString = string.format("%d", _interpolator.getValue());
+    int scoreWidth  = _font.stringWidth(scoreString) * scale;
+    int x           = (Screen.GetWidth() - scoreWidth) / 2;
+    Screen.drawText(_font,
+                    Font.CR_Blue,
+                    x,
+                    y,
+                    scoreString,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale);
 
-    return lineHeight * 2;
+    return lineHeight * scale;
   }
 
   const MARGIN = 10;
