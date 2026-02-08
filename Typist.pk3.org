@@ -6352,7 +6352,7 @@ class tt_InfoPanel : tt_View
     int screenWidth  = Screen.getWidth();
     int halfScreen   = screenWidth / 2;
     int scaledMargin = MARGIN * scale;
-    int y            = Y_START + scaledMargin;
+    int y            = scaledMargin;
     let answer       = _answerSource.getAnswer().getString();
     int color        = tt_Drawing.getColorForMode(_modeSource.getMode());
 
@@ -6456,11 +6456,7 @@ class tt_InfoPanel : tt_View
     }
   }
 
-  const Y_START = 10;
-
   const MARGIN = 2;
-  const HORIZONTAL_MARGIN = 2;
-  const VERTICAL_MARGIN   = 20;
 
   private tt_ModeSource        _modeSource;
   private tt_AnswerSource      _answerSource;
@@ -7185,11 +7181,21 @@ See [[file:modules/LazyPoints.org::*Parameters][LazyPoints Parameters documentat
 // LazyPoints customization.
 class tt_lp_TypistParameters : tt_lp_Parameters
 {
-  override Font getFont() const { return Font.getFont("BigFont"); }
+  override Font getFont() const { return Font.getFont("NewSmallFont"); }
 
   override int getBonusCountdown() const { return 3; }
 
-  override int getYOffset() const { return 10; }
+  override int getYOffset() const
+  {
+    int scale = max(1, Cvar.getCvar("tt_view_scale", players[consolePlayer]).getInt());
+    let [width, height] = tt_Drawing.getBoxSize("", "", scale);
+    return height * 2 + tt_InfoPanel.MARGIN;
+  }
+
+  override int getScale() const
+  {
+    return max(1, Cvar.getCvar("tt_view_scale", players[consolePlayer]).getInt());
+  }
 
   override bool isPickupBonusEnabled() const { return false; }
 
