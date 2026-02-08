@@ -30,7 +30,9 @@
 ^S_Init: Setting up sound.
 ^S_InitData: Load sound definitions.
 ^Script error, "gzdoom.pk3:menudef.txt"
+^Script error, "uzdoom.pk3:menudef.txt"
 ^Texman.Init: Init texture manager.
+^UZDoom version g
 ^Unknown texture M_EPISOD
 ^Using video driver x11
 ^V_Init: allocate screen.
@@ -38,6 +40,7 @@
 ^adding .*game_support.pk3, .* lumps
 ^adding .*gzdoom.pk3, .* lumps
 ^adding .*miniwad.wad, .* lumps
+^adding .*uzdoom.pk3, .* lumps
 ^adding tools/ClematisM-v.*\.pk3, .* lumps
 ^cc$
 ^player 1 of 1 \(1 nodes\)

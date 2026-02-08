@@ -9,8 +9,6 @@
 # TODO: move autoadvance to config.ini?
 #+wi_autoadvance 1\
 
-# TODO: add exit code to GZDoom "quit" CCMD.
-
 # TODO: add targets to build all packages and to run all tests.
 
 # TODO: Instead of copying all LICENSES, copy only needed. Use Reuse?
@@ -103,7 +101,7 @@ def add_test_target(org_file, main_target):
 
     result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args)
 
-    with open('tools/IgnoredGzdoomOutput.txt') as lines_to_skip_file:
+    with open('tools/IgnoredEngineOutput.txt') as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
     def printable(line):
