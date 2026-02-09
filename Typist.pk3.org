@@ -6839,8 +6839,6 @@ class tt_TargetOriginSender : tt_Effect
 
 ** Options
 
-TODO: rewrite with ~PlainTranslator~.
-
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
 
 AddOptionMenu OptionsMenu
@@ -6850,14 +6848,16 @@ AddOptionMenu OptionsMenu
 
 OptionMenu tt_Options
 {
+  tt_PlainTranslator
+
   Title      "$TT_TITLE"
 
-  Submenu    "$TT_CONTROLS_TITLE_OUT"         , tt_Controls
+  Submenu    "Controls", tt_Controls
 
   StaticText ""
-  Submenu    "General Options"                , tt_GeneralOptions
-  Submenu    "$TT_LESSON_OPTIONS_TITLE_OUT"   , tt_LessonOptions
-  Submenu    "$TT_SOUND_OPTIONS_TITLE_OUT"    , tt_SoundOptions
+  Submenu    "General Options", tt_GeneralOptions
+  Submenu    "Lesson Options",  tt_LessonOptions
+  Submenu    "Sound Options",   tt_SoundOptions
 }
 
 OptionMenu tt_GeneralOptions
@@ -6868,14 +6868,14 @@ OptionMenu tt_GeneralOptions
   Option     "Automatic word confirmation", tt_fast_confirmation, OnOff
 
   StaticText ""
-  Slider     "$TT_TARGET_SCALE", tt_view_scale, 1, 4, 1, 0
+  Slider     "Target text scale", tt_view_scale, 1, 4, 1, 0
 
   StaticText ""
   StaticText "Reduce distractions"
 
   StaticText ""
-  Option     "$TT_BUDDHA_ENABLED", tt_buddha_enabled, OnOff
-  StaticText "$TT_BUDDHA_NOTE"
+  Option     "Player cannot die", tt_buddha_enabled, OnOff
+  StaticText "Applies on new level start."
 
   StaticText ""
   Option     "Infinite ammo",      sv_infiniteammo, OnOff
@@ -6904,27 +6904,27 @@ OptionValue tt_InfightingValues
 
 OptionMenu tt_LessonOptions
 {
-  Title      "$TT_LESSON_OPTIONS_TITLE_IN"
+  Title      "Lesson Options"
 
-  Option     "$TT_LESSON_1000"   , tt_is_english_enabled , OnOff
-  Option     "$TT_LESSON_RANDOM" , tt_is_random_enabled  , OnOff
-  Option     "$TT_LESSON_MATH"   , tt_is_maths_enabled   , OnOff
-  Option     "$TT_CUSTOM_TEXT"   , tt_is_custom_enabled  , OnOff
-
-  StaticText ""
-  Submenu    "$TT_RANDOM_LESSON_TITLE", tt_RandomLesson
+  Option     "1000 Basic English Words", tt_is_english_enabled, OnOff
+  Option     "Random Characters",        tt_is_random_enabled,  OnOff
+  Option     "Arithmetic",               tt_is_maths_enabled,   OnOff
+  Option     "Custom Text",              tt_is_custom_enabled,  OnOff
 
   StaticText ""
-  Command    "$TT_APPLY", tt_reset_targets
-  StaticText "$TT_QUESTION_SOURCE_NOTE"
+  Submenu    "Random Characters Lesson Configuration", tt_RandomLesson
 
   StaticText ""
+  Command    "Update targets", tt_reset_targets
+
+  StaticText ""
+  StaticText "How to set up Custom Text lesson"
   StaticText "$TT_CUSTOM_LESSON_HELP_TEXT"
 }
 
 OptionMenu tt_Controls
 {
-  Title      "$TT_CONTROLS_TITLE_IN"
+  Title      "Controls"
 
   Control    "$TT_UNLOCK", tt_unlock_mode
   Control    "$TT_COMBAT", tt_force_combat
@@ -6939,29 +6939,29 @@ OptionMenu tt_Controls
 
 OptionMenu tt_SoundOptions
 {
-  Title  "$TT_SOUND_OPTIONS_TITLE_IN"
+  Title  "Sound Options"
 
-  Option "$TT_SOUND_ENABLED"        , tt_sound_enabled        , OnOff
-  Option "$TT_SOUND_TYPING_ENABLED" , tt_sound_typing_enabled , OnOff
-  Option "$TT_SOUND_THEME"          , tt_sound_theme          , tt_SoundThemes
+  Option "Sound effects", tt_sound_enabled, OnOff
+  Option "Typing sound",  tt_sound_typing_enabled, OnOff
+  Option "Sound theme",   tt_sound_theme, tt_SoundThemes
 }
 
 OptionMenu tt_RandomLesson
 {
-  Title  "$TT_RANDOM_LESSON_TITLE_FULL"
+  Title  "Random Characters Lesson Configuration"
 
-  Slider "$TT_RANDOM_LESSON_LENGTH", tt_rc_length, 1, 10, 1, 0
-
-  StaticText ""
-  Option "$TT_RANDOM_LESSON_UPPERCASE"   , tt_rc_uppercase_letters_enabled , OnOff
-  Option "$TT_RANDOM_LESSON_LOWERCASE"   , tt_rc_lowercase_letters_enabled , OnOff
-  Option "$TT_RANDOM_LESSON_NUMBERS"     , tt_rc_numbers_enabled           , OnOff
-  Option "$TT_RANDOM_LESSON_PUNCTUATION" , tt_rc_punctuation_enabled       , OnOff
-  Option "$TT_RANDOM_LESSON_SYMBOLS"     , tt_rc_symbols_enabled           , OnOff
+  Slider "Length", tt_rc_length, 1, 10, 1, 0
 
   StaticText ""
-  Option     "$TT_RANDOM_LESSON_CUSTOM"       , tt_rc_custom_enabled , OnOff
-  TextField  "$TT_RANDOM_LESSON_CUSTOM_CHARS" , tt_rc_custom
+  Option "$TT_RANDOM_LESSON_UPPERCASE", tt_rc_uppercase_letters_enabled , OnOff
+  Option "$TT_RANDOM_LESSON_LOWERCASE", tt_rc_lowercase_letters_enabled , OnOff
+  Option "0-9"                        , tt_rc_numbers_enabled           , OnOff
+  Option "Punctuation"                , tt_rc_punctuation_enabled       , OnOff
+  Option "Other characters"           , tt_rc_symbols_enabled           , OnOff
+
+  StaticText ""
+  Option     "Custom string"  , tt_rc_custom_enabled, OnOff
+  TextField  "Custom string:" , tt_rc_custom, tt_rc_custom_enabled
 }
 #+end_src
 
@@ -7069,64 +7069,27 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 #+begin_src c :tangle build/Typist.pk3/language.txt
 [enu default]
 
-// Menus ///////////////////////////////////////////////////////////////////////
-
-TT_TITLE = "Typist.pk3 v0.7.4";
+TT_TITLE  = "Typist.pk3";
 
 TT_UNLOCK = "Unlock Game Mode";
 TT_COMBAT = "Force Combat Mode";
 TT_SCORE  = "Open Score";
 
-TT_TARGET_SCALE               = "Target text scale";
-
-TT_QUESTION_SOURCE            = "Lesson";
-TT_APPLY                      = "Apply";
-TT_QUESTION_SOURCE_NOTE       = "Or existing targets will retain question from the previous Lesson.";
-
-TT_CONTROLS_TITLE_OUT         = "Controls";
-TT_CONTROLS_TITLE_IN          = "Typist.pk3 Controls";
-
-TT_BUDDHA_ENABLED = "Player cannot die";
-TT_BUDDHA_NOTE    = "Applies on new level start.";
-
-TT_LESSON_OPTIONS_TITLE_OUT = "Lesson Options";
-TT_LESSON_OPTIONS_TITLE_IN  = "Typist.pk3 Lesson Options";
-
-TT_LESSON_MATH = "Arithmetic";
-TT_LESSON_1000 = "1000 Basic English Words";
-TT_CUSTOM_TEXT = "Custom Text";
-
-TT_CUSTOM_LESSON_HELP_TEXT = "\cfHow to set up Custom Text lesson\c-\
-\
-1. Find any text or book in ASCII .txt file (UTF-8 may also work).\
+TT_CUSTOM_LESSON_HELP_TEXT = "\
+1. Find any text or book in a .txt file (ASCII or UTF-8).\
 2. Rename text file to `typist_custom_text.txt`.\
-3. Load `typist_custom_text.txt` with GZDoom alongside Typist.pk3.\
-4. Select Custom Text in Typist options menu.";
+3. Load `typist_custom_text.txt` alongside Typist.pk3.\
+4. Enable Custom Text in this menu.";
 
-TT_NIX_LESSON = "*nix Command Line";
+TT_RANDOM_LESSON_UPPERCASE = "A-Z";
+TT_RANDOM_LESSON_LOWERCASE = "a-z";
 
-TT_LESSON_RANDOM              = "Random Characters";
-TT_RANDOM_LESSON_TITLE        = "Random Characters Lesson Configuration";
-TT_RANDOM_LESSON_LENGTH       = "Length";
-TT_RANDOM_LESSON_UPPERCASE    = "A-Z";
-TT_RANDOM_LESSON_LOWERCASE    = "a-z";
-TT_RANDOM_LESSON_NUMBERS      = "0-9";
-TT_RANDOM_LESSON_PUNCTUATION  = "Punctuation";
-TT_RANDOM_LESSON_SYMBOLS      = "Other characters";
-TT_RANDOM_LESSON_CUSTOM       = "Custom string";
-TT_RANDOM_LESSON_CUSTOM_CHARS = "Custom string:";
-
-// Sound menus /////////////////////////////////////////////////////////////////
-
-TT_SOUND_OPTIONS_TITLE_OUT = "Sound Options";
-TT_SOUND_OPTIONS_TITLE_IN  = "Typist.pk3 Sound Options";
-
-TT_SOUND_THEME          = "Sound theme";
-TT_SOUND_ENABLED        = "Sound effects";
-TT_SOUND_TYPING_ENABLED = "Typing sound";
-
-// Helper string
 TT_FALLBACK_QUESTION = "<empty lesson>";
+
+[ru]
+
+// Note: plain text in menus is translatable.
+TT_CONTROLS = "Управление";
 #+end_src
 
 * Mod setup
@@ -7141,7 +7104,10 @@ version 4.14.2
 #include "zscript/tt_le_libeye.zs"
 #include "zscript/tt_lp_LazyPoints.zs"
 #include "zscript/tt_su_StringUtils.zs"
+#include "zscript/tt_PlainTranslator.zs"
 #+end_src
+
+Modules: [[file:modules/libeye.org][libeye]], [[file:modules/LazyPoints.org][LazyPoints]], [[file:modules/StringUtils.org][StringUtils]], [[file:modules/PlainTranslator.org][PlainTranslator]].
 
 #+begin_src text :tangle build/tmp.txt :exports none
 <<tools/scripts.org:copy-media("Typist.pk3")>>
