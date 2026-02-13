@@ -620,11 +620,11 @@ class tt_Server
     let radarStaleMarker   = tt_StaleMarkerImpl     .of(tt_TotalClock.of());
     let radarCacheDirty    = tt_TargetSourceCache   .of(targetRadar, radarStaleMarker);
     let radarCache         = tt_TargetSourcePruner  .of(radarCacheDirty);
-    let autoAimSetting     = tt_FloatCvar           .of(playerSource, "autoaim");
+    let freelookSetting    = tt_BoolCvar            .of(playerSource, "freelook");
 
     Array<tt_WorldChanger> targetChangers = {
       tt_HorizontalAimer.of(targetOriginSource, playerSource),
-      tt_VerticalAimer.of(targetOriginSource, playerSource, autoAimSetting),
+      tt_VerticalAimer.of(targetOriginSource, playerSource, freelookSetting),
       tt_Firer.of(playerSource)
     };
 
@@ -993,28 +993,23 @@ class tt_HorizontalAimer : tt_WorldChanger
 #+begin_src c :tangle build/Typist.pk3/zscript/tt_world_changer.zs
 
 // Implements tt_WorldChanger interface by adjusting the player pitch
-// (horizontal angle). If autoaim is enabled, no pitch adjustment is done.
+// (horizontal angle). If freelook is disabled, no pitch adjustment is done.
 class tt_VerticalAimer : tt_WorldChanger
 {
   static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
                              tt_PlayerSource playerSource,
-                             tt_FloatSetting autoAimSetting)
+                             tt_BoolSetting  freelookSetting)
   {
     let result = new("tt_VerticalAimer");
     result._targetOriginSource = targetOriginSource;
     result._playerSource       = playerSource;
-    result._autoAimSetting     = autoAimSetting;
+    result._freelookSetting    = freelookSetting;
     return result;
   }
 
   override void changeWorld()
   {
-    if (!isAutoAimEnabled()) setPitch();
-  }
-
-  private play bool isAutoAimEnabled()
-  {
-    return _autoAimSetting.getFloat() > 34.5;
+    if (_freelookSetting.get()) setPitch();
   }
 
   private play void setPitch()
@@ -1037,7 +1032,7 @@ class tt_VerticalAimer : tt_WorldChanger
 
   private tt_OriginSource _targetOriginSource;
   private tt_PlayerSource _playerSource;
-  private tt_FloatSetting _autoAimSetting;
+  private tt_BoolSetting  _freelookSetting;
 }
 #+end_src
 
@@ -1046,23 +1041,23 @@ class tt_VerticalAimer : tt_WorldChanger
   let tag = "tt_VerticalAimer";
   let targetOriginSource = tt_OriginSourceMock.of();
   let playerSource       = tt_PlayerSourceMock.of();
-  let autoAimSetting     = tt_FloatSettingMock.of();
+  let freelookSetting    = tt_BoolSettingMock.of();
 
-  let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, autoAimSetting);
+  let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, freelookSetting);
+  let pawn  = players[consolePlayer].mo;
+  pawn.setOrigin((0, 0, 0), false);
+  console.printf("before: %f %f", pawn.angle, pawn.pitch);
 
-  let targetOrigin = tt_Origin.of((550, 500, 500));
-  let pawn         = players[consolePlayer].mo;
-  pawn.SetOrigin((0, 0, 0), false);
-
-  targetOriginSource.expect_getOrigin(targetOrigin);
+  targetOriginSource.expect_getOrigin(tt_Origin.of((0, 10, 20)));
   playerSource      .expect_getPawn(pawn);
-  autoAimSetting    .expect_getFloat(0);
+  freelookSetting   .expect_get(true);
 
   aimer.changeWorld();
 
+  console.printf("after: %f %f", pawn.angle, pawn.pitch);
   assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
   assertSatisfaction(playerSource.getSatisfaction(), tag);
-  assertSatisfaction(autoAimSetting.getSatisfaction(), tag);
+  assertSatisfaction(freelookSetting.getSatisfaction(), tag);
 }
 #+end_src
 
