@@ -929,15 +929,15 @@ class tt_HorizontalAimer : tt_WorldChanger
 
     vector3 myPosition    = pawn.pos;
     vector3 otherPosition = targetOrigin.getVector();
-    double  angle         = AngleTo(myPosition.XY, otherPosition.XY);
+    double  angle         = angleTo(myPosition.XY, otherPosition.XY);
 
     pawn.A_SetAngle(angle, SPF_INTERPOLATE);
   }
 
-  private static double AngleTo(vector2 myPosition, vector2 otherPosition)
+  private static double angleTo(vector2 myPosition, vector2 otherPosition)
   {
-    vector2 xy = otherPosition - myPosition;
-    return vectorAngle(xy.x, xy.y);
+    vector2 diff = level.vec2Diff(myPosition, otherPosition);
+    return vectorAngle(diff.x, diff.y);
   }
 
   private tt_OriginSource _targetOriginSource;
@@ -1024,10 +1024,10 @@ class tt_VerticalAimer : tt_WorldChanger
     myPosition.z += pawn.Height / 2 + pawn.AttackZOffset;
 
     vector3 otherPosition = targetOrigin.getVector();
-    vector3 diff          = myPosition - otherPosition;
-    double  angle         = Atan2(diff.z, sqrt(diff.x * diff.x + diff.y * diff.y));
+    vector3 diff          = level.vec3Diff(myPosition, otherPosition);
+    double  pitch         = -atan2(diff.z, diff.xy.Length());
 
-    pawn.A_SetPitch(angle, SPF_INTERPOLATE);
+    pawn.a_SetPitch(pitch, SPF_INTERPOLATE);
   }
 
   private tt_OriginSource _targetOriginSource;
