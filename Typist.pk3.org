@@ -1038,7 +1038,7 @@ class tt_VerticalAimer : tt_WorldChanger
 
 #+begin_src c :noweb-ref test-body
 {
-  let tag = "tt_VerticalAimer";
+  let tag = "tt_VerticalAimer: freelook";
   let targetOriginSource = tt_OriginSourceMock.of();
   let playerSource       = tt_PlayerSourceMock.of();
   let freelookSetting    = tt_BoolSettingMock.of();
@@ -1050,6 +1050,22 @@ class tt_VerticalAimer : tt_WorldChanger
   targetOriginSource.expect_getOrigin(tt_Origin.of((0, 10, 20)));
   playerSource      .expect_getPawn(pawn);
   freelookSetting   .expect_get(true);
+
+  aimer.changeWorld();
+
+  assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
+  assertSatisfaction(playerSource.getSatisfaction(), tag);
+  assertSatisfaction(freelookSetting.getSatisfaction(), tag);
+}
+{
+  let tag = "tt_VerticalAimer: no freelook";
+  let targetOriginSource = tt_OriginSourceMock.of();
+  let playerSource       = tt_PlayerSourceMock.of();
+  let freelookSetting    = tt_BoolSettingMock.of();
+
+  let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, freelookSetting);
+
+  freelookSetting.expect_get(false);
 
   aimer.changeWorld();
 
