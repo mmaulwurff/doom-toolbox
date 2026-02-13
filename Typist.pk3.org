@@ -1046,7 +1046,6 @@ class tt_VerticalAimer : tt_WorldChanger
   let aimer = tt_VerticalAimer.of(targetOriginSource, playerSource, freelookSetting);
   let pawn  = players[consolePlayer].mo;
   pawn.setOrigin((0, 0, 0), false);
-  console.printf("before: %f %f", pawn.angle, pawn.pitch);
 
   targetOriginSource.expect_getOrigin(tt_Origin.of((0, 10, 20)));
   playerSource      .expect_getPawn(pawn);
@@ -1054,7 +1053,6 @@ class tt_VerticalAimer : tt_WorldChanger
 
   aimer.changeWorld();
 
-  console.printf("after: %f %f", pawn.angle, pawn.pitch);
   assertSatisfaction(targetOriginSource.getSatisfaction(), tag);
   assertSatisfaction(playerSource.getSatisfaction(), tag);
   assertSatisfaction(freelookSetting.getSatisfaction(), tag);
@@ -4785,7 +4783,7 @@ class tt_FloatSetting abstract
 {
   abstract bool isDefined();
 
-  abstract double getFloat();
+  abstract double get();
 }
 #+end_src
 
@@ -4799,7 +4797,7 @@ class tt_FloatSettingMock : tt_FloatSetting
 
   mixin tt_Mock;
   <<mock-method("bool",   "isDefined")>>
-  <<mock-method("double", "getFloat" )>>
+  <<mock-method("double", "get")>>
 }
 #+end_src
 
@@ -4901,7 +4899,7 @@ class tt_FloatCvar : tt_FloatSetting
   }
 
   override bool   isDefined() { return (_cvar != NULL); }
-  override double getFloat()  { return _cvar.getFloat(); }
+  override double get() { return _cvar.getFloat(); }
 
   private Cvar _cvar;
 }
