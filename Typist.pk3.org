@@ -909,29 +909,28 @@ class tt_VelocityStorage : Inventory
 // Implements tt_WorldChanger interface by rotating the player.
 class tt_HorizontalAimer : tt_WorldChanger
 {
-  static tt_HorizontalAimer of(tt_OriginSource targetOriginSource, tt_PlayerSource playerSource)
+  static tt_HorizontalAimer of(tt_OriginSource targetOriginSource,
+                               tt_PlayerSource playerSource)
   {
     let result = new("tt_HorizontalAimer");
-
     result._targetOriginSource = targetOriginSource;
     result._playerSource       = playerSource;
-
     return result;
   }
 
   override void changeWorld()
   {
     let targetOrigin = _targetOriginSource.getOrigin();
-    if (targetOrigin == NULL) { return; }
+    if (targetOrigin == NULL) return;
 
     let pawn = _playerSource.getPawn();
-    if (pawn == NULL) { return; }
+    if (pawn == NULL) return;
 
     vector3 myPosition    = pawn.pos;
     vector3 otherPosition = targetOrigin.getVector();
     double  angle         = angleTo(myPosition.XY, otherPosition.XY);
 
-    pawn.A_SetAngle(angle, SPF_INTERPOLATE);
+    pawn.a_SetAngle(angle, SPF_INTERPOLATE);
   }
 
   private static double angleTo(vector2 myPosition, vector2 otherPosition)
@@ -944,6 +943,8 @@ class tt_HorizontalAimer : tt_WorldChanger
   private tt_PlayerSource _playerSource;
 }
 #+end_src
+
+*** Test
 
 #+begin_src c :noweb-ref test-body
 {
@@ -1035,6 +1036,8 @@ class tt_VerticalAimer : tt_WorldChanger
   private tt_BoolSetting  _freelookSetting;
 }
 #+end_src
+
+*** Test
 
 #+begin_src c :noweb-ref test-body
 {
