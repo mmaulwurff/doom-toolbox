@@ -826,7 +826,7 @@ class tt_ProjectileSpeedController : tt_WorldChanger
 
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
     vector3 x10             = projectile.pos - playerPos;
-    vector3 prod            = tt_Math.crossProduct(vel, x10);
+    vector3 prod            = vel cross x10;
     double  lineDistance    = prod.length() / vel.length();
     double  hitDistance     = playerRadius + projectile.radius;
     bool    willTouchPlayer = (hitDistance >= lineDistance);
@@ -3474,15 +3474,6 @@ class tt_Math
     bool   inRange  = distance < MAX_DISTANCE;
 
     return inRange;
-  }
-
-  static vector3 crossProduct(vector3 u, vector3 v)
-  {
-    vector3 result;
-    result.x = u.y * v.z - u.z * v.y;
-    result.y = u.z * v.x - u.x * v.z;
-    result.z = u.x * v.y - u.y * v.x;
-    return result;
   }
 
   // Max effective distance.
