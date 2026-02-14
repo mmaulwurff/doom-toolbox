@@ -1,6 +1,7 @@
-personal_ws-1.1 en 103 
+personal_ws-1.1 en 106 
 CVar
 Cacowards
+Ctrl
 Cvar
 Cvarinfo
 Cvars
@@ -11,6 +12,7 @@ GL
 GLES
 GPL
 GZDoom
+Guncaster
 HtmlAll
 Http
 IWAD
@@ -26,6 +28,7 @@ Randomizer
 SPDX
 StringUtils
 TODO
+UZDoom
 VM
 ZScript
 Zandronum

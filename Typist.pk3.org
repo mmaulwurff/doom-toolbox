@@ -21,14 +21,14 @@ mode, instead of aiming and firing, you type. What to type is displayed on scree
 When what you type matches with an enemy, Typist.pk3 aims and fires for you. The
 match is checked when you press Space or Enter key, and there is an option to match
 immediately. If matching with Space or Enter is chosen, Space or Enter can be held to
-fire continuously.
+fire continuously. Press Ctrl-Backspace to erase all input.
 
 The Combat mode ends automatically when there are no enemies, or can be disabled
 manually with ~Esc~ key. Disabling the Combat mode manually locks the game into
 Exploration mode. The automatic mode switching can be enabled back with a key
 (configured in Controls section).
 
-To accomodate the slower pace of the game, the game is automatically changed:
+To accommodate the slower pace of the game, the game is automatically changed:
 - enemies move slower
 - weapons damage is increased
 - projectiles that fly towards the player move slower
@@ -39,17 +39,18 @@ To accomodate the slower pace of the game, the game is automatically changed:
 - several predefined lessons:
   - 1000 English words
   - random characters (configurable)
-  - arithmetics
+  - arithmetic operations
   - custom words (a text file named ~typist_custom_text.txt~ with your words can be
     loaded together with Typist.pk3)
 - "Pass-through" command (~/pass~ by default): after you enter this command, the
   following keyboard key acts like in normal game, so you can switch weapons, move
   and do other actions while remaining in Combat mode
-- Ctrl-Backspace to erase all input
 - scoring, with high scores table
 - options to enable infinite ammo, to disable enemy infighting, and to configure the
   HUD
 - several sound themes for Typist.pk3 events (can be turned off)
+- configurable colors: copy ~tt_colors.zs~, edit values, and load it together with
+  Typist.pk3
 - multiplayer
 
 ** Key setup
