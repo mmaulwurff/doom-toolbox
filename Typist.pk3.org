@@ -56,7 +56,9 @@ To accommodate the slower pace of the game, the game is automatically changed:
 ** Key setup
 
 Typist.pk3 doesn't require any special key setup. However, for smoother experience,
-it may be worth playing keyboard-only with the following assigned keys:
+it may be worth playing keyboard-only with the following assigned keys. This way,
+you'll waste no time switching from mouse to keyboard and back, and your fingers are
+almost at the right typing position.
 
 - E - move forward
 - S - strafe left
@@ -66,9 +68,6 @@ it may be worth playing keyboard-only with the following assigned keys:
 - J - turn left
 - K - turn around
 - L - turn right
-
-This way, you'll waste no time switching from mouse to keyboard and back, and your
-fingers are almost at the right typing position.
 
 ** Compatibility
 
