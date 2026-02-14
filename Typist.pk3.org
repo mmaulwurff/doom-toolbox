@@ -7323,7 +7323,7 @@ class tt_Satisfaction
 }
 #+end_src
 
-** Mock Macro
+** Mock Macro :noexport:
 
 #+begin_src c :tangle build/Typist.pk3Test/zscript/mocks.zs
 
