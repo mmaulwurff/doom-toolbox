@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
 #+title: Typist.pk3
-#+version: v0.8.0-beta
+# #+version: v0.8.0-beta
 
 * About
 
