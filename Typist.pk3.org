@@ -13,12 +13,75 @@ SPDX-License-Identifier: BSD-3-Clause
 
 Typist.pk3 turns FPS games into typing exercises.
 
-TODO: add instructions.
+** How to play
+
+The default game mode is Exploration. It is like normal game play, except when you
+find enemies. When there are enemies, the game switches to Combat mode. In Combat
+mode, instead of aiming and firing, you type. What to type is displayed on screen.
+When what you type matches with an enemy, Typist.pk3 aims and fires for you. The
+match is checked when you press Space or Enter key, and there is an option to match
+immediately. If matching with Space or Enter is chosen, Space or Enter can be held to
+fire continuously.
+
+The Combat mode ends automatically when there are no enemies, or can be disabled
+manually with ~Esc~ key. Disabling the Combat mode manually locks the game into
+Exploration mode. The automatic mode switching can be enabled back with a key
+(configured in Controls section).
+
+To accomodate the slower pace of the game, the game is automatically changed:
+- enemies move slower
+- weapons damage is increased
+- projectiles that fly towards the player move slower
+- the player cannot die, only lose health only down to 1 point (can be disabled)
+
+** Features
+
+- several predefined lessons:
+  - 1000 English words
+  - random characters (configurable)
+  - arithmetics
+  - custom words (a text file named ~typist_custom_text.txt~ with your words can be
+    loaded together with Typist.pk3)
+- "Pass-through" command (~/pass~ by default): after you enter this command, the
+  following keyboard key acts like in normal game, so you can switch weapons, move
+  and do other actions while remaining in Combat mode
+- Ctrl-Backspace to erase all input
+- scoring, with high scores table
+- options to enable infinite ammo, to disable enemy infighting, and to configure the
+  HUD
+- several sound themes for Typist.pk3 events (can be turned off)
+- multiplayer
+
+** Key setup
+
+Typist.pk3 doesn't require any special key setup. However, for smoother experience,
+it may be worth playing keyboard-only with the following assigned keys:
+
+- E - move forward
+- S - strafe left
+- D - move backward
+- F - strafe right
+- I - center view
+- J - turn left
+- K - turn around
+- L - turn right
+
+This way, you'll waste no time switching from mouse to keyboard and back, and your
+fingers are almost at the right typing position.
 
 ** Compatibility
 
+Typist.pk3 isn't coded specifically for any game, so there is a chance it is
+compatible with many GZDoom/UZDoom mods and games.
+
+- Typist.pk3 probably won't play well with mods and games which rely on melee combat,
+  because Typist.pk3 will only aim and fire, not move.
 - Actors that are normally friendly, but changed their friendliness by scripts, don't
   count as targets.
+- Guncaster and Guncaster Vindicated are not compatible with Typist.pk3. Reason:
+  Guncaster reads player input directly from player, so weapon firing cannot be
+  emulated like for other mods. Guncaster support cannot be added without
+  modifications in Guncaster or GZDoom.
 
 * License :noexport:
 
@@ -1002,6 +1065,7 @@ class tt_HorizontalAimer : tt_WorldChanger
 
 // Implements tt_WorldChanger interface by adjusting the player pitch
 // (horizontal angle). If freelook is disabled, no pitch adjustment is done.
+// TODO: fix when is an enemy is visible, but its middle is not.
 class tt_VerticalAimer : tt_WorldChanger
 {
   static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
