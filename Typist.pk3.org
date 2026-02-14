@@ -1197,6 +1197,7 @@ class tt_PassThrough : tt_Activatable
     let result = new("tt_PassThrough");
     result._inputManager = passThroughInputManager;
     result._passThroughSetting = passThroughSetting;
+    result._commands = tt_Strings.ofOne("");
     return result;
   }
 
@@ -1207,7 +1208,8 @@ class tt_PassThrough : tt_Activatable
 
   override tt_Strings getCommands()
   {
-    return tt_Strings.ofOne(_passThroughSetting.get());
+    _commands.set(0, _passThroughSetting.get());
+    return _commands;
   }
 
   override bool isVisible()
@@ -1217,6 +1219,7 @@ class tt_PassThrough : tt_Activatable
 
   private tt_PassThroughInputManager _inputManager;
   private tt_StringSetting _passThroughSetting;
+  private tt_Strings       _commands;
 }
 
 #+end_src
@@ -1241,6 +1244,7 @@ class tt_CommandDispatcher : tt_Activatable
     result._answerReporter    = answerReporter;
     result._answerStateSource = answerStateSource;
     result._fastConfirmation  = fastConfirmation;
+    result._commands          = tt_Strings.of();
 
     return result;
   }
@@ -1248,7 +1252,7 @@ class tt_CommandDispatcher : tt_Activatable
   override void activate()
   {
     let answerState = _answerStateSource.getAnswerState();
-    if (!answerState.isReady() && !_fastConfirmation.get()) return;
+    if (!tt_AnswerState.isReady(answerState) && !_fastConfirmation.get()) return;
 
     let answer       = _answerSource.getAnswer();
     let answerString = answer.getString();
@@ -1269,7 +1273,7 @@ class tt_CommandDispatcher : tt_Activatable
 
   override tt_Strings getCommands()
   {
-    let result = tt_Strings.of();
+    _commands.clear();
 
     foreach (activatable : _activatables)
     {
@@ -1279,10 +1283,10 @@ class tt_CommandDispatcher : tt_Activatable
 
       uint nCommands = commands.size();
       for (uint c = 0; c < nCommands; ++c)
-        result.add(commands.at(c));
+        _commands.add(commands.at(c));
     }
 
-    return result;
+    return _commands;
   }
 
   override bool isVisible()
@@ -1315,6 +1319,7 @@ class tt_CommandDispatcher : tt_Activatable
   private tt_AnswerReporter     _answerReporter;
   private tt_AnswerStateSource  _answerStateSource;
   private tt_BoolSetting        _fastConfirmation;
+  private tt_Strings            _commands;
 }
 #+end_src
 
@@ -1336,8 +1341,7 @@ class tt_CommandDispatcher : tt_Activatable
   env.activatable2.expect_getCommands(commands2);
   env.activatable2.expect_activate();
   env.answerReporter.expect_reportMatch();
-  env.answerStateSource
-    .expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
+  env.answerStateSource.expect_getAnswerState(tt_AnswerState.Ready);
   env.answerStateSource.expect_reset();
   env.answerSource.expect_reset();
 
@@ -1725,13 +1729,6 @@ class tt_PlayerInputTestEnvironment
 // See tt_Answer class.
 class tt_AnswerState
 {
-  static tt_AnswerState of(int state)
-  {
-    let result = new("tt_AnswerState");
-    result._state = state;
-    return result;
-  }
-
   enum _
   {
     Unknown,
@@ -1740,22 +1737,8 @@ class tt_AnswerState
     Finished
   }
 
-  bool isReady() const
-  {
-    return (_state >= Ready);
-  }
-
-  bool isFinished() const
-  {
-    return (_state == Finished);
-  }
-
-  bool isEqual(tt_AnswerState other)
-  {
-    return _state == other._state;
-  }
-
-  private int _state;
+  static bool isReady(int state) { return state >= Ready; }
+  static bool isFinished(int state) { return state == Finished; }
 }
 #+end_src
 
@@ -1766,7 +1749,8 @@ class tt_AnswerState
 // This interface provides access to tt_AnswerState.
 class tt_AnswerStateSource : tt_KeyProcessor abstract
 {
-  abstract tt_AnswerState getAnswerState();
+  // Returns value from tt_AnswerState.
+  abstract int getAnswerState();
 
   abstract void reset();
 }
@@ -1781,7 +1765,7 @@ class tt_AnswerStateSourceMock : tt_AnswerStateSource
   static tt_AnswerStateSourceMock of() { return new("tt_AnswerStateSourceMock"); }
 
   mixin tt_Mock;
-  <<mock-method("tt_AnswerState", "getAnswerState")>>
+  <<mock-method("int",  "getAnswerState")>>
   <<mock-method("void", "reset")>>
   <<mock-method("void", "processKey", "tt_Character character")>>
 }
@@ -1819,9 +1803,9 @@ class tt_PressedAnswerState : tt_AnswerStateSource
     }
   }
 
-  override tt_AnswerState getAnswerState()
+  override int getAnswerState()
   {
-    return tt_AnswerState.of(_answerState);
+    return _answerState;
   }
 
   override void reset()
@@ -2572,6 +2556,8 @@ class tt_KnownTargets
     if (index != size()) { _targets.Delete(index); }
   }
 
+  void clear() { _targets.clear(); }
+
   // Searches for a target with a particular id.
   // Returns index on success, the total number of targets on failure.
   private uint find(tt_Target target) const
@@ -2680,11 +2666,13 @@ class tt_TargetRegistry : tt_KnownTargetSource
   {
     let result = new("tt_TargetRegistry");
 
-    result._targetSource         = targetSource;
+    result._targetSource = targetSource;
     result._lesson       = lesson;
     result._disabledTargetSource = disabledTargetSource;
 
     result._registry = tt_KnownTargets.of();
+    result._newKnownTargets = tt_KnownTargets.of();
+    result._pruned = tt_KnownTargets.of();
 
     return result;
   }
@@ -2718,8 +2706,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
   // Optimization possible.
   private void merge(tt_Targets targets)
   {
-    uint nTargets        = targets.size();
-    let  newKnownTargets = tt_KnownTargets.of();
+    uint nTargets = targets.size();
 
     for (uint i = 0; i < nTargets; ++i)
     {
@@ -2731,13 +2718,12 @@ class tt_TargetRegistry : tt_KnownTargetSource
         let knownTarget = makeKnownTarget(target);
 
         if (knownTarget != NULL)
-        {
-          newKnownTargets.add(knownTarget);
-        }
+          _newKnownTargets.add(knownTarget);
       }
     }
 
-    _registry.addMany(newKnownTargets);
+    _registry.addMany(_newKnownTargets);
+    _newKnownTargets.clear();
   }
 
   // Given that tt_KnownTargets.remove() is at least O(n), this function is
@@ -2768,8 +2754,6 @@ class tt_TargetRegistry : tt_KnownTargetSource
 
   private void pruneNulls()
   {
-    let pruned = tt_KnownTargets.of();
-
     uint nTargets = _registry.size();
     for (uint i = 0; i < nTargets; ++i)
     {
@@ -2777,12 +2761,13 @@ class tt_TargetRegistry : tt_KnownTargetSource
       let targetActor = target.getActor();
 
       if (targetActor != NULL)
-      {
-        pruned.add(_registry.at(i));
-      }
+        _pruned.add(_registry.at(i));
     }
 
-    _registry = pruned;
+    tt_KnownTargets temp = _registry;
+    _registry = _pruned;
+    _pruned   = temp;
+    _pruned.clear();
   }
 
   private tt_TargetSource   _targetSource;
@@ -2790,6 +2775,8 @@ class tt_TargetRegistry : tt_KnownTargetSource
   private tt_TargetSource   _disabledTargetSource;
 
   private tt_KnownTargets _registry;
+  private tt_KnownTargets _newKnownTargets;
+  private tt_KnownTargets _pruned;
 }
 #+end_src
 
@@ -2938,7 +2925,6 @@ class tt_TargetRegistryTestEnvironment
 #+begin_src c :tangle build/Typist.pk3/zscript/tt_known_target.zs
 
 // Implements tt_KnownTargetSource by providing only targets visible to player.
-// Doesn't cache.
 class tt_VisibleKnownTargetSource : tt_KnownTargetSource
 {
   static tt_VisibleKnownTargetSource of(tt_KnownTargetSource base,
@@ -2947,13 +2933,15 @@ class tt_VisibleKnownTargetSource : tt_KnownTargetSource
     let result = new("tt_VisibleKnownTargetSource");
     result._base = base;
     result._playerSource = playerSource;
+    result._targets = tt_KnownTargets.of();
     return result;
   }
 
   override tt_KnownTargets getTargets() const
   {
-    let result = tt_KnownTargets.of();
-    if (_base.isEmpty()) return result;
+    _targets.clear();
+
+    if (_base.isEmpty()) return _targets;
 
     let  pawn        = _playerSource.getPawn();
     let  baseTargets = _base.getTargets();
@@ -2962,10 +2950,10 @@ class tt_VisibleKnownTargetSource : tt_KnownTargetSource
     for (uint i = 0; i < targetCount; ++i)
     {
       let target = baseTargets.at(i);
-      if (isVisible(target, pawn)) result.add(target);
+      if (isVisible(target, pawn)) _targets.add(target);
     }
 
-    return result;
+    return _targets;
   }
 
   override bool isEmpty() const
@@ -2991,6 +2979,7 @@ class tt_VisibleKnownTargetSource : tt_KnownTargetSource
 
   private tt_KnownTargetSource _base;
   private tt_PlayerSource _playerSource;
+  private tt_KnownTargets _targets;
 }
 #+end_src
 
@@ -4102,6 +4091,7 @@ class tt_Origin
   }
 
   vector3 getVector() const { return _pos; }
+  void setVector(vector3 value) { _pos = value; }
 
   private vector3 _pos;
 }
@@ -4242,9 +4232,8 @@ class tt_PlayerOriginSource : tt_OriginSource
   static tt_PlayerOriginSource of(tt_PlayerSource playerSource)
   {
     let result = new("tt_PlayerOriginSource");
-
     result._playerSource = playerSource;
-
+    result._origin = tt_Origin.of((0, 0, 0));
     return result;
   }
 
@@ -4254,10 +4243,12 @@ class tt_PlayerOriginSource : tt_OriginSource
     let pos  = pawn.pos;
     pos.z += pawn.height / 2;
 
-    return tt_Origin.of(pos);
+    _origin.setVector(pos);
+    return _origin;
   }
 
   private tt_PlayerSource _playerSource;
+  private tt_Origin       _origin;
 }
 #+end_src
 
@@ -4315,7 +4306,7 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
     if (answer == NULL) { return NULL; }
 
     let answerState = _answerStateSource.getAnswerState();
-    if (!answerState.isReady()) { return NULL; }
+    if (!tt_AnswerState.isReady(answerState)) { return NULL; }
 
     let result = findMatchedTarget(targets, answer);
 
@@ -4421,7 +4412,7 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
 
   let answer = tt_Answer.of("abc");
   env.answerSource.expect_getAnswer(answer);
-  env.stateSource.expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
+  env.stateSource.expect_getAnswerState(tt_AnswerState.Ready);
 
   let origin = env.matcher.getOrigin();
 
@@ -4445,7 +4436,7 @@ class tt_QuestionAnswerMatcher : tt_OriginSource
 
   let answer = tt_Answer.of("abc");
   env.answerSource.expect_getAnswer(answer);
-  env.stateSource.expect_getAnswerState(tt_AnswerState.of(tt_AnswerState.Ready));
+  env.stateSource.expect_getAnswerState(tt_AnswerState.Ready);
 
   let origin = env.matcher.getOrigin();
 
@@ -4720,7 +4711,7 @@ class tt_Match : tt_Question
     return getColoredMatch(_answer, answer);
   }
 
-  private static string getColoredMatch(string origin, string matched)
+  static string getColoredMatch(string origin, string matched)
   {
     string result;
 
@@ -5201,6 +5192,11 @@ class tt_Strings
     return _strings[i];
   }
 
+  void set(uint i, string value)
+  {
+    _strings[i] = value;
+  }
+
   bool contains(String str) const
   {
     uint foundIndex = _strings.Find(str);
@@ -5213,6 +5209,8 @@ class tt_Strings
   {
     _strings.push(str);
   }
+
+  void clear() { _strings.clear(); }
 
   private Array<String> _strings;
 }
@@ -5251,9 +5249,8 @@ class tt_Target
   static tt_Target of(Actor a)
   {
     let result = new("tt_Target");
-
     result._actor = a;
-
+    result._origin = tt_Origin.of((0, 0, 0));
     return result;
   }
 
@@ -5263,9 +5260,8 @@ class tt_Target
     vector3 position = _actor.pos;
     position.z += _actor.height / 2;
 
-    let result = tt_Origin.of(position);
-
-    return result;
+    _origin.setVector(position);
+    return _origin;
   }
 
   bool isEqual(tt_Target other) const
@@ -5278,7 +5274,8 @@ class tt_Target
     return _actor;
   }
 
-  private Actor _actor;
+  private Actor     _actor;
+  private tt_Origin _origin;
 }
 #+end_src
 
@@ -5304,6 +5301,8 @@ class tt_Targets
 
   // Adds a target to this list.
   void add(tt_Target target) { _targets.push(target); }
+
+  void clear() { _targets.clear(); }
 
   // Searches for a target with a particular id.
   // Returns index on success, the total number of targets on failure.
@@ -5355,15 +5354,14 @@ class tt_TargetRadar : tt_TargetSource
   static tt_TargetRadar of(tt_OriginSource originSource)
   {
     let result = new("tt_TargetRadar");
-
     result._originSource = originSource;
-
+    result._targets      = tt_Targets.of();
     return result;
   }
 
   override tt_Targets getTargets()
   {
-    let result = tt_Targets.of();
+    _targets.clear();
 
     let origin = _originSource.getOrigin().getVector();
 
@@ -5372,12 +5370,10 @@ class tt_TargetRadar : tt_TargetSource
     while (a = Actor(iterator.Next()))
     {
       if (tt_Math.isInEffectiveRange(a.pos, origin) && isSuitableForTargeting(a))
-      {
-        result.add(tt_Target.of(a));
-      }
+        _targets.add(tt_Target.of(a));
     }
 
-    return result;
+    return _targets;
   }
 
   private static bool isSuitableForTargeting(Actor anActor)
@@ -5392,6 +5388,7 @@ class tt_TargetRadar : tt_TargetSource
   }
 
   private tt_OriginSource _originSource;
+  private tt_Targets      _targets;
 }
 #+end_src
 
@@ -5504,26 +5501,28 @@ class tt_DeathReporter : tt_TargetSource
   static tt_DeathReporter of()
   {
     let result = new("tt_DeathReporter");
-
-    result._targets = tt_Targets.of();
-
+    result._accumulatedTargets = tt_Targets.of();
+    result._resultTargets      = tt_Targets.of();
     return result;
   }
 
   void reportDead(Actor thing)
   {
     let newDisabled = tt_Target.of(thing);
-    _targets.add(newDisabled);
+    _accumulatedTargets.add(newDisabled);
   }
 
   override tt_Targets getTargets()
   {
-    let result = _targets;
-    _targets = tt_Targets.of();
-    return result;
+    tt_Targets temp = _resultTargets;
+    _resultTargets = _accumulatedTargets;
+    _accumulatedTargets = temp;
+    _accumulatedTargets.clear();
+    return _resultTargets;
   }
 
-  private tt_Targets _targets;
+  private tt_Targets _accumulatedTargets;
+  private tt_Targets _resultTargets;
 }
 #+end_src
 
@@ -5596,6 +5595,7 @@ class tt_TargetSourcePruner : tt_TargetSource
   {
     let result = new("tt_TargetSourcePruner");
     result._targetSource = targetSource;
+    result._targets = tt_Targets.of();
     return result;
   }
 
@@ -5603,22 +5603,21 @@ class tt_TargetSourcePruner : tt_TargetSource
   {
     let targets = _targetSource.getTargets();
 
-    tt_Targets result = tt_Targets.of();
+    _targets.clear();
 
     uint nTargets = targets.size();
     for (uint i = 0; i < nTargets; ++i)
     {
       tt_Target target = targets.at(i);
       if (target.getActor() != NULL)
-      {
-        result.add(target);
-      }
+        _targets.add(target);
     }
 
-    return result;
+    return _targets;
   }
 
   private tt_TargetSource _targetSource;
+  private tt_Targets      _targets;
 }
 #+end_src
 
@@ -5714,6 +5713,8 @@ class tt_TargetWidgets
 
   void set(uint i, tt_TargetWidget widget)  { _widgets[i] = widget; }
 
+  void clear() { _widgets.clear(); }
+
   private Array<tt_TargetWidget> _widgets;
 }
 #+end_src
@@ -5751,6 +5752,8 @@ class tt_Projector : tt_TargetWidgetSource
     result._glProjection = new("tt_le_GlScreen");
     result._swProjection = new("tt_le_SwScreen");
 
+    result._widgets = tt_TargetWidgets.of();
+
     return result;
   }
 
@@ -5758,7 +5761,6 @@ class tt_Projector : tt_TargetWidgetSource
   {
     let targets = _knownTargetSource.getTargets();
     let info    = _playerSource.getInfo();
-    let result  = tt_TargetWidgets.of();
 
     prepareProjection();
 
@@ -5770,6 +5772,7 @@ class tt_Projector : tt_TargetWidgetSource
     tt_le_Viewport viewport;
     viewport.FromHud();
 
+    _widgets.clear();
     uint nTargets = targets.size();
     for (uint i = 0; i < nTargets; ++i)
     {
@@ -5789,11 +5792,11 @@ class tt_Projector : tt_TargetWidgetSource
       if (isPositionSuccessful)
       {
         let widget = tt_TargetWidget.of(target, position);
-        result.add(widget);
+        _widgets.add(widget);
       }
     }
 
-    return result;
+    return _widgets;
   }
 
   // Calculates the screen position (draw position).
@@ -5839,6 +5842,8 @@ class tt_Projector : tt_TargetWidgetSource
   private transient bool _isInitialized;
 
   private tt_IntCvar _cvarRenderer;
+
+  private tt_TargetWidgets _widgets;
 }
 #+end_src
 
@@ -5875,6 +5880,8 @@ class tt_SorterByDistance : tt_TargetWidgetSource
 
   static tt_TargetWidgets sort(tt_TargetWidgets widgets, vector3 origin)
   {
+    if (widgets.size() == 0) return widgets;
+
     let result    = widgets;
     let workplace = widgets.copy();
 
@@ -6081,17 +6088,15 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
   static tt_TargetWidgetRegistry of(tt_TargetWidgetSource source)
   {
     let result = new("tt_TargetWidgetRegistry");
-
-    result._source   = source;
-    result._registry = tt_TargetWidgets.of();
-
+    result._source      = source;
+    result._registry    = tt_TargetWidgets.of();
+    result._newRegistry = tt_TargetWidgets.of();
     return result;
   }
 
   override tt_TargetWidgets getWidgets(RenderEvent event)
   {
     let widgets     = _source.getWidgets(event);
-    let newRegistry = tt_TargetWidgets.of();
 
     uint nWidgets = widgets.size();
     for (uint i = 0; i < nWidgets; ++i)
@@ -6102,11 +6107,11 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
 
       if (existing == NULL)
       {
-        newRegistry.add(widget);
+        _newRegistry.add(widget);
       }
       else
       {
-        newRegistry.add(existing);
+        _newRegistry.add(existing);
         let newPosition      = widget.getPosition();
         let existingPosition = existing.getPosition();
         let middle           = (newPosition * 0.3 + existingPosition * 0.7);
@@ -6115,13 +6120,17 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
     }
 
     // Widgets that are not new or not updated are thrown away.
-    _registry = newRegistry;
+    tt_TargetWidgets temp = _registry;
+    _registry    = _newRegistry;
+    _newRegistry = temp;
+    _newRegistry.clear();
 
     return _registry;
   }
 
   private tt_TargetWidgetSource _source;
   private tt_TargetWidgets      _registry;
+  private tt_TargetWidgets      _newRegistry;
 }
 #+end_src
 
@@ -6409,8 +6418,7 @@ class tt_InfoPanel : tt_View
     for (uint c = 0; c < commandCount; ++c)
     {
       let  command        = commands.at(c);
-      let  question       = tt_Match.of(command, command);
-      let  hintedAnswer   = question.getHintFor(answer);
+      let  hintedAnswer   = tt_Match.getColoredMatch(command, answer);
       let [width, height] = tt_Drawing.getBoxSize(command, hintedAnswer, scale);
       bool isCentered     = targetCount == 0 && c == 0;
       let  x              = isCentered ? halfScreen - width / 2 : xLeft - width;
@@ -6742,18 +6750,17 @@ class tt_AnswerResetter : tt_Effect
                               tt_AnswerSource      answerSource)
   {
     let result = new("tt_AnswerResetter");
-
     result._answerStateSource = answerStateSource;
     result._answerSource      = answerSource;
-    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
-
+    result._oldAnswerState    = tt_AnswerState.Unknown;
     return result;
   }
 
   override void doEffect()
   {
     let newAnswerState = _answerStateSource.getAnswerState();
-    if (!_oldAnswerState.isFinished() && newAnswerState.isFinished())
+    if (!tt_AnswerState.isFinished(_oldAnswerState)
+        && tt_AnswerState.isFinished(newAnswerState))
     {
       _answerStateSource.reset();
       _answerSource.reset();
@@ -6765,7 +6772,7 @@ class tt_AnswerResetter : tt_Effect
   private tt_AnswerStateSource _answerStateSource;
   private tt_AnswerSource      _answerSource;
 
-  private tt_AnswerState _oldAnswerState;
+  private int _oldAnswerState;
 }
 #+end_src
 
@@ -6788,7 +6795,7 @@ class tt_MatchWatcher : tt_Effect
     result._answerStateSource = answerStateSource;
     result._answerReporter    = answerReporter;
     result._originSource      = originSource;
-    result._oldAnswerState    = tt_AnswerState.of(tt_AnswerState.Unknown);
+    result._oldAnswerState    = tt_AnswerState.Unknown;
 
     return result;
   }
@@ -6796,7 +6803,8 @@ class tt_MatchWatcher : tt_Effect
   override void doEffect()
   {
     let newAnswerState = _answerStateSource.getAnswerState();
-    if (!_oldAnswerState.isReady() && newAnswerState.isReady())
+    if (!tt_AnswerState.isReady(_oldAnswerState)
+        && tt_AnswerState.isReady(newAnswerState))
     {
       let isMatched = (_originSource.getOrigin() != NULL);
       if (isMatched)
@@ -6816,7 +6824,7 @@ class tt_MatchWatcher : tt_Effect
   private tt_AnswerReporter    _answerReporter;
   private tt_OriginSource      _originSource;
 
-  private tt_AnswerState _oldAnswerState;
+  private int  _oldAnswerState;
 }
 #+end_src
 
