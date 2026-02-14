@@ -9,9 +9,16 @@ SPDX-License-Identifier: BSD-3-Clause
 #+title: Typist.pk3
 # #+version: v0.7.4
 
+* About
+
 Typist.pk3 turns FPS games into typing exercises.
 
 TODO: add instructions.
+
+** Compatibility
+
+- Actors that are normally friendly, but changed their friendliness by scripts, don't
+  count as targets.
 
 * License :noexport:
 
@@ -5373,23 +5380,15 @@ class tt_TargetRadar : tt_TargetSource
     return result;
   }
 
-  private static bool isSuitableForTargeting(Actor a)
+  private static bool isSuitableForTargeting(Actor anActor)
   {
-    bool isMonster    = a.bIsMonster;
-    bool isAlive      = (a.Health > 0);
-    bool isFriendly   = a.bFriendly;
-    bool isMissile    = a.bMissile;
-    bool isDamageable = !a.bNoDamage;
-    bool isNoDamage   = (a.Damage == 0);
-    bool isMissileSuitable = false;
-    bool isSuitable   = (  (  (isMonster && isDamageable)
-                           || (isMissile && !isNoDamage && isMissileSuitable)
-                           )
-                        && isAlive
-                        && !isFriendly
-                        );
+    bool isMonster    = anActor.bIsMonster;
+    bool isDamageable = !anActor.bNoDamage;
+    bool isAlive      = anActor.Health > 0;
+    bool isFriendly   = anActor.bFriendly;
+    bool wasFriendly  = getDefaultByType(anActor.getClass()).bFriendly;
 
-    return isSuitable;
+    return isMonster && isDamageable && isAlive && !isFriendly && !wasFriendly;
   }
 
   private tt_OriginSource _originSource;
