@@ -1,9 +1,15 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+name: GPL
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
 
 #+title: FinalCustomDoom
 # #+version: v1.0.0-beta
+
+* About
 
 Final Custom Doom provides gameplay customization. It can be used to increase or
 decrease the difficulty in various ways.
@@ -17,11 +23,6 @@ Final Custom Doom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Do
 * License
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-#+name: GPL
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
 
 #+begin_src c :tangle build/FinalCustomDoom/menudef.txt :exports none
 // <<GPL>>
@@ -704,14 +705,6 @@ cd_Player = "Игрок";
 #+end_src
 @@html:</details>@@
 :end:
-
-* Acknowledgments
-
-- Custom Doom base idea: Lud (Accensus),
-- help with developing Custom Doom: JudgeGroovy, Doctrine Dark, Zhs2, Beed28,
-  FaggoStorm, Phantom Allies, FoxBoy, Eruanna.
-- help with developing Ultimate Custom Doom: Beed28, przemko27, DabbingSquidward,
-  drogga (Commado Pen), Nems, HexFlareheart, kondoriyano, Spaceman333, ghost.
 
 * Implementation details
 
