@@ -9,6 +9,8 @@ SPDX-License-Identifier: GPL-3.0-only
 #+title: 10.5x
 # #+version: v0.11.1
 
+* About
+
 [[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
 Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the
@@ -563,7 +565,7 @@ class x5_Killer : Actor
 
   static vector3 makePosition(Actor watched)
   {
-    return watched.pos + (0, 0, watched.height * 1.5);
+    return level.vec3Offset(watched.pos, (0, 0, watched.height * 1.5));
   }
 
   private Actor mWatched;
