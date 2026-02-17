@@ -101,14 +101,17 @@ Known issues (for multiplier > 1):
 * ~x5_EventHandler~
 
 #+begin_src c :tangle build/10.5x/mapinfo.txt
+
 GameInfo { EventHandlers = "x5_EventHandler" }
 #+end_src
 
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
+
 server int x5_multiplier = 100;
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+
 class x5_EventHandler : EventHandler
 {
   // 1. Entry point.
@@ -384,10 +387,11 @@ class x5_EventHandler : EventHandler
   private Dictionary mTypeMultipliers;
   private Array<x5_SpawnPoint> mSpawnPoints;
   private x5_Freezer mFreezer;
-} // class x5_EventHandler
+}
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/x5_EventHandler.zs
+
 class x5_SpawnPoint
 {
   vector3 position;
@@ -401,6 +405,7 @@ class x5_SpawnPoint
 * ~x5_Freezer~
 
 #+begin_src c :tangle build/10.5x/zscript/x5_Freezer.zs
+
 class x5_Freezer play
 {
   static x5_Freezer init()
@@ -477,7 +482,7 @@ class x5_Freezer play
   private vector3 mVelocity; // to reset weapon bobbing.
   private double mGravity;
 
-} // class x5_Freezer
+}
 #+end_src
 
 * ~x5_WalkAbilityWatcher~
@@ -485,6 +490,7 @@ class x5_Freezer play
 This inventory item resets ~bThruActors~ flag if the actor is able to move without it.
 
 #+begin_src c :tangle build/10.5x/zscript/x5_WalkAbilityWatcher.zs
+
 class x5_WalkAbilityWatcher : Inventory
 {
   override void tick()
@@ -504,7 +510,7 @@ class x5_WalkAbilityWatcher : Inventory
 
     Super.tick();
   }
-} // class x5_WalkAbilityWatcher
+}
 #+end_src
 
 * ~x5_Killer~
@@ -514,10 +520,12 @@ a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is
 controlled by ~x5_raise_divided~ Cvar.
 
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
+
 server bool x5_raise_divided = false;
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/x5_Killer.zs
+
 class x5_Killer : Actor
 {
   Default
@@ -569,12 +577,13 @@ class x5_Killer : Actor
   }
 
   private Actor mWatched;
-} // class x5_Killer
+}
 #+end_src
 
 * ~language~
 
 #+begin_src c :tangle build/10.5x/language.txt
+
 // SPDX-FileCopyrightText: 2020 Blueberryy
 
 [enu default]
@@ -595,6 +604,7 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 ** ~OptionMenuItemX5Slider~
 
 #+begin_src text :tangle build/10.5x/menudef.txt
+
 AddOptionMenu OptionsMenu
 {
   X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1
@@ -602,6 +612,7 @@ AddOptionMenu OptionsMenu
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
+
 class OptionMenuItemX5Slider : OptionMenuItemSlider
 {
   OptionMenuItemX5Slider init(string label,
@@ -629,7 +640,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
   {
     mLabel = (val == 0) ? StringTable.localize("$X5_000").." 10.5x:" : "10.5x:";
   }
-} // class OptionMenuItemX5Slider
+}
 #+end_src
 
 * Type multipliers
@@ -637,6 +648,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 ** ~x5_TypeMultipliersMenu~
 
 #+begin_src text :tangle build/10.5x/menudef.txt
+
 OptionMenu "x5_TypeMultipliers"
 {
   Class "x5_TypeMultipliersMenu"
@@ -645,10 +657,12 @@ OptionMenu "x5_TypeMultipliers"
 #+end_src
 
 #+begin_src c :tangle build/10.5x/cvarinfo.txt
+
 nosave string x5_type_multipliers = "";
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+
 class x5_TypeMultipliersMenu : OptionMenu
 {
   override bool menuEvent(int mKey, bool fromController)
@@ -763,10 +777,11 @@ class x5_TypeMultipliersMenu : OptionMenu
   }
 
   private EventHandler mEventHandler;
-} // class x5_TypeMultipliersMenu
+}
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/x5_TypeMultipliersMenu.zs
+
 class x5_TypeSortElement
 {
   string mName;
@@ -779,6 +794,7 @@ class x5_TypeSortElement
 ** ~OptionMenuItemX5TypeSlider~
 
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
+
 class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 {
   void init(class<Actor> enemyClass, int value)
@@ -816,6 +832,7 @@ version <<zscript-version>>
 sprites/m8rda0.png: [[file:media/10.5x/sprites/m8rda0.png]]
 
 #+begin_src text :tangle build/tmp.txt :exports none
+
 <<tools/scripts.org:copy-media("10.5x")>>
 #+end_src
 
@@ -826,19 +843,23 @@ GameInfo { EventHandlers = "x5t_Test", "x5t_Quoter" }
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/cvarinfo.txt
+
 server string x5t_name  = "";
 server string x5t_spawn = "";
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs :exports none
+
 version <<zscript-version>>
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
+
 class x5t_Clematis : Clematis {}
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
+
 class x5t_Test : StaticEventHandler
 {
   override void onRegister() { setOrder(-1); }
@@ -909,11 +930,11 @@ class x5t_Test : StaticEventHandler
   }
 
   private Clematis mTest;
-
-} // class x5t_Test
+}
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
+
 class x5t_Quoter : EventHandler
 {
   static string quote(string input)
@@ -942,6 +963,7 @@ Doom monsters with radius 20:
 | ~WolfensteinSS~ |          |                                    |
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs
+
 // clang-format off
 class x5t_Archvile : Archvile {}
 class x5t_Revenant : Revenant {}
@@ -974,17 +996,20 @@ TODO: make multiplayer tests, maybe?
 
 #+name: init-wait
 #+begin_src elisp :exports none
+
 (setq wait-delay 0)
 ""
 #+end_src
 
 #+name: wait
 #+begin_src elisp :var new-delay=2 :exports none
+
 (setq wait-delay (+ new-delay wait-delay))
 (format "wait %d" wait-delay)
 #+end_src
 
 #+begin_src text :tangle build/10.5xTest/commands.txt
+
 <<init-wait()>>
 
 x5_multiplier 100
