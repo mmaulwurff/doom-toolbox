@@ -861,7 +861,7 @@ class x5t_Test : StaticEventHandler
 
   override void worldLoaded(WorldEvent event)
   {
-    int width  = getDefaultByType('DoomImp').radius * 2;
+    int width  = int(getDefaultByType('DoomImp').radius * 2);
     int yBegin = -2 * width;
     int yEnd   = 2 * width;
     int x      = 100;
