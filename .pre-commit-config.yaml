@@ -11,10 +11,8 @@ repos:
     hooks:
     -   id: check-added-large-files
     -   id: check-case-conflict
-    -   id: check-executables-have-shebangs
     -   id: check-illegal-windows-names
     -   id: check-merge-conflict
-    -   id: check-shebang-scripts-are-executable
     -   id: check-toml
     -   id: check-yaml
     -   id: end-of-file-fixer
@@ -30,6 +28,6 @@ repos:
 
 # https://reuse.software/
 -   repo: https://github.com/fsfe/reuse-tool
-    rev: v5.1.1
+    rev: v6.2.0
     hooks:
     -   id: reuse
