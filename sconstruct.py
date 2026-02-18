@@ -23,6 +23,8 @@ from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import run, PIPE, STDOUT
 
 import hashlib
+import reuse.project
+import reuse.report
 
 
 # General setup
@@ -130,7 +132,12 @@ def add_pack_target(org_file, main_target):
     foundVersion = search('^#[+]version: *(.*)$', project_content, flags=MULTILINE)
     version = foundVersion.group(1) if foundVersion != None else make_short_hash()
 
-    copytree('LICENSES', build_path/'LICENSES', dirs_exist_ok=True)
+    licenses_path = build_path/'LICENSES'
+    makedirs(licenses_path, exist_ok=True)
+    project = reuse.project.Project.from_directory(build_path)
+    for license in reuse.report.ProjectReport.generate(project).used_licenses:
+      copy('LICENSES/' + license + '.txt', licenses_path)
+
     copytree('documentation', build_path/'documentation', dirs_exist_ok=True)
     copy(org_file, build_path/org_file)
 
