@@ -31,3 +31,10 @@ repos:
     rev: v6.2.0
     hooks:
     -   id: reuse
+
+# https://docs.astral.sh/ruff/
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.1
+    hooks:
+    -   id: ruff-check
+    -   id: ruff-format
