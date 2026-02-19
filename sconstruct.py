@@ -18,7 +18,7 @@ from os import environ, makedirs, path
 from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
-from subprocess import run, PIPE, STDOUT
+from subprocess import PIPE, STDOUT, TimeoutExpired, run
 
 from SCons.Script import (
   Alias,
@@ -47,10 +47,6 @@ assert emacs is not None
 
 
 # Common functions
-def noop(target, source, env):
-  pass
-
-
 def make_project_name(org_file):
   return path.splitext(path.basename(org_file))[0]
 
@@ -122,7 +118,14 @@ def add_test_target(org_file, main_target):
     if not Path('build/config.ini').exists():
       copy('tools/config.ini', 'build/config.ini')
 
-    result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args)
+    # Script errors cause an error window to appear,
+    # and execution waits for user to press the button.
+    # To not bother with closing this window programmatically, just time out.
+    try:
+      result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args, timeout=60 * 3)
+    except TimeoutExpired:
+      print('timeout')
+      return 1
 
     with open('tools/IgnoredEngineOutput.txt') as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
@@ -130,9 +133,13 @@ def add_test_target(org_file, main_target):
     def printable(line):
       return not any([search(to_skip, line) for to_skip in lines_to_skip])
 
+    has_errors = False
     for line in filter(printable, result.stdout.splitlines()):
+      has_errors = has_errors or 'ERROR' in line
       # TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
       print(line)
+
+    return 1 if has_errors else 0
 
   return AlwaysBuild(Alias(test_name, main_target, run_test))
 
@@ -176,12 +183,14 @@ def make_index(target, source, env):
 
 
 # Targets
-pk3_all = Alias('Pk3All', None, noop)
+pk3_all = Alias('Pk3All', None, None)
+test_all = Alias('TestAll', None, None)
 
 module_targets = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
   test_target = add_test_target(org_file, main_target)
+  Depends(test_all, test_target)
   module_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 project_targets = []
@@ -191,6 +200,8 @@ for org_file in Glob('*.org'):
     html_target = add_html_target(org_file, main_target)
     test_target = add_test_target(org_file, main_target)
     pack_target = add_pack_target(org_file, html_target)
+
+    Depends(test_all, test_target)
     Depends(pk3_all, pack_target)
     project_targets.append(
       f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}'
@@ -256,6 +267,7 @@ Projects:
 General targets:
 
 - Pk3All: build packages for all mods
+- TestAll: test all packages and modules
 - LintAll: run org-lint for all Org files
 
 Type 'scons <target>' to build a target.
