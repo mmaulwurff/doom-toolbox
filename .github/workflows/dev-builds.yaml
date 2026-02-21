@@ -59,11 +59,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt;
 
+      - name: Test
+        run: |
+          nix-shell tools/shell.nix --command "scons TestAll"
+
       - name: Build
+        if: ${{ success() }}
         run: |
           nix-shell tools/shell.nix --command "scons Pk3All"
 
       - name: Upload distributions
+        if: ${{ success() }}
         uses: actions/upload-artifact@v6
         with:
           name: doom-toolbox
@@ -72,22 +78,27 @@ jobs:
             !build/Typist.pk3
 
       - name: Clean up build
+        if: ${{ success() }}
         run: |
           rm -r build
 
       - name: Export to HTML
+        if: ${{ success() }}
         run: |
           nix-shell tools/shell.nix --command "scons HtmlAll"
 
       - name: Configure pages
+        if: ${{ success() }}
         uses: actions/configure-pages@v5
 
       - name: Upload pages
+        if: ${{ success() }}
         uses: actions/upload-pages-artifact@v4
         with:
           # Upload entire repository
           path: '.'
 
       - name: Deploy pages to GitHub Pages
+        if: ${{ success() }}
         id: deployment
         uses: actions/deploy-pages@v4
