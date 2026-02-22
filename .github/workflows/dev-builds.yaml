@@ -30,9 +30,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      uzdoom-version: '4.14.3'
     steps:
       - uses: actions/checkout@v6
 
+        # TODO: Nix is used only for Emacs. Use another way to install fresh Emacs?
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
@@ -48,17 +51,14 @@ jobs:
           nix-build tools/shell.nix
 
       - name: Cache UZDoom
-        id: cache-uzdoom
         uses: actions/cache@v5
-        env:
-          uzdoom-version: '4.14.3'
         with:
           path: ~/UZDoom.AppImage
-          key: ${{ runner.os }}-uzdoom-v-${{ env.uzdoom-version }}
+          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
 
       - name: Install UZDoom
         run: |
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ steps.cache-uzdoom.env.uzdoom-version }}/Linux-UZDoom-${{ steps.cache-uzdoom.env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
 
       - name: Install Python
         uses: actions/setup-python@v6
