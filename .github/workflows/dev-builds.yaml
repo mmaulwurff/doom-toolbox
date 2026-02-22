@@ -53,14 +53,15 @@ jobs:
       - name: Cache UZDoom
         uses: actions/cache@v5
         with:
-          path: ~/UZDoom.AppImage
-          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+          path: ~/squashfs-root
+          key: ${{ runner.os }}-1-uzdoom-v${{ env.uzdoom-version }}
 
       - name: Install UZDoom
         run: |
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
-          chmod +x ~/UZDoom.AppImage
-          ~/UZDoom.AppImage --appimage-extract
+          cd ~
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > UZDoom.AppImage
+          chmod +x UZDoom.AppImage
+          ./UZDoom.AppImage --appimage-extract
 
       - name: Install Python
         uses: actions/setup-python@v6
