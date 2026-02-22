@@ -60,6 +60,7 @@ jobs:
         run: |
           wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
           chmod +x ~/UZDoom.AppImage
+          ~/UZDoom.AppImage --appimage-extract
 
       - name: Install Python
         uses: actions/setup-python@v6
