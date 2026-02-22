@@ -61,7 +61,7 @@ jobs:
 
       - name: Test
         run: |
-          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum nix-shell tools/shell.nix --command "scons TestAll"
+          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum nix-shell tools/shell.nix --command "gzdoom -noautoload -nosound -config build/config.ini -iwad tools/miniwad.wad -file tools/ClematisM-v2.1.0.pk3 build/Hint build/HintTest +exec build/HintTest/commands.txt"
 
       - name: Build
         if: ${{ success() }}
