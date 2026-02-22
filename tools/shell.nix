@@ -11,7 +11,6 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
-    at-spi2-atk # Implicit GZDoom dependency
     emacs-nox
     gzdoom
   ];
@@ -20,4 +19,6 @@ pkgs.mkShellNoCC {
     which emacs
     which emacs-nox
   '';
+
+  NO_AT_BRIDGE = "1";
 }
