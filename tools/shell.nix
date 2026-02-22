@@ -19,6 +19,4 @@ pkgs.mkShellNoCC {
     which emacs
     which emacs-nox
   '';
-
-  NO_AT_BRIDGE = "1";
 }

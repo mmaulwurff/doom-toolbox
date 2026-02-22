@@ -47,6 +47,19 @@ jobs:
         run: |
           nix-build tools/shell.nix
 
+      - name: Cache UZDoom
+        id: cache-uzdoom
+        uses: actions/cache@v5
+        env:
+          uzdoom-version: '4.14.3'
+        with:
+          path: ~/UZDoom.AppImage
+          key: ${{ runner.os }}-uzdoom-v-${{ env.uzdoom-version }}
+
+      - name: Install UZDoom
+        run: |
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ steps.cache-uzdoom.env.uzdoom-version }}/Linux-UZDoom-${{ steps.cache-uzdoom.env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
+
       - name: Install Python
         uses: actions/setup-python@v6
         with:
@@ -61,7 +74,7 @@ jobs:
 
       - name: Test
         run: |
-          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum nix-shell tools/shell.nix --command "gzdoom -noautoload -nosound -config build/config.ini -iwad tools/miniwad.wad -file tools/ClematisM-v2.1.0.pk3 build/Hint build/HintTest +exec build/HintTest/commands.txt"
+          nix-shell tools/shell.nix --command "scons TestAll"
 
       - name: Build
         if: ${{ success() }}

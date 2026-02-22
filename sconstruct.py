@@ -45,6 +45,8 @@ DefaultEnvironment(ENV=environ.copy())
 emacs = which('emacs-nox') or which('emacs')
 assert emacs is not None
 
+uzdoom = which('uzdoom') or '~/UZDoom.AppImage'
+
 
 # Common functions
 def make_project_name(org_file):
@@ -101,7 +103,7 @@ def add_test_target(org_file, main_target):
 
   def run_test(target, source, env):
     args = [
-      'gzdoom',
+      uzdoom,
       '-noautoload',
       '-nosound',
       '-config',
