@@ -48,20 +48,23 @@ jobs:
 
       - name: Install system dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install libfuse2t64 libpulse0
+
+      - name: Install external dependencies
+        run: |
           nix-build tools/shell.nix
 
       - name: Cache UZDoom
         uses: actions/cache@v5
         with:
-          path: ~/squashfs-root
-          key: ${{ runner.os }}-1-uzdoom-v${{ env.uzdoom-version }}
+          path: ~/UZDoom.AppImage
+          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
 
       - name: Install UZDoom
         run: |
-          cd ~
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > UZDoom.AppImage
-          chmod +x UZDoom.AppImage
-          ./UZDoom.AppImage --appimage-extract
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
+          chmod +x ~/UZDoom.AppImage
 
       - name: Install Python
         uses: actions/setup-python@v6

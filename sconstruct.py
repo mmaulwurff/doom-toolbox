@@ -45,7 +45,7 @@ DefaultEnvironment(ENV=environ.copy())
 emacs = which('emacs-nox') or which('emacs')
 assert emacs is not None
 
-uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'squashfs-root/AppRun'
+uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
 
 
 # Common functions
