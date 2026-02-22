@@ -45,7 +45,7 @@ DefaultEnvironment(ENV=environ.copy())
 emacs = which('emacs-nox') or which('emacs')
 assert emacs is not None
 
-uzdoom = which('uzdoom') or '~/UZDoom.AppImage'
+uzdoom = which('uzdoom') or path.expanduser('~') / 'UZDoom.AppImage'
 
 
 # Common functions
