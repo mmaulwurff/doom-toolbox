@@ -61,7 +61,7 @@ jobs:
 
       - name: Test
         run: |
-          nix-shell tools/shell.nix --command "scons TestAll"
+          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum nix-shell tools/shell.nix --command "scons TestAll"
 
       - name: Build
         if: ${{ success() }}
