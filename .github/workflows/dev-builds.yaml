@@ -35,33 +35,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-        # TODO: Nix is used only for Emacs. Use another way to install fresh Emacs?
-      - name: Install Nix
-        uses: cachix/install-nix-action@v31
-        with:
-          nix_path: nixpkgs=channel:nixos-25.11
-
-      - name: Cache Nix
-        uses: nix-community/cache-nix-action@v7
-        with:
-          primary-key: nix-${{ runner.os }}-${{ hashFiles('tools/shell.nix') }}
-
+      # TODO: when Ubuntu 26.04 is available as GitHub runner, install Emacs with apt.
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install libfuse2t64 libpulse0
-
-      - name: Install external dependencies
-        run: |
-          nix-build tools/shell.nix
+          sudo snap install emacs --classic
 
       - name: Cache UZDoom
+        id: cache-uzdoom
         uses: actions/cache@v5
         with:
           path: ~/UZDoom.AppImage
           key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
 
-      - name: Install UZDoom
+      - if: ${{ steps.cache-gzdoom.outputs.cache-hit != 'true' }}
+        name: Install UZDoom
         run: |
           wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
           chmod +x ~/UZDoom.AppImage
@@ -80,12 +69,12 @@ jobs:
 
       - name: Test
         run: |
-          nix-shell tools/shell.nix --command "scons TestAll"
+          scons TestAll
 
       - name: Build
         if: ${{ success() }}
         run: |
-          nix-shell tools/shell.nix --command "scons Pk3All"
+          scons Pk3All
 
       - name: Upload distributions
         if: ${{ success() }}
@@ -104,7 +93,7 @@ jobs:
       - name: Export to HTML
         if: ${{ success() }}
         run: |
-          nix-shell tools/shell.nix --command "scons HtmlAll"
+          scons HtmlAll
 
       - name: Configure pages
         if: ${{ success() }}
