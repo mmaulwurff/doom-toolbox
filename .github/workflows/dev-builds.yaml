@@ -33,6 +33,7 @@ jobs:
     env:
       uzdoom-version: '4.14.3'
     steps:
+      - name: Check out
       - uses: actions/checkout@v6
 
       # TODO: when Ubuntu 26.04 is available as GitHub runner, install Emacs with apt.
@@ -67,7 +68,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt;
 
+      - name: Check pre-commit hooks
+        run: |
+          pre-commit run -a
+
       - name: Test
+        if: ${{ success() }}
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
