@@ -180,6 +180,55 @@ def add_pack_target(org_file, main_target):
   return AlwaysBuild(Alias(pack_name, main_target, pack))
 
 
+def make_check_compatibility_target():
+  names = []
+  for org_file in Glob('*.org'):
+    if str(org_file) != 'README.org':
+      names.append(make_project_name(org_file))
+
+  projects = ['build/' + name for name in names]
+
+  def check_compatibility(target, source, env):
+    args = [
+      uzdoom,
+      '-noautoload',
+      '-nosound',
+      '-config',
+      'build/config.ini',
+      '-iwad',
+      'tools/miniwad.wad',
+      '+map map01; wait 2; quit',
+      '-file',
+    ]
+
+    args += projects
+
+    if not Path('build/config.ini').exists():
+      copy('tools/config.ini', 'build/config.ini')
+
+    # Script errors cause an error window to appear,
+    # and execution waits for user to press the button.
+    # To not bother with closing this window programmatically, just time out.
+    try:
+      result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args, timeout=60 * 3)
+    except TimeoutExpired:
+      print('timeout')
+      return 1
+
+    with open('tools/IgnoredEngineOutput.txt') as lines_to_skip_file:
+      lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
+
+    def printable(line):
+      return not any([search(to_skip, line) for to_skip in lines_to_skip])
+
+    for line in filter(printable, result.stdout.splitlines()):
+      print(line)
+
+    return 0
+
+  return check_compatibility
+
+
 def make_index(target, source, env):
   copy('README.html', 'index.html')
 
@@ -228,6 +277,8 @@ AlwaysBuild(
   )
 )
 
+AlwaysBuild(Alias('CheckCompatibility', None, make_check_compatibility_target()))
+
 
 # Dependencies
 def add_dependency(project, module, namespace):
@@ -271,6 +322,7 @@ General targets:
 - Pk3All: build packages for all mods
 - TestAll: test all packages and modules
 - LintAll: run org-lint for all Org files
+- CheckCompatibility: check that all projects can be loaded together
 
 Type 'scons <target>' to build a target.
 """,

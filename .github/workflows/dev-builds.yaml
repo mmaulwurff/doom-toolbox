@@ -77,6 +77,11 @@ jobs:
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
+      - name: Check compatibility
+        if: ${{ success() }}
+        run: |
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons CheckCompatibility
+
       - name: Build
         if: ${{ success() }}
         run: |
