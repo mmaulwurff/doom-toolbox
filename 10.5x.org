@@ -1013,45 +1013,45 @@ TODO: make multiplayer tests, maybe?
 <<init-wait()>>
 
 x5_multiplier 100
-<<wait(2)>>; map map01
-<<wait(2)>>; netevent x5t_begin
+<<wait(9)>>; map map01
+<<wait(9)>>; netevent x5t_begin
 
-<<wait(2)>>; x5t_name IntegerMultiplier; x5_multiplier 300
-<<wait(2)>>; x5t_spawn {'DoomImp':'1','ZombieMan':'1'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_name IntegerMultiplier; x5_multiplier 300
+<<wait(9)>>; x5t_spawn {'DoomImp':'1','ZombieMan':'1'}
+<<wait(9)>>; map map01
 <<wait(9)>>; netevent x5t_expect{'DoomImp':'3','ZombieMan':'3'}
 
 <<wait(9)>>; x5t_name FractionalMultiplier; x5_multiplier 270
-<<wait(2)>>; x5t_spawn {'DoomImp':'10'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_spawn {'DoomImp':'10'}
+<<wait(9)>>; map map01
 <<wait(9)>>; netevent x5t_expect{'DoomImp':'27'}
 
 <<wait(9)>>; x5t_name Divider; x5_multiplier 70
-<<wait(2)>>; x5t_spawn {'DoomImp':'10'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_spawn {'DoomImp':'10'}
+<<wait(9)>>; map map01
 <<wait(9)>>; turn180
 <<wait(9)>>; +attack
 <<wait(9)>>; -attack
 <<wait(9)>>; netevent x5t_expect{'DoomImp':'7'}
 
 <<wait(9)>>; x5t_name PerClass; x5_multiplier 0
-<<wait(2)>>; x5t_spawn {'DoomImp':'1','ZombieMan':'1'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_spawn {'DoomImp':'1','ZombieMan':'1'}
+<<wait(9)>>; map map01
 <<wait(9)>>; netevent x5r{'DoomImp':'300','ZombieMan':'500'}; closemenu
 <<wait(9)>>; netevent x5t_expect{'DoomImp':'3','ZombieMan':'5'}
 
 <<wait(9)>>; x5t_name RandomSpawner; x5_multiplier 200
-<<wait(2)>>; x5t_spawn {'Archvile':'1'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_spawn {'Archvile':'1'}
+<<wait(9)>>; map map01
 <<wait(9)>>; netevent x5t_expect{'x5t_Archvile':'2'}
 
 <<wait(9)>>; x5t_name A_SpawnItemEx; x5_multiplier 200
-<<wait(2)>>; x5t_spawn {'Revenant':'1'}
-<<wait(2)>>; map map01
+<<wait(9)>>; x5t_spawn {'Revenant':'1'}
+<<wait(9)>>; map map01
 <<wait(9)>>; netevent x5t_expect{'x5t_Revenant':'2'}
 
 <<wait(9)>>; netevent x5t_end
-<<wait(2)>>; quit
+<<wait(9)>>; quit
 #+end_src
 
 #+begin_src elisp :exports none

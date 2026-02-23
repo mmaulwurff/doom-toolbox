@@ -69,7 +69,7 @@ jobs:
 
       - name: Test
         run: |
-          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum scons TestAll
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
         if: ${{ success() }}
