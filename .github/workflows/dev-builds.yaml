@@ -49,7 +49,7 @@ jobs:
           path: ~/UZDoom.AppImage
           key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
 
-      - if: ${{ steps.cache-gzdoom.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
         name: Install UZDoom
         run: |
           wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
@@ -69,7 +69,7 @@ jobs:
 
       - name: Test
         run: |
-          scons TestAll
+          xvfb-run --server-args "-screen 0 1920x1080x24" --auto-servernum scons TestAll
 
       - name: Build
         if: ${{ success() }}
