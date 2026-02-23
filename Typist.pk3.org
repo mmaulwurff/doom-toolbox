@@ -72,7 +72,7 @@ almost at the right typing position.
 ** Compatibility
 
 Typist.pk3 isn't coded specifically for any game, so there is a chance it is
-compatible with many GZDoom/UZDoom mods and games.
+compatible with many UZDoom mods and games.
 
 - Typist.pk3 probably won't play well with mods and games which rely on melee combat,
   because Typist.pk3 will only aim and fire, not move.
@@ -81,7 +81,7 @@ compatible with many GZDoom/UZDoom mods and games.
 - Guncaster and Guncaster Vindicated are not compatible with Typist.pk3. Reason:
   Guncaster reads player input directly from player, so weapon firing cannot be
   emulated like for other mods. Guncaster support cannot be added without
-  modifications in Guncaster or GZDoom.
+  modifications in Guncaster or the game engine.
 
 * License :noexport:
 
@@ -3359,7 +3359,7 @@ class tt_RandomCharactersLesson : tt_Lesson
     if (_settings.isPunctuationEnabled()) characters.appendFormat("%s", PUNCTUATION);
     if (_settings.isSymbolsEnabled())
     {
-      // GZDoom cannot handle "\\" in a string, so add it manually.
+      // UZDoom cannot handle "\\" in a string, so add it manually.
       characters.AppendFormat("%s%c", SYMBOLS, tt_su_Ascii.REVERSE_SOLIDUS);
     }
     if (_settings.isCustomCharactersEnabled())

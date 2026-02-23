@@ -6,7 +6,7 @@
 * About
 
 DoomToolbox is a collection of add-ons for Doom-based game engines which support
-ZScript, like [[https://zdoom.org/downloads][GZDoom]].
+ZScript, like [[https://zdoom.org/downloads][UZDoom]].
 
 DoomToolbox is free and open source software. Add-ons are mostly licensed under
 [[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
@@ -53,7 +53,7 @@ steps at the moment. Help with Windows is appreciated!
 Requirements: these must be installed and available in PATH environment variable:
 - Python, version >= 3.13
 - Emacs, version >= 30.1
-- GZDoom, version >= 4.14.2
+- UZDoom, version >= 4.14.3
 - Development tools (probably from a [[https://docs.python.org/3/library/venv.html][venv]]):
   ~pip install -r tools/requirements-dev.txt~
 
@@ -72,7 +72,7 @@ scons FinalCustomDoom.pk3
 #+end_example
 
 All commands require that ~PATH~ environment variable has Emacs, tests also require
-GZDoom in ~PATH~. All commands put their results in directory ~build~, and may remove
+UZDoom in ~PATH~. All commands put their results in directory ~build~, and may remove
 files and directories there.
 
 Tests use internally:

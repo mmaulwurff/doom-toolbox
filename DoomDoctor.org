@@ -5,7 +5,7 @@
 #+title: DoomDoctor
 # #+version: v1.0.0
 
-DoomDoctor contains tools for GZDoom mod debugging.
+DoomDoctor contains tools for mod debugging.
 
 DoomDoctor is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
@@ -420,7 +420,7 @@ class dd_Troublemaker : EventHandler
 
     // Interestingly, the
     //players[consolePlayer].mo = NULL;
-    // just crashes GZDoom. Don't ever do that!
+    // just crashed GZDoom. Don't ever do that!
   }
 
   private void nullifySpawnedThing()

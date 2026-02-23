@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
 LazyPoints module version: 0.6.5
 LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 
-Point scoring for GZDoom. Do things, get points!
+Point scoring for UZDoom. Do things, get points!
 
 License:
 <<license>>
@@ -408,7 +408,7 @@ class NAMESPACE_MapScoreItem : ScoreItem
 // class doesn't use a CVar.
 //
 // Code is partially borrowed from
-// gzdoom/wadsrc/static/zscript/ui/menu/optionmenuitems.zs.
+// wadsrc/static/zscript/ui/menu/optionmenuitems.zs.
 class OptionMenuScoreItem : OptionMenuItem
 {
 

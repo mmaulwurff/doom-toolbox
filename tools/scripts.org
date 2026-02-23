@@ -42,7 +42,7 @@ Copies the directory from media directory to the corresponding directory in buil
 
 * Waiting for file exec
 
-Peculiar behavior for command files executed by GZDoom with ~exec~: ~wait~ command
+Peculiar behavior for command files executed by UZDoom with ~exec~: ~wait~ command
 from a line doesn't affect the time of execution of the next line. So, we need a
 convenient way to force command sequence. So, use ~<<wait(N)>>~ instead of ~wait N~.
 Before calling ~<<wait(N)>>~, call ~<<init-wait()>>~ once.

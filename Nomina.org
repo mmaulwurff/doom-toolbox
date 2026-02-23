@@ -5,7 +5,7 @@
 #+title: Nomina
 # #+version: v2.0.0-beta
 
-Nomina is a GZDoom add-on that helps with enemy names (tags).
+Nomina is an add-on that helps with enemy names (tags).
 
 Features:
 - [[Automatic tags]]: if an enemy doesn't have a tag, Nomina assigns to beautify its

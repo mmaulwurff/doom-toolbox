@@ -17,7 +17,7 @@ License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 // PlainTranslator module version: 1.1.0
 // PlainTranslator is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
 //
-// In GZDoom, you have two options for putting text in your menu items:
+// In you had two options for putting text in your menu items:
 //
 // 1. Plain text:
 //   - in `menudef`: `StaticText "Hello, world!"`
