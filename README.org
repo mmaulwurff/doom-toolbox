@@ -45,6 +45,11 @@ This project doesn't use any AI tools.
 - [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld]]
 - [[https://mastodon.gamedev.place/@doomtoolbox][Mastodon]]
 
+* Help neeeded
+
+- playtesting: compatibility with games and mods, multiplayer
+- UX suggestions: visuals, wording, usability
+
 * Build
 
 Warning: build is not tested on MS Windows. Build process may have platform-dependent
