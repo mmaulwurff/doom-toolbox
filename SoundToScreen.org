@@ -102,6 +102,7 @@ GameInfo { EventHandlers = "sts_EventHandler" }
 
 * menudef
 
+// TODO: use PlainTranslator.
 #+begin_src c :tangle build/SoundToScreen/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$STS_MENU_NAME", sts_Menu }
@@ -134,6 +135,7 @@ OptionMenu sts_Menu
 
 version 4.7.1
 
+// TODO: make this StaticEventHandler.
 class sts_EventHandler : EventHandler
 {
   override void worldLoaded(WorldEvent event)
@@ -164,6 +166,7 @@ class sts_EventHandler : EventHandler
     bool noiseEnabled = mNoiseEnabledCvar.getInt();
 
     let player = players[consolePlayer].mo;
+    // TODO: cache actors and movers.
     Thinker aThinker;
     while (aThinker = mIterator.next())
     {
@@ -194,6 +197,7 @@ class sts_EventHandler : EventHandler
       let aMover = Mover(aThinker);
       if (aMover != NULL)
       {
+        // TODO: examine sector, check moving? PlaneMoving? Old/new heigh?
         Sector movingSector = aMover.getSector();
         vector3 playerRelative = player.posRelative(movingSector);
         vector2 diff = movingSector.centerSpot - playerRelative.xy;
@@ -210,6 +214,7 @@ class sts_EventHandler : EventHandler
   }
 
   // Displays mSounds array contents on the screen.
+  // TODO: redesign display: circle with dots.
   override void renderOverlay(RenderEvent event)
   {
     if (!mIsInitialized) return;
