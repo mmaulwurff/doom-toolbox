@@ -1,0 +1,336 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2022 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+title: SoundToScreen
+
+* About
+
+Sound to Screen is an add-on for GZDoom games. It displays sounds on screen depending
+on their position on the map.
+
+It may be useful for people who play without sound or people with hearing impairment.
+
+** Implementation Notes
+
+- due to the way Sound to Screen works, it may reduce performance, especially on
+  maps with high enemy count;
+- doors and elevators that only wait to move are detected as producing
+  sound. There is no way to detect this properly at the moment.
+
+** Inspiration
+
+- [[https://forum.zdoom.org/viewtopic.php?f=4&t=71349][Toby Accessibility Mod]] by Alando1.
+- [[https://youtu.be/4NGe4dzlukc][Making Games Better for the Deaf and Hard of Hearing]] by Game Maker's Toolkit.
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/SoundToScreen/language.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/SoundToScreen/mapinfo.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/SoundToScreen/menudef.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/SoundToScreen/zscript.zs :exports none
+// <<license>>
+#+end_src
+
+* cvarinfo
+
+#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
+
+user int   sts_scale = 2;
+user float sts_x_distance = 0.3;
+user float sts_y_position = 0.7;
+user bool  sts_show_distance = false;
+user bool  sts_on_automap = false;
+
+user int   sts_max_distance2 = 50;
+user bool  sts_noise_enabled = true;
+
+user int   sts_color_noise = 9; // white
+user int   sts_color_geometry = 3; // green
+user int   sts_color_danger = 6; // red
+#+end_src
+
+* language
+
+#+begin_src c :tangle build/SoundToScreen/language.txt
+
+[enu default]
+
+STS_LEFT_SOUND   = "⚟";
+STS_CENTER_SOUND = "⚞⚟";
+STS_RIGHT_SOUND  = "⚞";
+STS_BACKGROUND_COLOR = "000000";
+
+STS_MENU_NAME  = "\cj⚞\c- Sound to Screen Options";
+STS_MENU_TITLE = "Sound to Screen";
+
+STS_SCALE = "Scale";
+STS_X_DISTANCE = "Horizontal distance from center";
+STS_Y_POSITION = "Vertical position";
+STS_SHOW_DISTANCE = "Show distance";
+STS_ON_AUTOMAP = "On automap";
+
+STS_COLOR_NOISE    = "Noise color";
+STS_COLOR_GEOMETRY = "Level geometry change color";
+STS_COLOR_DANGER   = "Danger color";
+
+STS_MAX_DISTANCE  = "Maximum distance to sound";
+STS_NOISE_ENABLED = "Noise detection";
+#+end_src
+
+* mapinfo
+
+#+begin_src c :tangle build/SoundToScreen/mapinfo.txt
+
+GameInfo { EventHandlers = "sts_EventHandler" }
+#+end_src
+
+* menudef
+
+#+begin_src c :tangle build/SoundToScreen/menudef.txt
+
+AddOptionMenu OptionsMenu       { Submenu "$STS_MENU_NAME", sts_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$STS_MENU_NAME", sts_Menu }
+
+OptionMenu sts_Menu
+{
+  Title "$STS_MENU_TITLE"
+
+  Slider "$STS_SCALE", sts_scale, 1, 6, 1, 0
+  Slider "$STS_X_DISTANCE", sts_x_distance, 0.1, 0.5, 0.01, 2
+  Slider "$STS_Y_POSITION", sts_y_position, 0.0, 1.0, 0.01, 2
+  Option "$STS_SHOW_DISTANCE", sts_show_distance, OnOff
+  Option "$STS_ON_AUTOMAP", sts_on_automap, OnOff
+
+  StaticText ""
+  Option "$STS_COLOR_NOISE",    sts_color_noise,    TextColors
+  Option "$STS_COLOR_GEOMETRY", sts_color_geometry, TextColors
+  Option "$STS_COLOR_DANGER",   sts_color_danger,   TextColors
+
+  StaticText ""
+  Slider "$STS_MAX_DISTANCE", sts_max_distance2, 1, 500, 1, 0
+  Option "$STS_NOISE_ENABLED", sts_noise_enabled, OnOff
+}
+#+end_src
+
+* ZScript
+
+#+begin_src c :tangle build/SoundToScreen/zscript.zs
+
+version 4.7.1
+
+class sts_EventHandler : EventHandler
+{
+  override void worldLoaded(WorldEvent event)
+  {
+    bool isTitlemap = (level.mapName ~== "TITLEMAP");
+    if (isTitlemap)
+      destroy();
+  }
+
+  // Fills mSounds array by searching for actors that make sounds and doors/elevators.
+  override void worldTick()
+  {
+    for (let position = Left; position < PositionsCount; ++position)
+    {
+      mSounds[position] = None;
+      mMinDistance[position] = int.max;
+    }
+
+    if (players[consolePlayer].mo == NULL) return;
+    if (automapActive && !mOnAutomapCvar.getInt()) return;
+
+    if (mIsInitialized)
+      mIterator.reinit();
+    else
+      initialize();
+
+    int maxDistance = mMaxDistanceCvar.getInt();
+    bool noiseEnabled = mNoiseEnabledCvar.getInt();
+
+    let player = players[consolePlayer].mo;
+    Thinker aThinker;
+    while (aThinker = mIterator.next())
+    {
+      let anActor = Actor(aThinker);
+      if (anActor != NULL)
+      {
+        if (anActor == player) continue;
+        if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
+        if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
+        int distance = int(anActor.distance2D(player)) / DISTANCE_UNIT;
+        if (distance > maxDistance) continue;
+
+        let type = ((anActor.bIsMonster && !anActor.bFriendly && anActor.health > 0)
+                    || (anActor.bMissile && anActor.damage > 0)) ? Danger : Noise;
+        if (type == Noise && !noiseEnabled) continue;
+        let position = calculateActorScreenPosition(anActor);
+        mSounds[position] = max(mSounds[position], type);
+
+        if (mSounds[position] == type)
+          mMinDistance[position] = min(mMinDistance[position], distance);
+
+        if (mSounds[Left] == Danger && mSounds[Center] == Danger && mSounds[Right] == Danger)
+          break;
+
+        continue;
+      }
+
+      let aMover = Mover(aThinker);
+      if (aMover != NULL)
+      {
+        Sector movingSector = aMover.getSector();
+        vector3 playerRelative = player.posRelative(movingSector);
+        vector2 diff = movingSector.centerSpot - playerRelative.xy;
+        int distance = int(diff.length()) / DISTANCE_UNIT;
+        if (distance > maxDistance) continue;
+
+        let position = calculateSectorScreenPosition(movingSector);
+        mSounds[position] = max(mSounds[position], Geometry);
+
+        if (mSounds[position] == Geometry)
+          mMinDistance[position] = min(mMinDistance[position], distance);
+      }
+    }
+  }
+
+  // Displays mSounds array contents on the screen.
+  override void renderOverlay(RenderEvent event)
+  {
+    if (!mIsInitialized) return;
+    if (players[consolePlayer].mo == NULL) return;
+
+    double xDistance = mXDistanceCvar.getFloat();
+    double leftPosition  = SCREEN_CENTER - xDistance;
+    double rightPosition = SCREEN_CENTER + xDistance;
+
+    mColors[Noise]    = mColorNoiseCvar.getInt();
+    mColors[Geometry] = mColorGeometryCvar.getInt();
+    mColors[Danger]   = mColorDangerCvar.getInt();
+
+    if (mSounds[Left])   renderText(Left,   leftPosition,  "STS_LEFT_SOUND");
+    if (mSounds[Center]) renderText(Center, SCREEN_CENTER, "STS_CENTER_SOUND");
+    if (mSounds[Right])  renderText(Right,  rightPosition, "STS_RIGHT_SOUND");
+  }
+
+  private ui void renderText(ScreenPosition screenPosition, double xPosition, string text)
+  {
+    text = mShowDistanceCvar.getInt()
+      ? String.format("%d", mMinDistance[screenPosition])
+      : StringTable.localize(text, false);
+    Font aFont = NewSmallFont;
+    int scale = mScaleCvar.getInt();
+    int textWidth  = scale * aFont.stringWidth(text);
+    int textHeight = scale * aFont.getHeight();
+    int screenWidth  = Screen.getWidth();
+    int screenHeight = Screen.getHeight();
+    int scaledMargin = MARGIN * scale;
+    int x = clamp(int(xPosition * screenWidth) - textWidth / 2,
+                  scaledMargin, screenWidth - textWidth - scaledMargin);
+    int y = clamp(int(mYPositionCvar.getFloat() * screenHeight),
+                  scaledMargin, screenHeight - textHeight - scaledMargin);
+    int textColor = mColors[mSounds[screenPosition]];
+    Color backgroundColor = StringTable.localize("$STS_BACKGROUND_COLOR");
+
+    Screen.dim(backgroundColor, 0.5,
+               x - scaledMargin, y - scaledMargin,
+               textWidth + 2 * scaledMargin, textHeight + 2 * scaledMargin);
+    Screen.drawText(aFont, textColor, x, y, text, DTA_ScaleX, scale, DTA_ScaleY, scale);
+  }
+
+  private void initialize()
+  {
+    mIsInitialized = true;
+    mIterator = ThinkerIterator.create("Thinker");
+
+    PlayerInfo player = players[consolePlayer];
+    mScaleCvar        = Cvar.getCvar("sts_scale", player);
+    mXDistanceCvar    = Cvar.getCvar("sts_x_distance", player);
+    mYPositionCvar    = Cvar.getCvar("sts_y_position", player);
+    mShowDistanceCvar = Cvar.getCvar("sts_show_distance", player);
+    mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
+
+    mMaxDistanceCvar  = Cvar.getCvar("sts_max_distance2", player);
+    mNoiseEnabledCvar = Cvar.getCvar("sts_noise_enabled", player);
+
+    mColorNoiseCvar    = Cvar.getCvar("sts_color_noise", player);
+    mColorGeometryCvar = Cvar.getCvar("sts_color_geometry", player);
+    mColorDangerCvar   = Cvar.getCvar("sts_color_danger", player);
+  }
+
+  private static ScreenPosition calculateActorScreenPosition(Actor target)
+  {
+    PlayerInfo player = players[consolePlayer];
+    double angleToTarget = (player.mo.angleTo(target) - player.mo.angle) % 360.0 - 180.0;
+
+    if (abs(angleToTarget) > (180 - player.fov / 2))
+      return Center;
+
+    return (angleToTarget < 0.0) ? Left : Right;
+  }
+
+  private static ScreenPosition calculateSectorScreenPosition(sector aSector)
+  {
+    PlayerInfo player = players[consolePlayer];
+    vector3 playerRelative = player.mo.posRelative(aSector);
+    vector2 diff = aSector.centerSpot - playerRelative.xy;
+    double angleToTarget = (atan2(diff.y, diff.x) - player.mo.angle) % 360.0 - 180.0;
+
+    if (abs(angleToTarget) > (180 - player.fov / 2))
+      return Center;
+
+    return (angleToTarget < 0.0) ? Left : Right;
+  }
+
+  enum SoundType {None, Noise, Geometry, Danger, SoundTypesCount}
+  enum ScreenPosition {Left, Center, Right, PositionsCount}
+  const MARGIN = 5;
+  const SCREEN_CENTER = 0.5;
+  const DISTANCE_UNIT = 32;
+
+  private SoundType mSounds[PositionsCount];
+  private int mMinDistance[PositionsCount];
+  private ui int mColors[SoundTypesCount];
+  private transient bool mIsInitialized;
+  private transient ThinkerIterator mIterator;
+
+  private transient Cvar mScaleCvar;
+  private transient Cvar mXDistanceCvar;
+  private transient Cvar mYPositionCvar;
+  private transient Cvar mShowDistanceCvar;
+  private transient Cvar mOnAutomapCvar;
+
+  private transient Cvar mMaxDistanceCvar;
+  private transient Cvar mNoiseEnabledCvar;
+
+  private transient Cvar mColorNoiseCvar;
+  private transient Cvar mColorGeometryCvar;
+  private transient Cvar mColorDangerCvar;
+}
+#+end_src
+
+* Test
+
+#+begin_src text :tangle build/SoundToScreenTest/commands.txt
+
+wait 2; map map01; wait 2;
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "scons -Q SoundToScreenTest")
+#+end_src
