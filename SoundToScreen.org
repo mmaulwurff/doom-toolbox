@@ -7,16 +7,21 @@ SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
 #+title: SoundToScreen
+# #+version: v1.0.0
 
 * About
 
-Sound to Screen is an add-on for GZDoom games. It displays sounds on screen depending
-on their position on the map.
+SoundToScreen displays sounds on screen depending on their position on the map. It
+may be useful for people who play without sound or people with hearing impairment.
 
-It may be useful for people who play without sound or people with hearing impairment.
+** Features
+
+- Compatible with saves saved without SoundToScreen (not compatible with saves saved
+  with SoundToScreen < 2.0.0)
 
 ** Implementation Notes
 
+- SoundToScreen won't work if UZDoom is launched with ~-nosound~.
 - due to the way Sound to Screen works, it may reduce performance, especially on
   maps with high enemy count;
 - doors and elevators that only wait to move are detected as producing
@@ -133,21 +138,15 @@ OptionMenu sts_Menu
 
 #+begin_src c :tangle build/SoundToScreen/zscript.zs
 
-version 4.7.1
+version 4.13.3
 
-// TODO: make this StaticEventHandler.
-class sts_EventHandler : EventHandler
+class sts_EventHandler : StaticEventHandler
 {
-  override void worldLoaded(WorldEvent event)
-  {
-    bool isTitlemap = (level.mapName ~== "TITLEMAP");
-    if (isTitlemap)
-      destroy();
-  }
-
   // Fills mSounds array by searching for actors that make sounds and doors/elevators.
   override void worldTick()
   {
+    if (!mIsInitialized && !(level.mapName ~== "TITLEMAP")) initialize();
+
     for (let position = Left; position < PositionsCount; ++position)
     {
       mSounds[position] = None;
@@ -157,10 +156,7 @@ class sts_EventHandler : EventHandler
     if (players[consolePlayer].mo == NULL) return;
     if (automapActive && !mOnAutomapCvar.getInt()) return;
 
-    if (mIsInitialized)
-      mIterator.reinit();
-    else
-      initialize();
+    mIterator.reinit();
 
     int maxDistance = mMaxDistanceCvar.getInt();
     bool noiseEnabled = mNoiseEnabledCvar.getInt();
@@ -311,21 +307,21 @@ class sts_EventHandler : EventHandler
   private SoundType mSounds[PositionsCount];
   private int mMinDistance[PositionsCount];
   private ui int mColors[SoundTypesCount];
-  private transient bool mIsInitialized;
-  private transient ThinkerIterator mIterator;
+  private bool mIsInitialized;
+  private ThinkerIterator mIterator;
 
-  private transient Cvar mScaleCvar;
-  private transient Cvar mXDistanceCvar;
-  private transient Cvar mYPositionCvar;
-  private transient Cvar mShowDistanceCvar;
-  private transient Cvar mOnAutomapCvar;
+  private Cvar mScaleCvar;
+  private Cvar mXDistanceCvar;
+  private Cvar mYPositionCvar;
+  private Cvar mShowDistanceCvar;
+  private Cvar mOnAutomapCvar;
 
-  private transient Cvar mMaxDistanceCvar;
-  private transient Cvar mNoiseEnabledCvar;
+  private Cvar mMaxDistanceCvar;
+  private Cvar mNoiseEnabledCvar;
 
-  private transient Cvar mColorNoiseCvar;
-  private transient Cvar mColorGeometryCvar;
-  private transient Cvar mColorDangerCvar;
+  private Cvar mColorNoiseCvar;
+  private Cvar mColorGeometryCvar;
+  private Cvar mColorDangerCvar;
 }
 #+end_src
 
@@ -333,7 +329,7 @@ class sts_EventHandler : EventHandler
 
 #+begin_src text :tangle build/SoundToScreenTest/commands.txt
 
-wait 2; map map01; wait 2;
+wait 2; map map01; wait 2; quit
 #+end_src
 
 #+begin_src elisp :exports none
