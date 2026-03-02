@@ -162,7 +162,6 @@ class sts_EventHandler : StaticEventHandler
     bool noiseEnabled = mNoiseEnabledCvar.getInt();
 
     let player = players[consolePlayer].mo;
-    // TODO: cache actors and movers.
     Thinker aThinker;
     while (aThinker = mIterator.next())
     {
@@ -326,6 +325,30 @@ class sts_EventHandler : StaticEventHandler
 #+end_src
 
 * Test
+
+#+begin_src c :tangle build/SoundToScreenTest/mapinfo.txt
+
+GameInfo { EventHandlers = "stst_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle build/SoundToScreenTest/zscript.zs
+
+version 4.13.3
+
+class stst_EventHandler : StaticEventHandler
+{
+  override void networkProcess(ConsoleEvent command)
+  {
+    if (command.name == "stst_spawn_imps")
+    {
+      int count = command.args[0];
+      Console.printf("Spawning %d imps...", count);
+      for (int i = 0; i < count; ++i)
+        Actor.spawn("doomimp", players[consolePlayer].mo.pos + (50, 0, 0));
+    }
+  }
+}
+#+end_src
 
 #+begin_src text :tangle build/SoundToScreenTest/commands.txt
 
