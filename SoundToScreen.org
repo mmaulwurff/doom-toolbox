@@ -11,19 +11,18 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * About
 
-SoundToScreen displays sounds on screen depending on their position on the map. It
-may be useful for people who play without sound or people with hearing impairment.
+SoundToScreen shows where sounds come from. It may be useful for people who play
+without sound or people with hearing impairment.
 
 ** Features
 
+TODO: try to make savefile-compatible with SoundToScreen v1.0.0.
 - Compatible with saves saved without SoundToScreen (not compatible with saves saved
   with SoundToScreen < 2.0.0)
 
 ** Implementation Notes
 
 - SoundToScreen won't work if UZDoom is launched with ~-nosound~.
-- due to the way Sound to Screen works, it may reduce performance, especially on
-  maps with high enemy count;
 - doors and elevators that only wait to move are detected as producing
   sound. There is no way to detect this properly at the moment.
 
@@ -52,42 +51,15 @@ may be useful for people who play without sound or people with hearing impairmen
 // <<license>>
 #+end_src
 
-* cvarinfo
-
-#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
-
-user int   sts_scale = 2;
-user float sts_x_distance = 0.3;
-user float sts_y_position = 0.7;
-user bool  sts_show_distance = false;
-user bool  sts_on_automap = false;
-
-user int   sts_max_distance2 = 50;
-user bool  sts_noise_enabled = true;
-
-user int   sts_color_noise = 9; // white
-user int   sts_color_geometry = 3; // green
-user int   sts_color_danger = 6; // red
-#+end_src
-
 * language
 
 #+begin_src c :tangle build/SoundToScreen/language.txt
 
 [enu default]
 
-STS_LEFT_SOUND   = "⚟";
-STS_CENTER_SOUND = "⚞⚟";
-STS_RIGHT_SOUND  = "⚞";
-STS_BACKGROUND_COLOR = "000000";
+STS_MENU_NAME  = "\cj⚞\c- SoundToScreen Options";
+STS_MENU_TITLE = "SoundToScreen";
 
-STS_MENU_NAME  = "\cj⚞\c- Sound to Screen Options";
-STS_MENU_TITLE = "Sound to Screen";
-
-STS_SCALE = "Scale";
-STS_X_DISTANCE = "Horizontal distance from center";
-STS_Y_POSITION = "Vertical position";
-STS_SHOW_DISTANCE = "Show distance";
 STS_ON_AUTOMAP = "On automap";
 
 STS_COLOR_NOISE    = "Noise color";
@@ -95,14 +67,6 @@ STS_COLOR_GEOMETRY = "Level geometry change color";
 STS_COLOR_DANGER   = "Danger color";
 
 STS_MAX_DISTANCE  = "Maximum distance to sound";
-STS_NOISE_ENABLED = "Noise detection";
-#+end_src
-
-* mapinfo
-
-#+begin_src c :tangle build/SoundToScreen/mapinfo.txt
-
-GameInfo { EventHandlers = "sts_EventHandler" }
 #+end_src
 
 * menudef
@@ -117,24 +81,46 @@ OptionMenu sts_Menu
 {
   Title "$STS_MENU_TITLE"
 
-  Slider "$STS_SCALE", sts_scale, 1, 6, 1, 0
-  Slider "$STS_X_DISTANCE", sts_x_distance, 0.1, 0.5, 0.01, 2
-  Slider "$STS_Y_POSITION", sts_y_position, 0.0, 1.0, 0.01, 2
-  Option "$STS_SHOW_DISTANCE", sts_show_distance, OnOff
+  Slider "Horizontal position", sts_x_position, 0.0, 1.0, 0.01, 2
+  Slider "Vertical position",   sts_y_position, 0.0, 1.0, 0.01, 2
+  Slider "Width",               sts_x_radius, 20, 50, 1
+  Slider "Height",              sts_y_radius, 20, 50, 1
   Option "$STS_ON_AUTOMAP", sts_on_automap, OnOff
 
   StaticText ""
-  Option "$STS_COLOR_NOISE",    sts_color_noise,    TextColors
-  Option "$STS_COLOR_GEOMETRY", sts_color_geometry, TextColors
-  Option "$STS_COLOR_DANGER",   sts_color_danger,   TextColors
+  ColorPicker "$STS_COLOR_NOISE",    sts_color_noise
+  ColorPicker "$STS_COLOR_GEOMETRY", sts_color_geometry
+  ColorPicker "$STS_COLOR_DANGER",   sts_color_danger
 
   StaticText ""
   Slider "$STS_MAX_DISTANCE", sts_max_distance2, 1, 500, 1, 0
-  Option "$STS_NOISE_ENABLED", sts_noise_enabled, OnOff
 }
 #+end_src
 
-* ZScript
+* Cvars
+
+#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
+
+user float sts_x_position = 0.5;
+user float sts_y_position = 0.7;
+user float sts_x_radius = 3;
+user float sts_y_radius = 3;
+
+user bool  sts_on_automap = false;
+
+user int   sts_max_distance2 = 50;
+
+user color sts_color_noise    = "000000"; // white
+user color sts_color_geometry = "00FF00"; // green
+user color sts_color_danger   = "FF0000"; // red
+#+end_src
+
+* Event Handler
+
+#+begin_src c :tangle build/SoundToScreen/mapinfo.txt
+
+GameInfo { EventHandlers = "sts_EventHandler" }
+#+end_src
 
 #+begin_src c :tangle build/SoundToScreen/zscript.zs
 
@@ -142,24 +128,26 @@ version 4.13.3
 
 class sts_EventHandler : StaticEventHandler
 {
-  // Fills mSounds array by searching for actors that make sounds and doors/elevators.
+  // Collects sounds by searching for actors that make sounds and doors/elevators.
   override void worldTick()
   {
     if (!mIsInitialized && !(level.mapName ~== "TITLEMAP")) initialize();
-
-    for (let position = Left; position < PositionsCount; ++position)
-    {
-      mSounds[position] = None;
-      mMinDistance[position] = int.max;
-    }
 
     if (players[consolePlayer].mo == NULL) return;
     if (automapActive && !mOnAutomapCvar.getInt()) return;
 
     mIterator.reinit();
 
+    for (int type = Noise; type < SoundTypesCount; ++type)
+      mColors[type] = mColorCvars[type].getString();
+
+    for (int type = Noise; type < SoundTypesCount; ++type)
+    {
+      for (int i = 0; i < DOTS_COUNT; ++i)
+        mDots[type][i] = 0;
+    }
+
     int maxDistance = mMaxDistanceCvar.getInt();
-    bool noiseEnabled = mNoiseEnabledCvar.getInt();
 
     let player = players[consolePlayer].mo;
     Thinker aThinker;
@@ -171,20 +159,14 @@ class sts_EventHandler : StaticEventHandler
         if (anActor == player) continue;
         if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
         if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
-        int distance = int(anActor.distance2D(player)) / DISTANCE_UNIT;
+        double distance = anActor.distance3D(player) / DISTANCE_UNIT;
         if (distance > maxDistance) continue;
 
         let type = ((anActor.bIsMonster && !anActor.bFriendly && anActor.health > 0)
                     || (anActor.bMissile && anActor.damage > 0)) ? Danger : Noise;
-        if (type == Noise && !noiseEnabled) continue;
+
         let position = calculateActorScreenPosition(anActor);
-        mSounds[position] = max(mSounds[position], type);
-
-        if (mSounds[position] == type)
-          mMinDistance[position] = min(mMinDistance[position], distance);
-
-        if (mSounds[Left] == Danger && mSounds[Center] == Danger && mSounds[Right] == Danger)
-          break;
+        mDots[type][position] += min(1.0, 1.0 / max(distance / 10.0, 1.0));
 
         continue;
       }
@@ -192,65 +174,95 @@ class sts_EventHandler : StaticEventHandler
       let aMover = Mover(aThinker);
       if (aMover != NULL)
       {
-        // TODO: examine sector, check moving? PlaneMoving? Old/new heigh?
+        // TODO: examine sector, check moving? PlaneMoving? Old/new height?
         Sector movingSector = aMover.getSector();
         vector3 playerRelative = player.posRelative(movingSector);
+        // TODO: make this portal-aware.
         vector2 diff = movingSector.centerSpot - playerRelative.xy;
-        int distance = int(diff.length()) / DISTANCE_UNIT;
+        double distance = diff.length() / DISTANCE_UNIT;
         if (distance > maxDistance) continue;
 
         let position = calculateSectorScreenPosition(movingSector);
-        mSounds[position] = max(mSounds[position], Geometry);
-
-        if (mSounds[position] == Geometry)
-          mMinDistance[position] = min(mMinDistance[position], distance);
+        mDots[Geometry][position] += min(1.0, 1.0 / max(distance / 10.0, 1.0));
       }
     }
   }
 
-  // Displays mSounds array contents on the screen.
-  // TODO: redesign display: circle with dots.
   override void renderOverlay(RenderEvent event)
   {
     if (!mIsInitialized) return;
     if (players[consolePlayer].mo == NULL) return;
 
-    double xDistance = mXDistanceCvar.getFloat();
-    double leftPosition  = SCREEN_CENTER - xDistance;
-    double rightPosition = SCREEN_CENTER + xDistance;
+    vector2 center = (mXPositionCvar.getFloat() * Screen.getWidth(),
+                      mYPositionCvar.getFloat() * Screen.getHeight());
+    double radiusX = mXRadiusCvar.getFloat();
+    double radiusY = mYRadiusCvar.getFloat();
 
-    mColors[Noise]    = mColorNoiseCvar.getInt();
-    mColors[Geometry] = mColorGeometryCvar.getInt();
-    mColors[Danger]   = mColorDangerCvar.getInt();
+    for (int i = 0; i < DOTS_COUNT; ++i)
+      drawDot(center + makePosition(i, 0.0, radiusX, radiusY), "000000");
 
-    if (mSounds[Left])   renderText(Left,   leftPosition,  "STS_LEFT_SOUND");
-    if (mSounds[Center]) renderText(Center, SCREEN_CENTER, "STS_CENTER_SOUND");
-    if (mSounds[Right])  renderText(Right,  rightPosition, "STS_RIGHT_SOUND");
+    for (int type = Noise; type < SoundTypesCount; ++type)
+    {
+      for (int i = 0; i < DOTS_COUNT; ++i)
+      {
+        double diff = mDotsInterpolated[type][i] - mDots[type][i];
+        mDotsInterpolated[type][i] -= diff * ((diff > 0) ? 0.2 : 0.4);
+      }
+    }
+
+    // Fake sound level changes.
+    if (level.time % 3 == 0)
+    {
+      for (int type = Noise; type < SoundTypesCount; ++type)
+      {
+        for (int i = 0; i < DOTS_COUNT; ++i)
+          mDotsVariance[type][i] = frandom[SoundToScreen](-0.05, 0.05);
+      }
+    }
+
+    for (int type = Noise; type < SoundTypesCount; ++type)
+    {
+      for (int i = 0; i < DOTS_COUNT; ++i)
+      {
+        double sum = 0;
+        for (int j = -2; j <= 2; ++j)
+        {
+          int index = (i + j + DOTS_COUNT) % DOTS_COUNT;
+          sum += mDotsInterpolated[type][index] * mBlurWeights[2 + j];
+
+          if (mDotsInterpolated[type][index] > 0.05)
+            sum += mDotsVariance[type][index];
+        }
+        mDotsBlurred[type][i] = sum;
+      }
+    }
+
+    for (int type = Noise; type < SoundTypesCount; ++type)
+    {
+      for (int i = 0; i < DOTS_COUNT; ++i)
+      {
+        double dotLevel = mDotsBlurred[type][i];
+        if (dotLevel > 0.05)
+          drawDot(center + makePosition(i, dotLevel, radiusX, radiusY), mColors[type]);
+      }
+    }
   }
 
-  private ui void renderText(ScreenPosition screenPosition, double xPosition, string text)
+  private ui vector2 makePosition(int i, double dotLevel, double radiusX, double radiusY)
   {
-    text = mShowDistanceCvar.getInt()
-      ? String.format("%d", mMinDistance[screenPosition])
-      : StringTable.localize(text, false);
-    Font aFont = NewSmallFont;
-    int scale = mScaleCvar.getInt();
-    int textWidth  = scale * aFont.stringWidth(text);
-    int textHeight = scale * aFont.getHeight();
-    int screenWidth  = Screen.getWidth();
-    int screenHeight = Screen.getHeight();
-    int scaledMargin = MARGIN * scale;
-    int x = clamp(int(xPosition * screenWidth) - textWidth / 2,
-                  scaledMargin, screenWidth - textWidth - scaledMargin);
-    int y = clamp(int(mYPositionCvar.getFloat() * screenHeight),
-                  scaledMargin, screenHeight - textHeight - scaledMargin);
-    int textColor = mColors[mSounds[screenPosition]];
-    Color backgroundColor = StringTable.localize("$STS_BACKGROUND_COLOR");
+    double angle = i * (360.0 / DOTS_COUNT);
+    return ((1 + dotLevel) * radiusX * sin(angle),
+           -(1 + dotLevel) * radiusY * cos(angle));
+  }
 
-    Screen.dim(backgroundColor, 0.5,
-               x - scaledMargin, y - scaledMargin,
-               textWidth + 2 * scaledMargin, textHeight + 2 * scaledMargin);
-    Screen.drawText(aFont, textColor, x, y, text, DTA_ScaleX, scale, DTA_ScaleY, scale);
+  private ui void drawDot(vector2 position, Color aColor)
+  {
+    // TODO: scale dot size with screen size.
+    Screen.dim(aColor, 1.0,
+               int(round(position.x) - 1),
+               int(round(position.y) - 1),
+               3,
+               3);
   }
 
   private void initialize()
@@ -259,68 +271,63 @@ class sts_EventHandler : StaticEventHandler
     mIterator = ThinkerIterator.create("Thinker");
 
     PlayerInfo player = players[consolePlayer];
-    mScaleCvar        = Cvar.getCvar("sts_scale", player);
-    mXDistanceCvar    = Cvar.getCvar("sts_x_distance", player);
+    mXPositionCvar    = Cvar.getCvar("sts_x_position", player);
     mYPositionCvar    = Cvar.getCvar("sts_y_position", player);
-    mShowDistanceCvar = Cvar.getCvar("sts_show_distance", player);
+    mXRadiusCvar      = Cvar.getCvar("sts_x_radius", player);
+    mYRadiusCvar      = Cvar.getCvar("sts_y_radius", player);
     mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
 
     mMaxDistanceCvar  = Cvar.getCvar("sts_max_distance2", player);
-    mNoiseEnabledCvar = Cvar.getCvar("sts_noise_enabled", player);
 
-    mColorNoiseCvar    = Cvar.getCvar("sts_color_noise", player);
-    mColorGeometryCvar = Cvar.getCvar("sts_color_geometry", player);
-    mColorDangerCvar   = Cvar.getCvar("sts_color_danger", player);
+    mColorCvars[Noise]    = Cvar.getCvar("sts_color_noise", player);
+    mColorCvars[Geometry] = Cvar.getCvar("sts_color_geometry", player);
+    mColorCvars[Danger]   = Cvar.getCvar("sts_color_danger", player);
+
+    // Gaussian blur, sigma 1.
+    mBlurWeights[0] = 0.0613595978134402  / 0.38774041331389975;
+    mBlurWeights[1] = 0.24477019552960988 / 0.38774041331389975;
+    mBlurWeights[2] = 1.0;
+    mBlurWeights[3] = mBlurWeights[1];
+    mBlurWeights[4] = mBlurWeights[0];
   }
 
-  private static ScreenPosition calculateActorScreenPosition(Actor target)
+  private static int calculateActorScreenPosition(Actor target)
   {
     PlayerInfo player = players[consolePlayer];
-    double angleToTarget = (player.mo.angleTo(target) - player.mo.angle) % 360.0 - 180.0;
-
-    if (abs(angleToTarget) > (180 - player.fov / 2))
-      return Center;
-
-    return (angleToTarget < 0.0) ? Left : Right;
+    double angleToTarget = (player.mo.angle - player.mo.angleTo(target)) % 360.0;
+    return int(round(angleToTarget / (360.0 / DOTS_COUNT))) % DOTS_COUNT;
   }
 
-  private static ScreenPosition calculateSectorScreenPosition(sector aSector)
+  private static int calculateSectorScreenPosition(sector aSector)
   {
     PlayerInfo player = players[consolePlayer];
     vector3 playerRelative = player.mo.posRelative(aSector);
     vector2 diff = aSector.centerSpot - playerRelative.xy;
-    double angleToTarget = (atan2(diff.y, diff.x) - player.mo.angle) % 360.0 - 180.0;
-
-    if (abs(angleToTarget) > (180 - player.fov / 2))
-      return Center;
-
-    return (angleToTarget < 0.0) ? Left : Right;
+    double angleToTarget = (player.mo.angle - atan2(diff.y, diff.x)) % 360.0;
+    return int(round(angleToTarget / (360.0 / DOTS_COUNT))) % DOTS_COUNT;
   }
 
-  enum SoundType {None, Noise, Geometry, Danger, SoundTypesCount}
-  enum ScreenPosition {Left, Center, Right, PositionsCount}
-  const MARGIN = 5;
+  enum SoundType {Noise, Geometry, Danger, SoundTypesCount}
   const SCREEN_CENTER = 0.5;
   const DISTANCE_UNIT = 32;
+  const DOTS_COUNT = 32; // Should be divisible by 4 for clear base directions.
+  private double mDots[SoundTypesCount][DOTS_COUNT];
+  private ui double mDotsInterpolated[SoundTypesCount][DOTS_COUNT];
+  private ui double mDotsBlurred[SoundTypesCount][DOTS_COUNT];
+  private ui double mDotsVariance[SoundTypesCount][DOTS_COUNT];
+  private double mBlurWeights[5];
 
-  private SoundType mSounds[PositionsCount];
-  private int mMinDistance[PositionsCount];
-  private ui int mColors[SoundTypesCount];
+  private Color mColors[SoundTypesCount];
   private bool mIsInitialized;
   private ThinkerIterator mIterator;
 
-  private Cvar mScaleCvar;
-  private Cvar mXDistanceCvar;
+  private Cvar mXPositionCvar;
   private Cvar mYPositionCvar;
-  private Cvar mShowDistanceCvar;
+  private CVar mXRadiusCvar;
+  private CVar mYRadiusCvar;
   private Cvar mOnAutomapCvar;
-
   private Cvar mMaxDistanceCvar;
-  private Cvar mNoiseEnabledCvar;
-
-  private Cvar mColorNoiseCvar;
-  private Cvar mColorGeometryCvar;
-  private Cvar mColorDangerCvar;
+  private Cvar mColorCvars[SoundTypesCount];
 }
 #+end_src
 
