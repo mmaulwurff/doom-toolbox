@@ -174,15 +174,21 @@ class sts_EventHandler : StaticEventHandler
       let aMover = Mover(aThinker);
       if (aMover != NULL)
       {
-        // TODO: examine sector, check moving? PlaneMoving? Old/new height?
-        Sector movingSector = aMover.getSector();
-        vector3 playerRelative = player.posRelative(movingSector);
+        Sector aSector = aMover.getSector();
+        if (aSector.flags & Sector.SECF_SilentMove) continue;
+
+        // Important order: ask if moving before remembering.
+        bool isMoving = isMoving(aSector);
+        remember(aSector);
+        if (!isMoving) continue;
+
+        vector3 playerRelative = player.posRelative(aSector);
         // TODO: make this portal-aware.
-        vector2 diff = movingSector.centerSpot - playerRelative.xy;
+        vector2 diff = aSector.centerSpot - playerRelative.xy;
         double distance = diff.length() / DISTANCE_UNIT;
         if (distance > maxDistance) continue;
 
-        let position = calculateSectorScreenPosition(movingSector);
+        let position = calculateSectorScreenPosition(aSector);
         mDots[Geometry][position] += min(1.0, 1.0 / max(distance / 10.0, 1.0));
       }
     }
@@ -307,6 +313,30 @@ class sts_EventHandler : StaticEventHandler
     return int(round(angleToTarget / (360.0 / DOTS_COUNT))) % DOTS_COUNT;
   }
 
+  // No way to easily query if a sector is moving, hence this workaround.
+  private bool isMoving(Sector aSector)
+  {
+    let memory = sts_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
+    return memory != NULL
+        && memory.time == level.time - 1
+        && (memory.floorHeight != aSector.centerFloor()
+            || memory.ceilingHeight != aSector.centerCeiling());
+  }
+
+  private void remember(Sector aSector)
+  {
+    let memory = sts_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
+    if (memory == NULL)
+    {
+      memory = new("sts_SectorMemory");
+      mSectorMemories.insert(aSector.index(), memory);
+    }
+
+    memory.time = level.time;
+    memory.floorHeight   = aSector.centerFloor();
+    memory.ceilingHeight = aSector.centerCeiling();
+  }
+
   enum SoundType {Noise, Geometry, Danger, SoundTypesCount}
   const SCREEN_CENTER = 0.5;
   const DISTANCE_UNIT = 32;
@@ -316,10 +346,10 @@ class sts_EventHandler : StaticEventHandler
   private ui double mDotsBlurred[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsVariance[SoundTypesCount][DOTS_COUNT];
   private double mBlurWeights[5];
-
   private Color mColors[SoundTypesCount];
   private bool mIsInitialized;
   private ThinkerIterator mIterator;
+  private Map<int, Object> mSectorMemories;
 
   private Cvar mXPositionCvar;
   private Cvar mYPositionCvar;
@@ -328,6 +358,13 @@ class sts_EventHandler : StaticEventHandler
   private Cvar mOnAutomapCvar;
   private Cvar mMaxDistanceCvar;
   private Cvar mColorCvars[SoundTypesCount];
+}
+
+class sts_SectorMemory
+{
+  int time;
+  double floorHeight;
+  double ceilingHeight;
 }
 #+end_src
 
