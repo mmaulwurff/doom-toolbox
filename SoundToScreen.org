@@ -154,6 +154,7 @@ class sts_EventHandler : StaticEventHandler
         // TODO: handle actors with BOSS flag.
         if (anActor == player) continue;
         if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
+        if (anActor.bMissile && anActor.target == player) continue;
         if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
         double distance = anActor.distance3D(player);
         if (distance > MAX_DISTANCE) continue;
