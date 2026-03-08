@@ -166,7 +166,7 @@ class sts_EventHandler : StaticEventHandler
                     || (anActor.bMissile && anActor.damage > 0)) ? Danger : Noise;
 
         let position = calculateActorScreenPosition(anActor);
-        mDots[type][position] += min(1.0, 1.0 / max(distance / 10.0, 1.0));
+        mDots[type][position] += min(1.0, 1.0 / max(distance * distance / 100, 1.0));
 
         continue;
       }
@@ -183,13 +183,17 @@ class sts_EventHandler : StaticEventHandler
         if (!isMoving) continue;
 
         vector3 playerRelative = player.posRelative(aSector);
-        // TODO: make this portal-aware.
-        vector2 diff = aSector.centerSpot - playerRelative.xy;
+        vector2 xy = aSector.centerSpot;
+        double z = aMover is "MovingCeiling"
+          ? aSector.centerCeiling()
+          : aSector.centerFloor();
+        vector3 soundSource = (xy.x, xy.y, z);
+        vector3 diff = level.vec3Diff(soundSource, playerRelative);
         double distance = diff.length() / DISTANCE_UNIT;
         if (distance > maxDistance) continue;
 
         let position = calculateSectorScreenPosition(aSector);
-        mDots[Geometry][position] += min(1.0, 1.0 / max(distance / 10.0, 1.0));
+        mDots[Geometry][position] += min(1.0, 1.0 / max(distance * distance / 100, 1.0));
       }
     }
   }
