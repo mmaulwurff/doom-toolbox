@@ -228,6 +228,16 @@ class sts_EventHandler : StaticEventHandler
       }
     }
 
+    // Gaussian blur, sigma 1.
+    static const double blurWeights[] =
+    {
+      0.0613595978134402  / 0.38774041331389975,
+      0.24477019552960988 / 0.38774041331389975,
+      1.0,
+      0.24477019552960988 / 0.38774041331389975,
+      0.0613595978134402  / 0.38774041331389975
+    };
+
     for (int type = Noise; type < SoundTypesCount; ++type)
     {
       for (int i = 0; i < DOTS_COUNT; ++i)
@@ -236,7 +246,7 @@ class sts_EventHandler : StaticEventHandler
         for (int j = -2; j <= 2; ++j)
         {
           int index = (i + j + DOTS_COUNT) % DOTS_COUNT;
-          sum += mDotsInterpolated[type][index] * mBlurWeights[2 + j];
+          sum += mDotsInterpolated[type][index] * blurWeights[2 + j];
 
           if (mDotsInterpolated[type][index] > MIN_DOT_LEVEL)
             sum += mDotsVariance[type][index];
@@ -295,13 +305,6 @@ class sts_EventHandler : StaticEventHandler
     mColorCvars[Noise]    = Cvar.getCvar("sts_color_noise", player);
     mColorCvars[Geometry] = Cvar.getCvar("sts_color_geometry", player);
     mColorCvars[Danger]   = Cvar.getCvar("sts_color_danger", player);
-
-    // Gaussian blur, sigma 1.
-    mBlurWeights[0] = 0.0613595978134402  / 0.38774041331389975;
-    mBlurWeights[1] = 0.24477019552960988 / 0.38774041331389975;
-    mBlurWeights[2] = 1.0;
-    mBlurWeights[3] = mBlurWeights[1];
-    mBlurWeights[4] = mBlurWeights[0];
   }
 
   private static int calculateActorScreenPosition(Actor target)
@@ -360,7 +363,6 @@ class sts_EventHandler : StaticEventHandler
   private ui double mDotsInterpolated[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsBlurred[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsVariance[SoundTypesCount][DOTS_COUNT];
-  private double mBlurWeights[5];
   private Color mColors[SoundTypesCount];
   private bool mIsInitialized;
   private ThinkerIterator mIterator;
