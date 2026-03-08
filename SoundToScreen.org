@@ -85,9 +85,13 @@ OptionMenu sts_Menu
   Slider "Vertical position",   sts_y_position, 0.0, 1.0, 0.01, 2
   Slider "Width",               sts_x_radius, 20, 50, 1
   Slider "Height",              sts_y_radius, 20, 50, 1
+  Slider "Dot size",            sts_dot_size, 1, 9, 2
+
   Option "$STS_ON_AUTOMAP", sts_on_automap, OnOff
 
   StaticText ""
+  StaticText "Colors"
+  ColorPicker "Base", sts_color_base
   ColorPicker "$STS_COLOR_NOISE",    sts_color_noise
   ColorPicker "$STS_COLOR_GEOMETRY", sts_color_geometry
   ColorPicker "$STS_COLOR_DANGER",   sts_color_danger
@@ -105,12 +109,13 @@ user float sts_x_position = 0.5;
 user float sts_y_position = 0.7;
 user float sts_x_radius = 3;
 user float sts_y_radius = 3;
+user int   sts_dot_size = 3;
 
 user bool  sts_on_automap = false;
-
 user int   sts_max_distance2 = 50;
 
-user color sts_color_noise    = "000000"; // white
+user color sts_color_base     = "000000"; // black
+user color sts_color_noise    = "FFFFFF"; // white
 user color sts_color_geometry = "00FF00"; // green
 user color sts_color_danger   = "FF0000"; // red
 #+end_src
@@ -207,9 +212,11 @@ class sts_EventHandler : StaticEventHandler
                       mYPositionCvar.getFloat() * Screen.getHeight());
     double radiusX = mXRadiusCvar.getFloat();
     double radiusY = mYRadiusCvar.getFloat();
+    int    dotSize = mDotSizeCvar.getInt();
+    Color  baseColor = mBaseColorCvar.getString();
 
     for (int i = 0; i < DOTS_COUNT; ++i)
-      drawDot(center + makePosition(i, 0.0, radiusX, radiusY), "000000");
+      drawDot(center + makePosition(i, 0.0, radiusX, radiusY), baseColor, dotSize);
 
     for (int type = Noise; type < SoundTypesCount; ++type)
     {
@@ -253,7 +260,11 @@ class sts_EventHandler : StaticEventHandler
       {
         double dotLevel = mDotsBlurred[type][i];
         if (dotLevel > 0.05)
-          drawDot(center + makePosition(i, dotLevel, radiusX, radiusY), mColors[type]);
+        {
+          drawDot(center + makePosition(i, dotLevel, radiusX, radiusY),
+                  mColors[type],
+                  dotSize);
+        }
       }
     }
   }
@@ -265,14 +276,14 @@ class sts_EventHandler : StaticEventHandler
            -(1 + dotLevel) * radiusY * cos(angle));
   }
 
-  private ui void drawDot(vector2 position, Color aColor)
+  private ui void drawDot(vector2 position, Color aColor, int dotSize)
   {
-    // TODO: scale dot size with screen size.
+    int halfSize = dotSize / 2;
     Screen.dim(aColor, 1.0,
-               int(round(position.x) - 1),
-               int(round(position.y) - 1),
-               3,
-               3);
+               int(round(position.x)) - halfSize,
+               int(round(position.y)) - halfSize,
+               dotSize,
+               dotSize);
   }
 
   private void initialize()
@@ -285,10 +296,12 @@ class sts_EventHandler : StaticEventHandler
     mYPositionCvar    = Cvar.getCvar("sts_y_position", player);
     mXRadiusCvar      = Cvar.getCvar("sts_x_radius", player);
     mYRadiusCvar      = Cvar.getCvar("sts_y_radius", player);
-    mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
+    mDotSizeCvar      = Cvar.getCvar("sts_dot_size", player);
 
+    mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
     mMaxDistanceCvar  = Cvar.getCvar("sts_max_distance2", player);
 
+    mBaseColorCvar        = Cvar.getCvar("sts_color_base", player);
     mColorCvars[Noise]    = Cvar.getCvar("sts_color_noise", player);
     mColorCvars[Geometry] = Cvar.getCvar("sts_color_geometry", player);
     mColorCvars[Danger]   = Cvar.getCvar("sts_color_danger", player);
@@ -359,8 +372,10 @@ class sts_EventHandler : StaticEventHandler
   private Cvar mYPositionCvar;
   private CVar mXRadiusCvar;
   private CVar mYRadiusCvar;
+  private Cvar mDotSizeCvar;
   private Cvar mOnAutomapCvar;
   private Cvar mMaxDistanceCvar;
+  private Cvar mBaseColorCvar;
   private Cvar mColorCvars[SoundTypesCount];
 }
 
