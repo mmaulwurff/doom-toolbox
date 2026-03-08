@@ -65,8 +65,6 @@ STS_ON_AUTOMAP = "On automap";
 STS_COLOR_NOISE    = "Noise color";
 STS_COLOR_GEOMETRY = "Level geometry change color";
 STS_COLOR_DANGER   = "Danger color";
-
-STS_MAX_DISTANCE  = "Maximum distance to sound";
 #+end_src
 
 * menudef
@@ -86,7 +84,6 @@ OptionMenu sts_Menu
   Slider "Width",               sts_x_radius, 20, 50, 1
   Slider "Height",              sts_y_radius, 20, 50, 1
   Slider "Dot size",            sts_dot_size, 1, 9, 2
-
   Option "$STS_ON_AUTOMAP", sts_on_automap, OnOff
 
   StaticText ""
@@ -95,9 +92,6 @@ OptionMenu sts_Menu
   ColorPicker "$STS_COLOR_NOISE",    sts_color_noise
   ColorPicker "$STS_COLOR_GEOMETRY", sts_color_geometry
   ColorPicker "$STS_COLOR_DANGER",   sts_color_danger
-
-  StaticText ""
-  Slider "$STS_MAX_DISTANCE", sts_max_distance2, 1, 500, 1, 0
 }
 #+end_src
 
@@ -110,9 +104,7 @@ user float sts_y_position = 0.7;
 user float sts_x_radius = 3;
 user float sts_y_radius = 3;
 user int   sts_dot_size = 3;
-
 user bool  sts_on_automap = false;
-user int   sts_max_distance2 = 50;
 
 user color sts_color_base     = "000000"; // black
 user color sts_color_noise    = "FFFFFF"; // white
@@ -152,8 +144,6 @@ class sts_EventHandler : StaticEventHandler
         mDots[type][i] = 0;
     }
 
-    int maxDistance = mMaxDistanceCvar.getInt();
-
     let player = players[consolePlayer].mo;
     Thinker aThinker;
     while (aThinker = mIterator.next())
@@ -161,17 +151,18 @@ class sts_EventHandler : StaticEventHandler
       let anActor = Actor(aThinker);
       if (anActor != NULL)
       {
+        // TODO: handle actors with BOSS flag.
         if (anActor == player) continue;
         if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
         if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
-        double distance = anActor.distance3D(player) / DISTANCE_UNIT;
-        if (distance > maxDistance) continue;
+        double distance = anActor.distance3D(player);
+        if (distance > MAX_DISTANCE) continue;
 
         let type = ((anActor.bIsMonster && !anActor.bFriendly && anActor.health > 0)
                     || (anActor.bMissile && anActor.damage > 0)) ? Danger : Noise;
 
         let position = calculateActorScreenPosition(anActor);
-        mDots[type][position] += min(1.0, 1.0 / max(distance * distance / 100, 1.0));
+        mDots[type][position] += distanceToDotLevel(distance);
 
         continue;
       }
@@ -194,11 +185,11 @@ class sts_EventHandler : StaticEventHandler
           : aSector.centerFloor();
         vector3 soundSource = (xy.x, xy.y, z);
         vector3 diff = level.vec3Diff(soundSource, playerRelative);
-        double distance = diff.length() / DISTANCE_UNIT;
-        if (distance > maxDistance) continue;
+        double distance = diff.length();
+        if (distance > MAX_DISTANCE) continue;
 
         let position = calculateSectorScreenPosition(aSector);
-        mDots[Geometry][position] += min(1.0, 1.0 / max(distance * distance / 100, 1.0));
+        mDots[Geometry][position] += distanceToDotLevel(distance);
       }
     }
   }
@@ -233,7 +224,7 @@ class sts_EventHandler : StaticEventHandler
       for (int type = Noise; type < SoundTypesCount; ++type)
       {
         for (int i = 0; i < DOTS_COUNT; ++i)
-          mDotsVariance[type][i] = frandom[SoundToScreen](-0.05, 0.05);
+          mDotsVariance[type][i] = frandom[SoundToScreen](-MIN_DOT_LEVEL, MIN_DOT_LEVEL);
       }
     }
 
@@ -247,7 +238,7 @@ class sts_EventHandler : StaticEventHandler
           int index = (i + j + DOTS_COUNT) % DOTS_COUNT;
           sum += mDotsInterpolated[type][index] * mBlurWeights[2 + j];
 
-          if (mDotsInterpolated[type][index] > 0.05)
+          if (mDotsInterpolated[type][index] > MIN_DOT_LEVEL)
             sum += mDotsVariance[type][index];
         }
         mDotsBlurred[type][i] = min(1.0, sum);
@@ -259,7 +250,7 @@ class sts_EventHandler : StaticEventHandler
       for (int i = 0; i < DOTS_COUNT; ++i)
       {
         double dotLevel = mDotsBlurred[type][i];
-        if (dotLevel > 0.05)
+        if (dotLevel > MIN_DOT_LEVEL)
         {
           drawDot(center + makePosition(i, dotLevel, radiusX, radiusY),
                   mColors[type],
@@ -299,7 +290,6 @@ class sts_EventHandler : StaticEventHandler
     mDotSizeCvar      = Cvar.getCvar("sts_dot_size", player);
 
     mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
-    mMaxDistanceCvar  = Cvar.getCvar("sts_max_distance2", player);
 
     mBaseColorCvar        = Cvar.getCvar("sts_color_base", player);
     mColorCvars[Noise]    = Cvar.getCvar("sts_color_noise", player);
@@ -354,10 +344,18 @@ class sts_EventHandler : StaticEventHandler
     memory.ceilingHeight = aSector.centerCeiling();
   }
 
+  // Note: when changing this formula, adjust MAX_DISTANCE (reverse of this).
+  private double distanceToDotLevel(double distance)
+  {
+    return min(1.0, 1.0 / max(distance * distance / DISTANCE_FACTOR, 1.0));
+  }
+
   enum SoundType {Noise, Geometry, Danger, SoundTypesCount}
-  const SCREEN_CENTER = 0.5;
-  const DISTANCE_UNIT = 32;
   const DOTS_COUNT = 32; // Should be divisible by 4 for clear base directions.
+  const MIN_DOT_LEVEL = 0.05;
+  const DISTANCE_FACTOR = 100000.0;
+  const MAX_DISTANCE = sqrt(DISTANCE_FACTOR / MIN_DOT_LEVEL);
+
   private double mDots[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsInterpolated[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsBlurred[SoundTypesCount][DOTS_COUNT];
@@ -374,7 +372,6 @@ class sts_EventHandler : StaticEventHandler
   private CVar mYRadiusCvar;
   private Cvar mDotSizeCvar;
   private Cvar mOnAutomapCvar;
-  private Cvar mMaxDistanceCvar;
   private Cvar mBaseColorCvar;
   private Cvar mColorCvars[SoundTypesCount];
 }
