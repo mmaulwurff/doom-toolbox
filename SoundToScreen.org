@@ -215,6 +215,13 @@ class sts_EventHandler : StaticEventHandler
     for (int i = 0; i < DOTS_COUNT; ++i)
       drawDot(center + makePosition(i, 0.0, radiusX, radiusY), baseColor, dotSize);
 
+    if (level.mapTime < 2)
+    {
+      for (int type = Noise; type < SoundTypesCount; ++type)
+        for (int i = 0; i < DOTS_COUNT; ++i) mDotsInterpolated[type][i] = 0;
+      return;
+    }
+
     for (int type = Noise; type < SoundTypesCount; ++type)
     {
       for (int i = 0; i < DOTS_COUNT; ++i)
@@ -225,12 +232,13 @@ class sts_EventHandler : StaticEventHandler
     }
 
     // Fake sound level changes.
+    double dotsVariance[SoundTypesCount][DOTS_COUNT];
     if (level.time % 3 == 0)
     {
       for (int type = Noise; type < SoundTypesCount; ++type)
       {
         for (int i = 0; i < DOTS_COUNT; ++i)
-          mDotsVariance[type][i] = frandom[SoundToScreen](-MIN_DOT_LEVEL, MIN_DOT_LEVEL);
+          dotsVariance[type][i] = frandom[SoundToScreen](-MIN_DOT_LEVEL, MIN_DOT_LEVEL);
       }
     }
 
@@ -244,6 +252,7 @@ class sts_EventHandler : StaticEventHandler
       0.0613595978134402  / 0.38774041331389975
     };
 
+    double dotsBlurred[SoundTypesCount][DOTS_COUNT];
     for (int type = Noise; type < SoundTypesCount; ++type)
     {
       for (int i = 0; i < DOTS_COUNT; ++i)
@@ -255,9 +264,9 @@ class sts_EventHandler : StaticEventHandler
           sum += mDotsInterpolated[type][index] * blurWeights[2 + j];
 
           if (mDotsInterpolated[type][index] > MIN_DOT_LEVEL)
-            sum += mDotsVariance[type][index];
+            sum += dotsVariance[type][index];
         }
-        mDotsBlurred[type][i] = min(1.0, sum);
+        dotsBlurred[type][i] = min(1.0, sum);
       }
     }
 
@@ -265,7 +274,7 @@ class sts_EventHandler : StaticEventHandler
     {
       for (int i = 0; i < DOTS_COUNT; ++i)
       {
-        double dotLevel = mDotsBlurred[type][i];
+        double dotLevel = dotsBlurred[type][i];
         if (dotLevel > MIN_DOT_LEVEL)
         {
           drawDot(center + makePosition(i, dotLevel, radiusX, radiusY),
@@ -367,8 +376,6 @@ class sts_EventHandler : StaticEventHandler
 
   private double mDots[SoundTypesCount][DOTS_COUNT];
   private ui double mDotsInterpolated[SoundTypesCount][DOTS_COUNT];
-  private ui double mDotsBlurred[SoundTypesCount][DOTS_COUNT];
-  private ui double mDotsVariance[SoundTypesCount][DOTS_COUNT];
   private Color mColors[SoundTypesCount];
   private bool mIsInitialized;
   private ThinkerIterator mIterator;
