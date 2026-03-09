@@ -1,11 +1,5 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2022 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
-
 #+title: SoundToScreen
 # #+version: v1.0.0
 
@@ -16,7 +10,9 @@ without sound, with mono sound, or people with hearing impairment.
 
 ** Features
 
+- Three types of sound: noise (harmless), level (doors, elevators), danger (threats).
 - Compatible with old saves.
+- Options to configure looks.
 
 ** Implementation Notes
 
@@ -31,6 +27,11 @@ without sound, with mono sound, or people with hearing impairment.
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2022 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
 #+begin_src c :tangle build/SoundToScreen/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
@@ -92,8 +93,6 @@ ST_MENU_NAME  = "SoundToScreen \cj⚞\c-";
 ST_DANGER = "Опасность";
 #+end_src
 
-* Cvars
-
 #+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
 
 user float st_x_position = 0.5;
@@ -109,7 +108,7 @@ user color st_color_geometry = "00FF00"; // green
 user color st_color_danger   = "FF0000"; // red
 #+end_src
 
-* Event Handler
+* Code
 
 #+begin_src c :tangle build/SoundToScreen/mapinfo.txt
 
