@@ -51,48 +51,49 @@ TODO: try to make savefile-compatible with SoundToScreen v1.0.0.
 // <<license>>
 #+end_src
 
-* language
+* Options
+
+#+begin_src c :tangle build/SoundToScreen/menudef.txt
+
+OptionMenu sts_Menu
+{
+  sts_PlainTranslator
+
+  Title "$STS_MENU_NAME"
+
+  StaticText  "Position"
+  Slider      "Horizontal", sts_x_position, 0.0, 1.0, 0.01, 2
+  Slider      "Vertical",   sts_y_position, 0.0, 1.0, 0.01, 2
+
+  StaticText  ""
+  Slider      "Width",      sts_x_radius, 20, 50, 1
+  Slider      "Height",     sts_y_radius, 20, 50, 1
+  Slider      "Dot size",   sts_dot_size,  1,  9, 2
+
+  StaticText  ""
+  Option      "On automap", sts_on_automap, OnOff
+
+  StaticText  ""
+  StaticText  "Colors"
+  ColorPicker "Base",   sts_color_base
+  ColorPicker "Noise",  sts_color_noise
+  ColorPicker "Level",  sts_color_geometry
+  ColorPicker "Danger", sts_color_danger
+}
+
+AddOptionMenu OptionsMenu       { Submenu "$STS_MENU_NAME", sts_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$STS_MENU_NAME", sts_Menu }
+#+end_src
+
+[[file:modules/PlainTranslator.org][PlainTranslator]]
 
 #+begin_src c :tangle build/SoundToScreen/language.txt
 
 [enu default]
+STS_MENU_NAME  = "SoundToScreen \cj⚞\c-";
 
-STS_MENU_NAME  = "\cj⚞\c- SoundToScreen Options";
-STS_MENU_TITLE = "SoundToScreen";
-
-STS_ON_AUTOMAP = "On automap";
-
-STS_COLOR_NOISE    = "Noise color";
-STS_COLOR_GEOMETRY = "Level geometry change color";
-STS_COLOR_DANGER   = "Danger color";
-#+end_src
-
-* menudef
-
-// TODO: use PlainTranslator.
-#+begin_src c :tangle build/SoundToScreen/menudef.txt
-
-AddOptionMenu OptionsMenu       { Submenu "$STS_MENU_NAME", sts_Menu }
-AddOptionMenu OptionsMenuSimple { Submenu "$STS_MENU_NAME", sts_Menu }
-
-OptionMenu sts_Menu
-{
-  Title "$STS_MENU_TITLE"
-
-  Slider "Horizontal position", sts_x_position, 0.0, 1.0, 0.01, 2
-  Slider "Vertical position",   sts_y_position, 0.0, 1.0, 0.01, 2
-  Slider "Width",               sts_x_radius, 20, 50, 1
-  Slider "Height",              sts_y_radius, 20, 50, 1
-  Slider "Dot size",            sts_dot_size, 1, 9, 2
-  Option "$STS_ON_AUTOMAP", sts_on_automap, OnOff
-
-  StaticText ""
-  StaticText "Colors"
-  ColorPicker "Base", sts_color_base
-  ColorPicker "$STS_COLOR_NOISE",    sts_color_noise
-  ColorPicker "$STS_COLOR_GEOMETRY", sts_color_geometry
-  ColorPicker "$STS_COLOR_DANGER",   sts_color_danger
-}
+[ru]
+STS_DANGER = "Опасность";
 #+end_src
 
 * Cvars
@@ -122,6 +123,8 @@ GameInfo { EventHandlers = "sts_EventHandler" }
 #+begin_src c :tangle build/SoundToScreen/zscript.zs
 
 version 4.13.3
+
+#include "zscript/sts_PlainTranslator.zs"
 
 class sts_EventHandler : StaticEventHandler
 {

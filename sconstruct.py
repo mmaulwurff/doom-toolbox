@@ -299,6 +299,7 @@ def add_dependency(project, module, namespace):
 
 add_dependency('DoomDoctor', 'StringUtils', 'dd_')
 add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
+add_dependency('SoundToScreen', 'PlainTranslator', 'sts_')
 
 add_dependency('Typist.pk3', 'libeye', 'tt_le_')
 add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
