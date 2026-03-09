@@ -638,7 +638,9 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
   private void setLabel(int val)
   {
-    mLabel = (val == 0) ? StringTable.localize("$X5_000").." 10.5x:" : "10.5x:";
+    mLabel = (val == 0)
+      ? StringTable.localize("$X5_000").." 10.5x \cg⨂"
+      : "10.5x \cg⨂";
   }
 }
 #+end_src

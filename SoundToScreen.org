@@ -56,7 +56,7 @@ OptionMenu st_Menu
 {
   st_PlainTranslator
 
-  Title "$ST_MENU_NAME"
+  Title "SoundToScreen"
 
   StaticText  "Position"
   Slider      "Horizontal", st_x_position, 0.0, 1.0, 0.01, 2
@@ -87,7 +87,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$ST_MENU_NAME", st_Menu }
 #+begin_src c :tangle build/SoundToScreen/language.txt
 
 [enu default]
-ST_MENU_NAME  = "SoundToScreen \cj⚞\c-";
+ST_MENU_NAME  = "SoundToScreen \cj⚞";
 
 [ru]
 ST_DANGER = "Опасность";

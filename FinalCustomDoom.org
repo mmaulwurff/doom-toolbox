@@ -770,7 +770,7 @@ StaticText \"\"" note)
 // Normal $ string identifier can be used too.
 
 [enu default]
-cd_Title = "\c[CDLightBlue]⚒\c- Final Custom Doom";
+cd_Title = "Final Custom Doom \c[CDLightBlue]⚒";
 cd_Regeneration = "Regeneration";
 cd_Degeneration = "Degeneration";
 

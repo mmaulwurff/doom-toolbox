@@ -6924,7 +6924,7 @@ OptionMenu tt_Options
 {
   tt_PlainTranslator
 
-  Title      "$TT_TITLE"
+  Title      "Typist.pk3"
 
   Submenu    "Controls", tt_Controls
 
@@ -7143,7 +7143,7 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 #+begin_src c :tangle build/Typist.pk3/language.txt
 [enu default]
 
-TT_TITLE  = "Typist.pk3";
+TT_TITLE  = "Typist.pk3 ⧆";
 
 TT_UNLOCK = "Unlock Game Mode";
 TT_COMBAT = "Force Combat Mode";
