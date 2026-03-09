@@ -151,12 +151,12 @@ class sts_EventHandler : StaticEventHandler
       let anActor = Actor(aThinker);
       if (anActor != NULL)
       {
-        // TODO: handle actors with BOSS flag.
         if (anActor == player) continue;
         if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
         if (anActor.bMissile && anActor.target == player) continue;
         if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
         double distance = anActor.distance3D(player);
+        if (anActor.bBoss) distance = min(distance, MAX_DISTANCE / 2);
         if (distance > MAX_DISTANCE) continue;
 
         let type = ((anActor.bIsMonster && !anActor.bFriendly && anActor.health > 0)
