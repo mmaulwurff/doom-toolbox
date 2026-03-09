@@ -12,19 +12,15 @@ SPDX-License-Identifier: GPL-3.0-only
 * About
 
 SoundToScreen shows where sounds come from. It may be useful for people who play
-without sound or people with hearing impairment.
+without sound, with mono sound, or people with hearing impairment.
 
 ** Features
 
-TODO: try to make savefile-compatible with SoundToScreen v1.0.0.
-- Compatible with saves saved without SoundToScreen (not compatible with saves saved
-  with SoundToScreen < 2.0.0)
+- Compatible with old saves.
 
 ** Implementation Notes
 
 - SoundToScreen won't work if UZDoom is launched with ~-nosound~.
-- doors and elevators that only wait to move are detected as producing
-  sound. There is no way to detect this properly at the moment.
 
 ** Inspiration
 
@@ -55,34 +51,34 @@ TODO: try to make savefile-compatible with SoundToScreen v1.0.0.
 
 #+begin_src c :tangle build/SoundToScreen/menudef.txt
 
-OptionMenu sts_Menu
+OptionMenu st_Menu
 {
-  sts_PlainTranslator
+  st_PlainTranslator
 
-  Title "$STS_MENU_NAME"
+  Title "$ST_MENU_NAME"
 
   StaticText  "Position"
-  Slider      "Horizontal", sts_x_position, 0.0, 1.0, 0.01, 2
-  Slider      "Vertical",   sts_y_position, 0.0, 1.0, 0.01, 2
+  Slider      "Horizontal", st_x_position, 0.0, 1.0, 0.01, 2
+  Slider      "Vertical",   st_y_position, 0.0, 1.0, 0.01, 2
 
   StaticText  ""
-  Slider      "Width",      sts_x_radius, 20, 50, 1
-  Slider      "Height",     sts_y_radius, 20, 50, 1
-  Slider      "Dot size",   sts_dot_size,  1,  9, 2
+  Slider      "Width",      st_x_radius, 20, 50, 1
+  Slider      "Height",     st_y_radius, 20, 50, 1
+  Slider      "Dot size",   st_dot_size,  1,  9, 2
 
   StaticText  ""
-  Option      "On automap", sts_on_automap, OnOff
+  Option      "On automap", st_on_automap, OnOff
 
   StaticText  ""
   StaticText  "Colors"
-  ColorPicker "Base",   sts_color_base
-  ColorPicker "Noise",  sts_color_noise
-  ColorPicker "Level",  sts_color_geometry
-  ColorPicker "Danger", sts_color_danger
+  ColorPicker "Base",   st_color_base
+  ColorPicker "Noise",  st_color_noise
+  ColorPicker "Level",  st_color_geometry
+  ColorPicker "Danger", st_color_danger
 }
 
-AddOptionMenu OptionsMenu       { Submenu "$STS_MENU_NAME", sts_Menu }
-AddOptionMenu OptionsMenuSimple { Submenu "$STS_MENU_NAME", sts_Menu }
+AddOptionMenu OptionsMenu       { Submenu "$ST_MENU_NAME", st_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$ST_MENU_NAME", st_Menu }
 #+end_src
 
 [[file:modules/PlainTranslator.org][PlainTranslator]]
@@ -90,43 +86,43 @@ AddOptionMenu OptionsMenuSimple { Submenu "$STS_MENU_NAME", sts_Menu }
 #+begin_src c :tangle build/SoundToScreen/language.txt
 
 [enu default]
-STS_MENU_NAME  = "SoundToScreen \cj⚞\c-";
+ST_MENU_NAME  = "SoundToScreen \cj⚞\c-";
 
 [ru]
-STS_DANGER = "Опасность";
+ST_DANGER = "Опасность";
 #+end_src
 
 * Cvars
 
 #+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
 
-user float sts_x_position = 0.5;
-user float sts_y_position = 0.7;
-user float sts_x_radius = 3;
-user float sts_y_radius = 3;
-user int   sts_dot_size = 3;
-user bool  sts_on_automap = false;
+user float st_x_position = 0.5;
+user float st_y_position = 0.3;
+user float st_x_radius = 30;
+user float st_y_radius = 30;
+user int   st_dot_size = 3;
+user bool  st_on_automap = false;
 
-user color sts_color_base     = "000000"; // black
-user color sts_color_noise    = "FFFFFF"; // white
-user color sts_color_geometry = "00FF00"; // green
-user color sts_color_danger   = "FF0000"; // red
+user color st_color_base     = "000000"; // black
+user color st_color_noise    = "FFFFFF"; // white
+user color st_color_geometry = "00FF00"; // green
+user color st_color_danger   = "FF0000"; // red
 #+end_src
 
 * Event Handler
 
 #+begin_src c :tangle build/SoundToScreen/mapinfo.txt
 
-GameInfo { EventHandlers = "sts_EventHandler" }
+GameInfo { EventHandlers = "st_EventHandler" }
 #+end_src
 
 #+begin_src c :tangle build/SoundToScreen/zscript.zs
 
 version 4.13.3
 
-#include "zscript/sts_PlainTranslator.zs"
+#include "zscript/st_PlainTranslator.zs"
 
-class sts_EventHandler : StaticEventHandler
+class st_EventHandler : StaticEventHandler
 {
   override void playerEntered(PlayerEvent event)
   {
@@ -311,18 +307,18 @@ class sts_EventHandler : StaticEventHandler
     mIterator = ThinkerIterator.create("Thinker");
 
     PlayerInfo player = players[consolePlayer];
-    mXPositionCvar    = Cvar.getCvar("sts_x_position", player);
-    mYPositionCvar    = Cvar.getCvar("sts_y_position", player);
-    mXRadiusCvar      = Cvar.getCvar("sts_x_radius", player);
-    mYRadiusCvar      = Cvar.getCvar("sts_y_radius", player);
-    mDotSizeCvar      = Cvar.getCvar("sts_dot_size", player);
+    mXPositionCvar    = Cvar.getCvar("st_x_position", player);
+    mYPositionCvar    = Cvar.getCvar("st_y_position", player);
+    mXRadiusCvar      = Cvar.getCvar("st_x_radius", player);
+    mYRadiusCvar      = Cvar.getCvar("st_y_radius", player);
+    mDotSizeCvar      = Cvar.getCvar("st_dot_size", player);
 
-    mOnAutomapCvar    = Cvar.getCvar("sts_on_automap", player);
+    mOnAutomapCvar    = Cvar.getCvar("st_on_automap", player);
 
-    mBaseColorCvar        = Cvar.getCvar("sts_color_base", player);
-    mColorCvars[Noise]    = Cvar.getCvar("sts_color_noise", player);
-    mColorCvars[Geometry] = Cvar.getCvar("sts_color_geometry", player);
-    mColorCvars[Danger]   = Cvar.getCvar("sts_color_danger", player);
+    mBaseColorCvar        = Cvar.getCvar("st_color_base", player);
+    mColorCvars[Noise]    = Cvar.getCvar("st_color_noise", player);
+    mColorCvars[Geometry] = Cvar.getCvar("st_color_geometry", player);
+    mColorCvars[Danger]   = Cvar.getCvar("st_color_danger", player);
   }
 
   private static int calculateActorScreenPosition(Actor target)
@@ -344,7 +340,7 @@ class sts_EventHandler : StaticEventHandler
   // No way to easily query if a sector is moving, hence this workaround.
   private bool isMoving(Sector aSector)
   {
-    let memory = sts_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
+    let memory = st_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
     return memory != NULL
         && memory.time == level.time - 1
         && (memory.floorHeight != aSector.centerFloor()
@@ -353,10 +349,10 @@ class sts_EventHandler : StaticEventHandler
 
   private void remember(Sector aSector)
   {
-    let memory = sts_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
+    let memory = st_SectorMemory(mSectorMemories.getIfExists(aSector.index()));
     if (memory == NULL)
     {
-      memory = new("sts_SectorMemory");
+      memory = new("st_SectorMemory");
       mSectorMemories.insert(aSector.index(), memory);
     }
 
@@ -394,7 +390,7 @@ class sts_EventHandler : StaticEventHandler
   private Cvar mColorCvars[SoundTypesCount];
 }
 
-class sts_SectorMemory
+class st_SectorMemory
 {
   int time;
   double floorHeight;
@@ -406,18 +402,18 @@ class sts_SectorMemory
 
 #+begin_src c :tangle build/SoundToScreenTest/mapinfo.txt
 
-GameInfo { EventHandlers = "stst_EventHandler" }
+GameInfo { EventHandlers = "stt_EventHandler" }
 #+end_src
 
 #+begin_src c :tangle build/SoundToScreenTest/zscript.zs
 
 version 4.13.3
 
-class stst_EventHandler : StaticEventHandler
+class stt_EventHandler : StaticEventHandler
 {
   override void networkProcess(ConsoleEvent command)
   {
-    if (command.name == "stst_spawn_imps")
+    if (command.name == "stt_spawn_imps")
     {
       int count = command.args[0];
       Console.printf("Spawning %d imps...", count);
