@@ -43,7 +43,21 @@ This project doesn't use any AI tools.
 
 * Gallery
 
+10.5x:
+
+[[file:media/screenshots/10.5x.png]]
+
+Final Custom Doom:
+
+[[file:media/screenshots/FinalCustomDoom.png]]
+
+SoundToScreen:
+
 [[file:media/screenshots/SoundToScreen.png]]
+
+Typist.pk3:
+
+[[file:media/screenshots/Typist.pk3.png]]
 
 * Social
 
