@@ -18,6 +18,7 @@ Add-ons:
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
 - [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][ZDoom forum topic]])
 - [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][ZDoom forum topic]])
+- [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][ZDoom forumm topic]])
 - [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][ZDoom forum topic]])
 
 ZScript modules:
@@ -39,6 +40,10 @@ HTML pages for Doom Toolbox should be available [[https://mmaulwurff.github.io/d
 [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
 
 This project doesn't use any AI tools.
+
+* Gallery
+
+[[file:media/screenshots/SoundToScreen.png]]
 
 * Social
 
