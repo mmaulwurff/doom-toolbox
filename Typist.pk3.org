@@ -6915,10 +6915,8 @@ class tt_TargetOriginSender : tt_Effect
 
 #+begin_src c :tangle build/Typist.pk3/menudef.txt
 
-AddOptionMenu OptionsMenu
-{
-  tt_AnimatedSubmenu "$TT_TITLE", tt_Options
-}
+AddOptionMenu OptionsMenu       { tt_AnimatedSubmenu "$TT_TITLE", tt_Options }
+AddOptionMenu OptionsMenuSimple { tt_AnimatedSubmenu "$TT_TITLE", tt_Options }
 
 OptionMenu tt_Options
 {

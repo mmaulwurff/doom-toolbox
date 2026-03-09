@@ -605,10 +605,8 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 
 #+begin_src text :tangle build/10.5x/menudef.txt
 
-AddOptionMenu OptionsMenu
-{
-  X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1
-}
+AddOptionMenu OptionsMenu       { X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1 }
+AddOptionMenu OptionsMenuSimple { X5Slider "", x5_multiplier, 0, 10.5, 0.1, 1 }
 #+end_src
 
 #+begin_src c :tangle build/10.5x/zscript/OptionMenuItemX5Slider.zs
