@@ -64,10 +64,12 @@ Typist.pk3:
 - [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld]]
 - [[https://mastodon.gamedev.place/@doomtoolbox][Mastodon]]
 
-* Help neeeded
+* Help appreciated
 
 - playtesting: compatibility with games and mods, multiplayer
 - UX suggestions: visuals, wording, usability
+- code reviews: errors, style, readability
+- code contributions: optimizations, features (try to keep project scope)
 
 * Build
 
