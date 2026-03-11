@@ -63,3 +63,4 @@ The order is alphabetical.
 - KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566][libeye]], the concept of VM abort handler
 - Marrub: ZScript [[https://github.com/zdoom-docs/stable][documentation]]
 - ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606][Clematis]]
+- 3saster: [[file:../modules/MD5.org][MD5]]
