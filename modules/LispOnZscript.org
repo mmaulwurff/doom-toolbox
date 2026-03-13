@@ -65,67 +65,61 @@ version 4.14.2
 
 class tl_Test
 {
-  static tl_Test from()
+  static void run()
   {
-    let result = new("tl_Test");
-
     // Expression, expected evaluation result.
+    Map<string, string> cases;
 
-    result.add("0", "0");
-    result.add("1", "1");
-    result.add("(+ 1 2)", "3");
-    result.add("(+ (* 2 3) 4)", "10");
-    result.add("(quote 2)", "2");
-    result.add("(quote (+ 1 2))", "(+ 1 2)");
-    result.add("(atom? (+ 1 2))", "True");
-    result.add("(atom? (q (+ 1 2)))", "False");
-    result.add("(eq? 3 3)", "True");
-    result.add("(car (quote (1 2 3)))", "1");
-    result.add("(cdr (quote (1 2 3)))", "(2 3)");
-    result.add("(cons 1 (quote (2 3)))", "(1 2 3)");
-    result.add("(cond ((< 1 0) 2) ((< 0 1) 3))", "3");
-    result.add("(null? (quote ()))", "True");
-    result.add("(null? 2)", "False");
-    result.add("(if True 1 2)", "1");
-    result.add("(if False 1 2)", "2");
-    result.add("(begin 1 2 3)", "3");
-    result.add("(begin (set! abc 3) abc)", "3");
-    result.add("(begin (define abc 3) abc)", "3");
-    result.add("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
-    result.add("(begin (define cube (lambda (x) (* x (* x x)))) (cube 2))", "8");
-    result.add("\"hello world\"", "\"hello world\"");
-    result.add("(+ \"hello\" \" world\")", "\"hello world\"");
-    result.add("\"️♥\"", "\"️♥\"");
+    cases.insert("0", "0");
+    cases.insert("1", "1");
+    cases.insert("(+ 1 2)", "3");
+    cases.insert("(+ (* 2 3) 4)", "10");
+    cases.insert("(quote 2)", "2");
+    cases.insert("(quote (+ 1 2))", "(+ 1 2)");
+    cases.insert("(atom? (+ 1 2))", "True");
+    cases.insert("(atom? (q (+ 1 2)))", "False");
+    cases.insert("(eq? 3 3)", "True");
+    cases.insert("(car (quote (1 2 3)))", "1");
+    cases.insert("(cdr (quote (1 2 3)))", "(2 3)");
+    cases.insert("(cons 1 (quote (2 3)))", "(1 2 3)");
+    cases.insert("(cond ((< 1 0) 2) ((< 0 1) 3))", "3");
+    cases.insert("(null? (quote ()))", "True");
+    cases.insert("(null? 2)", "False");
+    cases.insert("(if True 1 2)", "1");
+    cases.insert("(if False 1 2)", "2");
+    cases.insert("(begin 1 2 3)", "3");
+    cases.insert("(begin (set! abc 3) abc)", "3");
+    cases.insert("(begin (define abc 3) abc)", "3");
+    cases.insert("(begin (define square (lambda (x) (* x x))) (square 3))", "9");
+    cases.insert("(begin (define cube (lambda (x) (* x (* x x)))) (cube 2))", "8");
+    cases.insert("\"hello world\"", "\"hello world\"");
+    cases.insert("(+ \"hello\" \" world\")", "\"hello world\"");
+    cases.insert("\"️♥\"", "\"️♥\"");
 
-    result.add("",    "Error: unexpected EOF while reading.");
-    result.add("()",  "Error: unexpected empty list.");
-    result.add("(",   "Error: unmatched \"(\".");
-    result.add(")",   "Error: unexpected \")\".");
-    result.add("(2)", "Error: \"2\" is not a function.");
-    result.add("(+ 1 2 3)",
-               "Error: TODO: add support for different number of parameters.");
+    cases.insert("",    "Error: unexpected EOF while reading.");
+    cases.insert("()",  "Error: unexpected empty list.");
+    cases.insert("(",   "Error: unmatched \"(\".");
+    cases.insert(")",   "Error: unexpected \")\".");
+    cases.insert("(2)", "Error: \"2\" is not a function.");
+    cases.insert("(+ 1 2 3)",
+                 "Error: TODO: add support for different number of parameters.");
 
-    result.add("player", "DoomPlayer");
-    result.add("(getCharacterName player)", "\"DoomPlayer\"");
-    result.add("(playerNumber player)", "0");
-    result.add("(isFrozen player)", "False");
-    result.add("(isFriend player player)", "True");
+    cases.insert("player", "DoomPlayer");
+    cases.insert("(getCharacterName player)", "\"DoomPlayer\"");
+    cases.insert("(playerNumber player)", "0");
+    cases.insert("(isFrozen player)", "False");
+    cases.insert("(isFriend player player)", "True");
 
-    return result;
-  }
-
-  void run()
-  {
     int successCount = 0;
 
-    foreach (aCase : cases)
+    foreach (input, expected: cases)
     {
-      Console.printf("Testing \"%s\", expecting \"%s\"", aCase.input, aCase.expected);
+      Console.printf("Testing \"%s\", expecting \"%s\"", input, expected);
 
-      tl_Expression inputExpression = tl_Parser.parse(aCase.input);
+      tl_Expression inputExpression = tl_Parser.parse(input);
       if (inputExpression == NULL)
       {
-        Console.printf("Fail: parse result is NULL");
+        Console.printf("ERROR: parse result is NULL");
         continue;
       }
 
@@ -133,41 +127,20 @@ class tl_Test
       tl_Expression resultExpression = tl_Eval.eval(inputExpression, env);
       if (resultExpression == NULL)
       {
-        Console.printf("Fail: eval result is NULL");
+        Console.printf("ERROR: eval result is NULL");
         continue;
       }
 
       let result = resultExpression.toString();
-      if (result == aCase.expected)
+      if (result == expected)
         ++successCount;
       else
-        Console.printf("Fail: expected: \"%s\", got \"%s\"", aCase.expected, result);
+        Console.printf("ERROR: expected: \"%s\", got \"%s\"", expected, result);
     }
 
-    string result = (successCount == cases.size()) ? "Success" : "Fail";
-    Console.printf("%s: %d succeeded of %d", result, successCount, cases.size());
+    string result = (successCount == cases.countUsed()) ? "Success" : "Fail";
+    Console.printf("%s: %d succeeded of %d", result, successCount, cases.countUsed());
   }
-
-  private void add(string input, string expectedResult)
-  {
-    cases.push(tl_TestCase.from(input, expectedResult));
-  }
-
-  Array<tl_TestCase> cases;
-}
-
-class tl_TestCase
-{
-  static tl_TestCase from(string input, string expected)
-  {
-    let result = new("tl_TestCase");
-    result.input = input;
-    result.expected = expected;
-    return result;
-  }
-
-  string input;
-  string expected;
 }
 #+end_src
 
@@ -186,12 +159,7 @@ class tl_TestEventHandler : StaticEventHandler
 {
   override void networkProcess(ConsoleEvent event)
   {
-    if (event.name == "lisp-test")
-    {
-      let test = tl_Test.from();
-      test.run();
-      return;
-    }
+    if (event.name == "lisp-test") tl_Test.run();
   }
 }
 #+end_src
