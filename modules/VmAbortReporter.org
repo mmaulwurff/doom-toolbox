@@ -1,0 +1,245 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: VmAbortReporter
+
+* About
+
+#+name: description
+#+begin_src org
+
+VM abort reports:
+- system time
+- map name
+- total time
+- multiplayer status
+- player class
+- skill
+- compat flags
+- dm flags
+- autoaim
+- event handler list
+- a request for the user to report the bug
+
+If there are several VM abort handlers loaded, only the first one will print
+stuff. For this to work, all handlers must have ~VmAbortHandler~ somewhere in
+their class name.
+
+To use (besides ZScript code):
+- define cvars:
+  <<cvarinfo>>
+
+- add event handlers in mapinfo:
+  <<mapinfo>>
+#+end_src
+
+#+name: cvarinfo
+#+begin_src c
+
+user bool NAMESPACE_vm_abort_report_enabled = true;
+#+end_src
+
+#+name: mapinfo
+#+begin_src c
+
+GameInfo
+{
+  EventHandlers = "NAMESPACE_VmAbortHandler"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs
+// <<license>>
+
+// <<description>>
+#+end_src
+
+* License
+
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
+* Source
+
+** ~VmAbortHandler~
+
+TODO: make ~VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
+
+#+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs
+
+class NAMESPACE_VmAbortHandler : EventHandler
+{
+  override void playerSpawned(PlayerEvent event)
+  {
+    mReport = new("NAMESPACE_Report");
+    if (event.playerNumber == consolePlayer) mReport.writePlayerInfo();
+  }
+
+  override void uiTick()
+  {
+    bool isOnceASecond = level.totalTime % TICRATE == 0;
+    if (isOnceASecond) mReport.writeSystemTime();
+  }
+
+  override void onDestroy()
+  {
+    if (gameState != GS_FullConsole
+        || !amIFirst()
+        || !Cvar.getCvar("NAMESPACE_vm_abort_report_enabled", players[consolePlayer]).getBool())
+      {
+        return;
+      }
+
+    Console.printf("%s\n%s", mReport.report(), getAttentionMessage());
+  }
+
+  override void consoleProcess(ConsoleEvent event)
+  {
+    if (amIFirst() && event.name == "NAMESPACE_report")
+      {
+        Console.printf("%s", mReport.report());
+      }
+  }
+
+  private clearscope bool amIFirst()
+  {
+    foreach (aClass : AllClasses)
+    {
+      string className = aClass.getClassName();
+      bool isVmAbortHandler = (className.indexOf("VmAbortHandler") != -1);
+
+      if (!isVmAbortHandler) continue;
+
+      return className == getClassName();
+    }
+    return false;
+  }
+
+  private clearscope string getAttentionMessage()
+  {
+    string userName = players[consolePlayer].getUserName();
+    string hashes = "\cg############################################################";
+
+    Array<string> lines =
+      {
+        "",
+        hashes,
+        " " .. userName .. "\cg, please report this VM abort to mod author.",
+        " Attach screenshot to the report.",
+        " Type \"screenshot\" below to take a screenshot.",
+        hashes
+      };
+
+    return NAMESPACE_su.join(lines, "\n");
+  }
+
+  private NAMESPACE_Report mReport;
+}
+#+end_src
+
+** ~Report~
+
+#+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs
+
+class NAMESPACE_Report
+{
+  clearscope void writePlayerInfo()
+  {
+    mPlayerClassName = players[consolePlayer].mo.getClassName();
+    mSkillName       = g_SkillName();
+  }
+
+  ui void writeSystemTime()
+  {
+    mSystemTime = SystemTime.now();
+  }
+
+  clearscope string report()
+  {
+    Array<string> lines =
+      {
+        "DoomDoctor Report: " .. getSystemTime(),
+        getGameInfo(),
+        getConfiguration(),
+        getEventHandlers()
+      };
+
+    return NAMESPACE_su.join(lines, "\n");
+  }
+
+  private static clearscope string getConfiguration()
+  {
+    return new("NAMESPACE_Description")
+      .addCvar("compatflags")
+      .addCvar("compatflags2")
+      .addCvar("dmflags")
+      .addCvar("dmflags2")
+      .addCvar("autoaim").compose();
+  }
+
+  private clearscope string getGameInfo()
+  {
+    return new("NAMESPACE_Description")
+      .add("level", level.mapName)
+      .addInt("time", level.totalTime)
+      .addBool("multiplayer", multiplayer)
+      .add("player class", mPlayerClassName)
+      .add("skill", mSkillName).compose();
+  }
+
+  private static clearscope string getEventHandlers()
+  {
+    Array<string> normalEventHandlers;
+    Array<string> staticEventHandlers;
+
+    foreach (aClass : AllClasses)
+    {
+      if (!(aClass is "StaticEventHandler")) continue;
+      if (aClass == "StaticEventHandler" || aClass == "EventHandler") continue;
+
+      if (aClass is "EventHandler") normalEventHandlers.push(aClass.getClassName());
+      else staticEventHandlers.push(aClass.getClassName());
+    }
+
+    return "Event handlers: " .. NAMESPACE_su.join(normalEventHandlers) .. "\n" ..
+      "Static event handlers: " .. NAMESPACE_su.join(staticEventHandlers);
+  }
+
+  private clearscope string getSystemTime()
+  {
+    return "System time: " .. SystemTime.format("%F %T %Z", mSystemTime);
+  }
+
+  private string mPlayerClassName;
+  private string mSkillName;
+  private int mSystemTime;
+}
+#+end_src
+
+* Tests
+
+#+begin_src text :tangle ../build/VmAbortReporterTest/commands.txt
+
+wait 2; map map01; wait 2; event NAMESPACE_report; wait 2; quit
+#+end_src
+
+#+begin_src c :tangle ../build/VmAbortReporterTest/mapinfo.txt
+<<mapinfo>>
+#+end_src
+#+begin_src c :tangle ../build/VmAbortReporterTest/cvarinfo.txt
+<<cvarinfo>>
+#+end_src
+
+#+begin_src c :tangle ../build/VmAbortReporter/zscript.txt
+
+version 4.13.3
+
+#include "VmAbortReporter.zs"
+#include "zscript/NAMESPACE_StringUtils.zs"
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "cd ..; scons VmAbortReporterTest")
+#+end_src

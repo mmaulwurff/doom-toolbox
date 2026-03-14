@@ -297,8 +297,13 @@ def add_dependency(project, module, namespace):
   )
 
 
+add_dependency('VmAbortReporter', 'StringUtils', 'NAMESPACE_')
+
 add_dependency('DoomDoctor', 'StringUtils', 'dd_')
+add_dependency('DoomDoctor', 'VmAbortReporter', 'dd_')
+
 add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
+
 add_dependency('SoundToScreen', 'PlainTranslator', 'st_')
 
 add_dependency('Typist.pk3', 'libeye', 'tt_le_')
