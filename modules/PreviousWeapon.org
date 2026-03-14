@@ -1,0 +1,164 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: PreviousWeapon
+
+* About
+
+#+name: description
+#+begin_src org
+
+Provides a key to select a previous weapon.
+
+To use (besides ZScript code):
+- add event handlers in mapinfo:
+  <<mapinfo>>
+
+- add an alias and a key in keyconf:
+  <<keyconf>>
+#+end_src
+
+* License
+
+License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
+* Source
+
+#+begin_src c :tangle ../build/PreviousWeapon/PreviousWeapon.zs
+// <<license>>
+
+// <<description>>
+
+// To save data into savegame.
+class NAMESPACE_PreviousWeaponStorage : EventHandler
+{
+  Weapon mCurrentWeapon;
+  Weapon mPreviousWeapon;
+  bool   mIsHolstered;
+}
+
+// Main event handler is static so data is carried over to next level.
+class NAMESPACE_PreviousWeaponEventHandler : StaticEventHandler
+{
+  override void playerEntered(PlayerEvent event)
+  {
+    mStorage = NAMESPACE_PreviousWeaponStorage(EventHandler
+                                               .find("NAMESPACE_PreviousWeaponStorage"));
+    if (event.playerNumber == consolePlayer) updatePreviousWeapon();
+  }
+
+  override void worldLoaded(WorldEvent event)
+  {
+    if (!event.isSaveGame) return;
+
+    mStorage = NAMESPACE_PreviousWeaponStorage(EventHandler
+                                               .find("NAMESPACE_PreviousWeaponStorage"));
+
+    if (mStorage == NULL) return;
+
+    mCurrentWeapon  = mStorage.mCurrentWeapon;
+    mPreviousWeapon = mStorage.mPreviousWeapon;
+    mIsHolstered    = mStorage.mIsHolstered;
+  }
+
+  override void worldTick()
+  {
+    if (mStorage == NULL) return;
+
+    updatePreviousWeapon();
+
+    mStorage.mCurrentWeapon  = mCurrentWeapon;
+    mStorage.mPreviousWeapon = mPreviousWeapon;
+    mStorage.mIsHolstered    = mIsHolstered;
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (mStorage == NULL) return;
+
+    if (event.name == "NAMESPACE_prev_weapon"
+        && mPreviousWeapon != NULL
+        && mPreviousWeapon != players[event.player].ReadyWeapon)
+    {
+      players[event.player].PendingWeapon = mPreviousWeapon;
+    }
+  }
+
+  private void updatePreviousWeapon()
+  {
+    Weapon ready = players[consolePlayer].readyWeapon;
+
+    if (ready == NULL || ready.getClassName() == "mg_Holstered")
+    {
+      if (!mIsHolstered)
+      {
+        // swap
+        let tmp         = mCurrentWeapon;
+        mCurrentWeapon  = mPreviousWeapon;
+        mPreviousWeapon = tmp;
+      }
+      mIsHolstered = true;
+      return;
+    }
+
+    mIsHolstered = false;
+
+    if (mCurrentWeapon != ready)
+    {
+      mPreviousWeapon = mCurrentWeapon;
+    }
+
+    mCurrentWeapon = ready;
+  }
+
+  private NAMESPACE_PreviousWeaponStorage mStorage;
+  private Weapon mCurrentWeapon;
+  private Weapon mPreviousWeapon;
+  private bool   mIsHolstered;
+}
+#+end_src
+
+* Test
+
+Basic check that this code can be loaded.
+
+#+begin_src text :tangle ../build/PreviousWeaponTest/commands.txt
+
+wait 2; map map01; wait 2; netevent NAMESPACE_prev_weapon; wait 2; quit
+#+end_src
+
+#+name: mapinfo
+#+begin_src c :tangle ../build/PreviousWeapon/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers =
+    "NAMESPACE_PreviousWeaponStorage",
+    "NAMESPACE_PreviousWeaponEventHandler"
+}
+#+end_src
+
+#+name: keyconf
+#+begin_src c :tangle ../build/PreviousWeapon/keyconf.txt
+
+Alias NAMESPACE_prev_weapon "netevent NAMESPACE_prev_weapon"
+
+AddKeySection "Previous weapon" PreviousWeaponKeys
+AddMenuKey "Previous weapon" NAMESPACE_prev_weapon
+#+end_src
+
+#+begin_src c :tangle ../build/PreviousWeapon/zscript.txt
+
+version 4.13.3
+
+#include "PreviousWeapon.zs"
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "cd ..; scons PreviousWeaponTest")
+#+end_src
