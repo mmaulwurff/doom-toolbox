@@ -15,52 +15,80 @@ The order is alphabetical.
 
 * Thanks
 
+- Ac!d
+- Apollucas
 - Arkezuli
 - Beed28
 - Blueberryy
 - Captain J
+- Carrascado
 - Colerx
+- Cutmanmike
 - DabbingSquidward
 - dard22
+- Dark-Assassin
 - Doctrine Dark
 - drogga (Commado Pen)
+- DrPyspy
+- Enjay
 - Eruanna
 - FaggoStorm
 - FoxBoy
 - generic name guy
 - ghost
+- HDV
 - HexFlareheart
 - IKA
 - Jarewill
 - Jimmy
+- JMartinez9820
+- JohnDoe8
 - JudgeGroovy
 - kadu522
 - kondoriyano
+- krutomisi
+- Lippeth
+- lucker42
+- mamaluigisbagel
+- Mr. Blazkowicz
 - murka
 - Nems
 - Nightsentinel
 - Paul Fioravanti
 - Phantom Allies
+- Player701
 - Proydoha
 - przemko27
 - Rowsol
+- rparhkdtp
+- Samarai1000
+- sebastianpanetta
+- Someone64
 - Spaceman333
+- spectrefps
 - SphericalCube
 - Star-X555
+- StraightWhiteMan
 - StroggVorbis
+- Talon1024
 - Tapwave
 - The Zombie Killer
+- TheRailgunner
+- wildweasel
 - Zhs2
 - ZikShadow
 
 * Special Thanks
 
+- [[https://github.com/ZDoom/gzdoom/graphs/contributors][GZDoom contributors]]
+- [[https://github.com/UZDoom/UZDoom/graphs/contributors][UZDoom contributors]]
+- [[https://forum.zdoom.org/][ZDoom Forums]] maintainers and admins
 - [[https://zdoom.org/w/index.php][ZDoom Wiki]] contributors
-- Lud (Accensus): [[https://forum.zdoom.org/viewtopic.php?t=51446][Custom Doom]], Dictionary testing
+
+- 3saster: [[file:../modules/MD5.org][MD5]]
 - Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
 - fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]
-- Graf Zahl: GZDoom
 - KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566][libeye]], the concept of VM abort handler
+- Lud (Accensus): [[https://forum.zdoom.org/viewtopic.php?t=51446][Custom Doom]], Dictionary testing
 - Marrub: ZScript [[https://github.com/zdoom-docs/stable][documentation]]
 - ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606][Clematis]]
-- 3saster: [[file:../modules/MD5.org][MD5]]

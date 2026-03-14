@@ -1,0 +1,96 @@
+# https://reuse.software/
+
+version = 1
+
+[[annotations]]
+path = "graphics/gb_ammo.png"
+SPDX-FileCopyrightText = "© 202 0 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_box.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_circ.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_circ.png"
+SPDX-FileCopyrightText = "© 2020 Accensus"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_cor.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_desc.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_hand.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_hand.png"
+SPDX-FileCopyrightText = "© 2020 Accensus"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_hcir.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_hcir.png"
+SPDX-FileCopyrightText = "© 2020 Accensus"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_nope.png"
+SPDX-FileCopyrightText = "© 2021 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_pip.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_pntr.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_pntr.png"
+SPDX-FileCopyrightText = "© 2020 Accensus"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "graphics/gb_weap.png"
+SPDX-FileCopyrightText = "© 2020 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Switch.ogg https://freesound.org/people/egomassive/sounds/536802/
+[[annotations]]
+path = "sounds/gb_nope.ogg"
+SPDX-FileCopyrightText = "© 2020 egomassive"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Click Tick.wav https://freesound.org/people/malle99/sounds/384187/
+[[annotations]]
+path = "sounds/gb_tick.ogg"
+SPDX-FileCopyrightText = "© 2017 malle99"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Metal Clang sound https://freesound.org/people/kermite607/sounds/362625/
+[[annotations]]
+path = "sounds/gb_toggle.ogg"
+SPDX-FileCopyrightText = "© 2016 kermite607"
+SPDX-License-Identifier = "CC0-1.0"

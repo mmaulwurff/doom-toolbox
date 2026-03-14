@@ -314,6 +314,10 @@ add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
 add_dependency('Typist.pk3', 'StringUtils', 'tt_su_')
 add_dependency('Typist.pk3', 'PlainTranslator', 'tt_')
 
+add_dependency('Gearbox', 'MD5', 'gb_')
+add_dependency('Gearbox', 'PreviousWeapon', 'gb_')
+add_dependency('Gearbox', 'StringUtils', 'gb_')
+add_dependency('Gearbox', 'VmAbortReporter', 'gb_')
 
 # Help
 Help(

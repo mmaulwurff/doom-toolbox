@@ -1,0 +1,5381 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: Gearbox
+# #+version: v0.7.3
+
+* About
+
+Gearbox is an add-on for GZDoom engine that provides more convenient ways to
+select weapons and items.
+
+Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+** How to Use
+
+1. open the menu by assigned key, or by next/previous weapon keys, if enabled in
+   options
+2. select the weapon with next/previous weapon keys, or with mouse (wheel only)
+3. use the drop weapon or drop inventory keys to drop selected thing
+
+** Features
+
+- Different representations: blocks, wheel, plain text
+- Press Fire key to select and Alt Fire key to cancel
+- Color and scale options
+- Behavior options
+- Multiplayer compatible
+- Reaction to number keys
+- extras.wad icon support for vanilla weapons
+- Inventory item selection
+- Ability to drop items or weapons from the menu
+
+** Note for Weapon Mod Authors
+
+If you want Gearbox to support your mod out of the box, assign Inventory.AltHudIcon
+for your weapons! Tag property is also nice to have.
+
+** Known Issues
+
+- [[https://forum.zdoom.org/viewtopic.php?f=43&t=61061][PyWeaponWheel v0.3]] overrides time freezing. If you are using both mods and want to
+  freeze time with Gearbox, set PyWeaponWheel's option "Freeze when wheel is open"
+  (`py_weaponwheel_freeze` CVar) to Off. Note that PyWeaponWheel may be built in some
+  mods. The solution is the same: disable time PyWeaponWheel's time freezing.
+- Weapon icons in wheel aren't affected by "HUD preserves aspect ration" option.
+- Mouse input in wheel in multiplayer causes screen shake.
+
+** Creating a Soundpack
+
+To create a new soundpack, replace the GB_PACK string in language.txt with your
+soundpack's name, then replace the sndinfo definitions with your own sounds, for
+example:
+
+In sndinfo.txt, add
+
+~gearbox/pack/tick sounds/[soundpack name]_tick.ogg~
+
+~gearbox/pack/open sounds/[soundpack name]_open.ogg~
+
+~gearbox/pack/close sounds/[soundpack name]_close.ogg~
+
+~gearbox/pack/nope sounds/[soundpack name]_nope.ogg~
+
+(replace [soundpack name] with your own name!)
+
+And you're done! Just select "Custom Soundpack" in the Gearbox UI options, and check
+if your sounds work.
+
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/menudef.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/sndinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/language.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/keyconf.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/mapinfo.txt
+// <<license>>
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/zscript/activity.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/changer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/freezer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/input.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/options.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/printer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/sender.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/sounds.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/view_model.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/gldefs.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/service/service.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs
+// <<license>>
+#+end_src
+
+* Options
+
+#+begin_src c :tangle build/Gearbox/menudef.txt
+
+AddOptionMenu OptionsMenu       { Submenu "$GB_OPTIONS", gb_Options }
+AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
+
+// Menus
+
+OptionMenu gb_Options
+{
+  Title "$GB_OPTIONS"
+
+  StaticText  ""
+  Option      "$GB_VIEW_TYPE", gb_view_type, gb_ViewTypeValues
+
+  StaticText  ""
+  StaticText  "$GB_KEYSECTION", 1
+  Control     "$GB_TOGGLE_WEAPON_MENU"    , "+gb_toggle_weapon_menu"
+  Control     "$GB_TOGGLE_INVENTORY_MENU" , "+gb_toggle_inventory_menu"
+  Control     "$GB_PREV_WEAPON"           , "gb_prev_weapon"
+  Control     "$GB_ROTATE_WEAPON_PRIORITY", "gb_rotate_weapon_priority"
+  Control     "$GB_ROTATE_WEAPON_SLOT"    , "gb_rotate_weapon_slot"
+
+  StaticText  ""
+  Submenu     "$GB_BEHAVIOR_OPTIONS" , gb_BehaviorOptions
+  Submenu     "$GB_UI_OPTIONS"       , gb_UiOptions
+  Submenu     "$GB_WHEEL_OPTIONS"    , gb_WheelOptions
+  Submenu     "$GB_BLOCKS_OPTIONS"   , gb_BlocksOptions
+  Submenu     "$GB_TEXT_OPTIONS"     , gb_TextOptions
+  Submenu     "$GB_ADVANCED_OPTIONS" , gb_AdvancedOptions
+  Submenu     "$GB_GZDOOM_OPTIONS"   , gb_GZDoomOptions
+
+  StaticText  ""
+  SafeCommand "$GB_RESET"              , gb_reset              , "$GB_RESET_PROMPT"
+  SafeCommand "$GB_RESET_CUSTOM_ORDER" , gb_reset_custom_order , "$GB_RESET_CUSTOM_ORDER_PROMPT"
+  StaticText  "$GB_RESET_CUSTOM_ORDER_NOTE", black
+}
+
+OptionMenu gb_BehaviorOptions
+{
+  Title "$GB_BEHAVIOR_OPTIONS_TITLE"
+
+  Option      "$GB_OPEN_ON_PREV_NEXT"        , gb_open_on_scroll           , OnOff
+
+  StaticText  ""
+  Option      "$GB_OPEN_ON_SLOT"             , gb_open_on_slot             , OnOff
+  Option      "$GB_REVERSE_SLOT_CYCLE_ORDER" , gb_reverse_slot_cycle_order , OnOff
+  Option      "$GB_SELECT_FIRST_SLOT_WEAPON" , gb_select_first_slot_weapon , OnOff
+  Option      "$GB_NO_MENU_IF_ONE"           , gb_no_menu_if_one           , OnOff
+
+  StaticText  ""
+  Option      "$GB_SELECT_ON_KEY_UP"         , gb_select_on_key_up         , OnOff
+  Option      "$GB_FREEZE_TIME"              , gb_time_freeze              , gb_FreezeValues
+  Option      "$GB_ENABLE_ON_AUTOMAP"        , gb_on_automap               , OnOff
+  Option      "$GB_LOCK_POSITION"            , gb_lock_positions           , OnOff
+  Option      "$GB_FROZEN_CAN_OPEN"          , gb_frozen_can_open          , OnOff
+}
+
+OptionMenu gb_GZDoomOptions
+{
+  Title "$GB_GZDOOM_OPTIONS_TITLE"
+
+  StaticText ""
+  Option     "$SCALEMNU_HUDASPECT", hud_AspectScale, OnOff
+  StaticText "$GB_ASPECT_SCALE_NOTE", black
+}
+
+OptionMenu gb_UiOptions
+{
+  Title "$GB_UI_OPTIONS_TITLE"
+
+  StaticText  ""
+  ColorPicker "$GB_COLOR"     , gb_color
+  Command     "$GB_PLAYER_COLOR", gb_copy_player_color
+
+  StaticText  ""
+  Option      "$GB_SHOW_TAGS" , gb_show_tags      , OnOff
+
+  StaticText  ""
+  Option      "$GB_DIM"       , gb_enable_dim     , OnOff
+  ColorPicker "$GB_DIM_COLOR" , gb_dim_color
+  Option      "$GB_BLUR"      , gb_enable_blur    , OnOff
+
+  StaticText  ""
+  Option      "$GB_SOUND"     , gb_enable_sounds  , OnOff
+  Option      "$GB_SOUNDPACK", gb_soundpack, gb_SoundpackValues, "gb_enable_sounds"
+
+  StaticText  ""
+  Option      "$GB_FONT"        , gb_font , gb_FontValues
+  TextField   "$GB_FONT_CUSTOM" , gb_font
+}
+
+OptionMenu gb_WheelOptions
+{
+  Title "$GB_WHEEL_OPTIONS_TITLE"
+
+  StaticText  ""
+  Slider      "$GB_WHEEL_X"     , gb_wheel_position , -1.5, 1.5, 0.1, 1
+  Slider      "$GB_WHEEL_SCALE" , gb_wheel_scale    , 0.1, 2, 0.1, 1
+  Option      "$GB_WHEEL_TINT"  , gb_wheel_tint     , OnOff
+
+  StaticText  ""
+  Option      "$GB_MOUSE_IN_WHEEL"    , gb_mouse_in_wheel   , OnOff
+  Slider      "$GB_MULTIWHEEL_LIMIT"  , gb_multiwheel_limit , 3, 100, 1, 0
+
+  StaticText  ""
+  StaticText  "$GB_MOUSE_SENSITIVITY", 1
+  Slider      "$GB_X", gb_mouse_sensitivity_x, 0.1, 5, 0.1, 1
+  Slider      "$GB_Y", gb_mouse_sensitivity_y, 0.1, 5, 0.1, 1
+}
+
+OptionMenu gb_BlocksOptions
+{
+  Title "$GB_BLOCKS_OPTIONS_TITLE"
+
+  StaticText ""
+  Slider     "$GB_SCALE"    , gb_scale, 1, 8, 1, 0
+
+  StaticText ""
+  StaticText "$GB_POSITION", 1
+  Slider     "$GB_X" , gb_blocks_position_x, 0.0, 1.0, 0.01, 2
+  Slider     "$GB_Y" , gb_blocks_position_y, 0.0, 1.0, 0.01, 2
+}
+
+OptionMenu gb_TextOptions
+{
+  Title "$GB_TEXT_OPTIONS_TITLE"
+
+  StaticText ""
+  Slider     "$GB_SCALE" , gb_text_scale, 1, 8, 1, 0
+
+  StaticText ""
+  StaticText "$GB_POSITION", 1
+  Slider     "$GB_X"          , gb_text_position_x     , 0.0, 1.0, 0.01, 2
+  Slider     "$GB_Y"          , gb_text_position_y     , 0.0, 1.0, 0.01, 2
+  Slider     "$GB_Y_BOUNDARY" , gb_text_position_y_max , 0.0, 1.0, 0.01, 2
+
+  StaticText ""
+  Option "$GB_TEXT_USUAL_COLOR"    , gb_text_usual_color    , TextColors
+  Option "$GB_TEXT_SELECTED_COLOR" , gb_text_selected_color , TextColors
+}
+
+OptionMenu gb_AdvancedOptions
+{
+  Title "$GB_ADVANCED_OPTIONS_TITLE"
+
+  StaticText ""
+  Option     "$GB_VM_ABORT_INFO_ENABLED", gb_zabor_enabled, OnOff
+}
+
+// Option Values
+
+OptionValue gb_ViewTypeValues
+{
+  0, "$GB_BLOCKY_VIEW"
+  1, "$GB_WHEEL_VIEW"
+  2, "$GB_TEXT_VIEW"
+}
+
+OptionValue gb_SoundpackValues
+{
+  0, "$GB_GEARBOX"
+  1, "$GB_PACK1"
+}
+
+OptionValue gb_FreezeValues
+{
+  0, "$OPTVAL_OFF"
+  1, "$GB_LEVEL_AND_PLAYER"
+  2, "$GB_PLAYER"
+}
+
+OptionString gb_FontValues
+{
+  "NewSmallFont" , "$GB_NEW_SMALL_FONT"
+  "SmallFont"    , "$GB_OLD_SMALL_FONT"
+  "ConsoleFont"  , "$GB_CONSOLE_FONT"
+  "BigFont"      , "$GB_BIG_FONT"
+}
+#+end_src
+
+* CVars
+
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+
+// When adding new options, don't forget to add them to:
+// - keyconf.txt:Alias gb_reset.
+
+// Options
+
+user int   gb_scale     = 1;
+user color gb_color     = "22 22 CC";
+user color gb_dim_color = "99 99 99";
+user bool  gb_show_tags = true;
+
+// 0 - blocky view
+// 1 - wheel view
+user int gb_view_type = 1;
+
+user bool  gb_enable_dim       = true;
+user bool  gb_enable_blur      = false;
+user float gb_wheel_position   = 1.0;
+user float gb_wheel_scale      = 1.0;
+user bool  gb_wheel_tint       = true;
+user int   gb_multiwheel_limit = 12;
+
+user float gb_blocks_position_x = 0.0;
+user float gb_blocks_position_y = 0.0;
+
+user int   gb_text_scale      = 1;
+user float gb_text_position_x = 0.0;
+user float gb_text_position_y = 0.0;
+user float gb_text_position_y_max = 1.0;
+user int   gb_text_usual_color    = 21; // cyan
+user int   gb_text_selected_color =  9; // white
+
+user string gb_font = "NewSmallFont";
+
+user bool gb_open_on_scroll   = false;
+
+user bool gb_open_on_slot     = true;
+user bool gb_reverse_slot_cycle_order  = false;
+user bool gb_select_first_slot_weapon  = false;
+
+user int gb_soundpack = 0;
+
+user bool gb_mouse_in_wheel   = true;
+user bool gb_select_on_key_up = false;
+user bool gb_no_menu_if_one   = false;
+user bool gb_on_automap       = false;
+user bool gb_lock_positions   = false;
+user bool gb_enable_sounds    = true;
+user bool gb_frozen_can_open  = false;
+
+user int  gb_time_freeze      = 0;
+
+user float gb_mouse_sensitivity_x = 1.0;
+user float gb_mouse_sensitivity_y = 1.0;
+
+user bool gb_zabor_enabled = true;
+
+// Custom weapon order storage
+
+nosave string gb_custom_weapon_order = "";
+#+end_src
+
+* Sounds
+
+#+begin_src c :tangle build/Gearbox/sndinfo.txt
+
+// Gearbox
+
+gearbox/tick sounds/gb_tick.ogg
+$volume gearbox/tick 0.5
+
+gearbox/open sounds/gb_toggle.ogg
+$volume gearbox/open 0.2
+
+gearbox/close sounds/gb_toggle.ogg
+$volume gearbox/close 0.2
+
+gearbox/nope sounds/gb_nope.ogg
+$volume gearbox/nope 0.5
+
+// Custom Soundpacks
+
+gearbox/pack/tick sounds/gb_tick.ogg
+$volume gearbox/pack/tick 0.5
+
+gearbox/pack/open sounds/gb_toggle.ogg
+$volume gearbox/pack/open 0.2
+
+gearbox/pack/close sounds/gb_toggle.ogg
+$volume gearbox/pack/close 0.2
+
+gearbox/pack/nope sounds/gb_nope.ogg
+$volume gearbox/pack/nope 0.5
+
+// Not found
+
+gearbox/notfound sounds/error.wav
+$volume gearbox/notfound 0.5
+#+end_src
+
+* Language
+
+#+begin_src c :tangle build/Gearbox/language.txt
+
+// SPDX-FileCopyrightText: © 2022 generic name guy
+
+[enu default]
+
+GB_GEARBOX = "Gearbox";
+GB_PACK1 = "Custom Soundpack";
+
+GB_OPTIONS = "\ch⚙\c- Gearbox Options";
+
+GB_UI_OPTIONS       = "UI options";
+GB_UI_OPTIONS_TITLE = "Gearbox UI Options";
+
+GB_COLOR          = "Color";
+GB_PLAYER_COLOR   = "Copy custom player color";
+GB_DIM_COLOR      = "Background dimming color";
+
+GB_SHOW_TAGS      = "Tags";
+GB_SOUND          = "Sound effects";
+
+GB_KEYSECTION            = "Gearbox Keys";
+GB_TOGGLE_WEAPON_MENU    = "Toggle weapon menu";
+GB_TOGGLE_INVENTORY_MENU = "Toggle inventory menu";
+GB_PREV_WEAPON           = "Select previous weapon";
+
+GB_VIEW_TYPE   = "Selector type";
+GB_BLOCKY_VIEW = "Blocks";
+GB_WHEEL_VIEW  = "Wheel";
+GB_TEXT_VIEW   = "Plain text";
+GB_DIM         = "Background dimming";
+GB_BLUR        = "Background blur";
+GB_WHEEL_X     = "Horizontal position";
+GB_WHEEL_SCALE = "Scale";
+GB_WHEEL_TINT  = "Colored tint on weapons";
+
+GB_BEHAVIOR_OPTIONS        = "Behavior options";
+GB_BEHAVIOR_OPTIONS_TITLE  = "Gearbox Behavior Options";
+
+GB_OPEN_ON_PREV_NEXT = "Intercept next/previous weapon keys";
+GB_OPEN_ON_SLOT      = "Intercept slot keys";
+GB_SELECT_ON_KEY_UP  = "Select on Toggle Menu key release";
+GB_NO_MENU_IF_ONE    = "Slot keys select if weapon is only one in slot";
+GB_ENABLE_ON_AUTOMAP = "Gearbox on automap";
+GB_LOCK_POSITION     = "Locked positions";
+GB_FROZEN_CAN_OPEN   = "Frozen player can open Gearbox";
+
+GB_REVERSE_SLOT_CYCLE_ORDER = "Reverse cycling order for the slot key";
+GB_SELECT_FIRST_SLOT_WEAPON = "Always start at first weapon for the slot key";
+
+GB_FREEZE_TIME       = "Freeze";
+GB_LEVEL_AND_PLAYER  = "Enemies and player (single-player only)";
+GB_PLAYER            = "Player";
+
+GB_MOUSE_IN_WHEEL    = "Enable mouse input";
+GB_MULTIWHEEL_LIMIT  = "Multiwheel threshold";
+
+GB_MOUSE_SENSITIVITY = "Mouse sensitivity";
+GB_X = "Horizontal";
+GB_Y = "Vertical";
+GB_Y_BOUNDARY = "Vertical lower boundary";
+
+GB_WHEEL_OPTIONS        = "Wheel options";
+GB_WHEEL_OPTIONS_TITLE  = "Gearbox Wheel Options";
+GB_BLOCKS_OPTIONS       = "Blocks options";
+GB_BLOCKS_OPTIONS_TITLE = "Gearbox Blocks Options";
+
+GB_TEXT_OPTIONS         = "Plain text options";
+GB_TEXT_OPTIONS_TITLE   = "Gearbox Plain Text Options";
+GB_TEXT_USUAL_COLOR     = "Usual color";
+GB_TEXT_SELECTED_COLOR  = "Selected color";
+
+GB_FONT        = "Font";
+GB_FONT_CUSTOM = "Font (custom)";
+GB_BAD_FONT    = "Font \"%s\" not found.";
+
+GB_SCALE    = "Scale";
+GB_POSITION = "Position";
+GB_X        = "Horizontal";
+GB_Y        = "Vertical";
+
+GB_RESET        = "Reset Gearbox options to defaults";
+GB_RESET_PROMPT = "Do you really want to reset Gearbox options to defaults?";
+
+GB_RESET_CUSTOM_ORDER        = "Reset current custom weapon order";
+GB_RESET_CUSTOM_ORDER_PROMPT = "Do you really want to reset custom weapon order?";
+GB_RESET_CUSTOM_ORDER_NOTE   = "Works only while in game.";
+
+GB_GZDOOM_OPTIONS       = "Relevant GZDoom options";
+GB_GZDOOM_OPTIONS_TITLE = "GZDoom Options that affect Gearbox";
+GB_ASPECT_SCALE_NOTE    = "Doesn't affect weapons in wheel for now.";
+
+GB_ADVANCED_OPTIONS = "Advanced options";
+GB_ADVANCED_OPTIONS_TITLE = "Gearbox Advanced Options";
+GB_VM_ABORT_INFO_ENABLED  = "VM abort info";
+
+GB_ROTATE_WEAPON_PRIORITY = "Cycle weapon priority";
+GB_ROTATE_WEAPON_SLOT     = "Cycle weapon slot";
+GB_SOUNDPACK = "Soundpack";
+
+GB_NEW_SMALL_FONT = "New small font";
+GB_OLD_SMALL_FONT = "Old small font";
+GB_CONSOLE_FONT   = "Console font";
+GB_BIG_FONT       = "Big font";
+
+[pt]
+
+GB_PACK1 = "Pacote de Sons Personalizado";
+
+GB_OPTIONS = "\ch⚙\c- Opções do Gearbox";
+
+GB_UI_OPTIONS       = "Opções de IU";
+GB_UI_OPTIONS_TITLE = "Opções de IU do Gearbox";
+
+GB_COLOR          = "Cor";
+GB_PLAYER_COLOR   = "Copiar cor personalizada do jogador";
+GB_DIM_COLOR      = "Cor de atenuação do fundo";
+
+GB_SHOW_TAGS      = "Tags";
+GB_SOUND          = "Efeitos sonoros";
+
+GB_KEYSECTION            = "Teclas do Gearbox";
+GB_TOGGLE_WEAPON_MENU    = "Abrir menu de armas";
+GB_TOGGLE_INVENTORY_MENU = "Abrir menu de inventário";
+GB_PREV_WEAPON           = "Selecionar arma anterior";
+
+GB_VIEW_TYPE   = "Tipo de selecionador";
+GB_BLOCKY_VIEW = "Blocos";
+GB_WHEEL_VIEW  = "Roda";
+GB_TEXT_VIEW   = "Texto plano";
+GB_DIM         = "Atenuação do fundo";
+GB_BLUR        = "Borrar fundo";
+GB_WHEEL_X     = "Posição horizontal";
+GB_WHEEL_SCALE = "Tamanho";
+GB_WHEEL_TINT  = "Tonalidade colorida nas armas";
+
+GB_BEHAVIOR_OPTIONS        = "Opções de comportamento";
+GB_BEHAVIOR_OPTIONS_TITLE  = "Opções de comportamento do Gearbox";
+
+GB_OPEN_ON_PREV_NEXT = "Interceptir teclas de arma proxima/anterior";
+GB_OPEN_ON_SLOT      = "Interceptir teclas de número das armas";
+GB_SELECT_ON_KEY_UP  = "Selecionar quando soltar o botão de Abrir";
+GB_NO_MENU_IF_ONE    = "Teclas de slot se tiver apenas uma arma no slot";
+GB_ENABLE_ON_AUTOMAP = "Gearbox no automapa";
+GB_LOCK_POSITION     = "Posições travadas";
+GB_FROZEN_CAN_OPEN   = "Jogadores congelados podem abrir o Gearbox";
+
+GB_REVERSE_SLOT_CYCLE_ORDER = "Ordem de circulação reversa";
+GB_SELECT_FIRST_SLOT_WEAPON = "Sempre começar na primeira arma";
+
+GB_FREEZE_TIME       = "Congelar";
+GB_LEVEL_AND_PLAYER  = "Inimigos e jogador (Apenas singleplayer)";
+GB_PLAYER            = "Jogador";
+
+GB_MOUSE_IN_WHEEL    = "Habilitar mouse";
+GB_MULTIWHEEL_LIMIT  = "Limite de múltiplas rodas";
+
+GB_MOUSE_SENSITIVITY = "Sensibilidade do mouse";
+GB_Y_BOUNDARY = "Limite vertical";
+
+GB_WHEEL_OPTIONS        = "Opções de Roda";
+GB_WHEEL_OPTIONS_TITLE  = "Opções da Roda do Gearbox";
+GB_BLOCKS_OPTIONS       = "Opções de Blocos";
+GB_BLOCKS_OPTIONS_TITLE = "Opções de Blocos do Gearbox";
+
+GB_TEXT_OPTIONS         = "Opções de Texto Plano";
+GB_TEXT_OPTIONS_TITLE   = "Opções de Texto Plano do Gearbox";
+GB_TEXT_USUAL_COLOR     = "Cor normal";
+GB_TEXT_SELECTED_COLOR  = "Cor selecionada";
+
+GB_FONT        = "Fonte";
+GB_FONT_CUSTOM = "Fonte (Personalizada)";
+GB_BAD_FONT    = "A fonte \"%s\" não foi encontrada.";
+
+GB_SCALE    = "Tamanho";
+GB_POSITION = "Posição";
+
+GB_RESET        = "Redefinir configurações padrões do Gearbox";
+GB_RESET_PROMPT = "Você realmente quer redefinir suas configurações do Gearbox aos padrões?";
+
+GB_RESET_CUSTOM_ORDER        = "Redefinir ordem de armas atual";
+GB_RESET_CUSTOM_ORDER_PROMPT = "Você realmente quer redefinir suas ordens personalizadas de armas?";
+GB_RESET_CUSTOM_ORDER_NOTE   = "Só funciona dentro do jogo.";
+
+GB_GZDOOM_OPTIONS       = "Opções relevantes do GZDoom";
+GB_GZDOOM_OPTIONS_TITLE = "Opções do GZDoom que afetam o Gearbox";
+GB_ASPECT_SCALE_NOTE    = "Não afeta armas na roda por agora.";
+
+GB_ADVANCED_OPTIONS = "Opções avançadas";
+GB_ADVANCED_OPTIONS_TITLE = "Opções avançadas do Gearbox";
+GB_VM_ABORT_INFO_ENABLED  = "Informações de VM Abort";
+
+GB_ROTATE_WEAPON_PRIORITY = "Circular prioridade de arma";
+GB_ROTATE_WEAPON_SLOT     = "Circular slot de arma";
+GB_SOUNDPACK = "Pacote de sons";
+
+GB_NEW_SMALL_FONT = "Fonte pequena nova";
+GB_OLD_SMALL_FONT = "Fonte pequena antiga";
+GB_CONSOLE_FONT   = "Fonte do console";
+GB_BIG_FONT       = "Fonte grande";
+#+end_src
+
+* Keys
+
+#+begin_src c :tangle build/Gearbox/keyconf.txt
+
+// Aliases
+
+Alias +gb_toggle_weapon_menu "event gb_toggle_weapon_menu"
+Alias -gb_toggle_weapon_menu "event gb_toggle_weapon_menu_up"
+
+Alias +gb_toggle_inventory_menu "event gb_toggle_inventory_menu"
+Alias -gb_toggle_inventory_menu "event gb_toggle_inventory_menu_up"
+
+Alias gb_prev_weapon "netevent gb_prev_weapon"
+
+Alias gb_rotate_weapon_priority "event gb_rotate_weapon_priority"
+Alias gb_rotate_weapon_slot     "event gb_rotate_weapon_slot"
+Alias gb_reset_custom_order     "netevent gb_reset_custom_order"
+
+Alias gb_report "event gd_report"
+
+Alias gb_copy_player_color "gb_color $color"
+
+// TODO: do this programmatically.
+Alias gb_reset "ResetCvar gb_scale; ResetCvar gb_color; ResetCvar gb_dim_color; ResetCvar gb_show_tags; ResetCvar gb_view_type; ResetCvar gb_enable_dim; ResetCvar gb_enable_blur; ResetCvar gb_wheel_position; ResetCvar gb_wheel_scale; ResetCvar gb_wheel_tint; ResetCvar gb_multiwheel_limit; ResetCvar gb_blocks_position_x; ResetCvar gb_blocks_position_y; ResetCvar gb_text_scale; ResetCvar gb_text_position_x; ResetCvar gb_text_position_y; ResetCvar gb_text_position_y_max; ResetCvar gb_text_usual_color; ResetCvar gb_text_selected_color; ResetCvar gb_open_on_scroll; ResetCvar gb_open_on_slot; ResetCvar gb_reverse_slot_cycle_order; ResetCvar gb_select_first_slot_weapon; ResetCvar gb_mouse_in_wheel; ResetCvar gb_select_on_key_up; ResetCvar gb_no_menu_if_one; ResetCvar gb_on_automap; ResetCvar gb_lock_positions; ResetCvar gb_enable_sounds; ResetCvar gb_frozen_can_open; ResetCvar gb_time_freeze; ResetCvar gb_mouse_sensitivity_x; ResetCvar gb_mouse_sensitivity_y; ResetCvar gb_zabor_enabled"
+
+// Keys
+
+AddKeySection "$GB_KEYSECTION" gb_Keys
+
+AddMenuKey "$GB_TOGGLE_WEAPON_MENU"    +gb_toggle_weapon_menu
+AddMenuKey "$GB_TOGGLE_INVENTORY_MENU" +gb_toggle_inventory_menu
+AddMenuKey "$GB_PREV_WEAPON"            gb_prev_weapon
+AddMenuKey "$GB_ROTATE_WEAPON_PRIORITY" gb_rotate_weapon_priority
+AddMenuKey "$GB_ROTATE_WEAPON_SLOT"     gb_rotate_weapon_slot
+#+end_src
+
+* Project setup :noexport:
+
+#+begin_src c :tangle build/Gearbox/zscript.zs
+
+version 4.14.3
+
+<<tools/scripts.org:include("Gearbox.org", "build/Gearbox/\\(zscript/.*zs\\)")>>
+
+#include "zscript/gb_MD5.zs"
+#include "zscript/gb_PreviousWeapon.zs"
+#include "zscript/gb_StringUtils.zs"
+#include "zscript/gb_VmAbortReporter.zs"
+#+end_src
+
+#+begin_src text :tangle build/tmp.txt :exports none
+<<tools/scripts.org:copy-media("Gearbox")>>
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/mapinfo.txt
+
+Gameinfo
+{
+  EventHandlers =
+    "gb_EventHandler",
+    "gb_PreviousWeaponEventHandler",
+    "gb_PreviousWeaponStorage",
+    "gb_VmAbortHandler"
+}
+#+end_src
+
+* Source
+
+** Behavior
+*** ~Activity~
+
+#+begin_src c :tangle build/Gearbox/zscript/activity.zs
+
+// This class stores top-level Gearbox state.
+// It can be either Weapons, Inventory, or None.
+class gb_Activity
+{
+  static
+  gb_Activity from()
+  {
+    let result = new("gb_Activity");
+    result.mActivity = gb_Activity.None;
+    return result;
+  }
+
+  bool isNone()      const { return mActivity == gb_Activity.None;      }
+  bool isWeapons()   const { return mActivity == gb_Activity.Weapons;   }
+  bool isInventory() const { return mActivity == gb_Activity.Inventory; }
+
+  void toggleWeaponMenu()
+  {
+    switch (mActivity)
+    {
+    case gb_Activity.Inventory:
+    case gb_Activity.None:    mActivity = gb_Activity.Weapons; break;
+    case gb_Activity.Weapons: mActivity = gb_Activity.None;    break;
+    }
+  }
+
+  void close()         { mActivity = gb_Activity.None; }
+  void openWeapons()   { mActivity = gb_Activity.Weapons; }
+  void openInventory() { mActivity = gb_Activity.Inventory; }
+
+  enum Activity
+  {
+
+    None,
+    Weapons,
+    Inventory,
+
+  }
+
+  private int mActivity;
+}
+#+end_src
+
+*** ~Changer~
+
+#+begin_src c :tangle build/Gearbox/zscript/changer.zs
+
+// SPDX-FileCopyrightText: © 2025 SandPoot
+
+class gb_Changer play
+{
+  static
+  gb_Changer from(gb_Caption caption, gb_Options options, gb_InventoryUser inventoryUser)
+  {
+    let result = new("gb_Changer");
+    result.mCaption       = caption;
+    result.mOptions       = options;
+    result.mInventoryUser = inventoryUser;
+    return result;
+  }
+
+  void selectWeapon(PlayerInfo player, string weapon)
+  {
+    Weapon targetWeapon = Weapon(player.mo.findInventory(weapon));
+    if (targetWeapon && gb_WeaponWatcher.currentFor(player) != targetWeapon.getClass())
+    {
+      player.pendingWeapon = targetWeapon;
+      if (mOptions.isShowingWeaponTagsOnChange()) mCaption.setActor(targetWeapon);
+    }
+  }
+
+  void useItem(PlayerInfo player, string item)
+  {
+    mInventoryUser.addToQueue(player, item);
+  }
+
+  void dropItem(PlayerInfo player, string itemString)
+  {
+    Inventory item = player.mo.findInventory(itemString);
+    if (item)
+      player.mo.dropInventory(item, 1);
+  }
+
+  static
+  void setAngles(PlayerInfo player, double pitch, double angle)
+  {
+    if (player.mo == NULL) return;
+
+    player.cheats |= CF_InterpView;
+    player.mo.pitch = pitch;
+    player.mo.angle = angle;
+
+    // To prevent mods that add weapon sway from swaying while moving mouse in wheel.
+    player.cmd.yaw   = 0;
+    player.cmd.pitch = 0;
+  }
+
+  static
+  void freezePlayer( PlayerInfo player
+                   , int        cheats
+                   , double     velocityX
+                   , double     velocityY
+                   , double     velocityZ
+                   , double     gravity
+                   )
+  {
+    if (player.mo == NULL) return;
+
+    vector3 velocity  = (velocityX, velocityY, velocityZ);
+    player.cheats     = cheats;
+    player.vel        = velocity.xy;
+    player.mo.vel     = velocity;
+    player.mo.gravity = gravity;
+  }
+
+  private gb_Caption       mCaption;
+  private gb_Options       mOptions;
+  private gb_InventoryUser mInventoryUser;
+}
+#+end_src
+
+*** ~CustomWeaponOrderStorage~
+
+#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs
+
+class gb_WeaponOrderOperations
+{
+  static
+  gb_WeaponOrderOperations from()
+  {
+    let result = new("gb_WeaponOrderOperations");
+    result.index.clear();
+    result.operationType.clear();
+    return result;
+  }
+
+  Array<int> index;
+  Array<int> operationType;
+}
+
+class gb_CustomWeaponOrderStorage
+{
+  enum OperationType
+  {
+    RotatePriority,
+    RotateSlot,
+  }
+
+  static
+  string calculateHash(gb_WeaponData data)
+  {
+    string dataString;
+
+    uint nWeapons = data.weapons.size();
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      dataString.appendFormat("%s%d", data.weapons[i].getClassName(), data.slots[i]);
+    }
+
+    return gb_MD5.hash(dataString);
+  }
+
+  static
+  void applyOperations(string weaponSetHash, gb_WeaponMenu menu)
+  {
+    let operations = gb_WeaponOrderOperations.from();
+    string operationsData = loadFromStorage(weaponSetHash);
+    deserializeOperations(operationsData, operations);
+
+    uint nOperations = operations.index.size();
+    for (uint i = 0; i < nOperations; ++i)
+    {
+      switch (operations.operationType[i])
+      {
+      case RotatePriority:
+        menu.rotatePriorityForIndex(operations.index[i]);
+        break;
+
+      case RotateSlot:
+        menu.rotateSlotForIndex(operations.index[i]);
+        break;
+
+      default:
+        Console.printf("Unknown operation: %d.", operations.operationType[i]);
+      }
+    }
+  }
+
+  static
+  void savePriorityRotation(string weaponSetHash, int index)
+  {
+    saveOperation(weaponSetHash, index, RotatePriority);
+  }
+
+  static
+  void saveSlotRotation(string weaponSetHash, int index)
+  {
+    saveOperation(weaponSetHash, index, RotateSlot);
+  }
+
+  static
+  void reset(string weaponSetHash)
+  {
+    Dictionary weaponSetOrders = readWeaponSetOrders();
+    weaponSetOrders.remove(weaponSetHash);
+    getStorageCvar().setString(weaponSetOrders.toString());
+  }
+
+  static
+  void saveOperation(string weaponSetHash, int index, int operationType)
+  {
+    let operations = gb_WeaponOrderOperations.from();
+    {
+      string operationsData = loadFromStorage(weaponSetHash);
+      deserializeOperations(operationsData, operations);
+    }
+
+    operations.index        .push(index);
+    operations.operationType.push(operationType);
+
+    string operationsData = serializeOperations(operations);
+    saveToStorage(weaponSetHash, operationsData);
+  }
+
+  private static
+  void saveToStorage(string hash, string data)
+  {
+    Dictionary weaponSetOrders = readWeaponSetOrders();
+    weaponSetOrders.insert(hash, data);
+    getStorageCvar().setString(weaponSetOrders.toString());
+  }
+
+  private static
+  string loadFromStorage(string hash)
+  {
+    return readWeaponSetOrders().at(hash);
+  }
+
+  private static
+  Dictionary readWeaponSetOrders()
+  {
+    return Dictionary.fromString(getStorageCvar().getString());
+  }
+
+  private static
+  Cvar getStorageCvar()
+  {
+    return Cvar.getCvar(STORAGE_CVAR_NAME);
+  }
+
+  private static
+  string serializeOperations(gb_WeaponOrderOperations operations)
+  {
+    string result;
+    uint nOperations = operations.index.size();
+    for (uint i = 0; i < nOperations; ++i)
+    {
+      result.appendFormat( "%d" .. DELIMITER .. "%d" .. DELIMITER
+                         , operations.index[i]
+                         , operations.operationType[i]
+                         );
+    }
+    return result;
+  }
+
+  private static
+  void deserializeOperations(string data, out gb_WeaponOrderOperations operations)
+  {
+    Array<string> tokens;
+    data.split(tokens, DELIMITER, TOK_SkipEmpty);
+
+    if (tokens.size() % 2 != 0)
+    {
+      Console.printf("Weapon order data is corrupted!");
+      return;
+    }
+
+    uint nTokens = tokens.size();
+    for (uint i = 0; i < nTokens; i += 2)
+    {
+      operations.index        .push(tokens[i    ].toInt());
+      operations.operationType.push(tokens[i + 1].toInt());
+    }
+  }
+
+  const STORAGE_CVAR_NAME = "gb_custom_weapon_order";
+  const DELIMITER = ";";
+}
+#+end_src
+
+*** ~EventProcessor~
+
+#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs
+
+class gb_EventProcessor
+{
+  static
+  int process(ConsoleEvent event, bool isSelectOnKeyUp)
+  {
+    if (event.name == "gb_toggle_weapon_menu") return InputToggleWeaponMenu;
+    if (event.name == "gb_toggle_weapon_menu_up" && isSelectOnKeyUp) return InputConfirmSelection;
+
+    if (event.name == "gb_toggle_inventory_menu") return InputToggleInventoryMenu;
+    if (event.name == "gb_toggle_inventory_menu_up" && isSelectOnKeyUp) return InputConfirmSelection;
+    if (event.name == "gb_rotate_weapon_priority") return InputRotateWeaponPriority;
+    if (event.name == "gb_rotate_weapon_slot"    ) return InputRotateWeaponSlot;
+
+    return InputNothing;
+  }
+}
+#+end_src
+
+*** ~FontSelector~
+
+#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs
+
+class gb_FontSelector
+{
+  static
+  gb_FontSelector from()
+  {
+    let result = new("gb_FontSelector");
+    result.mFontString = gb_Cvar.from("gb_font");
+    return result;
+  }
+
+  Font getFont()
+  {
+    Font newFont = Font.getFont(mFontString.getString());
+
+    if (newFont == NULL && mOldFont != NULL)
+    {
+      Console.printf(StringTable.localize("$GB_BAD_FONT"), mFontString.getString());
+    }
+
+    mOldFont = newFont;
+
+    if (newFont == NULL)
+    {
+      newFont = NewSmallFont;
+    }
+
+    return newFont;
+  }
+
+
+  private gb_Cvar        mFontString;
+  private transient Font mOldFont;
+}
+#+end_src
+
+*** ~Freezer~
+
+#+begin_src c :tangle build/Gearbox/zscript/freezer.zs
+
+class gb_Freezer play
+{
+  static
+  gb_Freezer from(gb_Options options)
+  {
+    let result = new("gb_Freezer");
+    result.mWasFrozen = false;
+    result.mOptions   = options;
+    result.mWasLevelFrozen = false;
+    return result;
+  }
+
+  void freeze()
+  {
+    if (mWasFrozen) return;
+    mWasFrozen = true;
+
+    int freezeMode = mOptions.getTimeFreezeMode();
+    if (isLevelFreezeEnabled (freezeMode)) freezeLevel();
+    if (isPlayerFreezeEnabled(freezeMode)) freezePlayer();
+  }
+
+  void thaw()
+  {
+    if (!mWasFrozen) return;
+    mWasFrozen = false;
+
+    if (isLevelThawEnabled()) thawLevel();
+    thawPlayer();
+  }
+
+  /**
+   * Corresponds to gb_FreezeValues in menudef.
+   */
+  private static
+  bool isLevelFreezeEnabled(int freezeMode)
+  {
+    return !multiplayer && (freezeMode == 1);
+  }
+
+  /**
+   * Corresponds to gb_FreezeValues in menudef.
+   *
+   * Freezing level without player causes weird behavior, like weapon bobbing
+   * while Gearbox is open. So, freeze player when level is frozen too.
+   */
+  private static
+  bool isPlayerFreezeEnabled(int freezeMode)
+  {
+    return freezeMode != 0;
+  }
+
+  /**
+   * Thaw regardless of freeze mode.
+   */
+  private static
+  bool isLevelThawEnabled()
+  {
+    return !multiplayer;
+  }
+
+  private
+  void freezeLevel()
+  {
+    mWasLevelFrozen = level.isFrozen();
+    level.setFrozen(true);
+  }
+
+  private
+  void freezePlayer()
+  {
+    mWasPlayerFrozen = true;
+
+    PlayerInfo player = players[consolePlayer];
+
+    mCheats   = player.cheats;
+    mVelocity = player.mo.vel;
+    mGravity  = player.mo.gravity;
+
+    gb_Sender.sendFreezePlayerEvent(player.cheats | FROZEN_CHEATS_FLAGS, (0, 0, 0), 0);
+  }
+
+  private
+  void thawLevel() const
+  {
+    level.setFrozen(mWasLevelFrozen);
+  }
+
+  private
+  void thawPlayer() const
+  {
+    if (mWasPlayerFrozen) gb_Sender.sendFreezePlayerEvent(mCheats, mVelocity, mGravity);
+    mWasPlayerFrozen = false;
+  }
+
+  const FROZEN_CHEATS_FLAGS  = CF_TotallyFrozen | CF_Frozen;
+
+  private bool    mWasFrozen;
+
+  private bool    mWasLevelFrozen;
+  private bool    mWasPlayerFrozen;
+
+  private int     mCheats;
+  private vector3 mVelocity; // to reset weapon bobbing.
+  private double  mGravity;
+
+  private gb_Options mOptions;
+}
+#+end_src
+
+*** ~Input~
+
+#+begin_src c :tangle build/Gearbox/zscript/input.zs
+
+// SPDX-FileCopyrightText: © 2025 SandPoot
+
+enum gb_Inputs
+{
+  InputNothing,
+
+  InputSelectNextWeapon,
+  InputSelectPrevWeapon,
+  InputConfirmSelection,
+  InputDrop,
+  InputToggleWeaponMenu,
+
+  InputSelectSlotBegin,
+  InputSelectSlotEnd = InputSelectSlotBegin + 11,
+  InputClose,
+
+  InputToggleInventoryMenu,
+  InputConfirmInventorySelection,
+
+  InputRotateWeaponPriority,
+  InputRotateWeaponSlot,
+  InputResetCustomOrder,
+}
+
+class gb_Input
+{
+  static
+  bool isSlot(gb_Inputs input)
+  {
+    return (InputSelectSlotBegin <= input && input <= InputSelectSlotEnd);
+  }
+
+  static
+  int getSlot(gb_Inputs input)
+  {
+    return input - InputSelectSlotBegin;
+  }
+}
+#+end_src
+
+*** ~InputProcessor~
+
+#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs
+
+// SPDX-FileCopyrightText: © 2025 SandPoot
+
+class gb_InputProcessor
+{
+  static
+  gb_Inputs process(InputEvent event)
+  {
+    if (event.type != InputEvent.Type_KeyDown) return InputNothing;
+
+    int key = event.keyScan;
+    if (isKeyForCommand(key, "weapNext"  )) return InputSelectNextWeapon;
+    if (isKeyForCommand(key, "weapPrev"  )) return InputSelectPrevWeapon;
+    if (isKeyForCommand(key, "+attack"   )) return InputConfirmSelection;
+    if (isKeyForCommand(key, "+altAttack")) return InputClose;
+    if (isKeyForCommand(key, "weapdrop"  )) return InputDrop;
+    if (isKeyForCommand(key, "invdrop"   )) return InputDrop;
+
+    for (int i = 0; i <= 11; ++i)
+    {
+      if (isKeyForCommand(key, string.format("slot %d", i))) return i + InputSelectSlotBegin;
+    }
+
+    return InputNothing;
+  }
+
+  private static
+  bool isKeyForCommand(int key, string command)
+  {
+    Array<int> keys;
+    bindings.getAllKeysForCommand(keys, command);
+    uint nKeys = keys.size();
+    for (uint i = 0; i < nKeys; ++i)
+    {
+      if (keys[i] == key) return true;
+    }
+    return false;
+  }
+}
+#+end_src
+
+*** ~InventoryMenu~
+
+#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs
+// SPDX-FileCopyrightText: © 2022 Carrascado
+
+class gb_InventoryMenu
+{
+  static
+  gb_InventoryMenu from()
+  {
+    let result = new("gb_InventoryMenu");
+
+    result.mSelectedIndex = 0;
+
+    return result;
+  }
+
+  static
+  bool thereAreNoItems()
+  {
+    return getItemsNumber() == 0;
+  }
+
+  string confirmSelection() const
+  {
+    let item  = players[consolePlayer].mo.inv;
+    int index = 0;
+    while (item != NULL)
+    {
+      if (item.bInvBar)
+      {
+        if (index == mSelectedIndex) return item.getClassName();
+        ++index;
+      }
+      item = item.inv;
+    }
+
+    return "";
+  }
+
+  ui
+  bool selectNext()
+  {
+    int nItems = getItemsNumber();
+    if (nItems == 0) return false;
+
+    mSelectedIndex = (mSelectedIndex + 1) % nItems;
+
+    return true;
+  }
+
+  ui
+  bool selectPrev()
+  {
+    int nItems = getItemsNumber();
+    if (nItems == 0) return false;
+
+    mSelectedIndex = (mSelectedIndex - 1 + nItems) % nItems;
+
+    return true;
+  }
+
+  ui
+  bool setSelectedIndex(int index)
+  {
+    if (index == -1 || mSelectedIndex == index) return false;
+
+    mSelectedIndex = index;
+
+    return true;
+  }
+
+  ui
+  int getSelectedIndex() const
+  {
+    return mSelectedIndex;
+  }
+
+  ui
+  void fill(out gb_ViewModel viewModel)
+  {
+    let item  = players[consolePlayer].mo.inv;
+    int index = 0;
+    while (item != NULL)
+    {
+      if (item.bInvBar)
+      {
+        string tag  = item.getTag();
+        TextureID icon = BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
+        viewModel.tags        .push(tag);
+        viewModel.slots       .push(index + 1);
+        viewModel.indices     .push(index);
+        viewModel.icons       .push(icon);
+        viewModel.iconScaleXs .push(1);
+        viewModel.iconScaleYs .push(1);
+        viewModel.quantity1   .push(item.maxAmount > 1 ? item.amount : -1);
+        viewModel.maxQuantity1.push(item.maxAmount);
+        viewModel.quantity2   .push(-1);
+        viewModel.maxQuantity2.push(-1);
+
+        ++index;
+      }
+      item = item.inv;
+    }
+
+    mSelectedIndex = min(mSelectedIndex, getItemsNumber() - 1);
+    if (mSelectedIndex == -1 && getItemsNumber() > 0) mSelectedIndex = 0;
+    viewModel.selectedIndex = mSelectedIndex;
+  }
+
+  private static
+  int getItemsNumber()
+  {
+    let item   = players[consolePlayer].mo.inv;
+    int result = 0;
+    while (item != NULL)
+    {
+      result += item.bInvBar;
+      item = item.inv;
+    }
+    return result;
+  }
+
+  private int mSelectedIndex;
+}
+#+end_src
+
+*** ~InventoryUser~
+
+#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs
+
+/**
+ * We could use inventory items directly, but player cannot use items when
+ * totally frozen. Therefore, we have to wait until player is not frozen.
+ */
+class gb_InventoryUser play
+{
+  static
+  gb_InventoryUser from()
+  {
+    return new("gb_InventoryUser");
+  }
+
+  void use()
+  {
+    for (uint i = 0; i < mItemQueue.size();)
+    {
+      PlayerPawn player = mPlayerQueue[i].mo;
+      if (player == NULL)
+      {
+        deleteFromQueue(i);
+        continue;
+      }
+
+      Inventory item = player.findInventory(mItemQueue[i]);
+      if (item == NULL)
+      {
+        deleteFromQueue(i);
+        continue;
+      }
+
+      if (player.player.isTotallyFrozen())
+      {
+        ++i;
+        continue;
+      }
+      else
+      {
+        player.useInventory(item);
+        deleteFromQueue(i);
+      }
+    }
+  }
+
+  void addToQueue(PlayerInfo player, string item)
+  {
+    mPlayerQueue.push(player);
+    mItemQueue.push(item);
+  }
+
+  private
+  void deleteFromQueue(uint index)
+  {
+    mPlayerQueue.delete(index);
+    mItemQueue.delete(index);
+  }
+
+  private Array<PlayerInfo> mPlayerQueue;
+  private Array<string>     mItemQueue;
+}
+#+end_src
+
+*** ~NeteventProcessor~
+
+#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs
+
+class gb_NeteventProcessor play
+{
+  static
+  gb_NeteventProcessor from(gb_Changer changer)
+  {
+    let result = new("gb_NeteventProcessor");
+    result.mChanger = changer;
+    return result;
+  }
+
+  int process(ConsoleEvent event)
+  {
+    if (event.name.left(3) != "gb_") return InputNothing;
+
+    Array<string> args;
+    event.name.split(args, ":");
+
+    PlayerInfo player = players[event.player];
+
+    if      (args[0] == "gb_select_weapon") mChanger.selectWeapon(player, args[1]);
+    else if (args[0] == "gb_use_item"     ) mChanger.useItem     (player, args[1]);
+    else if (args[0] == "gb_drop_item"    ) mChanger.dropItem    (player, args[1]);
+    else if (args[0] == "gb_set_angles"   ) mChanger.setAngles   (player, args[1].toDouble()
+                                                                        , args[2].toDouble()
+                                                                 );
+    else if (args[0] == "gb_freeze_player") mChanger.freezePlayer(player, args[1].toInt()
+                                                                        , args[2].toInt()
+                                                                        , args[3].toDouble()
+                                                                        , args[4].toDouble()
+                                                                        , args[5].toDouble()
+                                                                 );
+    else if (args[0] == "gb_reset_custom_order") return InputResetCustomOrder;
+
+    return InputNothing;
+  }
+
+  private gb_Changer mChanger;
+}
+#+end_src
+
+*** ~Options~
+
+#+begin_src c :tangle build/Gearbox/zscript/options.zs
+// SPDX-FileCopyrightText: © 2022 Carrascado
+
+class gb_Options
+{
+  static
+  gb_Options from()
+  {
+    let result = new("gb_Options");
+
+    result.mScale                  = gb_Cvar.from("gb_scale");
+    result.mColor                  = gb_Cvar.from("gb_color");
+    result.mDimColor               = gb_Cvar.from("gb_dim_color");
+    result.mViewType               = gb_Cvar.from("gb_view_type");
+    result.mIsDimEnabled           = gb_Cvar.from("gb_enable_dim");
+    result.mIsBlurEnabled          = gb_Cvar.from("gb_enable_blur");
+    result.mWheelTint              = gb_Cvar.from("gb_wheel_tint");
+    result.mMultiWheelLimit        = gb_Cvar.from("gb_multiwheel_limit");
+    result.mShowTags               = gb_Cvar.from("gb_show_tags");
+    result.mShowWeaponTagsOnChange = gb_Cvar.from("DisplayNameTags");
+    result.mIsPositionLocked       = gb_Cvar.from("gb_lock_positions");
+    result.mFrozenCanOpen          = gb_Cvar.from("gb_frozen_can_open");
+    result.mPreserveAspectRatio    = gb_Cvar.from("hud_AspectScale");
+
+    result.mOpenOnScroll           = gb_Cvar.from("gb_open_on_scroll");
+    result.mOpenOnSlot             = gb_Cvar.from("gb_open_on_slot");
+    result.mReverseSlotCycleOrder  = gb_Cvar.from("gb_reverse_slot_cycle_order");
+    result.mSelectFirstSlotWeapon  = gb_Cvar.from("gb_select_first_slot_weapon");
+    result.mMouseInWheel           = gb_Cvar.from("gb_mouse_in_wheel");
+    result.mSelectOnKeyUp          = gb_Cvar.from("gb_select_on_key_up");
+    result.mNoMenuIfOne            = gb_Cvar.from("gb_no_menu_if_one");
+    result.mTimeFreeze             = gb_Cvar.from("gb_time_freeze");
+    result.mOnAutomap              = gb_Cvar.from("gb_on_automap");
+    result.mEnableSounds           = gb_Cvar.from("gb_enable_sounds");
+
+    result.mMouseSensitivityX      = gb_Cvar.from("gb_mouse_sensitivity_x");
+    result.mMouseSensitivityY      = gb_Cvar.from("gb_mouse_sensitivity_y");
+    result.mInvertMouseX           = gb_Cvar.from("invertMouseX");
+    result.mInvertMouseY           = gb_Cvar.from("invertMouse");
+
+    result.mBlocksPositionX        = gb_Cvar.from("gb_blocks_position_x");
+    result.mBlocksPositionY        = gb_Cvar.from("gb_blocks_position_y");
+
+    result.mTextScale              = gb_Cvar.from("gb_text_scale");
+    result.mTextPositionX          = gb_Cvar.from("gb_text_position_x");
+    result.mTextPositionY          = gb_Cvar.from("gb_text_position_y");
+    result.mTextPositionYMax       = gb_Cvar.from("gb_text_position_y_max");
+    result.mTextUsualColor         = gb_Cvar.from("gb_text_usual_color");
+    result.mTextSelectedColor      = gb_Cvar.from("gb_text_selected_color");
+
+    result.mWheelPosition          = gb_Cvar.from("gb_wheel_position");
+    result.mWheelScale             = gb_Cvar.from("gb_wheel_scale");
+
+    result.mUseSoundpack           = gb_Cvar.from("gb_soundpack");
+
+    return result;
+  }
+
+  int  getViewType()                 const { return mViewType              .getInt();     }
+  int  getScale()                    const { return mScale                 .getInt();     }
+  int  getColor()                    const { return mColor                 .getInt();     }
+  int  getDimColor()                 const { return mDimColor              .getInt();     }
+  bool isDimEnabled()                const { return mIsDimEnabled          .getBool();    }
+  bool isBlurEnabled()               const { return mIsBlurEnabled         .getBool();    }
+  bool getWheelTint()                const { return mWheelTint             .getBool();    }
+  int  getMultiWheelLimit()          const { return mMultiWheelLimit       .getInt();     }
+  bool isShowingTags()               const { return mShowTags              .getBool();    }
+  bool isShowingWeaponTagsOnChange() const { return mShowWeaponTagsOnChange.getInt() & 2; }
+  bool isPositionLocked()            const { return mIsPositionLocked      .getBool();    }
+  bool isFrozenCanOpen()             const { return mFrozenCanOpen         .getBool();    }
+  bool isPreservingAspectRatio()     const { return mPreserveAspectRatio   .getBool();    }
+
+  bool isOpenOnScroll()              const { return mOpenOnScroll          .getBool();    }
+  bool isOpenOnSlot()                const { return mOpenOnSlot            .getBool();    }
+  bool isSlotCycleOrderReversed()    const { return mReverseSlotCycleOrder .getBool();    }
+  bool isSelectFirstSlotWeapon()     const { return mSelectFirstSlotWeapon .getBool();    }
+  bool isMouseInWheel()              const { return mMouseInWheel          .getBool();    }
+  bool isSelectOnKeyUp()             const { return mSelectOnKeyUp         .getBool();    }
+  bool isNoMenuIfOne()               const { return mNoMenuIfOne           .getBool();    }
+  bool isOnAutomap()                 const { return mOnAutomap             .getBool();    }
+  bool isSoundEnabled()              const { return mEnableSounds          .getBool();    }
+
+  int  getTimeFreezeMode()           const { return mTimeFreeze            .getInt();     }
+
+  int  getSoundpack()           const { return mUseSoundpack          .getInt();     }
+
+  vector2 getMouseSensitivity() const
+  {
+    double xDirection = mInvertMouseX.getBool() ? -1 : 1;
+    double yDirection = mInvertMouseY.getBool() ? -1 : 1;
+    return ( mMouseSensitivityX.getDouble() * xDirection
+           , mMouseSensitivityY.getDouble() * yDirection
+           );
+  }
+
+  vector2 getBlocksPosition() const
+  {
+    return (mBlocksPositionX.getDouble(), mBlocksPositionY.getDouble());
+  }
+
+  int getTextScale()           const { return mTextScale        .getInt();   }
+  int getTextUsualColor()      const { return mTextUsualColor   .getInt();   }
+  int getTextSelectedColor()   const { return mTextSelectedColor.getInt();   }
+  double getTextPositionYMax() const { return mTextPositionYMax.getDouble(); }
+
+  vector2 getTextPosition() const
+  {
+    return (mTextPositionX.getDouble(), mTextPositionY.getDouble());
+  }
+
+
+  double getWheelPosition() const { return mWheelPosition.getDouble(); }
+  double getWheelScale()    const { return mWheelScale.getDouble(); }
+
+  private gb_Cvar mScale;
+  private gb_Cvar mColor;
+  private gb_Cvar mDimColor;
+  private gb_Cvar mViewType;
+  private gb_Cvar mIsDimEnabled;
+  private gb_Cvar mIsBlurEnabled;
+  private gb_Cvar mWheelTint;
+  private gb_Cvar mMultiWheelLimit;
+  private gb_Cvar mShowTags;
+  private gb_Cvar mShowWeaponTagsOnChange;
+  private gb_Cvar mIsPositionLocked;
+
+  private gb_Cvar mOpenOnScroll;
+  private gb_Cvar mOpenOnSlot;
+  private gb_Cvar mReverseSlotCycleOrder;
+  private gb_Cvar mSelectFirstSlotWeapon;
+  private gb_Cvar mMouseInWheel;
+  private gb_Cvar mSelectOnKeyUp;
+  private gb_Cvar mNoMenuIfOne;
+  private gb_Cvar mTimeFreeze;
+  private gb_Cvar mOnAutomap;
+  private gb_Cvar mEnableSounds;
+  private gb_Cvar mFrozenCanOpen;
+  private gb_Cvar mPreserveAspectRatio;
+
+  private gb_Cvar mMouseSensitivityX;
+  private gb_Cvar mMouseSensitivityY;
+
+  private gb_Cvar mInvertMouseX;
+  private gb_Cvar mInvertMouseY;
+
+  private gb_Cvar mBlocksPositionX;
+  private gb_Cvar mBlocksPositionY;
+
+  private gb_Cvar mTextScale;
+  private gb_Cvar mTextPositionX;
+  private gb_Cvar mTextPositionY;
+  private gb_Cvar mTextPositionYMax;
+  private gb_Cvar mTextUsualColor;
+  private gb_Cvar mTextSelectedColor;
+
+  private gb_Cvar mWheelPosition;
+  private gb_Cvar mWheelScale;
+
+  private gb_Cvar mUseSoundpack;
+}
+#+end_src
+
+*** ~Printer~
+
+#+begin_src c :tangle build/Gearbox/zscript/printer.zs
+
+class gb_Printer
+{
+  static
+  void printWeaponData(gb_WeaponData data)
+  {
+    uint nWeapons = data.weapons.size();
+    uint nSlots = data.slots.size();
+
+    console.printf("numbers: %d, %d", nWeapons, nSlots);
+
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      let default = getDefaultByType(data.weapons[i]);
+      console.printf( "%s (%s), slot %d"
+                    , default.getTag()
+                    , default.getClassName()
+                    , data.slots[i]
+                    );
+    }
+  }
+}
+#+end_src
+
+*** ~Sender~
+
+#+begin_src c :tangle build/Gearbox/zscript/sender.zs
+
+// SPDX-FileCopyrightText: © 2025 SandPoot
+
+class gb_Sender
+{
+  static
+  void sendSelectEvent(string className)
+  {
+    EventHandler.sendNetworkEvent(string.format("gb_select_weapon:%s", className));
+  }
+
+  static
+  void sendUseItemEvent(string className)
+  {
+    EventHandler.sendNetworkEvent(string.format("gb_use_item:%s", className));
+  }
+
+  static
+  void sendDropItemEvent(string className)
+  {
+    EventHandler.sendNetworkEvent(string.format("gb_drop_item:%s", className));
+  }
+
+  static
+  void sendFreezePlayerEvent(int cheats, vector3 velocity, double gravity)
+  {
+    EventHandler.sendNetworkEvent(string.format( "gb_freeze_player:%d:%f:%f:%f:%f"
+                                               , cheats
+                                               , velocity.x
+                                               , velocity.y
+                                               , velocity.z
+                                               , gravity
+                                               ));
+  }
+
+  static
+  void sendPlayerAngles(double pitch, double yaw)
+  {
+    EventHandler.sendNetworkEvent("gb_set_angles:" .. pitch .. ":" .. yaw);
+  }
+}
+#+end_src
+
+*** ~Sounds~
+
+#+begin_src c :tangle build/Gearbox/zscript/sounds.zs
+
+// SPDX-FileCopyrightText: © 2022 Carrascado
+
+class gb_Sounds
+{
+  static
+  gb_Sounds from(gb_Options options)
+  {
+    let result = new("gb_Sounds");
+    result.mOptions = options;
+    return result;
+  }
+
+  void playTick()
+  {
+    switch(mOptions.GetSoundpack())
+    {
+        case(0):
+            playSound("gearbox/tick");
+            break;
+        case(1):
+            playSound("gearbox/pack/tick");
+            break;
+        DEFAULT:
+            playSound("gearbox/nope");
+            break;
+    }
+  }
+
+  void playOpen()
+  {
+    switch(mOptions.GetSoundpack())
+    {
+        case(0):
+            playSound("gearbox/open");
+            break;
+        case(1):
+            playSound("gearbox/pack/open");
+            break;
+        DEFAULT:
+            playSound("gearbox/nope");
+            break;
+    }
+  }
+
+  void playClose()
+  {
+    switch(mOptions.GetSoundpack())
+    {
+        case(0):
+            playSound("gearbox/close");
+            break;
+        case(1):
+            playSound("gearbox/pack/close");
+            break;
+        DEFAULT:
+            playSound("gearbox/nope");
+            break;
+    }
+  }
+
+  void playNope()
+  {
+    switch(mOptions.GetSoundpack())
+    {
+        case(0):
+            playSound("gearbox/nope");
+            break;
+        case(1):
+            playSound("gearbox/pack/nope");
+            break;
+        DEFAULT:
+            playSound("gearbox/nope");
+            break;
+    }
+  }
+
+  private
+  void playSound(string sound)
+  {
+    if (!mOptions.isSoundEnabled()) return;
+
+    players[consolePlayer].mo.a_StartSound(sound, CHAN_AUTO, CHANF_UI | CHANF_OVERLAP | CHANF_LOCAL);
+  }
+
+  private gb_Options mOptions;
+}
+#+end_src
+
+*** ~ViewModel~
+
+#+begin_src c :tangle build/Gearbox/zscript/view_model.zs
+
+struct gb_ViewModel
+{
+  int selectedIndex;
+
+  Array<string> tags;
+  Array<int> slots;
+  Array<int> indices;
+
+  Array<TextureID> icons;
+  Array<double> iconScaleXs;
+  Array<double> iconScaleYs;
+
+  Array<int> quantity1;
+  Array<int> maxQuantity1;
+
+  Array<int> quantity2;
+  Array<int> maxQuantity2;
+}
+#+end_src
+
+*** ~WeaponData~
+
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs
+
+struct gb_WeaponData
+{
+  Array< class<Weapon> > weapons;
+  Array<int> slots;
+}
+#+end_src
+
+*** ~WeaponDataLoader~
+
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs
+
+class gb_WeaponDataLoader play
+{
+  /**
+   * Code is adapted from
+   * GZDoom::src/src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
+   */
+  static
+  void load(out gb_WeaponData data)
+  {
+    int nClasses = AllActorClasses.Size();
+
+    gb_WeaponInfo info;
+    PlayerInfo player = players[consolePlayer];
+
+    for (int i = 0; i < nClasses; ++i)
+    {
+      let type = (class<Weapon>)(AllActorClasses[i]);
+
+      if (type == NULL || type == "Weapon") continue;
+
+      // This check from CheatGive doesn't work here.
+      // Why does it allow giving weapons for Treasure Tech there?
+      // Anyway, adding some replaced weapons to the data list won't harm, they
+      // won't show up unless the player has them.
+      //let replacement = Actor.getReplacement(type);
+      //if (replacement != type && !(replacement is "DehackedPickup")) continue;
+
+      bool located;
+      int  slot;
+      int  priority;
+      [located, slot, priority] = player.weapons.LocateWeapon(type);
+
+      if (!located) continue;
+
+      readonly<Weapon> def = GetDefaultByType(type);
+      if (!def.CanPickup(player.mo)) continue;
+
+      info.push(type, slot, priority);
+    }
+
+    sortWeapons(info);
+
+    data.weapons.move(info.classes);
+    data.slots.move(info.slots);
+  }
+
+  private static
+  void sortWeapons(gb_WeaponInfo info)
+  {
+    int nWeapons = info.classes.size();
+
+    quickSortWeapons(info, 0, nWeapons - 1);
+  }
+
+  private static
+  void quickSortWeapons(gb_WeaponInfo info, int lo, int hi)
+  {
+    if (lo < hi)
+    {
+      int p = quickSortWeaponsPartition(info, lo, hi);
+      quickSortWeapons(info, lo,    p - 1);
+      quickSortWeapons(info, p + 1, hi   );
+    }
+  }
+
+  private static
+  int quickSortWeaponsPartition(gb_WeaponInfo info, int lo, int hi)
+  {
+    int pivot = measure(info, hi);
+    int i     = lo - 1;
+
+    for (int j = lo; j <= hi - 1; ++j)
+    {
+      if (measure(info, j) <= pivot)
+      {
+        ++i;
+        info.swap(i, j);
+      }
+    }
+    info.swap(i + 1, hi);
+
+    return i + 1;
+  }
+
+  private static
+  int measure(gb_WeaponInfo info, int index)
+  {
+    int slot = info.slots[index];
+    if (slot == 0) slot = 99;
+
+    int result = slot * 100 + info.priorities[index];
+    return result;
+  }
+}
+
+struct gb_WeaponInfo
+{
+  void push(class<Weapon> aClass, int slot, int priority)
+  {
+    classes   .push(aClass);
+    slots     .push(slot);
+    priorities.push(priority);
+  }
+
+  void swap(int i, int j)
+  {
+    {
+      let tmp = classes[i];
+      classes[i] = classes[j];
+      classes[j] = tmp;
+    }
+    {
+      int tmp  = slots[i];
+      slots[i] = slots[j];
+      slots[j] = tmp;
+    }
+    {
+      int tmp = priorities[i];
+      priorities[i] = priorities[j];
+      priorities[j] = tmp;
+    }
+  }
+
+  Array< class<Weapon> > classes;
+  Array<int>             slots;
+  Array<int>             priorities;
+}
+#+end_src
+
+*** ~WeaponMenu~
+
+#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs
+
+// SPDX-FileCopyrightText: © 2022 Carrascado
+
+class gb_WeaponMenu
+{
+  static
+  gb_WeaponMenu from(gb_WeaponData weaponData, gb_Options options)
+  {
+    let result = new("gb_WeaponMenu");
+
+    result.mWeapons.move(weaponData.weapons);
+    result.mSlots.move(weaponData.slots);
+    result.mSelectedIndex = 0;
+    result.mCacheTime     = 0;
+    result.mOptions       = options;
+
+    loadIconServices(result.mIconServices);
+    loadHideServices(result.mHideServices);
+
+    return result;
+  }
+
+  int getSelectedIndex() const
+  {
+    return mSelectedIndex;
+  }
+
+  bool setSelectedIndexFromView(gb_ViewModel viewModel, int index)
+  {
+    if (index == -1 || mSelectedIndex == viewModel.indices[index]) return false;
+
+    mSelectedIndex = viewModel.indices[index];
+    return true;
+  }
+
+  void setSelectedWeapon(class<Weapon> aClass)
+  {
+    if (aClass == NULL) return;
+
+    uint index = getIndexOf(aClass);
+    if (index != mWeapons.size()) mSelectedIndex = index;
+  }
+
+  ui
+  bool selectNextWeapon()
+  {
+    mSelectedIndex = findNextWeapon();
+    return mSelectedIndex != mWeapons.size();
+  }
+
+  ui
+  bool selectPrevWeapon()
+  {
+    mSelectedIndex = findPrevWeapon();
+    return mSelectedIndex != mWeapons.size();
+  }
+
+  bool selectSlot(int slot, bool selectFirstWeapon = false)
+  {
+    uint nWeapons = mWeapons.size();
+    int direction = mOptions.isSlotCycleOrderReversed() ? -1 : 1;
+    int startOffset = selectFirstWeapon ? 0 : (mSelectedIndex + direction);
+
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      uint index = (startOffset + nWeapons + direction * i) % nWeapons;
+      if (mSlots[index] == slot && isInInventory(index) && !isHidden(mWeapons[index].getClassName()))
+      {
+        mSelectedIndex = index;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool isOneWeaponInSlot(int slot) const
+  {
+    uint nWeapons = mWeapons.size();
+    int  nWeaponsInSlot = 0;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      nWeaponsInSlot += (mSlots[i] == slot && isInInventory(i));
+      if (nWeaponsInSlot > 1) return false;
+    }
+    return nWeaponsInSlot == 1;
+  }
+
+  bool isInInventory(int index) const
+  {
+    return NULL != players[consolePlayer].mo.findInventory(mWeapons[index]);
+  }
+
+  string confirmSelection() const
+  {
+    if (mSelectedIndex >= mWeapons.size()) return "";
+
+    return getDefaultByType(mWeapons[mSelectedIndex]).getClassName();
+  }
+
+  ui
+  void fill(out gb_ViewModel viewModel)
+  {
+    // every other tic.
+    bool isCacheValid = (level.time <= mCacheTime + 1);
+    if (!isCacheValid)
+    {
+      mCacheTime = level.time;
+      mCachedViewModel.tags        .clear();
+      mCachedViewModel.slots       .clear();
+      mCachedViewModel.indices     .clear();
+      mCachedViewModel.icons       .clear();
+      mCachedViewModel.iconScaleXs .clear();
+      mCachedViewModel.iconScaleYs .clear();
+      mCachedViewModel.quantity1   .clear();
+      mCachedViewModel.maxQuantity1.clear();
+      mCachedViewModel.quantity2   .clear();
+      mCachedViewModel.maxQuantity2.clear();
+
+      fillDirect(mCachedViewModel);
+    }
+
+    copy(mCachedViewModel, viewModel);
+  }
+
+  void rotatePriority()
+  {
+    mSelectedIndex = rotatePriorityForIndex(mSelectedIndex);
+  }
+
+  uint rotatePriorityForIndex(int index)
+  {
+    bool isIndexFound;
+    uint targetIndex;
+    [isIndexFound, targetIndex] = findIndexOfNextWeaponWithSlot(index, mSlots[index]);
+
+    if (!isIndexFound) return mSelectedIndex;
+
+    rotate(index, targetIndex);
+    return targetIndex;
+  }
+
+  void rotateSlot()
+  {
+    mSelectedIndex = rotateSlotForIndex(mSelectedIndex);
+  }
+
+  int rotateSlotForIndex(int oldIndex)
+  {
+    uint nWeapons = mWeapons.size();
+    if (nWeapons < 2) return oldIndex;
+
+    int oldSlot = mSlots[oldIndex];
+    int newSlot = getNextSlot(oldSlot);
+
+    uint i = 0;
+    for (int slot = 1;;)
+    {
+      while (i < nWeapons && mSlots[i] == slot) ++i;
+
+      if (slot == newSlot)
+      {
+        mSlots[oldIndex] = newSlot;
+        move(oldIndex, i);
+        return (oldIndex < i) ? i - 1 : i;
+      }
+
+      slot = getNextSlot(slot);
+      if (slot == 1) break;
+    }
+
+    return oldIndex;
+  }
+
+  bool isThereNoWeapons() const
+  {
+    bool isNothingFound = true;
+    uint nWeapons = mWeapons.size();
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (isInInventory(i) && !isHidden(mWeapons[i].getClassName())) return false;
+    }
+    return isNothingFound;
+  }
+
+  private
+  void rotate(uint oldIndex, uint newIndex)
+  {
+    if (oldIndex > newIndex) move(oldIndex, newIndex);
+    else                     move(oldIndex, newIndex + 1);
+  }
+
+  private
+  void move(uint oldIndex, uint newIndex)
+  {
+    if (oldIndex == newIndex) return;
+
+    mWeapons.insert(newIndex, mWeapons[oldIndex]);
+    mSlots  .insert(newIndex, mSlots  [oldIndex]);
+
+    if (newIndex < oldIndex) ++oldIndex;
+
+    mWeapons.delete(oldIndex);
+    mSlots  .delete(oldIndex);
+  }
+
+  private
+  bool, uint findIndexOfNextWeaponWithSlot(uint weaponIndex, int slot)
+  {
+    uint nWeapons = mWeapons.size();
+    for (uint i = 1; i < nWeapons; ++i)
+    {
+      uint targetCandidateIndex = (weaponIndex + i) % nWeapons;
+      if (mSlots[targetCandidateIndex] == slot)
+      {
+        return true, targetCandidateIndex;
+      }
+    }
+
+    return false, 0;
+  }
+
+  private static
+  int getNextSlot(int slot)
+  {
+    if (1 <= slot && slot <= 8) return slot + 1;
+
+    switch (slot)
+    {
+    case 9:  return  0;
+    case 0:  return 10;
+    case 10: return 11;
+    case 11: return  1;
+    }
+
+    Console.printf("Unexpected slot: %d.", slot);
+    return 1;
+  }
+
+  private static ui
+  void copy(gb_ViewModel source, out gb_ViewModel destination)
+  {
+    destination.selectedIndex = source.selectedIndex;
+
+    destination.tags        .copy(source.tags);
+    destination.slots       .copy(source.slots);
+    destination.indices     .copy(source.indices);
+    destination.icons       .copy(source.icons);
+    destination.iconScaleXs .copy(source.iconScaleXs);
+    destination.iconScaleYs .copy(source.iconScaleYs);
+    destination.quantity1   .copy(source.quantity1);
+    destination.maxQuantity1.copy(source.maxQuantity1);
+    destination.quantity2   .copy(source.quantity2);
+    destination.maxQuantity2.copy(source.maxQuantity2);
+  }
+
+  private ui
+  void fillDirect(out gb_ViewModel viewModel)
+  {
+    uint nWeapons = mWeapons.size();
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      let aWeapon = Weapon(players[consolePlayer].mo.findInventory(mWeapons[i]));
+
+      if (aWeapon == NULL)
+      {
+        if (mOptions.isPositionLocked())
+        {
+          TextureID nulltex;
+          nulltex.SetInvalid();
+          viewModel.tags        .push("");
+          viewModel.slots       .push(mSlots[i]);
+          viewModel.indices     .push(i);
+          viewModel.icons       .push(nulltex);
+          viewModel.iconScaleXs .push(-1);
+          viewModel.iconScaleYs .push(-1);
+          viewModel.quantity1   .push(-1);
+          viewModel.maxQuantity1.push(-1);
+          viewModel.quantity2   .push(-1);
+          viewModel.maxQuantity2.push(-1);
+        }
+        continue;
+      }
+
+      if (isHidden(aWeapon.getClassName())) continue;
+
+      if (mSelectedIndex == i) viewModel.selectedIndex = viewModel.tags.size();
+
+      viewModel.tags.push(aWeapon.getTag());
+      viewModel.slots.push(mSlots[i]);
+      viewModel.indices.push(i);
+
+      TextureID icon = getIconFor(aWeapon);
+
+      // Workaround, casting TextureID to int may be unreliable.
+      viewModel.icons.push(icon);
+      viewModel.iconScaleXs.push(aWeapon.scale.x);
+      viewModel.iconScaleYs.push(aWeapon.scale.y);
+
+      bool hasAmmo1 = aWeapon.ammo1;
+      bool hasAmmo2 = aWeapon.ammo2 && aWeapon.ammo2 != aWeapon.ammo1;
+
+      viewModel.   quantity1.push(hasAmmo1 ? aWeapon.ammo1.   amount : -1);
+      viewModel.maxQuantity1.push(hasAmmo1 ? aWeapon.ammo1.maxAmount : -1);
+      viewModel.   quantity2.push(hasAmmo2 ? aWeapon.ammo2.   amount : -1);
+      viewModel.maxQuantity2.push(hasAmmo2 ? aWeapon.ammo2.maxAmount : -1);
+    }
+  }
+
+  private play
+  bool isHidden(string className) const
+  {
+    bool result = false;
+
+    uint nServices = mHideServices.size();
+    for (uint i = 0; i < nServices; ++i)
+    {
+      let service = mHideServices[i];
+      string hideResponse = service.get(className);
+      if (hideResponse.length() != 0)
+      {
+        bool isHidden = hideResponse.byteAt(0) - 48; // convert to bool from "0" or "1".
+        result = isHidden;
+      }
+    }
+
+    return result;
+  }
+
+  private ui
+  TextureID getIconFor(Weapon aWeapon) const
+  {
+    TextureID icon = BaseStatusBar.getInventoryIcon(aWeapon, BaseStatusBar.DI_AltIconFirst);
+
+    {
+      uint nServices = mIconServices.size();
+      string className = aWeapon.getClassName();
+      for (uint i = 0; i < nServices; ++i)
+      {
+        let service = mIconServices[i];
+        string iconResponse = service.uiGet(className);
+        if (iconResponse.length() != 0)
+        {
+          TextureID iconFromService = TexMan.checkForTexture(iconResponse, TexMan.Type_Any);
+          if (iconFromService.isValid()) icon = iconFromService;
+        }
+      }
+    }
+
+    return icon;
+  }
+
+  private play State getReadyState(Weapon w) const { return w.getReadyState(); }
+
+  private ui uint findNextWeapon() const { return findWeapon( 1); }
+  private ui uint findPrevWeapon() const { return findWeapon(-1); }
+
+  /**
+   ,* @param direction search direction from the selected weapon: 1 or -1.
+   ,*
+   ,* @returns a weapon in the direction. If there is only one weapon, return
+   ,* it. If there are no weapons, return weapons number.
+   ,*/
+  private ui
+  uint findWeapon(int direction) const
+  {
+    uint nWeapons = mWeapons.size();
+    // Note range: [1; nWeapons + 1) instead of [0; nWeapons).
+    // This is because I want the current weapon to be found last.
+    for (uint i = 1; i < nWeapons + 1; ++i)
+    {
+      uint index = (mSelectedIndex + i * direction + nWeapons) % nWeapons;
+      if (isHidden(mWeapons[index].getClassName())) continue;
+      if (isInInventory(index)) return index;
+    }
+
+    return nWeapons;
+  }
+
+  private
+  uint getIndexOf(class<Weapon> aClass) const
+  {
+    uint nWeapons = mWeapons.size();
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (mWeapons[i] == aClass) return i;
+    }
+    return nWeapons;
+  }
+
+  private static
+  void loadIconServices(out Array<gb_Service> services)
+  {
+    loadServices("gb_IconService", services);
+  }
+
+  private static
+  void loadHideServices(out Array<gb_Service> services)
+  {
+    loadServices("gb_HideService", services);
+  }
+
+  private static
+  void loadServices(string serviceName, out Array<gb_Service> services)
+  {
+    let iterator = gb_ServiceIterator.find(serviceName);
+    gb_Service aService;
+    while (aService = iterator.next())
+    {
+      services.push(aService);
+    }
+  }
+
+  private Array< class<Weapon> > mWeapons;
+  private Array< int >           mSlots;
+  private uint mSelectedIndex;
+
+  private Array<gb_Service> mIconServices;
+  private Array<gb_Service> mHideServices;
+
+  private gb_ViewModel mCachedViewModel;
+  private int          mCacheTime;
+
+  private gb_Options mOptions;
+}
+#+end_src
+
+** Display
+*** ~BlockyView~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs
+
+class gb_BlockyView
+{
+  static
+  gb_BlockyView from(gb_TextureCache textureCache, gb_Options options, gb_FontSelector fontSelector)
+  {
+    let result = new("gb_BlockyView");
+
+    result.setAlpha(1.0);
+    result.setScale(1);
+    result.setBaseColor(0x2222CC);
+    result.mTextureCache = textureCache;
+    result.mOptions      = options;
+    result.mFontSelector = fontSelector;
+
+    return result;
+  }
+
+  void setAlpha(double alpha)
+  {
+    mAlpha = alpha;
+  }
+
+  void setScale(int scale)
+  {
+    if (scale < 1) scale = 1;
+
+    double scaleFactor = getScaleFactor();
+
+    mScreenWidth  = int(Screen.getWidth()  / scale / scaleFactor);
+    mScreenHeight = int(Screen.getHeight() / scale / scaleFactor);
+  }
+
+  void setBaseColor(int color)
+  {
+    mBaseColor     = color;
+    mSlotColor     = addColor(mBaseColor, -0x22);
+    mSelectedColor = addColor(mBaseColor,  0x44);
+    mAmmoBackColor = addColor(mBaseColor,  0x66);
+  }
+
+  void display(gb_ViewModel viewModel) const
+  {
+    int selectedIndex = viewModel.selectedIndex;
+    if (selectedIndex >= viewModel.slots.size() || selectedIndex == -1) return;
+
+    vector2 position = mOptions.getBlocksPosition();
+    int maxWidth = getMaxWidth(getSlotsNumber(viewModel));
+    int maxHeight = getMaxHeight(viewModel);
+    int startX = int(min(BORDER + (mScreenWidth  - BORDER) * position.x, mScreenWidth - maxWidth));
+    int startY = int(min(BORDER + (mScreenHeight - BORDER) * position.y, mScreenHeight - maxHeight));
+
+    int lastDrawnSlot = 0;
+    int slotX = startX;
+    int inSlotIndex = 0;
+
+    int selectedSlot = viewModel.slots[selectedIndex];
+
+    Font aFont      = mFontSelector.getFont();
+    int  fontHeight = aFont.getHeight();
+    int  textY      = startY + SLOT_SIZE / 2 - fontHeight / 2;
+
+    uint nWeapons = viewModel.tags.size();
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      int slot = viewModel.slots[i];
+
+      // slot number box
+      if (slot != lastDrawnSlot)
+      {
+        drawAlphaTexture(mTextureCache.blockBox, slotX, startY, mSlotColor);
+
+        string slotText = string.format("%d", slot);
+        int    textX    = slotX + SLOT_SIZE / 2 - aFont.stringWidth(slotText) / 2;
+
+        drawText(aFont, Font.CR_WHITE, textX, textY, slotText);
+
+        lastDrawnSlot = slot;
+      }
+
+      if (slot == selectedSlot) // selected slot (big boxes)
+      {
+        bool isSelectedWeapon = (i == selectedIndex);
+        int  weaponColor      = isSelectedWeapon ? mSelectedColor : mBaseColor;
+        int  weaponY = startY + SLOT_SIZE + (SELECTED_WEAPON_HEIGHT + MARGIN) * inSlotIndex;
+
+        // big box
+        drawAlphaTexture(mTextureCache.blockBig, slotX, weaponY, weaponColor);
+
+        // weapon
+        {
+          // code is adapted from GZDoom AltHud.DrawImageToBox.
+          TextureID weaponTexture = viewModel.icons[i];
+          let weaponSize = TexMan.getScaledSize(weaponTexture);
+          weaponSize.x *= viewModel.iconScaleXs[i];
+          weaponSize.y *= viewModel.iconScaleYs[i];
+          if (mOptions.isPreservingAspectRatio()) weaponSize.y *= 1.2;
+
+          int allowedWidth  = SELECTED_SLOT_WIDTH    - MARGIN * 2;
+          int allowedHeight = SELECTED_WEAPON_HEIGHT - MARGIN * 2;
+
+          double scaleHor = (allowedWidth  < weaponSize.x) ? allowedWidth  / weaponSize.x : 1.0;
+          double scaleVer = (allowedHeight < weaponSize.y) ? allowedHeight / weaponSize.y : 1.0;
+          double scale    = min(scaleHor, scaleVer);
+
+          int weaponWidth  = int(round(weaponSize.x * scale));
+          int weaponHeight = int(round(weaponSize.y * scale));
+
+          drawWeapon( weaponTexture
+                    , slotX + SELECTED_SLOT_WIDTH / 2
+                    , weaponY + SELECTED_WEAPON_HEIGHT / 2
+                    , weaponWidth
+                    , weaponHeight
+                    );
+        }
+
+        // corners
+        if (isSelectedWeapon)
+        {
+          int lineEndX = slotX   + SELECTED_SLOT_WIDTH    - CORNER_SIZE;
+          int lineEndY = weaponY + SELECTED_WEAPON_HEIGHT - CORNER_SIZE;
+          TextureID cornerTexture = mTextureCache.corner;
+          // top left, top right, bottom left, bottom right
+          drawFlippedTexture(cornerTexture, slotX,    weaponY,  NoHorizontalFlip, NoVerticalFlip);
+          drawFlippedTexture(cornerTexture, lineEndX, weaponY,    HorizontalFlip, NoVerticalFlip);
+          drawFlippedTexture(cornerTexture, slotX,    lineEndY, NoHorizontalFlip,   VerticalFlip);
+          drawFlippedTexture(cornerTexture, lineEndX, lineEndY,   HorizontalFlip,   VerticalFlip);
+        }
+
+        // quantity indicators
+        TextureID ammoTexture = mTextureCache.ammoLine;
+        int ammoY = weaponY;
+        if (gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]))
+        {
+          drawAlphaTexture( ammoTexture
+                          , slotX + MARGIN * 2
+                          , ammoY
+                          , mAmmoBackColor
+                          );
+          int ammoRatioWidth = ammoRatioWidthFor(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+          drawAlphaWidthTexture( ammoTexture
+                               , slotX + MARGIN * 2
+                               , ammoY
+                               , FILLED_AMMO_COLOR
+                               , ammoRatioWidth
+                               );
+          ammoY += MARGIN + AMMO_HEIGHT;
+        }
+        if (gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]))
+        {
+          drawAlphaTexture( ammoTexture
+                          , slotX + MARGIN * 2
+                          , ammoY
+                          , mAmmoBackColor
+                          );
+          int ammoRatioWidth = ammoRatioWidthFor(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+          drawAlphaWidthTexture( ammoTexture
+                               , slotX + MARGIN * 2
+                               , ammoY
+                               , FILLED_AMMO_COLOR
+                               , ammoRatioWidth
+                               );
+        }
+
+        if (mOptions.isShowingTags()) drawTag(viewModel.tags[i], aFont, slotX, weaponY);
+      }
+      else // not selected slot (small boxes)
+      {
+        int boxY = startY - MARGIN + (SLOT_SIZE + MARGIN) * (inSlotIndex + 1);
+        drawAlphaTexture(mTextureCache.blockBox, slotX, boxY, mBaseColor);
+      }
+
+      if (i + 1 < nWeapons && viewModel.slots[i + 1] != slot)
+      {
+        slotX += ((slot == selectedSlot) ? SELECTED_SLOT_WIDTH : SLOT_SIZE) + MARGIN;
+        inSlotIndex = 0;
+      }
+      else
+      {
+        ++inSlotIndex;
+      }
+    }
+  }
+
+  private static
+  int getSlotsNumber(gb_ViewModel viewModel)
+  {
+    uint nEntries = viewModel.slots.size();
+    int nSlots = 0;
+    int lastSlot = -1;
+    for (uint i = 0; i < nEntries; ++i)
+    {
+      if (viewModel.slots[i] != lastSlot)
+      {
+        ++nSlots;
+        lastSlot = viewModel.slots[i];
+      }
+    }
+    return nSlots;
+  }
+
+  private static
+  int getMaxWidth(int nSlots)
+  {
+    return (nSlots - 1) * (SLOT_SIZE + MARGIN) + SELECTED_SLOT_WIDTH + BORDER;
+  }
+
+  private static
+  int getMaxHeight(gb_ViewModel viewModel)
+  {
+    uint nEntries = viewModel.slots.size();
+    int lastSlot = -1;
+    int itemsInSlot = 1;
+    int maxItemsInSlot = -1;
+    for (uint i = 0; i < nEntries; ++i)
+    {
+      if (viewModel.slots[i] == lastSlot)
+      {
+        ++itemsInSlot;
+      }
+      else
+      {
+        lastSlot = viewModel.slots[i];
+        if (itemsInSlot > maxItemsInSlot) maxItemsInSlot = itemsInSlot;
+        itemsInSlot = 1;
+      }
+    }
+    if (itemsInSlot > maxItemsInSlot) maxItemsInSlot = itemsInSlot;
+
+    return maxItemsInSlot * (SELECTED_WEAPON_HEIGHT + MARGIN) - MARGIN + BORDER + SLOT_SIZE;
+  }
+
+  private
+  void drawTag(string tag, Font aFont, double startX, double startY)
+  {
+    // >_<
+    //
+    // Trying to put as much text into the the box as possible, while gracefully
+    // (hopefully) handling when the whole tag cannot fit in the box.
+    //
+    // This code doesn't take the icon and quantity bars into account. Just print
+    // semi-transparent text over them.
+
+    if (tag.length() == 0) return;
+
+    Array<string> words;
+    tag.split(words, " ", Tok_SkipEmpty);
+
+    // Start filling lines with words from bottom to top. If the word doesn't
+    // fit into the line, it is pushed into the new top line.
+    Array<string> lines;
+    int nWords = words.size();
+    lines.push(words[nWords - 1]);
+    int spaceWidth = aFont.stringWidth(" ");
+    int allowedStringWidth = SELECTED_SLOT_WIDTH - 2;
+    for (int i = nWords - 2; i >= 0; --i)
+    {
+      uint newWidth = (aFont.stringWidth(lines[0]) + spaceWidth + aFont.stringWidth(words[i]));
+      if (newWidth < allowedStringWidth)
+      {
+        lines[0] = words[i] .. " " .. lines[0];
+      }
+      else
+      {
+        lines.insert(0, words[i]);
+      }
+    }
+
+    // If there are too many lines, put them on the third line and mark the it
+    // with ellipsis.
+    string ellipsis = aFont.getGlyphHeight(ELLIPSIS_CODE) ? "…" : "...";
+    uint nLines = lines.size();
+    if (nLines > 3)
+    {
+      for (uint i = 3; i < nLines; ++i)
+      {
+        lines[2].appendFormat(" %s", lines[i]);
+      }
+      lines[2] = lines[2] .. ellipsis;
+    }
+
+    // If a line is too long to fit in the box, replace the part that doesn't
+    // fit with ellipsis.
+    uint linesEnd = min(nLines, 3);
+    int ellipsisWidth = aFont.stringWidth(ellipsis);
+    for (uint i = 0; i < linesEnd; ++i)
+    {
+      if (aFont.stringWidth(lines[i]) <= allowedStringWidth) continue;
+
+      while (aFont.stringWidth(lines[i]) + ellipsisWidth > allowedStringWidth)
+      {
+        lines[i].deleteLastCharacter();
+      }
+      lines[i] = lines[i] .. ellipsis;
+    }
+
+    // Finally, print lines.
+    int lineHeight = aFont.getHeight();
+    for (uint i = 0; i < linesEnd; ++i)
+    {
+      double y = startY + SELECTED_WEAPON_HEIGHT + (i - linesEnd) * lineHeight;
+      drawText(aFont, Font.CR_WHITE, startX + 1, y, lines[i], 0.3);
+    }
+  }
+
+  private static
+  int ammoRatioWidthFor(int ammoCount, int ammoMax)
+  {
+    return int(round(float(ammoCount) / ammoMax * AMMO_WIDTH));
+  }
+
+  private
+  void drawAlphaTexture(TextureID texture, int x, int y, int color) const
+  {
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , x
+                      , y
+                      , DTA_FillColor     , color
+                      , DTA_AlphaChannel  , true
+                      , DTA_Alpha         , mAlpha
+                      , DTA_VirtualWidth  , mScreenWidth
+                      , DTA_VirtualHeight , mScreenHeight
+                      , DTA_KeepRatio     , true
+                      );
+  }
+
+  private
+  void drawAlphaWidthTexture(TextureID texture, int x, int y, int color, int width) const
+  {
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , x
+                      , y
+                      , DTA_FillColor     , color
+                      , DTA_AlphaChannel  , true
+                      , DTA_Alpha         , mAlpha
+                      , DTA_VirtualWidth  , mScreenWidth
+                      , DTA_VirtualHeight , mScreenHeight
+                      , DTA_KeepRatio     , true
+                      , DTA_DestWidth     , width
+                      );
+  }
+
+  enum HorizontalFlipOptions
+  {
+    NoHorizontalFlip = 0,
+    HorizontalFlip = 1,
+  }
+
+  enum VerticalFlipOptions
+  {
+    NoVerticalFlip = 0,
+    VerticalFlip = 1,
+  }
+
+  private
+  void drawFlippedTexture(TextureID texture, int x, int y, int horFlip, int verFlip) const
+  {
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , x
+                      , y
+                      , DTA_Alpha         , mAlpha
+                      , DTA_VirtualWidth  , mScreenWidth
+                      , DTA_VirtualHeight , mScreenHeight
+                      , DTA_KeepRatio     , true
+                      , DTA_FlipX         , horFlip
+                      , DTA_FlipY         , verFlip
+                      );
+  }
+
+  private
+  void drawWeapon(TextureID texture, int x, int y, int w, int h) const
+  {
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , x
+                      , y
+                      , DTA_CenterOffset  , true
+                      , DTA_KeepRatio     , true
+                      , DTA_DestWidth     , w
+                      , DTA_DestHeight    , h
+                      , DTA_Alpha         , mAlpha
+                      , DTA_VirtualWidth  , mScreenWidth
+                      , DTA_VirtualHeight , mScreenHeight
+                      );
+  }
+
+  private
+  void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  {
+    Screen.drawText( aFont
+                   , color
+                   , x
+                   , y
+                   , text
+                   , DTA_Alpha         , mAlpha * alpha
+                   , DTA_VirtualWidth  , mScreenWidth
+                   , DTA_VirtualHeight , mScreenHeight
+                   , DTA_KeepRatio     , true
+                   );
+  }
+
+  private static
+  color addColor(color base, int add)
+  {
+    uint newRed   = clamp(base.r + add, 0, 255);
+    uint newGreen = clamp(base.g + add, 0, 255);
+    uint newBlue  = clamp(base.b + add, 0, 255);
+
+    if (  abs(int(newRed  ) - base.r) < abs(add)
+       && abs(int(newGreen) - base.g) < abs(add)
+       && abs(int(newBlue ) - base.b) < abs(add)
+       )
+    {
+      return addColor(base, -add);
+    }
+
+    uint result   = (newRed << 16) + (newGreen << 8) + newBlue;
+    return result;
+  }
+
+  private static
+  double getScaleFactor()
+  {
+    return Screen.getHeight() / 1080.0;
+  }
+
+  const BORDER = 20;
+  const MARGIN = 4;
+
+  const SLOT_SIZE = 25;
+  const SELECTED_SLOT_WIDTH = 100;
+  const SELECTED_WEAPON_HEIGHT = SLOT_SIZE * 2 + MARGIN;
+
+  const NO_ANIMATION = 0; // == false
+
+  const CORNER_SIZE = 4;
+
+  const AMMO_WIDTH = 40;
+  const AMMO_HEIGHT = 6;
+
+  const FILLED_AMMO_COLOR = 0x22DD22;
+
+  const ELLIPSIS_CODE = 8230;
+
+  private double mAlpha;
+
+  private int    mScreenWidth;
+  private int    mScreenHeight;
+
+  private color  mBaseColor;
+  private color  mSlotColor;
+  private color  mSelectedColor;
+  private color  mAmmoBackColor;
+
+  private gb_TextureCache mTextureCache;
+  private gb_Options      mOptions;
+  private gb_FontSelector mFontSelector;
+}
+#+end_src
+
+*** ~Blur~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs
+
+class gb_Blur
+{
+  static
+  void setEnabled(bool isEnabled)
+  {
+    Shader.setEnabled(players[consolePlayer], "gb_blur", isEnabled);
+  }
+}
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/gldefs.txt
+
+HardwareShader postprocess scene
+{
+  Name   "gb_blur"
+  Shader "shaders/mfx_bss_blur.fp" 330
+}
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp
+
+// SPDX-FileCopyrightText: © 2012-2019 Marisa Kirisame
+
+/*
+   BlurSharpShift blur from MariENB
+   (C)2012-2019 Marisa Kirisame
+   https://git.sayachan.org/OrdinaryMagician/marifx_m
+
+   Modified by m8f 2021 (made radius a constant).
+*/
+void main()
+{
+	vec2 coord = TexCoord;
+	vec4 res = texture(InputTexture,coord);
+	vec2 ofs[16] = vec2[]
+	(
+		vec2(1.0,1.0), vec2(-1.0,-1.0),
+		vec2(-1.0,1.0), vec2(1.0,-1.0),
+
+		vec2(1.0,0.0), vec2(-1.0,0.0),
+		vec2(0.0,1.0), vec2(0.0,-1.0),
+
+		vec2(1.41,0.0), vec2(-1.41,0.0),
+		vec2(0.0,1.41), vec2(0.0,-1.41),
+
+		vec2(1.41,1.41), vec2(-1.41,-1.41),
+		vec2(-1.41,1.41), vec2(1.41,-1.41)
+	);
+	vec2 bresl = vec2(textureSize(InputTexture,0));
+	float radius = 2.0;
+	vec2 bof = radius/bresl;
+	for ( int i=0; i<16; i++ ) res.rgb += texture(InputTexture,coord+ofs[i]*bof).rgb;
+	res.rgb /= 17.0;
+	FragColor = res;
+}
+#+end_src
+
+*** ~Caption~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs
+
+class gb_Caption
+{
+  static
+  gb_Caption from()
+  {
+    let result = new("gb_Caption");
+    result.mActor = NULL;
+    return result;
+  }
+
+  void setActor(Actor anActor)
+  {
+    mActor = anActor;
+  }
+
+  ui
+  void show()
+  {
+    if (mActor == NULL) return;
+
+    mActor.displayNameTag();
+    mActor = NULL;
+  }
+
+  private Actor mActor;
+}
+#+end_src
+
+*** ~Dim~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs
+
+class gb_Dim
+{
+  static
+  void dim(double alpha, gb_Options options)
+  {
+    if (!options.isDimEnabled()) return;
+
+    Screen.Dim(options.getDimColor(), alpha * 0.4, 0, 0, Screen.getWidth(), Screen.getHeight());
+  }
+}
+#+end_src
+
+*** ~FadeInOut~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs
+
+class gb_FadeInOut
+{
+  static
+  gb_FadeInOut from()
+  {
+    let result = new("gb_FadeInOut");
+    result.mAlpha = 0.0;
+    return result;
+  }
+
+  void fadeInOut(double step)
+  {
+    mAlpha = clamp(mAlpha + step, 0.0, 1.0);
+  }
+
+  double getAlpha() const
+  {
+    return mAlpha;
+  }
+
+  private double mAlpha;
+}
+#+end_src
+
+*** ~TextView~
+
+#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs
+
+class gb_TextView
+{
+  static
+  gb_TextView from(gb_Options options, gb_FontSelector fontSelector)
+  {
+    let result = new("gb_TextView");
+
+    result.setAlpha(1.0);
+    result.setScale(1);
+    result.mOptions      = options;
+    result.mFontSelector = fontSelector;
+
+    return result;
+  }
+
+  void setAlpha(double alpha)
+  {
+    mAlpha = alpha;
+  }
+
+  void setScale(int scale)
+  {
+    if (scale < 1) scale = 1;
+
+    double scaleFactor = getScaleFactor();
+
+    mScreenWidth  = int(Screen.getWidth()  / scale / scaleFactor);
+    mScreenHeight = int(Screen.getHeight() / scale / scaleFactor);
+  }
+
+  void display(gb_ViewModel viewModel) const
+  {
+    uint nWeapons = viewModel.tags.size();
+    if (nWeapons == 0) return;
+
+    vector2 start = mOptions.getTextPosition();
+    start.x *= mScreenWidth;
+    start.y *= mScreenHeight;
+    double x = start.x;
+    double y = start.y;
+    Font   aFont = mFontSelector.getFont();
+    double lineHeight    = aFont.getHeight();
+    int    usualColor    = mOptions.getTextUsualColor();
+    int    selectedColor = mOptions.getTextSelectedColor();
+
+    double maxX = 0;
+    double maxY = 0;
+
+    // dry run
+    int maxSlotWidth = 0;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      string slotString = string.format("%d. ", viewModel.slots[i]);
+      maxSlotWidth = max(maxSlotWidth, aFont.stringWidth(slotString));
+    }
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      string itemString = makeItemString(viewModel, i);
+      maxX = max(maxX, maxSlotWidth + x + aFont.stringWidth(itemString));
+      y += lineHeight;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+    }
+    maxY = y;
+
+    if (maxX > mScreenWidth) x = max(0, mScreenWidth - (maxX - x));
+
+    double yBoundary = mScreenHeight * mOptions.getTextPositionYMax();
+    if (maxY > yBoundary && (maxY - lineHeight != start.y))
+    {
+      lineHeight *= (yBoundary - lineHeight - start.y) / (maxY - lineHeight - start.y);
+    }
+
+    y = start.y;
+
+    // real run
+    double selectedY = 0;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (i == viewModel.selectedIndex)
+      {
+        selectedY = y;
+      }
+      else
+      {
+        string slotString = string.format("%d. ", viewModel.slots[i]);
+        drawText(aFont, usualColor, x, y, slotString, mAlpha);
+      }
+      y += lineHeight;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+    }
+    {
+      string slotString = string.format("%d. ", viewModel.slots[viewModel.selectedIndex]);
+      drawText(aFont, selectedColor, x, selectedY, slotString, mAlpha);
+    }
+
+    y = start.y;
+
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (i != viewModel.selectedIndex)
+      {
+        string itemText  = makeItemString(viewModel, i);
+        drawText(aFont, usualColor, x + maxSlotWidth, y, itemText, mAlpha);
+      }
+      y += lineHeight;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+    }
+    {
+      string itemText  = makeItemString(viewModel, viewModel.selectedIndex);
+      drawText(aFont, selectedColor, x + maxSlotWidth, selectedY, itemText, mAlpha);
+    }
+  }
+
+  private
+  string makeItemString(gb_ViewModel viewModel, int i)
+  {
+      string result = viewModel.tags[i];
+
+      bool isQuantity1Valid = gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+      bool isQuantity2Valid = gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+
+      if (isQuantity1Valid && isQuantity2Valid)
+      {
+        result.appendFormat(" (%d/%d, %d/%d)"
+                           , viewModel.quantity1[i]
+                           , viewModel.maxQuantity1[i]
+                           , viewModel.quantity2[i]
+                           , viewModel.maxQuantity2[i]
+                           );
+      }
+      else if (isQuantity1Valid)
+      {
+        result.appendFormat(" (%d/%d)", viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+      }
+      else if (isQuantity2Valid)
+      {
+        result.appendFormat(" (%d/%d)", viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+      }
+
+      return result;
+  }
+
+  private
+  void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  {
+    Screen.drawText( aFont
+                   , color
+                   , x
+                   , y
+                   , text
+                   , DTA_Alpha         , mAlpha * alpha
+                   , DTA_VirtualWidth  , mScreenWidth
+                   , DTA_VirtualHeight , mScreenHeight
+                   , DTA_KeepRatio     , true
+                   );
+  }
+
+  private static
+  double getScaleFactor()
+  {
+    return Screen.getHeight() / 1080.0;
+  }
+
+  private double mAlpha;
+  private int    mScreenWidth;
+  private int    mScreenHeight;
+
+  private gb_Options      mOptions;
+  private gb_FontSelector mFontSelector;
+}
+#+end_src
+
+** Engine
+
+*** ~Level~
+
+#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs
+
+class gb_Level
+{
+  enum _ { NotInGame, Loading, JustLoaded, Loaded }
+
+  static
+  int getState()
+  {
+    // In the best case, the world is fully loaded on tick 0, but if player
+    // weapons are configured via keyconf, they require a bit of network
+    // communication, which finishes at tick 1.
+    if (level.mapName ~== "titlemap") return gb_Level.NotInGame;
+    if (level.mapTime == 0) return gb_Level.Loading;
+    if (level.mapTime == 1) return gb_Level.JustLoaded;
+    return gb_Level.Loaded;
+  }
+}
+#+end_src
+
+*** ~Player~
+
+#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs
+
+class gb_Player
+{
+  static
+  bool isDead()
+  {
+    return (players[consolePlayer].mo.health <= 0);
+  }
+}
+#+end_src
+
+*** ~WeaponWatcher~
+
+#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs
+
+/**
+ * This class provides information on what weapon the players hold.
+ */
+class gb_WeaponWatcher
+{
+  static
+  class<Weapon> current()
+  {
+    return currentFor(players[consolePlayer]);
+  }
+
+  static
+  class<Weapon> currentFor(PlayerInfo player)
+  {
+    if (player.pendingWeapon == NULL) return NULL;
+
+    let currentWeapon = player.pendingWeapon.getClassName() != "Object"
+      ? player.pendingWeapon
+      : player.readyWeapon;
+
+    return currentWeapon ? currentWeapon.getClass() : NULL;
+  }
+}
+#+end_src
+
+** EventHandler
+
+#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs
+
+// SPDX-FileCopyrightText: © 2022 Carrascado
+// SPDX-FileCopyrightText: © 2025 SandPoot
+
+// This class is the core of Gearbox.
+//
+// It delegates as much work to other classes while minimizing the relationships
+// between those classes.
+//
+// To ensure multiplayer compatibility, Gearbox does the following:
+//
+// 1. All visuals and input processing happens on client side and is invisible
+// to the network.
+//
+// 2. Actual game changing things, like switching weapons, are done through
+// network - even for the current player, even for the single-player game.
+class gb_EventHandler : EventHandler
+{
+  override
+  void worldTick()
+  {
+    switch (gb_Level.getState())
+    {
+    case gb_Level.NotInGame:  return;
+    case gb_Level.Loading:    return;
+    case gb_Level.JustLoaded: initialize(); // fall through
+    case gb_Level.Loaded:     break;
+    }
+
+    bool isClosed = mActivity.isNone();
+
+    // Thaw regardless of the option to prevent player being locked frozen after
+    // changing options.
+    if (isClosed) mFreezer.thaw();
+    else          mFreezer.freeze();
+
+    if (!isClosed && (gb_Player.isDead() || isDisabledOnAutomap()))
+    {
+      close();
+    }
+
+    if (isClosed)
+    {
+      // Watch for the current weapon, because player can change it without
+      // Gearbox. Also handles the case when Gearbox hasn't been opened yet,
+      // initializing weapon menu.
+      mWeaponMenu.setSelectedWeapon(gb_WeaponWatcher.current());
+    }
+    else if (mOptions.getViewType() == VIEW_TYPE_WHEEL)
+    {
+      mWheelController.process();
+    }
+
+    mInventoryUser.use();
+  }
+
+  /**
+   ,* This function processes key bindings specific for Gearbox.
+   ,*/
+  override
+  void consoleProcess(ConsoleEvent event)
+  {
+    if (players[consolePlayer].mo == NULL) return;
+
+    if (!mIsInitialized || isDisabledOnAutomap()) return;
+    if (isPlayerFrozen() && mActivity.isNone()) return;
+
+    switch (gb_EventProcessor.process(event, mOptions.isSelectOnKeyUp()))
+    {
+    case InputToggleWeaponMenu: toggleWeapons(); break;
+    case InputConfirmSelection: confirmSelection(); close(); break;
+    case InputToggleInventoryMenu: toggleInventory(); break;
+    case InputRotateWeaponPriority: rotateWeaponPriority(); break;
+    case InputRotateWeaponSlot:     rotateWeaponSlot(); break;
+    }
+
+    if (!mActivity.isNone()) mWheelController.reset();
+  }
+
+  /**
+   ,* This function provides latching to existing key bindings, and processing mouse input.
+   ,*/
+  override
+  bool inputProcess(InputEvent event)
+  {
+    if (players[consolePlayer].mo == NULL) return false;
+    if (!mIsInitialized || isDisabledOnAutomap() || gameState != GS_LEVEL) return false;
+    if (isPlayerFrozen() && mActivity.isNone()) return false;
+
+    int input = gb_InputProcessor.process(event);
+
+    if (mActivity.isWeapons())
+    {
+      switch (input)
+      {
+      case InputSelectNextWeapon: tickIf(mWeaponMenu.selectNextWeapon()); mWheelController.reset(); break;
+      case InputSelectPrevWeapon: tickIf(mWeaponMenu.selectPrevWeapon()); mWheelController.reset(); break;
+      case InputConfirmSelection: confirmSelection(); close(); break;
+      case InputDrop:             dropItem(); break;
+      case InputClose:            close(); break;
+
+      default:
+        if (!gb_Input.isSlot(input)) return false;
+        mWheelController.reset();
+        tickIf(mWeaponMenu.selectSlot(gb_Input.getSlot(input)));
+        break;
+      }
+
+      return true;
+    }
+    else if (mActivity.isInventory())
+    {
+      switch (input)
+      {
+      case InputSelectNextWeapon: tickIf(mInventoryMenu.selectNext()); mWheelController.reset(); break;
+      case InputSelectPrevWeapon: tickIf(mInventoryMenu.selectPrev()); mWheelController.reset(); break;
+      case InputConfirmSelection: confirmSelection(); close(); break;
+      case InputDrop:             dropItem(); break;
+      case InputClose:            close(); break;
+
+      default:
+      {
+        if (!gb_Input.isSlot(input)) return false;
+        mWheelController.reset();
+        int slot = gb_Input.getSlot(input);
+        int index = (slot == 0) ? 9 : slot - 1;
+        tickIf(mInventoryMenu.setSelectedIndex(index));
+        break;
+      }
+      }
+      return true;
+    }
+    else if (mActivity.isNone())
+    {
+      mWheelController.reset();
+
+      if (gb_Input.isSlot(input) && mOptions.isOpenOnSlot())
+      {
+        int slot = gb_Input.getSlot(input);
+
+        if (mOptions.isNoMenuIfOne() && mWeaponMenu.isOneWeaponInSlot(slot))
+        {
+          tickIf(mWeaponMenu.selectSlot(slot));
+          gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+        }
+        else if (mWeaponMenu.selectSlot(slot, mOptions.isSelectFirstSlotWeapon()))
+        {
+          mSounds.playOpen();
+          mActivity.openWeapons();
+        }
+        else
+        {
+          mSounds.playNope();
+          return false;
+        }
+
+        return true;
+      }
+
+      if (!mOptions.isOpenOnScroll()) return false;
+
+      switch (input)
+      {
+      case InputSelectNextWeapon: toggleWeapons(); mWeaponMenu.selectNextWeapon(); return true;
+      case InputSelectPrevWeapon: toggleWeapons(); mWeaponMenu.selectPrevWeapon(); return true;
+      }
+    }
+
+    return false;
+  }
+
+  override
+  void networkProcess(ConsoleEvent event)
+  {
+    if (players[consolePlayer].mo == NULL) return;
+
+    int input = mNeteventProcessor.process(event);
+
+    switch (input)
+    {
+    case InputResetCustomOrder: resetCustomOrder(); break;
+    }
+  }
+
+  override
+  void renderOverlay(RenderEvent event)
+  {
+    if (!mIsInitialized) return;
+
+    if (!mTextureCache.isLoaded) mTextureCache.load();
+
+    mCaption.show();
+    mFadeInOut.fadeInOut((mActivity.isNone()) ? -0.1 : 0.2);
+    gb_Blur.setEnabled(mOptions.isBlurEnabled() && !mActivity.isNone());
+
+    double alpha = mFadeInOut.getAlpha();
+
+    if (mActivity.isNone() && alpha == 0.0) return;
+
+    gb_ViewModel viewModel;
+    if      (mActivity.isWeapons())   mWeaponMenu.fill(viewModel);
+    else if (mActivity.isInventory()) mInventoryMenu.fill(viewModel);
+
+    verifyViewModel(viewModel);
+
+    gb_Dim.dim(alpha, mOptions);
+
+    switch (mOptions.getViewType())
+    {
+    case VIEW_TYPE_BLOCKY:
+      mBlockyView.setAlpha(alpha);
+      mBlockyView.setScale(mOptions.getScale());
+      mBlockyView.setBaseColor(mOptions.getColor());
+      mBlockyView.display(viewModel);
+      break;
+
+    case VIEW_TYPE_WHEEL:
+    {
+      gb_WheelControllerModel controllerModel;
+      mWheelController.fill(controllerModel);
+      mWheelIndexer.update(viewModel, controllerModel);
+      int selectedViewIndex = mWheelIndexer.getSelectedIndex();
+
+      if (mActivity.isWeapons()) tickIf(mWeaponMenu.setSelectedIndexFromView(viewModel, selectedViewIndex));
+      else if (mActivity.isInventory()) tickIf(mInventoryMenu.setSelectedIndex(selectedViewIndex));
+
+      if (selectedViewIndex != -1) viewModel.selectedIndex = selectedViewIndex;
+
+      int selectedIndex;
+      selectedIndex = mActivity.isWeapons()
+        ? mWeaponMenu.getSelectedIndex()
+        : mInventoryMenu.getSelectedIndex();
+
+      mWheelView.setAlpha(alpha);
+      mWheelView.setBaseColor(mOptions.getColor());
+      mWheelView.setRotating(mActivity.isWeapons());
+
+      int innerIndex = mWheelIndexer.getInnerIndex(selectedIndex, viewModel);
+      int outerIndex = mWheelIndexer.getOuterIndex(selectedIndex, viewModel);
+      mWheelView.display( viewModel
+                        , controllerModel
+                        , mOptions.isMouseInWheel()
+                        , innerIndex
+                        , outerIndex
+                        );
+      break;
+    }
+
+    case VIEW_TYPE_TEXT:
+      mTextView.setAlpha(alpha);
+      mTextView.setScale(mOptions.getTextScale());
+      mTextView.display(viewModel);
+      break;
+
+    }
+  }
+
+  private play
+  bool isDisabledOnAutomap() const
+  {
+    return automapActive && !mOptions.isOnAutomap();
+  }
+
+  private play
+  bool isPlayerFrozen() const
+  {
+    return players[consolePlayer].isTotallyFrozen() && !mOptions.isFrozenCanOpen();
+  }
+
+  private ui
+  void tickIf(bool mustTick)
+  {
+    if (mustTick) mSounds.playTick();
+  }
+
+  private ui
+  void toggleWeapons()
+  {
+    if (mActivity.isWeapons()) close();
+    else openWeapons();
+  }
+
+  private ui
+  void toggleInventory()
+  {
+    if (mActivity.isInventory()) close();
+    else openInventory();
+  }
+
+  private ui
+  void openWeapons()
+  {
+    if (gb_Player.isDead() || mWeaponMenu.isThereNoWeapons())
+    {
+      mSounds.playNope();
+      return;
+    }
+
+    mWeaponMenu.setSelectedWeapon(gb_WeaponWatcher.current());
+    mSounds.playOpen();
+    mActivity.openWeapons();
+  }
+
+  private ui
+  void openInventory()
+  {
+    if (gb_Player.isDead() || gb_InventoryMenu.thereAreNoItems())
+    {
+      mSounds.playNope();
+      return;
+    }
+
+    mSounds.playOpen();
+    mActivity.openInventory();
+  }
+
+  private clearscope
+  void close()
+  {
+    mSounds.playClose();
+    mActivity.close();
+  }
+
+  private ui
+  void confirmSelection()
+  {
+    if (mActivity.isWeapons())
+    {
+      gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+    }
+    else if (mActivity.isInventory())
+    {
+      gb_Sender.sendUseItemEvent(mInventoryMenu.confirmSelection());
+    }
+  }
+
+  private ui
+  void dropItem()
+  {
+    if (paused)
+    {
+      return;
+    }
+
+    if (mActivity.isWeapons())
+    {
+      gb_Sender.sendDropItemEvent(mWeaponMenu.confirmSelection());
+      mSounds.playTick();
+    }
+    else if (mActivity.isInventory())
+    {
+      gb_Sender.sendDropItemEvent(mInventoryMenu.confirmSelection());
+      mSounds.playTick();
+    }
+  }
+
+  private ui
+  void rotateWeaponPriority()
+  {
+    if (mActivity.isWeapons())
+    {
+      gb_CustomWeaponOrderStorage.savePriorityRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
+      mWeaponMenu.rotatePriority();
+    }
+  }
+
+  private ui
+  void rotateWeaponSlot()
+  {
+    if (mActivity.isWeapons())
+    {
+      gb_CustomWeaponOrderStorage.saveSlotRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
+      mWeaponMenu.rotateSlot();
+    }
+  }
+
+  private
+  void resetCustomOrder()
+  {
+    gb_CustomWeaponOrderStorage.reset(mWeaponSetHash);
+    gb_WeaponData weaponData;
+    gb_WeaponDataLoader.load(weaponData);
+    mWeaponMenu = gb_WeaponMenu.from(weaponData, mOptions);
+  }
+
+  private ui
+  void verifyViewModel(gb_ViewModel model)
+  {
+    uint nTags           = model.tags        .size();
+    uint nSlots          = model.slots       .size();
+    uint nIndices        = model.indices     .size();
+    uint nIcons          = model.icons       .size();
+    uint nIconScaleXs    = model.iconScaleXs .size();
+    uint nIconScaleYs    = model.iconScaleYs .size();
+    uint nQuantities1    = model.quantity1   .size();
+    uint nQuantitiesMax1 = model.maxQuantity1.size();
+    uint nQuantities2    = model.quantity2   .size();
+    uint nQuantitiesMax2 = model.maxQuantity2.size();
+
+    if (nTags > 0
+        && (model.selectedIndex >= nTags
+            || nTags != nSlots
+            || nTags != nIndices
+            || nTags != nIcons
+            || nTags != nIconScaleXs
+            || nTags != nIconScaleYs
+            || nTags != nQuantities1
+            || nTags != nQuantitiesMax1
+            || nTags != nQuantities2
+            || nTags != nQuantitiesMax2))
+    {
+      Console.printf("Bad view model:\n"
+                     "selected index: %d,\n"
+                     "tags: %d,\n"
+                     "slots: %d,\n"
+                     "indices: %d,\n"
+                     "icons: %d,\n"
+                     "icon scale X: %d,\n"
+                     "icon scale Y: %d,\n"
+                     "quantities 1: %d,\n"
+                     "max quantities 1: %d,\n"
+                     "quantities 2: %d,\n"
+                     "max quantities 2: %d,\n"
+                    , model.selectedIndex
+                    , nTags
+                    , nSlots
+                    , nIndices
+                    , nIcons
+                    , nIconScaleXs
+                    , nIconScaleYs
+                    , nQuantities1
+                    , nQuantitiesMax1
+                    , nQuantities2
+                    , nQuantitiesMax2
+                    );
+    }
+  }
+
+  enum ViewTypes
+  {
+    VIEW_TYPE_BLOCKY = 0,
+    VIEW_TYPE_WHEEL  = 1,
+    VIEW_TYPE_TEXT   = 2,
+  }
+
+  private
+  void initialize()
+  {
+    mOptions         = gb_Options.from();
+    mFontSelector    = gb_FontSelector.from();
+    mSounds          = gb_Sounds.from(mOptions);
+
+    gb_WeaponData weaponData;
+    gb_WeaponDataLoader.load(weaponData);
+    mWeaponSetHash   = gb_CustomWeaponOrderStorage.calculateHash(weaponData);
+    mWeaponMenu      = gb_WeaponMenu.from(weaponData, mOptions);
+    gb_CustomWeaponOrderStorage.applyOperations(mWeaponSetHash, mWeaponMenu);
+    mInventoryMenu   = gb_InventoryMenu.from();
+
+    mActivity        = gb_Activity.from();
+    mFadeInOut       = gb_FadeInOut.from();
+    mFreezer         = gb_Freezer.from(mOptions);
+
+    mTextureCache    = gb_TextureCache.from();
+    mCaption         = gb_Caption.from();
+    mInventoryUser   = gb_InventoryUser.from();
+    mChanger         = gb_Changer.from(mCaption, mOptions, mInventoryUser);
+    mNeteventProcessor = gb_NeteventProcessor.from(mChanger);
+
+    mBlockyView      = gb_BlockyView.from(mTextureCache, mOptions, mFontSelector);
+    mTextView        = gb_TextView.from(mOptions, mFontSelector);
+
+    mMultiWheelMode  = gb_MultiWheelMode.from(mOptions);
+    let screen       = gb_Screen.from(mOptions);
+    mWheelView       = gb_WheelView.from( mOptions
+                                        , mMultiWheelMode
+                                        , mTextureCache
+                                        , screen
+                                        , mFontSelector
+                                        );
+    mWheelController = gb_WheelController.from(mOptions, screen);
+    mWheelIndexer    = gb_WheelIndexer.from(mMultiWheelMode, screen);
+
+    mIsInitialized = true;
+  }
+
+  private gb_Options       mOptions;
+  private gb_FontSelector  mFontSelector;
+  private gb_Sounds        mSounds;
+
+  private string           mWeaponSetHash;
+  private gb_WeaponMenu    mWeaponMenu;
+  private gb_InventoryMenu mInventoryMenu;
+  private gb_Activity      mActivity;
+  private gb_FadeInOut     mFadeInOut;
+  private gb_Freezer       mFreezer;
+
+  private gb_TextureCache  mTextureCache;
+  private gb_Caption       mCaption;
+  private gb_InventoryUser mInventoryUser;
+  private gb_Changer       mChanger;
+  private gb_NeteventProcessor mNeteventProcessor;
+
+  private gb_BlockyView mBlockyView;
+  private gb_TextView   mTextView;
+
+  private gb_MultiWheelMode  mMultiWheelMode;
+  private gb_WheelView       mWheelView;
+  private gb_WheelController mWheelController;
+  private gb_WheelIndexer    mWheelIndexer;
+
+  private bool mIsInitialized;
+}
+#+end_src
+
+** Service
+
+*** ~Service~
+
+#+begin_src c :tangle build/Gearbox/zscript/service/service.zs
+
+// This is Service interface.
+class gb_Service abstract
+{
+  virtual play
+  string get(string request)
+  {
+    return "";
+  }
+
+  virtual ui
+  string uiGet(string request)
+  {
+    return "";
+  }
+}
+
+// Use this class to find and iterate over services.
+//
+// Example usage:
+//
+// ServiceIterator i = ServiceIterator.find("MyService");
+// Service s;
+// while (s = i.next())
+// {
+//   string request = ...
+//   string answer  = s.get(request);
+//   ...
+// }
+//
+// If no services are found, the all calls to next() will return NULL.
+class gb_ServiceIterator
+{
+  /**
+   * Creates a Service iterator for a service name. It will iterate over all existing Services
+   * with names that match @a serviceName or have it as a part of their names.
+   *
+   * Matching is case-independent.
+   *
+   * @param serviceName class name of service to find.
+   */
+  static
+  gb_ServiceIterator find(string serviceName)
+  {
+    let result = new("gb_ServiceIterator");
+
+    result.mServiceName = serviceName;
+    result.mClassIndex = 0;
+    result.findNextService();
+
+    return result;
+  }
+
+  /**
+   * Gets the service and advances the iterator.
+   *
+   * @returns service instance, or NULL if no more servers found.
+   *
+   * @note Each ServiceIterator will return new instances of services.
+   */
+  gb_Service next()
+  {
+    uint classesNumber = AllClasses.size();
+    gb_Service result = (mClassIndex == classesNumber)
+      ? NULL
+      : gb_Service(new(AllClasses[mClassIndex]));
+
+    ++mClassIndex;
+    findNextService();
+
+    return result;
+  }
+
+  private
+  void findNextService()
+  {
+    uint classesNumber = AllClasses.size();
+    while (mClassIndex < classesNumber && !ServiceNameContains(AllClasses[mClassIndex], mServiceName))
+    {
+      ++mClassIndex;
+    }
+  }
+
+  private static
+  bool serviceNameContains(class aClass, string substring)
+  {
+    if (!(aClass is "gb_Service")) return false;
+
+    string className = aClass.getClassName();
+    string lowerClassName = className.makeLower();
+    string lowerSubstring = substring.makeLower();
+    bool result = lowerClassName.indexOf(lowerSubstring) != -1;
+    return result;
+  }
+
+  private string mServiceName;
+  private uint   mClassIndex;
+}
+#+end_src
+
+*** ~IconService~
+
+#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs
+
+class gb_IconService : gb_Service
+{
+  override
+  string uiGet(string className)
+  {
+    if (isSmoothDoom()) switch (Name(className))
+    {
+    case 'PerkFist'           : return "PUNGB0";
+    case 'Z86Chainsaw'        : return "CSAWA0";
+    case 'PerkShotgun'        : return "SHOTA0";
+    case 'PerkSuperShotgun'   : return "SGN2A0";
+    case 'Z86Chaingun'        : return "MGUNA0";
+    case 'PerkRocketLauncher' : return "LAUNA0";
+    case 'BloxPlasmaRifle'    : return "PLRLA0";
+    case 'Z86BFG9000'         : return "BFG9A0";
+    }
+
+    switch (Name(className))
+    {
+    case 'Fist'           : return "SMFIST0";
+    case 'Chainsaw'       : return "SMCSAW0";
+    case 'Pistol'         : return "SMPISG0";
+    case 'Shotgun'        : return "SMSHOT0";
+    case 'SuperShotgun'   : return "SMSGN20";
+    case 'Chaingun'       : return "SMMGUN0";
+    case 'RocketLauncher' : return "SMLAUN0";
+    case 'PlasmaRifle'    : return "SMPLAS0";
+    case 'BFG9000'        : return "SMBFGG0";
+
+    default: return IGNORE;
+    }
+  }
+
+  const IGNORE = "";
+
+  private static
+  bool isSmoothDoom()
+  {
+    string s1 = "SmoothFloatingSkull";
+    class  c1 = s1;
+    string s2 = "SmoothDoomImp";
+    class  c2 = s2;
+    return (c1 && c2);
+  }
+}
+#+end_src
+
+*** ~HideService~
+
+#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs
+
+class gb_HideService : gb_Service
+{
+  override
+  string get(string className)
+  {
+    switch (Name(className))
+    {
+    // SWWM GZ: https://forum.zdoom.org/viewtopic.php?f=43&t=67687
+    case 'DualExplodiumGun':
+    {
+      string explodiumGunClass = "ExplodiumGun";
+      return (players[consolePlayer].mo.countInv(explodiumGunClass) > 1) ? SHOW : HIDE;
+    }
+
+    default: return IGNORE;
+    }
+  }
+
+  const HIDE = "1";
+  const SHOW = "0";
+  const IGNORE = "";
+}
+#+end_src
+
+** Tools
+
+*** ~Ammo~
+
+#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs
+
+class gb_Ammo
+{
+  static
+  bool isValid(int ammo, int maxAmmo)
+  {
+    return (ammo != -1 && maxAmmo > 0);
+  }
+}
+#+end_src
+
+*** ~Cvar~
+
+#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs
+
+/**
+ * This class provides access to a user or server Cvar.
+ *
+ * Accessing Cvars through this class is faster because calling Cvar.GetCvar()
+ * is costly. This class caches the result of Cvar.GetCvar() and handles
+ * loading a savegame.
+ */
+class gb_Cvar
+{
+  static
+  gb_Cvar from(string name)
+  {
+    let result = new("gb_Cvar");
+
+    result.mName = name;
+    result.load();
+
+    return result;
+  }
+
+  string getString() { if (!mCvar) load(); return mCvar.getString(); }
+  bool   getBool()   { if (!mCvar) load(); return mCvar.getInt();    }
+  int    getInt()    { if (!mCvar) load(); return mCvar.getInt();    }
+  double getDouble() { if (!mCvar) load(); return mCvar.getFloat();  }
+
+  private
+  void load()
+  {
+    mCvar = Cvar.getCvar(mName, players[consolePlayer]);
+
+    if (mCvar == NULL)
+    {
+      gb_Log.error(string.Format("cvar %s not found", mName));
+    }
+  }
+
+  private string         mName;
+  private transient Cvar mCvar;
+}
+#+end_src
+
+*** ~Log~
+
+#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs
+
+class gb_Log
+{
+  static
+  void print(string s)
+  {
+    Console.printf("%s", StringTable.localize(s, false));
+  }
+
+  static
+  void notice(string s)
+  {
+    Console.printf("[NOTICE] %s: %s", MOD_NAME, StringTable.localize(s, false));
+  }
+
+  static
+  void error(string s)
+  {
+    Console.printf("[ERROR] %s: %s.", MOD_NAME, s);
+  }
+
+  static
+  void log(string s)
+  {
+    Console.printf("[LOG] %s: %s.", MOD_NAME, s);
+  }
+
+  static
+  void debug(string s)
+  {
+    if (DEBUG_ENABLED)
+    {
+      Console.printf("[DEBUG] %s: %s.", MOD_NAME, s);
+    }
+  }
+
+  const DEBUG_ENABLED = 0; // == false
+
+  const MOD_NAME = "Gearbox";
+}
+#+end_src
+
+*** ~TextureCache~
+
+#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs
+
+class gb_TextureCache
+{
+  static
+  gb_TextureCache from()
+  {
+    return new("gb_TextureCache");
+  }
+
+  void load()
+  {
+    isLoaded = true;
+
+    // Wheel
+    circle     = TexMan.checkForTexture("gb_circ", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    halfCircle = TexMan.checkForTexture("gb_hcir", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    ammoPip    = TexMan.checkForTexture("gb_pip" , TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    hand       = TexMan.checkForTexture("gb_hand", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    pointer    = TexMan.checkForTexture("gb_pntr", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    textBox    = TexMan.checkForTexture("gb_desc", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    noIcon     = TexMan.checkForTexture("gb_nope", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+
+    // Blocks
+    blockBox   = TexMan.checkForTexture("gb_box",  TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    blockBig   = TexMan.checkForTexture("gb_weap", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    corner     = TexMan.checkForTexture("gb_cor",  TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    ammoLine   = TexMan.checkForTexture("gb_ammo", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+
+    // Sizes
+    ammoPipSize = TexMan.getScaledSize(ammoPip);
+  }
+
+  transient TextureID circle;
+  transient TextureID halfCircle;
+  transient TextureID ammoPip;
+  transient TextureID hand;
+  transient TextureID pointer;
+  transient TextureID textBox;
+  transient TextureID noIcon;
+
+  transient TextureID blockBox;
+  transient TextureID blockBig;
+  transient TextureID corner;
+  transient TextureID ammoLine;
+
+  transient vector2 ammoPipSize;
+
+  transient bool isLoaded;
+
+  const TEXTURE_FLAGS = 0;
+}
+#+end_src
+
+** Wheel
+
+*** ~Controller~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs
+
+class gb_WheelController
+{
+  static
+  gb_WheelController from(gb_Options options, gb_Screen screen)
+  {
+    let result = new("gb_WheelController");
+
+    result.reset();
+    result.mScreen  = screen;
+    result.mOptions = options;
+
+    return result;
+  }
+
+  void reset()
+  {
+    mX = 0;
+    mY = 0;
+
+    PlayerInfo player = players[consolePlayer];
+    mStartPitch = player.mo.pitch;
+    mStartYaw   = player.mo.angle;
+  }
+
+  void fill(out gb_WheelControllerModel model)
+  {
+    model.angle  = getAngle();
+    model.radius = getRadius();
+  }
+
+  play
+  void process() const
+  {
+    if (!mOptions.isMouseInWheel()) return;
+
+    vector2 mouseSensitivity = mOptions.getMouseSensitivity();
+    double yawMod   = 0.08 * mouseSensitivity.x;
+    double pitchMod = 0.08 * mouseSensitivity.y;
+
+    PlayerInfo player = players[consolePlayer];
+    // Code derived from PyWeaponWheel's mouse input handling.
+    mX -= int(round(player.original_cmd.yaw   * yawMod  ));
+    mY -= int(round(player.original_cmd.pitch * pitchMod));
+
+    if (multiplayer)
+    {
+      gb_Sender.sendPlayerAngles(mStartPitch, mStartYaw);
+    }
+    else
+    {
+      gb_Changer.setAngles(players[consolePlayer], mStartPitch, mStartYaw);
+    }
+
+    vector2 center = mScreen.getWheelCenter();
+    int centerX = int(center.x);
+    int centerY = int(center.y);
+    mX = clamp(mX, -centerX, Screen.getWidth()  - centerX);
+    mY = clamp(mY, -centerY, Screen.getHeight() - centerY);
+  }
+
+  private
+  double getAngle() const
+  {
+    return -atan2(mX, mY) + 180;
+  }
+
+  private
+  double getRadius() const
+  {
+    return sqrt(mX * mX + mY * mY);
+  }
+
+  private int mX;
+  private int mY;
+
+  private double mStartPitch;
+  private double mStartYaw;
+
+  private gb_Screen  mScreen;
+  private gb_Options mOptions;
+}
+#+end_src
+
+*** ~WheelControllerModel~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs
+
+struct gb_WheelControllerModel
+{
+  double angle;
+  double radius;
+}
+#+end_src
+
+*** ~WheelIndexer~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs
+
+class gb_WheelIndexer
+{
+  static
+  gb_WheelIndexer from(gb_MultiWheelMode multiWheelMode, gb_Screen screen)
+  {
+    let result = new("gb_WheelIndexer");
+    result.mSelectedIndex  = UNDEFINED_INDEX;
+    result.mLastSlotIndex  = UNDEFINED_INDEX;
+    result.mInnerIndex     = UNDEFINED_INDEX;
+    result.mOuterIndex     = UNDEFINED_INDEX;
+    result.mMultiWheelMode = multiWheelMode;
+    result.mScreen         = screen;
+    return result;
+  }
+
+  int getSelectedIndex() const { return mSelectedIndex; }
+
+  int getInnerIndex(int externalSelectedIndex, gb_ViewModel viewModel) const
+  {
+    if (areIndicesDefined()) return mInnerIndex;
+
+    uint nWeapons = viewModel.tags.size();
+    uint externalSelectedIndexInModel = UNDEFINED_INDEX;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (viewModel.indices[i] == externalSelectedIndex)
+      {
+        externalSelectedIndexInModel = i;
+        break;
+      }
+    }
+
+    if (externalSelectedIndexInModel < 0 || !mMultiWheelMode.isEngaged(viewModel)) return externalSelectedIndexInModel;
+
+    gb_MultiWheelModel multiWheelModel;
+    gb_MultiWheel.fill(viewModel, multiWheelModel);
+
+    uint nPlaces = multiWheelModel.data.size();
+    for (uint i = 0; i < nPlaces; ++i)
+    {
+      if (multiWheelModel.isWeapon[i])
+      {
+        if (viewModel.indices[multiWheelModel.data[i]] == externalSelectedIndex) return i;
+      }
+      else
+      {
+        if (multiWheelModel.data[i] == viewModel.slots[externalSelectedIndexInModel]) return i;
+      }
+    }
+
+    return UNDEFINED_INDEX;
+  }
+
+  int getOuterIndex(int externalSelectedIndex, gb_ViewModel viewModel) const
+  {
+    if (areIndicesDefined()) return mOuterIndex;
+
+    if (!mMultiWheelMode.isEngaged(viewModel)) return UNDEFINED_INDEX;
+
+    uint nWeapons = viewModel.tags.size();
+    uint externalSelectedIndexInModel = UNDEFINED_INDEX;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      if (viewModel.indices[i] == externalSelectedIndex)
+      {
+        externalSelectedIndexInModel = i;
+        break;
+      }
+    }
+
+    if (externalSelectedIndexInModel < 0) return externalSelectedIndexInModel;
+
+    int slot = viewModel.slots[externalSelectedIndexInModel];
+
+    uint start = 0;
+    for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
+
+    return externalSelectedIndexInModel - start;
+  }
+
+  void update(gb_ViewModel viewModel, gb_WheelControllerModel controllerModel)
+  {
+    if (controllerModel.radius < mScreen.getWheelDeadRadius())
+    {
+      mSelectedIndex = UNDEFINED_INDEX;
+      mLastSlotIndex = UNDEFINED_INDEX;
+      mInnerIndex    = UNDEFINED_INDEX;
+      mOuterIndex    = UNDEFINED_INDEX;
+      return;
+    }
+
+    uint nWeapons = viewModel.tags.size();
+
+    if (!mMultiWheelMode.isEngaged(viewModel))
+    {
+      mSelectedIndex = gb_WheelInnerIndexer.getSelectedIndex(nWeapons, controllerModel, mScreen);
+      mLastSlotIndex = UNDEFINED_INDEX;
+      mInnerIndex    = mSelectedIndex;
+      mOuterIndex    = UNDEFINED_INDEX;
+      return;
+    }
+
+    gb_MultiWheelModel multiWheelModel;
+    gb_MultiWheel.fill(viewModel, multiWheelModel);
+
+    uint nPlaces = multiWheelModel.data.size();
+    int wheelRadius = mScreen.getWheelRadius();
+
+    if (controllerModel.radius < wheelRadius)
+    {
+      reportInnerIndex(nPlaces, controllerModel, multiWheelModel, viewModel);
+      return;
+    }
+
+    if (mLastSlotIndex == UNDEFINED_INDEX || mLastSlotIndex >= multiWheelModel.data.size())
+    {
+      mSelectedIndex = UNDEFINED_INDEX;
+      mInnerIndex    = UNDEFINED_INDEX;
+      mOuterIndex    = UNDEFINED_INDEX;
+      return;
+    }
+
+    int slot = multiWheelModel.data[mLastSlotIndex];
+
+    uint start = 0;
+    for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
+    uint end = start;
+    for (; end < nWeapons && viewModel.slots[end] == slot; ++end);
+    uint nWeaponsInSlot = end - start;
+
+    double slotAngle = itemAngle(nPlaces, mLastSlotIndex);
+
+    double r = controllerModel.radius;
+    double w = wheelRadius;
+    double forSlotAngle = slotAngle - controllerModel.angle;
+    double side  = sqrt(r * r + w * w - 2 * r * w * cos(forSlotAngle));
+
+    if (side < mScreen.getWheelDeadRadius())
+    {
+      reportInnerIndex(nPlaces, controllerModel, multiWheelModel, viewModel);
+      return;
+    }
+
+    // due to computation precision, the value of ratio may be slightly out of range [-1, 1].
+    double ratio = clamp(r / side * sin(forSlotAngle), -1.0, 1.0);
+    double angle = -asin(ratio);
+
+    // Limit angle on the borders of the second wheel:
+    double borderRadius = wheelRadius / sin(90 - forSlotAngle);
+    if (r < borderRadius)
+    {
+      angle = (angle > 0) ? 89.9999 : -89.9999;
+    }
+
+    angle += 90;
+    angle %= 180;
+
+    int indexInSlot = int((angle * nWeaponsInSlot / 180.0) % nWeaponsInSlot);
+
+    mSelectedIndex = start + indexInSlot;
+    mInnerIndex    = mLastSlotIndex;
+    mOuterIndex    = indexInSlot;
+  }
+
+  private
+  void reportInnerIndex( uint nPlaces
+                       , gb_WheelControllerModel controllerModel
+                       , gb_MultiWheelModel      multiWheelModel
+                       , gb_ViewModel            viewModel
+                       )
+  {
+    int  innerIndex = gb_WheelInnerIndexer.getSelectedIndex(nPlaces, controllerModel, mScreen);
+    bool isWeapon   = multiWheelModel.isWeapon[innerIndex];
+
+    mSelectedIndex = isWeapon
+      ? multiWheelModel.data[innerIndex]
+      : firstInSlot(viewModel, multiWheelModel.data[innerIndex]);
+
+    mLastSlotIndex = isWeapon ? UNDEFINED_INDEX : innerIndex;
+    mInnerIndex    = innerIndex;
+    mOuterIndex    = 0;
+  }
+
+  private static
+  int firstInSlot(gb_ViewModel viewModel, int slot)
+  {
+    int nWeapons = viewModel.tags.size();
+    for (int i = 0; i < nWeapons; ++i)
+    {
+      if (viewModel.slots[i] == slot) return i;
+    }
+
+    return UNDEFINED_INDEX;
+  }
+
+  private
+  bool areIndicesDefined() const
+  {
+    return (mInnerIndex != UNDEFINED_INDEX);
+  }
+
+  private static
+  double itemAngle(uint nItems, uint index)
+  {
+    return 360.0 / nItems * index;
+  }
+
+  const UNDEFINED_INDEX = -1;
+
+  private int mSelectedIndex;
+
+  private int mLastSlotIndex;
+  private int mInnerIndex;
+  private int mOuterIndex;
+
+  private gb_MultiWheelMode mMultiWheelMode;
+  private gb_Screen         mScreen;
+}
+#+end_src
+
+*** ~WheelInnerIndexer~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs
+
+class gb_WheelInnerIndexer
+{
+  static
+  int getSelectedIndex(uint nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
+  {
+    if (controllerModel.radius < screen.getWheelDeadRadius() || nItems == 0)
+    {
+      return -1;
+    }
+
+    int result = int(round(controllerModel.angle * nItems / 360.0)) % nItems;
+    return result;
+  }
+}
+#+end_src
+
+*** ~MultiWheel~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs
+
+struct gb_MultiWheelModel
+{
+  Array<bool> isWeapon;
+  Array<int>  data; // slot or weapon index
+}
+
+class gb_MultiWheel
+{
+  static
+  void fill(gb_ViewModel viewModel, out gb_MultiWheelModel model)
+  {
+    uint nWeapons = viewModel.tags.size();
+    int  lastSlot = -1;
+
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      int  slot     = viewModel.slots[i];
+      bool isSingle = isSingleWeaponInSlot(viewModel, nWeapons, slot);
+      if (isSingle)
+      {
+        model.isWeapon.push(true);
+        model.data.push(i);
+      }
+      else
+      {
+        if (slot != lastSlot)
+        {
+          lastSlot = slot;
+          model.isWeapon.push(false);
+          model.data.push(slot);
+        }
+      }
+    }
+  }
+
+  static
+  bool isSingleWeaponInSlot(gb_ViewModel viewModel, uint nWeapons, int slot)
+  {
+    int nWeaponsInSlot = 0;
+    for (uint i = 0; i < nWeapons; ++i)
+    {
+      nWeaponsInSlot += (viewModel.slots[i] == slot);
+      if (nWeaponsInSlot > 1) return false;
+    }
+    return true;
+  }
+}
+#+end_src
+
+*** ~MultiWheelMode~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs
+
+class gb_MultiWheelMode
+{
+  static
+  gb_MultiWheelMode from(gb_Options options)
+  {
+    let result = new("gb_MultiWheelMode");
+    result.mOptions = options;
+    return result;
+  }
+
+  bool isEngaged(gb_ViewModel viewModel)
+  {
+    uint nWeapons = viewModel.tags.size();
+    bool result   = (nWeapons > mOptions.getMultiWheelLimit());
+    return result;
+  }
+
+  private gb_Options mOptions;
+}
+#+end_src
+
+*** ~Screen~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs
+
+/**
+ * This class provides helper functions for screen position and sizes.
+ */
+class gb_Screen
+{
+  static
+  gb_Screen from(gb_Options options)
+  {
+    let result = new("gb_Screen");
+    result.mOptions = options;
+    return result;
+  }
+
+  vector2 getWheelCenter() const
+  {
+    int screenWidth      = Screen.getWidth();
+    int halfScreenHeight = Screen.getHeight() / 2;
+    int centerPosition   = int((screenWidth / 2 - halfScreenHeight) * mOptions.getWheelPosition());
+    return (screenWidth / 2 + centerPosition, halfScreenHeight);
+  }
+
+  int getWheelRadius() const
+  {
+    return getScaledScreenHeight() / 4;
+  }
+
+  int getWheelDeadRadius() const
+  {
+    return getScaledScreenHeight() / 16;
+  }
+
+  double getScaleFactor() const
+  {
+    return getScaledScreenHeight() / 1080.0;
+  }
+
+  int getScaledScreenHeight() const
+  {
+    return int(Screen.getHeight() * mOptions.getWheelScale());
+  }
+
+  int getScaledScreenWidth() const
+  {
+    return int(Screen.getWidth() * mOptions.getWheelScale());
+  }
+
+  private gb_Options mOptions;
+}
+#+end_src
+
+*** ~Text~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs
+
+/**
+ * This class helps displaying text on screen.
+ */
+class gb_Text
+{
+  static
+  gb_Text from(gb_TextureCache textureCache, gb_Screen screen, gb_FontSelector fontSelector)
+  {
+    let result = new("gb_Text");
+    result.mTextureCache = textureCache;
+    result.mScreen       = screen;
+    result.mFontSelector = fontSelector;
+    return result;
+  }
+
+  static
+  void draw(string aString, vector2 pos, Font aFont, double alpha, bool isBig = false)
+  {
+    int textScale = isBig ? getBigTextScale() : getTextScale();
+
+    pos.x -= aFont.stringWidth(aString) * textScale / 2;
+    pos.y -= aFont.getHeight()          * textScale / 2;
+
+    Screen.drawText( aFont
+                   , Font.CR_WHITE
+                   , pos.x
+                   , pos.y
+                   , aString
+                   , DTA_Alpha  , alpha
+                   , DTA_ScaleX , textScale
+                   , DTA_ScaleY , textScale
+                   );
+  }
+
+  void drawBox( string  topText
+              , string  middleText
+              , string  bottomText
+              , vector2 pos
+              , bool    isPosTop   // true: pos is the top of text box, false: bottom.
+              , color   baseColor
+              , double  alpha
+              )
+  {
+    double scaleFactor = mScreen.getScaleFactor();
+    Font   aFont       = mFontSelector.getFont();
+    int    textScale   = getTextScale();
+    int    lineHeight  = aFont.getHeight() * textScale;
+    int    margin      = int(10 * scaleFactor);
+    int    height      = int((margin * 2 + lineHeight * 3) / scaleFactor);
+
+    if (!isPosTop) pos.y -= height * scaleFactor;
+
+    int topTextWidth    = aFont.stringWidth(topText);
+    int middleTextWidth = aFont.stringWidth(middleText);
+    int bottomTextWidth = aFont.stringWidth(bottomText);
+
+    int width = max(int( ( max(middleTextWidth, max(topTextWidth, bottomTextWidth)) * textScale
+                       + margin * 2
+                       ) / scaleFactor
+                   ), height * 2);
+    vector2 size   = (width, height) * scaleFactor;
+    vector2 center = pos + (0, size.y / 2);
+
+    Screen.drawTexture( mTextureCache.textBox
+                      , NO_ANIMATION
+                      , center.x
+                      , center.y
+                      , DTA_FillColor    , baseColor
+                      , DTA_AlphaChannel , true
+                      , DTA_CenterOffset , true
+                      , DTA_Alpha        , alpha
+                      , DTA_DestWidth    , int(size.x)
+                      , DTA_DestHeight   , int(size.y)
+                      );
+
+    vector2 line = (0, lineHeight);
+    if (topText   .length() > 0) draw(topText   , center - line, aFont, alpha);
+    if (middleText.length() > 0) draw(middleText, center       , aFont, alpha);
+    if (bottomText.length() > 0) draw(bottomText, center + line, aFont, alpha);
+  }
+
+  private static
+  int getBigTextScale()
+  {
+    return getTextScale() * 2;
+  }
+
+  private static
+  int getTextScale()
+  {
+    return max(Screen.getHeight() / 720, 1);
+  }
+
+  const NO_ANIMATION = 0; // == false
+
+  private gb_TextureCache mTextureCache;
+  private gb_Screen       mScreen;
+  private gb_FontSelector mFontSelector;
+}
+#+end_src
+
+*** ~WheelView~
+
+#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs
+
+class gb_WheelView
+{
+  static
+  gb_WheelView from( gb_Options        options
+                   , gb_MultiWheelMode multiWheelMode
+                   , gb_TextureCache   textureCache
+                   , gb_Screen         screen
+                   , gb_FontSelector   fontSelector
+                   )
+  {
+    let result = new("gb_WheelView");
+
+    result.setAlpha(1.0);
+    result.setBaseColor(0x2222CC);
+
+    result.mScreen         = screen;
+    result.mOptions        = options;
+    result.mFontSelector   = fontSelector;
+    result.mMultiWheelMode = multiWheelMode;
+    result.mText           = gb_Text.from(textureCache, screen, fontSelector);
+    result.mTextureCache   = textureCache;
+    result.mIsRotating     = true;
+
+    return result;
+  }
+
+  void setAlpha(double alpha)
+  {
+    mAlpha = alpha;
+  }
+
+  void setBaseColor(int color)
+  {
+    mBaseColor = color;
+  }
+
+  void setRotating(bool isRotating)
+  {
+    mIsRotating = isRotating;
+  }
+
+  void display( gb_ViewModel viewModel
+              , gb_WheelControllerModel controllerModel
+              , bool showPointer
+              , int  innerIndex
+              , int  outerIndex
+              ) const
+  {
+    mScaleFactor = mScreen.getScaleFactor();
+    mCenter      = mScreen.getWheelCenter();
+
+    drawInnerWheel();
+
+    uint nWeapons = viewModel.tags.size();
+    if (nWeapons == 0) return;
+
+    int screenHeight = mScreen.getScaledScreenHeight();
+    int radius       = screenHeight * 5 / 32;
+    int allowedWidth = int(screenHeight * 3 / 16 - MARGIN * 2 * mScaleFactor);
+
+    int nPlaces = 0;
+
+    bool isSlotExpanded = false;
+    bool isMultiWheelMode = mMultiWheelMode.isEngaged(viewModel);
+    if (isMultiWheelMode)
+    {
+      gb_MultiWheelModel multiWheelModel;
+      gb_MultiWheel.fill(viewModel, multiWheelModel);
+
+      nPlaces = multiWheelModel.data.size();
+      for (uint i = 0; i < nPlaces; ++i)
+      {
+        bool isWeapon = multiWheelModel.isWeapon[i];
+        int  data     = multiWheelModel.data[i];
+
+        if (isWeapon) displayWeapon(i, data, nPlaces, radius, allowedWidth, viewModel, mCenter);
+        else          displaySlot  (i, data, nPlaces, radius);
+      }
+
+      drawHands(nPlaces, innerIndex, mCenter, 0);
+
+      isSlotExpanded = (outerIndex != UNDEFINED_INDEX && !multiWheelModel.isWeapon[innerIndex]);
+      if (isSlotExpanded)
+      {
+        int slot = multiWheelModel.data[innerIndex];
+        drawOuterWeapons( innerIndex
+                        , outerIndex
+                        , nPlaces
+                        , slot
+                        , viewModel
+                        , radius
+                        , allowedWidth
+                        , int(controllerModel.radius)
+                        );
+      }
+    }
+    else
+    {
+      isSlotExpanded = false;
+      for (uint i = 0; i < nWeapons; ++i)
+      {
+        if (i == innerIndex) continue;
+        displayWeapon(i, i, nWeapons, radius, allowedWidth, viewModel, mCenter);
+      }
+
+      nPlaces = nWeapons;
+      if (innerIndex != -1)
+      {
+        displayWeapon(innerIndex, innerIndex, nPlaces, radius, allowedWidth, viewModel, mCenter);
+      }
+      drawHands(nPlaces, innerIndex, mCenter, 0);
+    }
+
+    if (showPointer)
+    {
+      drawPointer(controllerModel.angle, controllerModel.radius);
+    }
+
+    if (mOptions.isShowingTags())
+    {
+      drawWeaponDescription(viewModel, innerIndex, nPlaces, isSlotExpanded);
+    }
+  }
+
+  private
+  void drawOuterWeapons( int  innerIndex
+                       , int  outerIndex
+                       , uint nPlaces
+                       , int  slot
+                       , gb_ViewModel viewModel
+                       , int  radius
+                       , int  allowedWidth
+                       , int  controllerRadius
+                       )
+  {
+    int     wheelRadius      = mScreen.getWheelRadius();
+    double  angle            = itemAngle(nPlaces, innerIndex);
+    vector2 outerWheelCenter = (sin(angle), -cos(angle)) * wheelRadius + mCenter;
+    drawOuterWheel(outerWheelCenter.x, outerWheelCenter.y, -angle);
+
+    uint nWeapons = viewModel.tags.size();
+
+    uint start = 0;
+    for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
+    uint end = start;
+    for (; end < nWeapons && viewModel.slots[end] == slot; ++end);
+
+    uint   nWeaponsInSlot = end - start;
+    double startingAngle  = angle - 90 + (180.0 / nWeaponsInSlot / 2);
+
+    uint place = 0;
+    uint selectedPlace = 0;
+    for (uint i = start; i < end; ++i, ++place)
+    {
+      if (i == viewModel.selectedIndex)
+      {
+        selectedPlace = place;
+        continue;
+      }
+
+      displayWeapon( place
+                   , i
+                   , nWeaponsInSlot * 2
+                   , radius
+                   , allowedWidth
+                   , viewModel
+                   , outerWheelCenter
+                   , startingAngle
+                   );
+    }
+
+    // draw the selected thing last in case of icon overlapping
+    displayWeapon( selectedPlace
+                 , viewModel.selectedIndex
+                 , nWeaponsInSlot * 2
+                 , radius
+                 , allowedWidth
+                 , viewModel
+                 , outerWheelCenter
+                 , startingAngle
+                 );
+
+    int deadRadius = mScreen.getWheelDeadRadius();
+
+    drawHands( nWeaponsInSlot * 2
+             , outerIndex
+             , outerWheelCenter
+             , -startingAngle
+             );
+  }
+
+  private
+  void drawInnerWheel()
+  {
+    int wheelDiameter = mScreen.getWheelRadius() * 2;
+    Screen.drawTexture( mTextureCache.circle
+                      , NO_ANIMATION
+                      , mCenter.x
+                      , mCenter.y
+                      , DTA_FillColor    , mBaseColor
+                      , DTA_AlphaChannel , true
+                      , DTA_Alpha        , mAlpha
+                      , DTA_CenterOffset , true
+                      , DTA_DestWidth    , wheelDiameter
+                      , DTA_DestHeight   , wheelDiameter
+                      );
+  }
+
+  private
+  void drawOuterWheel(double x, double y, double angle)
+  {
+    int wheelDiameter = mScreen.getWheelRadius() * 2;
+    Screen.drawTexture( mTextureCache.halfCircle
+                      , NO_ANIMATION
+                      , x
+                      , y
+                      , DTA_FillColor    , mBaseColor
+                      , DTA_AlphaChannel , true
+                      , DTA_Alpha        , mAlpha
+                      , DTA_CenterOffset , true
+                      , DTA_Rotate       , angle
+                      , DTA_DestWidth    , wheelDiameter
+                      , DTA_DestHeight   , wheelDiameter
+                      );
+  }
+
+  private
+  void displayWeapon( uint place
+                    , uint iconIndex
+                    , uint nPlaces
+                    , int  radius
+                    , int  allowedWidth
+                    , gb_ViewModel viewModel
+                    , vector2 center
+                    , double startingAngle = 0.0
+                    ) const
+  {
+    // Code is adapted from GZDoom AltHud.DrawImageToBox.
+
+    TextureID texture     = viewModel.icons[iconIndex];
+    vector2   textureSize = TexMan.getScaledSize(texture) * 2 * mScaleFactor;
+
+    if (texture.isValid())
+    {
+      textureSize.x *= viewModel.iconScaleXs[iconIndex];
+      textureSize.y *= viewModel.iconScaleYs[iconIndex];
+    }
+
+    bool      isTall      = (textureSize.y * 1.2 > textureSize.x);
+
+    double scale = isTall
+      ? ((allowedWidth < textureSize.y) ? allowedWidth / textureSize.y : 1.0)
+      : ((allowedWidth < textureSize.x) ? allowedWidth / textureSize.x : 1.0)
+      ;
+
+    double  angle = (startingAngle + itemAngle(nPlaces, place)) % 360;
+    vector2 xy    = (sin(angle), -cos(angle)) * radius + center;
+    int width  = int(textureSize.x * scale);
+    int height = int(textureSize.y * scale);
+
+    drawIcon(texture, xy, width, height, angle, isTall);
+    drawAmmo(angle, center, viewModel, iconIndex);
+  }
+
+  private
+  void drawIcon(TextureID texture, vector2 xy, int w, int h, double angle, bool isTall) const
+  {
+    bool flipX;
+    double scaleY;
+
+    if (mIsRotating)
+    {
+      flipX = (angle > 180);
+      if (flipX) angle -= 180;
+      angle = -angle + 90;
+
+      if (isTall) angle += flipX ? 90 : -90;
+
+      scaleY = 1.0;
+    }
+    else
+    {
+      flipX  = false;
+      angle  = 0;
+      scaleY = mOptions.isPreservingAspectRatio() ? 1.2 : 1.0;
+    }
+
+    if (!texture.isValid()) texture = mTextureCache.noIcon;
+
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , xy.x
+                      , xy.y
+                      , DTA_CenterOffset , true
+                      , DTA_DestWidth    , w
+                      , DTA_DestHeight   , h
+                      , DTA_ScaleY       , scaleY
+                      , DTA_Alpha        , mAlpha
+                      , DTA_Rotate       , angle
+                      , DTA_FlipX        , flipX
+                      , DTA_KeepRatio, false
+                      );
+
+    if (!mOptions.getWheelTint()) return;
+
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , xy.x
+                      , xy.y
+                      , DTA_CenterOffset , true
+                      , DTA_DestWidth    , w
+                      , DTA_DestHeight   , h
+                      , DTA_ScaleY       , scaleY
+                      , DTA_Alpha        , mAlpha * 0.3
+                      , DTA_FillColor    , mBaseColor
+                      , DTA_Rotate       , angle
+                      , DTA_FlipX        , flipX
+                      );
+  }
+
+  private
+  void drawAmmoPip(double angle, double radius, vector2 center, bool colored)
+  {
+    vector2 xy   = (sin(angle), -cos(angle)) * radius + center;
+    vector2 size = mTextureCache.ammoPipSize * mScaleFactor;
+
+    if (colored)
+    {
+      Screen.drawTexture( mTextureCache.ammoPip
+                        , NO_ANIMATION
+                        , round(xy.x)
+                        , round(xy.y)
+                        , DTA_CenterOffset , true
+                        , DTA_Alpha        , mAlpha
+                        , DTA_DestWidth    , int(size.x)
+                        , DTA_DestHeight   , int(size.y)
+                        , DTA_FillColor    , FILLED_QUANTITY_COLOR
+                        );
+    }
+    else
+    {
+      Screen.drawTexture( mTextureCache.ammoPip
+                        , NO_ANIMATION
+                        , round(xy.x)
+                        , round(xy.y)
+                        , DTA_CenterOffset , true
+                        , DTA_Alpha        , mAlpha
+                        , DTA_DestWidth    , int(size.x)
+                        , DTA_DestHeight   , int(size.y)
+                        );
+    }
+  }
+
+  private static
+  int, int makePipsNumbers(int items, int maxItems)
+  {
+    if (maxItems <= MAX_N_PIPS) return items, maxItems;
+
+    int nColoredPips = int(ceil(MAX_N_PIPS * double(items) / maxItems));
+    return nColoredPips, MAX_N_PIPS;
+  }
+
+  private
+  void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, uint weaponIndex)
+  {
+    if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex], viewModel.maxQuantity1[weaponIndex]))
+    {
+      int margin = int(10 * mScaleFactor);
+      int radius = mScreen.getScaledScreenHeight() / 4 - margin;
+      int nColoredPips, nTotalPips;
+      [nColoredPips, nTotalPips] = makePipsNumbers( viewModel.quantity1   [weaponIndex]
+                                                  , viewModel.maxQuantity1[weaponIndex]
+                                                  );
+      drawQuantityPips(radius, weaponAngle, center, nColoredPips, nTotalPips);
+    }
+
+    if (gb_Ammo.isValid(viewModel.quantity2[weaponIndex], viewModel.maxQuantity2[weaponIndex]))
+    {
+      int margin = int(20 * mScaleFactor);
+      int radius = mScreen.getScaledScreenHeight() / 4 - margin;
+      int nColoredPips, nTotalPips;
+      [nColoredPips, nTotalPips] = makePipsNumbers( viewModel.quantity2   [weaponIndex]
+                                                  , viewModel.maxQuantity2[weaponIndex]
+                                                  );
+      drawQuantityPips(radius, weaponAngle, center, nColoredPips, nTotalPips);
+    }
+  }
+
+  void drawQuantityPips( double  radius
+                       , double  centerAngle
+                       , vector2 center
+                       , int     nColoredPips
+                       , int     nTotalPips
+                       )
+  {
+    if (nTotalPips % 2 == 0)
+    {
+      int nTotalPipsHalved = nTotalPips / 2;
+
+      for (int i = -nTotalPipsHalved + 1; i <= 0; ++i)
+      {
+        double angle = centerAngle - PIPS_GAP + i * PIPS_STEP;
+        drawAmmoPip(angle, radius, center, nColoredPips > 0);
+        --nColoredPips;
+      }
+
+      for (int i = 0; i < nTotalPipsHalved; ++i)
+      {
+        double angle = centerAngle + PIPS_GAP + i * PIPS_STEP;
+        drawAmmoPip(angle, radius, center, nColoredPips > 0);
+        --nColoredPips;
+      }
+    }
+    else
+    {
+      double angleStart = centerAngle - (nTotalPips - 1) * PIPS_STEP / 2;
+      for (int i = 0; i < nTotalPips; ++i)
+      {
+        double angle = angleStart + i * PIPS_STEP;
+        drawAmmoPip(angle, radius, center, nColoredPips > 0);
+        --nColoredPips;
+      }
+    }
+  }
+
+  private
+  void displaySlot(uint place, int slot, uint nPlaces, int radius)
+  {
+    double  angle = itemAngle(nPlaces, place);
+    vector2 pos   = (sin(angle), -cos(angle)) * radius + mCenter;
+    Font    aFont = mFontSelector.getFont();
+
+    gb_Text.draw(string.format("%d", slot), pos, aFont, mAlpha, true);
+  }
+
+  private static
+  double itemAngle(uint nItems, uint index)
+  {
+    return 360.0 / nItems * index;
+  }
+
+  private
+  void drawHands(uint nPlaces, uint selectedIndex, vector2 center, double startAngle)
+  {
+    if (nPlaces < 2) return;
+
+    double  handsAngle           = startAngle - itemAngle(nPlaces, selectedIndex);
+    double  sectorAngleHalfWidth = max(6, 360.0 / 2.0 / nPlaces - 2);
+    double  scaleFactor          = mScreen.getScaleFactor();
+    vector2 size                 = TexMan.getScaledSize(mTextureCache.hand) * scaleFactor;
+
+    Screen.drawTexture( mTextureCache.hand
+                      , NO_ANIMATION
+                      , center.x
+                      , center.y
+                      , DTA_KeepRatio     , true
+                      , DTA_CenterOffset  , true
+                      , DTA_Alpha         , mAlpha
+                      , DTA_Rotate        , handsAngle - sectorAngleHalfWidth
+                      , DTA_FlipX         , true
+                      , DTA_DestWidthF    , size.x
+                      , DTA_DestHeightF   , size.y
+                      );
+
+    Screen.drawTexture( mTextureCache.hand
+                      , NO_ANIMATION
+                      , center.x
+                      , center.y
+                      , DTA_KeepRatio     , true
+                      , DTA_CenterOffset  , true
+                      , DTA_CenterOffset  , true
+                      , DTA_Alpha         , mAlpha
+                      , DTA_Rotate        , handsAngle + sectorAngleHalfWidth
+                      , DTA_DestWidthF    , size.x
+                      , DTA_DestHeightF   , size.y
+                      );
+  }
+
+  private
+  void drawWeaponDescription( gb_ViewModel viewModel
+                            , int  innerIndex
+                            , int  nPlaces
+                            , bool isSlotExpanded
+                            )
+  {
+    int    index       = viewModel.selectedIndex;
+    string description = viewModel.tags[index];
+    if (description.length() == 0) return;
+
+    string ammo1 = gb_Ammo.isValid(viewModel.quantity1[index], viewModel.maxQuantity1[index])
+      ? string.format("%d/%d", viewModel.quantity1[index], viewModel.maxQuantity1[index])
+      : "";
+    string ammo2 = gb_Ammo.isValid(viewModel.quantity2[index], viewModel.maxQuantity2[index])
+      ? string.format("%d/%d", viewModel.quantity2[index], viewModel.maxQuantity2[index])
+      : "";
+
+    double  angle   = itemAngle(nPlaces, innerIndex);
+    bool    isOnTop = isSlotExpanded && (90.0 < angle && angle < 270.0);
+    vector2 pos     = mCenter;
+    pos.y += mScreen.getWheelRadius() * (isOnTop ? -1 : 1);
+
+    mText.drawBox(ammo1, description, ammo2, pos, !isOnTop, mBaseColor, mAlpha);
+  }
+
+  private
+  void drawPointer(double angle, double radius)
+  {
+    vector2 pos = (sin(angle), -cos(angle)) * radius + mCenter;
+    vector2 size = TexMan.getScaledSize(mTextureCache.pointer);
+    size *= mScaleFactor;
+
+    Screen.drawTexture( mTextureCache.pointer
+                      , NO_ANIMATION
+                      , pos.x
+                      , pos.y
+                      , DTA_CenterOffset , true
+                      , DTA_Alpha        , mAlpha
+                      , DTA_DestWidth    , int(size.x)
+                      , DTA_DestHeight   , int(size.y)
+                      );
+  }
+
+  const NO_ANIMATION = 0; // == false
+
+  const MARGIN = 4;
+
+  const UNDEFINED_INDEX = -1;
+
+  const MAX_N_PIPS = 10;
+
+  const PIPS_GAP  = 1.2;
+  const PIPS_STEP = 1.5;
+
+  const FILLED_QUANTITY_COLOR = 0x22DD22;
+
+  private double  mAlpha;
+  private color   mBaseColor;
+  private vector2 mCenter;
+
+  private gb_Screen         mScreen;
+  private gb_Options        mOptions;
+  private gb_FontSelector   mFontSelector;
+  private gb_MultiWheelMode mMultiWheelMode;
+
+  private gb_Text mText;
+
+  private bool mIsRotating;
+
+  // cache
+  private gb_TextureCache mTextureCache;
+  private double mScaleFactor;
+}
+#+end_src
+
+* Test
+
+Basic check: the mod can be loaded without errors.
+
+#+begin_src text :tangle build/GearboxTest/commands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "scons -Q GearboxTest")
+#+end_src
