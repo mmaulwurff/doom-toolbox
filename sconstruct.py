@@ -282,7 +282,10 @@ AlwaysBuild(Alias('CheckCompatibility', None, make_check_compatibility_target())
 
 # Dependencies
 def add_dependency(project, module, namespace):
+  target_directory = f'build/{project}/zscript'
+
   def export_module(target, source, env):
+    makedirs(target_directory, exist_ok=True)
     with open(target[0], 'w') as target_file:
       with open(source[0]) as module_file:
         target_file.write(module_file.read().replace('NAMESPACE_', namespace))
@@ -290,7 +293,7 @@ def add_dependency(project, module, namespace):
   Depends(
     project,
     Command(
-      target=f'build/{project}/zscript/{namespace}{module}.zs',
+      target=f'{target_directory}/{namespace}{module}.zs',
       source=f'build/{module}/{module}.zs',
       action=export_module,
     ),
