@@ -123,15 +123,14 @@ version 4.13.3
 
 class st_EventHandler : StaticEventHandler
 {
-  override void playerEntered(PlayerEvent event)
-  {
-    if (!mIsInitialized && !(level.mapName ~== "TITLEMAP")) initialize();
-  }
-
   // Collects sounds by searching for actors that make sounds and doors/elevators.
   override void worldTick()
   {
-    if (!mIsInitialized) return;
+    if (!mIsInitialized)
+    {
+      if (level.mapName ~== "TITLEMAP") return;
+      initialize();
+    }
 
     if (players[consolePlayer].mo == NULL) return;
 
