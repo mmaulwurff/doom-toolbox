@@ -955,8 +955,8 @@ class gb_CustomWeaponOrderStorage
   {
     string dataString;
 
-    uint nWeapons = data.weapons.size();
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = data.weapons.size();
+    for (int i = 0; i < nWeapons; ++i)
     {
       dataString.appendFormat("%s%d", data.weapons[i].getClassName(), data.slots[i]);
     }
@@ -971,8 +971,8 @@ class gb_CustomWeaponOrderStorage
     string operationsData = loadFromStorage(weaponSetHash);
     deserializeOperations(operationsData, operations);
 
-    uint nOperations = operations.index.size();
-    for (uint i = 0; i < nOperations; ++i)
+    int nOperations = operations.index.size();
+    for (int i = 0; i < nOperations; ++i)
     {
       switch (operations.operationType[i])
       {
@@ -1056,8 +1056,8 @@ class gb_CustomWeaponOrderStorage
   string serializeOperations(gb_WeaponOrderOperations operations)
   {
     string result;
-    uint nOperations = operations.index.size();
-    for (uint i = 0; i < nOperations; ++i)
+    int nOperations = operations.index.size();
+    for (int i = 0; i < nOperations; ++i)
     {
       result.appendFormat( "%d" .. DELIMITER .. "%d" .. DELIMITER
                          , operations.index[i]
@@ -1079,8 +1079,8 @@ class gb_CustomWeaponOrderStorage
       return;
     }
 
-    uint nTokens = tokens.size();
-    for (uint i = 0; i < nTokens; i += 2)
+    int nTokens = tokens.size();
+    for (int i = 0; i < nTokens; i += 2)
     {
       operations.index        .push(tokens[i    ].toInt());
       operations.operationType.push(tokens[i + 1].toInt());
@@ -1345,8 +1345,8 @@ class gb_InputProcessor
   {
     Array<int> keys;
     bindings.getAllKeysForCommand(keys, command);
-    uint nKeys = keys.size();
-    for (uint i = 0; i < nKeys; ++i)
+    int nKeys = keys.size();
+    for (int i = 0; i < nKeys; ++i)
     {
       if (keys[i] == key) return true;
     }
@@ -1500,7 +1500,7 @@ class gb_InventoryUser play
 
   void use()
   {
-    for (uint i = 0; i < mItemQueue.size();)
+    for (int i = 0; i < mItemQueue.size();)
     {
       PlayerPawn player = mPlayerQueue[i].mo;
       if (player == NULL)
@@ -1536,7 +1536,7 @@ class gb_InventoryUser play
   }
 
   private
-  void deleteFromQueue(uint index)
+  void deleteFromQueue(int index)
   {
     mPlayerQueue.delete(index);
     mItemQueue.delete(index);
@@ -1764,12 +1764,12 @@ class gb_Printer
   static
   void printWeaponData(gb_WeaponData data)
   {
-    uint nWeapons = data.weapons.size();
-    uint nSlots = data.slots.size();
+    int nWeapons = data.weapons.size();
+    int nSlots = data.slots.size();
 
     console.printf("numbers: %d, %d", nWeapons, nSlots);
 
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       let default = getDefaultByType(data.weapons[i]);
       console.printf( "%s (%s), slot %d"
@@ -2130,7 +2130,7 @@ class gb_WeaponMenu
   {
     if (aClass == NULL) return;
 
-    uint index = getIndexOf(aClass);
+    int index = getIndexOf(aClass);
     if (index != mWeapons.size()) mSelectedIndex = index;
   }
 
@@ -2150,13 +2150,13 @@ class gb_WeaponMenu
 
   bool selectSlot(int slot, bool selectFirstWeapon = false)
   {
-    uint nWeapons = mWeapons.size();
+    int nWeapons = mWeapons.size();
     int direction = mOptions.isSlotCycleOrderReversed() ? -1 : 1;
     int startOffset = selectFirstWeapon ? 0 : (mSelectedIndex + direction);
 
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
-      uint index = (startOffset + nWeapons + direction * i) % nWeapons;
+      int index = (startOffset + nWeapons + direction * i) % nWeapons;
       if (mSlots[index] == slot && isInInventory(index) && !isHidden(mWeapons[index].getClassName()))
       {
         mSelectedIndex = index;
@@ -2169,9 +2169,9 @@ class gb_WeaponMenu
 
   bool isOneWeaponInSlot(int slot) const
   {
-    uint nWeapons = mWeapons.size();
+    int nWeapons = mWeapons.size();
     int  nWeaponsInSlot = 0;
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       nWeaponsInSlot += (mSlots[i] == slot && isInInventory(i));
       if (nWeaponsInSlot > 1) return false;
@@ -2221,10 +2221,10 @@ class gb_WeaponMenu
     mSelectedIndex = rotatePriorityForIndex(mSelectedIndex);
   }
 
-  uint rotatePriorityForIndex(int index)
+  int rotatePriorityForIndex(int index)
   {
     bool isIndexFound;
-    uint targetIndex;
+    int targetIndex;
     [isIndexFound, targetIndex] = findIndexOfNextWeaponWithSlot(index, mSlots[index]);
 
     if (!isIndexFound) return mSelectedIndex;
@@ -2240,13 +2240,13 @@ class gb_WeaponMenu
 
   int rotateSlotForIndex(int oldIndex)
   {
-    uint nWeapons = mWeapons.size();
+    int nWeapons = mWeapons.size();
     if (nWeapons < 2) return oldIndex;
 
     int oldSlot = mSlots[oldIndex];
     int newSlot = getNextSlot(oldSlot);
 
-    uint i = 0;
+    int i = 0;
     for (int slot = 1;;)
     {
       while (i < nWeapons && mSlots[i] == slot) ++i;
@@ -2268,8 +2268,8 @@ class gb_WeaponMenu
   bool isThereNoWeapons() const
   {
     bool isNothingFound = true;
-    uint nWeapons = mWeapons.size();
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = mWeapons.size();
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (isInInventory(i) && !isHidden(mWeapons[i].getClassName())) return false;
     }
@@ -2277,14 +2277,14 @@ class gb_WeaponMenu
   }
 
   private
-  void rotate(uint oldIndex, uint newIndex)
+  void rotate(int oldIndex, int newIndex)
   {
     if (oldIndex > newIndex) move(oldIndex, newIndex);
     else                     move(oldIndex, newIndex + 1);
   }
 
   private
-  void move(uint oldIndex, uint newIndex)
+  void move(int oldIndex, int newIndex)
   {
     if (oldIndex == newIndex) return;
 
@@ -2298,12 +2298,12 @@ class gb_WeaponMenu
   }
 
   private
-  bool, uint findIndexOfNextWeaponWithSlot(uint weaponIndex, int slot)
+  bool, int findIndexOfNextWeaponWithSlot(int weaponIndex, int slot)
   {
-    uint nWeapons = mWeapons.size();
-    for (uint i = 1; i < nWeapons; ++i)
+    int nWeapons = mWeapons.size();
+    for (int i = 1; i < nWeapons; ++i)
     {
-      uint targetCandidateIndex = (weaponIndex + i) % nWeapons;
+      int targetCandidateIndex = (weaponIndex + i) % nWeapons;
       if (mSlots[targetCandidateIndex] == slot)
       {
         return true, targetCandidateIndex;
@@ -2350,8 +2350,8 @@ class gb_WeaponMenu
   private ui
   void fillDirect(out gb_ViewModel viewModel)
   {
-    uint nWeapons = mWeapons.size();
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = mWeapons.size();
+    for (int i = 0; i < nWeapons; ++i)
     {
       let aWeapon = Weapon(players[consolePlayer].mo.findInventory(mWeapons[i]));
 
@@ -2405,8 +2405,8 @@ class gb_WeaponMenu
   {
     bool result = false;
 
-    uint nServices = mHideServices.size();
-    for (uint i = 0; i < nServices; ++i)
+    int nServices = mHideServices.size();
+    for (int i = 0; i < nServices; ++i)
     {
       let service = mHideServices[i];
       string hideResponse = service.get(className);
@@ -2426,9 +2426,9 @@ class gb_WeaponMenu
     TextureID icon = BaseStatusBar.getInventoryIcon(aWeapon, BaseStatusBar.DI_AltIconFirst);
 
     {
-      uint nServices = mIconServices.size();
+      int nServices = mIconServices.size();
       string className = aWeapon.getClassName();
-      for (uint i = 0; i < nServices; ++i)
+      for (int i = 0; i < nServices; ++i)
       {
         let service = mIconServices[i];
         string iconResponse = service.uiGet(className);
@@ -2445,8 +2445,8 @@ class gb_WeaponMenu
 
   private play State getReadyState(Weapon w) const { return w.getReadyState(); }
 
-  private ui uint findNextWeapon() const { return findWeapon( 1); }
-  private ui uint findPrevWeapon() const { return findWeapon(-1); }
+  private ui int findNextWeapon() const { return findWeapon( 1); }
+  private ui int findPrevWeapon() const { return findWeapon(-1); }
 
   /**
    ,* @param direction search direction from the selected weapon: 1 or -1.
@@ -2455,14 +2455,14 @@ class gb_WeaponMenu
    ,* it. If there are no weapons, return weapons number.
    ,*/
   private ui
-  uint findWeapon(int direction) const
+  int findWeapon(int direction) const
   {
-    uint nWeapons = mWeapons.size();
+    int nWeapons = mWeapons.size();
     // Note range: [1; nWeapons + 1) instead of [0; nWeapons).
     // This is because I want the current weapon to be found last.
-    for (uint i = 1; i < nWeapons + 1; ++i)
+    for (int i = 1; i < nWeapons + 1; ++i)
     {
-      uint index = (mSelectedIndex + i * direction + nWeapons) % nWeapons;
+      int index = (mSelectedIndex + i * direction + nWeapons) % nWeapons;
       if (isHidden(mWeapons[index].getClassName())) continue;
       if (isInInventory(index)) return index;
     }
@@ -2471,10 +2471,10 @@ class gb_WeaponMenu
   }
 
   private
-  uint getIndexOf(class<Weapon> aClass) const
+  int getIndexOf(class<Weapon> aClass) const
   {
-    uint nWeapons = mWeapons.size();
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = mWeapons.size();
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (mWeapons[i] == aClass) return i;
     }
@@ -2506,7 +2506,7 @@ class gb_WeaponMenu
 
   private Array< class<Weapon> > mWeapons;
   private Array< int >           mSlots;
-  private uint mSelectedIndex;
+  private int mSelectedIndex;
 
   private Array<gb_Service> mIconServices;
   private Array<gb_Service> mHideServices;
@@ -2584,8 +2584,8 @@ class gb_BlockyView
     int  fontHeight = aFont.getHeight();
     int  textY      = startY + SLOT_SIZE / 2 - fontHeight / 2;
 
-    uint nWeapons = viewModel.tags.size();
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = viewModel.tags.size();
+    for (int i = 0; i < nWeapons; ++i)
     {
       int slot = viewModel.slots[i];
 
@@ -2709,10 +2709,10 @@ class gb_BlockyView
   private static
   int getSlotsNumber(gb_ViewModel viewModel)
   {
-    uint nEntries = viewModel.slots.size();
+    int nEntries = viewModel.slots.size();
     int nSlots = 0;
     int lastSlot = -1;
-    for (uint i = 0; i < nEntries; ++i)
+    for (int i = 0; i < nEntries; ++i)
     {
       if (viewModel.slots[i] != lastSlot)
       {
@@ -2732,11 +2732,11 @@ class gb_BlockyView
   private static
   int getMaxHeight(gb_ViewModel viewModel)
   {
-    uint nEntries = viewModel.slots.size();
+    int nEntries = viewModel.slots.size();
     int lastSlot = -1;
     int itemsInSlot = 1;
     int maxItemsInSlot = -1;
-    for (uint i = 0; i < nEntries; ++i)
+    for (int i = 0; i < nEntries; ++i)
     {
       if (viewModel.slots[i] == lastSlot)
       {
@@ -2779,7 +2779,7 @@ class gb_BlockyView
     int allowedStringWidth = SELECTED_SLOT_WIDTH - 2;
     for (int i = nWords - 2; i >= 0; --i)
     {
-      uint newWidth = (aFont.stringWidth(lines[0]) + spaceWidth + aFont.stringWidth(words[i]));
+      int newWidth = (aFont.stringWidth(lines[0]) + spaceWidth + aFont.stringWidth(words[i]));
       if (newWidth < allowedStringWidth)
       {
         lines[0] = words[i] .. " " .. lines[0];
@@ -2793,10 +2793,10 @@ class gb_BlockyView
     // If there are too many lines, put them on the third line and mark the it
     // with ellipsis.
     string ellipsis = aFont.getGlyphHeight(ELLIPSIS_CODE) ? "…" : "...";
-    uint nLines = lines.size();
+    int nLines = lines.size();
     if (nLines > 3)
     {
-      for (uint i = 3; i < nLines; ++i)
+      for (int i = 3; i < nLines; ++i)
       {
         lines[2].appendFormat(" %s", lines[i]);
       }
@@ -2805,9 +2805,9 @@ class gb_BlockyView
 
     // If a line is too long to fit in the box, replace the part that doesn't
     // fit with ellipsis.
-    uint linesEnd = min(nLines, 3);
+    int linesEnd = min(nLines, 3);
     int ellipsisWidth = aFont.stringWidth(ellipsis);
-    for (uint i = 0; i < linesEnd; ++i)
+    for (int i = 0; i < linesEnd; ++i)
     {
       if (aFont.stringWidth(lines[i]) <= allowedStringWidth) continue;
 
@@ -2820,7 +2820,7 @@ class gb_BlockyView
 
     // Finally, print lines.
     int lineHeight = aFont.getHeight();
-    for (uint i = 0; i < linesEnd; ++i)
+    for (int i = 0; i < linesEnd; ++i)
     {
       double y = startY + SELECTED_WEAPON_HEIGHT + (i - linesEnd) * lineHeight;
       drawText(aFont, Font.CR_WHITE, startX + 1, y, lines[i], 0.3);
@@ -3158,7 +3158,7 @@ class gb_TextView
 
   void display(gb_ViewModel viewModel) const
   {
-    uint nWeapons = viewModel.tags.size();
+    int nWeapons = viewModel.tags.size();
     if (nWeapons == 0) return;
 
     vector2 start = mOptions.getTextPosition();
@@ -3176,12 +3176,12 @@ class gb_TextView
 
     // dry run
     int maxSlotWidth = 0;
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       string slotString = string.format("%d. ", viewModel.slots[i]);
       maxSlotWidth = max(maxSlotWidth, aFont.stringWidth(slotString));
     }
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       string itemString = makeItemString(viewModel, i);
       maxX = max(maxX, maxSlotWidth + x + aFont.stringWidth(itemString));
@@ -3202,7 +3202,7 @@ class gb_TextView
 
     // real run
     double selectedY = 0;
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (i == viewModel.selectedIndex)
       {
@@ -3223,7 +3223,7 @@ class gb_TextView
 
     y = start.y;
 
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (i != viewModel.selectedIndex)
       {
@@ -3756,16 +3756,16 @@ class gb_EventHandler : EventHandler
   private ui
   void verifyViewModel(gb_ViewModel model)
   {
-    uint nTags           = model.tags        .size();
-    uint nSlots          = model.slots       .size();
-    uint nIndices        = model.indices     .size();
-    uint nIcons          = model.icons       .size();
-    uint nIconScaleXs    = model.iconScaleXs .size();
-    uint nIconScaleYs    = model.iconScaleYs .size();
-    uint nQuantities1    = model.quantity1   .size();
-    uint nQuantitiesMax1 = model.maxQuantity1.size();
-    uint nQuantities2    = model.quantity2   .size();
-    uint nQuantitiesMax2 = model.maxQuantity2.size();
+    int nTags           = model.tags        .size();
+    int nSlots          = model.slots       .size();
+    int nIndices        = model.indices     .size();
+    int nIcons          = model.icons       .size();
+    int nIconScaleXs    = model.iconScaleXs .size();
+    int nIconScaleYs    = model.iconScaleYs .size();
+    int nQuantities1    = model.quantity1   .size();
+    int nQuantitiesMax1 = model.maxQuantity1.size();
+    int nQuantities2    = model.quantity2   .size();
+    int nQuantitiesMax2 = model.maxQuantity2.size();
 
     if (nTags > 0
         && (model.selectedIndex >= nTags
@@ -3950,7 +3950,7 @@ class gb_ServiceIterator
    */
   gb_Service next()
   {
-    uint classesNumber = AllClasses.size();
+    int classesNumber = AllClasses.size();
     gb_Service result = (mClassIndex == classesNumber)
       ? NULL
       : gb_Service(new(AllClasses[mClassIndex]));
@@ -3964,7 +3964,7 @@ class gb_ServiceIterator
   private
   void findNextService()
   {
-    uint classesNumber = AllClasses.size();
+    int classesNumber = AllClasses.size();
     while (mClassIndex < classesNumber && !ServiceNameContains(AllClasses[mClassIndex], mServiceName))
     {
       ++mClassIndex;
@@ -3984,7 +3984,7 @@ class gb_ServiceIterator
   }
 
   private string mServiceName;
-  private uint   mClassIndex;
+  private int    mClassIndex;
 }
 #+end_src
 
@@ -4354,9 +4354,9 @@ class gb_WheelIndexer
   {
     if (areIndicesDefined()) return mInnerIndex;
 
-    uint nWeapons = viewModel.tags.size();
-    uint externalSelectedIndexInModel = UNDEFINED_INDEX;
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = viewModel.tags.size();
+    int externalSelectedIndexInModel = UNDEFINED_INDEX;
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (viewModel.indices[i] == externalSelectedIndex)
       {
@@ -4370,8 +4370,8 @@ class gb_WheelIndexer
     gb_MultiWheelModel multiWheelModel;
     gb_MultiWheel.fill(viewModel, multiWheelModel);
 
-    uint nPlaces = multiWheelModel.data.size();
-    for (uint i = 0; i < nPlaces; ++i)
+    int nPlaces = multiWheelModel.data.size();
+    for (int i = 0; i < nPlaces; ++i)
     {
       if (multiWheelModel.isWeapon[i])
       {
@@ -4392,9 +4392,9 @@ class gb_WheelIndexer
 
     if (!mMultiWheelMode.isEngaged(viewModel)) return UNDEFINED_INDEX;
 
-    uint nWeapons = viewModel.tags.size();
-    uint externalSelectedIndexInModel = UNDEFINED_INDEX;
-    for (uint i = 0; i < nWeapons; ++i)
+    int nWeapons = viewModel.tags.size();
+    int externalSelectedIndexInModel = UNDEFINED_INDEX;
+    for (int i = 0; i < nWeapons; ++i)
     {
       if (viewModel.indices[i] == externalSelectedIndex)
       {
@@ -4407,7 +4407,7 @@ class gb_WheelIndexer
 
     int slot = viewModel.slots[externalSelectedIndexInModel];
 
-    uint start = 0;
+    int start = 0;
     for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
 
     return externalSelectedIndexInModel - start;
@@ -4424,7 +4424,7 @@ class gb_WheelIndexer
       return;
     }
 
-    uint nWeapons = viewModel.tags.size();
+    int nWeapons = viewModel.tags.size();
 
     if (!mMultiWheelMode.isEngaged(viewModel))
     {
@@ -4438,7 +4438,7 @@ class gb_WheelIndexer
     gb_MultiWheelModel multiWheelModel;
     gb_MultiWheel.fill(viewModel, multiWheelModel);
 
-    uint nPlaces = multiWheelModel.data.size();
+    int nPlaces = multiWheelModel.data.size();
     int wheelRadius = mScreen.getWheelRadius();
 
     if (controllerModel.radius < wheelRadius)
@@ -4457,11 +4457,11 @@ class gb_WheelIndexer
 
     int slot = multiWheelModel.data[mLastSlotIndex];
 
-    uint start = 0;
+    int start = 0;
     for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
-    uint end = start;
+    int end = start;
     for (; end < nWeapons && viewModel.slots[end] == slot; ++end);
-    uint nWeaponsInSlot = end - start;
+    int nWeaponsInSlot = end - start;
 
     double slotAngle = itemAngle(nPlaces, mLastSlotIndex);
 
@@ -4498,7 +4498,7 @@ class gb_WheelIndexer
   }
 
   private
-  void reportInnerIndex( uint nPlaces
+  void reportInnerIndex( int nPlaces
                        , gb_WheelControllerModel controllerModel
                        , gb_MultiWheelModel      multiWheelModel
                        , gb_ViewModel            viewModel
@@ -4535,7 +4535,7 @@ class gb_WheelIndexer
   }
 
   private static
-  double itemAngle(uint nItems, uint index)
+  double itemAngle(int nItems, int index)
   {
     return 360.0 / nItems * index;
   }
@@ -4560,7 +4560,7 @@ class gb_WheelIndexer
 class gb_WheelInnerIndexer
 {
   static
-  int getSelectedIndex(uint nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
+  int getSelectedIndex(int nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
   {
     if (controllerModel.radius < screen.getWheelDeadRadius() || nItems == 0)
     {
@@ -4588,10 +4588,10 @@ class gb_MultiWheel
   static
   void fill(gb_ViewModel viewModel, out gb_MultiWheelModel model)
   {
-    uint nWeapons = viewModel.tags.size();
-    int  lastSlot = -1;
+    int nWeapons = viewModel.tags.size();
+    int lastSlot = -1;
 
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       int  slot     = viewModel.slots[i];
       bool isSingle = isSingleWeaponInSlot(viewModel, nWeapons, slot);
@@ -4613,10 +4613,10 @@ class gb_MultiWheel
   }
 
   static
-  bool isSingleWeaponInSlot(gb_ViewModel viewModel, uint nWeapons, int slot)
+  bool isSingleWeaponInSlot(gb_ViewModel viewModel, int nWeapons, int slot)
   {
     int nWeaponsInSlot = 0;
-    for (uint i = 0; i < nWeapons; ++i)
+    for (int i = 0; i < nWeapons; ++i)
     {
       nWeaponsInSlot += (viewModel.slots[i] == slot);
       if (nWeaponsInSlot > 1) return false;
@@ -4642,7 +4642,7 @@ class gb_MultiWheelMode
 
   bool isEngaged(gb_ViewModel viewModel)
   {
-    uint nWeapons = viewModel.tags.size();
+    int  nWeapons = viewModel.tags.size();
     bool result   = (nWeapons > mOptions.getMultiWheelLimit());
     return result;
   }
@@ -4867,7 +4867,7 @@ class gb_WheelView
 
     drawInnerWheel();
 
-    uint nWeapons = viewModel.tags.size();
+    int nWeapons = viewModel.tags.size();
     if (nWeapons == 0) return;
 
     int screenHeight = mScreen.getScaledScreenHeight();
@@ -4884,7 +4884,7 @@ class gb_WheelView
       gb_MultiWheel.fill(viewModel, multiWheelModel);
 
       nPlaces = multiWheelModel.data.size();
-      for (uint i = 0; i < nPlaces; ++i)
+      for (int i = 0; i < nPlaces; ++i)
       {
         bool isWeapon = multiWheelModel.isWeapon[i];
         int  data     = multiWheelModel.data[i];
@@ -4913,7 +4913,7 @@ class gb_WheelView
     else
     {
       isSlotExpanded = false;
-      for (uint i = 0; i < nWeapons; ++i)
+      for (int i = 0; i < nWeapons; ++i)
       {
         if (i == innerIndex) continue;
         displayWeapon(i, i, nWeapons, radius, allowedWidth, viewModel, mCenter);
@@ -4941,7 +4941,7 @@ class gb_WheelView
   private
   void drawOuterWeapons( int  innerIndex
                        , int  outerIndex
-                       , uint nPlaces
+                       , int  nPlaces
                        , int  slot
                        , gb_ViewModel viewModel
                        , int  radius
@@ -4954,19 +4954,19 @@ class gb_WheelView
     vector2 outerWheelCenter = (sin(angle), -cos(angle)) * wheelRadius + mCenter;
     drawOuterWheel(outerWheelCenter.x, outerWheelCenter.y, -angle);
 
-    uint nWeapons = viewModel.tags.size();
+    int nWeapons = viewModel.tags.size();
 
-    uint start = 0;
+    int start = 0;
     for (; start < nWeapons && viewModel.slots[start] != slot; ++start);
-    uint end = start;
+    int end = start;
     for (; end < nWeapons && viewModel.slots[end] == slot; ++end);
 
-    uint   nWeaponsInSlot = end - start;
+    int    nWeaponsInSlot = end - start;
     double startingAngle  = angle - 90 + (180.0 / nWeaponsInSlot / 2);
 
-    uint place = 0;
-    uint selectedPlace = 0;
-    for (uint i = start; i < end; ++i, ++place)
+    int place = 0;
+    int selectedPlace = 0;
+    for (int i = start; i < end; ++i, ++place)
     {
       if (i == viewModel.selectedIndex)
       {
@@ -5041,9 +5041,9 @@ class gb_WheelView
   }
 
   private
-  void displayWeapon( uint place
-                    , uint iconIndex
-                    , uint nPlaces
+  void displayWeapon( int place
+                    , int iconIndex
+                    , int nPlaces
                     , int  radius
                     , int  allowedWidth
                     , gb_ViewModel viewModel
@@ -5177,7 +5177,7 @@ class gb_WheelView
   }
 
   private
-  void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, uint weaponIndex)
+  void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, int weaponIndex)
   {
     if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex], viewModel.maxQuantity1[weaponIndex]))
     {
@@ -5240,7 +5240,7 @@ class gb_WheelView
   }
 
   private
-  void displaySlot(uint place, int slot, uint nPlaces, int radius)
+  void displaySlot(int place, int slot, int nPlaces, int radius)
   {
     double  angle = itemAngle(nPlaces, place);
     vector2 pos   = (sin(angle), -cos(angle)) * radius + mCenter;
@@ -5250,13 +5250,13 @@ class gb_WheelView
   }
 
   private static
-  double itemAngle(uint nItems, uint index)
+  double itemAngle(int nItems, int index)
   {
     return 360.0 / nItems * index;
   }
 
   private
-  void drawHands(uint nPlaces, uint selectedIndex, vector2 center, double startAngle)
+  void drawHands(int nPlaces, int selectedIndex, vector2 center, double startAngle)
   {
     if (nPlaces < 2) return;
 
