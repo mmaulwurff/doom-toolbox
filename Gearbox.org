@@ -806,8 +806,7 @@ Gameinfo
 // It can be either Weapons, Inventory, or None.
 class gb_Activity
 {
-  static
-  gb_Activity from()
+  static gb_Activity from()
   {
     let result = new("gb_Activity");
     result.mActivity = gb_Activity.None;
@@ -853,8 +852,7 @@ class gb_Activity
 
 class gb_Changer play
 {
-  static
-  gb_Changer from(gb_Caption caption, gb_Options options, gb_InventoryUser inventoryUser)
+  static gb_Changer from(gb_Caption caption, gb_Options options, gb_InventoryUser inventoryUser)
   {
     let result = new("gb_Changer");
     result.mCaption       = caption;
@@ -885,8 +883,7 @@ class gb_Changer play
       player.mo.dropInventory(item, 1);
   }
 
-  static
-  void setAngles(PlayerInfo player, double pitch, double angle)
+  static void setAngles(PlayerInfo player, double pitch, double angle)
   {
     if (player.mo == NULL) return;
 
@@ -899,8 +896,7 @@ class gb_Changer play
     player.cmd.pitch = 0;
   }
 
-  static
-  void freezePlayer( PlayerInfo player
+  static void freezePlayer( PlayerInfo player
                    , int        cheats
                    , double     velocityX
                    , double     velocityY
@@ -929,8 +925,7 @@ class gb_Changer play
 
 class gb_WeaponOrderOperations
 {
-  static
-  gb_WeaponOrderOperations from()
+  static gb_WeaponOrderOperations from()
   {
     let result = new("gb_WeaponOrderOperations");
     result.index.clear();
@@ -950,8 +945,7 @@ class gb_CustomWeaponOrderStorage
     RotateSlot,
   }
 
-  static
-  string calculateHash(gb_WeaponData data)
+  static string calculateHash(gb_WeaponData data)
   {
     string dataString;
 
@@ -964,8 +958,7 @@ class gb_CustomWeaponOrderStorage
     return gb_MD5.hash(dataString);
   }
 
-  static
-  void applyOperations(string weaponSetHash, gb_WeaponMenu menu)
+  static void applyOperations(string weaponSetHash, gb_WeaponMenu menu)
   {
     let operations = gb_WeaponOrderOperations.from();
     string operationsData = loadFromStorage(weaponSetHash);
@@ -990,28 +983,24 @@ class gb_CustomWeaponOrderStorage
     }
   }
 
-  static
-  void savePriorityRotation(string weaponSetHash, int index)
+  static void savePriorityRotation(string weaponSetHash, int index)
   {
     saveOperation(weaponSetHash, index, RotatePriority);
   }
 
-  static
-  void saveSlotRotation(string weaponSetHash, int index)
+  static void saveSlotRotation(string weaponSetHash, int index)
   {
     saveOperation(weaponSetHash, index, RotateSlot);
   }
 
-  static
-  void reset(string weaponSetHash)
+  static void reset(string weaponSetHash)
   {
     Dictionary weaponSetOrders = readWeaponSetOrders();
     weaponSetOrders.remove(weaponSetHash);
     getStorageCvar().setString(weaponSetOrders.toString());
   }
 
-  static
-  void saveOperation(string weaponSetHash, int index, int operationType)
+  static void saveOperation(string weaponSetHash, int index, int operationType)
   {
     let operations = gb_WeaponOrderOperations.from();
     {
@@ -1026,34 +1015,29 @@ class gb_CustomWeaponOrderStorage
     saveToStorage(weaponSetHash, operationsData);
   }
 
-  private static
-  void saveToStorage(string hash, string data)
+  private static void saveToStorage(string hash, string data)
   {
     Dictionary weaponSetOrders = readWeaponSetOrders();
     weaponSetOrders.insert(hash, data);
     getStorageCvar().setString(weaponSetOrders.toString());
   }
 
-  private static
-  string loadFromStorage(string hash)
+  private static string loadFromStorage(string hash)
   {
     return readWeaponSetOrders().at(hash);
   }
 
-  private static
-  Dictionary readWeaponSetOrders()
+  private static Dictionary readWeaponSetOrders()
   {
     return Dictionary.fromString(getStorageCvar().getString());
   }
 
-  private static
-  Cvar getStorageCvar()
+  private static Cvar getStorageCvar()
   {
     return Cvar.getCvar(STORAGE_CVAR_NAME);
   }
 
-  private static
-  string serializeOperations(gb_WeaponOrderOperations operations)
+  private static string serializeOperations(gb_WeaponOrderOperations operations)
   {
     string result;
     int nOperations = operations.index.size();
@@ -1067,8 +1051,7 @@ class gb_CustomWeaponOrderStorage
     return result;
   }
 
-  private static
-  void deserializeOperations(string data, out gb_WeaponOrderOperations operations)
+  private static void deserializeOperations(string data, out gb_WeaponOrderOperations operations)
   {
     Array<string> tokens;
     data.split(tokens, DELIMITER, TOK_SkipEmpty);
@@ -1098,8 +1081,7 @@ class gb_CustomWeaponOrderStorage
 
 class gb_EventProcessor
 {
-  static
-  int process(ConsoleEvent event, bool isSelectOnKeyUp)
+  static int process(ConsoleEvent event, bool isSelectOnKeyUp)
   {
     if (event.name == "gb_toggle_weapon_menu") return InputToggleWeaponMenu;
     if (event.name == "gb_toggle_weapon_menu_up" && isSelectOnKeyUp) return InputConfirmSelection;
@@ -1120,8 +1102,7 @@ class gb_EventProcessor
 
 class gb_FontSelector
 {
-  static
-  gb_FontSelector from()
+  static gb_FontSelector from()
   {
     let result = new("gb_FontSelector");
     result.mFontString = gb_Cvar.from("gb_font");
@@ -1159,8 +1140,7 @@ class gb_FontSelector
 
 class gb_Freezer play
 {
-  static
-  gb_Freezer from(gb_Options options)
+  static gb_Freezer from(gb_Options options)
   {
     let result = new("gb_Freezer");
     result.mWasFrozen = false;
@@ -1188,45 +1168,34 @@ class gb_Freezer play
     thawPlayer();
   }
 
-  /**
-   * Corresponds to gb_FreezeValues in menudef.
-   */
-  private static
-  bool isLevelFreezeEnabled(int freezeMode)
+  // Corresponds to gb_FreezeValues in menudef.
+  private static bool isLevelFreezeEnabled(int freezeMode)
   {
     return !multiplayer && (freezeMode == 1);
   }
 
-  /**
-   * Corresponds to gb_FreezeValues in menudef.
-   *
-   * Freezing level without player causes weird behavior, like weapon bobbing
-   * while Gearbox is open. So, freeze player when level is frozen too.
-   */
-  private static
-  bool isPlayerFreezeEnabled(int freezeMode)
+  // Corresponds to gb_FreezeValues in menudef.
+  //
+  // Freezing level without player causes weird behavior, like weapon bobbing
+  // while Gearbox is open. So, freeze player when level is frozen too.
+  private static bool isPlayerFreezeEnabled(int freezeMode)
   {
     return freezeMode != 0;
   }
 
-  /**
-   * Thaw regardless of freeze mode.
-   */
-  private static
-  bool isLevelThawEnabled()
+  // Thaw regardless of freeze mode.
+  private static bool isLevelThawEnabled()
   {
     return !multiplayer;
   }
 
-  private
-  void freezeLevel()
+  private void freezeLevel()
   {
     mWasLevelFrozen = level.isFrozen();
     level.setFrozen(true);
   }
 
-  private
-  void freezePlayer()
+  private void freezePlayer()
   {
     mWasPlayerFrozen = true;
 
@@ -1239,14 +1208,12 @@ class gb_Freezer play
     gb_Sender.sendFreezePlayerEvent(player.cheats | FROZEN_CHEATS_FLAGS, (0, 0, 0), 0);
   }
 
-  private
-  void thawLevel() const
+  private void thawLevel() const
   {
     level.setFrozen(mWasLevelFrozen);
   }
 
-  private
-  void thawPlayer() const
+  private void thawPlayer() const
   {
     if (mWasPlayerFrozen) gb_Sender.sendFreezePlayerEvent(mCheats, mVelocity, mGravity);
     mWasPlayerFrozen = false;
@@ -1297,14 +1264,12 @@ enum gb_Inputs
 
 class gb_Input
 {
-  static
-  bool isSlot(gb_Inputs input)
+  static bool isSlot(gb_Inputs input)
   {
     return (InputSelectSlotBegin <= input && input <= InputSelectSlotEnd);
   }
 
-  static
-  int getSlot(gb_Inputs input)
+  static int getSlot(gb_Inputs input)
   {
     return input - InputSelectSlotBegin;
   }
@@ -1319,8 +1284,7 @@ class gb_Input
 
 class gb_InputProcessor
 {
-  static
-  gb_Inputs process(InputEvent event)
+  static gb_Inputs process(InputEvent event)
   {
     if (event.type != InputEvent.Type_KeyDown) return InputNothing;
 
@@ -1334,22 +1298,21 @@ class gb_InputProcessor
 
     for (int i = 0; i <= 11; ++i)
     {
-      if (isKeyForCommand(key, string.format("slot %d", i))) return i + InputSelectSlotBegin;
+      if (isKeyForCommand(key, string.format("slot %d", i)))
+        return i + InputSelectSlotBegin;
     }
 
     return InputNothing;
   }
 
-  private static
-  bool isKeyForCommand(int key, string command)
+  private static bool isKeyForCommand(int key, string command)
   {
     Array<int> keys;
     bindings.getAllKeysForCommand(keys, command);
-    int nKeys = keys.size();
-    for (int i = 0; i < nKeys; ++i)
-    {
-      if (keys[i] == key) return true;
-    }
+
+    foreach (aKey : keys)
+      if (aKey == key) return true;
+
     return false;
   }
 }
@@ -1362,8 +1325,7 @@ class gb_InputProcessor
 
 class gb_InventoryMenu
 {
-  static
-  gb_InventoryMenu from()
+  static gb_InventoryMenu from()
   {
     let result = new("gb_InventoryMenu");
 
@@ -1372,8 +1334,7 @@ class gb_InventoryMenu
     return result;
   }
 
-  static
-  bool thereAreNoItems()
+  static bool thereAreNoItems()
   {
     return getItemsNumber() == 0;
   }
@@ -1395,8 +1356,7 @@ class gb_InventoryMenu
     return "";
   }
 
-  ui
-  bool selectNext()
+  ui bool selectNext()
   {
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
@@ -1406,8 +1366,7 @@ class gb_InventoryMenu
     return true;
   }
 
-  ui
-  bool selectPrev()
+  ui bool selectPrev()
   {
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
@@ -1417,8 +1376,7 @@ class gb_InventoryMenu
     return true;
   }
 
-  ui
-  bool setSelectedIndex(int index)
+  ui bool setSelectedIndex(int index)
   {
     if (index == -1 || mSelectedIndex == index) return false;
 
@@ -1427,14 +1385,12 @@ class gb_InventoryMenu
     return true;
   }
 
-  ui
-  int getSelectedIndex() const
+  ui int getSelectedIndex() const
   {
     return mSelectedIndex;
   }
 
-  ui
-  void fill(out gb_ViewModel viewModel)
+  ui void fill(out gb_ViewModel viewModel)
   {
     let item  = players[consolePlayer].mo.inv;
     int index = 0;
@@ -1465,8 +1421,7 @@ class gb_InventoryMenu
     viewModel.selectedIndex = mSelectedIndex;
   }
 
-  private static
-  int getItemsNumber()
+  private static int getItemsNumber()
   {
     let item   = players[consolePlayer].mo.inv;
     int result = 0;
@@ -1486,14 +1441,11 @@ class gb_InventoryMenu
 
 #+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs
 
-/**
- * We could use inventory items directly, but player cannot use items when
- * totally frozen. Therefore, we have to wait until player is not frozen.
- */
+// We could use inventory items directly, but player cannot use items when
+// totally frozen. Therefore, we have to wait until player is not frozen.
 class gb_InventoryUser play
 {
-  static
-  gb_InventoryUser from()
+  static gb_InventoryUser from()
   {
     return new("gb_InventoryUser");
   }
@@ -1535,8 +1487,7 @@ class gb_InventoryUser play
     mItemQueue.push(item);
   }
 
-  private
-  void deleteFromQueue(int index)
+  private void deleteFromQueue(int index)
   {
     mPlayerQueue.delete(index);
     mItemQueue.delete(index);
@@ -1553,8 +1504,7 @@ class gb_InventoryUser play
 
 class gb_NeteventProcessor play
 {
-  static
-  gb_NeteventProcessor from(gb_Changer changer)
+  static gb_NeteventProcessor from(gb_Changer changer)
   {
     let result = new("gb_NeteventProcessor");
     result.mChanger = changer;
@@ -1598,8 +1548,7 @@ class gb_NeteventProcessor play
 
 class gb_Options
 {
-  static
-  gb_Options from()
+  static gb_Options from()
   {
     let result = new("gb_Options");
 
@@ -1761,8 +1710,7 @@ class gb_Options
 
 class gb_Printer
 {
-  static
-  void printWeaponData(gb_WeaponData data)
+  static void printWeaponData(gb_WeaponData data)
   {
     int nWeapons = data.weapons.size();
     int nSlots = data.slots.size();
@@ -1790,26 +1738,22 @@ class gb_Printer
 
 class gb_Sender
 {
-  static
-  void sendSelectEvent(string className)
+  static void sendSelectEvent(string className)
   {
     EventHandler.sendNetworkEvent(string.format("gb_select_weapon:%s", className));
   }
 
-  static
-  void sendUseItemEvent(string className)
+  static void sendUseItemEvent(string className)
   {
     EventHandler.sendNetworkEvent(string.format("gb_use_item:%s", className));
   }
 
-  static
-  void sendDropItemEvent(string className)
+  static void sendDropItemEvent(string className)
   {
     EventHandler.sendNetworkEvent(string.format("gb_drop_item:%s", className));
   }
 
-  static
-  void sendFreezePlayerEvent(int cheats, vector3 velocity, double gravity)
+  static void sendFreezePlayerEvent(int cheats, vector3 velocity, double gravity)
   {
     EventHandler.sendNetworkEvent(string.format( "gb_freeze_player:%d:%f:%f:%f:%f"
                                                , cheats
@@ -1820,8 +1764,7 @@ class gb_Sender
                                                ));
   }
 
-  static
-  void sendPlayerAngles(double pitch, double yaw)
+  static void sendPlayerAngles(double pitch, double yaw)
   {
     EventHandler.sendNetworkEvent("gb_set_angles:" .. pitch .. ":" .. yaw);
   }
@@ -1836,8 +1779,7 @@ class gb_Sender
 
 class gb_Sounds
 {
-  static
-  gb_Sounds from(gb_Options options)
+  static gb_Sounds from(gb_Options options)
   {
     let result = new("gb_Sounds");
     result.mOptions = options;
@@ -1908,8 +1850,7 @@ class gb_Sounds
     }
   }
 
-  private
-  void playSound(string sound)
+  private void playSound(string sound)
   {
     if (!mOptions.isSoundEnabled()) return;
 
@@ -1961,21 +1902,16 @@ struct gb_WeaponData
 
 class gb_WeaponDataLoader play
 {
-  /**
-   * Code is adapted from
-   * GZDoom::src/src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
-   */
-  static
-  void load(out gb_WeaponData data)
+  // Code is adapted from
+  // GZDoom::src/src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
+  static void load(out gb_WeaponData data)
   {
-    int nClasses = AllActorClasses.Size();
-
     gb_WeaponInfo info;
     PlayerInfo player = players[consolePlayer];
 
-    for (int i = 0; i < nClasses; ++i)
+    foreach (aClass : AllActorClasses)
     {
-      let type = (class<Weapon>)(AllActorClasses[i]);
+      let type = (class<Weapon>)(aClass);
 
       if (type == NULL || type == "Weapon") continue;
 
@@ -2005,16 +1941,14 @@ class gb_WeaponDataLoader play
     data.slots.move(info.slots);
   }
 
-  private static
-  void sortWeapons(gb_WeaponInfo info)
+  private static void sortWeapons(gb_WeaponInfo info)
   {
     int nWeapons = info.classes.size();
 
     quickSortWeapons(info, 0, nWeapons - 1);
   }
 
-  private static
-  void quickSortWeapons(gb_WeaponInfo info, int lo, int hi)
+  private static void quickSortWeapons(gb_WeaponInfo info, int lo, int hi)
   {
     if (lo < hi)
     {
@@ -2024,8 +1958,7 @@ class gb_WeaponDataLoader play
     }
   }
 
-  private static
-  int quickSortWeaponsPartition(gb_WeaponInfo info, int lo, int hi)
+  private static int quickSortWeaponsPartition(gb_WeaponInfo info, int lo, int hi)
   {
     int pivot = measure(info, hi);
     int i     = lo - 1;
@@ -2043,8 +1976,7 @@ class gb_WeaponDataLoader play
     return i + 1;
   }
 
-  private static
-  int measure(gb_WeaponInfo info, int index)
+  private static int measure(gb_WeaponInfo info, int index)
   {
     int slot = info.slots[index];
     if (slot == 0) slot = 99;
@@ -2096,8 +2028,7 @@ struct gb_WeaponInfo
 
 class gb_WeaponMenu
 {
-  static
-  gb_WeaponMenu from(gb_WeaponData weaponData, gb_Options options)
+  static gb_WeaponMenu from(gb_WeaponData weaponData, gb_Options options)
   {
     let result = new("gb_WeaponMenu");
 
@@ -2134,15 +2065,13 @@ class gb_WeaponMenu
     if (index != mWeapons.size()) mSelectedIndex = index;
   }
 
-  ui
-  bool selectNextWeapon()
+  ui bool selectNextWeapon()
   {
     mSelectedIndex = findNextWeapon();
     return mSelectedIndex != mWeapons.size();
   }
 
-  ui
-  bool selectPrevWeapon()
+  ui bool selectPrevWeapon()
   {
     mSelectedIndex = findPrevWeapon();
     return mSelectedIndex != mWeapons.size();
@@ -2191,8 +2120,7 @@ class gb_WeaponMenu
     return getDefaultByType(mWeapons[mSelectedIndex]).getClassName();
   }
 
-  ui
-  void fill(out gb_ViewModel viewModel)
+  ui void fill(out gb_ViewModel viewModel)
   {
     // every other tic.
     bool isCacheValid = (level.time <= mCacheTime + 1);
@@ -2276,15 +2204,13 @@ class gb_WeaponMenu
     return isNothingFound;
   }
 
-  private
-  void rotate(int oldIndex, int newIndex)
+  private void rotate(int oldIndex, int newIndex)
   {
     if (oldIndex > newIndex) move(oldIndex, newIndex);
     else                     move(oldIndex, newIndex + 1);
   }
 
-  private
-  void move(int oldIndex, int newIndex)
+  private void move(int oldIndex, int newIndex)
   {
     if (oldIndex == newIndex) return;
 
@@ -2297,8 +2223,7 @@ class gb_WeaponMenu
     mSlots  .delete(oldIndex);
   }
 
-  private
-  bool, int findIndexOfNextWeaponWithSlot(int weaponIndex, int slot)
+  private bool, int findIndexOfNextWeaponWithSlot(int weaponIndex, int slot)
   {
     int nWeapons = mWeapons.size();
     for (int i = 1; i < nWeapons; ++i)
@@ -2313,8 +2238,7 @@ class gb_WeaponMenu
     return false, 0;
   }
 
-  private static
-  int getNextSlot(int slot)
+  private static int getNextSlot(int slot)
   {
     if (1 <= slot && slot <= 8) return slot + 1;
 
@@ -2330,8 +2254,7 @@ class gb_WeaponMenu
     return 1;
   }
 
-  private static ui
-  void copy(gb_ViewModel source, out gb_ViewModel destination)
+  private static ui void copy(gb_ViewModel source, out gb_ViewModel destination)
   {
     destination.selectedIndex = source.selectedIndex;
 
@@ -2347,8 +2270,7 @@ class gb_WeaponMenu
     destination.maxQuantity2.copy(source.maxQuantity2);
   }
 
-  private ui
-  void fillDirect(out gb_ViewModel viewModel)
+  private ui void fillDirect(out gb_ViewModel viewModel)
   {
     int nWeapons = mWeapons.size();
     for (int i = 0; i < nWeapons; ++i)
@@ -2400,15 +2322,12 @@ class gb_WeaponMenu
     }
   }
 
-  private play
-  bool isHidden(string className) const
+  private play bool isHidden(string className) const
   {
     bool result = false;
 
-    int nServices = mHideServices.size();
-    for (int i = 0; i < nServices; ++i)
+    foreach (service : mHideServices)
     {
-      let service = mHideServices[i];
       string hideResponse = service.get(className);
       if (hideResponse.length() != 0)
       {
@@ -2420,17 +2339,14 @@ class gb_WeaponMenu
     return result;
   }
 
-  private ui
-  TextureID getIconFor(Weapon aWeapon) const
+  private ui TextureID getIconFor(Weapon aWeapon) const
   {
     TextureID icon = BaseStatusBar.getInventoryIcon(aWeapon, BaseStatusBar.DI_AltIconFirst);
 
     {
-      int nServices = mIconServices.size();
       string className = aWeapon.getClassName();
-      for (int i = 0; i < nServices; ++i)
+      foreach (service : mIconServices)
       {
-        let service = mIconServices[i];
         string iconResponse = service.uiGet(className);
         if (iconResponse.length() != 0)
         {
@@ -2448,14 +2364,11 @@ class gb_WeaponMenu
   private ui int findNextWeapon() const { return findWeapon( 1); }
   private ui int findPrevWeapon() const { return findWeapon(-1); }
 
-  /**
-   ,* @param direction search direction from the selected weapon: 1 or -1.
-   ,*
-   ,* @returns a weapon in the direction. If there is only one weapon, return
-   ,* it. If there are no weapons, return weapons number.
-   ,*/
-  private ui
-  int findWeapon(int direction) const
+  // direction: search direction from the selected weapon: 1 or -1.
+  //
+  // Returns a weapon in the direction. If there is only one weapon, return
+  // it. If there are no weapons, return weapons number.
+  private ui int findWeapon(int direction) const
   {
     int nWeapons = mWeapons.size();
     // Note range: [1; nWeapons + 1) instead of [0; nWeapons).
@@ -2470,8 +2383,7 @@ class gb_WeaponMenu
     return nWeapons;
   }
 
-  private
-  int getIndexOf(class<Weapon> aClass) const
+  private int getIndexOf(class<Weapon> aClass) const
   {
     int nWeapons = mWeapons.size();
     for (int i = 0; i < nWeapons; ++i)
@@ -2481,20 +2393,17 @@ class gb_WeaponMenu
     return nWeapons;
   }
 
-  private static
-  void loadIconServices(out Array<gb_Service> services)
+  private static void loadIconServices(out Array<gb_Service> services)
   {
     loadServices("gb_IconService", services);
   }
 
-  private static
-  void loadHideServices(out Array<gb_Service> services)
+  private static void loadHideServices(out Array<gb_Service> services)
   {
     loadServices("gb_HideService", services);
   }
 
-  private static
-  void loadServices(string serviceName, out Array<gb_Service> services)
+  private static void loadServices(string serviceName, out Array<gb_Service> services)
   {
     let iterator = gb_ServiceIterator.find(serviceName);
     gb_Service aService;
@@ -2519,14 +2428,14 @@ class gb_WeaponMenu
 #+end_src
 
 ** Display
+
 *** ~BlockyView~
 
 #+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs
 
 class gb_BlockyView
 {
-  static
-  gb_BlockyView from(gb_TextureCache textureCache, gb_Options options, gb_FontSelector fontSelector)
+  static gb_BlockyView from(gb_TextureCache textureCache, gb_Options options, gb_FontSelector fontSelector)
   {
     let result = new("gb_BlockyView");
 
@@ -2706,31 +2615,27 @@ class gb_BlockyView
     }
   }
 
-  private static
-  int getSlotsNumber(gb_ViewModel viewModel)
+  private static int getSlotsNumber(gb_ViewModel viewModel)
   {
-    int nEntries = viewModel.slots.size();
     int nSlots = 0;
     int lastSlot = -1;
-    for (int i = 0; i < nEntries; ++i)
+    foreach (aSlot : viewModel.slots)
     {
-      if (viewModel.slots[i] != lastSlot)
+      if (aSlot != lastSlot)
       {
         ++nSlots;
-        lastSlot = viewModel.slots[i];
+        lastSlot = aSlot;
       }
     }
-    return nSlots;
+    return viewModel.slots.size();
   }
 
-  private static
-  int getMaxWidth(int nSlots)
+  private static int getMaxWidth(int nSlots)
   {
     return (nSlots - 1) * (SLOT_SIZE + MARGIN) + SELECTED_SLOT_WIDTH + BORDER;
   }
 
-  private static
-  int getMaxHeight(gb_ViewModel viewModel)
+  private static int getMaxHeight(gb_ViewModel viewModel)
   {
     int nEntries = viewModel.slots.size();
     int lastSlot = -1;
@@ -2754,8 +2659,7 @@ class gb_BlockyView
     return maxItemsInSlot * (SELECTED_WEAPON_HEIGHT + MARGIN) - MARGIN + BORDER + SLOT_SIZE;
   }
 
-  private
-  void drawTag(string tag, Font aFont, double startX, double startY)
+  private void drawTag(string tag, Font aFont, double startX, double startY)
   {
     // >_<
     //
@@ -2827,14 +2731,12 @@ class gb_BlockyView
     }
   }
 
-  private static
-  int ammoRatioWidthFor(int ammoCount, int ammoMax)
+  private static int ammoRatioWidthFor(int ammoCount, int ammoMax)
   {
     return int(round(float(ammoCount) / ammoMax * AMMO_WIDTH));
   }
 
-  private
-  void drawAlphaTexture(TextureID texture, int x, int y, int color) const
+  private void drawAlphaTexture(TextureID texture, int x, int y, int color) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2849,8 +2751,7 @@ class gb_BlockyView
                       );
   }
 
-  private
-  void drawAlphaWidthTexture(TextureID texture, int x, int y, int color, int width) const
+  private void drawAlphaWidthTexture(TextureID texture, int x, int y, int color, int width) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2878,8 +2779,7 @@ class gb_BlockyView
     VerticalFlip = 1,
   }
 
-  private
-  void drawFlippedTexture(TextureID texture, int x, int y, int horFlip, int verFlip) const
+  private void drawFlippedTexture(TextureID texture, int x, int y, int horFlip, int verFlip) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2894,8 +2794,7 @@ class gb_BlockyView
                       );
   }
 
-  private
-  void drawWeapon(TextureID texture, int x, int y, int w, int h) const
+  private void drawWeapon(TextureID texture, int x, int y, int w, int h) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2911,8 +2810,7 @@ class gb_BlockyView
                       );
   }
 
-  private
-  void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  private void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
   {
     Screen.drawText( aFont
                    , color
@@ -2926,8 +2824,7 @@ class gb_BlockyView
                    );
   }
 
-  private static
-  color addColor(color base, int add)
+  private static color addColor(color base, int add)
   {
     uint newRed   = clamp(base.r + add, 0, 255);
     uint newGreen = clamp(base.g + add, 0, 255);
@@ -2945,8 +2842,7 @@ class gb_BlockyView
     return result;
   }
 
-  private static
-  double getScaleFactor()
+  private static double getScaleFactor()
   {
     return Screen.getHeight() / 1080.0;
   }
@@ -2991,8 +2887,7 @@ class gb_BlockyView
 
 class gb_Blur
 {
-  static
-  void setEnabled(bool isEnabled)
+  static void setEnabled(bool isEnabled)
   {
     Shader.setEnabled(players[consolePlayer], "gb_blur", isEnabled);
   }
@@ -3052,8 +2947,7 @@ void main()
 
 class gb_Caption
 {
-  static
-  gb_Caption from()
+  static gb_Caption from()
   {
     let result = new("gb_Caption");
     result.mActor = NULL;
@@ -3065,8 +2959,7 @@ class gb_Caption
     mActor = anActor;
   }
 
-  ui
-  void show()
+  ui void show()
   {
     if (mActor == NULL) return;
 
@@ -3084,8 +2977,7 @@ class gb_Caption
 
 class gb_Dim
 {
-  static
-  void dim(double alpha, gb_Options options)
+  static void dim(double alpha, gb_Options options)
   {
     if (!options.isDimEnabled()) return;
 
@@ -3100,8 +2992,7 @@ class gb_Dim
 
 class gb_FadeInOut
 {
-  static
-  gb_FadeInOut from()
+  static gb_FadeInOut from()
   {
     let result = new("gb_FadeInOut");
     result.mAlpha = 0.0;
@@ -3128,8 +3019,7 @@ class gb_FadeInOut
 
 class gb_TextView
 {
-  static
-  gb_TextView from(gb_Options options, gb_FontSelector fontSelector)
+  static gb_TextView from(gb_Options options, gb_FontSelector fontSelector)
   {
     let result = new("gb_TextView");
 
@@ -3239,8 +3129,7 @@ class gb_TextView
     }
   }
 
-  private
-  string makeItemString(gb_ViewModel viewModel, int i)
+  private string makeItemString(gb_ViewModel viewModel, int i)
   {
       string result = viewModel.tags[i];
 
@@ -3268,8 +3157,7 @@ class gb_TextView
       return result;
   }
 
-  private
-  void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  private void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
   {
     Screen.drawText( aFont
                    , color
@@ -3283,8 +3171,7 @@ class gb_TextView
                    );
   }
 
-  private static
-  double getScaleFactor()
+  private static double getScaleFactor()
   {
     return Screen.getHeight() / 1080.0;
   }
@@ -3308,8 +3195,7 @@ class gb_Level
 {
   enum _ { NotInGame, Loading, JustLoaded, Loaded }
 
-  static
-  int getState()
+  static int getState()
   {
     // In the best case, the world is fully loaded on tick 0, but if player
     // weapons are configured via keyconf, they require a bit of network
@@ -3328,8 +3214,7 @@ class gb_Level
 
 class gb_Player
 {
-  static
-  bool isDead()
+  static bool isDead()
   {
     return (players[consolePlayer].mo.health <= 0);
   }
@@ -3340,19 +3225,15 @@ class gb_Player
 
 #+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs
 
-/**
- * This class provides information on what weapon the players hold.
- */
+// This class provides information on what weapon the players hold.
 class gb_WeaponWatcher
 {
-  static
-  class<Weapon> current()
+  static class<Weapon> current()
   {
     return currentFor(players[consolePlayer]);
   }
 
-  static
-  class<Weapon> currentFor(PlayerInfo player)
+  static class<Weapon> currentFor(PlayerInfo player)
   {
     if (player.pendingWeapon == NULL) return NULL;
 
@@ -3386,8 +3267,7 @@ class gb_WeaponWatcher
 // network - even for the current player, even for the single-player game.
 class gb_EventHandler : EventHandler
 {
-  override
-  void worldTick()
+  override void worldTick()
   {
     switch (gb_Level.getState())
     {
@@ -3424,11 +3304,8 @@ class gb_EventHandler : EventHandler
     mInventoryUser.use();
   }
 
-  /**
-   ,* This function processes key bindings specific for Gearbox.
-   ,*/
-  override
-  void consoleProcess(ConsoleEvent event)
+  // This function processes key bindings specific for Gearbox.
+  override void consoleProcess(ConsoleEvent event)
   {
     if (players[consolePlayer].mo == NULL) return;
 
@@ -3447,11 +3324,9 @@ class gb_EventHandler : EventHandler
     if (!mActivity.isNone()) mWheelController.reset();
   }
 
-  /**
-   ,* This function provides latching to existing key bindings, and processing mouse input.
-   ,*/
-  override
-  bool inputProcess(InputEvent event)
+  // This function provides latching to existing key bindings,
+  // and processing mouse input.
+  override bool inputProcess(InputEvent event)
   {
     if (players[consolePlayer].mo == NULL) return false;
     if (!mIsInitialized || isDisabledOnAutomap() || gameState != GS_LEVEL) return false;
@@ -3539,8 +3414,7 @@ class gb_EventHandler : EventHandler
     return false;
   }
 
-  override
-  void networkProcess(ConsoleEvent event)
+  override void networkProcess(ConsoleEvent event)
   {
     if (players[consolePlayer].mo == NULL) return;
 
@@ -3552,8 +3426,7 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  override
-  void renderOverlay(RenderEvent event)
+  override void renderOverlay(RenderEvent event)
   {
     if (!mIsInitialized) return;
 
@@ -3625,40 +3498,34 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  private play
-  bool isDisabledOnAutomap() const
+  private play bool isDisabledOnAutomap() const
   {
     return automapActive && !mOptions.isOnAutomap();
   }
 
-  private play
-  bool isPlayerFrozen() const
+  private play bool isPlayerFrozen() const
   {
     return players[consolePlayer].isTotallyFrozen() && !mOptions.isFrozenCanOpen();
   }
 
-  private ui
-  void tickIf(bool mustTick)
+  private ui void tickIf(bool mustTick)
   {
     if (mustTick) mSounds.playTick();
   }
 
-  private ui
-  void toggleWeapons()
+  private ui void toggleWeapons()
   {
     if (mActivity.isWeapons()) close();
     else openWeapons();
   }
 
-  private ui
-  void toggleInventory()
+  private ui void toggleInventory()
   {
     if (mActivity.isInventory()) close();
     else openInventory();
   }
 
-  private ui
-  void openWeapons()
+  private ui void openWeapons()
   {
     if (gb_Player.isDead() || mWeaponMenu.isThereNoWeapons())
     {
@@ -3671,8 +3538,7 @@ class gb_EventHandler : EventHandler
     mActivity.openWeapons();
   }
 
-  private ui
-  void openInventory()
+  private ui void openInventory()
   {
     if (gb_Player.isDead() || gb_InventoryMenu.thereAreNoItems())
     {
@@ -3691,8 +3557,7 @@ class gb_EventHandler : EventHandler
     mActivity.close();
   }
 
-  private ui
-  void confirmSelection()
+  private ui void confirmSelection()
   {
     if (mActivity.isWeapons())
     {
@@ -3704,8 +3569,7 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  private ui
-  void dropItem()
+  private ui void dropItem()
   {
     if (paused)
     {
@@ -3724,8 +3588,7 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  private ui
-  void rotateWeaponPriority()
+  private ui void rotateWeaponPriority()
   {
     if (mActivity.isWeapons())
     {
@@ -3734,8 +3597,7 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  private ui
-  void rotateWeaponSlot()
+  private ui void rotateWeaponSlot()
   {
     if (mActivity.isWeapons())
     {
@@ -3744,8 +3606,7 @@ class gb_EventHandler : EventHandler
     }
   }
 
-  private
-  void resetCustomOrder()
+  private void resetCustomOrder()
   {
     gb_CustomWeaponOrderStorage.reset(mWeaponSetHash);
     gb_WeaponData weaponData;
@@ -3753,8 +3614,7 @@ class gb_EventHandler : EventHandler
     mWeaponMenu = gb_WeaponMenu.from(weaponData, mOptions);
   }
 
-  private ui
-  void verifyViewModel(gb_ViewModel model)
+  private ui void verifyViewModel(gb_ViewModel model)
   {
     int nTags           = model.tags        .size();
     int nSlots          = model.slots       .size();
@@ -3813,8 +3673,7 @@ class gb_EventHandler : EventHandler
     VIEW_TYPE_TEXT   = 2,
   }
 
-  private
-  void initialize()
+  private void initialize()
   {
     mOptions         = gb_Options.from();
     mFontSelector    = gb_FontSelector.from();
@@ -3892,14 +3751,12 @@ class gb_EventHandler : EventHandler
 // This is Service interface.
 class gb_Service abstract
 {
-  virtual play
-  string get(string request)
+  virtual play string get(string request)
   {
     return "";
   }
 
-  virtual ui
-  string uiGet(string request)
+  virtual ui string uiGet(string request)
   {
     return "";
   }
@@ -3921,16 +3778,14 @@ class gb_Service abstract
 // If no services are found, the all calls to next() will return NULL.
 class gb_ServiceIterator
 {
-  /**
-   * Creates a Service iterator for a service name. It will iterate over all existing Services
-   * with names that match @a serviceName or have it as a part of their names.
-   *
-   * Matching is case-independent.
-   *
-   * @param serviceName class name of service to find.
-   */
-  static
-  gb_ServiceIterator find(string serviceName)
+  // Creates a Service iterator for a service name. It will iterate over all
+  // existing Services with names that match @a serviceName or have it as a part
+  // of their names.
+  //
+  // Matching is case-independent.
+  //
+  // serviceName: class name of service to find.
+  static gb_ServiceIterator find(string serviceName)
   {
     let result = new("gb_ServiceIterator");
 
@@ -3941,13 +3796,11 @@ class gb_ServiceIterator
     return result;
   }
 
-  /**
-   * Gets the service and advances the iterator.
-   *
-   * @returns service instance, or NULL if no more servers found.
-   *
-   * @note Each ServiceIterator will return new instances of services.
-   */
+  // Gets the service and advances the iterator.
+  //
+  // Returns service instance, or NULL if no more servers found.
+  //
+  // Note: each ServiceIterator will return new instances of services.
   gb_Service next()
   {
     int classesNumber = AllClasses.size();
@@ -3961,8 +3814,7 @@ class gb_ServiceIterator
     return result;
   }
 
-  private
-  void findNextService()
+  private void findNextService()
   {
     int classesNumber = AllClasses.size();
     while (mClassIndex < classesNumber && !ServiceNameContains(AllClasses[mClassIndex], mServiceName))
@@ -3971,8 +3823,7 @@ class gb_ServiceIterator
     }
   }
 
-  private static
-  bool serviceNameContains(class aClass, string substring)
+  private static bool serviceNameContains(class aClass, string substring)
   {
     if (!(aClass is "gb_Service")) return false;
 
@@ -3994,8 +3845,7 @@ class gb_ServiceIterator
 
 class gb_IconService : gb_Service
 {
-  override
-  string uiGet(string className)
+  override string uiGet(string className)
   {
     if (isSmoothDoom()) switch (Name(className))
     {
@@ -4027,8 +3877,7 @@ class gb_IconService : gb_Service
 
   const IGNORE = "";
 
-  private static
-  bool isSmoothDoom()
+  private static bool isSmoothDoom()
   {
     string s1 = "SmoothFloatingSkull";
     class  c1 = s1;
@@ -4045,8 +3894,7 @@ class gb_IconService : gb_Service
 
 class gb_HideService : gb_Service
 {
-  override
-  string get(string className)
+  override string get(string className)
   {
     switch (Name(className))
     {
@@ -4075,8 +3923,7 @@ class gb_HideService : gb_Service
 
 class gb_Ammo
 {
-  static
-  bool isValid(int ammo, int maxAmmo)
+  static bool isValid(int ammo, int maxAmmo)
   {
     return (ammo != -1 && maxAmmo > 0);
   }
@@ -4087,17 +3934,14 @@ class gb_Ammo
 
 #+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs
 
-/**
- * This class provides access to a user or server Cvar.
- *
- * Accessing Cvars through this class is faster because calling Cvar.GetCvar()
- * is costly. This class caches the result of Cvar.GetCvar() and handles
- * loading a savegame.
- */
+// This class provides access to a user or server Cvar.
+//
+// Accessing Cvars through this class is faster because calling Cvar.GetCvar()
+// is costly. This class caches the result of Cvar.GetCvar() and handles
+// loading a savegame.
 class gb_Cvar
 {
-  static
-  gb_Cvar from(string name)
+  static gb_Cvar from(string name)
   {
     let result = new("gb_Cvar");
 
@@ -4112,15 +3956,10 @@ class gb_Cvar
   int    getInt()    { if (!mCvar) load(); return mCvar.getInt();    }
   double getDouble() { if (!mCvar) load(); return mCvar.getFloat();  }
 
-  private
-  void load()
+  private void load()
   {
     mCvar = Cvar.getCvar(mName, players[consolePlayer]);
-
-    if (mCvar == NULL)
-    {
-      gb_Log.error(string.Format("cvar %s not found", mName));
-    }
+    if (mCvar == NULL) gb_Log.error(string.format("cvar %s not found", mName));
   }
 
   private string         mName;
@@ -4134,32 +3973,27 @@ class gb_Cvar
 
 class gb_Log
 {
-  static
-  void print(string s)
+  static void print(string s)
   {
     Console.printf("%s", StringTable.localize(s, false));
   }
 
-  static
-  void notice(string s)
+  static void notice(string s)
   {
     Console.printf("[NOTICE] %s: %s", MOD_NAME, StringTable.localize(s, false));
   }
 
-  static
-  void error(string s)
+  static void error(string s)
   {
     Console.printf("[ERROR] %s: %s.", MOD_NAME, s);
   }
 
-  static
-  void log(string s)
+  static void log(string s)
   {
     Console.printf("[LOG] %s: %s.", MOD_NAME, s);
   }
 
-  static
-  void debug(string s)
+  static void debug(string s)
   {
     if (DEBUG_ENABLED)
     {
@@ -4179,8 +4013,7 @@ class gb_Log
 
 class gb_TextureCache
 {
-  static
-  gb_TextureCache from()
+  static gb_TextureCache from()
   {
     return new("gb_TextureCache");
   }
@@ -4237,8 +4070,7 @@ class gb_TextureCache
 
 class gb_WheelController
 {
-  static
-  gb_WheelController from(gb_Options options, gb_Screen screen)
+  static gb_WheelController from(gb_Options options, gb_Screen screen)
   {
     let result = new("gb_WheelController");
 
@@ -4265,8 +4097,7 @@ class gb_WheelController
     model.radius = getRadius();
   }
 
-  play
-  void process() const
+  play void process() const
   {
     if (!mOptions.isMouseInWheel()) return;
 
@@ -4295,14 +4126,12 @@ class gb_WheelController
     mY = clamp(mY, -centerY, Screen.getHeight() - centerY);
   }
 
-  private
-  double getAngle() const
+  private double getAngle() const
   {
     return -atan2(mX, mY) + 180;
   }
 
-  private
-  double getRadius() const
+  private double getRadius() const
   {
     return sqrt(mX * mX + mY * mY);
   }
@@ -4335,8 +4164,7 @@ struct gb_WheelControllerModel
 
 class gb_WheelIndexer
 {
-  static
-  gb_WheelIndexer from(gb_MultiWheelMode multiWheelMode, gb_Screen screen)
+  static gb_WheelIndexer from(gb_MultiWheelMode multiWheelMode, gb_Screen screen)
   {
     let result = new("gb_WheelIndexer");
     result.mSelectedIndex  = UNDEFINED_INDEX;
@@ -4497,8 +4325,7 @@ class gb_WheelIndexer
     mOuterIndex    = indexInSlot;
   }
 
-  private
-  void reportInnerIndex( int nPlaces
+  private void reportInnerIndex( int nPlaces
                        , gb_WheelControllerModel controllerModel
                        , gb_MultiWheelModel      multiWheelModel
                        , gb_ViewModel            viewModel
@@ -4516,8 +4343,7 @@ class gb_WheelIndexer
     mOuterIndex    = 0;
   }
 
-  private static
-  int firstInSlot(gb_ViewModel viewModel, int slot)
+  private static int firstInSlot(gb_ViewModel viewModel, int slot)
   {
     int nWeapons = viewModel.tags.size();
     for (int i = 0; i < nWeapons; ++i)
@@ -4528,14 +4354,12 @@ class gb_WheelIndexer
     return UNDEFINED_INDEX;
   }
 
-  private
-  bool areIndicesDefined() const
+  private bool areIndicesDefined() const
   {
     return (mInnerIndex != UNDEFINED_INDEX);
   }
 
-  private static
-  double itemAngle(int nItems, int index)
+  private static double itemAngle(int nItems, int index)
   {
     return 360.0 / nItems * index;
   }
@@ -4559,8 +4383,7 @@ class gb_WheelIndexer
 
 class gb_WheelInnerIndexer
 {
-  static
-  int getSelectedIndex(int nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
+  static int getSelectedIndex(int nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
   {
     if (controllerModel.radius < screen.getWheelDeadRadius() || nItems == 0)
     {
@@ -4585,8 +4408,7 @@ struct gb_MultiWheelModel
 
 class gb_MultiWheel
 {
-  static
-  void fill(gb_ViewModel viewModel, out gb_MultiWheelModel model)
+  static void fill(gb_ViewModel viewModel, out gb_MultiWheelModel model)
   {
     int nWeapons = viewModel.tags.size();
     int lastSlot = -1;
@@ -4612,8 +4434,7 @@ class gb_MultiWheel
     }
   }
 
-  static
-  bool isSingleWeaponInSlot(gb_ViewModel viewModel, int nWeapons, int slot)
+  static bool isSingleWeaponInSlot(gb_ViewModel viewModel, int nWeapons, int slot)
   {
     int nWeaponsInSlot = 0;
     for (int i = 0; i < nWeapons; ++i)
@@ -4632,8 +4453,7 @@ class gb_MultiWheel
 
 class gb_MultiWheelMode
 {
-  static
-  gb_MultiWheelMode from(gb_Options options)
+  static gb_MultiWheelMode from(gb_Options options)
   {
     let result = new("gb_MultiWheelMode");
     result.mOptions = options;
@@ -4655,13 +4475,10 @@ class gb_MultiWheelMode
 
 #+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs
 
-/**
- * This class provides helper functions for screen position and sizes.
- */
+// This class provides helper functions for screen position and sizes.
 class gb_Screen
 {
-  static
-  gb_Screen from(gb_Options options)
+  static gb_Screen from(gb_Options options)
   {
     let result = new("gb_Screen");
     result.mOptions = options;
@@ -4709,13 +4526,10 @@ class gb_Screen
 
 #+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs
 
-/**
- * This class helps displaying text on screen.
- */
+// This class helps displaying text on screen.
 class gb_Text
 {
-  static
-  gb_Text from(gb_TextureCache textureCache, gb_Screen screen, gb_FontSelector fontSelector)
+  static gb_Text from(gb_TextureCache textureCache, gb_Screen screen, gb_FontSelector fontSelector)
   {
     let result = new("gb_Text");
     result.mTextureCache = textureCache;
@@ -4724,8 +4538,7 @@ class gb_Text
     return result;
   }
 
-  static
-  void draw(string aString, vector2 pos, Font aFont, double alpha, bool isBig = false)
+  static void draw(string aString, vector2 pos, Font aFont, double alpha, bool isBig = false)
   {
     int textScale = isBig ? getBigTextScale() : getTextScale();
 
@@ -4790,14 +4603,12 @@ class gb_Text
     if (bottomText.length() > 0) draw(bottomText, center + line, aFont, alpha);
   }
 
-  private static
-  int getBigTextScale()
+  private static int getBigTextScale()
   {
     return getTextScale() * 2;
   }
 
-  private static
-  int getTextScale()
+  private static int getTextScale()
   {
     return max(Screen.getHeight() / 720, 1);
   }
@@ -4816,8 +4627,7 @@ class gb_Text
 
 class gb_WheelView
 {
-  static
-  gb_WheelView from( gb_Options        options
+  static gb_WheelView from( gb_Options        options
                    , gb_MultiWheelMode multiWheelMode
                    , gb_TextureCache   textureCache
                    , gb_Screen         screen
@@ -4938,8 +4748,7 @@ class gb_WheelView
     }
   }
 
-  private
-  void drawOuterWeapons( int  innerIndex
+  private void drawOuterWeapons( int  innerIndex
                        , int  outerIndex
                        , int  nPlaces
                        , int  slot
@@ -5005,8 +4814,7 @@ class gb_WheelView
              );
   }
 
-  private
-  void drawInnerWheel()
+  private void drawInnerWheel()
   {
     int wheelDiameter = mScreen.getWheelRadius() * 2;
     Screen.drawTexture( mTextureCache.circle
@@ -5022,8 +4830,7 @@ class gb_WheelView
                       );
   }
 
-  private
-  void drawOuterWheel(double x, double y, double angle)
+  private void drawOuterWheel(double x, double y, double angle)
   {
     int wheelDiameter = mScreen.getWheelRadius() * 2;
     Screen.drawTexture( mTextureCache.halfCircle
@@ -5040,8 +4847,7 @@ class gb_WheelView
                       );
   }
 
-  private
-  void displayWeapon( int place
+  private void displayWeapon( int place
                     , int iconIndex
                     , int nPlaces
                     , int  radius
@@ -5078,8 +4884,7 @@ class gb_WheelView
     drawAmmo(angle, center, viewModel, iconIndex);
   }
 
-  private
-  void drawIcon(TextureID texture, vector2 xy, int w, int h, double angle, bool isTall) const
+  private void drawIcon(TextureID texture, vector2 xy, int w, int h, double angle, bool isTall) const
   {
     bool flipX;
     double scaleY;
@@ -5134,8 +4939,7 @@ class gb_WheelView
                       );
   }
 
-  private
-  void drawAmmoPip(double angle, double radius, vector2 center, bool colored)
+  private void drawAmmoPip(double angle, double radius, vector2 center, bool colored)
   {
     vector2 xy   = (sin(angle), -cos(angle)) * radius + center;
     vector2 size = mTextureCache.ammoPipSize * mScaleFactor;
@@ -5167,8 +4971,7 @@ class gb_WheelView
     }
   }
 
-  private static
-  int, int makePipsNumbers(int items, int maxItems)
+  private static int, int makePipsNumbers(int items, int maxItems)
   {
     if (maxItems <= MAX_N_PIPS) return items, maxItems;
 
@@ -5176,8 +4979,7 @@ class gb_WheelView
     return nColoredPips, MAX_N_PIPS;
   }
 
-  private
-  void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, int weaponIndex)
+  private void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, int weaponIndex)
   {
     if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex], viewModel.maxQuantity1[weaponIndex]))
     {
@@ -5239,8 +5041,7 @@ class gb_WheelView
     }
   }
 
-  private
-  void displaySlot(int place, int slot, int nPlaces, int radius)
+  private void displaySlot(int place, int slot, int nPlaces, int radius)
   {
     double  angle = itemAngle(nPlaces, place);
     vector2 pos   = (sin(angle), -cos(angle)) * radius + mCenter;
@@ -5249,14 +5050,12 @@ class gb_WheelView
     gb_Text.draw(string.format("%d", slot), pos, aFont, mAlpha, true);
   }
 
-  private static
-  double itemAngle(int nItems, int index)
+  private static double itemAngle(int nItems, int index)
   {
     return 360.0 / nItems * index;
   }
 
-  private
-  void drawHands(int nPlaces, int selectedIndex, vector2 center, double startAngle)
+  private void drawHands(int nPlaces, int selectedIndex, vector2 center, double startAngle)
   {
     if (nPlaces < 2) return;
 
@@ -5292,8 +5091,7 @@ class gb_WheelView
                       );
   }
 
-  private
-  void drawWeaponDescription( gb_ViewModel viewModel
+  private void drawWeaponDescription( gb_ViewModel viewModel
                             , int  innerIndex
                             , int  nPlaces
                             , bool isSlotExpanded
@@ -5318,8 +5116,7 @@ class gb_WheelView
     mText.drawBox(ammo1, description, ammo2, pos, !isOnTop, mBaseColor, mAlpha);
   }
 
-  private
-  void drawPointer(double angle, double radius)
+  private void drawPointer(double angle, double radius)
   {
     vector2 pos = (sin(angle), -cos(angle)) * radius + mCenter;
     vector2 size = TexMan.getScaledSize(mTextureCache.pointer);
