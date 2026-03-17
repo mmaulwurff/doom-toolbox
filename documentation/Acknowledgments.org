@@ -40,6 +40,7 @@ The order is alphabetical.
 - HexFlareheart
 - IKA
 - Jarewill
+- Jekyll Grim Payne (Agent Ash)
 - Jimmy
 - JMartinez9820
 - JohnDoe8
@@ -62,6 +63,7 @@ The order is alphabetical.
 - Rowsol
 - rparhkdtp
 - Samarai1000
+- SandPoot
 - sebastianpanetta
 - Someone64
 - Spaceman333
@@ -74,6 +76,7 @@ The order is alphabetical.
 - Tapwave
 - The Zombie Killer
 - TheRailgunner
+- UndeadZeratul
 - wildweasel
 - Zhs2
 - ZikShadow

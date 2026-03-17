@@ -73,6 +73,9 @@ if your sounds work.
 #+name: license
 #+begin_src text :exports none
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2022 generic-name-guy
+SPDX-FileCopyrightText: © 2022 Carrascado
+SPDX-FileCopyrightText: © 2025 SandPoot
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
@@ -164,7 +167,7 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/Gearbox/gldefs.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp.txt
+#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp
 // <<license>>
 #+end_src
 #+begin_src c :tangle build/Gearbox/zscript/display/caption.zs
@@ -844,8 +847,6 @@ class gb_Activity
 
 #+begin_src c :tangle build/Gearbox/zscript/changer.zs
 
-// SPDX-FileCopyrightText: © 2025 SandPoot
-
 class gb_Changer play
 {
   static gb_Changer from(gb_Caption caption,
@@ -1243,8 +1244,6 @@ class gb_Freezer play
 
 #+begin_src c :tangle build/Gearbox/zscript/input.zs
 
-// SPDX-FileCopyrightText: © 2025 SandPoot
-
 enum gb_Inputs
 {
   InputNothing,
@@ -1285,8 +1284,6 @@ class gb_Input
 
 #+begin_src c :tangle build/Gearbox/zscript/input_processor.zs
 
-// SPDX-FileCopyrightText: © 2025 SandPoot
-
 class gb_InputProcessor
 {
   static gb_Inputs process(InputEvent event)
@@ -1326,7 +1323,6 @@ class gb_InputProcessor
 *** ~InventoryMenu~
 
 #+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs
-// SPDX-FileCopyrightText: © 2022 Carrascado
 
 class gb_InventoryMenu
 {
@@ -1553,7 +1549,6 @@ class gb_NeteventProcessor play
 *** ~Options~
 
 #+begin_src c :tangle build/Gearbox/zscript/options.zs
-// SPDX-FileCopyrightText: © 2022 Carrascado
 
 class gb_Options
 {
@@ -1745,8 +1740,6 @@ class gb_Printer
 
 #+begin_src c :tangle build/Gearbox/zscript/sender.zs
 
-// SPDX-FileCopyrightText: © 2025 SandPoot
-
 class gb_Sender
 {
   static void sendSelectEvent(string className)
@@ -1785,8 +1778,6 @@ class gb_Sender
 *** ~Sounds~
 
 #+begin_src c :tangle build/Gearbox/zscript/sounds.zs
-
-// SPDX-FileCopyrightText: © 2022 Carrascado
 
 class gb_Sounds
 {
@@ -2036,8 +2027,6 @@ struct gb_WeaponInfo
 *** ~WeaponMenu~
 
 #+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs
-
-// SPDX-FileCopyrightText: © 2022 Carrascado
 
 class gb_WeaponMenu
 {
@@ -3305,9 +3294,6 @@ class gb_WeaponWatcher
 ** EventHandler
 
 #+begin_src c :tangle build/Gearbox/zscript/event_handler.zs
-
-// SPDX-FileCopyrightText: © 2022 Carrascado
-// SPDX-FileCopyrightText: © 2025 SandPoot
 
 // This class is the core of Gearbox.
 //
