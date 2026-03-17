@@ -252,7 +252,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
 OptionMenu gb_Options
 {
   gb_PlainTranslator
-  Title "$GB_OPTIONS"
+  Title "Gearbox"
 
   StaticText  ""
   Option      "$GB_VIEW_TYPE", gb_view_type, gb_ViewTypeValues
@@ -403,7 +403,7 @@ OptionValue gb_ViewTypeValues
 
 OptionValue gb_SoundpackValues
 {
-  0, "$GB_GEARBOX"
+  0, "Gearbox"
   1, "$GB_PACK1"
 }
 
@@ -534,10 +534,9 @@ $volume gearbox/notfound 0.5
 
 [enu default]
 
-GB_GEARBOX = "Gearbox";
 GB_PACK1 = "Custom Soundpack";
 
-GB_OPTIONS = "\ch⚙\c- Gearbox Options";
+GB_OPTIONS = "Gearbox \ch⚙";
 
 GB_UI_OPTIONS       = "UI options";
 GB_UI_OPTIONS_TITLE = "Gearbox UI Options";
