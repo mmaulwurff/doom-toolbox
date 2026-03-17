@@ -284,20 +284,20 @@ OptionMenu gb_BehaviorOptions
 {
   Title "$GB_BEHAVIOR_OPTIONS_TITLE"
 
-  Option      "$GB_OPEN_ON_PREV_NEXT"        , gb_open_on_scroll           , OnOff
+  Option      "$GB_OPEN_ON_PREV_NEXT", gb_open_on_scroll, OnOff
 
   StaticText  ""
-  Option      "$GB_OPEN_ON_SLOT"             , gb_open_on_slot             , OnOff
-  Option      "$GB_REVERSE_SLOT_CYCLE_ORDER" , gb_reverse_slot_cycle_order , OnOff
-  Option      "$GB_SELECT_FIRST_SLOT_WEAPON" , gb_select_first_slot_weapon , OnOff
-  Option      "$GB_NO_MENU_IF_ONE"           , gb_no_menu_if_one           , OnOff
+  Option      "$GB_OPEN_ON_SLOT",             gb_open_on_slot,             OnOff
+  Option      "$GB_REVERSE_SLOT_CYCLE_ORDER", gb_reverse_slot_cycle_order, OnOff
+  Option      "$GB_SELECT_FIRST_SLOT_WEAPON", gb_select_first_slot_weapon, OnOff
+  Option      "$GB_NO_MENU_IF_ONE",           gb_no_menu_if_one,           OnOff
 
   StaticText  ""
-  Option      "$GB_SELECT_ON_KEY_UP"         , gb_select_on_key_up         , OnOff
-  Option      "$GB_FREEZE_TIME"              , gb_time_freeze              , gb_FreezeValues
-  Option      "$GB_ENABLE_ON_AUTOMAP"        , gb_on_automap               , OnOff
-  Option      "$GB_LOCK_POSITION"            , gb_lock_positions           , OnOff
-  Option      "$GB_FROZEN_CAN_OPEN"          , gb_frozen_can_open          , OnOff
+  Option      "$GB_SELECT_ON_KEY_UP",  gb_select_on_key_up, OnOff
+  Option      "$GB_FREEZE_TIME",       gb_time_freeze,      gb_FreezeValues
+  Option      "$GB_ENABLE_ON_AUTOMAP", gb_on_automap,       OnOff
+  Option      "$GB_LOCK_POSITION",     gb_lock_positions,   OnOff
+  Option      "$GB_FROZEN_CAN_OPEN",   gb_frozen_can_open,  OnOff
 }
 
 OptionMenu gb_GZDoomOptions
@@ -796,6 +796,7 @@ Gameinfo
 * Source
 
 ** Behavior
+
 *** ~Activity~
 
 #+begin_src c :tangle build/Gearbox/zscript/activity.zs
@@ -831,11 +832,9 @@ class gb_Activity
 
   enum Activity
   {
-
     None,
     Weapons,
     Inventory,
-
   }
 
   private int mActivity;
@@ -850,7 +849,9 @@ class gb_Activity
 
 class gb_Changer play
 {
-  static gb_Changer from(gb_Caption caption, gb_Options options, gb_InventoryUser inventoryUser)
+  static gb_Changer from(gb_Caption caption,
+                         gb_Options options,
+                         gb_InventoryUser inventoryUser)
   {
     let result = new("gb_Changer");
     result.mCaption       = caption;
@@ -862,7 +863,8 @@ class gb_Changer play
   void selectWeapon(PlayerInfo player, string weapon)
   {
     Weapon targetWeapon = Weapon(player.mo.findInventory(weapon));
-    if (targetWeapon && gb_WeaponWatcher.currentFor(player) != targetWeapon.getClass())
+    if (targetWeapon
+        && gb_WeaponWatcher.currentFor(player) != targetWeapon.getClass())
     {
       player.pendingWeapon = targetWeapon;
       if (mOptions.isShowingWeaponTagsOnChange()) mCaption.setActor(targetWeapon);
@@ -1049,7 +1051,8 @@ class gb_CustomWeaponOrderStorage
     return result;
   }
 
-  private static void deserializeOperations(string data, out gb_WeaponOrderOperations operations)
+  private static void deserializeOperations(string data,
+                                            out gb_WeaponOrderOperations operations)
   {
     Array<string> tokens;
     data.split(tokens, DELIMITER, TOK_SkipEmpty);
@@ -1082,10 +1085,12 @@ class gb_EventProcessor
   static int process(ConsoleEvent event, bool isSelectOnKeyUp)
   {
     if (event.name == "gb_toggle_weapon_menu") return InputToggleWeaponMenu;
-    if (event.name == "gb_toggle_weapon_menu_up" && isSelectOnKeyUp) return InputConfirmSelection;
+    if (event.name == "gb_toggle_weapon_menu_up" && isSelectOnKeyUp)
+      return InputConfirmSelection;
 
     if (event.name == "gb_toggle_inventory_menu") return InputToggleInventoryMenu;
-    if (event.name == "gb_toggle_inventory_menu_up" && isSelectOnKeyUp) return InputConfirmSelection;
+    if (event.name == "gb_toggle_inventory_menu_up" && isSelectOnKeyUp)
+      return InputConfirmSelection;
     if (event.name == "gb_rotate_weapon_priority") return InputRotateWeaponPriority;
     if (event.name == "gb_rotate_weapon_slot"    ) return InputRotateWeaponSlot;
 
@@ -1203,7 +1208,9 @@ class gb_Freezer play
     mVelocity = player.mo.vel;
     mGravity  = player.mo.gravity;
 
-    gb_Sender.sendFreezePlayerEvent(player.cheats | FROZEN_CHEATS_FLAGS, (0, 0, 0), 0);
+    gb_Sender.sendFreezePlayerEvent(player.cheats | FROZEN_CHEATS_FLAGS,
+                                    (0, 0, 0),
+                                    0);
   }
 
   private void thawLevel() const
@@ -1213,7 +1220,8 @@ class gb_Freezer play
 
   private void thawPlayer() const
   {
-    if (mWasPlayerFrozen) gb_Sender.sendFreezePlayerEvent(mCheats, mVelocity, mGravity);
+    if (mWasPlayerFrozen)
+      gb_Sender.sendFreezePlayerEvent(mCheats, mVelocity, mGravity);
     mWasPlayerFrozen = false;
   }
 
@@ -1397,7 +1405,8 @@ class gb_InventoryMenu
       if (item.bInvBar)
       {
         string tag  = item.getTag();
-        TextureID icon = BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
+        TextureID icon =
+          BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
         viewModel.tags        .push(tag);
         viewModel.slots       .push(index + 1);
         viewModel.indices     .push(index);
@@ -1521,15 +1530,18 @@ class gb_NeteventProcessor play
     if      (args[0] == "gb_select_weapon") mChanger.selectWeapon(player, args[1]);
     else if (args[0] == "gb_use_item"     ) mChanger.useItem     (player, args[1]);
     else if (args[0] == "gb_drop_item"    ) mChanger.dropItem    (player, args[1]);
-    else if (args[0] == "gb_set_angles"   ) mChanger.setAngles   (player, args[1].toDouble()
-                                                                        , args[2].toDouble()
-                                                                 );
-    else if (args[0] == "gb_freeze_player") mChanger.freezePlayer(player, args[1].toInt()
-                                                                        , args[2].toInt()
-                                                                        , args[3].toDouble()
-                                                                        , args[4].toDouble()
-                                                                        , args[5].toDouble()
-                                                                 );
+    else if (args[0] == "gb_set_angles"   ) mChanger.setAngles(player,
+                                                               args[1].toDouble(),
+                                                               args[2].toDouble());
+    else if (args[0] == "gb_freeze_player")
+    {
+      mChanger.freezePlayer(player,
+                            args[1].toInt(),
+                            args[2].toInt(),
+                            args[3].toDouble(),
+                            args[4].toDouble(),
+                            args[5].toDouble());
+    }
     else if (args[0] == "gb_reset_custom_order") return InputResetCustomOrder;
 
     return InputNothing;
@@ -1598,41 +1610,43 @@ class gb_Options
     return result;
   }
 
-  int  getViewType()                 const { return mViewType              .getInt();     }
-  int  getScale()                    const { return mScale                 .getInt();     }
-  int  getColor()                    const { return mColor                 .getInt();     }
-  int  getDimColor()                 const { return mDimColor              .getInt();     }
-  bool isDimEnabled()                const { return mIsDimEnabled          .getBool();    }
-  bool isBlurEnabled()               const { return mIsBlurEnabled         .getBool();    }
-  bool getWheelTint()                const { return mWheelTint             .getBool();    }
-  int  getMultiWheelLimit()          const { return mMultiWheelLimit       .getInt();     }
-  bool isShowingTags()               const { return mShowTags              .getBool();    }
-  bool isShowingWeaponTagsOnChange() const { return mShowWeaponTagsOnChange.getInt() & 2; }
-  bool isPositionLocked()            const { return mIsPositionLocked      .getBool();    }
-  bool isFrozenCanOpen()             const { return mFrozenCanOpen         .getBool();    }
-  bool isPreservingAspectRatio()     const { return mPreserveAspectRatio   .getBool();    }
+  int  getViewType()              const { return mViewType             .getInt();  }
+  int  getScale()                 const { return mScale                .getInt();  }
+  int  getColor()                 const { return mColor                .getInt();  }
+  int  getDimColor()              const { return mDimColor             .getInt();  }
+  bool isDimEnabled()             const { return mIsDimEnabled         .getBool(); }
+  bool isBlurEnabled()            const { return mIsBlurEnabled        .getBool(); }
+  bool getWheelTint()             const { return mWheelTint            .getBool(); }
+  int  getMultiWheelLimit()       const { return mMultiWheelLimit      .getInt();  }
+  bool isShowingTags()            const { return mShowTags             .getBool(); }
+  bool isPositionLocked()         const { return mIsPositionLocked     .getBool(); }
+  bool isFrozenCanOpen()          const { return mFrozenCanOpen        .getBool(); }
+  bool isPreservingAspectRatio()  const { return mPreserveAspectRatio  .getBool(); }
 
-  bool isOpenOnScroll()              const { return mOpenOnScroll          .getBool();    }
-  bool isOpenOnSlot()                const { return mOpenOnSlot            .getBool();    }
-  bool isSlotCycleOrderReversed()    const { return mReverseSlotCycleOrder .getBool();    }
-  bool isSelectFirstSlotWeapon()     const { return mSelectFirstSlotWeapon .getBool();    }
-  bool isMouseInWheel()              const { return mMouseInWheel          .getBool();    }
-  bool isSelectOnKeyUp()             const { return mSelectOnKeyUp         .getBool();    }
-  bool isNoMenuIfOne()               const { return mNoMenuIfOne           .getBool();    }
-  bool isOnAutomap()                 const { return mOnAutomap             .getBool();    }
-  bool isSoundEnabled()              const { return mEnableSounds          .getBool();    }
+  bool isOpenOnScroll()           const { return mOpenOnScroll         .getBool(); }
+  bool isOpenOnSlot()             const { return mOpenOnSlot           .getBool(); }
+  bool isSlotCycleOrderReversed() const { return mReverseSlotCycleOrder.getBool(); }
+  bool isSelectFirstSlotWeapon()  const { return mSelectFirstSlotWeapon.getBool(); }
+  bool isMouseInWheel()           const { return mMouseInWheel         .getBool(); }
+  bool isSelectOnKeyUp()          const { return mSelectOnKeyUp        .getBool(); }
+  bool isNoMenuIfOne()            const { return mNoMenuIfOne          .getBool(); }
+  bool isOnAutomap()              const { return mOnAutomap            .getBool(); }
+  bool isSoundEnabled()           const { return mEnableSounds         .getBool(); }
 
-  int  getTimeFreezeMode()           const { return mTimeFreeze            .getInt();     }
+  int  getTimeFreezeMode()        const { return mTimeFreeze           .getInt();  }
+  int  getSoundpack()             const { return mUseSoundpack         .getInt();  }
 
-  int  getSoundpack()           const { return mUseSoundpack          .getInt();     }
+  bool isShowingWeaponTagsOnChange() const
+  {
+    return mShowWeaponTagsOnChange.getInt() & 2;
+  }
 
   vector2 getMouseSensitivity() const
   {
     double xDirection = mInvertMouseX.getBool() ? -1 : 1;
     double yDirection = mInvertMouseY.getBool() ? -1 : 1;
-    return ( mMouseSensitivityX.getDouble() * xDirection
-           , mMouseSensitivityY.getDouble() * yDirection
-           );
+    return (mMouseSensitivityX.getDouble() * xDirection,
+            mMouseSensitivityY.getDouble() * yDirection);
   }
 
   vector2 getBlocksPosition() const
@@ -1852,7 +1866,9 @@ class gb_Sounds
   {
     if (!mOptions.isSoundEnabled()) return;
 
-    players[consolePlayer].mo.a_StartSound(sound, CHAN_AUTO, CHANF_UI | CHANF_OVERLAP | CHANF_LOCAL);
+    players[consolePlayer].mo.a_StartSound(sound,
+                                           CHAN_AUTO,
+                                           CHANF_UI | CHANF_OVERLAP | CHANF_LOCAL);
   }
 
   private gb_Options mOptions;
@@ -1900,8 +1916,8 @@ struct gb_WeaponData
 
 class gb_WeaponDataLoader play
 {
-  // Code is adapted from
-  // GZDoom::src/src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
+  // Code is adapted from GZDoom:
+  // src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
   static void load(out gb_WeaponData data)
   {
     gb_WeaponInfo info;
@@ -2084,7 +2100,9 @@ class gb_WeaponMenu
     for (int i = 0; i < nWeapons; ++i)
     {
       int index = (startOffset + nWeapons + direction * i) % nWeapons;
-      if (mSlots[index] == slot && isInInventory(index) && !isHidden(mWeapons[index].getClassName()))
+      if (mSlots[index] == slot
+          && isInInventory(index)
+          && !isHidden(mWeapons[index].getClassName()))
       {
         mSelectedIndex = index;
         return true;
@@ -2151,7 +2169,8 @@ class gb_WeaponMenu
   {
     bool isIndexFound;
     int targetIndex;
-    [isIndexFound, targetIndex] = findIndexOfNextWeaponWithSlot(index, mSlots[index]);
+    [isIndexFound, targetIndex] =
+      findIndexOfNextWeaponWithSlot(index, mSlots[index]);
 
     if (!isIndexFound) return mSelectedIndex;
 
@@ -2329,7 +2348,8 @@ class gb_WeaponMenu
       string hideResponse = service.get(className);
       if (hideResponse.length() != 0)
       {
-        bool isHidden = hideResponse.byteAt(0) - 48; // convert to bool from "0" or "1".
+        // convert to bool from "0" or "1".
+        bool isHidden = hideResponse.byteAt(0) - 48;
         result = isHidden;
       }
     }
@@ -2339,7 +2359,8 @@ class gb_WeaponMenu
 
   private ui TextureID getIconFor(Weapon aWeapon) const
   {
-    TextureID icon = BaseStatusBar.getInventoryIcon(aWeapon, BaseStatusBar.DI_AltIconFirst);
+    TextureID icon =
+      BaseStatusBar.getInventoryIcon(aWeapon, BaseStatusBar.DI_AltIconFirst);
 
     {
       string className = aWeapon.getClassName();
@@ -2348,7 +2369,8 @@ class gb_WeaponMenu
         string iconResponse = service.uiGet(className);
         if (iconResponse.length() != 0)
         {
-          TextureID iconFromService = TexMan.checkForTexture(iconResponse, TexMan.Type_Any);
+          TextureID iconFromService =
+            TexMan.checkForTexture(iconResponse, TexMan.Type_Any);
           if (iconFromService.isValid()) icon = iconFromService;
         }
       }
@@ -2401,7 +2423,8 @@ class gb_WeaponMenu
     loadServices("gb_HideService", services);
   }
 
-  private static void loadServices(string serviceName, out Array<gb_Service> services)
+  private static void loadServices(string serviceName,
+                                   out Array<gb_Service> services)
   {
     let iterator = gb_ServiceIterator.find(serviceName);
     gb_Service aService;
@@ -2433,7 +2456,9 @@ class gb_WeaponMenu
 
 class gb_BlockyView
 {
-  static gb_BlockyView from(gb_TextureCache textureCache, gb_Options options, gb_FontSelector fontSelector)
+  static gb_BlockyView from(gb_TextureCache textureCache,
+                            gb_Options options,
+                            gb_FontSelector fontSelector)
   {
     let result = new("gb_BlockyView");
 
@@ -2478,8 +2503,10 @@ class gb_BlockyView
     vector2 position = mOptions.getBlocksPosition();
     int maxWidth = getMaxWidth(getSlotsNumber(viewModel));
     int maxHeight = getMaxHeight(viewModel);
-    int startX = int(min(BORDER + (mScreenWidth  - BORDER) * position.x, mScreenWidth - maxWidth));
-    int startY = int(min(BORDER + (mScreenHeight - BORDER) * position.y, mScreenHeight - maxHeight));
+    int startX = int(min(BORDER + (mScreenWidth  - BORDER) * position.x,
+                         mScreenWidth - maxWidth));
+    int startY = int(min(BORDER + (mScreenHeight - BORDER) * position.y,
+                         mScreenHeight - maxHeight));
 
     int lastDrawnSlot = 0;
     int slotX = startX;
@@ -2513,7 +2540,8 @@ class gb_BlockyView
       {
         bool isSelectedWeapon = (i == selectedIndex);
         int  weaponColor      = isSelectedWeapon ? mSelectedColor : mBaseColor;
-        int  weaponY = startY + SLOT_SIZE + (SELECTED_WEAPON_HEIGHT + MARGIN) * inSlotIndex;
+        int  weaponY =
+          startY + SLOT_SIZE + (SELECTED_WEAPON_HEIGHT + MARGIN) * inSlotIndex;
 
         // big box
         drawAlphaTexture(mTextureCache.blockBig, slotX, weaponY, weaponColor);
@@ -2530,8 +2558,10 @@ class gb_BlockyView
           int allowedWidth  = SELECTED_SLOT_WIDTH    - MARGIN * 2;
           int allowedHeight = SELECTED_WEAPON_HEIGHT - MARGIN * 2;
 
-          double scaleHor = (allowedWidth  < weaponSize.x) ? allowedWidth  / weaponSize.x : 1.0;
-          double scaleVer = (allowedHeight < weaponSize.y) ? allowedHeight / weaponSize.y : 1.0;
+          double scaleHor =
+            (allowedWidth  < weaponSize.x) ? allowedWidth  / weaponSize.x : 1.0;
+          double scaleVer =
+            (allowedHeight < weaponSize.y) ? allowedHeight / weaponSize.y : 1.0;
           double scale    = min(scaleHor, scaleVer);
 
           int weaponWidth  = int(round(weaponSize.x * scale));
@@ -2552,10 +2582,10 @@ class gb_BlockyView
           int lineEndY = weaponY + SELECTED_WEAPON_HEIGHT - CORNER_SIZE;
           TextureID cornerTexture = mTextureCache.corner;
           // top left, top right, bottom left, bottom right
-          drawFlippedTexture(cornerTexture, slotX,    weaponY,  NoHorizontalFlip, NoVerticalFlip);
-          drawFlippedTexture(cornerTexture, lineEndX, weaponY,    HorizontalFlip, NoVerticalFlip);
-          drawFlippedTexture(cornerTexture, slotX,    lineEndY, NoHorizontalFlip,   VerticalFlip);
-          drawFlippedTexture(cornerTexture, lineEndX, lineEndY,   HorizontalFlip,   VerticalFlip);
+          drawFlippedTexture(cornerTexture, slotX,    weaponY,   No,  No);
+          drawFlippedTexture(cornerTexture, lineEndX, weaponY,  Yes,  No);
+          drawFlippedTexture(cornerTexture, slotX,    lineEndY,  No, Yes);
+          drawFlippedTexture(cornerTexture, lineEndX, lineEndY, Yes, Yes);
         }
 
         // quantity indicators
@@ -2568,7 +2598,8 @@ class gb_BlockyView
                           , ammoY
                           , mAmmoBackColor
                           );
-          int ammoRatioWidth = ammoRatioWidthFor(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+          int ammoRatioWidth =
+            ammoRatioWidthFor(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
           drawAlphaWidthTexture( ammoTexture
                                , slotX + MARGIN * 2
                                , ammoY
@@ -2584,7 +2615,8 @@ class gb_BlockyView
                           , ammoY
                           , mAmmoBackColor
                           );
-          int ammoRatioWidth = ammoRatioWidthFor(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+          int ammoRatioWidth =
+            ammoRatioWidthFor(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
           drawAlphaWidthTexture( ammoTexture
                                , slotX + MARGIN * 2
                                , ammoY
@@ -2593,7 +2625,8 @@ class gb_BlockyView
                                );
         }
 
-        if (mOptions.isShowingTags()) drawTag(viewModel.tags[i], aFont, slotX, weaponY);
+        if (mOptions.isShowingTags())
+          drawTag(viewModel.tags[i], aFont, slotX, weaponY);
       }
       else // not selected slot (small boxes)
       {
@@ -2654,7 +2687,8 @@ class gb_BlockyView
     }
     if (itemsInSlot > maxItemsInSlot) maxItemsInSlot = itemsInSlot;
 
-    return maxItemsInSlot * (SELECTED_WEAPON_HEIGHT + MARGIN) - MARGIN + BORDER + SLOT_SIZE;
+    return maxItemsInSlot
+      ,* (SELECTED_WEAPON_HEIGHT + MARGIN) - MARGIN + BORDER + SLOT_SIZE;
   }
 
   private void drawTag(string tag, Font aFont, double startX, double startY)
@@ -2681,15 +2715,13 @@ class gb_BlockyView
     int allowedStringWidth = SELECTED_SLOT_WIDTH - 2;
     for (int i = nWords - 2; i >= 0; --i)
     {
-      int newWidth = (aFont.stringWidth(lines[0]) + spaceWidth + aFont.stringWidth(words[i]));
+      int newWidth =
+        (aFont.stringWidth(lines[0]) + spaceWidth + aFont.stringWidth(words[i]));
+
       if (newWidth < allowedStringWidth)
-      {
         lines[0] = words[i] .. " " .. lines[0];
-      }
       else
-      {
         lines.insert(0, words[i]);
-      }
     }
 
     // If there are too many lines, put them on the third line and mark the it
@@ -2699,9 +2731,8 @@ class gb_BlockyView
     if (nLines > 3)
     {
       for (int i = 3; i < nLines; ++i)
-      {
         lines[2].appendFormat(" %s", lines[i]);
-      }
+
       lines[2] = lines[2] .. ellipsis;
     }
 
@@ -2749,7 +2780,11 @@ class gb_BlockyView
                       );
   }
 
-  private void drawAlphaWidthTexture(TextureID texture, int x, int y, int color, int width) const
+  private void drawAlphaWidthTexture(TextureID texture,
+                                     int x,
+                                     int y,
+                                     int color,
+                                     int width) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2765,19 +2800,17 @@ class gb_BlockyView
                       );
   }
 
-  enum HorizontalFlipOptions
+  enum FlipOptions
   {
-    NoHorizontalFlip = 0,
-    HorizontalFlip = 1,
+    No = 0,
+    Yes = 1,
   }
 
-  enum VerticalFlipOptions
-  {
-    NoVerticalFlip = 0,
-    VerticalFlip = 1,
-  }
-
-  private void drawFlippedTexture(TextureID texture, int x, int y, int horFlip, int verFlip) const
+  private void drawFlippedTexture(TextureID texture,
+                                  int x,
+                                  int y,
+                                  int horFlip,
+                                  int verFlip) const
   {
     Screen.drawTexture( texture
                       , NO_ANIMATION
@@ -2808,7 +2841,12 @@ class gb_BlockyView
                       );
   }
 
-  private void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  private void drawText(Font aFont,
+                        int color,
+                        double x,
+                        double y,
+                        string text,
+                        double alpha = 1.0) const
   {
     Screen.drawText( aFont
                    , color
@@ -2979,7 +3017,12 @@ class gb_Dim
   {
     if (!options.isDimEnabled()) return;
 
-    Screen.Dim(options.getDimColor(), alpha * 0.4, 0, 0, Screen.getWidth(), Screen.getHeight());
+    Screen.Dim(options.getDimColor(),
+               alpha * 0.4,
+               0,
+               0,
+               Screen.getWidth(),
+               Screen.getHeight());
   }
 }
 #+end_src
@@ -3074,7 +3117,8 @@ class gb_TextView
       string itemString = makeItemString(viewModel, i);
       maxX = max(maxX, maxSlotWidth + x + aFont.stringWidth(itemString));
       y += lineHeight;
-      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1])
+        y += lineHeight / 3;
     }
     maxY = y;
 
@@ -3083,7 +3127,8 @@ class gb_TextView
     double yBoundary = mScreenHeight * mOptions.getTextPositionYMax();
     if (maxY > yBoundary && (maxY - lineHeight != start.y))
     {
-      lineHeight *= (yBoundary - lineHeight - start.y) / (maxY - lineHeight - start.y);
+      lineHeight *=
+        (yBoundary - lineHeight - start.y) / (maxY - lineHeight - start.y);
     }
 
     y = start.y;
@@ -3102,10 +3147,12 @@ class gb_TextView
         drawText(aFont, usualColor, x, y, slotString, mAlpha);
       }
       y += lineHeight;
-      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1])
+        y += lineHeight / 3;
     }
     {
-      string slotString = string.format("%d. ", viewModel.slots[viewModel.selectedIndex]);
+      string slotString = string.format("%d. ",
+                                        viewModel.slots[viewModel.selectedIndex]);
       drawText(aFont, selectedColor, x, selectedY, slotString, mAlpha);
     }
 
@@ -3119,7 +3166,8 @@ class gb_TextView
         drawText(aFont, usualColor, x + maxSlotWidth, y, itemText, mAlpha);
       }
       y += lineHeight;
-      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1]) y += lineHeight / 3;
+      if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1])
+        y += lineHeight / 3;
     }
     {
       string itemText  = makeItemString(viewModel, viewModel.selectedIndex);
@@ -3131,8 +3179,10 @@ class gb_TextView
   {
       string result = viewModel.tags[i];
 
-      bool isQuantity1Valid = gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
-      bool isQuantity2Valid = gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+      bool isQuantity1Valid =
+        gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+      bool isQuantity2Valid =
+        gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
 
       if (isQuantity1Valid && isQuantity2Valid)
       {
@@ -3145,17 +3195,26 @@ class gb_TextView
       }
       else if (isQuantity1Valid)
       {
-        result.appendFormat(" (%d/%d)", viewModel.quantity1[i], viewModel.maxQuantity1[i]);
+        result.appendFormat(" (%d/%d)",
+                            viewModel.quantity1[i],
+                            viewModel.maxQuantity1[i]);
       }
       else if (isQuantity2Valid)
       {
-        result.appendFormat(" (%d/%d)", viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+        result.appendFormat(" (%d/%d)",
+                            viewModel.quantity2[i],
+                            viewModel.maxQuantity2[i]);
       }
 
       return result;
   }
 
-  private void drawText(Font aFont, int color, double x, double y, string text, double alpha = 1.0) const
+  private void drawText(Font aFont,
+                        int color,
+                        double x,
+                        double y,
+                        string text,
+                        double alpha = 1.0) const
   {
     Screen.drawText( aFont
                    , color
@@ -3327,7 +3386,8 @@ class gb_EventHandler : EventHandler
   override bool inputProcess(InputEvent event)
   {
     if (players[consolePlayer].mo == NULL) return false;
-    if (!mIsInitialized || isDisabledOnAutomap() || gameState != GS_LEVEL) return false;
+    if (!mIsInitialized || isDisabledOnAutomap() || gameState != GS_LEVEL)
+      return false;
     if (isPlayerFrozen() && mActivity.isNone()) return false;
 
     int input = gb_InputProcessor.process(event);
@@ -3336,8 +3396,10 @@ class gb_EventHandler : EventHandler
     {
       switch (input)
       {
-      case InputSelectNextWeapon: tickIf(mWeaponMenu.selectNextWeapon()); mWheelController.reset(); break;
-      case InputSelectPrevWeapon: tickIf(mWeaponMenu.selectPrevWeapon()); mWheelController.reset(); break;
+      case InputSelectNextWeapon:
+        tickIf(mWeaponMenu.selectNextWeapon()); mWheelController.reset(); break;
+      case InputSelectPrevWeapon:
+        tickIf(mWeaponMenu.selectPrevWeapon()); mWheelController.reset(); break;
       case InputConfirmSelection: confirmSelection(); close(); break;
       case InputDrop:             dropItem(); break;
       case InputClose:            close(); break;
@@ -3355,8 +3417,10 @@ class gb_EventHandler : EventHandler
     {
       switch (input)
       {
-      case InputSelectNextWeapon: tickIf(mInventoryMenu.selectNext()); mWheelController.reset(); break;
-      case InputSelectPrevWeapon: tickIf(mInventoryMenu.selectPrev()); mWheelController.reset(); break;
+      case InputSelectNextWeapon:
+        tickIf(mInventoryMenu.selectNext()); mWheelController.reset(); break;
+      case InputSelectPrevWeapon:
+        tickIf(mInventoryMenu.selectPrev()); mWheelController.reset(); break;
       case InputConfirmSelection: confirmSelection(); close(); break;
       case InputDrop:             dropItem(); break;
       case InputClose:            close(); break;
@@ -3404,8 +3468,10 @@ class gb_EventHandler : EventHandler
 
       switch (input)
       {
-      case InputSelectNextWeapon: toggleWeapons(); mWeaponMenu.selectNextWeapon(); return true;
-      case InputSelectPrevWeapon: toggleWeapons(); mWeaponMenu.selectPrevWeapon(); return true;
+      case InputSelectNextWeapon:
+        toggleWeapons(); mWeaponMenu.selectNextWeapon(); return true;
+      case InputSelectPrevWeapon:
+        toggleWeapons(); mWeaponMenu.selectPrevWeapon(); return true;
       }
     }
 
@@ -3462,8 +3528,10 @@ class gb_EventHandler : EventHandler
       mWheelIndexer.update(viewModel, controllerModel);
       int selectedViewIndex = mWheelIndexer.getSelectedIndex();
 
-      if (mActivity.isWeapons()) tickIf(mWeaponMenu.setSelectedIndexFromView(viewModel, selectedViewIndex));
-      else if (mActivity.isInventory()) tickIf(mInventoryMenu.setSelectedIndex(selectedViewIndex));
+      if (mActivity.isWeapons())
+        tickIf(mWeaponMenu.setSelectedIndexFromView(viewModel, selectedViewIndex));
+      else if (mActivity.isInventory())
+        tickIf(mInventoryMenu.setSelectedIndex(selectedViewIndex));
 
       if (selectedViewIndex != -1) viewModel.selectedIndex = selectedViewIndex;
 
@@ -3548,8 +3616,7 @@ class gb_EventHandler : EventHandler
     mActivity.openInventory();
   }
 
-  private clearscope
-  void close()
+  private clearscope void close()
   {
     mSounds.playClose();
     mActivity.close();
@@ -3590,7 +3657,8 @@ class gb_EventHandler : EventHandler
   {
     if (mActivity.isWeapons())
     {
-      gb_CustomWeaponOrderStorage.savePriorityRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
+      gb_CustomWeaponOrderStorage
+        .savePriorityRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
       mWeaponMenu.rotatePriority();
     }
   }
@@ -3599,7 +3667,8 @@ class gb_EventHandler : EventHandler
   {
     if (mActivity.isWeapons())
     {
-      gb_CustomWeaponOrderStorage.saveSlotRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
+      gb_CustomWeaponOrderStorage
+        .saveSlotRotation(mWeaponSetHash, mWeaponMenu.getSelectedIndex());
       mWeaponMenu.rotateSlot();
     }
   }
@@ -3815,7 +3884,8 @@ class gb_ServiceIterator
   private void findNextService()
   {
     int classesNumber = AllClasses.size();
-    while (mClassIndex < classesNumber && !ServiceNameContains(AllClasses[mClassIndex], mServiceName))
+    while (mClassIndex < classesNumber
+           && !ServiceNameContains(AllClasses[mClassIndex], mServiceName))
     {
       ++mClassIndex;
     }
@@ -3900,7 +3970,9 @@ class gb_HideService : gb_Service
     case 'DualExplodiumGun':
     {
       string explodiumGunClass = "ExplodiumGun";
-      return (players[consolePlayer].mo.countInv(explodiumGunClass) > 1) ? SHOW : HIDE;
+      return (players[consolePlayer].mo.countInv(explodiumGunClass) > 1)
+        ? SHOW
+        : HIDE;
     }
 
     default: return IGNORE;
@@ -4021,22 +4093,27 @@ class gb_TextureCache
     isLoaded = true;
 
     // Wheel
-    circle     = TexMan.checkForTexture("gb_circ", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    halfCircle = TexMan.checkForTexture("gb_hcir", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    ammoPip    = TexMan.checkForTexture("gb_pip" , TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    hand       = TexMan.checkForTexture("gb_hand", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    pointer    = TexMan.checkForTexture("gb_pntr", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    textBox    = TexMan.checkForTexture("gb_desc", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    noIcon     = TexMan.checkForTexture("gb_nope", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    circle     = loadTexture("gb_circ");
+    halfCircle = loadTexture("gb_hcir");
+    ammoPip    = loadTexture("gb_pip");
+    hand       = loadTexture("gb_hand");
+    pointer    = loadTexture("gb_pntr");
+    textBox    = loadTexture("gb_desc");
+    noIcon     = loadTexture("gb_nope");
 
     // Blocks
-    blockBox   = TexMan.checkForTexture("gb_box",  TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    blockBig   = TexMan.checkForTexture("gb_weap", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    corner     = TexMan.checkForTexture("gb_cor",  TexMan.Type_MiscPatch, TEXTURE_FLAGS);
-    ammoLine   = TexMan.checkForTexture("gb_ammo", TexMan.Type_MiscPatch, TEXTURE_FLAGS);
+    blockBox   = loadTexture("gb_box");
+    blockBig   = loadTexture("gb_weap");
+    corner     = loadTexture("gb_cor");
+    ammoLine   = loadTexture("gb_ammo");
 
     // Sizes
     ammoPipSize = TexMan.getScaledSize(ammoPip);
+  }
+
+  private TextureID loadTexture(string name)
+  {
+    return TexMan.checkForTexture(name, TexMan.Type_MiscPatch, 0);
   }
 
   transient TextureID circle;
@@ -4055,8 +4132,6 @@ class gb_TextureCache
   transient vector2 ammoPipSize;
 
   transient bool isLoaded;
-
-  const TEXTURE_FLAGS = 0;
 }
 #+end_src
 
@@ -4191,7 +4266,8 @@ class gb_WheelIndexer
       }
     }
 
-    if (externalSelectedIndexInModel < 0 || !mMultiWheelMode.isEngaged(viewModel)) return externalSelectedIndexInModel;
+    if (externalSelectedIndexInModel < 0 || !mMultiWheelMode.isEngaged(viewModel))
+      return externalSelectedIndexInModel;
 
     gb_MultiWheelModel multiWheelModel;
     gb_MultiWheel.fill(viewModel, multiWheelModel);
@@ -4201,11 +4277,14 @@ class gb_WheelIndexer
     {
       if (multiWheelModel.isWeapon[i])
       {
-        if (viewModel.indices[multiWheelModel.data[i]] == externalSelectedIndex) return i;
+        if (viewModel.indices[multiWheelModel.data[i]] == externalSelectedIndex)
+          return i;
       }
       else
       {
-        if (multiWheelModel.data[i] == viewModel.slots[externalSelectedIndexInModel]) return i;
+        if (multiWheelModel.data[i] ==
+            viewModel.slots[externalSelectedIndexInModel])
+          return i;
       }
     }
 
@@ -4254,7 +4333,9 @@ class gb_WheelIndexer
 
     if (!mMultiWheelMode.isEngaged(viewModel))
     {
-      mSelectedIndex = gb_WheelInnerIndexer.getSelectedIndex(nWeapons, controllerModel, mScreen);
+      mSelectedIndex = gb_WheelInnerIndexer.getSelectedIndex(nWeapons,
+                                                             controllerModel,
+                                                             mScreen);
       mLastSlotIndex = UNDEFINED_INDEX;
       mInnerIndex    = mSelectedIndex;
       mOuterIndex    = UNDEFINED_INDEX;
@@ -4273,7 +4354,8 @@ class gb_WheelIndexer
       return;
     }
 
-    if (mLastSlotIndex == UNDEFINED_INDEX || mLastSlotIndex >= multiWheelModel.data.size())
+    if (mLastSlotIndex == UNDEFINED_INDEX
+        || mLastSlotIndex >= multiWheelModel.data.size())
     {
       mSelectedIndex = UNDEFINED_INDEX;
       mInnerIndex    = UNDEFINED_INDEX;
@@ -4302,7 +4384,8 @@ class gb_WheelIndexer
       return;
     }
 
-    // due to computation precision, the value of ratio may be slightly out of range [-1, 1].
+    // Due to computation precision, the value of ratio may be
+    // slightly out of range [-1, 1].
     double ratio = clamp(r / side * sin(forSlotAngle), -1.0, 1.0);
     double angle = -asin(ratio);
 
@@ -4329,7 +4412,9 @@ class gb_WheelIndexer
                        , gb_ViewModel            viewModel
                        )
   {
-    int  innerIndex = gb_WheelInnerIndexer.getSelectedIndex(nPlaces, controllerModel, mScreen);
+    int  innerIndex = gb_WheelInnerIndexer.getSelectedIndex(nPlaces,
+                                                            controllerModel,
+                                                            mScreen);
     bool isWeapon   = multiWheelModel.isWeapon[innerIndex];
 
     mSelectedIndex = isWeapon
@@ -4381,7 +4466,9 @@ class gb_WheelIndexer
 
 class gb_WheelInnerIndexer
 {
-  static int getSelectedIndex(int nItems, gb_WheelControllerModel controllerModel, gb_Screen screen)
+  static int getSelectedIndex(int nItems,
+                              gb_WheelControllerModel controllerModel,
+                              gb_Screen screen)
   {
     if (controllerModel.radius < screen.getWheelDeadRadius() || nItems == 0)
     {
@@ -4487,7 +4574,8 @@ class gb_Screen
   {
     int screenWidth      = Screen.getWidth();
     int halfScreenHeight = Screen.getHeight() / 2;
-    int centerPosition   = int((screenWidth / 2 - halfScreenHeight) * mOptions.getWheelPosition());
+    int centerPosition   = int((screenWidth / 2 - halfScreenHeight) *
+                               mOptions.getWheelPosition());
     return (screenWidth / 2 + centerPosition, halfScreenHeight);
   }
 
@@ -4527,7 +4615,9 @@ class gb_Screen
 // This class helps displaying text on screen.
 class gb_Text
 {
-  static gb_Text from(gb_TextureCache textureCache, gb_Screen screen, gb_FontSelector fontSelector)
+  static gb_Text from(gb_TextureCache textureCache,
+                      gb_Screen screen,
+                      gb_FontSelector fontSelector)
   {
     let result = new("gb_Text");
     result.mTextureCache = textureCache;
@@ -4536,7 +4626,11 @@ class gb_Text
     return result;
   }
 
-  static void draw(string aString, vector2 pos, Font aFont, double alpha, bool isBig = false)
+  static void draw(string aString,
+                   vector2 pos,
+                   Font aFont,
+                   double alpha,
+                   bool isBig = false)
   {
     int textScale = isBig ? getBigTextScale() : getTextScale();
 
@@ -4558,7 +4652,7 @@ class gb_Text
               , string  middleText
               , string  bottomText
               , vector2 pos
-              , bool    isPosTop   // true: pos is the top of text box, false: bottom.
+              , bool    isPosTop // true: pos is the top of text box, false: bottom.
               , color   baseColor
               , double  alpha
               )
@@ -4576,10 +4670,8 @@ class gb_Text
     int middleTextWidth = aFont.stringWidth(middleText);
     int bottomTextWidth = aFont.stringWidth(bottomText);
 
-    int width = max(int( ( max(middleTextWidth, max(topTextWidth, bottomTextWidth)) * textScale
-                       + margin * 2
-                       ) / scaleFactor
-                   ), height * 2);
+    int width = max(int((max(middleTextWidth, max(topTextWidth, bottomTextWidth)) *
+                         textScale + margin * 2) / scaleFactor), height * 2);
     vector2 size   = (width, height) * scaleFactor;
     vector2 center = pos + (0, size.y / 2);
 
@@ -4697,13 +4789,15 @@ class gb_WheelView
         bool isWeapon = multiWheelModel.isWeapon[i];
         int  data     = multiWheelModel.data[i];
 
-        if (isWeapon) displayWeapon(i, data, nPlaces, radius, allowedWidth, viewModel, mCenter);
-        else          displaySlot  (i, data, nPlaces, radius);
+        if (isWeapon)
+          displayWeapon(i, data, nPlaces, radius, allowedWidth, viewModel, mCenter);
+        else displaySlot  (i, data, nPlaces, radius);
       }
 
       drawHands(nPlaces, innerIndex, mCenter, 0);
 
-      isSlotExpanded = (outerIndex != UNDEFINED_INDEX && !multiWheelModel.isWeapon[innerIndex]);
+      isSlotExpanded = (outerIndex != UNDEFINED_INDEX
+                        && !multiWheelModel.isWeapon[innerIndex]);
       if (isSlotExpanded)
       {
         int slot = multiWheelModel.data[innerIndex];
@@ -4730,7 +4824,13 @@ class gb_WheelView
       nPlaces = nWeapons;
       if (innerIndex != -1)
       {
-        displayWeapon(innerIndex, innerIndex, nPlaces, radius, allowedWidth, viewModel, mCenter);
+        displayWeapon(innerIndex,
+                      innerIndex,
+                      nPlaces,
+                      radius,
+                      allowedWidth,
+                      viewModel,
+                      mCenter);
       }
       drawHands(nPlaces, innerIndex, mCenter, 0);
     }
@@ -4882,7 +4982,12 @@ class gb_WheelView
     drawAmmo(angle, center, viewModel, iconIndex);
   }
 
-  private void drawIcon(TextureID texture, vector2 xy, int w, int h, double angle, bool isTall) const
+  private void drawIcon(TextureID texture,
+                        vector2 xy,
+                        int w,
+                        int h,
+                        double angle,
+                        bool isTall) const
   {
     bool flipX;
     double scaleY;
@@ -4977,27 +5082,32 @@ class gb_WheelView
     return nColoredPips, MAX_N_PIPS;
   }
 
-  private void drawAmmo(double weaponAngle, vector2 center, gb_ViewModel viewModel, int weaponIndex)
+  private void drawAmmo(double weaponAngle,
+                        vector2 center,
+                        gb_ViewModel viewModel,
+                        int weaponIndex)
   {
-    if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex], viewModel.maxQuantity1[weaponIndex]))
+    if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex],
+                        viewModel.maxQuantity1[weaponIndex]))
     {
       int margin = int(10 * mScaleFactor);
       int radius = mScreen.getScaledScreenHeight() / 4 - margin;
       int nColoredPips, nTotalPips;
-      [nColoredPips, nTotalPips] = makePipsNumbers( viewModel.quantity1   [weaponIndex]
-                                                  , viewModel.maxQuantity1[weaponIndex]
-                                                  );
+      [nColoredPips, nTotalPips] =
+        makePipsNumbers(viewModel.quantity1   [weaponIndex],
+                        viewModel.maxQuantity1[weaponIndex]);
       drawQuantityPips(radius, weaponAngle, center, nColoredPips, nTotalPips);
     }
 
-    if (gb_Ammo.isValid(viewModel.quantity2[weaponIndex], viewModel.maxQuantity2[weaponIndex]))
+    if (gb_Ammo.isValid(viewModel.quantity2[weaponIndex],
+                        viewModel.maxQuantity2[weaponIndex]))
     {
       int margin = int(20 * mScaleFactor);
       int radius = mScreen.getScaledScreenHeight() / 4 - margin;
       int nColoredPips, nTotalPips;
-      [nColoredPips, nTotalPips] = makePipsNumbers( viewModel.quantity2   [weaponIndex]
-                                                  , viewModel.maxQuantity2[weaponIndex]
-                                                  );
+      [nColoredPips, nTotalPips] =
+        makePipsNumbers(viewModel.quantity2   [weaponIndex],
+                        viewModel.maxQuantity2[weaponIndex]);
       drawQuantityPips(radius, weaponAngle, center, nColoredPips, nTotalPips);
     }
   }
@@ -5053,14 +5163,17 @@ class gb_WheelView
     return 360.0 / nItems * index;
   }
 
-  private void drawHands(int nPlaces, int selectedIndex, vector2 center, double startAngle)
+  private void drawHands(int nPlaces,
+                         int selectedIndex,
+                         vector2 center,
+                         double startAngle)
   {
     if (nPlaces < 2) return;
 
     double  handsAngle           = startAngle - itemAngle(nPlaces, selectedIndex);
     double  sectorAngleHalfWidth = max(6, 360.0 / 2.0 / nPlaces - 2);
     double  scaleFactor          = mScreen.getScaleFactor();
-    vector2 size                 = TexMan.getScaledSize(mTextureCache.hand) * scaleFactor;
+    vector2 size = TexMan.getScaledSize(mTextureCache.hand) * scaleFactor;
 
     Screen.drawTexture( mTextureCache.hand
                       , NO_ANIMATION
@@ -5099,11 +5212,17 @@ class gb_WheelView
     string description = viewModel.tags[index];
     if (description.length() == 0) return;
 
-    string ammo1 = gb_Ammo.isValid(viewModel.quantity1[index], viewModel.maxQuantity1[index])
-      ? string.format("%d/%d", viewModel.quantity1[index], viewModel.maxQuantity1[index])
+    string ammo1 = gb_Ammo.isValid(viewModel.quantity1[index],
+                                   viewModel.maxQuantity1[index])
+      ? string.format("%d/%d",
+                      viewModel.quantity1[index],
+                      viewModel.maxQuantity1[index])
       : "";
-    string ammo2 = gb_Ammo.isValid(viewModel.quantity2[index], viewModel.maxQuantity2[index])
-      ? string.format("%d/%d", viewModel.quantity2[index], viewModel.maxQuantity2[index])
+    string ammo2 = gb_Ammo.isValid(viewModel.quantity2[index],
+                                   viewModel.maxQuantity2[index])
+      ? string.format("%d/%d",
+                      viewModel.quantity2[index],
+                      viewModel.maxQuantity2[index])
       : "";
 
     double  angle   = itemAngle(nPlaces, innerIndex);
