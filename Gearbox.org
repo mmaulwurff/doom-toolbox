@@ -274,8 +274,8 @@ OptionMenu gb_Options
   Submenu     "$GB_GZDOOM_OPTIONS"   , gb_GZDoomOptions
 
   StaticText  ""
-  SafeCommand "$GB_RESET"              , gb_reset              , "$GB_RESET_PROMPT"
-  SafeCommand "$GB_RESET_CUSTOM_ORDER" , gb_reset_custom_order , "$GB_RESET_CUSTOM_ORDER_PROMPT"
+  SafeCommand "$GB_RESET"              , gb_reset
+  SafeCommand "$GB_RESET_CUSTOM_ORDER" , gb_reset_custom_order
   StaticText  "$GB_RESET_CUSTOM_ORDER_NOTE", black
 }
 
@@ -609,10 +609,8 @@ GB_X        = "Horizontal";
 GB_Y        = "Vertical";
 
 GB_RESET        = "Reset Gearbox options to defaults";
-GB_RESET_PROMPT = "Do you really want to reset Gearbox options to defaults?";
 
 GB_RESET_CUSTOM_ORDER        = "Reset current custom weapon order";
-GB_RESET_CUSTOM_ORDER_PROMPT = "Do you really want to reset custom weapon order?";
 GB_RESET_CUSTOM_ORDER_NOTE   = "Works only while in game.";
 
 GB_GZDOOM_OPTIONS       = "Relevant GZDoom options";
@@ -705,10 +703,8 @@ GB_SCALE    = "Tamanho";
 GB_POSITION = "Posição";
 
 GB_RESET        = "Redefinir configurações padrões do Gearbox";
-GB_RESET_PROMPT = "Você realmente quer redefinir suas configurações do Gearbox aos padrões?";
 
 GB_RESET_CUSTOM_ORDER        = "Redefinir ordem de armas atual";
-GB_RESET_CUSTOM_ORDER_PROMPT = "Você realmente quer redefinir suas ordens personalizadas de armas?";
 GB_RESET_CUSTOM_ORDER_NOTE   = "Só funciona dentro do jogo.";
 
 GB_GZDOOM_OPTIONS       = "Opções relevantes do GZDoom";
