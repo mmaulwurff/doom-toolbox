@@ -318,6 +318,7 @@ add_dependency('Gearbox', 'MD5', 'gb_')
 add_dependency('Gearbox', 'PreviousWeapon', 'gb_')
 add_dependency('Gearbox', 'StringUtils', 'gb_')
 add_dependency('Gearbox', 'VmAbortReporter', 'gb_')
+add_dependency('Gearbox', 'PlainTranslator', 'gb_')
 
 # Help
 Help(

@@ -251,6 +251,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
 
 OptionMenu gb_Options
 {
+  gb_PlainTranslator
   Title "$GB_OPTIONS"
 
   StaticText  ""
@@ -773,6 +774,7 @@ version 4.14.3
 #include "zscript/gb_PreviousWeapon.zs"
 #include "zscript/gb_StringUtils.zs"
 #include "zscript/gb_VmAbortReporter.zs"
+#include "zscript/gb_PlainTranslator.zs"
 #+end_src
 
 #+begin_src text :tangle build/tmp.txt :exports none
