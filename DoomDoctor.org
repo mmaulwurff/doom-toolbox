@@ -72,9 +72,9 @@ wait 6; interfaceEvent TestInterfaceEvent 9;
 wait 7; mdk TestDamageType;
 wait 8; kill;
 
-wait 11; resurrect; warp 60 -128 0; +use;
+wait 16; resurrect; warp 60 -128 0; +use;
 
-wait 14; quit
+wait 19; quit
 #+end_src
 
 #+begin_src elisp :exports none
