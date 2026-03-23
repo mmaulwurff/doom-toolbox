@@ -42,6 +42,8 @@ for your weapons! Tag property is also nice to have.
   mods. The solution is the same: disable time PyWeaponWheel's time freezing.
 - Weapon icons in wheel aren't affected by "HUD preserves aspect ration" option.
 - Mouse input in wheel in multiplayer causes screen shake.
+- Cheat codes that contain keys assigned for weapon slots are not supported as
+  Gearbox blocks them.
 
 ** Creating a Soundpack
 
