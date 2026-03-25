@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ---
 name: Feature request
 about: Suggest an idea for DoomToolbox

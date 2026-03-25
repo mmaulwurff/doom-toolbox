@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ---
 name: Bug report
 about: Create a report to help DoomToolbox improve
