@@ -5,8 +5,7 @@
 
 * About
 
-Gearbox is an add-on for GZDoom engine that provides more convenient ways to
-select weapons and items.
+Gearbox provides more convenient ways to select weapons and items.
 
 Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 

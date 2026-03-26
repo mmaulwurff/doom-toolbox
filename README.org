@@ -17,6 +17,7 @@ Add-ons:
 - [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][ZDoom forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
 - [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][ZDoom forum topic]])
+- [[file:Gearbox.org][Gearbox]] - more convenient ways to select weapons and items ([[https://forum.zdoom.org/viewtopic.php?t=71086][ZDoom forum topic]])
 - [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][ZDoom forum topic]])
 - [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][ZDoom forumm topic]])
 - [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][ZDoom forum topic]])
@@ -58,6 +59,11 @@ SoundToScreen:
 Typist.pk3:
 
 [[file:media/screenshots/Typist.pk3.png]]
+
+Gearbox:
+
+[[file:media/screenshots/Gearbox-wheel.png]]
+[[file:media/screenshots/Gearbox-blocks.png]]
 
 * Social
 
