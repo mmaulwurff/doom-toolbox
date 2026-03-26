@@ -397,7 +397,7 @@ OptionMenu gb_AdvancedOptions
   Title "$GB_ADVANCED_OPTIONS_TITLE"
 
   StaticText ""
-  Option     "$GB_VM_ABORT_INFO_ENABLED", gb_zabor_enabled, OnOff
+  Option     "$GB_VM_ABORT_INFO_ENABLED", gb_vm_abort_report_enabled, OnOff
 }
 
 // Option Values
@@ -429,18 +429,6 @@ OptionString gb_FontValues
   "ConsoleFont"  , "$GB_CONSOLE_FONT"
   "BigFont"      , "$GB_BIG_FONT"
 }
-#+end_src
-
-* CVars
-
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt
-
-// TODO: change to user bool NAMESPACE_vm_abort_report_enabled = true;
-user bool gb_zabor_enabled = true;
-
-// Custom weapon order storage
-
-nosave string gb_custom_weapon_order = "";
 #+end_src
 
 * Sounds
@@ -701,7 +689,7 @@ Alias gb_report "event gd_report"
 Alias gb_copy_player_color "gb_color $color"
 
 // TODO: do this programmatically.
-Alias gb_reset "ResetCvar gb_scale; ResetCvar gb_color; ResetCvar gb_dim_color; ResetCvar gb_show_tags; ResetCvar gb_view_type; ResetCvar gb_enable_dim; ResetCvar gb_enable_blur; ResetCvar gb_wheel_position; ResetCvar gb_wheel_scale; ResetCvar gb_wheel_tint; ResetCvar gb_multiwheel_limit; ResetCvar gb_blocks_position_x; ResetCvar gb_blocks_position_y; ResetCvar gb_text_scale; ResetCvar gb_text_position_x; ResetCvar gb_text_position_y; ResetCvar gb_text_position_y_max; ResetCvar gb_text_usual_color; ResetCvar gb_text_selected_color; ResetCvar gb_open_on_scroll; ResetCvar gb_open_on_slot; ResetCvar gb_reverse_slot_cycle_order; ResetCvar gb_select_first_slot_weapon; ResetCvar gb_mouse_in_wheel; ResetCvar gb_select_on_key_up; ResetCvar gb_no_menu_if_one; ResetCvar gb_on_automap; ResetCvar gb_lock_positions; ResetCvar gb_enable_sounds; ResetCvar gb_frozen_can_open; ResetCvar gb_time_freeze; ResetCvar gb_mouse_sensitivity_x; ResetCvar gb_mouse_sensitivity_y; ResetCvar gb_zabor_enabled"
+Alias gb_reset "ResetCvar gb_scale; ResetCvar gb_color; ResetCvar gb_dim_color; ResetCvar gb_show_tags; ResetCvar gb_view_type; ResetCvar gb_enable_dim; ResetCvar gb_enable_blur; ResetCvar gb_wheel_position; ResetCvar gb_wheel_scale; ResetCvar gb_wheel_tint; ResetCvar gb_multiwheel_limit; ResetCvar gb_blocks_position_x; ResetCvar gb_blocks_position_y; ResetCvar gb_text_scale; ResetCvar gb_text_position_x; ResetCvar gb_text_position_y; ResetCvar gb_text_position_y_max; ResetCvar gb_text_usual_color; ResetCvar gb_text_selected_color; ResetCvar gb_open_on_scroll; ResetCvar gb_open_on_slot; ResetCvar gb_reverse_slot_cycle_order; ResetCvar gb_select_first_slot_weapon; ResetCvar gb_mouse_in_wheel; ResetCvar gb_select_on_key_up; ResetCvar gb_no_menu_if_one; ResetCvar gb_on_automap; ResetCvar gb_lock_positions; ResetCvar gb_enable_sounds; ResetCvar gb_frozen_can_open; ResetCvar gb_time_freeze; ResetCvar gb_mouse_sensitivity_x; ResetCvar gb_mouse_sensitivity_y"
 
 // Keys
 
@@ -731,6 +719,12 @@ version 4.14.3
 
 #+begin_src text :tangle build/tmp.txt :exports none
 <<tools/scripts.org:copy-media("Gearbox")>>
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+
+// VmAbortReporter
+user bool gb_vm_abort_report_enabled = true;
 #+end_src
 
 #+begin_src c :tangle build/Gearbox/mapinfo.txt
@@ -1024,6 +1018,12 @@ class gb_CustomWeaponOrderStorage
   const STORAGE_CVAR_NAME = "gb_custom_weapon_order";
   const DELIMITER = ";";
 }
+#+end_src
+
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+
+// Custom weapon order storage
+nosave string gb_custom_weapon_order = "";
 #+end_src
 
 *** ~EventProcessor~

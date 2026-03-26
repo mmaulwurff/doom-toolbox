@@ -160,7 +160,7 @@ class NAMESPACE_Report
   {
     Array<string> lines =
       {
-        "DoomDoctor Report: " .. getSystemTime(),
+        getSystemTime(),
         getGameInfo(),
         getConfiguration(),
         getEventHandlers()
