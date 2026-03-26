@@ -326,6 +326,9 @@ OptionMenu gb_UiOptions
   Option      "$GB_SHOW_TAGS" , gb_show_tags      , OnOff
 
   StaticText  ""
+  Option      "Print selection", gb_print_selection, OnOff
+
+  StaticText  ""
   Option      "$GB_DIM"       , gb_enable_dim     , OnOff
   ColorPicker "$GB_DIM_COLOR" , gb_dim_color
   Option      "$GB_BLUR"      , gb_enable_blur    , OnOff
@@ -432,60 +435,7 @@ OptionString gb_FontValues
 
 #+begin_src c :tangle build/Gearbox/cvarinfo.txt
 
-// When adding new options, don't forget to add them to:
-// - keyconf.txt:Alias gb_reset.
-
-// Options
-
-user int   gb_scale     = 1;
-user color gb_color     = "22 22 CC";
-user color gb_dim_color = "99 99 99";
-user bool  gb_show_tags = true;
-
-// 0 - blocky view
-// 1 - wheel view
-user int gb_view_type = 1;
-
-user bool  gb_enable_dim       = true;
-user bool  gb_enable_blur      = false;
-user float gb_wheel_position   = 1.0;
-user float gb_wheel_scale      = 1.0;
-user bool  gb_wheel_tint       = true;
-user int   gb_multiwheel_limit = 12;
-
-user float gb_blocks_position_x = 0.0;
-user float gb_blocks_position_y = 0.0;
-
-user int   gb_text_scale      = 1;
-user float gb_text_position_x = 0.0;
-user float gb_text_position_y = 0.0;
-user float gb_text_position_y_max = 1.0;
-user int   gb_text_usual_color    = 21; // cyan
-user int   gb_text_selected_color =  9; // white
-
-user string gb_font = "NewSmallFont";
-
-user bool gb_open_on_scroll   = false;
-
-user bool gb_open_on_slot     = true;
-user bool gb_reverse_slot_cycle_order  = false;
-user bool gb_select_first_slot_weapon  = false;
-
-user int gb_soundpack = 0;
-
-user bool gb_mouse_in_wheel   = true;
-user bool gb_select_on_key_up = false;
-user bool gb_no_menu_if_one   = false;
-user bool gb_on_automap       = false;
-user bool gb_lock_positions   = false;
-user bool gb_enable_sounds    = true;
-user bool gb_frozen_can_open  = false;
-
-user int  gb_time_freeze      = 0;
-
-user float gb_mouse_sensitivity_x = 1.0;
-user float gb_mouse_sensitivity_y = 1.0;
-
+// TODO: change to user bool NAMESPACE_vm_abort_report_enabled = true;
 user bool gb_zabor_enabled = true;
 
 // Custom weapon order storage
@@ -1326,12 +1276,11 @@ class gb_InputProcessor
 
 class gb_InventoryMenu
 {
-  static gb_InventoryMenu from()
+  static gb_InventoryMenu from(gb_Options options)
   {
     let result = new("gb_InventoryMenu");
-
     result.mSelectedIndex = 0;
-
+    result.mOptions = options;
     return result;
   }
 
@@ -1362,7 +1311,7 @@ class gb_InventoryMenu
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
 
-    mSelectedIndex = (mSelectedIndex + 1) % nItems;
+    setSelectedIndexImpl((mSelectedIndex + 1) % nItems);
 
     return true;
   }
@@ -1372,7 +1321,7 @@ class gb_InventoryMenu
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
 
-    mSelectedIndex = (mSelectedIndex - 1 + nItems) % nItems;
+    setSelectedIndexImpl((mSelectedIndex - 1 + nItems) % nItems);
 
     return true;
   }
@@ -1381,7 +1330,7 @@ class gb_InventoryMenu
   {
     if (index == -1 || mSelectedIndex == index) return false;
 
-    mSelectedIndex = index;
+    setSelectedIndexImpl(index);
 
     return true;
   }
@@ -1389,6 +1338,25 @@ class gb_InventoryMenu
   ui int getSelectedIndex() const
   {
     return mSelectedIndex;
+  }
+
+  private ui void setSelectedIndexImpl(int index)
+  {
+    if (index == mSelectedIndex) return;
+
+    mSelectedIndex = index;
+
+    if (mOptions.isPrintSelection() && 0 <= index && index < getItemsNumber())
+    {
+      let item = players[consolePlayer].mo.inv;
+      int i = 0;
+      while (item != NULL && i != index)
+      {
+        item = item.inv;
+        ++i;
+      }
+      Console.printf("%s", item.getTag());
+    }
   }
 
   ui void fill(out gb_ViewModel viewModel)
@@ -1436,6 +1404,7 @@ class gb_InventoryMenu
   }
 
   private int mSelectedIndex;
+  private gb_Options mOptions;
 }
 #+end_src
 
@@ -1548,6 +1517,64 @@ class gb_NeteventProcessor play
 
 *** ~Options~
 
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+
+// When adding new options, don't forget to add them to:
+// - keyconf.txt:Alias gb_reset.
+
+// Options
+
+user int   gb_scale     = 1;
+user color gb_color     = "22 22 CC";
+user color gb_dim_color = "99 99 99";
+user bool  gb_show_tags = true;
+user bool  gb_print_selection = false;
+
+// 0 - blocky view
+// 1 - wheel view
+user int gb_view_type = 1;
+
+user bool  gb_enable_dim       = true;
+user bool  gb_enable_blur      = false;
+user float gb_wheel_position   = 1.0;
+user float gb_wheel_scale      = 1.0;
+user bool  gb_wheel_tint       = true;
+user int   gb_multiwheel_limit = 12;
+
+user float gb_blocks_position_x = 0.0;
+user float gb_blocks_position_y = 0.0;
+
+user int   gb_text_scale      = 1;
+user float gb_text_position_x = 0.0;
+user float gb_text_position_y = 0.0;
+user float gb_text_position_y_max = 1.0;
+user int   gb_text_usual_color    = 21; // cyan
+user int   gb_text_selected_color =  9; // white
+
+user string gb_font = "NewSmallFont";
+
+user bool gb_open_on_scroll   = false;
+
+user bool gb_open_on_slot     = true;
+user bool gb_reverse_slot_cycle_order  = false;
+user bool gb_select_first_slot_weapon  = false;
+
+user int gb_soundpack = 0;
+
+user bool gb_mouse_in_wheel   = true;
+user bool gb_select_on_key_up = false;
+user bool gb_no_menu_if_one   = false;
+user bool gb_on_automap       = false;
+user bool gb_lock_positions   = false;
+user bool gb_enable_sounds    = true;
+user bool gb_frozen_can_open  = false;
+
+user int  gb_time_freeze      = 0;
+
+user float gb_mouse_sensitivity_x = 1.0;
+user float gb_mouse_sensitivity_y = 1.0;
+#+end_src
+
 #+begin_src c :tangle build/Gearbox/zscript/options.zs
 
 class gb_Options
@@ -1565,6 +1592,7 @@ class gb_Options
     result.mWheelTint              = gb_Cvar.from("gb_wheel_tint");
     result.mMultiWheelLimit        = gb_Cvar.from("gb_multiwheel_limit");
     result.mShowTags               = gb_Cvar.from("gb_show_tags");
+    result.mPrintSelection         = gb_Cvar.from("gb_print_selection");
     result.mShowWeaponTagsOnChange = gb_Cvar.from("DisplayNameTags");
     result.mIsPositionLocked       = gb_Cvar.from("gb_lock_positions");
     result.mFrozenCanOpen          = gb_Cvar.from("gb_frozen_can_open");
@@ -1613,6 +1641,7 @@ class gb_Options
   bool getWheelTint()             const { return mWheelTint            .getBool(); }
   int  getMultiWheelLimit()       const { return mMultiWheelLimit      .getInt();  }
   bool isShowingTags()            const { return mShowTags             .getBool(); }
+  bool isPrintSelection()         const { return mPrintSelection       .getBool(); }
   bool isPositionLocked()         const { return mIsPositionLocked     .getBool(); }
   bool isFrozenCanOpen()          const { return mFrozenCanOpen        .getBool(); }
   bool isPreservingAspectRatio()  const { return mPreserveAspectRatio  .getBool(); }
@@ -1671,6 +1700,7 @@ class gb_Options
   private gb_Cvar mWheelTint;
   private gb_Cvar mMultiWheelLimit;
   private gb_Cvar mShowTags;
+  private gb_Cvar mPrintSelection;
   private gb_Cvar mShowWeaponTagsOnChange;
   private gb_Cvar mIsPositionLocked;
 
@@ -2051,11 +2081,24 @@ class gb_WeaponMenu
     return mSelectedIndex;
   }
 
+  void setSelectedIndex(int index)
+  {
+    if (index == mSelectedIndex) return;
+
+    mSelectedIndex = index;
+
+    if (mOptions.isPrintSelection() && 0 <= index && index < mWeapons.size())
+    {
+      let aWeapon = players[consolePlayer].mo.findInventory(mWeapons[index]);
+      Console.printf("%s", aWeapon.getTag());
+    }
+  }
+
   bool setSelectedIndexFromView(gb_ViewModel viewModel, int index)
   {
     if (index == -1 || mSelectedIndex == viewModel.indices[index]) return false;
 
-    mSelectedIndex = viewModel.indices[index];
+    setSelectedIndex(viewModel.indices[index]);
     return true;
   }
 
@@ -2064,18 +2107,18 @@ class gb_WeaponMenu
     if (aClass == NULL) return;
 
     int index = getIndexOf(aClass);
-    if (index != mWeapons.size()) mSelectedIndex = index;
+    if (index != mWeapons.size()) setSelectedIndex(index);
   }
 
   ui bool selectNextWeapon()
   {
-    mSelectedIndex = findNextWeapon();
+    setSelectedIndex(findNextWeapon());
     return mSelectedIndex != mWeapons.size();
   }
 
   ui bool selectPrevWeapon()
   {
-    mSelectedIndex = findPrevWeapon();
+    setSelectedIndex(findPrevWeapon());
     return mSelectedIndex != mWeapons.size();
   }
 
@@ -2092,7 +2135,7 @@ class gb_WeaponMenu
           && isInInventory(index)
           && !isHidden(mWeapons[index].getClassName()))
       {
-        mSelectedIndex = index;
+        setSelectedIndex(index);
         return true;
       }
     }
@@ -2150,7 +2193,7 @@ class gb_WeaponMenu
 
   void rotatePriority()
   {
-    mSelectedIndex = rotatePriorityForIndex(mSelectedIndex);
+    setSelectedIndex(rotatePriorityForIndex(mSelectedIndex));
   }
 
   int rotatePriorityForIndex(int index)
@@ -2168,7 +2211,7 @@ class gb_WeaponMenu
 
   void rotateSlot()
   {
-    mSelectedIndex = rotateSlotForIndex(mSelectedIndex);
+    setSelectedIndex(rotateSlotForIndex(mSelectedIndex));
   }
 
   int rotateSlotForIndex(int oldIndex)
@@ -3762,7 +3805,7 @@ class gb_EventHandler : EventHandler
     mWeaponSetHash   = gb_CustomWeaponOrderStorage.calculateHash(weaponData);
     mWeaponMenu      = gb_WeaponMenu.from(weaponData, mOptions);
     gb_CustomWeaponOrderStorage.applyOperations(mWeaponSetHash, mWeaponMenu);
-    mInventoryMenu   = gb_InventoryMenu.from();
+    mInventoryMenu   = gb_InventoryMenu.from(mOptions);
 
     mActivity        = gb_Activity.from();
     mFadeInOut       = gb_FadeInOut.from();
