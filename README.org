@@ -25,10 +25,13 @@ Add-ons:
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
 - [[file:modules/LazyPoints.org][LazyPoints]] - points scoring
+- [[file:modules/libeye.org][libeye]] by KeksDose - level and screen projections
 - [[file:modules/LispOnZscript.org][LispOnZscript]] - toy Lisp-like language on top of ZScript ([[https://forum.zdoom.org/viewtopic.php?t=80881][ZDoom forum topic]])
+- [[file:modules/MD5.org][MD5]] by 3saster - MD5 Implementation in ZScript
 - [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
+- [[file:modules/PreviousWeapon.org][PreviousWeapon]] - provides a key to select a previous weapon
 - [[file:modules/StringUtils.org][StringUtils]] - string manipulation library
-- [[file:modules/libeye.org][libeye]] - level and screen projections
+- [[file:modules/VmAbortReporter.org][VmAbortReporter]] - prints a report when VM abort happens
 
 Documentation:
 - [[file:documentation/Acknowledgments.org][Acknowledgments]]
@@ -52,6 +55,11 @@ Final Custom Doom:
 
 [[file:media/screenshots/FinalCustomDoom.png]]
 
+Gearbox:
+
+[[file:media/screenshots/Gearbox-wheel.png]]
+[[file:media/screenshots/Gearbox-blocks.png]]
+
 SoundToScreen:
 
 [[file:media/screenshots/SoundToScreen.png]]
@@ -59,11 +67,6 @@ SoundToScreen:
 Typist.pk3:
 
 [[file:media/screenshots/Typist.pk3.png]]
-
-Gearbox:
-
-[[file:media/screenshots/Gearbox-wheel.png]]
-[[file:media/screenshots/Gearbox-blocks.png]]
 
 * Social
 
