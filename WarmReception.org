@@ -1,0 +1,216 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: WarmReception
+# #+version: v0.3.1
+
+* About
+
+Warm Reception is a minimod for UZDoom that alters enemy behavior on level start.
+
+With this mod, you can either make your life harder by aggravating every enemy from
+the start, or effectively disable hot starts.
+
+** Options
+
+- Wake every enemy on a level (optionally even enemies in ambush), or
+- Don't change original behavior, or
+- Turn away enemies that look at you at level start, or
+- Turn enemies to you at level start.
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+name: license
+#+begin_src text :exports none
+SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle build/WarmReception/menudef.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/WarmReception/language.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/WarmReception/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/WarmReception/mapinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/WarmReception/zscript.txt
+// <<license>>
+#+end_src
+
+* Menu
+
+TODO: use PlainTranslator
+
+#+begin_src c :tangle build/WarmReception/menudef.txt
+
+AddOptionMenu OptionsMenu
+{
+  Option "$WR_MODE", wr_mode, wr_Modes
+}
+
+OptionValue wr_Modes
+{
+  0, "$WR_ALL_AWAKE"
+  1, "$WR_VANILLA"
+  2, "$WR_ALL_ASLEEP"
+  3, "$WR_ALL_AWAKE_AMBUSH"
+  4, "$WR_HOT_START"
+  5, "$WR_REMOVE_START"
+  6, "$WR_KILL_START"
+}
+#+end_src
+
+#+begin_src c :tangle build/WarmReception/language.txt
+
+[enu default]
+
+WR_MODE             = "Warm Reception Mode";
+
+WR_ALL_AWAKE        = "Wake everybody";
+WR_VANILLA          = "Original behavior";
+WR_ALL_ASLEEP       = "Disable hot starts";
+WR_ALL_AWAKE_AMBUSH = "Wake everybody, even in ambush";
+WR_HOT_START        = "Imitate hot starts";
+WR_REMOVE_START     = "Remove enemies at start";
+WR_KILL_START       = "Kill enemies at start";
+#+end_src
+
+* Source
+
+#+begin_src c :tangle build/WarmReception/cvarinfo.txt
+
+// See wr_EventHandler.Mode enum for values.
+server int wr_mode = 0;
+#+end_src
+
+#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs
+
+class wr_EventHandler : EventHandler
+{
+  override
+  void WorldThingSpawned(WorldEvent event)
+  {
+    let monster = event.thing;
+    let player  = players[consolePlayer].mo;
+    if (monster == NULL || !monster.bIsMonster || player == NULL) return;
+
+    switch (wr_mode)
+    {
+    case AllAwake:  alert(monster, player); return;
+    case AllAsleep: turnAwayWhoLooksAtPlayer(monster, player); return;
+    case AllAwakeEvenAmbush: alertAmbush(monster, player); return;
+    case HotStart:  turnToLookAtPlayer(monster, player); return;
+    case NoStartEnemies: removeStartEnemies(monster, player); return;
+    case DeadStartEnemies: killStartEnemies(monster, player); return;
+    }
+  }
+
+// private: ////////////////////////////////////////////////////////////////////////////////////////
+
+  enum Mode
+  {
+    AllAwake,
+    Vanilla,
+    AllAsleep,
+    AllAwakeEvenAmbush,
+    HotStart,
+    NoStartEnemies,
+    DeadStartEnemies,
+  }
+
+  private static
+  void alert(Actor monster, Actor player)
+  {
+    monster.SoundAlert(player);
+  }
+
+  private static
+  void alertAmbush(Actor monster, Actor player)
+  {
+    monster.bAmbush = false;
+    monster.SoundAlert(player);
+  }
+
+  private static
+  void turnAwayWhoLooksAtPlayer(Actor monster, Actor player)
+  {
+    if (isAtStart(monster, player))
+    {
+      double awayAngle = monster.AngleTo(player) + 180.0;
+      monster.A_SetAngle(awayAngle);
+    }
+  }
+
+  private static
+  void turnToLookAtPlayer(Actor monster, Actor player)
+  {
+    if (isAtStart(monster, player))
+    {
+      monster.A_SetAngle(monster.AngleTo(player));
+    }
+  }
+
+  private static
+  void removeStartEnemies(Actor monster, Actor player)
+  {
+    if (isAtStart(monster, player))
+    {
+      level.total_monsters -= monster.bCountKill;
+      monster.Destroy();
+    }
+  }
+
+  private static
+  void killStartEnemies(Actor monster, Actor player)
+  {
+    if (isAtStart(monster, player))
+    {
+      monster.A_Die();
+    }
+  }
+
+  private static
+  bool isAtStart(Actor monster, Actor player)
+  {
+    return monster.CheckSight(player) && level.time < 2;
+  }
+}
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle build/WarmReception/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "wr_EventHandler"
+}
+#+end_src
+
+#+begin_src c :tangle build/WarmReception/zscript.txt
+
+version 4.14.3
+
+#include "zscript/wr_EventHandler.zs"
+#+end_src
+
+* Tests
+
+Basic check: the mod can be loaded without errors.
+
+#+begin_src text :tangle build/WarmReceptionTest/commands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
+
+#+begin_src elisp :exports none
+(compile "scons -Q WarmReceptionTest")
+#+end_src
