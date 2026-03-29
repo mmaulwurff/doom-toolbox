@@ -86,8 +86,6 @@ WR_KILL_START       = "Kill enemies at start";
 
 * Source
 
-TODO: implement multiplayer
-
 #+begin_src c :tangle build/WarmReception/cvarinfo.txt
 
 // See wr_EventHandler.Mode enum for values.
@@ -98,20 +96,25 @@ server int wr_mode = 0;
 
 class wr_EventHandler : EventHandler
 {
-  override void WorldThingSpawned(WorldEvent event)
+  override void worldTick()
+  {
+    if (level.mapName ~== "titlemap" || level.mapTime > 4) destroy();
+  }
+
+  override void worldThingSpawned(WorldEvent event)
   {
     let monster = event.thing;
-    let player  = players[consolePlayer].mo;
-    if (monster == NULL || !monster.bIsMonster || player == NULL) return;
+    if (players[Net_Arbitrator].mo == NULL) return;
+    if (monster == NULL || !monster.bIsMonster) return;
 
     switch (wr_mode)
     {
-    case AllAwake:  alert(monster, player); return;
-    case AllAsleep: turnAwayWhoLooksAtPlayer(monster, player); return;
-    case AllAwakeEvenAmbush: alertAmbush(monster, player); return;
-    case HotStart:  turnToLookAtPlayer(monster, player); return;
-    case NoStartEnemies: removeStartEnemies(monster, player); return;
-    case DeadStartEnemies: killStartEnemies(monster, player); return;
+    case AllAwake:  alert(monster); return;
+    case AllAsleep: turnAwayWhoLooksAtPlayer(monster); return;
+    case AllAwakeEvenAmbush: alertAmbush(monster); return;
+    case HotStart:  turnToLookAtPlayer(monster); return;
+    case NoStartEnemies: removeStartEnemies(monster); return;
+    case DeadStartEnemies: killStartEnemies(monster); return;
     }
   }
 
@@ -126,54 +129,49 @@ class wr_EventHandler : EventHandler
     DeadStartEnemies,
   }
 
-  private static void alert(Actor monster, Actor player)
+  private static void alert(Actor monster)
   {
-    monster.SoundAlert(player);
+    monster.soundAlert(players[Net_Arbitrator].mo);
   }
 
-  private static void alertAmbush(Actor monster, Actor player)
+  private static void alertAmbush(Actor monster)
   {
     monster.bAmbush = false;
-    monster.SoundAlert(player);
+    monster.soundAlert(players[Net_Arbitrator].mo);
   }
 
-  private static void turnAwayWhoLooksAtPlayer(Actor monster, Actor player)
+  private static void turnAwayWhoLooksAtPlayer(Actor monster)
   {
-    if (isAtStart(monster, player))
-    {
-      double awayAngle = monster.AngleTo(player) + 180.0;
-      monster.A_SetAngle(awayAngle);
-    }
+    if (isAtStart(monster))
+      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo) + 180.0);
   }
 
-  private static void turnToLookAtPlayer(Actor monster, Actor player)
+  private static void turnToLookAtPlayer(Actor monster)
   {
-    if (isAtStart(monster, player))
-    {
-      monster.A_SetAngle(monster.AngleTo(player));
-    }
+    if (isAtStart(monster))
+      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo));
   }
 
-  private static void removeStartEnemies(Actor monster, Actor player)
+  private static void removeStartEnemies(Actor monster)
   {
-    if (isAtStart(monster, player))
+    if (isAtStart(monster))
     {
       level.total_monsters -= monster.bCountKill;
-      monster.Destroy();
+      monster.destroy();
     }
   }
 
-  private static void killStartEnemies(Actor monster, Actor player)
+  private static void killStartEnemies(Actor monster)
   {
-    if (isAtStart(monster, player))
-    {
-      monster.A_Die();
-    }
+    if (isAtStart(monster)) monster.a_Die();
   }
 
-  private static bool isAtStart(Actor monster, Actor player)
+  private static bool isAtStart(Actor monster)
   {
-    return monster.CheckSight(player) && level.time < 2;
+    for (int i = 0; i < MAXPLAYERS; ++i)
+      if (players[i].mo && monster.checkSight(players[i].mo)) return true;
+
+    return false;
   }
 }
 #+end_src
