@@ -48,24 +48,38 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Menu
 
-TODO: use PlainTranslator
+TODO: use PlainTranslator?
 
 #+begin_src c :tangle build/WarmReception/menudef.txt
 
-AddOptionMenu OptionsMenu
+AddOptionMenu OptionsMenu       { Submenu "$wr_Title", wr_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$wr_Title", wr_Menu }
+
+OptionMenu wr_Menu
 {
-  Option "$WR_MODE", wr_mode, wr_Modes
+  Title "$wr_Title"
+
+  Option "$wr_Start",  wr_start,  wr_Actions
+  Option "$wr_Ambush", wr_ambush, wr_SafeActions
+  Option "$wr_Other",  wr_other,  wr_SafeActions
 }
 
-OptionValue wr_Modes
+OptionValue wr_Actions
 {
-  0, "$WR_ALL_AWAKE"
-  1, "$WR_VANILLA"
-  2, "$WR_ALL_ASLEEP"
-  3, "$WR_ALL_AWAKE_AMBUSH"
-  4, "$WR_HOT_START"
-  5, "$WR_REMOVE_START"
-  6, "$WR_KILL_START"
+  0, "$wr_Keep"
+  1, "$wr_Wake"
+  2, "$wr_TurnAway"
+  3, "$wr_TurnTowards"
+  4, "$wr_Kill"
+  5, "$wr_Remove"
+}
+
+OptionValue wr_SafeActions
+{
+  0, "$wr_Keep"
+  1, "$wr_Wake"
+  2, "$wr_TurnAway"
+  3, "$wr_TurnTowards"
 }
 #+end_src
 
@@ -73,15 +87,18 @@ OptionValue wr_Modes
 
 [enu default]
 
-WR_MODE             = "Warm Reception Mode";
+wr_Title       = "WarmReception \ci♨";
 
-WR_ALL_AWAKE        = "Wake everybody";
-WR_VANILLA          = "Original behavior";
-WR_ALL_ASLEEP       = "Disable hot starts";
-WR_ALL_AWAKE_AMBUSH = "Wake everybody, even in ambush";
-WR_HOT_START        = "Imitate hot starts";
-WR_REMOVE_START     = "Remove enemies at start";
-WR_KILL_START       = "Kill enemies at start";
+wr_Keep        = "Keep as is";
+wr_Wake        = "Wake up (may wake up others)";
+wr_TurnAway    = "Turn away from player";
+wr_TurnTowards = "Turn towards player";
+wr_Kill        = "Kill (when alerted)";
+wr_Remove      = "Remove (may break scripts)";
+
+wr_Start       = "Enemies at start";
+wr_Ambush      = "Enemies in ambush";
+wr_Other       = "Other enemies";
 #+end_src
 
 * Source
@@ -89,7 +106,9 @@ WR_KILL_START       = "Kill enemies at start";
 #+begin_src c :tangle build/WarmReception/cvarinfo.txt
 
 // See wr_EventHandler.Mode enum for values.
-server int wr_mode = 0;
+server int wr_start  = 2;
+server int wr_other  = 0;
+server int wr_ambush = 0;
 #+end_src
 
 #+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs
@@ -103,67 +122,52 @@ class wr_EventHandler : EventHandler
 
   override void worldThingSpawned(WorldEvent event)
   {
-    let monster = event.thing;
     if (players[Net_Arbitrator].mo == NULL) return;
-    if (monster == NULL || !monster.bIsMonster) return;
+    if (event.thing == NULL || !event.thing.bIsMonster) return;
 
-    switch (wr_mode)
+    if (isAtStart(event.thing))   act(event.thing, wr_start);
+    else if (event.thing.bAmbush) act(event.thing, wr_ambush);
+    else                          act(event.thing, wr_other);
+  }
+
+  private void act(Actor monster, int anAction)
+  {
+    switch (anAction)
     {
-    case AllAwake:  alert(monster); return;
-    case AllAsleep: turnAwayWhoLooksAtPlayer(monster); return;
-    case AllAwakeEvenAmbush: alertAmbush(monster); return;
-    case HotStart:  turnToLookAtPlayer(monster); return;
-    case NoStartEnemies: removeStartEnemies(monster); return;
-    case DeadStartEnemies: killStartEnemies(monster); return;
+    case Keep: return;
+
+    case Wake:
+      monster.bAmbush = false;
+      monster.soundAlert(players[Net_Arbitrator].mo);
+      return;
+
+    case TurnAway:
+      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo) + 180.0);
+      return;
+
+    case TurnTowards:
+      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo));
+      return;
+
+    case Kill:
+      wr_Killer(Actor.spawn("wr_Killer", (0, 0, 0))).init(monster);
+      return;
+
+    case Remove:
+      level.total_monsters -= monster.bCountKill;
+      monster.destroy();
+      return;
     }
   }
 
   enum Mode
   {
-    AllAwake,
-    Vanilla,
-    AllAsleep,
-    AllAwakeEvenAmbush,
-    HotStart,
-    NoStartEnemies,
-    DeadStartEnemies,
-  }
-
-  private static void alert(Actor monster)
-  {
-    monster.soundAlert(players[Net_Arbitrator].mo);
-  }
-
-  private static void alertAmbush(Actor monster)
-  {
-    monster.bAmbush = false;
-    monster.soundAlert(players[Net_Arbitrator].mo);
-  }
-
-  private static void turnAwayWhoLooksAtPlayer(Actor monster)
-  {
-    if (isAtStart(monster))
-      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo) + 180.0);
-  }
-
-  private static void turnToLookAtPlayer(Actor monster)
-  {
-    if (isAtStart(monster))
-      monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo));
-  }
-
-  private static void removeStartEnemies(Actor monster)
-  {
-    if (isAtStart(monster))
-    {
-      level.total_monsters -= monster.bCountKill;
-      monster.destroy();
-    }
-  }
-
-  private static void killStartEnemies(Actor monster)
-  {
-    if (isAtStart(monster)) monster.a_Die();
+    Keep,
+    Wake,
+    TurnAway,
+    TurnTowards,
+    Kill,
+    Remove,
   }
 
   private static bool isAtStart(Actor monster)
@@ -173,6 +177,44 @@ class wr_EventHandler : EventHandler
 
     return false;
   }
+}
+
+class wr_Killer : Actor
+{
+  Default
+  {
+    +NoBlockmap;
+    +NoGravity;
+    +DontSplash;
+    +NotOnAutomap;
+  }
+
+  States
+  {
+  Spawn:
+    TNT1 A -1;
+    Stop;
+  }
+
+  override void tick()
+  {
+    Super.tick();
+
+    if (mWatched == NULL)
+    {
+      destroy();
+      return;
+    }
+
+    if (mWatched.health > 0 && mWatched.target == NULL) return;
+
+    mWatched.a_Die();
+    destroy();
+  }
+
+  void init(Actor watched) { mWatched = watched; }
+
+  private Actor mWatched;
 }
 #+end_src
 
