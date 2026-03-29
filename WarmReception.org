@@ -86,6 +86,8 @@ WR_KILL_START       = "Kill enemies at start";
 
 * Source
 
+TODO: implement multiplayer
+
 #+begin_src c :tangle build/WarmReception/cvarinfo.txt
 
 // See wr_EventHandler.Mode enum for values.
@@ -96,8 +98,7 @@ server int wr_mode = 0;
 
 class wr_EventHandler : EventHandler
 {
-  override
-  void WorldThingSpawned(WorldEvent event)
+  override void WorldThingSpawned(WorldEvent event)
   {
     let monster = event.thing;
     let player  = players[consolePlayer].mo;
@@ -114,8 +115,6 @@ class wr_EventHandler : EventHandler
     }
   }
 
-// private: ////////////////////////////////////////////////////////////////////////////////////////
-
   enum Mode
   {
     AllAwake,
@@ -127,21 +126,18 @@ class wr_EventHandler : EventHandler
     DeadStartEnemies,
   }
 
-  private static
-  void alert(Actor monster, Actor player)
+  private static void alert(Actor monster, Actor player)
   {
     monster.SoundAlert(player);
   }
 
-  private static
-  void alertAmbush(Actor monster, Actor player)
+  private static void alertAmbush(Actor monster, Actor player)
   {
     monster.bAmbush = false;
     monster.SoundAlert(player);
   }
 
-  private static
-  void turnAwayWhoLooksAtPlayer(Actor monster, Actor player)
+  private static void turnAwayWhoLooksAtPlayer(Actor monster, Actor player)
   {
     if (isAtStart(monster, player))
     {
@@ -150,8 +146,7 @@ class wr_EventHandler : EventHandler
     }
   }
 
-  private static
-  void turnToLookAtPlayer(Actor monster, Actor player)
+  private static void turnToLookAtPlayer(Actor monster, Actor player)
   {
     if (isAtStart(monster, player))
     {
@@ -159,8 +154,7 @@ class wr_EventHandler : EventHandler
     }
   }
 
-  private static
-  void removeStartEnemies(Actor monster, Actor player)
+  private static void removeStartEnemies(Actor monster, Actor player)
   {
     if (isAtStart(monster, player))
     {
@@ -169,8 +163,7 @@ class wr_EventHandler : EventHandler
     }
   }
 
-  private static
-  void killStartEnemies(Actor monster, Actor player)
+  private static void killStartEnemies(Actor monster, Actor player)
   {
     if (isAtStart(monster, player))
     {
@@ -178,8 +171,7 @@ class wr_EventHandler : EventHandler
     }
   }
 
-  private static
-  bool isAtStart(Actor monster, Actor player)
+  private static bool isAtStart(Actor monster, Actor player)
   {
     return monster.CheckSight(player) && level.time < 2;
   }
