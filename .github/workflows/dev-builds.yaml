@@ -140,15 +140,15 @@ jobs:
         id: cache-uzdoom
         uses: actions/cache@v5
         with:
-          path: ${GITHUB_WORKSPACE}/UZDoom
+          path: ~/UZDoom
           key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
 
       - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
         name: Install UZDoom
         shell: bash
         run: |
-          curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o UZDoom.zip
-          unzip UZDoom.zip -d UZDoom
+          curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
+          unzip ~/UZDoom.zip -d ~/UZDoom
           PATH=$PATH:${GITHUB_WORKSPACE}/UZDoom
 
       - name: Install Python
