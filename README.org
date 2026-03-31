@@ -14,19 +14,20 @@ tag in each .org file for details. For third-party resources, such as image and 
 files, see ~REUSE.toml~ files in their directories for licenses.
 
 Add-ons:
-- [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][ZDoom forum topic]])
+- [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
-- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][ZDoom forum topic]])
-- [[file:Gearbox.org][Gearbox]] - more convenient ways to select weapons and items ([[https://forum.zdoom.org/viewtopic.php?t=71086][ZDoom forum topic]])
-- [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][ZDoom forum topic]])
-- [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][ZDoom forumm topic]])
-- [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][ZDoom forum topic]])
+- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
+- [[file:Gearbox.org][Gearbox]] - more convenient ways to select weapons and items ([[https://forum.zdoom.org/viewtopic.php?t=71086][forum topic]])
+- [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][forum topic]])
+- [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][forum topic]])
+- [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][forum topic]])
+- [[file:WarmReception.org][WarmReception]] - alters enemy behavior on level start ([[https://forum.zdoom.org/viewtopic.php?t=69486][forum topic]])
 
 ZScript modules:
 - [[file:modules/Hint.org][Hint]] - hints for menu items
 - [[file:modules/LazyPoints.org][LazyPoints]] - points scoring
 - [[file:modules/libeye.org][libeye]] by KeksDose - level and screen projections
-- [[file:modules/LispOnZscript.org][LispOnZscript]] - toy Lisp-like language on top of ZScript ([[https://forum.zdoom.org/viewtopic.php?t=80881][ZDoom forum topic]])
+- [[file:modules/LispOnZscript.org][LispOnZscript]] - toy Lisp-like language on top of ZScript ([[https://forum.zdoom.org/viewtopic.php?t=80881][forum topic]])
 - [[file:modules/MD5.org][MD5]] by 3saster - MD5 Implementation in ZScript
 - [[file:modules/PlainTranslator.org][PlainTranslator]] - enables translation for plain text menu items
 - [[file:modules/PreviousWeapon.org][PreviousWeapon]] - provides a key to select a previous weapon
