@@ -149,7 +149,7 @@ jobs:
         run: |
           curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
           unzip ~/UZDoom.zip -d ~/UZDoom
-          echo ~/UZDoom >> $GITHUB_PATH
+          echo ~/UZDoom >> "$GITHUB_PATH"
 
       - name: Install Python
         uses: actions/setup-python@v6
