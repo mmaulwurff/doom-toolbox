@@ -46,6 +46,7 @@ emacs = which('emacs-nox') or which('emacs')
 assert emacs is not None
 
 uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
+print(f'Found UZDoom: {uzdoom}')
 
 
 # Common functions
