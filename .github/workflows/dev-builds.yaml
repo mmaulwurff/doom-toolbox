@@ -147,7 +147,7 @@ jobs:
         name: Install UZDoom
         shell: bash
         run: |
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip > UZDoom.zip
+          curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o UZDoom.zip
           unzip UZDoom.zip -d UZDoom
           PATH=$PATH:${GITHUB_WORKSPACE}/UZDoom
 
