@@ -1,11 +1,5 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
-
 #+title: 10.5x
 # #+version: v0.11.2
 
@@ -53,6 +47,12 @@ Known issues (for multiplier > 1):
 * Licenses
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+name: license
+#+begin_src text
+SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
 
 #+begin_src c :tangle build/10.5x/zscript.zs :exports none
 // <<license>>

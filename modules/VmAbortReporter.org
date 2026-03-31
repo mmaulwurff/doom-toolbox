@@ -55,8 +55,10 @@ GameInfo
 
 * License
 
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
 #+name: license
-#+begin_src text :exports none
+#+begin_src text
 SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src

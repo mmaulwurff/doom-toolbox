@@ -1,14 +1,10 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: BSD-3-Clause
-#+end_src
-
 #+title: LazyPoints
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
+* About
 
 #+name: description
 #+begin_src org
@@ -70,10 +66,20 @@ OptionMenu NAMESPACE_TopMenu
 }
 #+end_src
 
-#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
+#+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs :exports none
 // <<license>>
 
 // <<description>>
+#+end_src
+
+* License
+
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+name: license
+#+begin_src text
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
 * Source

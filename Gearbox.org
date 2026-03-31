@@ -72,7 +72,7 @@ if your sounds work.
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+name: license
-#+begin_src text :exports none
+#+begin_src text
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-FileCopyrightText: © 2022 generic-name-guy
 SPDX-FileCopyrightText: © 2022 Carrascado
@@ -80,167 +80,167 @@ SPDX-FileCopyrightText: © 2025 SandPoot
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/menudef.txt
+#+begin_src c :tangle build/Gearbox/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+#+begin_src c :tangle build/Gearbox/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/sndinfo.txt
+#+begin_src c :tangle build/Gearbox/sndinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/language.txt
+#+begin_src c :tangle build/Gearbox/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/keyconf.txt
+#+begin_src c :tangle build/Gearbox/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript.zs
+#+begin_src c :tangle build/Gearbox/zscript.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/mapinfo.txt
+#+begin_src c :tangle build/Gearbox/mapinfo.txt :exports none
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/zscript/activity.zs
+#+begin_src c :tangle build/Gearbox/zscript/activity.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/changer.zs
+#+begin_src c :tangle build/Gearbox/zscript/changer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs
+#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs
+#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs
+#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/freezer.zs
+#+begin_src c :tangle build/Gearbox/zscript/freezer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/input.zs
+#+begin_src c :tangle build/Gearbox/zscript/input.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs
+#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs
+#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs
+#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs
+#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/options.zs
+#+begin_src c :tangle build/Gearbox/zscript/options.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/printer.zs
+#+begin_src c :tangle build/Gearbox/zscript/printer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/sender.zs
+#+begin_src c :tangle build/Gearbox/zscript/sender.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/sounds.zs
+#+begin_src c :tangle build/Gearbox/zscript/sounds.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/view_model.zs
+#+begin_src c :tangle build/Gearbox/zscript/view_model.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs
+#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs
+#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/gldefs.txt
+#+begin_src c :tangle build/Gearbox/gldefs.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp
+#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs
+#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs
+#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs
+#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs
+#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs
+#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/service.zs
+#+begin_src c :tangle build/Gearbox/zscript/service/service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs
+#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs
+#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs
+#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs
+#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs
+#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs
+#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs
+#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs :exports none
 // <<license>>
 #+end_src
 

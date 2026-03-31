@@ -22,27 +22,27 @@ the start, or effectively disable hot starts.
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+name: license
-#+begin_src text :exports none
+#+begin_src text
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/WarmReception/menudef.txt
+#+begin_src c :tangle build/WarmReception/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/language.txt
+#+begin_src c :tangle build/WarmReception/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/cvarinfo.txt
+#+begin_src c :tangle build/WarmReception/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/mapinfo.txt
+#+begin_src c :tangle build/WarmReception/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs
+#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/zscript.txt
+#+begin_src c :tangle build/WarmReception/zscript.txt :exports none
 // <<license>>
 #+end_src
 

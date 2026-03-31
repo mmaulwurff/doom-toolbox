@@ -1,11 +1,5 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: BSD-3-Clause
-#+end_src
-
 #+title: Typist.pk3
 # #+version: v0.8.1-beta
 
@@ -86,6 +80,12 @@ compatible with many UZDoom mods and games.
 * License :noexport:
 
 License: [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+name: license
+#+begin_src text
+SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
 
 #+begin_src c :tangle build/Typist.pk3/cvarinfo.txt
 // <<license>>

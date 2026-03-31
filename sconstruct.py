@@ -165,14 +165,14 @@ def add_pack_target(org_file, main_target):
       foundVersion.group(1) if foundVersion is not None else make_short_hash()
     )
 
+    copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
+    copy(org_file, build_path / org_file)
+
     licenses_path = build_path / 'LICENSES'
     makedirs(licenses_path, exist_ok=True)
     project = reuse.project.Project.from_directory(build_path)
     for license in reuse.report.ProjectReport.generate(project).used_licenses:
       copy('LICENSES/' + license + '.txt', licenses_path)
-
-    copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
-    copy(org_file, build_path / org_file)
 
     archive = make_archive(Path(str(build_path) + '-' + version), 'zip', build_path)
     move(archive, Path(archive).with_suffix('.pk3'))

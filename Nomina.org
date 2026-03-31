@@ -21,18 +21,19 @@ Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]]
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
-* License :noexport:
+* License
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-#+begin_src c :tangle build/Nomina/zscript.zs :exports none
+#+begin_src c :tangle build/Nomina/zscript.zs
 // SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 // SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+
 #+name: CC
-#+begin_src text :exports none
+#+begin_src text
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
@@ -365,7 +366,7 @@ class nat_EventHandler : StaticEventHandler
 }
 #+end_src
 
-* Run tests
+* Run tests :noexport:
 
 #+name: init-wait
 #+begin_src elisp
@@ -387,6 +388,6 @@ class nat_EventHandler : StaticEventHandler
 <<wait(9)>>; quit
 #+end_src
 
-#+begin_src elisp :exports none
+#+begin_src elisp
 (compile "scons -Q NominaTest")
 #+end_src

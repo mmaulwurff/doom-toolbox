@@ -1,13 +1,8 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: license
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2019 KeksDose / MemeDose
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: LicenseRef-libeye
-#+end_src
-
 #+title: libeye
+
+* About
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
@@ -103,6 +98,15 @@ SPDX-License-Identifier: LicenseRef-libeye
 //                                       //
 //
 //                         ((          /////         ((
+#+end_src
+
+* License
+
+#+name: license
+#+begin_src text
+SPDX-FileCopyrightText: © 2019 KeksDose / MemeDose
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: LicenseRef-libeye
 #+end_src
 
 * libeye
