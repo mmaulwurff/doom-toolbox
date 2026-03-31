@@ -121,3 +121,62 @@ jobs:
         if: ${{ success() }}
         id: deployment
         uses: actions/deploy-pages@v4
+
+  build_windows:
+    runs-on: windows-2022
+    # TODO: use common version for Linux and Windows?
+    env:
+      uzdoom-version: '4.14.3'
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+
+        # TODO: cache choco?
+      - name: Install system dependencies
+        run: |
+          choco install emacs
+
+      - name: Cache UZDoom
+        id: cache-uzdoom
+        uses: actions/cache@v5
+        with:
+          path: ${GITHUB_WORKSPACE}/UZDoom
+          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+
+      - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
+        name: Install UZDoom
+        shell: bash
+        run: |
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip > UZDoom.zip
+          unzip UZDoom.zip -d UZDoom
+          PATH=$PATH:${GITHUB_WORKSPACE}/UZDoom
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: 'tools/requirements-dev.txt'
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt;
+
+      - name: Check pre-commit hooks
+        shell: bash
+        run: |
+          pre-commit run -a
+
+      - name: Test
+        shell: bash
+        if: ${{ success() }}
+        run: |
+          scons TestAll
+
+      - name: Check compatibility
+        shell: bash
+        if: ${{ success() }}
+        run: |
+          scons CheckCompatibility
