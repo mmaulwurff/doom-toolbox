@@ -106,14 +106,14 @@ def add_test_target(org_file, main_target):
       '-noautoload',
       '-nosound',
       '-config',
-      path.normpath('build/config.ini'),
+      path.normpath('./build/config.ini'),
       '-iwad',
-      path.normpath('tools/miniwad.wad'),
+      path.normpath('./tools/miniwad.wad'),
       '-file',
-      path.normpath('tools/ClematisM-v2.1.0.pk3'),
-      path.normpath(f'build/{name}'),
-      path.normpath(f'build/{name}Test'),
-      f'+exec {path.normpath(f"build/{name}Test/commands.txt")}',
+      path.normpath('./tools/ClematisM-v2.1.0.pk3'),
+      path.normpath(f'./build/{name}'),
+      path.normpath(f'./build/{name}Test'),
+      f'+exec {path.normpath(f"./build/{name}Test/commands.txt")}',
     ]
 
     if not Path('build/config.ini').exists():
@@ -185,7 +185,7 @@ def make_check_compatibility_target():
     if str(org_file) != 'README.org':
       names.append(make_project_name(org_file))
 
-  projects = ['build/' + name for name in names]
+  projects = [path.normpath('./build/') + name for name in names]
 
   def check_compatibility(target, source, env):
     args = [
@@ -193,9 +193,9 @@ def make_check_compatibility_target():
       '-noautoload',
       '-nosound',
       '-config',
-      path.normpath('build/config.ini'),
+      path.normpath('./build/config.ini'),
       '-iwad',
-      path.normpath('tools/miniwad.wad'),
+      path.normpath('./tools/miniwad.wad'),
       '+map map01; wait 2; quit',
       '-file',
     ]
