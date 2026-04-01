@@ -3,6 +3,7 @@
 
 # GitHub Action for dev builds
 # https://docs.github.com/en/actions
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 
 name: dev-builds
 
@@ -27,11 +28,12 @@ concurrency:
   group: 'dev-build'
   cancel-in-progress: false
 
+env:
+  uzdoom-version: '4.14.3'
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      uzdoom-version: '4.14.3'
     steps:
       - name: Check out
         uses: actions/checkout@v6
@@ -124,9 +126,6 @@ jobs:
 
   build_windows:
     runs-on: windows-2022
-    # TODO: use common version for Linux and Windows?
-    env:
-      uzdoom-version: '4.14.3'
     steps:
       - name: Check out
         uses: actions/checkout@v6
@@ -148,8 +147,8 @@ jobs:
         shell: bash
         run: |
           curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
-          unzip ~/UZDoom.zip -d ~/UZDoom
-          echo ~/UZDoom >> "$GITHUB_PATH"
+          mkdir -p ~/bin
+          unzip ~/UZDoom.zip -d ~/bin
 
       - name: Install Python
         uses: actions/setup-python@v6
