@@ -70,6 +70,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt;
 
+      - name: Cache pre-commit
+        id: pre-commit
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-v${{ hashFiles('.pre-commit-config.yaml') }}
+
       - name: Check pre-commit hooks
         run: |
           pre-commit run -a
