@@ -12,8 +12,7 @@
 # TODO: fix parallel builds (-j 4). Check with moules of Typist.pk3.
 # May be a problem with cleaning, if main target is built after a module.
 
-import os
-from os import environ, makedirs, path, listdir
+from os import environ, makedirs, path
 from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
@@ -102,17 +101,6 @@ def add_test_target(org_file, main_target):
   test_name = f'{name}Test'
 
   def run_test(target, source, env):
-    def list_files_recursive(path='.'):
-      for entry in listdir(path):
-        full_path = os.path.join(path, entry)
-        if os.path.isdir(full_path):
-          list_files_recursive(full_path)
-        else:
-          print(full_path)
-
-    list_files_recursive()
-
-    commands_path = path.normpath(f'build/{name}Test/commands.txt')
     args = [
       uzdoom,
       '-noautoload',
@@ -125,7 +113,7 @@ def add_test_target(org_file, main_target):
       path.normpath('tools/ClematisM-v2.1.0.pk3'),
       path.normpath(f'build/{name}'),
       path.normpath(f'build/{name}Test'),
-      f'+exec {commands_path}',
+      f'+exec {path.normpath(f"build/{name}Test/commands.txt")}',
     ]
 
     if not Path('build/config.ini').exists():
