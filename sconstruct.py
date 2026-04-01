@@ -47,6 +47,7 @@ assert emacs is not None
 
 uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
 print(f'Found UZDoom: {uzdoom}')
+print(f'PATH: {environ["PATH"]}')
 
 
 # Common functions
