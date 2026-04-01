@@ -4,8 +4,6 @@
 # This is build definitions for DoomToolbox.
 # See https://scons.github.io/docs/scons-user.html for details.
 
-# TODO: test on Windows.
-
 # TODO: move autoadvance to config.ini?
 # +wi_autoadvance 1\
 
@@ -108,14 +106,14 @@ def add_test_target(org_file, main_target):
       '-noautoload',
       '-nosound',
       '-config',
-      'build/config.ini',
+      path.normpath('build/config.ini'),
       '-iwad',
-      'tools/miniwad.wad',
+      path.normpath('tools/miniwad.wad'),
       '-file',
-      'tools/ClematisM-v2.1.0.pk3',
-      f'build/{name}',
-      f'build/{name}Test',
-      f'+exec build/{name}Test/commands.txt',
+      path.normpath('tools/ClematisM-v2.1.0.pk3'),
+      path.normpath(f'build/{name}'),
+      path.normpath(f'build/{name}Test'),
+      f'+exec {path.normpath(f"build/{name}Test/commands.txt")}',
     ]
 
     if not Path('build/config.ini').exists():
@@ -195,9 +193,9 @@ def make_check_compatibility_target():
       '-noautoload',
       '-nosound',
       '-config',
-      'build/config.ini',
+      path.normpath('build/config.ini'),
       '-iwad',
-      'tools/miniwad.wad',
+      path.normpath('tools/miniwad.wad'),
       '+map map01; wait 2; quit',
       '-file',
     ]
