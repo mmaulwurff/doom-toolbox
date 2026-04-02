@@ -188,22 +188,17 @@ jobs:
           key: ${{ runner.os }}-pre-commit-v${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Check pre-commit hooks
-        shell: bash
         run: |
           pre-commit run -a
 
-      - name: try UZDoom
+      # I couldn't make UZDoom work here. Most probably because of missing video drivers.
+      #- name: try UZDoom
+      #  run: |
+      #    ~/UZDoom/uzdoom.exe -stdout -nosound -nodraw -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
+
+      # At least check that scons works.
+      - name: Build
+        shell: bash
         run: |
-          ~/UZDoom/uzdoom.exe -stdout -nosound -nodraw -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
-
-      #- name: Test
-      #  shell: bash
-      #  if: ${{ success() }}
-      #  run: |
-      #    scons TestAll
-
-      #- name: Check compatibility
-      #  shell: bash
-      #  if: ${{ success() }}
-      #  run: |
-      #    scons CheckCompatibility
+          scons Pk3All
+          ls build
