@@ -147,25 +147,27 @@ jobs:
           path: c:\tools\emacs
           key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
 
+      # TODO: add emacs to PATH.
       - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
         name: Install Emacs
         run: |
           choco install emacs --version ${{ env.emacs-version }}
 
-      - name: Cache UZDoom
-        id: cache-uzdoom
-        uses: actions/cache@v5
-        with:
-          path: ~/UZDoom
-          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
-
-      - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
-        name: Install UZDoom
-        shell: bash
-        run: |
-          curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
-          mkdir -p ~/UZDoom
-          unzip ~/UZDoom.zip -d ~/UZDoom
+      # No point if I cannot run UZDoom (see comments below).
+      #- name: Cache UZDoom
+      #  id: cache-uzdoom
+      #  uses: actions/cache@v5
+      #  with:
+      #    path: ~/UZDoom
+      #    key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+      #
+      #- if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
+      #  name: Install UZDoom
+      #  shell: bash
+      #  run: |
+      #    curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
+      #    mkdir -p ~/UZDoom
+      #    unzip ~/UZDoom.zip -d ~/UZDoom
 
       - name: Install Python
         uses: actions/setup-python@v6

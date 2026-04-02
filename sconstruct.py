@@ -40,15 +40,8 @@ Decider('timestamp-match')
 Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
-emacs = which('emacs-nox') or which('emacs') or Path('c:\\tools\\emacs\\emacs.exe')
-assert emacs is not None
-
-uzdoom = (
-  which('uzdoom')
-  or Path(path.expanduser('~')) / 'UZDoom.AppImage'
-  or Path(path.expanduser('~')) / 'UZDoom/uzdoom.exe'
-)
-print(f'Found UZDoom: {uzdoom}')
+emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/emacs.exe')
+uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
 
 
 # Common functions
@@ -110,14 +103,14 @@ def add_test_target(org_file, main_target):
       '-noautoload',
       '-nosound',
       '-config',
-      path.normpath('./build/config.ini'),
+      './build/config.ini',
       '-iwad',
-      path.normpath('./tools/miniwad.wad'),
+      './tools/miniwad.wad',
       '-file',
-      path.normpath('./tools/ClematisM-v2.1.0.pk3'),
-      path.normpath(f'./build/{name}'),
-      path.normpath(f'./build/{name}Test'),
-      f'+exec {path.normpath(f"./build/{name}Test/commands.txt")}',
+      './tools/ClematisM-v2.1.0.pk3',
+      f'./build/{name}',
+      f'./build/{name}Test',
+      f'+exec {f"./build/{name}Test/commands.txt"}',
     ]
 
     if not Path('build/config.ini').exists():
@@ -189,7 +182,7 @@ def make_check_compatibility_target():
     if str(org_file) != 'README.org':
       names.append(make_project_name(org_file))
 
-  projects = [path.normpath('./build/') + name for name in names]
+  projects = ['./build/' + name for name in names]
 
   def check_compatibility(target, source, env):
     args = [
@@ -197,9 +190,9 @@ def make_check_compatibility_target():
       '-noautoload',
       '-nosound',
       '-config',
-      path.normpath('./build/config.ini'),
+      './build/config.ini',
       '-iwad',
-      path.normpath('./tools/miniwad.wad'),
+      './tools/miniwad.wad',
       '+map map01; wait 2; quit',
       '-file',
     ]
