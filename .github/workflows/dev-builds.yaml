@@ -134,7 +134,7 @@ jobs:
   build_windows:
     runs-on: windows-2022
     env:
-      emacs-version: '3.1.0'
+      emacs-version: '30.1.0'
 
     steps:
       - name: Check out
