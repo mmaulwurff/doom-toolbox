@@ -40,7 +40,7 @@ Decider('timestamp-match')
 Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
-emacs = which('emacs-nox') or which('emacs')
+emacs = which('emacs-nox') or which('emacs') or Path('c:\\tools\\emacs\\emacs.exe')
 assert emacs is not None
 
 uzdoom = (

@@ -147,7 +147,8 @@ jobs:
           path: c:\tools\emacs
           key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
 
-      - name: Install Emacs
+      - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
+        name: Install Emacs
         run: |
           choco install emacs --version ${{ env.emacs-version }}
 
@@ -193,7 +194,7 @@ jobs:
 
       - name: try UZDoom
         run: |
-          %USERPROFILE%\UZDoom\uzdoom.exe -iwad .\tools\miniwad.wad -config .\tools\config.ini +map map01; wait 2; quit
+          ~/UZDoom/uzdoom.exe -iwad tools/miniwad.wad -config tools/config.ini +map map01; wait 2; quit
 
       #- name: Test
       #  shell: bash
