@@ -191,6 +191,10 @@ jobs:
         run: |
           pre-commit run -a
 
+      - name: try UZDoom
+        run: |
+          %USERPROFILE%\UZDoom\uzdoom.exe -iwad .\tools\miniwad.wad -config .\tools\config.ini +map map01; wait 2; quit
+
       #- name: Test
       #  shell: bash
       #  if: ${{ success() }}
