@@ -133,14 +133,23 @@ jobs:
 
   build_windows:
     runs-on: windows-2022
+    env:
+      emacs-version: '3.1.0'
+
     steps:
       - name: Check out
         uses: actions/checkout@v6
 
-        # TODO: cache choco?
-      - name: Install system dependencies
+      - name: Cache Emacs
+        id: cache-emacs
+        uses: actions/cache@v5
+        with:
+          path: c:\tools\emacs
+          key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
+
+      - name: Install Emacs
         run: |
-          choco install emacs
+          choco install emacs --version ${{ env.emacs-version }}
 
       - name: Cache UZDoom
         id: cache-uzdoom
