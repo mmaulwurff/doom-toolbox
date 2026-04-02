@@ -200,7 +200,6 @@ jobs:
 
       # At least check that scons works.
       - name: Build
-        shell: bash
         run: |
           scons Pk3All
-          ls build
+          Get-ChildItem -Path build
