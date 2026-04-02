@@ -194,7 +194,7 @@ jobs:
 
       - name: try UZDoom
         run: |
-          ~/UZDoom/uzdoom.exe -iwad tools/miniwad.wad -config tools/config.ini +map map01; wait 2; quit
+          ~/UZDoom/uzdoom.exe -stdout -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
 
       #- name: Test
       #  shell: bash
