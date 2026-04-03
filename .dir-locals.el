@@ -11,6 +11,7 @@
                  "./tools/aspell.en.pws"
                  (file-name-directory
                   (let ((d (dir-locals-find-file "./"))) (if (stringp d) d (car d)))))))
+  (eval . (set-language-environment "UTF-8"))
   (ispell-local-dictionary . "american")))
 
 (org-mode . (
