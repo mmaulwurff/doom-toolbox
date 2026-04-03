@@ -13,7 +13,7 @@
 # May be a problem with cleaning, if main target is built after a module.
 
 from os import environ, makedirs, path
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import PIPE, STDOUT, TimeoutExpired, run
@@ -50,7 +50,7 @@ def make_project_name(org_file):
 
 
 def make_export(source):
-  htmlize_path = path.abspath('tools/htmlize.el')
+  htmlize_path = str(PurePosixPath(path.abspath('tools/htmlize.el')))
   rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
   css_path = rel + 'tools/org-adwaita.css'
   css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
