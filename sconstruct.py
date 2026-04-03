@@ -71,6 +71,7 @@ def add_main_target(org_file, target_format):
   tangle = f'{emacs} $SOURCE --quick --batch --eval "\
     (progn (require \'ob-tangle)\
            (setq org-confirm-babel-evaluate nil)\
+           (set-language-environment "UTF-8")\
            (org-babel-tangle))"'
 
   def clean(target, source, env):
