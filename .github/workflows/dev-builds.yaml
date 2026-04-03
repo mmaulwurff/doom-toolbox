@@ -150,8 +150,7 @@ jobs:
       - name: Where is Emacs?
         shell: bash
         run: |
-          ls c:/tools/
-          ls c:/tools/emacs
+          ls c:/tools/ 2>&1; ls c:/tools/emacs 2>&1
 
       # TODO: add emacs to PATH.
       - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
