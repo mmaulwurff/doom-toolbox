@@ -13,7 +13,7 @@
 # May be a problem with cleaning, if main target is built after a module.
 
 from os import environ, makedirs, path
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from re import search, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import PIPE, STDOUT, TimeoutExpired, run
@@ -50,17 +50,16 @@ def make_project_name(org_file):
 
 
 def make_export(source):
-  htmlize_path = str(PurePosixPath(path.abspath('tools/htmlize.el')))
-  rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
-  css_path = rel + 'tools/org-adwaita.css'
-  css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
+  htmlize_path = path.abspath('tools/htmlize.el')
+  # rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
+  # css_path = rel + 'tools/org-adwaita.css'
+  # css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
   return f'{emacs} {source} --quick --batch --load {htmlize_path} --eval "\
     (progn (require \'htmlize)\
            (setq org-confirm-babel-evaluate nil)\
            (set-language-environment \\"UTF-8\\")\
            (setq org-html-htmlize-output-type \'css)\
            (setq org-html-validation-link nil)\
-           (setq org-html-head-extra \\"{css_link}\\")\
            (org-html-export-to-html))"'
 
 
