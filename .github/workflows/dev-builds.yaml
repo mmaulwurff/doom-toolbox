@@ -147,6 +147,12 @@ jobs:
           path: c:\tools\emacs
           key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
 
+      - name: Where is Emacs?
+        shell: bash
+        run: |
+          ls c:/tools/
+          ls c:/tools/emacs
+
       # TODO: add emacs to PATH.
       - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
         name: Install Emacs
