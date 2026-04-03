@@ -40,7 +40,7 @@ Decider('timestamp-match')
 Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
-emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/emacs.exe')
+emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/bin/emacs.exe')
 uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
 
 
