@@ -50,29 +50,22 @@ def make_project_name(org_file):
 
 
 def make_export(source):
-  htmlize_path = path.abspath('tools/htmlize.el')
-  # rel = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
-  # css_path = rel + 'tools/org-adwaita.css'
-  # css_link = f'<link rel=\\\\\\"stylesheet\\\\\\" type=\\\\\\"text/css\\\\\\" href=\\\\\\"{css_path}\\\\\\"/>'
-  return f'{emacs} {source} --quick --batch --load {htmlize_path} --eval "\
-    (progn (require \'htmlize)\
-           (setq org-confirm-babel-evaluate nil)\
-           (set-language-environment \\"UTF-8\\")\
-           (setq org-html-htmlize-output-type \'css)\
-           (setq org-html-validation-link nil)\
-           (org-html-export-to-html))"'
+  htmlize_el_path = path.abspath('tools/htmlize.el')
+  build_el_path = path.abspath('tools/build.el')
+  relative_part = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
+  return f'{emacs} {source} --quick --batch \
+    --load {build_el_path}\
+    --eval "(dt-export \\"{htmlize_el_path}\\" \\"{relative_part}\\")"'
 
 
 # Target setup functions
 def add_main_target(org_file, target_format):
   name = make_project_name(org_file)
   zscript_name = target_format.format(name)
-
-  tangle = f'{emacs} $SOURCE --quick --batch --eval "\
-    (progn (require \'ob-tangle)\
-           (setq org-confirm-babel-evaluate nil)\
-           (set-language-environment \\"UTF-8\\")\
-           (org-babel-tangle))"'
+  build_el_path = path.abspath('tools/build.el')
+  tangle = f'{emacs} $SOURCE --quick --batch \
+    --load {build_el_path} \
+    --eval "(dt-tangle)"'
 
   def clean(target, source, env):
     rmtree(f'build/{name}', True)
@@ -126,7 +119,9 @@ def add_test_target(org_file, main_target):
       print('timeout')
       return 1
 
-    with open('tools/IgnoredEngineOutput.txt') as lines_to_skip_file:
+    with open(
+      'tools/IgnoredEngineOutput.txt', encoding='utf-8'
+    ) as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
     def printable(line):
@@ -149,7 +144,7 @@ def add_pack_target(org_file, main_target):
   build_path = Path(f'build/{name}')
 
   def pack(target, source, env):
-    with open(org_file) as project_file:
+    with open(org_file, encoding='utf-8') as project_file:
       project_content = project_file.read()
 
     def make_short_hash():
@@ -212,7 +207,9 @@ def make_check_compatibility_target():
       print('timeout')
       return 1
 
-    with open('tools/IgnoredEngineOutput.txt') as lines_to_skip_file:
+    with open(
+      'tools/IgnoredEngineOutput.txt', encoding='utf-8'
+    ) as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
     def printable(line):
@@ -283,8 +280,8 @@ def add_dependency(project, module, namespace):
 
   def export_module(target, source, env):
     makedirs(target_directory, exist_ok=True)
-    with open(target[0], 'w') as target_file:
-      with open(source[0]) as module_file:
+    with open(target[0], 'w', encoding='utf-8') as target_file:
+      with open(source[0], encoding='utf-8') as module_file:
         target_file.write(module_file.read().replace('NAMESPACE_', namespace))
 
   Depends(
