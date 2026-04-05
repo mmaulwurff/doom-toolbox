@@ -2,8 +2,15 @@
 # SPDX-License-Identifier: CC0-1.0
 
 # This is the list of Python packages requirements for DoomToolbox.
-# Usage (in this directory): `pip install -r requirements-dev.txt`
 
+# prek: framework to run hooks
+# https://prek.j178.dev/
 prek ~= 0.3
+
+# REUSE: open source licenses helper tool
+# https://reuse.software/
 reuse ~= 6.2
+
+# SCons: software construction tool
+# http://www.scons.org/documentation.html
 scons ~= 4.10
