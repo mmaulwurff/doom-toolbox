@@ -50,12 +50,11 @@ def make_project_name(org_file):
 
 
 def make_export(source):
-  htmlize_el_path = path.abspath('tools/htmlize.el')
   build_el_path = path.abspath('tools/build.el')
-  relative_part = '' if len(path.normpath(source).split(path.sep)) == 1 else '../'
+  level = len(path.normpath(source).split(path.sep))
   return f'{emacs} {source} --quick --batch \
     --load {build_el_path}\
-    --eval "(dt-export \\"{htmlize_el_path}\\" \\"{relative_part}\\")"'
+    --eval "(dt-export {level})"'
 
 
 # Target setup functions
