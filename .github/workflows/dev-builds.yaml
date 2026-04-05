@@ -70,16 +70,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt;
 
-      - name: Cache pre-commit
-        id: pre-commit
+      - name: Cache prek
+        id: prek
         uses: actions/cache@v5
         with:
-          path: ~/.cache/pre-commit
-          key: ${{ runner.os }}-pre-commit-v${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/prek
+          key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Check pre-commit hooks
+      - name: Check prek hooks
         run: |
-          pre-commit run -a
+          prek run -a
 
       - name: Test
         if: ${{ success() }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: Upload distributions
         if: ${{ success() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: doom-toolbox
           path: |
@@ -117,7 +117,7 @@ jobs:
 
       - name: Configure pages
         if: ${{ success() }}
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload pages
         if: ${{ success() }}
@@ -129,7 +129,7 @@ jobs:
       - name: Deploy pages to GitHub Pages
         if: ${{ success() }}
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   build_windows:
     runs-on: windows-2022
@@ -182,16 +182,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt;
 
-      - name: Cache pre-commit
-        id: pre-commit
+      - name: Cache prek
+        id: prek
         uses: actions/cache@v5
         with:
-          path: ~/.cache/pre-commit
-          key: ${{ runner.os }}-pre-commit-v${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/prek
+          key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Check pre-commit hooks
+      - name: Check prek hooks
         run: |
-          pre-commit run -a
+          prek run -a
 
       # I couldn't make UZDoom work here. Most probably because of missing video drivers.
       #- name: try UZDoom
