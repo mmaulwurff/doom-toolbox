@@ -173,7 +173,10 @@ class wr_EventHandler : EventHandler
   private static bool isAtStart(Actor monster)
   {
     for (int i = 0; i < MAXPLAYERS; ++i)
-      if (players[i].mo && monster.checkSight(players[i].mo)) return true;
+    {
+      if (players[i].mo && monster.checkSight(players[i].mo, SF_IGNOREVISIBILITY))
+        return true;
+    }
 
     return false;
   }
