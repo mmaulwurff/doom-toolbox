@@ -84,7 +84,7 @@ jobs:
       - name: Check compatibility
         if: ${{ success() }}
         run: |
-          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 3 CheckCompatibility
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons CheckCompatibility
 
       - name: Test
         if: ${{ success() }}
@@ -94,7 +94,7 @@ jobs:
       - name: Build
         if: ${{ success() }}
         run: |
-          scons -j 3 Pk3All
+          scons Pk3All
 
       - name: Upload distributions
         if: ${{ success() }}
@@ -113,7 +113,7 @@ jobs:
       - name: Export to HTML
         if: ${{ success() }}
         run: |
-          scons -j 3 HtmlAll
+          scons HtmlAll
 
       - name: Configure pages
         if: ${{ success() }}
