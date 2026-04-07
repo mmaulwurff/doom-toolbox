@@ -25,7 +25,6 @@ This project doesn't use any AI tools.
 
 ** Add-ons
 
-Add-ons:
 - [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
 - [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
@@ -98,7 +97,7 @@ To build:
    ~scons --help~
 6. Build what you need.
 
-To build add-on PK3, for example FinalCustomDoom, use this command: ~scons
+To build an add-on PK3, for example FinalCustomDoom, use this command: ~scons
 FinalCustomDoom.pk3~. It will create FinalCustomDoom-NNNN.pk3 in directory ~build~.
 
 To build a module so you can use it in your project, for example, ~StringUtils~, use
