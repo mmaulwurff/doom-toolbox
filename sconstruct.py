@@ -279,14 +279,15 @@ def add_dependency(project, module, namespace):
 
   def export_module(target, source, env):
     makedirs(target_directory, exist_ok=True)
-    with open(target[0], 'w', encoding='utf-8') as target_file:
+    destination = f'{target_directory}/{namespace}{module}.zs'
+    with open(destination, 'w', encoding='utf-8') as target_file:
       with open(source[0], encoding='utf-8') as module_file:
         target_file.write(module_file.read().replace('NAMESPACE_', namespace))
 
   Depends(
     project,
     Command(
-      target=f'{target_directory}/{namespace}{module}.zs',
+      target=project + module,
       source=f'build/{module}/{module}.zs',
       action=export_module,
     ),
