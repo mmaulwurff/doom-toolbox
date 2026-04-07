@@ -81,15 +81,15 @@ jobs:
         run: |
           prek run -a
 
-      - name: Test
-        if: ${{ success() }}
-        run: |
-          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 TestAll
-
       - name: Check compatibility
         if: ${{ success() }}
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 CheckCompatibility
+
+      - name: Test
+        if: ${{ success() }}
+        run: |
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
         if: ${{ success() }}

@@ -271,6 +271,9 @@ AlwaysBuild(
 )
 
 AlwaysBuild(Alias('CheckCompatibility', None, make_check_compatibility_target()))
+for org_file in Glob('*.org'):
+  if str(org_file) != 'README.org':
+    Depends('CheckCompatibility', make_project_name(org_file))
 
 
 # Dependencies
