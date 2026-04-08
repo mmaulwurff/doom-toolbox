@@ -782,7 +782,7 @@ cd_Weapon_damage_multiplier = "Множитель урона от оружия";
 
 #+begin_src c :tangle build/FinalCustomDoom/zscript.zs
 
-version 4.14.2
+version 4.14.3
 
 <<tools/scripts.org:include("FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
 
@@ -1321,7 +1321,7 @@ OptionValue cde_Values
 #+end_src
 
 #+begin_src c :tangle build/FinalCustomDoomExtensionExample/zscript.zs
-version 4.14.2
+version 4.14.3
 
 class cde_Effects
 {

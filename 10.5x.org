@@ -11,12 +11,6 @@ Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from 
 reach of a single slider.
 #+end_quote
 
-Required ZScript version:
-#+name: zscript-version
-#+begin_src c
-4.14
-#+end_src
-
 Features:
 - Can increase or decrease the number of enemies;
 - Should work with enemy replacers and randomizers;
@@ -822,7 +816,7 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 
 #+begin_src c :tangle build/10.5x/zscript.zs
 
-version <<zscript-version>>
+version 4.14.3
 
 <<tools/scripts.org:include("10.5x.org", "build/10.5x/\\(zscript/.*zs\\)")>>
 #+end_src
@@ -850,7 +844,7 @@ server string x5t_spawn = "";
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs :exports none
 
-version <<zscript-version>>
+version 4.14.3
 #+end_src
 
 #+begin_src c :tangle build/10.5xTest/zscript.zs

@@ -157,7 +157,7 @@ class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItem
 
 #+begin_src c :tangle ../build/PlainTranslator/zscript.zs
 
-version 4.12.2
+version 4.14.3
 
 #include "PlainTranslator.zs"
 #+end_src

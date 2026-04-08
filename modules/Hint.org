@@ -69,7 +69,7 @@ class OptionMenuItemNAMESPACE_Hint : OptionMenuItemStaticText
 
 #+begin_src c :tangle ../build/Hint/zscript.zs
 
-version 4.12.2
+version 4.14.3
 
 #include "Hint.zs"
 #+end_src

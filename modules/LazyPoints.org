@@ -1046,7 +1046,7 @@ AddMenuKey    "Open Score" "NAMESPACE_top"
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPoints/zscript.zs
-version 4.14
+version 4.14.3
 #include "LazyPoints.zs"
 #+end_src
 

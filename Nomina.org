@@ -57,12 +57,12 @@ SPDX-License-Identifier: CC0-1.0
 * Source code
 
 #+begin_src c :tangle build/NominaTest/zscript.zs
-version 4.14
+version 4.14.3
 <<tests-preamble>>
 #+end_src
 
 #+begin_src c :tangle build/Nomina/zscript.zs
-version 4.14
+version 4.14.3
 #+end_src
 
 ** Event handler

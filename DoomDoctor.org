@@ -86,7 +86,7 @@ GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
 #+begin_src c :tangle build/DoomDoctorTest/zscript.zs :exports none
-version 4.12.2
+version 4.14.3
 
 class dd_LoggerTest : Clematis {}
 
@@ -150,7 +150,7 @@ GameInfo
 #+end_src
 
 #+begin_src c :tangle build/DoomDoctor/zscript.zs :exports none
-version 4.12.2
+version 4.14.3
 
 <<tools/scripts.org:include("DoomDoctor.org", "build/DoomDoctor/\\(zscript/.*zs\\)")>>
 

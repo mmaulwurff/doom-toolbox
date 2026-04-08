@@ -154,7 +154,7 @@ AddMenuKey "Previous weapon" NAMESPACE_prev_weapon
 
 #+begin_src c :tangle ../build/PreviousWeapon/zscript.txt
 
-version 4.13.3
+version 4.14.3
 
 #include "PreviousWeapon.zs"
 #+end_src

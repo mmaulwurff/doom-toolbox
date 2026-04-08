@@ -7168,7 +7168,7 @@ TT_CONTROLS = "Управление";
 
 #+begin_src c :tangle build/Typist.pk3/zscript.zs
 
-version 4.14.2
+version 4.14.3
 
 <<tools/scripts.org:include("Typist.pk3.org", "build/Typist.pk3/\\(zscript/.*zs\\)")>>
 #include "tt_colors.zs"
@@ -7241,7 +7241,7 @@ class tt_lp_TypistParameters : tt_lp_Parameters
 
 #+begin_src c :tangle build/Typist.pk3Test/zscript.zs
 
-version 4.14.2
+version 4.14.3
 
 <<tools/scripts.org:include("Typist.pk3.org", "build/Typist.pk3Test/\\(zscript/.*zs\\)")>>
 #+end_src

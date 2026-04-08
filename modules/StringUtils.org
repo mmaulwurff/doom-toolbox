@@ -584,14 +584,14 @@ class NAMESPACE_Ascii
 
 #+begin_src c :tangle ../build/StringUtils/zscript.zs
 
-version 4.12.2
+version 4.14.3
 
 #include "StringUtils.zs"
 #+end_src
 
 #+begin_src c :tangle ../build/StringUtilsTest/zscript.zs
 
-version 4.12.2
+version 4.14.3
 
 class su : NAMESPACE_su {}
 class Description : NAMESPACE_Description {}
