@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
+# https://docs.astral.sh/ruff/
 [tool.ruff]
 line-length = 85
 indent-width = 2
 target-version = "py313"
-
-[tool.ruff.format]
-quote-style = "single"
+format.quote-style = "single"
 
 # https://github.com/crate-ci/typos/blob/master/docs/reference.md
 [tool.typos]
