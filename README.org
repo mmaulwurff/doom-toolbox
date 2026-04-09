@@ -21,7 +21,7 @@ HTML pages for DoomToolbox should be available [[https://mmaulwurff.github.io/do
 DoomToolbox has a [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld topic]] and a [[https://mastodon.gamedev.place/@doomtoolbox][Mastodon page]]. Some add-ons and modules also
 have a ZDoom forums thread.
 
-This project doesn't use any AI tools.
+This project doesn't use any AI tools or resources.
 
 ** Add-ons
 

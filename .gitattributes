@@ -8,11 +8,11 @@
 
 *.css  eol=lf
 *.el   eol=lf
+*.en.pws eol=lf
 *.ini  eol=lf
-*.nix  eol=lf
+*.md   eol=lf
 *.org  eol=lf
 *.py   eol=lf
-*.sh   eol=lf
 *.toml eol=lf
 *.txt  eol=lf
 *.yaml eol=lf

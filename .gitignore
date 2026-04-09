@@ -8,7 +8,6 @@
 !**/
 # and these files:
 !.clang-format
-!.dir-locals.el
 !.editorconfig
 !.gitattributes
 !.gitignore
