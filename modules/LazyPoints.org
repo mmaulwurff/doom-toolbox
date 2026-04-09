@@ -615,26 +615,26 @@ class NAMESPACE_ScoreStorage
     String mapScoresString = scoreDict.At(mapChecksum);
 
     Array<int> scores;
-    Array<bool> isLatests;
+    Array<bool> isLatest;
     Array<String> names;
 
-    read(mapScoresString, scores, isLatests, names);
+    read(mapScoresString, scores, isLatest, names);
 
     for (int i = 0; i < N_TOP; ++i)
-      isLatests[i] = false;
+      isLatest[i] = false;
 
     for (int i = 0; i < N_TOP; ++i)
     {
       if (score > scores[i])
       {
         scores.insert(i, score);
-        isLatests.insert(i, true);
+        isLatest.insert(i, true);
         names.insert(i, "");
         break;
       }
     }
 
-    String newMapScoresString = write(scores, isLatests, names);
+    String newMapScoresString = write(scores, isLatest, names);
     scoreDict.Insert(mapChecksum, newMapScoresString);
 
     String newScoreString = scoreDict.ToString();
@@ -650,14 +650,14 @@ class NAMESPACE_ScoreStorage
     String mapScoresString = scoreDict.At(mapChecksum);
 
     Array<int> scores;
-    Array<bool> isLatests;
+    Array<bool> isLatest;
     Array<String> names;
 
-    read(mapScoresString, scores, isLatests, names);
+    read(mapScoresString, scores, isLatest, names);
 
     names[index] = name;
 
-    String newMapScoresString = write(scores, isLatests, names);
+    String newMapScoresString = write(scores, isLatest, names);
     scoreDict.Insert(mapChecksum, newMapScoresString);
 
     String newScoreString = scoreDict.ToString();
@@ -666,7 +666,7 @@ class NAMESPACE_ScoreStorage
 
   static void loadScores(String mapChecksum,
                          out Array<int> scores,
-                         out Array<bool> isLatests,
+                         out Array<bool> isLatest,
                          out Array<String> names)
   {
     CVar scoreCVar     = CVar.findCVar(STORAGE_CVAR_NAME);
@@ -675,7 +675,7 @@ class NAMESPACE_ScoreStorage
 
     String mapScoresString = scoreDict.at(mapChecksum);
 
-    read(mapScoresString, scores, isLatests, names);
+    read(mapScoresString, scores, isLatest, names);
   }
 
   // Format:
@@ -683,7 +683,7 @@ class NAMESPACE_ScoreStorage
   // repeated N_TOP times.
   private static void read(String scoresString,
                            out Array<int> scores,
-                           out Array<bool> isLatests,
+                           out Array<bool> isLatest,
                            out Array<String> names)
   {
     if (scoresString.Length() == 0)
@@ -691,7 +691,7 @@ class NAMESPACE_ScoreStorage
       for (int i = 0; i < N_TOP; ++i)
       {
         scores.Push(0);
-        isLatests.Push(0);
+        isLatest.Push(0);
         names.Push("");
       }
       return;
@@ -704,17 +704,17 @@ class NAMESPACE_ScoreStorage
     for (int i = 0; i < N_TOP; ++i)
     {
       scores.Push(tokens[tokenIndex++].ToInt());
-      isLatests.Push(tokens[tokenIndex++].ToInt());
+      isLatest.Push(tokens[tokenIndex++].ToInt());
       names.Push(tokens[tokenIndex++]);
     }
   }
 
   private static string
-  write(Array<int> scores, Array<bool> isLatests, Array<String> names)
+  write(Array<int> scores, Array<bool> isLatest, Array<String> names)
   {
     String result;
     for (int i = 0; i < N_TOP; ++i)
-      result.appendFormat("%d\n%d\n%s\n", scores[i], isLatests[i], names[i]);
+      result.appendFormat("%d\n%d\n%s\n", scores[i], isLatest[i], names[i]);
 
     return result;
   }
@@ -897,10 +897,10 @@ class NAMESPACE_Top : OptionMenu
     String checksum = Level.GetChecksum();
 
     Array<int> scores;
-    Array<bool> isLatests;
+    Array<bool> isLatest;
     Array<String> names;
 
-    NAMESPACE_ScoreStorage.loadScores(checksum, scores, isLatests, names);
+    NAMESPACE_ScoreStorage.loadScores(checksum, scores, isLatest, names);
 
     int maxLength = 0;
     for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
@@ -915,7 +915,7 @@ class NAMESPACE_Top : OptionMenu
     for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
     {
       String label = String.Format(format, i + 1, scores[i]);
-      addCommand(label, names[i], i, isLatests[i]);
+      addCommand(label, names[i], i, isLatest[i]);
     }
   }
 

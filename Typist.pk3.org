@@ -2436,7 +2436,7 @@ class tt_InputByModeManager : tt_InputManager
 
 #+begin_src c :tangle build/Typist.pk3/zscript/tt_input_manager.zs
 
-// Doesn't capture keys when pass throug is set, otherwise acts as base.
+// Doesn't capture keys when pass through is set, otherwise acts as base.
 class tt_PassThroughInputManager : tt_InputManager
 {
   static tt_PassThroughInputManager of(tt_InputManager base)

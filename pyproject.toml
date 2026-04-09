@@ -8,3 +8,11 @@ target-version = "py313"
 
 [tool.ruff.format]
 quote-style = "single"
+
+# https://github.com/crate-ci/typos/blob/master/docs/reference.md
+[tool.typos]
+default.extend-ignore-re = [
+    "SPDX-FileCopyrightText = .*",
+    # Ignore blocks between `# spellchecker:off` and `# spellchecker:on`
+    "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",
+]

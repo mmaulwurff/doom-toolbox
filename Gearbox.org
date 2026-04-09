@@ -470,6 +470,8 @@ $volume gearbox/notfound 0.5
 
 * Language
 
+** English
+
 #+begin_src c :tangle build/Gearbox/language.txt
 
 // SPDX-FileCopyrightText: © 2022 generic name guy
@@ -571,6 +573,12 @@ GB_NEW_SMALL_FONT = "New small font";
 GB_OLD_SMALL_FONT = "Old small font";
 GB_CONSOLE_FONT   = "Console font";
 GB_BIG_FONT       = "Big font";
+#+end_src
+
+** Brazilian Portuguese
+
+# spellchecker:off
+#+begin_src c :tangle build/Gearbox/language.txt
 
 [pt]
 
@@ -664,6 +672,7 @@ GB_OLD_SMALL_FONT = "Fonte pequena antiga";
 GB_CONSOLE_FONT   = "Fonte do console";
 GB_BIG_FONT       = "Fonte grande";
 #+end_src
+# spellchecker:on
 
 * Keys
 

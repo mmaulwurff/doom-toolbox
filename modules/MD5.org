@@ -69,7 +69,7 @@ Class NAMESPACE_MD5
 	protected static uint H (uint B, uint C, uint D) { return B ^ C ^ D; }
 	protected static uint I (uint B, uint C, uint D) { return C ^ (B | ~D); }
 	protected static uint leftrotate (uint x, uint c) { return (x << c) | (x >> (32-c)); }
-	// Swap endianess of byte bitwise
+	// Swap endianness of byte bitwise
 	protected static uint swapByte (uint x)
 	{
 		uint r = 0;
@@ -77,7 +77,7 @@ Class NAMESPACE_MD5
 			r += ((x>>i) & 1) << (7-i);
 		return r;
 	}
-	// Swap endianess of word bytewise
+	// Swap endianness of word bytewise
 	protected static uint swapWord (uint x)
 	{
 		uint r = 0;
@@ -140,7 +140,7 @@ Class NAMESPACE_MD5
 			strLen >>= 8;
 		}
 
-		// Swap endianess of each byte
+		// Swap endianness of each byte
 		uint inputSize = uint(input.size());
 		for(uint i=0; i < inputSize; i++)
 		{

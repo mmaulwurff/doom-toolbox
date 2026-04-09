@@ -1065,7 +1065,7 @@ GameInfo { EventHandlers = "cd_EventHandler" }
 
 class cd_EventHandler : StaticEventHandler
 {
-  enum EffecTime
+  enum EffectTime
   {
     Immediately,
     OnPlayerStarted,

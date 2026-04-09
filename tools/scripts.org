@@ -8,7 +8,7 @@ Various utility scripts for DoomToolbox development.
 * Include
 
 Lists includes from ~org-file~ by ~regexp~. ~regexp~ must contain a group with
-zscript file name. Exammple: ~"build/MyMod/\\(zscript/.*zs\\)"~.
+zscript file name. Example: ~"build/MyMod/\\(zscript/.*zs\\)"~.
 
 #+name: include
 #+begin_src elisp :var org-file="" :var regexp=""

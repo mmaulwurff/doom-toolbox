@@ -38,3 +38,9 @@ repos:
     hooks:
     -   id: ruff-check
     -   id: ruff-format
+
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.45.0
+    hooks:
+    -   id: typos
+        args: []
