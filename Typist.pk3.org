@@ -853,14 +853,14 @@ class tt_ProjectileSpeedController : tt_WorldChanger
     let playerRadius = _playerSource.getPawn().radius;
     int player       = _playerSource.getNumber();
 
-    foreach (Actor a : ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT))
+    foreach (Actor a : ThinkerIterator.create("Actor", Thinker.STAT_DEFAULT))
       if (a.bMissile) controlProjectile(a, origin, playerRadius, player);
   }
 
-  private play void controlProjectile(Actor a,
-                                      vector3 playerOrigin,
-                                      double playerRadius,
-                                      int player)
+  private static play void controlProjectile(Actor a,
+                                             vector3 playerOrigin,
+                                             double playerRadius,
+                                             int player)
   {
     bool isInRange = tt_Math.isInEffectiveRange(a.pos, playerOrigin);
 
@@ -875,20 +875,21 @@ class tt_ProjectileSpeedController : tt_WorldChanger
     }
   }
 
-  private play bool isMovingTowardsPlayer(Actor projectile,
-                                          vector3 playerPos,
-                                          double playerRadius)
+  private static play bool isMovingTowardsPlayer(Actor projectile,
+                                                 vector3 playerPos,
+                                                 double playerRadius)
   {
     vector3 vel = projectile.vel;
-    if (vel == (0, 0, 0)) { return false; } // doesn't move
+    if (vel == (0, 0, 0)) return false; // doesn't move
 
-    double oldDistance = (projectile.pos - vel - playerPos).length();
-    double distance    = (projectile.pos -       playerPos).length();
+    vector3 oldProjectileRelativePosition = level.vec3Diff(playerPos, projectile.pos);
+    vector3 newProjectileRelativePosition = oldProjectileRelativePosition + vel;
 
-    if (distance > oldDistance) { return false; } // moves from player
+    if (oldProjectileRelativePosition.length()
+        < newProjectileRelativePosition.length()) return false; // moves from player
 
     // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-    vector3 x10             = projectile.pos - playerPos;
+    vector3 x10             = level.vec3Diff(projectile.pos, playerPos);
     vector3 prod            = vel cross x10;
     double  lineDistance    = prod.length() / vel.length();
     double  hitDistance     = playerRadius + projectile.radius;
