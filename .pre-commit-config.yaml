@@ -14,6 +14,7 @@ repos:
     -   id: check-illegal-windows-names
     -   id: check-merge-conflict
     -   id: check-toml
+    -   id: check-vcs-permalinks
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: fix-byte-order-marker
@@ -34,7 +35,7 @@ repos:
 
 # https://docs.astral.sh/ruff/
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.9
+    rev: v0.15.10
     hooks:
     -   id: ruff-check
     -   id: ruff-format
@@ -44,3 +45,9 @@ repos:
     hooks:
     -   id: typos
         args: []
+
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+    -   id: pyupgrade
+        args: [--py313-plus]
