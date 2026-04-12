@@ -1,7 +1,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Typist.pk3
-#+version: v0.8.2
+# #+version: v0.8.2
 
 * About
 
