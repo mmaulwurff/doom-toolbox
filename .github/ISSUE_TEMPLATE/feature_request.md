@@ -6,11 +6,6 @@ labels: enhancement
 assignees: ''
 ---
 
-<!--
-SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: CC0-1.0
--->
-
 **Project**
 What add-on or module is this suggestion for [e.g. Gearbox, Typist.pk3, StringUtils]
 
