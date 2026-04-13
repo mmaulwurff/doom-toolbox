@@ -1,4 +1,4 @@
-personal_ws-1.1 en 113 
+personal_ws-1.1 en 116 
 CVar
 Cacowards
 Codeberg
@@ -22,10 +22,12 @@ Http
 IWAD
 JSON
 Keyconf
+LazyPoints
 MTF
 Mapinfo
 Menudef
 Nomina
+PlainTranslator
 Powerup
 RANDOMIZE
 Randomizer
@@ -69,6 +71,7 @@ https
 init
 ispell
 lhs
+libeye
 localize
 menudef
 mkdir

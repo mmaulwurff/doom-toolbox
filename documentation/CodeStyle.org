@@ -35,8 +35,8 @@
 
 * Formatting
 
-See [[../.clang-format]], [[../.editorconfig]], and [[../.pre-commit-config.yaml]] for formatting
-settings.
+See [[../.clang-format]], [[../.editorconfig]], [[../.pre-commit-config.yaml]], and
+[[../pyproject.toml]] for formatting settings.
 
 * Abbreviations
 
