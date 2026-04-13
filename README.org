@@ -8,6 +8,10 @@
 DoomToolbox is a collection of add-ons for Doom-based game engines which support
 ZScript, like [[https://zdoom.org/downloads][UZDoom]].
 
+The goal of DoomToolbox is to increase replayability of compatible games and mods,
+make gameplay more enjoyable, and to have fun both while playing and developing this
+project. The development is done under "Move slow and fix things" flag.
+
 DoomToolbox is free and open source software. Add-ons are mostly licensed under
 [[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
 tag in each .org file for details. For third-party resources, such as image and sound
@@ -27,7 +31,7 @@ This project doesn't use any AI tools or resources.
 
 - [[file:10.5x.org][10.5x]] - enemy number multiplier ([[https://forum.zdoom.org/viewtopic.php?t=65962][forum topic]])
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
-- [[file:FinalCustomDoom.org][Final Custom Doom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
+- [[file:FinalCustomDoom.org][FinalCustomDoom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
 - [[file:Gearbox.org][Gearbox]] - more convenient ways to select weapons and items ([[https://forum.zdoom.org/viewtopic.php?t=71086][forum topic]])
 - [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][forum topic]])
 - [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][forum topic]])
@@ -59,7 +63,7 @@ add-ons include them.
 
 [[file:media/screenshots/10.5x.png]]
 
-Final Custom Doom:
+FinalCustomDoom:
 
 [[file:media/screenshots/FinalCustomDoom.png]]
 

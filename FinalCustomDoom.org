@@ -11,12 +11,12 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * About
 
-Final Custom Doom provides gameplay customization. It can be used to increase or
+FinalCustomDoom provides gameplay customization. It can be used to increase or
 decrease the difficulty in various ways.
 
-Final Custom Doom is a successor to Ultimate Custom Doom and Custom Doom.
+FinalCustomDoom is a successor to Ultimate Custom Doom and Custom Doom.
 
-Final Custom Doom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
@@ -770,7 +770,7 @@ StaticText \"\"" note)
 // Normal $ string identifier can be used too.
 
 [enu default]
-cd_Title = "Final Custom Doom \c[CDLightBlue]⚒";
+cd_Title = "FinalCustomDoom \c[CDLightBlue]⚒";
 cd_Regeneration = "Regeneration";
 cd_Degeneration = "Degeneration";
 
@@ -1146,7 +1146,7 @@ class cd_EventHandler : StaticEventHandler
   {
     // TODO: support multiplayer?
     if (multiplayer)
-      throwAbortException("Final Custom Doom doesn't support multiplayer (yet?).");
+      throwAbortException("FinalCustomDoom doesn't support multiplayer (yet?).");
 
     PlayerPawn player = players[event.playerNumber].mo;
 
@@ -1253,9 +1253,9 @@ class cd_EffectsBase play
 }
 #+end_src
 
-* Extending Final Custom Doom
+* Extending FinalCustomDoom
 
-You can use Final Custom Doom (FCD) to add your own game settings. To do so, a FCD
+You can use FinalCustomDoom (FCD) to add your own game settings. To do so, a FCD
 extension can be created. Basically, such extension consists of two parts: settings
 definition and settings implementation. Settings definition is contained in menudef
 lump, where settings are added to ~cd_Menu~, possibly via a submenu. Settings
@@ -1290,12 +1290,12 @@ See the example below.
 // Note: naming everything related to the Custom Doom extension with "cde" prefix.
 OptionMenu cd_Menu
 {
-  Submenu "Final Custom Doom Extension", cde_Menu
+  Submenu "FinalCustomDoom Extension", cde_Menu
 }
 
 OptionMenu cde_Menu
 {
-  Title "Final Custom Doom Extension"
+  Title "FinalCustomDoom Extension"
 
   StaticText  "1. Settings types example:", White
   TextField   "Double setting" , "cde_Effects:doubleSetting:Immediately"

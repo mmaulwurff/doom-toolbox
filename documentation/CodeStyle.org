@@ -28,6 +28,11 @@
 
 - console variables and aliases: ~snake_case~
 
+- project names: ~CapitalizedWords~
+  - exceptions: external projects imported into DoomToolbox retain their names, e.g.
+    libeye
+  - Typist.pk3, 10.5x
+
 * Formatting
 
 See [[../.clang-format]], [[../.editorconfig]], and [[../.pre-commit-config.yaml]] for formatting
