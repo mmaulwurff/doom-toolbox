@@ -30,7 +30,7 @@ from SCons.Script import (
   Help,
 )
 
-import hashlib
+import git
 import reuse.project
 import reuse.report
 
@@ -146,15 +146,9 @@ def add_pack_target(org_file, main_target):
     with open(org_file, encoding='utf-8') as project_file:
       project_content = project_file.read()
 
-    def make_short_hash():
-      h = hashlib.new('sha1')
-      h.update(project_content.encode('utf-8'))
-      return h.hexdigest()[:8]
-
+    commit_sha = git.Repo().head.object.hexsha[:10]
     foundVersion = search('^#[+]version: *(.*)$', project_content, flags=MULTILINE)
-    version = (
-      foundVersion.group(1) if foundVersion is not None else make_short_hash()
-    )
+    version = foundVersion.group(1) if foundVersion is not None else commit_sha
 
     copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
     copy(org_file, build_path / org_file)

@@ -3,6 +3,9 @@
 
 # This is the list of Python packages requirements for DoomToolbox.
 
+# https://pypi.org/project/GitPython/
+GitPython ~= 3.1
+
 # prek: framework to run hooks
 # https://prek.j178.dev/
 prek ~= 0.3

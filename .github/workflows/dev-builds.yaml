@@ -105,6 +105,25 @@ jobs:
             build/*.pk3
             !build/Typist.pk3
 
+      - name: Devbuilds - update tag
+        run: |
+          git tag -d dev-builds || true
+          git push origin :refs/tags/dev-builds || true
+          git tag dev-builds ${{ github.event.workflow_run.head_sha }}
+          git push origin dev-builds
+
+      - name: Devbuilds - upload
+        uses: softprops/action-gh-release@v3.0.0
+        with:
+          name: DoomToolbox Devbuilds
+          tag_name: dev-builds
+          draft: false
+          prerelease: true
+          make_latest: false
+          generate_release_notes: false
+          files: build/*.pk3
+          body: "May be unstable."
+
       - name: Clean up build
         if: ${{ success() }}
         run: |
