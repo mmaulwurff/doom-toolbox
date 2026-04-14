@@ -70,8 +70,9 @@ OptionValue wr_Actions
   1, "$wr_Wake"
   2, "$wr_TurnAway"
   3, "$wr_TurnTowards"
-  4, "$wr_Kill"
-  5, "$wr_Remove"
+  4, "$wr_TurnRandomly"
+  5, "$wr_Kill"
+  6, "$wr_Remove"
 }
 
 OptionValue wr_SafeActions
@@ -80,6 +81,7 @@ OptionValue wr_SafeActions
   1, "$wr_Wake"
   2, "$wr_TurnAway"
   3, "$wr_TurnTowards"
+  4, "$wr_TurnRandomly"
 }
 #+end_src
 
@@ -93,6 +95,7 @@ wr_Keep        = "Keep as is";
 wr_Wake        = "Wake up (may wake up others)";
 wr_TurnAway    = "Turn away from player";
 wr_TurnTowards = "Turn towards player";
+wr_TurnRandomly = "Turn to a random direction";
 wr_Kill        = "Kill (when alerted)";
 wr_Remove      = "Remove (may break scripts)";
 
@@ -149,6 +152,10 @@ class wr_EventHandler : EventHandler
       monster.a_SetAngle(monster.angleTo(players[Net_Arbitrator].mo));
       return;
 
+    case TurnRandomly:
+      monster.a_SetAngle(random[WarmReception](0, 359));
+      return;
+
     case Kill:
       wr_Killer(Actor.spawn("wr_Killer", (0, 0, 0))).init(monster);
       return;
@@ -166,6 +173,7 @@ class wr_EventHandler : EventHandler
     Wake,
     TurnAway,
     TurnTowards,
+    TurnRandomly,
     Kill,
     Remove,
   }
