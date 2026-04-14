@@ -14,7 +14,7 @@
 
 from os import environ, makedirs, path
 from pathlib import Path
-from re import search, MULTILINE
+from re import search, sub, MULTILINE
 from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import PIPE, STDOUT, TimeoutExpired, run
 
@@ -129,8 +129,7 @@ def add_test_target(org_file, main_target):
     has_errors = False
     for line in filter(printable, result.stdout.splitlines()):
       has_errors = has_errors or 'ERROR' in line
-      # TODO: sed 's/Script error, \"\(.*\)\/:\(.*\)\" line \(.*\)/\1\/\2:\3/')"
-      print(line)
+      print(sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line))
 
     return 1 if has_errors else 0
 
