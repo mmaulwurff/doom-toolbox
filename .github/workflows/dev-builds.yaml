@@ -99,13 +99,14 @@ jobs:
         run: |
           scons Pk3All
 
-      - name: Devbuilds - update tag
+      - name: Devbuilds - prepare
         if: ${{ success() }}
         run: |
           git tag -d dev-builds || true
           git push origin :refs/tags/dev-builds || true
           git tag dev-builds ${{ github.event.workflow_run.head_sha }}
           git push origin dev-builds
+          zip -r build/DoomToolbox build -i \*.pk3
 
       - name: Devbuilds - upload
         uses: softprops/action-gh-release@v2.5.0
@@ -116,7 +117,7 @@ jobs:
           prerelease: true
           make_latest: false
           generate_release_notes: false
-          files: build/*.pk3
+          files: build/DoomToolbox.zip
           body: |
             Warning: these packages may contain bugs or unfinished features.
 
