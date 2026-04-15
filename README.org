@@ -89,6 +89,8 @@ Typist.pk3:
 
 * Build
 
+[[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
 Build is supported on recent versions of GNU/Linux and Microsoft Windows.
 
 To build:
@@ -113,6 +115,11 @@ All commands require that ~PATH~ environment variable has Emacs, tests also requ
 UZDoom in ~PATH~. All commands put their results in directory ~build~, and may remove
 files and directories there.
 
+⚠ !WARNING!
+- Scons scripts contain code. Only run ~scons~ for projects you trust.
+- Org files may contain code, extracting the source files may execute it. Only
+  extract files from Org files from the sources you trust.
+
 Tests use internally:
 - [[https://github.com/fragglet/miniwad][Miniwad]]: minimalist IWAD
 - [[https://github.com/mmaulwurff/clematis][ClematisM]]: ZScript unit test framework
@@ -135,4 +142,3 @@ Documentation:
 - [[file:documentation/CodeOfConduct.org][Code of conduct]]
 - [[file:documentation/CodeStyle.org][Code style]]
 - [[file:documentation/MadeWith.org][Made with]]
-- [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
