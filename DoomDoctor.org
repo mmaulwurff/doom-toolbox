@@ -77,10 +77,6 @@ wait 16; resurrect; warp 60 -128 0; +use;
 wait 19; quit
 #+end_src
 
-#+begin_src elisp :exports none
-(compile "scons -Q DoomDoctorTest")
-#+end_src
-
 #+begin_src text :tangle build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src

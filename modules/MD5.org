@@ -256,7 +256,3 @@ class md5_TestEventHandler : StaticEventHandler
 #+begin_src text :tangle ../build/MD5Test/commands.txt
 wait 2; map map01; wait 2; netevent md5-test; wait 2; quit
 #+end_src
-
-#+begin_src elisp :exports none
-(compile "cd ..; scons -Q MD5Test")
-#+end_src

@@ -435,7 +435,3 @@ class stt_EventHandler : StaticEventHandler
 
 wait 2; map map01; wait 2; quit
 #+end_src
-
-#+begin_src elisp :exports none
-(compile "scons -Q SoundToScreenTest")
-#+end_src

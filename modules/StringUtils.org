@@ -612,7 +612,3 @@ class su_Test : Clematis
 
 wait 2; map map01; wait 2; netevent test:su_Test; wait 2; quit
 #+end_src
-
-#+begin_src elisp :exports none
-(compile "cd ..; scons -Q StringUtilsTest")
-#+end_src

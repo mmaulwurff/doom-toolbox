@@ -1047,7 +1047,3 @@ x5_multiplier 100
 <<wait(9)>>; netevent x5t_end
 <<wait(9)>>; quit
 #+end_src
-
-#+begin_src elisp :exports none
-(compile "scons -Q 10.5xTest")
-#+end_src

@@ -805,6 +805,11 @@ version 4.14.3
 #include "libeye.zs"
 #+end_src
 
+#+begin_src text :tangle ../build/libeyeTest/commands.txt
+
+wait 2; map map01; wait 2; quit
+#+end_src
+
 ** ShowBox
 
 #+begin_src c :tangle ../build/libeyeTest/bounding_box.zs
@@ -1536,15 +1541,4 @@ class TextCandleGl : EventHandler {
 		}
 	}
 }
-#+end_src
-
-* Build
-
-#+begin_src text :tangle ../build/libeyeTest/commands.txt
-
-wait 2; map map01; wait 2; quit
-#+end_src
-
-#+begin_src elisp :exports none
-(compile "cd ..; scons -Q libeyeTest")
 #+end_src

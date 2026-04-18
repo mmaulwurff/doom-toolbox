@@ -7408,14 +7408,11 @@ private tt_Expectation _mock_%2$s_expectation;
 ") return-type function-name parameters)
 #+end_src
 
-* Run Tests :noexport:
+** Run
 
 Note: ~sv_fastweapons~ is for ~tt_Firer~ test.
 
 #+begin_src text :tangle build/Typist.pk3Test/commands.txt
-wait 2; map map01; sv_fastweapons 2; wait 2; netevent test:tt_Test; wait 2; quit
-#+end_src
 
-#+begin_src elisp
-(compile "scons -Q Typist.pk3Test")
+wait 2; map map01; sv_fastweapons 2; wait 2; netevent test:tt_Test; wait 2; quit
 #+end_src

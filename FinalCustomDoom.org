@@ -1379,7 +1379,3 @@ class cde_Effects
 wait 2; openmenu cd_menu
 wait 2; quit
 #+end_src
-
-#+begin_src elisp :exports none
-(compile "scons -Q FinalCustomDoomTest")
-#+end_src

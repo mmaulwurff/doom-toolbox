@@ -366,8 +366,6 @@ class nat_EventHandler : StaticEventHandler
 }
 #+end_src
 
-* Run tests :noexport:
-
 #+name: init-wait
 #+begin_src elisp
 (setq wait-delay 0)
@@ -386,8 +384,4 @@ class nat_EventHandler : StaticEventHandler
 <<wait(2)>>; na_rename nat_NamelessToRename Renamed To Several Words
 <<wait(2)>>; summon nat_NamelessToRename
 <<wait(9)>>; quit
-#+end_src
-
-#+begin_src elisp
-(compile "scons -Q NominaTest")
 #+end_src

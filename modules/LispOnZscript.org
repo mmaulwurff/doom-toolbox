@@ -146,6 +146,10 @@ class tl_Test
 }
 #+end_src
 
+#+begin_src text :tangle ../build/LispOnZscriptTest/commands.txt
+wait 2; map map01; wait 2; netevent lisp-test; wait 2; quit
+#+end_src
+
 #+begin_src c :tangle ../build/LispOnZscript/mapinfo.txt
 
 // <<license>>
@@ -1209,14 +1213,4 @@ class tl_Globals
                                        rhs.getClassName()));
   }
 }
-#+end_src
-
-* Run
-
-#+begin_src text :tangle ../build/LispOnZscriptTest/commands.txt
-wait 2; map map01; wait 2; netevent lisp-test; wait 2; quit
-#+end_src
-
-#+begin_src elisp :exports none
-(compile "cd ..; scons -Q LispOnZscriptTest")
 #+end_src
