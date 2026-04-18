@@ -1,0 +1,373 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: TargetSpy
+# #+version: v3.0.0
+
+* About
+
+* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+name: license
+#+begin_src text
+SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+* Source
+
+** ~TargetSpyClass~
+
+TargetSpy can be extended by declaring classes as ~TargetSpyClass~. These classes are
+not meant to be instantiated, only their static functions are used.
+
+To be detected by TargetSpy, a class must:
+- inherit Actor,
+- have ~TargetSpyClass~ in its name,
+- have ~static string getName()~ function that returns a string that describes
+  this ~TargetSpyclass~, it will be visible to players in menus,
+- have a specific function, see below.
+
+There are four types of ~TargetSpyClass~:
+1. Finders find targets. They must have ~static void find(out ts_Target)~ function.
+2. Filters remove unwanted targets.
+3. Informers collect information about a target. They must have ~static void
+   makeInformation(ts_Target, out ts_InformationPiece)~ function.
+4. Views display information. They must have have ~static ui void draw(out
+   Array<ts_InformationPiece>)~ function.
+
+** Target
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
+
+class ts_Target
+{
+  Actor anActor;
+  // TODO: add lines and flats?
+
+  bool isEmpty() const { return anActor == NULL; }
+}
+#+end_src
+
+** InformationPiece
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
+
+class ts_InformationPiece
+{
+  enum _
+  {
+    KindEmpty,
+    KindPlainText,
+    KindValue,
+    KindValueAndMax,
+    KindCoordinates,
+  }
+
+  int kind;
+  string text;
+  int value;
+  int max;
+  vector3 coordinates;
+}
+#+end_src
+
+** Event handler
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_EventHandler : StaticEventHandler
+{
+  override void onRegister()
+  {
+    collectClasses();
+  }
+
+  override void worldTick()
+  {
+    // TODO: reset mCurrentTarget on map change.
+    // TODO: add titlemap check.
+    if (players[consolePlayer].mo == NULL) return;
+
+    findTargets();
+    filterTargets();
+    chooseCurrentTarget();
+    collectInformation();
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    if (players[consolePlayer].mo == NULL) return;
+
+    int viewsCount = mViews.size();
+    for (int i = 0; i < viewsCount; ++i)
+    {
+      mViews[i].call(mInformationPieces);
+    }
+  }
+
+  private void findTargets()
+  {
+    int findersCount = mFinders.size();
+    for (int i = 0; i < findersCount; ++i)
+    {
+      mTargets[i].anActor = NULL;
+      mFinders[i].call(mTargets[i]);
+    }
+  }
+
+  private void filterTargets()
+  {
+    // TODO: implement
+  }
+
+  private void chooseCurrentTarget()
+  {
+    ts_Target closestTarget = NULL;
+    double minDistance = double.max;
+    foreach (target : mTargets)
+    {
+      if (target.isEmpty()) continue;
+      double distance = distanceTo(target);
+      if (distance < minDistance)
+      {
+        closestTarget = target;
+        minDistance = distance;
+      }
+    }
+
+    // TODO: keep old mCurrentTarget until timeout expires.
+    mCurrentTarget = closestTarget;
+  }
+
+  private void collectInformation()
+  {
+    int informersCount = mInformers.size();
+    for (int i = 0; i < informersCount; ++i)
+      mInformationPieces[i].kind = ts_InformationPiece.KindEmpty;
+
+    if (mCurrentTarget == NULL) return;
+
+    for (int i = 0; i < informersCount; ++i)
+    {
+      mInformers[i].call(mCurrentTarget, mInformationPieces[i]);
+    }
+  }
+
+  private void collectClasses()
+  {
+    foreach (aClass : AllActorClasses)
+    {
+      string className = aClass.getClassName();
+      if (className.indexOf("TargetSpyClass") == -1) continue;
+
+      let namer = (Function<play string()>)(findFunction(aClass, "getName"));
+      if (namer == NULL)
+        Console.printf("%s: TargetSpyClass without getName", className);
+
+      string name = namer.call();
+
+      if (!tryAddFinder(aClass, name)
+          && !tryAddInformer(aClass, name)
+          && !tryAddView(aClass, name))
+        Console.printf("%s: unknown TargetSpyClass", className);
+    }
+  }
+
+  private bool tryAddFinder(class<Object> aClass, string name)
+  {
+    let finder = (Function<play void(out ts_Target)>)(findFunction(aClass, "find"));
+    if (finder != NULL)
+    {
+      mFinders.push(finder);
+      mFinderNames.push(name);
+      mFinderClassNames.push(aClass.getClassName());
+      mTargets.push(new("ts_Target"));
+    }
+    return finder != NULL;
+  }
+
+  private bool tryAddInformer(class<Object> aClass, string name)
+  {
+    let informer = (Function<play void(ts_Target, out ts_InformationPiece)>)
+      (findFunction(aClass, "makeInformation"));
+    if (informer != NULL)
+    {
+      mInformers.push(informer);
+      mInformerNames.push(name);
+      mInformerClassNames.push(aClass.getClassName());
+      mInformationPieces.push(new("ts_InformationPiece"));
+    }
+    return informer != NULL;
+  }
+
+  private bool tryAddView(class<Object> aClass, string name)
+  {
+    let view = (Function<ui void(Array<ts_InformationPiece>)>)
+      (findFunction(aClass, "draw"));
+    if (view != NULL)
+    {
+      mViews.push(view);
+      mViewNames.push(name);
+      mViewClassNames.push(aClass.getClassName());
+    }
+    return view != NULL;
+  }
+
+  private static double distanceTo(ts_Target target)
+  {
+    if (target.anActor != NULL)
+      return players[consolePlayer].mo.distance3d(target.anActor);
+
+    return 0;
+  }
+
+  Array< Function<play void(out ts_Target)> > mFinders;
+  Array<string> mFinderNames;
+  Array<string> mFinderClassNames;
+  Array<ts_Target> mTargets;
+  ts_Target mCurrentTarget;
+
+  Array< Function<play void(ts_Target, out ts_InformationPiece)> > mInformers;
+  Array<string> mInformerNames;
+  Array<string> mInformerClassNames;
+  Array<ts_InformationPiece> mInformationPieces;
+
+  Array< Function<ui void(Array<ts_InformationPiece>)> > mViews;
+  Array<string> mViewNames;
+  Array<string> mViewClassNames;
+}
+#+end_src
+
+** Finders
+
+*** Actor finder
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+
+// TODO: rename this class.
+class ts_ActorFinderTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_ActorFinderName"; }
+
+  static void find(out ts_Target target)
+  {
+    PlayerInfo player = players[consolePlayer];
+    PlayerPawn pawn = player.mo;
+
+    // Try an easy way to get a target (also works with autoaim).
+    Actor aimTarget = pawn.aimTarget();
+
+    if (aimTarget != NULL)
+    {
+      target.anActor = aimTarget;
+      return;
+    }
+
+    // If target is not found by easy way, try the difficult way.
+    FLineTraceData lineTraceData;
+    double angle = pawn.angle;
+    double pitch = pawn.pitch;
+    double viewHeight = player.viewHeight;
+    // TODO: move 4000.0 to a constant?
+    pawn.lineTrace(angle, 4000.0, pitch, 0, viewHeight, 0.0, 0.0, lineTraceData);
+
+    target.anActor = lineTraceData.hitActor;
+  }
+}
+#+end_src
+
+** Filters
+
+TODO: add filters.
+
+** Informers
+
+*** Health informer
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class tt_HealthInformerTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_HealthInformerName"; }
+
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    result.kind = ts_InformationPiece.KindValue;
+    if (target.anActor != NULL) result.value = target.anActor.health;
+  }
+}
+#+end_src
+
+** Views
+
+*** Text view
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class tt_TextViewTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_TextViewName"; }
+
+  static ui void draw(Array<ts_InformationPiece> informationPieces)
+  {
+    int xCenter = Screen.getWidth() / 2;
+    int y = int(round(Screen.getHeight() * 0.2));
+    Font aFont = Font.findFont("NewSmallFont");
+
+    foreach (informationPiece : informationPieces)
+    {
+      string text = string.format("%d", informationPiece.value);
+      int x = xCenter - aFont.stringWidth(text);
+
+      if (informationPiece.kind == ts_InformationPiece.KindValue)
+      {
+        Screen.drawText(aFont,
+                        Font.CR_Gray,
+                        x,
+                        y,
+                        text,
+                        DTA_ScaleX,
+                        1.0,
+                        DTA_ScaleY,
+                        1.0,
+                        DTA_Alpha,
+                        1.0);
+      }
+    }
+  }
+}
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle build/TargetSpy/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "ts_EventHandler"
+}
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript.zs
+
+version 4.14.3
+
+<<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
+#+end_src
+
+* Tests
+
+#+begin_src c :tangle build/TargetSpyTest/zscript.zs
+
+version 4.14.3
+
+<<tools/scripts.org:include("TargetSpy.org", "build/TargetSpyTest/\\(zscript/.*zs\\)")>>
+#+end_src
+
+#+begin_src text :tangle build/TargetSpyTest/commands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
