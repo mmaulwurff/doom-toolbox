@@ -208,12 +208,10 @@ class ts_EventHandler : StaticEventHandler
       for (int i = 0; i < filtersCount; ++i)
       {
         if (!ts_ClassToggle.isEnabled(mFilterClasses.classes[i])) continue;
+        if (mFilters[i].call(target)) continue;
 
-        if (!mFilters[i].call(target))
-        {
-          target.clear();
-          break;
-        }
+        target.clear();
+        break;
       }
     }
   }
@@ -577,41 +575,24 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   private string mClass;
 }
 
-class ts_FinderToggles : ts_ClassToggles
-{
-  override void init(Menu parent, OptionMenuDescriptor descriptor)
-  {
-    Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().getFinderClasses());
-  }
-}
+<<define-toggles("ts_FinderToggles",   "getFinderClasses")>>
+<<define-toggles("ts_FilterToggles",   "getFilterClasses")>>
+<<define-toggles("ts_InformerToggles", "getInformerClasses")>>
+<<define-toggles("ts_ViewToggles",     "getViewClasses")>>
+#+end_src
 
-class ts_FilterToggles : ts_ClassToggles
-{
-  override void init(Menu parent, OptionMenuDescriptor descriptor)
-  {
-    Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().getFilterClasses());
-  }
-}
+#+name: define-toggles
+#+begin_src elisp :var definition-name="" classes-getter="" :exports none
 
-class ts_InformerToggles : ts_ClassToggles
+(format "
+class %s : ts_ClassToggles
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
     Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().getInformerClasses());
+    Super.fill(ts_EventHandler.getInstance().%s());
   }
-}
-
-class ts_ViewToggles : ts_ClassToggles
-{
-  override void init(Menu parent, OptionMenuDescriptor descriptor)
-  {
-    Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().getViewClasses());
-  }
-}
+}" definition-name classes-getter)
 #+end_src
 
 * Project setup
