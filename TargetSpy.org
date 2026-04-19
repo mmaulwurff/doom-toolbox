@@ -17,6 +17,46 @@ SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
+* Menu
+
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+
+AddOptionMenu OptionsMenu       { Submenu "$ts_OptionsTitle", ts_Options }
+AddOptionMenu OptionsMenuSimple { Submenu "$ts_OptionsTitle", ts_Options }
+
+OptionMenu ts_Options
+{
+  Title "$ts_OptionsTitle"
+
+  Submenu "Finders",   ts_FinderOptions
+  Submenu "Filters",   ts_FilterOptions
+  Submenu "Informers", ts_InformerOptions
+  Submenu "Views",     ts_ViewOptions
+}
+
+OptionMenu ts_FinderOptions
+{
+  Class ts_FinderOptions
+  Title "Finder Options"
+}
+
+OptionMenu ts_FilterOptions
+{
+}
+
+OptionMenu ts_InformerOptions
+{
+  Class ts_InformerOptions
+  Title "Informer Options"
+}
+
+OptionMenu ts_ViewOptions
+{
+  Class ts_ViewOptions
+  Title "View Options"
+}
+#+end_src
+
 * Source
 
 ** ~TargetSpyClass~
@@ -39,7 +79,9 @@ There are four types of ~TargetSpyClass~:
 4. Views display information. They must have have ~static ui void draw(out
    Array<ts_InformationPiece>)~ function.
 
-** Target
+** Common types
+
+*** Target
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
 
@@ -52,7 +94,7 @@ class ts_Target
 }
 #+end_src
 
-** InformationPiece
+*** Information piece
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
 
@@ -72,6 +114,17 @@ class ts_InformationPiece
   int value;
   int max;
   vector3 coordinates;
+}
+#+end_src
+
+*** ~TargetSpyClasses~
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
+
+class ts_Classes
+{
+  Array<string> classes;
+  Array<string> names;
 }
 #+end_src
 
@@ -105,9 +158,19 @@ class ts_EventHandler : StaticEventHandler
     int viewsCount = mViews.size();
     for (int i = 0; i < viewsCount; ++i)
     {
-      mViews[i].call(mInformationPieces);
+      if (ts_ClassToggle.isEnabled(mViewClasses.classes[i]))
+        mViews[i].call(mInformationPieces);
     }
   }
+
+  static clearscope ts_EventHandler getInstance()
+  {
+    return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
+  }
+
+  clearscope ts_Classes getFinderClasses()   { return mFinderClasses; }
+  clearscope ts_Classes getInformerClasses() { return mInformerClasses; }
+  clearscope ts_Classes getViewClasses()     { return mViewClasses; }
 
   private void findTargets()
   {
@@ -115,7 +178,8 @@ class ts_EventHandler : StaticEventHandler
     for (int i = 0; i < findersCount; ++i)
     {
       mTargets[i].anActor = NULL;
-      mFinders[i].call(mTargets[i]);
+      if (ts_ClassToggle.isEnabled(mFinderClasses.classes[i]))
+        mFinders[i].call(mTargets[i]);
     }
   }
 
@@ -153,12 +217,17 @@ class ts_EventHandler : StaticEventHandler
 
     for (int i = 0; i < informersCount; ++i)
     {
-      mInformers[i].call(mCurrentTarget, mInformationPieces[i]);
+      if (ts_ClassToggle.isEnabled(mInformerClasses.classes[i]))
+        mInformers[i].call(mCurrentTarget, mInformationPieces[i]);
     }
   }
 
   private void collectClasses()
   {
+    mFinderClasses   = new("ts_Classes");
+    mInformerClasses = new("ts_Classes");
+    mViewClasses     = new("ts_Classes");
+
     foreach (aClass : AllActorClasses)
     {
       string className = aClass.getClassName();
@@ -183,8 +252,8 @@ class ts_EventHandler : StaticEventHandler
     if (finder != NULL)
     {
       mFinders.push(finder);
-      mFinderNames.push(name);
-      mFinderClassNames.push(aClass.getClassName());
+      mFinderClasses.classes.push(aClass.getClassName());
+      mFinderClasses.names.push(name);
       mTargets.push(new("ts_Target"));
     }
     return finder != NULL;
@@ -197,8 +266,8 @@ class ts_EventHandler : StaticEventHandler
     if (informer != NULL)
     {
       mInformers.push(informer);
-      mInformerNames.push(name);
-      mInformerClassNames.push(aClass.getClassName());
+      mInformerClasses.classes.push(aClass.getClassName());
+      mInformerClasses.names.push(name);
       mInformationPieces.push(new("ts_InformationPiece"));
     }
     return informer != NULL;
@@ -211,8 +280,8 @@ class ts_EventHandler : StaticEventHandler
     if (view != NULL)
     {
       mViews.push(view);
-      mViewNames.push(name);
-      mViewClassNames.push(aClass.getClassName());
+      mViewClasses.classes.push(aClass.getClassName());
+      mViewClasses.names.push(name);
     }
     return view != NULL;
   }
@@ -226,19 +295,16 @@ class ts_EventHandler : StaticEventHandler
   }
 
   Array< Function<play void(out ts_Target)> > mFinders;
-  Array<string> mFinderNames;
-  Array<string> mFinderClassNames;
+  ts_Classes mFinderClasses;
   Array<ts_Target> mTargets;
   ts_Target mCurrentTarget;
 
   Array< Function<play void(ts_Target, out ts_InformationPiece)> > mInformers;
-  Array<string> mInformerNames;
-  Array<string> mInformerClassNames;
+  ts_Classes mInformerClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
   Array< Function<ui void(Array<ts_InformationPiece>)> > mViews;
-  Array<string> mViewNames;
-  Array<string> mViewClassNames;
+  ts_Classes mViewClasses;
 }
 #+end_src
 
@@ -342,6 +408,91 @@ class tt_TextViewTargetSpyClass : Actor
 }
 #+end_src
 
+** Menu classes
+
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user string ts_classes = "";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+
+class ts_ClassToggles : OptionMenu
+{
+  void fill(ts_Classes classes)
+  {
+    mDesc.mItems.clear();
+    int classesCount = classes.classes.size();
+    for (int i = 0; i < classesCount; ++i)
+    {
+      let toggle = new("ts_ClassToggle");
+      toggle.initialize(classes.names[i], classes.classes[i]);
+      mDesc.mItems.push(toggle);
+    }
+    mDesc.mSelectedItem = 0;
+  }
+}
+
+class ts_ClassToggle : OptionMenuItemOptionBase
+{
+  void initialize(string label, string aClass)
+  {
+    mClass = aClass;
+    Super.init(label, '', "OnOff", NULL, 0);
+  }
+
+  override int getSelection()
+  {
+    return isEnabled(mClass);
+  }
+
+  static clearscope bool isEnabled(string className)
+  {
+    let toggles = Dictionary.fromString(Cvar.findCvar("ts_classes").getString());
+    string value = toggles.at(className);
+    bool isEnabled = value.length() == 0 ? true : value.toInt();
+    return isEnabled;
+  }
+
+  override void setSelection(int selection)
+  {
+    let cvar = Cvar.findCvar("ts_classes");
+    let toggles = Dictionary.fromString(cvar.getString());
+    toggles.insert(mClass, string.format("%d", selection));
+    cvar.setString(toggles.toString());
+  }
+
+  private string mClass;
+}
+
+class ts_FinderOptions : ts_ClassToggles
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    Super.init(parent, descriptor);
+    Super.fill(ts_EventHandler.getInstance().getFinderClasses());
+  }
+}
+
+class ts_InformerOptions : ts_ClassToggles
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    Super.init(parent, descriptor);
+    Super.fill(ts_EventHandler.getInstance().getInformerClasses());
+  }
+}
+
+class ts_ViewOptions : ts_ClassToggles
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    Super.init(parent, descriptor);
+    Super.fill(ts_EventHandler.getInstance().getViewClasses());
+  }
+}
+#+end_src
+
 * Project setup
 
 #+begin_src c :tangle build/TargetSpy/mapinfo.txt
@@ -357,6 +508,15 @@ GameInfo
 version 4.14.3
 
 <<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
+#+end_src
+
+* Strings
+
+#+begin_src c :tangle build/TargetSpy/language.txt
+
+[enu default]
+
+ts_OptionsTitle = "Target Spy \cd⌖";
 #+end_src
 
 * Tests
