@@ -19,6 +19,10 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Options
 
+#+begin_src c :noweb-ref strings
+ts_OptionsTitle = "Target Spy \cd⌖";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$ts_OptionsTitle", ts_Options }
@@ -70,8 +74,6 @@ not meant to be instantiated, only their static functions are used.
 To be detected by TargetSpy, a class must:
 - inherit Actor,
 - have ~TargetSpyClass~ in its name,
-- have ~static string getName()~ function that returns a string that describes
-  this ~TargetSpyclass~, it will be visible to players in menus,
 - have a specific function, see below.
 
 There are four types of ~TargetSpyClass~:
@@ -82,6 +84,9 @@ There are four types of ~TargetSpyClass~:
    makeInformation(ts_Target, out ts_InformationPiece)~ function.
 4. Views display information. They must have have ~static ui void draw(out
    Array<ts_InformationPiece>)~ function.
+
+~TargetSpyClass~ classes can have a translatable user string defined in ~LANGUAGE~
+lump. The string key is simply a class name.
 
 ** Common types
 
@@ -133,7 +138,6 @@ class ts_InformationPiece
 class ts_Classes
 {
   Array<string> classes;
-  Array<string> names;
 }
 #+end_src
 
@@ -262,46 +266,38 @@ class ts_EventHandler : StaticEventHandler
       string className = aClass.getClassName();
       if (className.indexOf("TargetSpyClass") == -1) continue;
 
-      let namer = (Function<play string()>)(findFunction(aClass, "getName"));
-      if (namer == NULL)
-        Console.printf("%s: TargetSpyClass without getName", className);
-
-      string name = namer.call();
-
-      if (!tryAddFinder(aClass, name)
-          && !tryAddFilter(aClass, name)
-          && !tryAddInformer(aClass, name)
-          && !tryAddView(aClass, name))
+      if (!tryAddFinder(aClass)
+          && !tryAddFilter(aClass)
+          && !tryAddInformer(aClass)
+          && !tryAddView(aClass))
         Console.printf("%s: unknown TargetSpyClass", className);
     }
   }
 
-  private bool tryAddFinder(class<Object> aClass, string name)
+  private bool tryAddFinder(class<Object> aClass)
   {
     let finder = (Function<play void(out ts_Target)>)(findFunction(aClass, "find"));
     if (finder != NULL)
     {
       mFinders.push(finder);
       mFinderClasses.classes.push(aClass.getClassName());
-      mFinderClasses.names.push(name);
       mTargets.push(new("ts_Target"));
     }
     return finder != NULL;
   }
 
-  private bool tryAddFilter(class<Object> aClass, string name)
+  private bool tryAddFilter(class<Object> aClass)
   {
     let filter = (Function<play bool(ts_Target)>)(findFunction(aClass, "isAllowed"));
     if (filter != NULL)
     {
       mFilters.push(filter);
       mFilterClasses.classes.push(aClass.getClassName());
-      mFilterClasses.names.push(name);
     }
     return filter != NULL;
   }
 
-  private bool tryAddInformer(class<Object> aClass, string name)
+  private bool tryAddInformer(class<Object> aClass)
   {
     let informer = (Function<play void(ts_Target, out ts_InformationPiece)>)
       (findFunction(aClass, "makeInformation"));
@@ -309,13 +305,12 @@ class ts_EventHandler : StaticEventHandler
     {
       mInformers.push(informer);
       mInformerClasses.classes.push(aClass.getClassName());
-      mInformerClasses.names.push(name);
       mInformationPieces.push(new("ts_InformationPiece"));
     }
     return informer != NULL;
   }
 
-  private bool tryAddView(class<Object> aClass, string name)
+  private bool tryAddView(class<Object> aClass)
   {
     let view = (Function<ui void(Array<ts_InformationPiece>)>)
       (findFunction(aClass, "draw"));
@@ -323,7 +318,6 @@ class ts_EventHandler : StaticEventHandler
     {
       mViews.push(view);
       mViewClasses.classes.push(aClass.getClassName());
-      mViewClasses.names.push(name);
     }
     return view != NULL;
   }
@@ -358,13 +352,15 @@ class ts_EventHandler : StaticEventHandler
 
 *** Actor finder
 
+#+begin_src c :noweb-ref strings
+ts_ActorFinderTargetSpyClass = "Actors";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
 // TODO: rename this class.
 class ts_ActorFinderTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_ActorFinderName"; }
-
   static void find(out ts_Target target)
   {
     PlayerInfo player = players[consolePlayer];
@@ -394,12 +390,14 @@ class ts_ActorFinderTargetSpyClass : Actor
 
 ** Filters
 
+#+begin_src c :noweb-ref strings
+ts_MonstersOnlyTargetSpyClass = "Monsters only";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class ts_MonstersOnlyTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_MonstersOnlyName"; }
-
   static bool isAllowed(ts_Target target)
   {
     if (target.anActor != NULL)
@@ -414,12 +412,14 @@ class ts_MonstersOnlyTargetSpyClass : Actor
 
 *** Health
 
+#+begin_src c :noweb-ref strings
+tt_PlainHealthInformerTargetSpyClass = "Health (value)";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
-class tt_HealthInformerTargetSpyClass : Actor
+class tt_PlainHealthInformerTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_HealthInformerName"; }
-
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
     if (target.anActor == NULL) return;
@@ -431,12 +431,14 @@ class tt_HealthInformerTargetSpyClass : Actor
 
 *** Class
 
+#+begin_src c :noweb-ref strings
+tt_ClassInformerTargetSpyClass = "Class name";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
 class tt_ClassInformerTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_ClassInformerName"; }
-
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
     if (target.anActor == NULL) return;
@@ -448,12 +450,14 @@ class tt_ClassInformerTargetSpyClass : Actor
 
 *** Tag
 
+#+begin_src c :noweb-ref strings
+tt_TagInformerTargetSpyClass = "Tag";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
 class tt_TagInformerTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_TagInformerName"; }
-
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
     if (target.anActor == NULL) return;
@@ -467,12 +471,14 @@ class tt_TagInformerTargetSpyClass : Actor
 
 *** Text view
 
+#+begin_src c :noweb-ref strings
+tt_TextViewTargetSpyClass = "Text";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
 class tt_TextViewTargetSpyClass : Actor
 {
-  static string getName() { return "$ts_TextViewName"; }
-
   static ui void draw(Array<ts_InformationPiece> informationPieces)
   {
     Font aFont = Font.findFont("NewSmallFont");
@@ -532,7 +538,7 @@ class ts_ClassToggles : OptionMenu
     for (int i = 0; i < classesCount; ++i)
     {
       let toggle = new("ts_ClassToggle");
-      toggle.initialize(classes.names[i], classes.classes[i]);
+      toggle.initialize(classes.classes[i]);
       mDesc.mItems.push(toggle);
     }
     mDesc.mSelectedItem = 0;
@@ -541,10 +547,10 @@ class ts_ClassToggles : OptionMenu
 
 class ts_ClassToggle : OptionMenuItemOptionBase
 {
-  void initialize(string label, string aClass)
+  void initialize(string aClass)
   {
     mClass = aClass;
-    Super.init(label, '', "OnOff", NULL, 0);
+    Super.init("$" .. aClass, '', "OnOff", NULL, 0);
   }
 
   override int getSelection()
@@ -625,13 +631,10 @@ version 4.14.3
 <<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
 #+end_src
 
-* Strings
-
 #+begin_src c :tangle build/TargetSpy/language.txt
 
 [enu default]
-
-ts_OptionsTitle = "Target Spy \cd⌖";
+<<strings>>
 #+end_src
 
 * Tests
