@@ -17,7 +17,7 @@ SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-* Menu
+* Options
 
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
@@ -28,32 +28,35 @@ OptionMenu ts_Options
 {
   Title "$ts_OptionsTitle"
 
-  Submenu "Finders",   ts_FinderOptions
-  Submenu "Filters",   ts_FilterOptions
-  Submenu "Informers", ts_InformerOptions
-  Submenu "Views",     ts_ViewOptions
+  StaticText "Toggles"
+  Submenu "Finders",   ts_FinderToggles
+  Submenu "Filters",   ts_FilterToggles
+  Submenu "Informers", ts_InformerToggles
+  Submenu "Views",     ts_ViewToggles
 }
 
-OptionMenu ts_FinderOptions
+OptionMenu ts_FinderToggles
 {
-  Class ts_FinderOptions
-  Title "Finder Options"
+  Class ts_FinderToggles
+  Title "Finder Toggles"
 }
 
-OptionMenu ts_FilterOptions
+OptionMenu ts_FilterToggles
 {
+  Class ts_FilterToggles
+  Title "Filter Toggles"
 }
 
-OptionMenu ts_InformerOptions
+OptionMenu ts_InformerToggles
 {
-  Class ts_InformerOptions
-  Title "Informer Options"
+  Class ts_InformerToggles
+  Title "Informer Toggles"
 }
 
-OptionMenu ts_ViewOptions
+OptionMenu ts_ViewToggles
 {
-  Class ts_ViewOptions
-  Title "View Options"
+  Class ts_ViewToggles
+  Title "View Toggles"
 }
 #+end_src
 
@@ -73,7 +76,8 @@ To be detected by TargetSpy, a class must:
 
 There are four types of ~TargetSpyClass~:
 1. Finders find targets. They must have ~static void find(out ts_Target)~ function.
-2. Filters remove unwanted targets.
+2. Filters remove unwanted targets. They must have ~static bool isAllowed(ts_Target)~
+   function.
 3. Informers collect information about a target. They must have ~static void
    makeInformation(ts_Target, out ts_InformationPiece)~ function.
 4. Views display information. They must have have ~static ui void draw(out
@@ -91,6 +95,11 @@ class ts_Target
   // TODO: add lines and flats?
 
   bool isEmpty() const { return anActor == NULL; }
+
+  void clear()
+  {
+    anActor = NULL;
+  }
 }
 #+end_src
 
@@ -169,6 +178,7 @@ class ts_EventHandler : StaticEventHandler
   }
 
   clearscope ts_Classes getFinderClasses()   { return mFinderClasses; }
+  clearscope ts_Classes getFilterClasses()   { return mFilterClasses; }
   clearscope ts_Classes getInformerClasses() { return mInformerClasses; }
   clearscope ts_Classes getViewClasses()     { return mViewClasses; }
 
@@ -185,7 +195,23 @@ class ts_EventHandler : StaticEventHandler
 
   private void filterTargets()
   {
-    // TODO: implement
+    int filtersCount = mFilters.size();
+
+    foreach (target : mTargets)
+    {
+      if (target.isEmpty()) continue;
+
+      for (int i = 0; i < filtersCount; ++i)
+      {
+        if (!ts_ClassToggle.isEnabled(mFilterClasses.classes[i])) continue;
+
+        if (!mFilters[i].call(target))
+        {
+          target.clear();
+          break;
+        }
+      }
+    }
   }
 
   private void chooseCurrentTarget()
@@ -225,6 +251,7 @@ class ts_EventHandler : StaticEventHandler
   private void collectClasses()
   {
     mFinderClasses   = new("ts_Classes");
+    mFilterClasses   = new("ts_Classes");
     mInformerClasses = new("ts_Classes");
     mViewClasses     = new("ts_Classes");
 
@@ -240,6 +267,7 @@ class ts_EventHandler : StaticEventHandler
       string name = namer.call();
 
       if (!tryAddFinder(aClass, name)
+          && !tryAddFilter(aClass, name)
           && !tryAddInformer(aClass, name)
           && !tryAddView(aClass, name))
         Console.printf("%s: unknown TargetSpyClass", className);
@@ -257,6 +285,18 @@ class ts_EventHandler : StaticEventHandler
       mTargets.push(new("ts_Target"));
     }
     return finder != NULL;
+  }
+
+  private bool tryAddFilter(class<Object> aClass, string name)
+  {
+    let filter = (Function<play bool(ts_Target)>)(findFunction(aClass, "isAllowed"));
+    if (filter != NULL)
+    {
+      mFilters.push(filter);
+      mFilterClasses.classes.push(aClass.getClassName());
+      mFilterClasses.names.push(name);
+    }
+    return filter != NULL;
   }
 
   private bool tryAddInformer(class<Object> aClass, string name)
@@ -297,6 +337,10 @@ class ts_EventHandler : StaticEventHandler
   Array< Function<play void(out ts_Target)> > mFinders;
   ts_Classes mFinderClasses;
   Array<ts_Target> mTargets;
+
+  Array< Function<play bool(ts_Target)> > mFilters;
+  ts_CLasses mFilterClasses;
+
   ts_Target mCurrentTarget;
 
   Array< Function<play void(ts_Target, out ts_InformationPiece)> > mInformers;
@@ -348,7 +392,21 @@ class ts_ActorFinderTargetSpyClass : Actor
 
 ** Filters
 
-TODO: add filters.
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class ts_MonstersOnlyTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_MonstersOnlyName"; }
+
+  static bool isAllowed(ts_Target target)
+  {
+    if (target.anActor != NULL)
+      return target.anActor.bIsMonster;
+
+    return false;
+  }
+}
+#+end_src
 
 ** Informers
 
@@ -465,7 +523,7 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   private string mClass;
 }
 
-class ts_FinderOptions : ts_ClassToggles
+class ts_FinderToggles : ts_ClassToggles
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
@@ -474,7 +532,16 @@ class ts_FinderOptions : ts_ClassToggles
   }
 }
 
-class ts_InformerOptions : ts_ClassToggles
+class ts_FilterToggles : ts_ClassToggles
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    Super.init(parent, descriptor);
+    Super.fill(ts_EventHandler.getInstance().getFilterClasses());
+  }
+}
+
+class ts_InformerToggles : ts_ClassToggles
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
@@ -483,7 +550,7 @@ class ts_InformerOptions : ts_ClassToggles
   }
 }
 
-class ts_ViewOptions : ts_ClassToggles
+class ts_ViewToggles : ts_ClassToggles
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
