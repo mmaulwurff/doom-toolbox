@@ -246,6 +246,8 @@ class ts_EventHandler : StaticEventHandler
       if (ts_ClassToggle.isEnabled(mInformerClasses.classes[i]))
         mInformers[i].call(mCurrentTarget, mInformationPieces[i]);
     }
+
+    // TODO: add priorities, sort information pieces according to priorities.
   }
 
   private void collectClasses()
@@ -410,7 +412,7 @@ class ts_MonstersOnlyTargetSpyClass : Actor
 
 ** Informers
 
-*** Health informer
+*** Health
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
@@ -420,8 +422,43 @@ class tt_HealthInformerTargetSpyClass : Actor
 
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
+    if (target.anActor == NULL) return;
     result.kind = ts_InformationPiece.KindValue;
-    if (target.anActor != NULL) result.value = target.anActor.health;
+    result.value = target.anActor.health;
+  }
+}
+#+end_src
+
+*** Class
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class tt_ClassInformerTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_ClassInformerName"; }
+
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind = ts_InformationPiece.KindPlainText;
+    result.text = target.anActor.getClassName();
+  }
+}
+#+end_src
+
+*** Tag
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class tt_TagInformerTargetSpyClass : Actor
+{
+  static string getName() { return "$ts_TagInformerName"; }
+
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind = ts_InformationPiece.KindPlainText;
+    result.text = target.anActor.getTag();
   }
 }
 #+end_src
@@ -438,30 +475,41 @@ class tt_TextViewTargetSpyClass : Actor
 
   static ui void draw(Array<ts_InformationPiece> informationPieces)
   {
+    Font aFont = Font.findFont("NewSmallFont");
     int xCenter = Screen.getWidth() / 2;
     int y = int(round(Screen.getHeight() * 0.2));
-    Font aFont = Font.findFont("NewSmallFont");
+    int lineHeight = aFont.getHeight();
 
     foreach (informationPiece : informationPieces)
     {
-      string text = string.format("%d", informationPiece.value);
-      int x = xCenter - aFont.stringWidth(text);
-
       if (informationPiece.kind == ts_InformationPiece.KindValue)
       {
-        Screen.drawText(aFont,
-                        Font.CR_Gray,
-                        x,
-                        y,
-                        text,
-                        DTA_ScaleX,
-                        1.0,
-                        DTA_ScaleY,
-                        1.0,
-                        DTA_Alpha,
-                        1.0);
+        drawText(string.format("%d", informationPiece.value), xCenter, y);
+        y += lineHeight;
+      }
+      else if (informationPiece.kind == ts_InformationPiece.KindPlainText)
+      {
+        drawText(informationPiece.text, xCenter, y);
+        y += lineHeight;
       }
     }
+  }
+
+  static ui void drawText(string text, int xCenter, int y)
+  {
+    Font aFont = Font.findFont("NewSmallFont");
+    int x = xCenter - aFont.stringWidth(text) / 2;
+    Screen.drawText(aFont,
+                    Font.CR_Gray,
+                    x,
+                    y,
+                    text,
+                    DTA_ScaleX,
+                    1.0,
+                    DTA_ScaleY,
+                    1.0,
+                    DTA_Alpha,
+                    1.0);
   }
 }
 #+end_src
