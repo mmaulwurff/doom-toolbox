@@ -411,7 +411,7 @@ class ts_MonstersOnlyTargetSpyClass : Actor
 *** Health
 
 #+begin_src c :noweb-ref strings
-tt_PlainHealthInformerTargetSpyClass = "Health (value)";
+tt_PlainHealthInformerTargetSpyClass = "Health (number)";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
@@ -423,6 +423,46 @@ class tt_PlainHealthInformerTargetSpyClass : Actor
     if (target.anActor == NULL) return;
     result.kind = ts_InformationPiece.KindValue;
     result.value = target.anActor.health;
+  }
+}
+#+end_src
+
+*** Health and max health
+
+#+begin_src c :noweb-ref strings
+tt_PlainHealthAndMaxInformerTargetSpyClass = "Health and max health (numbers)";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class tt_PlainHealthAndMaxInformerTargetSpyClass : Actor
+{
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind  = ts_InformationPiece.KindValueAndMax;
+    result.value = target.anActor.health;
+    result.max   = getActorMaxHealth(target.anActor);
+  }
+
+  static int getActorMaxHealth(Actor anActor)
+  {
+    if (anActor.player != NULL && anActor.player.mo != NULL)
+      return anActor.player.mo.getMaxHealth();
+
+    int result = anActor.spawnHealth();
+
+    string drpgToken = "DRPGMonsterStatsHandler";
+    bool isDRPG = (anActor.countInv(drpgToken) > 0);
+    if (isDRPG)
+      result = anActor.ACS_scriptCall("GetMonsterHealthMax");
+
+    string legendaryToken = "LDLegendaryMonsterToken";
+    bool isLegenDoom = (anActor.countInv(legendaryToken) > 0);
+    if (isLegenDoom && !isDRPG)
+      result *= Cvar.getCvar("LD_legendaryHealth").getInt() / 100;
+
+    return result;
   }
 }
 #+end_src
@@ -470,7 +510,7 @@ class tt_TagInformerTargetSpyClass : Actor
 *** Text view
 
 #+begin_src c :noweb-ref strings
-tt_TextViewTargetSpyClass = "Text";
+tt_TextViewTargetSpyClass = "Always text";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
@@ -484,16 +524,22 @@ class tt_TextViewTargetSpyClass : Actor
     int y = int(round(Screen.getHeight() * 0.2));
     int lineHeight = aFont.getHeight();
 
-    foreach (informationPiece : informationPieces)
+    foreach (piece : informationPieces)
     {
-      if (informationPiece.kind == ts_InformationPiece.KindValue)
+      if (piece.kind == ts_InformationPiece.KindValue)
       {
-        drawText(string.format("%d", informationPiece.value), xCenter, y);
+        drawText(string.format("%d", piece.value), xCenter, y);
         y += lineHeight;
       }
-      else if (informationPiece.kind == ts_InformationPiece.KindPlainText)
+      else if (piece.kind == ts_InformationPiece.KindPlainText)
       {
-        drawText(informationPiece.text, xCenter, y);
+        drawText(piece.text, xCenter, y);
+        y += lineHeight;
+      }
+      else if (piece.kind == ts_InformationPiece.KindValueAndMax)
+      {
+        let text = string.format("%d/%d", piece.value, piece.max);
+        drawText(text, xCenter, y);
         y += lineHeight;
       }
     }
