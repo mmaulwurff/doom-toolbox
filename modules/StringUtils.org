@@ -207,6 +207,40 @@ static clearscope void splitByWords(string text, out Array<string> words)
 }
 #+end_src
 
+*** ~highlight~
+
+Highlights a character inside a string with a color.
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope string highlight(string base, int index, int color)
+{
+  if (index < 0) return base;
+
+  int baseLength = base.length();
+  int letterCode;
+  int position = 0;
+  for (int i = 0; i < index && position < baseLength; ++i)
+    [letterCode, position] = base.getNextCodePoint(position);
+
+  if (position == baseLength) return base;
+
+  string left            = base.left(position);
+  [letterCode, position] = base.getNextCodePoint(position);
+  string right           = base.mid(position, base.length() - position);
+  int    colorCode       = NAMESPACE_Ascii.LATIN_SMALL_LETTER_A + color;
+
+  return string.format("%s\c%c%c\c-%s", left, colorCode, letterCode, right);
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+it("highlight -1",  Assert("мышь"       == su.highlight("мышь", -1, Font.CR_Tan)));
+it("highlight 0",   Assert("\cbм\c-ышь" == su.highlight("мышь",  0, Font.CR_Tan)));
+it("highlight 1",   Assert("м\cgы\c-шь" == su.highlight("мышь",  1, Font.CR_Red)));
+it("highlight end", Assert("мыш\cgь\c-" == su.highlight("мышь",  3, Font.CR_Red)));
+it("highlight 4" ,  Assert("мышь"       == su.highlight("мышь",  4, Font.CR_Tan)));
+#+end_src
+
 ** ~Description~
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs

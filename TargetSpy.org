@@ -37,6 +37,9 @@ OptionMenu ts_Options
   Submenu "Filters",   ts_FilterToggles
   Submenu "Informers", ts_InformerToggles
   Submenu "Views",     ts_ViewToggles
+
+  StaticText ""
+  Submenu "Bar options", ts_BarOptions
 }
 
 OptionMenu ts_FinderToggles
@@ -62,6 +65,41 @@ OptionMenu ts_ViewToggles
   Class ts_ViewToggles
   Title "View Toggles"
 }
+
+OptionMenu ts_BarOptions
+{
+  Title "Bar options"
+
+  ts_BarPreview 0
+  ts_BarPreview 25
+  ts_BarPreview 50
+  ts_BarPreview 75
+  ts_BarPreview 100
+  ts_BarPreview 101
+
+  StaticText ""
+  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter ts_text_filled_character_index
+  Slider "Empty character", ts_text_empty_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter ts_text_empty_character_index
+  TextField "Characters", ts_characters
+
+  StaticText ""
+  StaticText "Colors for filled characters"
+  Option "1-25%" ,  ts_text_filled_25_color,  TextColors
+  Option "26-50%",  ts_text_filled_50_color,  TextColors
+  Option "51-75%",  ts_text_filled_75_color,  TextColors
+  Option "76-100%", ts_text_filled_100_color, TextColors
+  Option "> 100%",  ts_text_filled_101_color, TextColors
+
+  StaticText ""
+  StaticText "Colors for empty characters"
+  Option "≤ 0",     ts_text_empty_0_color,   TextColors
+  Option "1-25%",   ts_text_empty_25_color,  TextColors
+  Option "26-50%",  ts_text_empty_50_color,  TextColors
+  Option "51-75%",  ts_text_empty_75_color,  TextColors
+  Option "76-100%", ts_text_empty_100_color, TextColors
+}
 #+end_src
 
 * Source
@@ -83,10 +121,79 @@ There are four types of ~TargetSpyClass~:
 3. Informers collect information about a target. They must have ~static void
    makeInformation(ts_Target, out ts_InformationPiece)~ function.
 4. Views display information. They must have have ~static ui void draw(out
-   Array<ts_InformationPiece>)~ function.
+   Array<ts_InformationPiece>, ts_Options)~ function.
 
 ~TargetSpyClass~ classes can have a translatable user string defined in ~LANGUAGE~
 lump. The string key is simply a class name.
+
+** Options
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+
+class ts_Options
+{
+  void initialize()
+  {
+    mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
+    mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
+    mCharactersCvar       = Cvar.findCvar("ts_characters");
+
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
+
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
+  }
+
+  int getFilledCharacter() const
+  {
+    return getCharacter(max(mFilledCharacterIndex.getInt(), 0));
+  }
+
+  int getEmptyCharacter() const
+  {
+    return getCharacter(max(mEmptyCharacterIndex.getInt(), 0));
+  }
+
+  int getFilledColor(int percent) const
+  {
+    return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
+  }
+
+  int getEmptyColor(int percent) const
+  {
+    return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
+  }
+
+  private int getCharacter(int index) const
+  {
+    string characters = mCharactersCvar.getString();
+    int charactersLength = characters.length();
+    int i = 0;
+    for (int position = 0; position < charactersLength; ++i)
+    {
+      int result;
+      [result, position] = characters.getNextCodePoint(position);
+      if (i == index) return result;
+    }
+
+    return ts_Ascii.FULL_STOP;
+  }
+
+  private Cvar mCharactersCvar;
+  private Cvar mFilledCharacterIndex;
+  private Cvar mEmptyCharacterIndex;
+
+  private Array<Cvar> mFilledColorCvars;
+  private Array<Cvar> mEmptyColorCvars;
+}
+#+end_src
 
 ** Common types
 
@@ -150,6 +257,7 @@ class ts_EventHandler : StaticEventHandler
 {
   override void onRegister()
   {
+    initializeOptions();
     collectClasses();
   }
 
@@ -186,6 +294,8 @@ class ts_EventHandler : StaticEventHandler
   clearscope ts_Classes getFilterClasses()   { return mFilterClasses; }
   clearscope ts_Classes getInformerClasses() { return mInformerClasses; }
   clearscope ts_Classes getViewClasses()     { return mViewClasses; }
+
+  clearscope ts_Options getOptions() { return mOptions; }
 
   private void findTargets()
   {
@@ -253,6 +363,12 @@ class ts_EventHandler : StaticEventHandler
     // TODO: add priorities, sort information pieces according to priorities.
   }
 
+  private void initializeOptions()
+  {
+    mOptions = new("ts_Options");
+    mOptions.initialize();
+  }
+
   private void collectClasses()
   {
     mFinderClasses   = new("ts_Classes");
@@ -269,7 +385,7 @@ class ts_EventHandler : StaticEventHandler
           && !tryAddFilter(aClass)
           && !tryAddInformer(aClass)
           && !tryAddView(aClass))
-        Console.printf("%s: unknown TargetSpyClass", className);
+        Console.printf("ERROR: %s: unknown TargetSpyClass", className);
     }
   }
 
@@ -328,6 +444,8 @@ class ts_EventHandler : StaticEventHandler
 
     return 0;
   }
+
+  ts_Options mOptions;
 
   Array< Function<play void(out ts_Target)> > mFinders;
   ts_Classes mFinderClasses;
@@ -582,16 +700,17 @@ class ts_TextViewTargetSpyClass : Actor
 
   static ui string makeBar(int value, int max)
   {
+    ts_Options options = ts_EventHandler.getInstance().getOptions();
     int length = int(round(log(max) * 2));
     int filledCount = (max < 1)
       ? 0
       : clamp(int(round(double(value) * length / max)), 0, length);
 
-    // TODO: make these customizable.
-    int filledColor = Font.CR_Green;
-    int emptyColor  = Font.CR_Red;
-    string filled = "█";
-    string empty  = "▒";
+    int percent = int(round(double(value) * 100 / max));
+    int filledColor = options.getFilledColor(percent);
+    int emptyColor  = options.getEmptyColor(percent);
+    string filled = string.format("%c", options.getFilledCharacter());
+    string empty  = string.format("%c", options.getEmptyCharacter());
 
     return string.format("\c%c%s\c%c%s",
                          SMALL_A + filledColor,
@@ -621,7 +740,33 @@ class ts_TextViewTargetSpyClass : Actor
 }
 #+end_src
 
+#+begin_src c :noweb-ref strings
+
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user string ts_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
+
+user int ts_text_filled_character_index = 0;
+user int ts_text_empty_character_index = 0;
+
+user int ts_text_filled_25_color  = 3; // green
+user int ts_text_filled_50_color  = 3;
+user int ts_text_filled_75_color  = 3;
+user int ts_text_filled_100_color = 3;
+user int ts_text_filled_101_color = 3;
+
+user int ts_text_empty_0_color    = 6; // red
+user int ts_text_empty_25_color   = 6;
+user int ts_text_empty_50_color   = 6;
+user int ts_text_empty_75_color   = 6;
+user int ts_text_empty_100_color  = 6;
+#+end_src
+
 ** Menu classes
+
+*** Toggles
 
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
@@ -696,6 +841,58 @@ class %s : ts_ClassToggles
     Super.fill(ts_EventHandler.getInstance().%s());
   }
 }" definition-name classes-getter)
+#+end_src
+
+*** Highlighted character static text
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+
+class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
+{
+	OptionMenuItemStaticText init(Name command)
+  {
+    mCvar = Cvar.findCvar(command);
+    mCharactersCvar = Cvar.findCvar("ts_characters");
+    return Super.init("", -1);
+  }
+
+	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+	{
+    string characters = mCharactersCvar.getString();
+    mLabel = ts_su.highlight(characters,
+                             clamp(mCvar.getInt(), 0, characters.length() - 1),
+                             Font.CR_Teal);
+    drawLabel(indent, y, Font.CR_White);
+    return -1;
+	}
+
+  private Cvar mCvar;
+  private Cvar mCharactersCvar;
+}
+#+end_src
+
+*** Bar preview
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+
+class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
+{
+	OptionMenuItemStaticText init(int percent)
+  {
+    mPercent = percent;
+    return Super.init("", -1);
+  }
+
+	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+	{
+    mLabel = ts_TextViewTargetSpyClass
+      .makeBar(int(round(double(mPercent) * 64 / 100)), 64);
+    drawLabel(indent, y, Font.CR_White);
+    return -1;
+	}
+
+  private int mPercent;
+}
 #+end_src
 
 * Project setup

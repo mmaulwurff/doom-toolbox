@@ -7098,25 +7098,9 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
   {
     int highlightedLetterIndex = _state / CHARACTER_TIMEOUT_TICS;
 
-    if (highlightedLetterIndex < _originalLength)
-    {
-      int letterCode;
-      int charPos = 0;
-      for (int i = 0; i < highlightedLetterIndex; ++i)
-      {
-        [letterCode, charPos] = _originalLabel.GetNextCodePoint(charPos);
-      }
-
-      string left           = _originalLabel.Left(charPos);
-      [letterCode, charPos] = _originalLabel.GetNextCodePoint(charPos);
-      string right          = _originalLabel.Mid(charPos, _originalLabel.Length() - charPos);
-
-      mLabel = string.format("%s\cd%c\c-%s", left, letterCode, right);
-    }
-    else
-    {
-      mLabel = _originalLabel;
-    }
+    mLabel = (highlightedLetterIndex < _originalLength)
+      ? tt_su_su.highlight(_originalLabel, highlightedLetterIndex, Font.CR_Green)
+      : _originalLabel;
 
     ++_state;
     if (_state >= _period)
