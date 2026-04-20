@@ -120,6 +120,7 @@ class ts_InformationPiece
     KindPlainText,
     KindValue,
     KindValueAndMax,
+    KindBar,
     KindCoordinates,
   }
 
@@ -408,44 +409,13 @@ class ts_MonstersOnlyTargetSpyClass : Actor
 
 ** Informers
 
-*** Health
-
-#+begin_src c :noweb-ref strings
-tt_PlainHealthInformerTargetSpyClass = "Health (number)";
-#+end_src
+*** Utilities
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
-class tt_PlainHealthInformerTargetSpyClass : Actor
+class ts_InformerUtilities
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
-  {
-    if (target.anActor == NULL) return;
-    result.kind = ts_InformationPiece.KindValue;
-    result.value = target.anActor.health;
-  }
-}
-#+end_src
-
-*** Health and max health
-
-#+begin_src c :noweb-ref strings
-tt_PlainHealthAndMaxInformerTargetSpyClass = "Health and max health (numbers)";
-#+end_src
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
-
-class tt_PlainHealthAndMaxInformerTargetSpyClass : Actor
-{
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
-  {
-    if (target.anActor == NULL) return;
-    result.kind  = ts_InformationPiece.KindValueAndMax;
-    result.value = target.anActor.health;
-    result.max   = getActorMaxHealth(target.anActor);
-  }
-
-  static int getActorMaxHealth(Actor anActor)
+  static play int getActorMaxHealth(Actor anActor)
   {
     if (anActor.player != NULL && anActor.player.mo != NULL)
       return anActor.player.mo.getMaxHealth();
@@ -467,15 +437,74 @@ class tt_PlainHealthAndMaxInformerTargetSpyClass : Actor
 }
 #+end_src
 
-*** Class
+*** Health
 
 #+begin_src c :noweb-ref strings
-tt_ClassInformerTargetSpyClass = "Class name";
+ts_PlainHealthInformerTargetSpyClass = "Health (number)";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
-class tt_ClassInformerTargetSpyClass : Actor
+class ts_PlainHealthInformerTargetSpyClass : Actor
+{
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind = ts_InformationPiece.KindValue;
+    result.value = target.anActor.health;
+  }
+}
+#+end_src
+
+*** Health and max health
+
+#+begin_src c :noweb-ref strings
+ts_PlainHealthAndMaxInformerTargetSpyClass = "Health and max health (numbers)";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class ts_PlainHealthAndMaxInformerTargetSpyClass : Actor
+{
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind  = ts_InformationPiece.KindValueAndMax;
+    result.value = target.anActor.health;
+    result.max   = ts_InformerUtilities.getActorMaxHealth(target.anActor);
+  }
+}
+#+end_src
+
+*** Health bar
+
+#+begin_src c :noweb-ref strings
+ts_HealthBarInformerTargetSpyClass = "Health bar";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class ts_HealthBarInformerTargetSpyClass : Actor
+{
+  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  {
+    if (target.anActor == NULL) return;
+    result.kind  = ts_InformationPiece.KindBar;
+    result.value = target.anActor.health;
+    result.max   = ts_InformerUtilities.getActorMaxHealth(target.anActor);
+  }
+}
+#+end_src
+
+*** Class
+
+#+begin_src c :noweb-ref strings
+ts_ClassInformerTargetSpyClass = "Class name";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class ts_ClassInformerTargetSpyClass : Actor
 {
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
@@ -489,12 +518,12 @@ class tt_ClassInformerTargetSpyClass : Actor
 *** Tag
 
 #+begin_src c :noweb-ref strings
-tt_TagInformerTargetSpyClass = "Tag";
+ts_TagInformerTargetSpyClass = "Tag";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
 
-class tt_TagInformerTargetSpyClass : Actor
+class ts_TagInformerTargetSpyClass : Actor
 {
   static void makeInformation(ts_Target target, out ts_InformationPiece result)
   {
@@ -510,12 +539,12 @@ class tt_TagInformerTargetSpyClass : Actor
 *** Text view
 
 #+begin_src c :noweb-ref strings
-tt_TextViewTargetSpyClass = "Always text";
+ts_TextViewTargetSpyClass = "Always text";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
-class tt_TextViewTargetSpyClass : Actor
+class ts_TextViewTargetSpyClass : Actor
 {
   static ui void draw(Array<ts_InformationPiece> informationPieces)
   {
@@ -542,7 +571,33 @@ class tt_TextViewTargetSpyClass : Actor
         drawText(text, xCenter, y);
         y += lineHeight;
       }
+      else if (piece.kind == ts_InformationPiece.KindBar)
+      {
+        let text = makeBar(piece.value, piece.max);
+        drawText(text, xCenter, y);
+        y += lineHeight;
+      }
     }
+  }
+
+  static ui string makeBar(int value, int max)
+  {
+    int length = int(round(log(max) * 2));
+    int filledCount = (max < 1)
+      ? 0
+      : clamp(int(round(double(value) * length / max)), 0, length);
+
+    // TODO: make these customizable.
+    int filledColor = Font.CR_Green;
+    int emptyColor  = Font.CR_Red;
+    string filled = "█";
+    string empty  = "▒";
+
+    return string.format("\c%c%s\c%c%s",
+                         SMALL_A + filledColor,
+                         ts_su.repeat(filled, filledCount),
+                         SMALL_A + emptyColor,
+                         ts_su.repeat(empty, length - filledCount));
   }
 
   static ui void drawText(string text, int xCenter, int y)
@@ -561,6 +616,8 @@ class tt_TextViewTargetSpyClass : Actor
                     DTA_Alpha,
                     1.0);
   }
+
+  const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
 }
 #+end_src
 
@@ -656,6 +713,8 @@ GameInfo
 version 4.14.3
 
 <<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
+
+#include "zscript/ts_StringUtils.zs"
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/language.txt
