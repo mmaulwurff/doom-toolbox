@@ -115,11 +115,11 @@ To be detected by TargetSpy, a class must:
 - have a specific function, see below.
 
 There are four types of ~TargetSpyClass~:
-1. Finders find targets. They must have ~static void find(out ts_Target)~ function.
-2. Filters remove unwanted targets. They must have ~static bool isAllowed(ts_Target)~
+1. Finders find targets. They must have ~static Actor find()~ function.
+2. Filters remove unwanted targets. They must have ~static bool isAllowed(Actor)~
    function.
 3. Informers collect information about a target. They must have ~static void
-   makeInformation(ts_Target, out ts_InformationPiece)~ function.
+   makeInformation(Actor, out ts_InformationPiece)~ function.
 4. Views display information. They must have have ~static ui void draw(out
    Array<ts_InformationPiece>, ts_Options)~ function.
 
@@ -197,45 +197,16 @@ class ts_Options
 
 ** Common types
 
-*** Target
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
-
-class ts_Target
-{
-  Actor anActor;
-  // TODO: add lines and flats?
-
-  bool isEmpty() const { return anActor == NULL; }
-
-  void clear()
-  {
-    anActor = NULL;
-  }
-}
-#+end_src
-
 *** Information piece
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
 
 class ts_InformationPiece
 {
-  enum _
-  {
-    KindEmpty,
-    KindPlainText,
-    KindValue,
-    KindValueAndMax,
-    KindBar,
-    KindCoordinates,
-  }
-
   int kind;
   string text;
   int value;
   int max;
-  vector3 coordinates;
 }
 #+end_src
 
@@ -255,6 +226,15 @@ class ts_Classes
 
 class ts_EventHandler : StaticEventHandler
 {
+  enum _
+  {
+    KindEmpty,
+    KindPlainText,
+    KindValue,
+    KindValueAndMax,
+    KindBar,
+  }
+
   override void onRegister()
   {
     initializeOptions();
@@ -302,26 +282,27 @@ class ts_EventHandler : StaticEventHandler
     int findersCount = mFinders.size();
     for (int i = 0; i < findersCount; ++i)
     {
-      mTargets[i].anActor = NULL;
-      if (ts_ClassToggle.isEnabled(mFinderClasses.classes[i]))
-        mFinders[i].call(mTargets[i]);
+      mTargets[i] = ts_ClassToggle.isEnabled(mFinderClasses.classes[i])
+        ? mFinders[i].call()
+        : NULL;
     }
   }
 
   private void filterTargets()
   {
     int filtersCount = mFilters.size();
+    int targetsCount = mTargets.size();
 
-    foreach (target : mTargets)
+    for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
     {
-      if (target.isEmpty()) continue;
+      if (mTargets[targetIndex] == NULL) continue;
 
       for (int i = 0; i < filtersCount; ++i)
       {
         if (!ts_ClassToggle.isEnabled(mFilterClasses.classes[i])) continue;
-        if (mFilters[i].call(target)) continue;
+        if (mFilters[i].call(mTargets[targetIndex])) continue;
 
-        target.clear();
+        mTargets[targetIndex] = NULL;
         break;
       }
     }
@@ -329,11 +310,11 @@ class ts_EventHandler : StaticEventHandler
 
   private void chooseCurrentTarget()
   {
-    ts_Target closestTarget = NULL;
+    Actor closestTarget = NULL;
     double minDistance = double.max;
     foreach (target : mTargets)
     {
-      if (target.isEmpty()) continue;
+      if (target == NULL) continue;
       double distance = distanceTo(target);
       if (distance < minDistance)
       {
@@ -350,14 +331,20 @@ class ts_EventHandler : StaticEventHandler
   {
     int informersCount = mInformers.size();
     for (int i = 0; i < informersCount; ++i)
-      mInformationPieces[i].kind = ts_InformationPiece.KindEmpty;
+      mInformationPieces[i].kind = KindEmpty;
 
     if (mCurrentTarget == NULL) return;
 
     for (int i = 0; i < informersCount; ++i)
     {
       if (ts_ClassToggle.isEnabled(mInformerClasses.classes[i]))
-        mInformers[i].call(mCurrentTarget, mInformationPieces[i]);
+      {
+        let [kind, text, value, max] = mInformers[i].call(mCurrentTarget);
+        mInformationPieces[i].kind  = kind;
+        mInformationPieces[i].text  = text;
+        mInformationPieces[i].value = value;
+        mInformationPieces[i].max   = max;
+      }
     }
 
     // TODO: add priorities, sort information pieces according to priorities.
@@ -391,19 +378,19 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddFinder(class<Object> aClass)
   {
-    let finder = (Function<play void(out ts_Target)>)(findFunction(aClass, "find"));
+    let finder = (Function<play Actor()>)(findFunction(aClass, "find"));
     if (finder != NULL)
     {
       mFinders.push(finder);
       mFinderClasses.classes.push(aClass.getClassName());
-      mTargets.push(new("ts_Target"));
+      mTargets.push(NULL);
     }
     return finder != NULL;
   }
 
   private bool tryAddFilter(class<Object> aClass)
   {
-    let filter = (Function<play bool(ts_Target)>)(findFunction(aClass, "isAllowed"));
+    let filter = (Function<play bool(Actor)>)(findFunction(aClass, "isAllowed"));
     if (filter != NULL)
     {
       mFilters.push(filter);
@@ -414,7 +401,7 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddInformer(class<Object> aClass)
   {
-    let informer = (Function<play void(ts_Target, out ts_InformationPiece)>)
+    let informer = (Function<play int, string, int, int(Actor)>)
       (findFunction(aClass, "makeInformation"));
     if (informer != NULL)
     {
@@ -437,26 +424,25 @@ class ts_EventHandler : StaticEventHandler
     return view != NULL;
   }
 
-  private static double distanceTo(ts_Target target)
+  private static double distanceTo(Actor anActor)
   {
-    if (target.anActor != NULL)
-      return players[consolePlayer].mo.distance3d(target.anActor);
-
-    return 0;
+    return (anActor != NULL)
+      ? players[consolePlayer].mo.distance3d(anActor)
+      : 0;
   }
 
   ts_Options mOptions;
 
-  Array< Function<play void(out ts_Target)> > mFinders;
+  Array< Function<play Actor()> > mFinders;
   ts_Classes mFinderClasses;
-  Array<ts_Target> mTargets;
+  Array<Actor> mTargets;
 
-  Array< Function<play bool(ts_Target)> > mFilters;
+  Array< Function<play bool(Actor)> > mFilters;
   ts_CLasses mFilterClasses;
 
-  ts_Target mCurrentTarget;
+  Actor mCurrentTarget;
 
-  Array< Function<play void(ts_Target, out ts_InformationPiece)> > mInformers;
+  Array< Function<play int, string, int, int(Actor)> > mInformers;
   ts_Classes mInformerClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
@@ -478,7 +464,7 @@ ts_ActorFinderTargetSpyClass = "Actors";
 // TODO: rename this class.
 class ts_ActorFinderTargetSpyClass : Actor
 {
-  static void find(out ts_Target target)
+  static Actor find()
   {
     PlayerInfo player = players[consolePlayer];
     PlayerPawn pawn = player.mo;
@@ -487,10 +473,7 @@ class ts_ActorFinderTargetSpyClass : Actor
     Actor aimTarget = pawn.aimTarget();
 
     if (aimTarget != NULL)
-    {
-      target.anActor = aimTarget;
-      return;
-    }
+      return aimTarget;
 
     // If target is not found by easy way, try the difficult way.
     FLineTraceData lineTraceData;
@@ -500,7 +483,7 @@ class ts_ActorFinderTargetSpyClass : Actor
     // TODO: move 4000.0 to a constant?
     pawn.lineTrace(angle, 4000.0, pitch, 0, viewHeight, 0.0, 0.0, lineTraceData);
 
-    target.anActor = lineTraceData.hitActor;
+    return lineTraceData.hitActor;
   }
 }
 #+end_src
@@ -515,12 +498,11 @@ ts_MonstersOnlyTargetSpyClass = "Monsters only";
 
 class ts_MonstersOnlyTargetSpyClass : Actor
 {
-  static bool isAllowed(ts_Target target)
+  static bool isAllowed(Actor anActor)
   {
-    if (target.anActor != NULL)
-      return target.anActor.bIsMonster;
-
-    return false;
+    return (anActor != NULL)
+      ? anActor.bIsMonster
+      : false;
   }
 }
 #+end_src
@@ -565,11 +547,10 @@ ts_PlainHealthInformerTargetSpyClass = "Health (number)";
 
 class ts_PlainHealthInformerTargetSpyClass : Actor
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  static int, string, int, int makeInformation(Actor anActor)
   {
-    if (target.anActor == NULL) return;
-    result.kind = ts_InformationPiece.KindValue;
-    result.value = target.anActor.health;
+    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    return ts_EventHandler.KindValue, "", anActor.health, 0;
   }
 }
 #+end_src
@@ -584,12 +565,11 @@ ts_PlainHealthAndMaxInformerTargetSpyClass = "Health and max health (numbers)";
 
 class ts_PlainHealthAndMaxInformerTargetSpyClass : Actor
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  static int, string, int, int makeInformation(Actor anActor)
   {
-    if (target.anActor == NULL) return;
-    result.kind  = ts_InformationPiece.KindValueAndMax;
-    result.value = target.anActor.health;
-    result.max   = ts_InformerUtilities.getActorMaxHealth(target.anActor);
+    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
+    return ts_EventHandler.KindValueAndMax, "", anActor.health, maxHealth;
   }
 }
 #+end_src
@@ -604,12 +584,11 @@ ts_HealthBarInformerTargetSpyClass = "Health bar";
 
 class ts_HealthBarInformerTargetSpyClass : Actor
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  static int, string, int, int makeInformation(Actor anActor)
   {
-    if (target.anActor == NULL) return;
-    result.kind  = ts_InformationPiece.KindBar;
-    result.value = target.anActor.health;
-    result.max   = ts_InformerUtilities.getActorMaxHealth(target.anActor);
+    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
+    return ts_EventHandler.KindBar, "", anActor.health, maxHealth;
   }
 }
 #+end_src
@@ -624,11 +603,10 @@ ts_ClassInformerTargetSpyClass = "Class name";
 
 class ts_ClassInformerTargetSpyClass : Actor
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  static int, string, int, int makeInformation(Actor anActor)
   {
-    if (target.anActor == NULL) return;
-    result.kind = ts_InformationPiece.KindPlainText;
-    result.text = target.anActor.getClassName();
+    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    return ts_EventHandler.KindPlainText, anActor.getClassName(), 0, 0;
   }
 }
 #+end_src
@@ -643,11 +621,10 @@ ts_TagInformerTargetSpyClass = "Tag";
 
 class ts_TagInformerTargetSpyClass : Actor
 {
-  static void makeInformation(ts_Target target, out ts_InformationPiece result)
+  static int, string, int, int makeInformation(Actor anActor)
   {
-    if (target.anActor == NULL) return;
-    result.kind = ts_InformationPiece.KindPlainText;
-    result.text = target.anActor.getTag();
+    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    return ts_EventHandler.KindPlainText, anActor.getTag(), 0, 0;
   }
 }
 #+end_src
@@ -673,23 +650,23 @@ class ts_TextViewTargetSpyClass : Actor
 
     foreach (piece : informationPieces)
     {
-      if (piece.kind == ts_InformationPiece.KindValue)
+      if (piece.kind == ts_EventHandler.KindValue)
       {
         drawText(string.format("%d", piece.value), xCenter, y);
         y += lineHeight;
       }
-      else if (piece.kind == ts_InformationPiece.KindPlainText)
+      else if (piece.kind == ts_EventHandler.KindPlainText)
       {
         drawText(piece.text, xCenter, y);
         y += lineHeight;
       }
-      else if (piece.kind == ts_InformationPiece.KindValueAndMax)
+      else if (piece.kind == ts_EventHandler.KindValueAndMax)
       {
         let text = string.format("%d/%d", piece.value, piece.max);
         drawText(text, xCenter, y);
         y += lineHeight;
       }
-      else if (piece.kind == ts_InformationPiece.KindBar)
+      else if (piece.kind == ts_EventHandler.KindBar)
       {
         let text = makeBar(piece.value, piece.max);
         drawText(text, xCenter, y);
