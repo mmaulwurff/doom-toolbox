@@ -118,10 +118,10 @@ There are four types of ~TargetSpyClass~:
 1. Finders find targets. They must have ~static Actor find()~ function.
 2. Filters remove unwanted targets. They must have ~static bool isAllowed(Actor)~
    function.
-3. Informers collect information about a target. They must have ~static void
-   makeInformation(Actor, out ts_InformationPiece)~ function.
+3. Informers collect information about a target. They must have ~static int, string,
+   int, int makeInformation(Actor)~ function.
 4. Views display information. They must have have ~static ui void draw(out
-   Array<ts_InformationPiece>, ts_Options)~ function.
+   Array<ts_InformationPiece>)~ function.
 
 ~TargetSpyClass~ classes can have a translatable user string defined in ~LANGUAGE~
 lump. The string key is simply a class name.
@@ -257,11 +257,15 @@ class ts_EventHandler : StaticEventHandler
   {
     if (players[consolePlayer].mo == NULL) return;
 
+    Array<string> disabledClasses;
+    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+
     int viewsCount = mViews.size();
     for (int i = 0; i < viewsCount; ++i)
     {
-      if (ts_ClassToggle.isEnabled(mViewClasses.classes[i]))
-        mViews[i].call(mInformationPieces);
+      bool isEnabled = disabledClasses.find(mViewClasses.classes[i])
+        == disabledClasses.size();
+      if (isEnabled) mViews[i].call(mInformationPieces);
     }
   }
 
@@ -279,12 +283,15 @@ class ts_EventHandler : StaticEventHandler
 
   private void findTargets()
   {
+    Array<string> disabledClasses;
+    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+
     int findersCount = mFinders.size();
     for (int i = 0; i < findersCount; ++i)
     {
-      mTargets[i] = ts_ClassToggle.isEnabled(mFinderClasses.classes[i])
-        ? mFinders[i].call()
-        : NULL;
+      bool isEnabled = disabledClasses.find(mFinderClasses.classes[i])
+        == disabledClasses.size();
+      mTargets[i] = isEnabled ? mFinders[i].call() : NULL;
     }
   }
 
@@ -293,13 +300,18 @@ class ts_EventHandler : StaticEventHandler
     int filtersCount = mFilters.size();
     int targetsCount = mTargets.size();
 
+    Array<string> disabledClasses;
+    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+
     for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
     {
       if (mTargets[targetIndex] == NULL) continue;
 
       for (int i = 0; i < filtersCount; ++i)
       {
-        if (!ts_ClassToggle.isEnabled(mFilterClasses.classes[i])) continue;
+        bool isEnabled = disabledClasses.find(mFilterClasses.classes[i])
+          == disabledClasses.size();
+        if (!isEnabled) continue;
         if (mFilters[i].call(mTargets[targetIndex])) continue;
 
         mTargets[targetIndex] = NULL;
@@ -335,9 +347,14 @@ class ts_EventHandler : StaticEventHandler
 
     if (mCurrentTarget == NULL) return;
 
+    Array<string> disabledClasses;
+    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+
     for (int i = 0; i < informersCount; ++i)
     {
-      if (ts_ClassToggle.isEnabled(mInformerClasses.classes[i]))
+      bool isEnabled = disabledClasses.find(mInformerClasses.classes[i])
+        == disabledClasses.size();
+      if (isEnabled)
       {
         let [kind, text, value, max] = mInformers[i].call(mCurrentTarget);
         mInformationPieces[i].kind  = kind;
@@ -354,6 +371,8 @@ class ts_EventHandler : StaticEventHandler
   {
     mOptions = new("ts_Options");
     mOptions.initialize();
+
+    mDisabledClassesCvar = Cvar.findCvar("ts_disabled_classes");
   }
 
   private void collectClasses()
@@ -432,6 +451,7 @@ class ts_EventHandler : StaticEventHandler
   }
 
   ts_Options mOptions;
+  Cvar mDisabledClassesCvar;
 
   Array< Function<play Actor()> > mFinders;
   ts_Classes mFinderClasses;
@@ -747,7 +767,7 @@ user int ts_text_empty_100_color  = 6;
 
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
-user string ts_classes = "";
+user string ts_disabled_classes = "";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
@@ -773,30 +793,34 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   void initialize(string aClass)
   {
     mClass = aClass;
+    mCvar  = Cvar.findCvar("ts_disabled_classes");
     Super.init("$" .. aClass, '', "OnOff", NULL, 0);
   }
 
   override int getSelection()
   {
-    return isEnabled(mClass);
-  }
-
-  static clearscope bool isEnabled(string className)
-  {
-    let toggles = Dictionary.fromString(Cvar.findCvar("ts_classes").getString());
-    string value = toggles.at(className);
-    bool isEnabled = value.length() == 0 ? true : value.toInt();
-    return isEnabled;
+    Array<string> parts;
+    mCvar.getString().split(parts, ",", TOK_SkipEmpty);
+    return parts.find(mClass) == parts.size();
   }
 
   override void setSelection(int selection)
   {
-    let cvar = Cvar.findCvar("ts_classes");
-    let toggles = Dictionary.fromString(cvar.getString());
-    toggles.insert(mClass, string.format("%d", selection));
-    cvar.setString(toggles.toString());
+    Array<string> parts;
+    mCvar.getString().split(parts, ",", TOK_SkipEmpty);
+    int found = parts.find(mClass);
+
+    if (selection == (found == parts.size())) return;
+
+    if (selection)
+      parts.delete(found);
+    else
+      parts.push(mClass);
+
+    mCvar.setString(ts_su.join(parts, ","));
   }
 
+  private Cvar   mCvar;
   private string mClass;
 }
 
