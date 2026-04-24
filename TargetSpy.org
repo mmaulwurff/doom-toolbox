@@ -36,7 +36,6 @@ OptionMenu ts_Options
   Submenu "Finders",   ts_FinderToggles
   Submenu "Filters",   ts_FilterToggles
   Submenu "Informers", ts_InformerToggles
-  Submenu "Views",     ts_ViewToggles
 
   StaticText ""
   Submenu "Bar options", ts_BarOptions
@@ -58,12 +57,6 @@ OptionMenu ts_InformerToggles
 {
   Class ts_InformerToggles
   Title "Informer Toggles"
-}
-
-OptionMenu ts_ViewToggles
-{
-  Class ts_ViewToggles
-  Title "View Toggles"
 }
 
 OptionMenu ts_BarOptions
@@ -120,8 +113,6 @@ There are four types of ~TargetSpyClass~:
    function.
 3. Informers collect information about a target. They must have ~static int, string,
    int, int makeInformation(Actor)~ function.
-4. Views display information. They must have have ~static ui void draw(out
-   Array<ts_InformationPiece>)~ function.
 
 ~TargetSpyClass~ classes can have a translatable user string defined in ~LANGUAGE~
 lump. The string key is simply a class name.
@@ -201,8 +192,21 @@ class ts_Options
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
 
+class ts_Kind
+{
+  enum _
+  {
+    Empty,
+    PlainText,
+    Value,
+    ValueAndMax,
+    Bar,
+  }
+}
+
 class ts_InformationPiece
 {
+  string id;
   int kind;
   string text;
   int value;
@@ -226,15 +230,6 @@ class ts_Classes
 
 class ts_EventHandler : StaticEventHandler
 {
-  enum _
-  {
-    KindEmpty,
-    KindPlainText,
-    KindValue,
-    KindValueAndMax,
-    KindBar,
-  }
-
   override void onRegister()
   {
     initializeOptions();
@@ -257,16 +252,7 @@ class ts_EventHandler : StaticEventHandler
   {
     if (players[consolePlayer].mo == NULL) return;
 
-    Array<string> disabledClasses;
-    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
-
-    int viewsCount = mViews.size();
-    for (int i = 0; i < viewsCount; ++i)
-    {
-      bool isEnabled = disabledClasses.find(mViewClasses.classes[i])
-        == disabledClasses.size();
-      if (isEnabled) mViews[i].call(mInformationPieces);
-    }
+    mView.call(mInformationPieces);
   }
 
   static clearscope ts_EventHandler getInstance()
@@ -277,7 +263,6 @@ class ts_EventHandler : StaticEventHandler
   clearscope ts_Classes getFinderClasses()   { return mFinderClasses; }
   clearscope ts_Classes getFilterClasses()   { return mFilterClasses; }
   clearscope ts_Classes getInformerClasses() { return mInformerClasses; }
-  clearscope ts_Classes getViewClasses()     { return mViewClasses; }
 
   clearscope ts_Options getOptions() { return mOptions; }
 
@@ -343,7 +328,7 @@ class ts_EventHandler : StaticEventHandler
   {
     int informersCount = mInformers.size();
     for (int i = 0; i < informersCount; ++i)
-      mInformationPieces[i].kind = KindEmpty;
+      mInformationPieces[i].kind = ts_Kind.Empty;
 
     if (mCurrentTarget == NULL) return;
 
@@ -357,6 +342,7 @@ class ts_EventHandler : StaticEventHandler
       if (isEnabled)
       {
         let [kind, text, value, max] = mInformers[i].call(mCurrentTarget);
+        mInformationPieces[i].id    = mInformerClasses.classes[i];
         mInformationPieces[i].kind  = kind;
         mInformationPieces[i].text  = text;
         mInformationPieces[i].value = value;
@@ -380,7 +366,6 @@ class ts_EventHandler : StaticEventHandler
     mFinderClasses   = new("ts_Classes");
     mFilterClasses   = new("ts_Classes");
     mInformerClasses = new("ts_Classes");
-    mViewClasses     = new("ts_Classes");
 
     foreach (aClass : AllActorClasses)
     {
@@ -433,13 +418,10 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddView(class<Object> aClass)
   {
+    // TODO: make sure external view always overrides the internal one.
     let view = (Function<ui void(Array<ts_InformationPiece>)>)
       (findFunction(aClass, "draw"));
-    if (view != NULL)
-    {
-      mViews.push(view);
-      mViewClasses.classes.push(aClass.getClassName());
-    }
+    if (view != NULL) mView = view;
     return view != NULL;
   }
 
@@ -466,8 +448,7 @@ class ts_EventHandler : StaticEventHandler
   ts_Classes mInformerClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
-  Array< Function<ui void(Array<ts_InformationPiece>)> > mViews;
-  ts_Classes mViewClasses;
+  Function<ui void(Array<ts_InformationPiece>)> mView;
 }
 #+end_src
 
@@ -569,8 +550,8 @@ class ts_PlainHealthInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
-    return ts_EventHandler.KindValue, "", anActor.health, 0;
+    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
+    return ts_Kind.Value, "", anActor.health, 0;
   }
 }
 #+end_src
@@ -587,9 +568,9 @@ class ts_PlainHealthAndMaxInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
-    return ts_EventHandler.KindValueAndMax, "", anActor.health, maxHealth;
+    return ts_Kind.ValueAndMax, "", anActor.health, maxHealth;
   }
 }
 #+end_src
@@ -606,9 +587,9 @@ class ts_HealthBarInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
+    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
-    return ts_EventHandler.KindBar, "", anActor.health, maxHealth;
+    return ts_Kind.Bar, "", anActor.health, maxHealth;
   }
 }
 #+end_src
@@ -625,8 +606,8 @@ class ts_ClassInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
-    return ts_EventHandler.KindPlainText, anActor.getClassName(), 0, 0;
+    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
+    return ts_Kind.PlainText, anActor.getClassName(), 0, 0;
   }
 }
 #+end_src
@@ -643,8 +624,8 @@ class ts_TagInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_EventHandler.KindEmpty, "", 0, 0;
-    return ts_EventHandler.KindPlainText, anActor.getTag(), 0, 0;
+    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
+    return ts_Kind.PlainText, anActor.getTag(), 0, 0;
   }
 }
 #+end_src
@@ -670,29 +651,23 @@ class ts_TextViewTargetSpyClass : Actor
 
     foreach (piece : informationPieces)
     {
-      if (piece.kind == ts_EventHandler.KindValue)
-      {
-        drawText(string.format("%d", piece.value), xCenter, y);
-        y += lineHeight;
-      }
-      else if (piece.kind == ts_EventHandler.KindPlainText)
-      {
-        drawText(piece.text, xCenter, y);
-        y += lineHeight;
-      }
-      else if (piece.kind == ts_EventHandler.KindValueAndMax)
-      {
-        let text = string.format("%d/%d", piece.value, piece.max);
-        drawText(text, xCenter, y);
-        y += lineHeight;
-      }
-      else if (piece.kind == ts_EventHandler.KindBar)
-      {
-        let text = makeBar(piece.value, piece.max);
-        drawText(text, xCenter, y);
-        y += lineHeight;
-      }
+      string text = toText(piece);
+      if (text.length() == 0) continue;
+      drawText(aFont, text, xCenter, y);
+      y += lineHeight;
     }
+  }
+
+  static private ui string toText(ts_InformationPiece piece)
+  {
+    switch (piece.kind)
+    {
+    case ts_Kind.PlainText:   return piece.text;
+    case ts_Kind.Value:       return string.format("%d", piece.value);
+    case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
+    case ts_Kind.Bar:         return makeBar(piece.value, piece.max);
+    }
+    return "";
   }
 
   static ui string makeBar(int value, int max)
@@ -716,9 +691,8 @@ class ts_TextViewTargetSpyClass : Actor
                          ts_su.repeat(empty, length - filledCount));
   }
 
-  static ui void drawText(string text, int xCenter, int y)
+  static private ui void drawText(Font aFont, string text, int xCenter, int y)
   {
-    Font aFont = Font.findFont("NewSmallFont");
     int x = xCenter - aFont.stringWidth(text) / 2;
     Screen.drawText(aFont,
                     Font.CR_Gray,
@@ -735,10 +709,6 @@ class ts_TextViewTargetSpyClass : Actor
 
   const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
 }
-#+end_src
-
-#+begin_src c :noweb-ref strings
-
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
@@ -827,7 +797,6 @@ class ts_ClassToggle : OptionMenuItemOptionBase
 <<define-toggles("ts_FinderToggles",   "getFinderClasses")>>
 <<define-toggles("ts_FilterToggles",   "getFilterClasses")>>
 <<define-toggles("ts_InformerToggles", "getInformerClasses")>>
-<<define-toggles("ts_ViewToggles",     "getViewClasses")>>
 #+end_src
 
 #+name: define-toggles
