@@ -222,16 +222,6 @@ class ts_InformationPiece
 }
 #+end_src
 
-*** ~ts_Classes~
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
-
-class ts_Classes
-{
-  Array<string> classes;
-}
-#+end_src
-
 ** Event handler
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
@@ -268,9 +258,9 @@ class ts_EventHandler : StaticEventHandler
     return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
   }
 
-  clearscope ts_Classes getFinders() { return mFinderClasses; }
-  clearscope ts_Classes getFilters() { return mFilterClasses; }
-  clearscope ts_Classes getGetters() { return mGetterClasses; }
+  clearscope void getFinders(out Array<string> result) { result.copy(mFinderClasses); }
+  clearscope void getFilters(out Array<string> result) { result.copy(mFilterClasses); }
+  clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
 
@@ -282,7 +272,7 @@ class ts_EventHandler : StaticEventHandler
     int findersCount = mFinders.size();
     for (int i = 0; i < findersCount; ++i)
     {
-      bool isEnabled = disabledClasses.find(mFinderClasses.classes[i])
+      bool isEnabled = disabledClasses.find(mFinderClasses[i])
         == disabledClasses.size();
       mTargets[i] = isEnabled ? mFinders[i].call() : NULL;
     }
@@ -302,7 +292,7 @@ class ts_EventHandler : StaticEventHandler
 
       for (int i = 0; i < filtersCount; ++i)
       {
-        bool isEnabled = disabledClasses.find(mFilterClasses.classes[i])
+        bool isEnabled = disabledClasses.find(mFilterClasses[i])
           == disabledClasses.size();
         if (!isEnabled) continue;
         if (mFilters[i].call(mTargets[targetIndex])) continue;
@@ -345,12 +335,12 @@ class ts_EventHandler : StaticEventHandler
 
     for (int i = 0; i < gettersCount; ++i)
     {
-      bool isEnabled = disabledClasses.find(mGetterClasses.classes[i])
+      bool isEnabled = disabledClasses.find(mGetterClasses[i])
         == disabledClasses.size();
       if (isEnabled)
       {
         let [kind, text, value, max] = mGetters[i].call(mCurrentTarget);
-        mInformationPieces[i].id    = mGetterClasses.classes[i];
+        mInformationPieces[i].id    = mGetterClasses[i];
         mInformationPieces[i].kind  = kind;
         mInformationPieces[i].text  = text;
         mInformationPieces[i].value = value;
@@ -373,10 +363,6 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectClasses()
   {
-    mFinderClasses = new("ts_Classes");
-    mFilterClasses = new("ts_Classes");
-    mGetterClasses = new("ts_Classes");
-
     foreach (aClass : AllActorClasses)
     {
       string className = aClass.getClassName();
@@ -398,9 +384,9 @@ class ts_EventHandler : StaticEventHandler
     warnTooLongList(mGetterClasses, "getters");
   }
 
-  private static void warnTooLongList(ts_Classes classes, string listName)
+  private static void warnTooLongList(out Array<string> classes, string listName)
   {
-    string disabledClasses = ts_su.join(classes.classes, ",");
+    string disabledClasses = ts_su.join(classes, ",");
     if (disabledClasses.length() > 256)
       Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
                      listName,
@@ -420,7 +406,7 @@ class ts_EventHandler : StaticEventHandler
     if (finder != NULL)
     {
       mFinders.push(finder);
-      mFinderClasses.classes.push(shorten(aClass.getClassName()));
+      mFinderClasses.push(shorten(aClass.getClassName()));
       mTargets.push(NULL);
     }
     return finder != NULL;
@@ -432,7 +418,7 @@ class ts_EventHandler : StaticEventHandler
     if (filter != NULL)
     {
       mFilters.push(filter);
-      mFilterClasses.classes.push(shorten(aClass.getClassName()));
+      mFilterClasses.push(shorten(aClass.getClassName()));
     }
     return filter != NULL;
   }
@@ -444,7 +430,7 @@ class ts_EventHandler : StaticEventHandler
     if (getter != NULL)
     {
       mGetters.push(getter);
-      mGetterClasses.classes.push(shorten(aClass.getClassName()));
+      mGetterClasses.push(shorten(aClass.getClassName()));
       mInformationPieces.push(new("ts_InformationPiece"));
     }
     return getter != NULL;
@@ -472,16 +458,16 @@ class ts_EventHandler : StaticEventHandler
   Cvar mDisabledGettersCvar;
 
   Array< Function<play Actor()> > mFinders;
-  ts_Classes mFinderClasses;
+  Array<string> mFinderClasses;
   Array<Actor> mTargets;
 
   Array< Function<play bool(Actor)> > mFilters;
-  ts_CLasses mFilterClasses;
+  Array<string> mFilterClasses;
 
   Actor mCurrentTarget;
 
   Array< Function<play int, string, int, int(Actor)> > mGetters;
-  ts_Classes mGetterClasses;
+  Array<string> mGetterClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
   Function<ui void(Array<ts_InformationPiece>)> mView;
@@ -984,14 +970,16 @@ user string ts_disabled_getters = "";
 
 class ts_ClassToggles : OptionMenu
 {
-  void fill(ts_Classes classes, string classPrefix, string disabledClassesCvarName)
+  void fill(out Array<string> classes,
+            string classPrefix,
+            string disabledClassesCvarName)
   {
     mDesc.mItems.clear();
-    int classesCount = classes.classes.size();
+    int classesCount = classes.size();
     for (int i = 0; i < classesCount; ++i)
     {
       let toggle = new("ts_ClassToggle");
-      toggle.initialize(classes.classes[i], classPrefix, disabledClassesCvarName);
+      toggle.initialize(classes[i], classPrefix, disabledClassesCvarName);
       mDesc.mItems.push(toggle);
     }
     mDesc.mSelectedItem = 0;
@@ -1048,7 +1036,9 @@ class %s : ts_ClassToggles
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
     Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().%s(), \"%s\", \"%s\");
+    Array<string> classes;
+    ts_EventHandler.getInstance().%s(classes);
+    Super.fill(classes, \"%s\", \"%s\");
   }
 }" definition-name classes-getter class-prefix disabled-classes-cvar-name)
 #+end_src
