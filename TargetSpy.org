@@ -99,16 +99,18 @@ OptionMenu ts_BarOptions
 
 ** Extending TargetSpy
 
+*** Finders, filters, and getters
+
 TargetSpy can be extended by declaring special classes. To be detected by TargetSpy,
 a class must inherit Actor and meet specific requirements, listed below.
 
 There are three types of TargetSpy extension classes:
-1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and have
-   ~static Actor find()~ function.
+1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and
+   have ~static Actor find()~ function.
 2. *Filters* remove unwanted targets. They must have a name that starts with
    ~tsFilter_~ and have ~static bool isAllowed(Actor)~ function.
-3. *Getters* collect information about a target. They must have a name that starts with
-   ~tsGetter_~ and have ~static int, string, int, int makeInformation(Actor)~
+3. *Getters* collect information about a target. They must have a name that starts
+   with ~tsGetter_~ and have ~static int, string, int, int makeInformation(Actor)~
    function. This function returns:
    - int: value of ~ts_Kind~ enum, which tells what kind of information is provided;
    - string: string value, used only for ~ts_Kind.Text~;
@@ -124,6 +126,11 @@ configuration.
 
 In fact, all out-of-the-box TargetSpy finders, filters, and getters are implemented
 as extensions, and can be used as examples for implementing custom extensions.
+
+*** Blacklist
+
+To make TargetSpy ignore classes, put them into ~ts_blacklist~ lump. Any number of
+~ts_blacklist~ lumps can be loaded. Blacklist filter must be enabled.
 
 ** Options
 
@@ -232,6 +239,7 @@ class ts_EventHandler : StaticEventHandler
   {
     initializeOptions();
     collectClasses();
+    initializeBlacklist();
   }
 
   override void worldTick()
@@ -263,6 +271,7 @@ class ts_EventHandler : StaticEventHandler
   clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
+  clearscope ts_Blacklist getBlacklist() { return mBlacklist; }
 
   private void findTargets()
   {
@@ -452,6 +461,12 @@ class ts_EventHandler : StaticEventHandler
       : 0;
   }
 
+  private void initializeBlacklist()
+  {
+    mBlacklist = new("ts_Blacklist");
+    mBlacklist.initialize();
+  }
+
   ts_Options mOptions;
   Cvar mDisabledFindersCvar;
   Cvar mDisabledFiltersCvar;
@@ -471,6 +486,8 @@ class ts_EventHandler : StaticEventHandler
   Array<ts_InformationPiece> mInformationPieces;
 
   Function<ui void(Array<ts_InformationPiece>)> mView;
+
+  ts_Blacklist mBlacklist;
 }
 #+end_src
 
@@ -676,6 +693,8 @@ class tsFinder_Noblockmap : Actor
 
 ** Filters
 
+*** Monsters only
+
 #+begin_src c :noweb-ref strings
 tsFilter_MonstersOnly = "Monsters only";
 #+end_src
@@ -690,6 +709,77 @@ class tsFilter_MonstersOnly : Actor
       ? anActor.bIsMonster
       : false;
   }
+}
+#+end_src
+
+*** Blacklist
+
+# spellchecker:off
+#+begin_src text :tangle build/TargetSpy/ts_blacklist.txt
+
+AutoautosaveAlertToken
+AutoautosaveAlerter
+AutoautosaveBossAlerter
+AutoautosaveToken
+Cow
+CowboyCow
+MummyCow
+ShieldDefense
+ShieldDefense2
+SpaceCow
+SpaceCowFloating
+UGGib_Corpse_Shootable
+VoidField
+WinterCow
+m8f_aas_token
+#+end_src
+# spellchecker:on
+
+#+begin_src c :noweb-ref strings
+tsFilter_Blacklist = "Blacklist";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_Blacklist : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    string className = anActor.getClassName();
+    return !ts_EventHandler
+      .getInstance()
+      .getBlacklist()
+      .contains(className.makeLower());
+  }
+}
+
+class ts_Blacklist
+{
+  void initialize()
+  {
+    for (int i = Wads.findLump(BLACKLIST);
+         i != -1;
+         i = Wads.findLump(BLACKLIST, i + 1))
+    {
+      string contents = Wads.readLump(i);
+      contents.replace("\r", "");
+      Array<string> lines;
+      contents.split(lines, "\n", TOK_SkipEmpty);
+      int linesCount = lines.size();
+      for (int l = 0; l < linesCount; ++l)
+      {
+        mBlacklistedClasses.insert(lines[l].makeLower(), 0);
+      }
+    }
+  }
+
+  bool contains(string className) const
+  {
+    return mBlacklistedClasses.checkKey(className);
+  }
+
+  const BLACKLIST = "ts_blacklist";
+  Map<string, int> mBlacklistedClasses;
 }
 #+end_src
 
