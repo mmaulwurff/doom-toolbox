@@ -38,6 +38,7 @@ OptionMenu ts_Options
   Submenu "Getters", ts_GetterToggles
 
   StaticText ""
+  Submenu "Filter options", ts_FilterOptions
   Submenu "Bar options", ts_BarOptions
 }
 
@@ -92,6 +93,13 @@ OptionMenu ts_BarOptions
   Option "26-50%",  ts_text_empty_50_color,  TextColors
   Option "51-75%",  ts_text_empty_75_color,  TextColors
   Option "76-100%", ts_text_empty_100_color, TextColors
+}
+
+OptionMenu ts_FilterOptions
+{
+  Title "Filter options"
+
+  Slider "Minimal light level", ts_min_light_level, 0, 250, 10, 0
 }
 #+end_src
 
@@ -155,6 +163,8 @@ class ts_Options
     mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
     mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
     mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
+
+    mMinLightLevelCvar = Cvar.findCvar("ts_min_light_level");
   }
 
   int getFilledCharacter() const
@@ -175,6 +185,11 @@ class ts_Options
   int getEmptyColor(int percent) const
   {
     return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
+  }
+
+  int getMinLightLevel() const
+  {
+    return mMinLightLevelCvar.getInt();
   }
 
   private int getCharacter(int index) const
@@ -198,6 +213,8 @@ class ts_Options
 
   private Array<Cvar> mFilledColorCvars;
   private Array<Cvar> mEmptyColorCvars;
+
+  private Cvar mMinLightLevelCvar;
 }
 #+end_src
 
@@ -781,6 +798,36 @@ class ts_Blacklist
   const BLACKLIST = "ts_blacklist";
   Map<string, int> mBlacklistedClasses;
 }
+#+end_src
+
+*** Light level
+
+#+begin_src c :noweb-ref strings
+tsFilter_LightLevel = "Light level";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_LightLevel : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    PlayerPawn pawn = players[consolePlayer].mo;
+    if (pawn.findInventory("PowerLightAmp")
+      || pawn.findInventory("PowerInvulnerable")) return true;
+
+    Sector aSector = anActor.curSector;
+    int lightLevel = aSector.lightLevel;
+    ts_Options options = ts_EventHandler.getInstance().getOptions();
+
+    return lightLevel >= options.getMinLightLevel();
+  }
+}
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user int ts_min_light_level = 120;
 #+end_src
 
 ** Getters
