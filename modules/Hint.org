@@ -1,17 +1,23 @@
-# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Hint
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
+* License
+
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
 * Source
 
 #+begin_src c :tangle ../build/Hint/Hint.zs
 
-// SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-// SPDX-License-Identifier: BSD-3-Clause
+// <<license>>
 
 // Hint module version: 1.1.0
 // Hint is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/

@@ -1,18 +1,22 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: PlainTranslator
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
 
+* License
+
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
 * Source
 
-License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
-
 #+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
-// SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-// SPDX-License-Identifier: BSD-3-Clause
+// <<license>>
 
 // PlainTranslator module version: 1.1.0
 // PlainTranslator is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/

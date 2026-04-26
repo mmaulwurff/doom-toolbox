@@ -1,5 +1,3 @@
-# SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: BSD-3-Clause
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: StringUtils

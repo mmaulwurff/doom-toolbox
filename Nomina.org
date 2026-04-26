@@ -1,5 +1,3 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Nomina
@@ -32,8 +30,7 @@ Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]]
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
 
-#+name: CC
-#+begin_src text
+#+begin_src text :noweb-ref CC
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src

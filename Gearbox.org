@@ -71,8 +71,7 @@ if your sounds work.
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-#+name: license
-#+begin_src text
+#+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-FileCopyrightText: © 2022 generic-name-guy
 SPDX-FileCopyrightText: © 2022 Carrascado

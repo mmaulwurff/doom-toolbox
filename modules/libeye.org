@@ -102,8 +102,7 @@
 
 * License
 
-#+name: license
-#+begin_src text
+#+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2019 KeksDose / MemeDose
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: LicenseRef-libeye

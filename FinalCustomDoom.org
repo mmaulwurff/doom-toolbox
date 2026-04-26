@@ -1,11 +1,5 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+name: GPL
-#+begin_src text :exports none
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-SPDX-License-Identifier: GPL-3.0-only
-#+end_src
-
 #+title: FinalCustomDoom
 # #+version: v1.0.0-beta
 
@@ -22,41 +16,46 @@ FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doom
 
 * License
 
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src c :tangle build/FinalCustomDoom/menudef.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src c :tangle build/FinalCustomDoom/language.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 
 #+begin_src c :tangle build/FinalCustomDoom/zscript.zs :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 #+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs :exports none
-// <<GPL>>
+// <<license>>
 #+end_src
 
 * Options
