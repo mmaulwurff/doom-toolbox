@@ -454,29 +454,37 @@ class ts_EventHandler : StaticEventHandler
 
 ** Finders
 
-*** Blockmap actor finder
+*** Aim targets
 
 #+begin_src c :noweb-ref strings
-ts_ActorFinderTargetSpyClass = "Actors";
+ts_AimFinderTargetSpyClass = "Aim target";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
-// TODO: rename this class.
-class ts_ActorFinderTargetSpyClass : Actor
+class ts_AimFinderTargetSpyClass : Actor
+{
+  static Actor find()
+  {
+    return players[consolePlayer].mo.aimTarget();
+  }
+}
+#+end_src
+
+*** Shootable
+
+#+begin_src c :noweb-ref strings
+ts_ShootableFinderTargetSpyClass = "Shootable";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+
+class ts_ShootableFinderTargetSpyClass : Actor
 {
   static Actor find()
   {
     PlayerInfo player = players[consolePlayer];
     PlayerPawn pawn = player.mo;
-
-    // Try an easy way to get a target (also works with autoaim).
-    Actor aimTarget = pawn.aimTarget();
-
-    if (aimTarget != NULL)
-      return aimTarget;
-
-    // If target is not found by easy way, try the difficult way.
     FLineTraceData lineTraceData;
     double angle = pawn.angle;
     double pitch = pawn.pitch;
@@ -486,6 +494,28 @@ class ts_ActorFinderTargetSpyClass : Actor
 
     return lineTraceData.hitActor;
   }
+}
+#+end_src
+
+*** Non-shootable
+
+#+begin_src c :noweb-ref strings
+ts_NonShootableFinderTargetSpyClass = "Non-shootable";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+
+class ts_NonShootableFinderTargetSpyClass : Actor
+{
+  static Actor find()
+  {
+    PlayerPawn pawn = players[consolePlayer].mo;
+    FTranslatedLineTarget lineTarget;
+    pawn.aimLineAttack(pawn.angle, 2048.0, lineTarget, 0, AIM_FLAGS);
+    return lineTarget.lineTarget;
+  }
+
+  const AIM_FLAGS = ALF_CheckNonShootable | ALF_ForceNoSmart;
 }
 #+end_src
 
