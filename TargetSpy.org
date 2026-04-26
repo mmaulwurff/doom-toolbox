@@ -750,7 +750,6 @@ class ts_HealthBarInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
     return ts_Kind.Bar, "", anActor.health, maxHealth;
   }
@@ -769,8 +768,29 @@ class ts_ClassInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     return ts_Kind.PlainText, anActor.getClassName(), 0, 0;
+  }
+}
+#+end_src
+
+*** Class (only if differs from tag)
+
+#+begin_src c :noweb-ref strings
+ts_ClassDiffersTagInformerTargetSpyClass = "Class name (only if differs from tag)";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class ts_ClassDiffersTagInformerTargetSpyClass : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    string tag = anActor.getTag();
+    string aClass = anActor.getClassName();
+    if (aClass != tag)
+      return ts_Kind.PlainText, aClass, 0, 0;
+    else
+      return ts_Kind.Empty, "", 0, 0;
   }
 }
 #+end_src
@@ -787,8 +807,29 @@ class ts_TagInformerTargetSpyClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     return ts_Kind.PlainText, anActor.getTag(), 0, 0;
+  }
+}
+#+end_src
+
+*** Tag (only if differs from class)
+
+#+begin_src c :noweb-ref strings
+ts_TagDiffersClassInformerTargetSpyClass = "Tag (only if differs from class name)";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+
+class ts_TagDiffersClassInformerTargetSpyClass : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    string tag = anActor.getTag();
+    string aClass = anActor.getClassName();
+    if (aClass != tag)
+      return ts_Kind.PlainText, tag, 0, 0;
+    else
+      return ts_Kind.Empty, "", 0, 0;
   }
 }
 #+end_src
