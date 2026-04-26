@@ -33,9 +33,9 @@ OptionMenu ts_Options
   Title "$ts_OptionsTitle"
 
   StaticText "Toggles"
-  Submenu "Finders",   ts_FinderToggles
-  Submenu "Filters",   ts_FilterToggles
-  Submenu "Informers", ts_InformerToggles
+  Submenu "Finders", ts_FinderToggles
+  Submenu "Filters", ts_FilterToggles
+  Submenu "Getters", ts_GetterToggles
 
   StaticText ""
   Submenu "Bar options", ts_BarOptions
@@ -53,10 +53,10 @@ OptionMenu ts_FilterToggles
   Title "Filter Toggles"
 }
 
-OptionMenu ts_InformerToggles
+OptionMenu ts_GetterToggles
 {
-  Class ts_InformerToggles
-  Title "Informer Toggles"
+  Class ts_GetterToggles
+  Title "Getter Toggles"
 }
 
 OptionMenu ts_BarOptions
@@ -97,25 +97,33 @@ OptionMenu ts_BarOptions
 
 * Source
 
-** ~TargetSpyClass~
+** Extending TargetSpy
 
-TargetSpy can be extended by declaring classes as ~TargetSpyClass~. These classes are
-not meant to be instantiated, only their static functions are used.
+TargetSpy can be extended by declaring special classes. To be detected by TargetSpy,
+a class must inherit Actor and meet specific requirements, listed below.
 
-To be detected by TargetSpy, a class must:
-- inherit Actor,
-- have ~TargetSpyClass~ in its name,
-- have a specific function, see below.
+There are three types of TargetSpy extension classes:
+1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and have
+   ~static Actor find()~ function.
+2. *Filters* remove unwanted targets. They must have a name that starts with
+   ~tsFilter_~ and have ~static bool isAllowed(Actor)~ function.
+3. *Getters* collect information about a target. They must have a name that starts with
+   ~tsGetter_~ and have ~static int, string, int, int makeInformation(Actor)~
+   function. This function returns:
+   - int: value of ~ts_Kind~ enum, which tells what kind of information is provided;
+   - string: string value, used only for ~ts_Kind.Text~;
+   - int: current value, used for ~ts_Kind.Value~, ~ts_Kind.ValueAndMax~, and
+     ~ts_Kind.Bar~;
+   - int: max value, used for ~ts_Kind.ValueAndMax~ and ~ts_Kind.Bar~.
 
-There are four types of ~TargetSpyClass~:
-1. Finders find targets. They must have ~static Actor find()~ function.
-2. Filters remove unwanted targets. They must have ~static bool isAllowed(Actor)~
-   function.
-3. Informers collect information about a target. They must have ~static int, string,
-   int, int makeInformation(Actor)~ function.
+Extension classes are not meant to be instantiated, only their static functions are
+used. Extension classes can have a translatable user string defined in ~LANGUAGE~
+lump. The string key is simply a class name. Extension classes are automatically
+added to TargetSpy option menus, and their toggle state is saved in game
+configuration.
 
-~TargetSpyClass~ classes can have a translatable user string defined in ~LANGUAGE~
-lump. The string key is simply a class name.
+In fact, all out-of-the-box TargetSpy finders, filters, and getters are implemented
+as extensions, and can be used as examples for implementing custom extensions.
 
 ** Options
 
@@ -214,7 +222,7 @@ class ts_InformationPiece
 }
 #+end_src
 
-*** ~TargetSpyClasses~
+*** ~ts_Classes~
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
 
@@ -260,16 +268,16 @@ class ts_EventHandler : StaticEventHandler
     return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
   }
 
-  clearscope ts_Classes getFinderClasses()   { return mFinderClasses; }
-  clearscope ts_Classes getFilterClasses()   { return mFilterClasses; }
-  clearscope ts_Classes getInformerClasses() { return mInformerClasses; }
+  clearscope ts_Classes getFinders() { return mFinderClasses; }
+  clearscope ts_Classes getFilters() { return mFilterClasses; }
+  clearscope ts_Classes getGetters() { return mGetterClasses; }
 
   clearscope ts_Options getOptions() { return mOptions; }
 
   private void findTargets()
   {
     Array<string> disabledClasses;
-    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    mDisabledFindersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
 
     int findersCount = mFinders.size();
     for (int i = 0; i < findersCount; ++i)
@@ -286,7 +294,7 @@ class ts_EventHandler : StaticEventHandler
     int targetsCount = mTargets.size();
 
     Array<string> disabledClasses;
-    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    mDisabledFiltersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
 
     for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
     {
@@ -326,23 +334,23 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectInformation()
   {
-    int informersCount = mInformers.size();
-    for (int i = 0; i < informersCount; ++i)
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
       mInformationPieces[i].kind = ts_Kind.Empty;
 
     if (mCurrentTarget == NULL) return;
 
     Array<string> disabledClasses;
-    mDisabledClassesCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
 
-    for (int i = 0; i < informersCount; ++i)
+    for (int i = 0; i < gettersCount; ++i)
     {
-      bool isEnabled = disabledClasses.find(mInformerClasses.classes[i])
+      bool isEnabled = disabledClasses.find(mGetterClasses.classes[i])
         == disabledClasses.size();
       if (isEnabled)
       {
-        let [kind, text, value, max] = mInformers[i].call(mCurrentTarget);
-        mInformationPieces[i].id    = mInformerClasses.classes[i];
+        let [kind, text, value, max] = mGetters[i].call(mCurrentTarget);
+        mInformationPieces[i].id    = mGetterClasses.classes[i];
         mInformationPieces[i].kind  = kind;
         mInformationPieces[i].text  = text;
         mInformationPieces[i].value = value;
@@ -358,26 +366,52 @@ class ts_EventHandler : StaticEventHandler
     mOptions = new("ts_Options");
     mOptions.initialize();
 
-    mDisabledClassesCvar = Cvar.findCvar("ts_disabled_classes");
+    mDisabledFindersCvar = Cvar.findCvar("ts_disabled_finders");
+    mDisabledFiltersCvar = Cvar.findCvar("ts_disabled_filters");
+    mDisabledGettersCvar = Cvar.findCvar("ts_disabled_getters");
   }
 
   private void collectClasses()
   {
-    mFinderClasses   = new("ts_Classes");
-    mFilterClasses   = new("ts_Classes");
-    mInformerClasses = new("ts_Classes");
+    mFinderClasses = new("ts_Classes");
+    mFilterClasses = new("ts_Classes");
+    mGetterClasses = new("ts_Classes");
 
     foreach (aClass : AllActorClasses)
     {
       string className = aClass.getClassName();
-      if (className.indexOf("TargetSpyClass") == -1) continue;
+      if (className.indexOf("tsFinder_") != -1 && !tryAddFinder(aClass))
+        Console.printf("ERROR: %s: invalid tsFinder", className);
 
-      if (!tryAddFinder(aClass)
-          && !tryAddFilter(aClass)
-          && !tryAddInformer(aClass)
-          && !tryAddView(aClass))
-        Console.printf("ERROR: %s: unknown TargetSpyClass", className);
+      if (className.indexOf("tsFilter_") != -1 && !tryAddFilter(aClass))
+        Console.printf("ERROR: %s: invalid tsFilter", className);
+
+      if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
+        Console.printf("ERROR: %s: invalid tsGetter", className);
+
+      if (className.indexOf("tsView_") != -1 && !tryAddView(aClass))
+        Console.printf("ERROR: %s: invalid tsView", className);
     }
+
+    warnTooLongList(mFinderClasses, "finders");
+    warnTooLongList(mFilterClasses, "filters");
+    warnTooLongList(mGetterClasses, "getters");
+  }
+
+  private static void warnTooLongList(ts_Classes classes, string listName)
+  {
+    string disabledClasses = ts_su.join(classes.classes, ",");
+    if (disabledClasses.length() > 256)
+      Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
+                     listName,
+                     disabledClasses.length(),
+                     disabledClasses);
+  }
+
+  private static string shorten(string className)
+  {
+    // Length of "tsFinder_", "tsFilter_", and "tsGetter_".
+    return className.mid(9);
   }
 
   private bool tryAddFinder(class<Object> aClass)
@@ -386,7 +420,7 @@ class ts_EventHandler : StaticEventHandler
     if (finder != NULL)
     {
       mFinders.push(finder);
-      mFinderClasses.classes.push(aClass.getClassName());
+      mFinderClasses.classes.push(shorten(aClass.getClassName()));
       mTargets.push(NULL);
     }
     return finder != NULL;
@@ -398,22 +432,22 @@ class ts_EventHandler : StaticEventHandler
     if (filter != NULL)
     {
       mFilters.push(filter);
-      mFilterClasses.classes.push(aClass.getClassName());
+      mFilterClasses.classes.push(shorten(aClass.getClassName()));
     }
     return filter != NULL;
   }
 
-  private bool tryAddInformer(class<Object> aClass)
+  private bool tryAddGetter(class<Object> aClass)
   {
-    let informer = (Function<play int, string, int, int(Actor)>)
+    let getter = (Function<play int, string, int, int(Actor)>)
       (findFunction(aClass, "makeInformation"));
-    if (informer != NULL)
+    if (getter != NULL)
     {
-      mInformers.push(informer);
-      mInformerClasses.classes.push(aClass.getClassName());
+      mGetters.push(getter);
+      mGetterClasses.classes.push(shorten(aClass.getClassName()));
       mInformationPieces.push(new("ts_InformationPiece"));
     }
-    return informer != NULL;
+    return getter != NULL;
   }
 
   private bool tryAddView(class<Object> aClass)
@@ -433,7 +467,9 @@ class ts_EventHandler : StaticEventHandler
   }
 
   ts_Options mOptions;
-  Cvar mDisabledClassesCvar;
+  Cvar mDisabledFindersCvar;
+  Cvar mDisabledFiltersCvar;
+  Cvar mDisabledGettersCvar;
 
   Array< Function<play Actor()> > mFinders;
   ts_Classes mFinderClasses;
@@ -444,8 +480,8 @@ class ts_EventHandler : StaticEventHandler
 
   Actor mCurrentTarget;
 
-  Array< Function<play int, string, int, int(Actor)> > mInformers;
-  ts_Classes mInformerClasses;
+  Array< Function<play int, string, int, int(Actor)> > mGetters;
+  ts_Classes mGetterClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
   Function<ui void(Array<ts_InformationPiece>)> mView;
@@ -457,12 +493,12 @@ class ts_EventHandler : StaticEventHandler
 *** Aim targets
 
 #+begin_src c :noweb-ref strings
-ts_AimFinderTargetSpyClass = "Aim target";
+tsFinder_Aim = "Aim target";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
-class ts_AimFinderTargetSpyClass : Actor
+class tsFinder_Aim : Actor
 {
   static Actor find()
   {
@@ -474,12 +510,12 @@ class ts_AimFinderTargetSpyClass : Actor
 *** Shootable
 
 #+begin_src c :noweb-ref strings
-ts_ShootableFinderTargetSpyClass = "Shootable";
+tsFinder_Shootable = "Shootable";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
-class ts_ShootableFinderTargetSpyClass : Actor
+class tsFinder_Shootable : Actor
 {
   static Actor find()
   {
@@ -500,12 +536,12 @@ class ts_ShootableFinderTargetSpyClass : Actor
 *** Non-shootable
 
 #+begin_src c :noweb-ref strings
-ts_NonShootableFinderTargetSpyClass = "Non-shootable";
+tsFinder_NonShootable = "Non-shootable";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
-class ts_NonShootableFinderTargetSpyClass : Actor
+class tsFinder_NonShootable : Actor
 {
   static Actor find()
   {
@@ -522,14 +558,14 @@ class ts_NonShootableFinderTargetSpyClass : Actor
 *** Noblockmap actor finder
 
 #+begin_src c :noweb-ref strings
-ts_NoblockmapFinderTargetSpyClass = "Noblockmap";
+tsFinder_Noblockmap = "Noblockmap";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
 
 // SPDX-FileCopyrightText: © 2020 proydoha
 
-class ts_NoblockmapFinderTargetSpyClass : Actor
+class tsFinder_Noblockmap : Actor
 {
   static Actor find()
   {
@@ -655,12 +691,12 @@ class ts_NoblockmapFinderTargetSpyClass : Actor
 ** Filters
 
 #+begin_src c :noweb-ref strings
-ts_MonstersOnlyTargetSpyClass = "Monsters only";
+tsFilter_MonstersOnly = "Monsters only";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
-class ts_MonstersOnlyTargetSpyClass : Actor
+class tsFilter_MonstersOnly : Actor
 {
   static bool isAllowed(Actor anActor)
   {
@@ -671,13 +707,13 @@ class ts_MonstersOnlyTargetSpyClass : Actor
 }
 #+end_src
 
-** Informers
+** Getters
 
 *** Utilities
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_InformerUtilities
+class ts_GetterUtilities
 {
   static play int getActorMaxHealth(Actor anActor)
   {
@@ -704,16 +740,15 @@ class ts_InformerUtilities
 *** Health
 
 #+begin_src c :noweb-ref strings
-ts_PlainHealthInformerTargetSpyClass = "Health (number)";
+tsGetter_Health = "Health (number)";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_PlainHealthInformerTargetSpyClass : Actor
+class tsGetter_Health : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
     return ts_Kind.Value, "", anActor.health, 0;
   }
 }
@@ -722,17 +757,16 @@ class ts_PlainHealthInformerTargetSpyClass : Actor
 *** Health and max health
 
 #+begin_src c :noweb-ref strings
-ts_PlainHealthAndMaxInformerTargetSpyClass = "Health and max health (numbers)";
+tsGetter_HealthAndMax = "Health and max health (numbers)";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_PlainHealthAndMaxInformerTargetSpyClass : Actor
+class tsGetter_HealthAndMax : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    if (anActor == NULL) return ts_Kind.Empty, "", 0, 0;
-    int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
+    int maxHealth = ts_GetterUtilities.getActorMaxHealth(anActor);
     return ts_Kind.ValueAndMax, "", anActor.health, maxHealth;
   }
 }
@@ -741,16 +775,16 @@ class ts_PlainHealthAndMaxInformerTargetSpyClass : Actor
 *** Health bar
 
 #+begin_src c :noweb-ref strings
-ts_HealthBarInformerTargetSpyClass = "Health bar";
+tsGetter_HealthBar = "Health bar";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_HealthBarInformerTargetSpyClass : Actor
+class tsGetter_HealthBar : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    int maxHealth = ts_InformerUtilities.getActorMaxHealth(anActor);
+    int maxHealth = ts_GetterUtilities.getActorMaxHealth(anActor);
     return ts_Kind.Bar, "", anActor.health, maxHealth;
   }
 }
@@ -759,12 +793,12 @@ class ts_HealthBarInformerTargetSpyClass : Actor
 *** Class
 
 #+begin_src c :noweb-ref strings
-ts_ClassInformerTargetSpyClass = "Class name";
+tsGetter_Class = "Class name";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_ClassInformerTargetSpyClass : Actor
+class tsGetter_Class : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
@@ -776,12 +810,12 @@ class ts_ClassInformerTargetSpyClass : Actor
 *** Class (only if differs from tag)
 
 #+begin_src c :noweb-ref strings
-ts_ClassDiffersTagInformerTargetSpyClass = "Class name (only if differs from tag)";
+tsGetter_ClassNotTag = "Class name (only if differs from tag)";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_ClassDiffersTagInformerTargetSpyClass : Actor
+class tsGetter_ClassNotTag : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
@@ -798,12 +832,12 @@ class ts_ClassDiffersTagInformerTargetSpyClass : Actor
 *** Tag
 
 #+begin_src c :noweb-ref strings
-ts_TagInformerTargetSpyClass = "Tag";
+tsGetter_Tag = "Tag";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_TagInformerTargetSpyClass : Actor
+class tsGetter_Tag : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
@@ -815,12 +849,12 @@ class ts_TagInformerTargetSpyClass : Actor
 *** Tag (only if differs from class)
 
 #+begin_src c :noweb-ref strings
-ts_TagDiffersClassInformerTargetSpyClass = "Tag (only if differs from class name)";
+tsGetter_TagNotClass = "Tag (only if differs from class name)";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_informers.zs
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class ts_TagDiffersClassInformerTargetSpyClass : Actor
+class tsGetter_TagNotClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
@@ -839,12 +873,12 @@ class ts_TagDiffersClassInformerTargetSpyClass : Actor
 *** Text view
 
 #+begin_src c :noweb-ref strings
-ts_TextViewTargetSpyClass = "Always text";
+tsView_Text = "Always text";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
-class ts_TextViewTargetSpyClass : Actor
+class tsView_Text : Actor
 {
   static ui void draw(Array<ts_InformationPiece> informationPieces)
   {
@@ -941,21 +975,23 @@ user int ts_text_empty_100_color  = 6;
 
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
-user string ts_disabled_classes = "";
+user string ts_disabled_finders = "";
+user string ts_disabled_filters = "";
+user string ts_disabled_getters = "";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
 
 class ts_ClassToggles : OptionMenu
 {
-  void fill(ts_Classes classes)
+  void fill(ts_Classes classes, string classPrefix, string disabledClassesCvarName)
   {
     mDesc.mItems.clear();
     int classesCount = classes.classes.size();
     for (int i = 0; i < classesCount; ++i)
     {
       let toggle = new("ts_ClassToggle");
-      toggle.initialize(classes.classes[i]);
+      toggle.initialize(classes.classes[i], classPrefix, disabledClassesCvarName);
       mDesc.mItems.push(toggle);
     }
     mDesc.mSelectedItem = 0;
@@ -964,11 +1000,11 @@ class ts_ClassToggles : OptionMenu
 
 class ts_ClassToggle : OptionMenuItemOptionBase
 {
-  void initialize(string aClass)
+  void initialize(string aClass, string classPrefix, string disabledClassesCvarName)
   {
     mClass = aClass;
-    mCvar  = Cvar.findCvar("ts_disabled_classes");
-    Super.init("$" .. aClass, '', "OnOff", NULL, 0);
+    mCvar  = Cvar.findCvar(disabledClassesCvarName);
+    Super.init("$" .. classPrefix .. aClass, '', "OnOff", NULL, 0);
   }
 
   override int getSelection()
@@ -998,13 +1034,13 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   private string mClass;
 }
 
-<<define-toggles("ts_FinderToggles",   "getFinderClasses")>>
-<<define-toggles("ts_FilterToggles",   "getFilterClasses")>>
-<<define-toggles("ts_InformerToggles", "getInformerClasses")>>
+<<define-toggles("ts_FinderToggles", "getFinders", "tsFinder_", "ts_disabled_finders")>>
+<<define-toggles("ts_FilterToggles", "getFilters", "tsFilter_", "ts_disabled_filters")>>
+<<define-toggles("ts_GetterToggles", "getGetters", "tsGetter_", "ts_disabled_getters")>>
 #+end_src
 
 #+name: define-toggles
-#+begin_src elisp :var definition-name="" classes-getter="" :exports none
+#+begin_src elisp :var definition-name="" classes-getter="" class-prefix="" disabled-classes-cvar-name="" :exports none
 
 (format "
 class %s : ts_ClassToggles
@@ -1012,9 +1048,9 @@ class %s : ts_ClassToggles
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
     Super.init(parent, descriptor);
-    Super.fill(ts_EventHandler.getInstance().%s());
+    Super.fill(ts_EventHandler.getInstance().%s(), \"%s\", \"%s\");
   }
-}" definition-name classes-getter)
+}" definition-name classes-getter class-prefix disabled-classes-cvar-name)
 #+end_src
 
 *** Highlighted character static text
@@ -1059,8 +1095,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 
 	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
 	{
-    mLabel = ts_TextViewTargetSpyClass
-      .makeBar(int(round(double(mPercent) * 64 / 100)), 64);
+    mLabel = tsView_Text.makeBar(int(round(double(mPercent) * 64 / 100)), 64);
     drawLabel(indent, y, Font.CR_White);
     return -1;
 	}
