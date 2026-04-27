@@ -255,12 +255,12 @@ class ts_EventHandler : StaticEventHandler
   {
     initializeOptions();
     collectClasses();
-    initializeBlacklist();
+    mFader = new("ts_Fader");
+    (mBlacklist = new("ts_Blacklist")).initialize();
   }
 
   override void worldTick()
   {
-    // TODO: reset mCurrentTarget on map change.
     // TODO: add titlemap check.
     if (players[consolePlayer].mo == NULL) return;
 
@@ -268,13 +268,19 @@ class ts_EventHandler : StaticEventHandler
     filterTargets();
     chooseCurrentTarget();
     collectInformation();
+    mFader.tick();
+  }
+
+  override void worldLoaded(WorldEvent event)
+  {
+    clearInformation();
   }
 
   override void renderOverlay(RenderEvent event)
   {
     if (players[consolePlayer].mo == NULL) return;
 
-    mView.call(mInformationPieces);
+    mView.call(mInformationPieces, mFader.getAlpha(event.fracTic));
   }
 
   static clearscope ts_EventHandler getInstance()
@@ -350,9 +356,10 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectInformation()
   {
-    clearInformation();
-
     if (mCurrentTarget == NULL) return;
+
+    clearInformation();
+    mFader.reset();
 
     Array<string> disabledClasses;
     mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
@@ -384,8 +391,7 @@ class ts_EventHandler : StaticEventHandler
 
   private void initializeOptions()
   {
-    mOptions = new("ts_Options");
-    mOptions.initialize();
+    (mOptions = new("ts_Options")).initialize();
 
     mDisabledFindersCvar = Cvar.findCvar("ts_disabled_finders");
     mDisabledFiltersCvar = Cvar.findCvar("ts_disabled_filters");
@@ -470,7 +476,7 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddView(class<Object> aClass)
   {
     // TODO: make sure external view always overrides the internal one.
-    let view = (Function<ui void(Array<ts_InformationPiece>)>)
+    let view = (Function<ui void(Array<ts_InformationPiece>, double)>)
       (findFunction(aClass, "draw"));
     if (view != NULL) mView = view;
     return view != NULL;
@@ -481,12 +487,6 @@ class ts_EventHandler : StaticEventHandler
     return (anActor != NULL)
       ? players[consolePlayer].mo.distance3d(anActor)
       : 0;
-  }
-
-  private void initializeBlacklist()
-  {
-    mBlacklist = new("ts_Blacklist");
-    mBlacklist.initialize();
   }
 
   ts_Options mOptions;
@@ -507,9 +507,10 @@ class ts_EventHandler : StaticEventHandler
   Array<string> mGetterClasses;
   Array<ts_InformationPiece> mInformationPieces;
 
-  Function<ui void(Array<ts_InformationPiece>)> mView;
+  Function<ui void(Array<ts_InformationPiece>, double)> mView;
 
   ts_Blacklist mBlacklist;
+  ts_Fader mFader;
 }
 #+end_src
 
@@ -998,6 +999,25 @@ class tsGetter_TagNotClass : Actor
 
 ** Views
 
+*** Fader
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class ts_Fader
+{
+  double getAlpha(double fracTic) const
+  {
+    return min(1, (FADE_TIME_TICS - (mElapsed + fracTic)) / FADE_TIME_TICS);
+  }
+
+  void reset() { mElapsed = -2; } // -2 for one-tick buffer to prevent flickering.
+  void tick() { ++mElapsed; }
+
+  const FADE_TIME_TICS = TICRATE / 2;
+  private double mElapsed;
+}
+#+end_src
+
 *** Text view
 
 #+begin_src c :noweb-ref strings
@@ -1008,7 +1028,7 @@ tsView_Text = "Always text";
 
 class tsView_Text : Actor
 {
-  static ui void draw(Array<ts_InformationPiece> informationPieces)
+  static ui void draw(Array<ts_InformationPiece> informationPieces, double alpha)
   {
     Font aFont = Font.findFont("NewSmallFont");
     int xCenter = Screen.getWidth() / 2;
@@ -1019,7 +1039,7 @@ class tsView_Text : Actor
     {
       string text = toText(piece);
       if (text.length() == 0) continue;
-      drawText(aFont, text, xCenter, y);
+      drawText(aFont, text, xCenter, y, alpha);
       y += lineHeight;
     }
   }
@@ -1057,7 +1077,11 @@ class tsView_Text : Actor
                          ts_su.repeat(empty, length - filledCount));
   }
 
-  static private ui void drawText(Font aFont, string text, int xCenter, int y)
+  static private ui void drawText(Font aFont,
+                                  string text,
+                                  int xCenter,
+                                  int y,
+                                  double alpha)
   {
     int x = xCenter - aFont.stringWidth(text) / 2;
     Screen.drawText(aFont,
@@ -1070,7 +1094,7 @@ class tsView_Text : Actor
                     DTA_ScaleY,
                     1.0,
                     DTA_Alpha,
-                    1.0);
+                    alpha);
   }
 
   const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
