@@ -293,12 +293,12 @@ class ts_EventHandler : StaticEventHandler
   {
     Array<string> disabledClasses;
     mDisabledFindersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
 
     int findersCount = mFinders.size();
     for (int i = 0; i < findersCount; ++i)
     {
-      bool isEnabled = disabledClasses.find(mFinderClasses[i])
-        == disabledClasses.size();
+      bool isEnabled = disabledClasses.find(mFinderClasses[i]) == disabledClassesSize;
       mTargets[i] = isEnabled ? mFinders[i].call() : NULL;
     }
   }
@@ -310,6 +310,7 @@ class ts_EventHandler : StaticEventHandler
 
     Array<string> disabledClasses;
     mDisabledFiltersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
 
     for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
     {
@@ -318,7 +319,7 @@ class ts_EventHandler : StaticEventHandler
       for (int i = 0; i < filtersCount; ++i)
       {
         bool isEnabled = disabledClasses.find(mFilterClasses[i])
-          == disabledClasses.size();
+          == disabledClassesSize;
         if (!isEnabled) continue;
         if (mFilters[i].call(mTargets[targetIndex])) continue;
 
@@ -349,31 +350,36 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectInformation()
   {
-    int gettersCount = mGetters.size();
-    for (int i = 0; i < gettersCount; ++i)
-      mInformationPieces[i].kind = ts_Kind.Empty;
+    clearInformation();
 
     if (mCurrentTarget == NULL) return;
 
     Array<string> disabledClasses;
     mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
 
+    int gettersCount = mGetters.size();
     for (int i = 0; i < gettersCount; ++i)
     {
-      bool isEnabled = disabledClasses.find(mGetterClasses[i])
-        == disabledClasses.size();
+      bool isEnabled = disabledClasses.find(mGetterClasses[i]) == disabledClassesSize;
       if (isEnabled)
       {
-        let [kind, text, value, max] = mGetters[i].call(mCurrentTarget);
-        mInformationPieces[i].id    = mGetterClasses[i];
-        mInformationPieces[i].kind  = kind;
-        mInformationPieces[i].text  = text;
-        mInformationPieces[i].value = value;
-        mInformationPieces[i].max   = max;
+        mInformationPieces[i].id = mGetterClasses[i];
+        [mInformationPieces[i].kind,
+         mInformationPieces[i].text,
+         mInformationPieces[i].value,
+         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
       }
     }
 
     // TODO: add priorities, sort information pieces according to priorities.
+  }
+
+  private void clearInformation()
+  {
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
+      mInformationPieces[i].kind = ts_Kind.Empty;
   }
 
   private void initializeOptions()
