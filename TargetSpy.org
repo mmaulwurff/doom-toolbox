@@ -261,8 +261,8 @@ class ts_EventHandler : StaticEventHandler
 
   override void worldTick()
   {
-    // TODO: add titlemap check.
     if (players[consolePlayer].mo == NULL) return;
+    if (level.mapName ~== "titlemap") return;
 
     findTargets();
     filterTargets();
