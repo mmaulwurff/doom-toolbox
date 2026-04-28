@@ -134,10 +134,10 @@ configuration.
 In fact, all out-of-the-box TargetSpy finders, filters, and getters are implemented
 as extensions, and can be used as examples for implementing custom extensions.
 
-*** Blacklist
+*** Blocklist
 
-To make TargetSpy ignore classes, put them into ~ts_blacklist~ lump. Any number of
-~ts_blacklist~ lumps can be loaded. Blacklist filter must be enabled.
+To make TargetSpy ignore classes, put them into ~ts_blocklist~ lump. Any number of
+~ts_blocklist~ lumps can be loaded. Blocklist filter must be enabled.
 
 ** Options
 
@@ -245,6 +245,36 @@ class ts_InformationPiece
 }
 #+end_src
 
+*** Class list
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class ts_ClassList
+{
+  void initialize(string lumpName)
+  {
+    for (int i = Wads.findLump(lumpName);
+         i != -1;
+         i = Wads.findLump(lumpName, i + 1))
+    {
+      string contents = Wads.readLump(i);
+      contents.replace("\r", "");
+      Array<string> lines;
+      contents.split(lines, "\n", TOK_SkipEmpty);
+      int linesCount = lines.size();
+      for (int l = 0; l < linesCount; ++l)
+      {
+        mClasses.insert(lines[l].makeLower(), 0);
+      }
+    }
+  }
+
+  bool contains(string className) const { return mClasses.checkKey(className); }
+
+  Map<string, int> mClasses;
+}
+#+end_src
+
 ** Event handler
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
@@ -256,7 +286,7 @@ class ts_EventHandler : StaticEventHandler
     initializeOptions();
     collectClasses();
     mFader = new("ts_Fader");
-    (mBlacklist = new("ts_Blacklist")).initialize();
+    (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
   }
 
   override void worldTick()
@@ -293,7 +323,7 @@ class ts_EventHandler : StaticEventHandler
   clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
-  clearscope ts_Blacklist getBlacklist() { return mBlacklist; }
+  clearscope ts_ClassList getBlocklist() { return mBlocklist; }
 
   private void findTargets()
   {
@@ -350,7 +380,6 @@ class ts_EventHandler : StaticEventHandler
       }
     }
 
-    // TODO: keep old mCurrentTarget until timeout expires.
     mCurrentTarget = closestTarget;
   }
 
@@ -509,7 +538,7 @@ class ts_EventHandler : StaticEventHandler
 
   Function<ui void(Array<ts_InformationPiece>, double)> mView;
 
-  ts_Blacklist mBlacklist;
+  ts_ClassList mBlocklist;
   ts_Fader mFader;
 }
 #+end_src
@@ -735,74 +764,59 @@ class tsFilter_MonstersOnly : Actor
 }
 #+end_src
 
-*** Blacklist
+*** Blocklist
 
 # spellchecker:off
-#+begin_src text :tangle build/TargetSpy/ts_blacklist.txt
 
+Autoautosave
+#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
 AutoautosaveAlertToken
 AutoautosaveAlerter
 AutoautosaveBossAlerter
 AutoautosaveToken
+m8f_aas_token
+#+end_src
+
+The Adventures of Square
+#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
 Cow
 CowboyCow
 MummyCow
-ShieldDefense
-ShieldDefense2
+WinterCow
 SpaceCow
 SpaceCowFloating
-UGGib_Corpse_Shootable
-VoidField
-WinterCow
-m8f_aas_token
 #+end_src
+
+???
+#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+ShieldDefense
+ShieldDefense2
+VoidField
+#+end_src
+
+Universal Gibs
+#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+UGGib_Corpse_Shootable
+#+end_src
+
 # spellchecker:on
 
 #+begin_src c :noweb-ref strings
-tsFilter_Blacklist = "Blacklist";
+tsFilter_Blocklist = "Blocklist";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
-class tsFilter_Blacklist : Actor
+class tsFilter_Blocklist : Actor
 {
   static bool isAllowed(Actor anActor)
   {
     string className = anActor.getClassName();
     return !ts_EventHandler
       .getInstance()
-      .getBlacklist()
+      .getBlocklist()
       .contains(className.makeLower());
   }
-}
-
-class ts_Blacklist
-{
-  void initialize()
-  {
-    for (int i = Wads.findLump(BLACKLIST);
-         i != -1;
-         i = Wads.findLump(BLACKLIST, i + 1))
-    {
-      string contents = Wads.readLump(i);
-      contents.replace("\r", "");
-      Array<string> lines;
-      contents.split(lines, "\n", TOK_SkipEmpty);
-      int linesCount = lines.size();
-      for (int l = 0; l < linesCount; ++l)
-      {
-        mBlacklistedClasses.insert(lines[l].makeLower(), 0);
-      }
-    }
-  }
-
-  bool contains(string className) const
-  {
-    return mBlacklistedClasses.checkKey(className);
-  }
-
-  const BLACKLIST = "ts_blacklist";
-  Map<string, int> mBlacklistedClasses;
 }
 #+end_src
 
