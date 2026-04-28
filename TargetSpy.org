@@ -269,7 +269,21 @@ class ts_ClassList
     }
   }
 
-  bool contains(string className) const { return mClasses.checkKey(className); }
+  bool contains(string className) const
+  {
+    return mClasses.checkKey(className.makeLower());
+  }
+
+  bool containsParent(class<Object> aClass)
+  {
+    for (class<Object> parent = aClass;
+         parent.getClassName() != "Thinker";
+         parent = parent.getParentClass())
+    {
+      if (contains(parent.getClassName())) return true;
+    }
+    return false;
+  }
 
   Map<string, int> mClasses;
 }
@@ -287,6 +301,7 @@ class ts_EventHandler : StaticEventHandler
     collectClasses();
     mFader = new("ts_Fader");
     (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
+    (mFollowers = new("ts_ClassList")).initialize("ts_followers");
   }
 
   override void worldTick()
@@ -335,7 +350,11 @@ class ts_EventHandler : StaticEventHandler
     for (int i = 0; i < findersCount; ++i)
     {
       bool isEnabled = disabledClasses.find(mFinderClasses[i]) == disabledClassesSize;
-      mTargets[i] = isEnabled ? mFinders[i].call() : NULL;
+      Actor target = isEnabled ? mFinders[i].call() : NULL;
+      if (target != NULL && mFollowers.containsParent(target.getClass()))
+        target = target.master;
+
+      mTargets[i] = target;
     }
   }
 
@@ -539,8 +558,45 @@ class ts_EventHandler : StaticEventHandler
   Function<ui void(Array<ts_InformationPiece>, double)> mView;
 
   ts_ClassList mBlocklist;
+  ts_ClassList mFollowers;
   ts_Fader mFader;
 }
+#+end_src
+
+*** Follower classes
+
+???
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotTargetZombie
+HeadshotTargetEliteZombie
+HeadshotTargetImp
+HeadshotTargetAngryImp
+HeadshotTargetNoble
+HeadshotTargetEliteNoble
+HeadshotTargetBossNoble
+HeadshotTargetArchvile
+HeadshotTargetEliteArchvile
+HeadshotTargetRevenant
+HeadshotTargetEliteRevenant
+HeadshotTargetMancubus
+HeadshotTargetSoulCommander
+HeadshotTargetCacodemon
+HeadshotTargetPainElemental
+HeadshotTargetDemon
+HeadshotTargetCyberdemon
+#+end_src
+
+Brutal Doom
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotTargetBase
+#+end_src
+
+Venturous
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotHitbox
+HeadshotHitboxDouble
+HeadshotHitboxHigher
+HeadshotHitboxHeavyeadshotHitbox
 #+end_src
 
 ** Finders
@@ -812,10 +868,7 @@ class tsFilter_Blocklist : Actor
   static bool isAllowed(Actor anActor)
   {
     string className = anActor.getClassName();
-    return !ts_EventHandler
-      .getInstance()
-      .getBlocklist()
-      .contains(className.makeLower());
+    return !ts_EventHandler.getInstance().getBlocklist().contains(className);
   }
 }
 #+end_src
