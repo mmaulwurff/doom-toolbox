@@ -1216,6 +1216,11 @@ user string ts_disabled_filters = "";
 user string ts_disabled_getters = "";
 #+end_src
 
+#+begin_src c :noweb-ref strings
+ts_AllOn  = "Activate all";
+ts_AllOff = "Deactivate all";
+#+end_src
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
 
 class ts_ClassToggles : OptionMenu
@@ -1232,7 +1237,17 @@ class ts_ClassToggles : OptionMenu
       toggle.initialize(classes[i], classPrefix, disabledClassesCvarName);
       mDesc.mItems.push(toggle);
     }
-    mDesc.mSelectedItem = 0;
+
+    mDesc.mItems.push(new("OptionMenuItemStaticText").initDirect("", 0));
+    mDesc.mItems.push(new("OptionMenuItemCommand")
+                      .init("$ts_AllOn", disabledClassesCvarName .. " \"\""));
+    mDesc.mItems.push(new("OptionMenuItemCommand")
+                      .init("$ts_AllOff",
+                            string.format("%s \"%s\"",
+                                          disabledClassesCvarName,
+                                          ts_su.join(classes, ","))));
+
+    mDesc.mSelectedItem = clamp(mDesc.mSelectedItem, 0, mDesc.mItems.size() - 1);
   }
 }
 
