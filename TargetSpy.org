@@ -903,6 +903,23 @@ class tsFilter_LightLevel : Actor
 user int ts_min_light_level = 120;
 #+end_src
 
+*** Positive health
+
+#+begin_src c :noweb-ref strings
+tsFilter_PositiveHealth = "Positive health";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_PositiveHealth : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    return anActor.health > 0;
+  }
+}
+#+end_src
+
 ** Getters
 
 *** Utilities
