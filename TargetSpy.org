@@ -801,25 +801,6 @@ class tsFinder_Noblockmap : Actor
 
 ** Filters
 
-*** Monsters only
-
-#+begin_src c :noweb-ref strings
-tsFilter_MonstersOnly = "Monsters only";
-#+end_src
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
-
-class tsFilter_MonstersOnly : Actor
-{
-  static bool isAllowed(Actor anActor)
-  {
-    return (anActor != NULL)
-      ? anActor.bIsMonster
-      : false;
-  }
-}
-#+end_src
-
 *** Blocklist
 
 # spellchecker:off
@@ -860,7 +841,6 @@ UGGib_Corpse_Shootable
 #+begin_src c :noweb-ref strings
 tsFilter_Blocklist = "Blocklist";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Blocklist : Actor
@@ -873,12 +853,24 @@ class tsFilter_Blocklist : Actor
 }
 #+end_src
 
+*** Monsters
+
+#+begin_src c :noweb-ref strings
+tsFilter_Monsters = "Monsters only";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_Monsters : Actor
+{
+  static bool isAllowed(Actor anActor) { return anActor.bIsMonster; }
+}
+#+end_src
+
 *** Light level
 
 #+begin_src c :noweb-ref strings
 tsFilter_LightLevel = "Lit only";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_LightLevel : Actor
@@ -903,20 +895,16 @@ class tsFilter_LightLevel : Actor
 user int ts_min_light_level = 120;
 #+end_src
 
-*** Positive health
+*** Health
 
 #+begin_src c :noweb-ref strings
-tsFilter_PositiveHealth = "Positive health only";
+tsFilter_Health = "Positive health only";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
-class tsFilter_PositiveHealth : Actor
+class tsFilter_Health : Actor
 {
-  static bool isAllowed(Actor anActor)
-  {
-    return anActor.health > 0;
-  }
+  static bool isAllowed(Actor anActor) { return anActor.health > 0; }
 }
 #+end_src
 
@@ -925,7 +913,6 @@ class tsFilter_PositiveHealth : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Hidden = "Not hidden only";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Hidden : Actor
@@ -942,15 +929,11 @@ class tsFilter_Hidden : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Enemies = "Enemies only";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Enemies : Actor
 {
-  static bool isAllowed(Actor anActor)
-  {
-    return !anActor.bFriendly;
-  }
+  static bool isAllowed(Actor anActor) { return !anActor.bFriendly; }
 }
 #+end_src
 
@@ -959,15 +942,24 @@ class tsFilter_Enemies : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Dormant = "Not dormant only";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Dormant : Actor
 {
-  static bool isAllowed(Actor anActor)
-  {
-    return !anActor.bDormant;
-  }
+  static bool isAllowed(Actor anActor) { return !anActor.bDormant; }
+}
+#+end_src
+
+*** Active
+
+#+begin_src c :noweb-ref strings
+tsFilter_Active = "Active only";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_Active : Actor
+{
+  static bool isAllowed(Actor anActor) { return anActor.target != NULL; }
 }
 #+end_src
 
