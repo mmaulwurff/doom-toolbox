@@ -38,7 +38,8 @@ OptionMenu ts_Options
 
   StaticText ""
   Submenu "Filter options", ts_FilterOptions
-  Submenu "Bar options", ts_BarOptions
+  Submenu "Bar options",    ts_BarOptions
+  Submenu "View options",   ts_ViewOptions
 }
 
 OptionMenu ts_FinderToggles
@@ -100,6 +101,13 @@ OptionMenu ts_FilterOptions
 
   Slider "Minimal light level", ts_min_light_level, 0, 250, 10, 0
 }
+
+OptionMenu ts_ViewOptions
+{
+  Title "View options"
+
+  Slider "Scale", ts_scale, 0.1, 4.0, 0.1, 1
+}
 #+end_src
 
 * Source
@@ -150,6 +158,7 @@ class ts_Options
     mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
     mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
     mCharactersCvar       = Cvar.findCvar("ts_characters");
+    mScaleCvar            = Cvar.findCvar("ts_scale");
 
     mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
     mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
@@ -206,9 +215,15 @@ class ts_Options
     return ts_Ascii.FULL_STOP;
   }
 
+  double getScale() const
+  {
+    return mScaleCvar.getFloat();
+  }
+
   private Cvar mCharactersCvar;
   private Cvar mFilledCharacterIndex;
   private Cvar mEmptyCharacterIndex;
+  private Cvar mScaleCvar;
 
   private Array<Cvar> mFilledColorCvars;
   private Array<Cvar> mEmptyColorCvars;
@@ -1160,32 +1175,33 @@ class tsView_Text : Actor
     Font aFont = Font.findFont("NewSmallFont");
     int xCenter = Screen.getWidth() / 2;
     int y = int(round(Screen.getHeight() * 0.2));
-    int lineHeight = aFont.getHeight();
+    ts_Options options = ts_EventHandler.getInstance().getOptions();
+    double scale = options.getScale();
+    int lineHeight = int(round(aFont.getHeight() * scale));
 
     foreach (piece : informationPieces)
     {
-      string text = toText(piece);
+      string text = toText(piece, options);
       if (text.length() == 0) continue;
-      drawText(aFont, text, xCenter, y, alpha);
+      drawText(aFont, text, xCenter, y, alpha, options.getScale());
       y += lineHeight;
     }
   }
 
-  static private ui string toText(ts_InformationPiece piece)
+  static private ui string toText(ts_InformationPiece piece, ts_Options options)
   {
     switch (piece.kind)
     {
     case ts_Kind.PlainText:   return piece.text;
     case ts_Kind.Value:       return string.format("%d", piece.value);
     case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
-    case ts_Kind.Bar:         return makeBar(piece.value, piece.max);
+    case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
     }
     return "";
   }
 
-  static ui string makeBar(int value, int max)
+  static ui string makeBar(int value, int max, ts_Options options)
   {
-    ts_Options options = ts_EventHandler.getInstance().getOptions();
     int length = int(round(log(max) * 2));
     int filledCount = (max < 1)
       ? 0
@@ -1208,18 +1224,19 @@ class tsView_Text : Actor
                                   string text,
                                   int xCenter,
                                   int y,
-                                  double alpha)
+                                  double alpha,
+                                  double scale)
   {
-    int x = xCenter - aFont.stringWidth(text) / 2;
+    int x = xCenter - int(round(aFont.stringWidth(text) * scale / 2));
     Screen.drawText(aFont,
                     Font.CR_Gray,
                     x,
                     y,
                     text,
                     DTA_ScaleX,
-                    1.0,
+                    scale,
                     DTA_ScaleY,
-                    1.0,
+                    scale,
                     DTA_Alpha,
                     alpha);
   }
@@ -1246,6 +1263,8 @@ user int ts_text_empty_25_color   = 6;
 user int ts_text_empty_50_color   = 6;
 user int ts_text_empty_75_color   = 6;
 user int ts_text_empty_100_color  = 6;
+
+user float ts_scale = 1.0;
 #+end_src
 
 ** Menu classes
@@ -1393,7 +1412,9 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 
 	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
 	{
-    mLabel = tsView_Text.makeBar(int(round(double(mPercent) * 64 / 100)), 64);
+    ts_Options options = ts_EventHandler.getInstance().getOptions();
+    int value = int(round(double(mPercent) * 64 / 100));
+    mLabel = tsView_Text.makeBar(value, 64, options);
     drawLabel(indent, y, Font.CR_White);
     return -1;
 	}
