@@ -876,7 +876,7 @@ class tsFilter_Blocklist : Actor
 *** Light level
 
 #+begin_src c :noweb-ref strings
-tsFilter_LightLevel = "Light level";
+tsFilter_LightLevel = "Lit only";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
@@ -906,7 +906,7 @@ user int ts_min_light_level = 120;
 *** Positive health
 
 #+begin_src c :noweb-ref strings
-tsFilter_PositiveHealth = "Positive health";
+tsFilter_PositiveHealth = "Positive health only";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
@@ -916,6 +916,23 @@ class tsFilter_PositiveHealth : Actor
   static bool isAllowed(Actor anActor)
   {
     return anActor.health > 0;
+  }
+}
+#+end_src
+
+*** Hidden
+
+#+begin_src c :noweb-ref strings
+tsFilter_Hidden = "Not hidden only";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_Hidden : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    return !anActor.bShadow && !anActor.bStealth;
   }
 }
 #+end_src
