@@ -60,53 +60,18 @@ OptionMenu ts_GetterToggles
   Title "Getter Toggles"
 }
 
-OptionMenu ts_BarOptions
-{
-  Title "Bar options"
-
-  ts_BarPreview 0
-  ts_BarPreview 25
-  ts_BarPreview 50
-  ts_BarPreview 75
-  ts_BarPreview 100
-  ts_BarPreview 101
-
-  StaticText ""
-  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter ts_text_filled_character_index
-  Slider "Empty character", ts_text_empty_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter ts_text_empty_character_index
-  TextField "Characters", ts_characters
-
-  StaticText ""
-  StaticText "Colors for filled characters"
-  Option "1-25%" ,  ts_text_filled_25_color,  TextColors
-  Option "26-50%",  ts_text_filled_50_color,  TextColors
-  Option "51-75%",  ts_text_filled_75_color,  TextColors
-  Option "76-100%", ts_text_filled_100_color, TextColors
-  Option "> 100%",  ts_text_filled_101_color, TextColors
-
-  StaticText ""
-  StaticText "Colors for empty characters"
-  Option "≤ 0",     ts_text_empty_0_color,   TextColors
-  Option "1-25%",   ts_text_empty_25_color,  TextColors
-  Option "26-50%",  ts_text_empty_50_color,  TextColors
-  Option "51-75%",  ts_text_empty_75_color,  TextColors
-  Option "76-100%", ts_text_empty_100_color, TextColors
-}
-
 OptionMenu ts_FilterOptions
 {
   Title "Filter options"
 
-  Slider "Minimal light level", ts_min_light_level, 0, 250, 10, 0
+  <<filter-options>>
 }
 
 OptionMenu ts_ViewOptions
 {
   Title "View options"
 
-  Slider "Scale", ts_scale, 0.1, 4.0, 0.1, 1
+  <<view-options>>
 }
 #+end_src
 
@@ -146,91 +111,6 @@ as extensions, and can be used as examples for implementing custom extensions.
 
 To make TargetSpy ignore classes, put them into ~ts_blocklist~ lump. Any number of
 ~ts_blocklist~ lumps can be loaded. Blocklist filter must be enabled.
-
-** Options
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
-
-class ts_Options
-{
-  void initialize()
-  {
-    mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
-    mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
-    mCharactersCvar       = Cvar.findCvar("ts_characters");
-    mScaleCvar            = Cvar.findCvar("ts_scale");
-
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
-
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
-
-    mMinLightLevelCvar = Cvar.findCvar("ts_min_light_level");
-  }
-
-  int getFilledCharacter() const
-  {
-    return getCharacter(max(mFilledCharacterIndex.getInt(), 0));
-  }
-
-  int getEmptyCharacter() const
-  {
-    return getCharacter(max(mEmptyCharacterIndex.getInt(), 0));
-  }
-
-  int getFilledColor(int percent) const
-  {
-    return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
-  }
-
-  int getEmptyColor(int percent) const
-  {
-    return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
-  }
-
-  int getMinLightLevel() const
-  {
-    return mMinLightLevelCvar.getInt();
-  }
-
-  private int getCharacter(int index) const
-  {
-    string characters = mCharactersCvar.getString();
-    int charactersLength = characters.length();
-    int i = 0;
-    for (int position = 0; position < charactersLength; ++i)
-    {
-      int result;
-      [result, position] = characters.getNextCodePoint(position);
-      if (i == index) return result;
-    }
-
-    return ts_Ascii.FULL_STOP;
-  }
-
-  double getScale() const
-  {
-    return mScaleCvar.getFloat();
-  }
-
-  private Cvar mCharactersCvar;
-  private Cvar mFilledCharacterIndex;
-  private Cvar mEmptyCharacterIndex;
-  private Cvar mScaleCvar;
-
-  private Array<Cvar> mFilledColorCvars;
-  private Array<Cvar> mEmptyColorCvars;
-
-  private Cvar mMinLightLevelCvar;
-}
-#+end_src
 
 ** Common types
 
@@ -905,9 +785,20 @@ class tsFilter_LightLevel : Actor
 }
 #+end_src
 
+#+begin_src c :noweb-ref options-cvar-getter
+int getMinLightLevel() const { return mMinLightLevelCvar.getInt(); }
+#+end_src
+#+begin_src c :noweb-ref options-cvar-definition
+private Cvar mMinLightLevelCvar;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+mMinLightLevelCvar = Cvar.findCvar("ts_min_light_level");
+#+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
-
 user int ts_min_light_level = 120;
+#+end_src
+#+begin_src c :noweb-ref filter-options
+Slider "Minimal light level", ts_min_light_level, 0, 250, 10, 0
 #+end_src
 
 *** Health
@@ -1183,22 +1074,29 @@ class tsView_Text : Actor
     {
       string text = toText(piece, options);
       if (text.length() == 0) continue;
-      drawText(aFont, text, xCenter, y, alpha, options.getScale());
+      drawText(aFont, text, xCenter, y, alpha, scale);
       y += lineHeight;
     }
   }
+#+end_src
 
-  static private ui string toText(ts_InformationPiece piece, ts_Options options)
-  {
-    switch (piece.kind)
-    {
-    case ts_Kind.PlainText:   return piece.text;
-    case ts_Kind.Value:       return string.format("%d", piece.value);
-    case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
-    case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
-    }
-    return "";
-  }
+#+begin_src c :noweb-ref options-cvar-getter
+double getScale() const { return mScaleCvar.getFloat(); }
+#+end_src
+#+begin_src c :noweb-ref options-cvar-definition
+private Cvar mScaleCvar;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+mScaleCvar = Cvar.findCvar("ts_scale");
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+user float ts_scale = 1.0;
+#+end_src
+#+begin_src c :noweb-ref view-options
+Slider "Scale", ts_scale, 0.1, 4.0, 0.1, 1
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
   static ui string makeBar(int value, int max, ts_Options options)
   {
@@ -1218,6 +1116,131 @@ class tsView_Text : Actor
                          ts_su.repeat(filled, filledCount),
                          SMALL_A + emptyColor,
                          ts_su.repeat(empty, length - filledCount));
+  }
+#+end_src
+
+#+begin_src c :noweb-ref options-cvar-getter
+int getFilledColor(int percent) const
+{
+  return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
+}
+int getEmptyColor(int percent) const
+{
+  return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
+}
+int getFilledCharacter() const
+{
+  return getCharacter(max(mFilledCharacterIndex.getInt(), 0));
+}
+int getEmptyCharacter() const
+{
+  return getCharacter(max(mEmptyCharacterIndex.getInt(), 0));
+}
+private int getCharacter(int index) const
+{
+  // TODO: move this to StringUtils?
+  string characters = mCharactersCvar.getString();
+  int charactersLength = characters.length();
+  int i = 0;
+  for (int position = 0; position < charactersLength; ++i)
+  {
+    int result;
+    [result, position] = characters.getNextCodePoint(position);
+    if (i == index) return result;
+  }
+  return 0;
+}
+#+end_src
+#+begin_src c :noweb-ref options-cvar-definition
+private Array<Cvar> mFilledColorCvars;
+private Array<Cvar> mEmptyColorCvars;
+private Cvar mFilledCharacterIndex;
+private Cvar mEmptyCharacterIndex;
+private Cvar mCharactersCvar;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
+mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
+mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
+mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
+mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
+
+mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
+mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
+mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
+mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
+mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
+
+mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
+mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
+mCharactersCvar       = Cvar.findCvar("ts_characters");
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+user int ts_text_filled_25_color  = 3; // green
+user int ts_text_filled_50_color  = 3;
+user int ts_text_filled_75_color  = 3;
+user int ts_text_filled_100_color = 3;
+user int ts_text_filled_101_color = 3;
+
+user int ts_text_empty_0_color    = 6; // red
+user int ts_text_empty_25_color   = 6;
+user int ts_text_empty_50_color   = 6;
+user int ts_text_empty_75_color   = 6;
+user int ts_text_empty_100_color  = 6;
+
+user int ts_text_filled_character_index = 0;
+user int ts_text_empty_character_index  = 0;
+user string ts_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+OptionMenu ts_BarOptions
+{
+  Title "Bar options"
+
+  ts_BarPreview 0
+  ts_BarPreview 25
+  ts_BarPreview 50
+  ts_BarPreview 75
+  ts_BarPreview 100
+  ts_BarPreview 101
+
+  StaticText ""
+  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_text_filled_character_index
+  Slider "Empty character",  ts_text_empty_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_text_empty_character_index
+  TextField "Characters",    ts_characters
+
+  StaticText ""
+  StaticText "Colors for filled characters"
+  Option "1-25%" ,  ts_text_filled_25_color,  TextColors
+  Option "26-50%",  ts_text_filled_50_color,  TextColors
+  Option "51-75%",  ts_text_filled_75_color,  TextColors
+  Option "76-100%", ts_text_filled_100_color, TextColors
+  Option "> 100%",  ts_text_filled_101_color, TextColors
+
+  StaticText ""
+  StaticText "Colors for empty characters"
+  Option "≤ 0",     ts_text_empty_0_color,   TextColors
+  Option "1-25%",   ts_text_empty_25_color,  TextColors
+  Option "26-50%",  ts_text_empty_50_color,  TextColors
+  Option "51-75%",  ts_text_empty_75_color,  TextColors
+  Option "76-100%", ts_text_empty_100_color, TextColors
+}
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+  static private ui string toText(ts_InformationPiece piece, ts_Options options)
+  {
+    switch (piece.kind)
+    {
+    case ts_Kind.PlainText:   return piece.text;
+    case ts_Kind.Value:       return string.format("%d", piece.value);
+    case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
+    case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
+    }
+    return "";
   }
 
   static private ui void drawText(Font aFont,
@@ -1243,28 +1266,6 @@ class tsView_Text : Actor
 
   const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
 }
-#+end_src
-
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
-
-user string ts_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
-
-user int ts_text_filled_character_index = 0;
-user int ts_text_empty_character_index = 0;
-
-user int ts_text_filled_25_color  = 3; // green
-user int ts_text_filled_50_color  = 3;
-user int ts_text_filled_75_color  = 3;
-user int ts_text_filled_100_color = 3;
-user int ts_text_filled_101_color = 3;
-
-user int ts_text_empty_0_color    = 6; // red
-user int ts_text_empty_25_color   = 6;
-user int ts_text_empty_50_color   = 6;
-user int ts_text_empty_75_color   = 6;
-user int ts_text_empty_100_color  = 6;
-
-user float ts_scale = 1.0;
 #+end_src
 
 ** Menu classes
@@ -1446,6 +1447,21 @@ version 4.14.3
 
 [enu default]
 <<strings>>
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+
+class ts_Options
+{
+  void initialize()
+  {
+    <<options-cvar-initialization>>
+  }
+
+  <<options-cvar-getter>>
+
+  <<options-cvar-definition>>
+}
 #+end_src
 
 * Tests
