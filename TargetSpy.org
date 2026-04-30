@@ -1197,19 +1197,19 @@ OptionMenu ts_BarOptions
 {
   Title "Bar options"
 
+  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_text_filled_character_index
+  Slider "Empty character",  ts_text_empty_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_text_empty_character_index
+  TextField "Characters",    ts_characters
+
+  StaticText ""
   ts_BarPreview 0
   ts_BarPreview 25
   ts_BarPreview 50
   ts_BarPreview 75
   ts_BarPreview 100
   ts_BarPreview 101
-
-  StaticText ""
-  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_text_filled_character_index
-  Slider "Empty character",  ts_text_empty_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_text_empty_character_index
-  TextField "Characters",    ts_characters
 
   StaticText ""
   StaticText "Colors for filled characters"
@@ -1415,7 +1415,8 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 	{
     ts_Options options = ts_EventHandler.getInstance().getOptions();
     int value = int(round(double(mPercent) * 64 / 100));
-    mLabel = tsView_Text.makeBar(value, 64, options);
+    mLabel = string.format("%3d%% ", mPercent)
+      .. tsView_Text.makeBar(value, 64, options);
     drawLabel(indent, y, Font.CR_White);
     return -1;
 	}
