@@ -223,6 +223,12 @@ class ts_EventHandler : StaticEventHandler
     mView.call(mInformationPieces, mFader.getAlpha(event.fracTic));
   }
 
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (event.player == consolePlayer && event.name == "ts_swap_getters")
+      swapGetters(event.args[0], event.args[1]);
+  }
+
   static clearscope ts_EventHandler getInstance()
   {
     return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
@@ -233,7 +239,27 @@ class ts_EventHandler : StaticEventHandler
   clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
-  clearscope ts_ClassList getBlocklist() { return mBlocklist; }
+
+  ts_ClassList getBlocklist() { return mBlocklist; }
+
+  private void swapGetters(int i, int j)
+  {
+    int gettersCount = mGetters.size();
+    i = clamp(i, 0, gettersCount - 1);
+    j = clamp(j, 0, gettersCount - 1);
+    if (i == j) return;
+
+    {
+      let temp = mGetters[i];
+      mGetters[i] = mGetters[j];
+      mGetters[j] = temp;
+    }
+    {
+      let temp = mGetterClasses[i];
+      mGetterClasses[i] = mGetterClasses[j];
+      mGetterClasses[j] = temp;
+    }
+  }
 
   private void findTargets()
   {
@@ -432,29 +458,29 @@ class ts_EventHandler : StaticEventHandler
       : 0;
   }
 
-  ts_Options mOptions;
-  Cvar mDisabledFindersCvar;
-  Cvar mDisabledFiltersCvar;
-  Cvar mDisabledGettersCvar;
+  private ts_Options mOptions;
+  private Cvar mDisabledFindersCvar;
+  private Cvar mDisabledFiltersCvar;
+  private Cvar mDisabledGettersCvar;
 
-  Array< Function<play Actor()> > mFinders;
-  Array<string> mFinderClasses;
-  Array<Actor> mTargets;
+  private Array< Function<play Actor()> > mFinders;
+  private Array<string> mFinderClasses;
+  private Array<Actor> mTargets;
 
-  Array< Function<play bool(Actor)> > mFilters;
-  Array<string> mFilterClasses;
+  private Array< Function<play bool(Actor)> > mFilters;
+  private Array<string> mFilterClasses;
 
-  Actor mCurrentTarget;
+  private Actor mCurrentTarget;
 
-  Array< Function<play int, string, int, int(Actor)> > mGetters;
-  Array<string> mGetterClasses;
-  Array<ts_InformationPiece> mInformationPieces;
+  private Array< Function<play int, string, int, int(Actor)> > mGetters;
+  private Array<string> mGetterClasses;
+  private Array<ts_InformationPiece> mInformationPieces;
 
-  Function<ui void(Array<ts_InformationPiece>, double)> mView;
+  private Function<ui void(Array<ts_InformationPiece>, double)> mView;
 
-  ts_ClassList mBlocklist;
-  ts_ClassList mFollowers;
-  ts_Fader mFader;
+  private ts_ClassList mBlocklist;
+  private ts_ClassList mFollowers;
+  private ts_Fader mFader;
 }
 #+end_src
 
