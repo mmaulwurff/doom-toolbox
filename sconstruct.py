@@ -129,7 +129,9 @@ def add_test_target(org_file, main_target):
     has_errors = False
     for line in filter(printable, result.stdout.splitlines()):
       has_errors = has_errors or 'ERROR' in line
-      print(sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line))
+      line = sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line)
+      line = sub(r'Script error, \"(.*)/:(.*)\" line (.*)', r'\1/\2:\3', line)
+      print(line)
 
     return 1 if has_errors else 0
 
