@@ -38,6 +38,7 @@ OptionMenu ts_Options
 
   StaticText ""
   Submenu "Filter options", ts_FilterOptions
+  Submenu "Getters order",  ts_GettersOrder
   Submenu "Bar options",    ts_BarOptions
   Submenu "View options",   ts_ViewOptions
 }
@@ -225,8 +226,8 @@ class ts_EventHandler : StaticEventHandler
 
   override void networkProcess(ConsoleEvent event)
   {
-    if (event.player == consolePlayer && event.name == "ts_swap_getters")
-      swapGetters(event.args[0], event.args[1]);
+    if (event.player == consolePlayer && event.name == "ts_read_getters")
+      collectGetters();
   }
 
   static clearscope ts_EventHandler getInstance()
@@ -241,25 +242,6 @@ class ts_EventHandler : StaticEventHandler
   clearscope ts_Options getOptions() { return mOptions; }
 
   ts_ClassList getBlocklist() { return mBlocklist; }
-
-  private void swapGetters(int i, int j)
-  {
-    int gettersCount = mGetters.size();
-    i = clamp(i, 0, gettersCount - 1);
-    j = clamp(j, 0, gettersCount - 1);
-    if (i == j) return;
-
-    {
-      let temp = mGetters[i];
-      mGetters[i] = mGetters[j];
-      mGetters[j] = temp;
-    }
-    {
-      let temp = mGetterClasses[i];
-      mGetterClasses[i] = mGetterClasses[j];
-      mGetterClasses[j] = temp;
-    }
-  }
 
   private void findTargets()
   {
@@ -367,6 +349,35 @@ class ts_EventHandler : StaticEventHandler
     mDisabledGettersCvar = Cvar.findCvar("ts_disabled_getters");
   }
 
+  private void collectGetters()
+  {
+    mGetters.clear();
+    mGetterClasses.clear();
+
+    Array<string> orderedGetters;
+    Cvar.findCvar("ts_getters_order").getString()
+      .split(orderedGetters, ",", TOK_SkipEmpty);
+
+    foreach (getter : orderedGetters)
+    {
+      string className = "tsGetter_" .. getter;
+      Class<Object> aClass = className;
+      if (aClass != NULL && !tryAddGetter(aClass))
+        Console.printf("ERROR: %s: invalid tsGetter", className);
+    }
+
+    foreach (aClass : AllActorClasses)
+    {
+      string className = aClass.getClassName();
+      string shortName = shorten(className);
+      if (mGetterClasses.find(shortName) != mGetterClasses.size()) continue;
+      if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
+        Console.printf("ERROR: %s: invalid tsGetter", className);
+    }
+
+    warnTooLongList(mGetterClasses, "getters");
+  }
+
   private void collectClasses()
   {
     foreach (aClass : AllActorClasses)
@@ -378,16 +389,14 @@ class ts_EventHandler : StaticEventHandler
       if (className.indexOf("tsFilter_") != -1 && !tryAddFilter(aClass))
         Console.printf("ERROR: %s: invalid tsFilter", className);
 
-      if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
-        Console.printf("ERROR: %s: invalid tsGetter", className);
-
       if (className.indexOf("tsView_") != -1 && !tryAddView(aClass))
         Console.printf("ERROR: %s: invalid tsView", className);
     }
 
     warnTooLongList(mFinderClasses, "finders");
     warnTooLongList(mFilterClasses, "filters");
-    warnTooLongList(mGetterClasses, "getters");
+
+    collectGetters();
   }
 
   private static void warnTooLongList(out Array<string> classes, string listName)
@@ -1448,6 +1457,96 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 	}
 
   private int mPercent;
+}
+#+end_src
+
+*** Getters order
+
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+
+OptionMenu ts_GettersOrder
+{
+  Class ts_GettersOrderMenu
+  Title "Getters order"
+}
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+user string ts_getters_order = "";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+
+class ts_GettersOrderMenu : OptionMenu
+{
+  override void init(Menu parent, OptionMenuDescriptor descriptor)
+  {
+    Super.init(parent, descriptor);
+    ts_EventHandler.getInstance().getGetters(mClasses);
+
+    mDesc.mItems.clear();
+    int classesCount = mClasses.size();
+    for (int i = 0; i < classesCount; ++i)
+    {
+      let entry = new("ts_GettersOrderElement");
+      entry.init("$tsGetter_" .. mClasses[i], i, self);
+      mDesc.mItems.push(entry);
+    }
+
+    mDesc.mSelectedItem = clamp(mDesc.mSelectedItem, 0, mDesc.mItems.size() - 1);
+    mOrderCvar = Cvar.findCvar("ts_getters_order");
+  }
+
+  void moveDown(int i)
+  {
+    if (i + 1 >= mDesc.mItems.size()) return;
+
+    {
+      let temp = mClasses[i];
+      mClasses[i] = mClasses[i + 1];
+      mClasses[i + 1] = temp;
+    }
+    {
+      let temp = mDesc.mItems[i];
+      mDesc.mItems[i] = mDesc.mItems[i + 1];
+      mDesc.mItems[i + 1] = temp;
+    }
+
+    ++mDesc.mSelectedItem;
+    (ts_GettersOrderElement)(mDesc.mItems[i]).setIndex(i);
+    (ts_GettersOrderElement)(mDesc.mItems[i + 1]).setIndex(i + 1);
+
+    mOrderCvar.setString(ts_su.join(mClasses, ","));
+    EventHandler.sendNetworkEvent("ts_read_getters");
+  }
+
+  Array<string> mClasses;
+  Cvar mOrderCvar;
+}
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+
+class ts_GettersOrderElement : OptionMenuItemCommand
+{
+  ts_GettersOrderElement init(string label, int index, ts_GettersOrderMenu menu)
+  {
+    Super.init(label, "");
+    mIndex = index;
+    mMenu = menu;
+    return self;
+  }
+
+	override bool Activate()
+  {
+    mMenu.moveDown(mIndex);
+    return true;
+  }
+
+  void setIndex(int index) { mIndex = index; }
+
+  private int mIndex;
+  private ts_GettersOrderMenu mMenu;
 }
 #+end_src
 
