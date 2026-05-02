@@ -3,6 +3,11 @@
 
 #+title: Code Style
 
+* Enforcing
+
+It's OK to leave code style of old code as is. New code should conform to the code
+style, unless there is a good reason not to.
+
 * Capitalization
 
 - classes and structs: ~CapitalizedWords~
@@ -20,6 +25,8 @@
 - class members: ~mCapitalizedWords~
   - exceptions: ~camelCase~ if a class is plain data
 
+- struct members: ~camelCase~
+
 - local variables and parameters: ~camelCase~
 
 - states: ~CapitalizedWords~
@@ -28,10 +35,12 @@
 
 - console variables and aliases: ~snake_case~
 
-- project names: ~CapitalizedWords~
-  - exceptions: external projects imported into DoomToolbox retain their names, e.g.
-    libeye
-  - Typist.pk3, 10.5x
+- project names: ~CapitalizedWords~.
+  - exceptions: external projects imported into DoomToolbox, like ~libeye~
+  - exceptions: Typist.pk3, 10.5x
+
+- file names: ~CapitalizedWords~
+  - exceptions: tangled ZScript files: ~snake_case~
 
 * Formatting
 
