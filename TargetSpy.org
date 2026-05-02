@@ -67,13 +67,6 @@ OptionMenu ts_FilterOptions
 
   <<filter-options>>
 }
-
-OptionMenu ts_ViewOptions
-{
-  Title "View options"
-
-  <<view-options>>
-}
 #+end_src
 
 * Source
@@ -198,6 +191,7 @@ class ts_EventHandler : StaticEventHandler
     mFader = new("ts_Fader");
     (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
     (mFollowers = new("ts_ClassList")).initialize("ts_followers");
+    (mProjector = new("ts_Projector")).initialize();
   }
 
   override void worldTick()
@@ -205,10 +199,10 @@ class ts_EventHandler : StaticEventHandler
     if (players[consolePlayer].mo == NULL) return;
     if (level.mapName ~== "titlemap") return;
 
+    mProjector.prepare();
     findTargets();
     filterTargets();
-    chooseCurrentTarget();
-    collectInformation();
+    collectInformation(chooseCurrentTarget());
     mFader.tick();
   }
 
@@ -221,7 +215,11 @@ class ts_EventHandler : StaticEventHandler
   {
     if (players[consolePlayer].mo == NULL) return;
 
-    mView.call(mInformationPieces, mFader.getAlpha(event.fracTic));
+    mView.call(mInformationPieces,
+               mFader.getAlpha(event.fracTic),
+               event,
+               mLastTargetPosition,
+               mLastTargetSize);
   }
 
   override void networkProcess(ConsoleEvent event)
@@ -240,6 +238,7 @@ class ts_EventHandler : StaticEventHandler
   clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
+  clearscope ts_Projector getProjector() { return mProjector; }
 
   ts_ClassList getBlocklist() { return mBlocklist; }
 
@@ -287,7 +286,7 @@ class ts_EventHandler : StaticEventHandler
     }
   }
 
-  private void chooseCurrentTarget()
+  private Actor chooseCurrentTarget()
   {
     Actor closestTarget = NULL;
     double minDistance = double.max;
@@ -302,12 +301,18 @@ class ts_EventHandler : StaticEventHandler
       }
     }
 
-    mCurrentTarget = closestTarget;
+    if (closestTarget != NULL)
+    {
+      mLastTargetSize = (closestTarget.radius, closestTarget.height);
+      mLastTargetPosition = closestTarget.pos;
+    }
+
+    return closestTarget;
   }
 
-  private void collectInformation()
+  private void collectInformation(Actor currentTarget)
   {
-    if (mCurrentTarget == NULL) return;
+    if (currentTarget == NULL) return;
 
     clearInformation();
     mFader.reset();
@@ -326,7 +331,7 @@ class ts_EventHandler : StaticEventHandler
         [mInformationPieces[i].kind,
          mInformationPieces[i].text,
          mInformationPieces[i].value,
-         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
+         mInformationPieces[i].max] = mGetters[i].call(currentTarget);
       }
     }
 
@@ -454,8 +459,11 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddView(class<Object> aClass)
   {
     // TODO: make sure external view always overrides the internal one.
-    let view = (Function<ui void(Array<ts_InformationPiece>, double)>)
-      (findFunction(aClass, "draw"));
+    let view = (Function<ui void(Array<ts_InformationPiece>,
+                                 double,
+                                 RenderEvent,
+                                 vector3,
+                                 vector2)>)(findFunction(aClass, "draw"));
     if (view != NULL) mView = view;
     return view != NULL;
   }
@@ -479,17 +487,23 @@ class ts_EventHandler : StaticEventHandler
   private Array< Function<play bool(Actor)> > mFilters;
   private Array<string> mFilterClasses;
 
-  private Actor mCurrentTarget;
+  private vector3 mLastTargetPosition;
+  private vector2 mLastTargetSize;
 
   private Array< Function<play int, string, int, int(Actor)> > mGetters;
   private Array<string> mGetterClasses;
   private Array<ts_InformationPiece> mInformationPieces;
 
-  private Function<ui void(Array<ts_InformationPiece>, double)> mView;
+  private Function <ui void(Array<ts_InformationPiece>,
+                            double,
+                            RenderEvent,
+                            vector3,
+                            vector2)> mView;
 
   private ts_ClassList mBlocklist;
   private ts_ClassList mFollowers;
   private ts_Fader mFader;
+  private ts_Projector mProjector;
 }
 #+end_src
 
@@ -820,10 +834,10 @@ class tsFilter_LightLevel : Actor
 }
 #+end_src
 
-#+begin_src c :noweb-ref options-cvar-getter
+#+begin_src c :noweb-ref ts_Options.functions
 int getMinLightLevel() const { return mMinLightLevelCvar.getInt(); }
 #+end_src
-#+begin_src c :noweb-ref options-cvar-definition
+#+begin_src c :noweb-ref ts_Options.members
 private Cvar mMinLightLevelCvar;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
@@ -1091,70 +1105,152 @@ class ts_Fader
 #+begin_src c :noweb-ref strings
 tsView_Text = "Always text";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
 class tsView_Text : Actor
 {
-  static ui void draw(Array<ts_InformationPiece> informationPieces, double alpha)
+  <<tsView_Text.functions>>
+}
+#+end_src
+
+**** ~draw~
+
+#+begin_src c :noweb-ref tsView_Text.functions
+
+static ui void draw (Array<ts_InformationPiece> informationPieces,
+                     double alpha,
+                     RenderEvent event,
+                     vector3 targetPosition,
+                     vector2 targetSize)
+{
+  ts_Options options = ts_EventHandler.getInstance().getOptions();
+
+  Array<string> lines;
+
+  foreach (piece : informationPieces)
   {
-    Font aFont = Font.findFont("NewSmallFont");
-    int xCenter = Screen.getWidth() / 2;
-    int y = int(round(Screen.getHeight() * 0.2));
-    ts_Options options = ts_EventHandler.getInstance().getOptions();
-    double scale = options.getScale();
-    int lineHeight = int(round(aFont.getHeight() * scale));
-
-    foreach (piece : informationPieces)
-    {
-      string text = toText(piece, options);
-      if (text.length() == 0) continue;
-      drawText(aFont, text, xCenter, y, alpha, scale);
-      y += lineHeight;
-    }
+    string line = toText(piece, options);
+    if (line.length() != 0) lines.push(line);
   }
+
+  Font aFont = Font.findFont("NewSmallFont");
+  double scale = options.getScale();
+  double lineHeight = aFont.getHeight() * scale;
+
+  double totalHeight = lineHeight * lines.size();
+  double totalWidth = 0;
+  foreach (line : lines)
+    totalWidth = max(totalWidth, aFont.stringWidth(line));
+  // Note: stringWidth underestimates.
+  totalWidth = totalWidth * 1.1 * scale;
+
+  int screenWidth = Screen.getWidth();
+  int screenHeight = Screen.getHeight();
+  vector2 position = getPosition(options, event, targetPosition, targetSize);
+  if (options.getPlace() == ts_Options.PlaceAboveTarget)
+    position.y -= totalHeight;
+  position.x = clamp(position.x, totalWidth / 2, screenWidth - totalWidth / 2);
+  position.y = clamp(position.y, 0, screenHeight - totalHeight);
+
+  foreach (line : lines)
+  {
+    drawText(aFont, line, position, alpha, scale);
+    position.y += lineHeight;
+  }
+}
+
+static ui vector2 getPosition(ts_Options options,
+                              RenderEvent event,
+                              vector3 targetPosition,
+                              vector2 targetSize)
+{
+  int place = options.getPlace();
+  if (place == ts_Options.PlaceFixed)
+    return (options.getXPosition() * Screen.getWidth(),
+      options.getYPosition() * Screen.getHeight());
+
+  ts_Projector projector = ts_EventHandler.getInstance().getProjector();
+
+  if (place == ts_Options.PlaceAboveTarget) targetPosition.z += targetSize.y;
+  return projector.makePosition(event, targetPosition);
+}
 #+end_src
 
-#+begin_src c :noweb-ref options-cvar-getter
+#+begin_src c :noweb-ref ts_Options.functions
+
 double getScale() const { return mScaleCvar.getFloat(); }
+double getXPosition() const { return mXPositionCvar.getFloat(); }
+double getYPosition() const { return mYPositionCvar.getFloat(); }
+enum Places { PlaceFixed, PlaceAboveTarget, PlaceBelowTarget }
+int getPlace() const { return mPlaceCvar.getInt(); }
 #+end_src
-#+begin_src c :noweb-ref options-cvar-definition
+#+begin_src c :noweb-ref ts_Options.members
+
 private Cvar mScaleCvar;
+private Cvar mXPositionCvar;
+private Cvar mYPositionCvar;
+private Cvar mPlaceCvar;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
-mScaleCvar = Cvar.findCvar("ts_scale");
+
+mScaleCvar     = Cvar.findCvar("ts_scale");
+mXPositionCvar = Cvar.findCvar("ts_x_position");
+mYPositionCvar = Cvar.findCvar("ts_y_position");
+mPlaceCvar     = Cvar.findCvar("ts_place");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
 user float ts_scale = 1.0;
+user float ts_x_position = 0.5;
+user float ts_y_position = 0.2;
+user int   ts_place = 0;
 #+end_src
-#+begin_src c :noweb-ref view-options
-Slider "Scale", ts_scale, 0.1, 4.0, 0.1, 1
-#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+OptionMenu ts_ViewOptions
+{
+  Title "View options"
 
-  static ui string makeBar(int value, int max, ts_Options options)
-  {
-    int length = int(round(log(max) * 2));
-    int filledCount = (max < 1)
-      ? 0
-      : clamp(int(round(double(value) * length / max)), 0, length);
+  Slider "Scale",      ts_scale, 0.1, 4.0, 0.1, 1
+  Slider "X position", ts_x_position, 0, 1.0, 0.01, 2
+  Slider "Y position", ts_y_position, 0, 1.0, 0.01, 2
+  Option "Place",      ts_place, ts_Places
+}
 
-    int percent = int(round(double(value) * 100 / max));
-    int filledColor = options.getFilledColor(percent);
-    int emptyColor  = options.getEmptyColor(percent);
-    string filled = string.format("%c", options.getFilledCharacter());
-    string empty  = string.format("%c", options.getEmptyCharacter());
-
-    return string.format("\c%c%s\c%c%s",
-                         SMALL_A + filledColor,
-                         ts_su.repeat(filled, filledCount),
-                         SMALL_A + emptyColor,
-                         ts_su.repeat(empty, length - filledCount));
-  }
+OptionValue ts_Places
+{
+  0, "Fixed"
+  1, "Above target"
+  2, "Below target"
+}
 #+end_src
 
-#+begin_src c :noweb-ref options-cvar-getter
+**** ~makeBar~
+
+#+begin_src c :noweb-ref tsView_Text.functions
+
+static ui string makeBar(int value, int max, ts_Options options)
+{
+  int length = int(round(log(max) * 2));
+  int filledCount = (max < 1)
+    ? 0
+    : clamp(int(round(double(value) * length / max)), 0, length);
+
+  int percent = int(round(double(value) * 100 / max));
+  int filledColor = options.getFilledColor(percent);
+  int emptyColor  = options.getEmptyColor(percent);
+  string filled = string.format("%c", options.getFilledCharacter());
+  string empty  = string.format("%c", options.getEmptyCharacter());
+
+  return string.format("\c%c%s\c%c%s",
+                        SMALL_A + filledColor,
+                        ts_su.repeat(filled, filledCount),
+                        SMALL_A + emptyColor,
+                        ts_su.repeat(empty, length - filledCount));
+}
+#+end_src
+
+#+begin_src c :noweb-ref ts_Options.functions
 int getFilledColor(int percent) const
 {
   return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
@@ -1186,7 +1282,7 @@ private int getCharacter(int index) const
   return 0;
 }
 #+end_src
-#+begin_src c :noweb-ref options-cvar-definition
+#+begin_src c :noweb-ref ts_Options.members
 private Array<Cvar> mFilledColorCvars;
 private Array<Cvar> mEmptyColorCvars;
 private Cvar mFilledCharacterIndex;
@@ -1264,42 +1360,91 @@ OptionMenu ts_BarOptions
 }
 #+end_src
 
+**** Helper functions
+
+#+begin_src c :noweb-ref tsView_Text.functions
+
+static private ui string toText(ts_InformationPiece piece, ts_Options options)
+{
+  switch (piece.kind)
+  {
+  case ts_Kind.PlainText:   return piece.text;
+  case ts_Kind.Value:       return string.format("%d", piece.value);
+  case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
+  case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
+  }
+  return "";
+}
+
+static private ui void drawText
+  (Font aFont, string text, vector2 position, double alpha, double scale)
+{
+  position.x -= int(round(aFont.stringWidth(text) * scale / 2));
+  Screen.drawText(aFont,
+                  Font.CR_Gray,
+                  position.x,
+                  position.y,
+                  text,
+                  DTA_ScaleX, scale,
+                  DTA_ScaleY, scale,
+                  DTA_Alpha,  alpha);
+}
+
+const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
+#+end_src
+
+*** Projector
+
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
-  static private ui string toText(ts_InformationPiece piece, ts_Options options)
+class ts_Projector
+{
+  void initialize()
   {
-    switch (piece.kind)
+    mGlProjection = new("ts_GlScreen");
+    mSwProjection = new("ts_SwScreen");
+    mCvarRenderer = Cvar.findCvar("vid_rendermode");
+    if (mCvarRenderer == NULL)
+      Console.printf("TargetSpy: WARNING: vid_rendermode CVar not found");
+  }
+
+  void prepare()
+  {
+    // Projection type detection is not quite right here.
+    // vid_rendermode contains more complex information.
+    // If something breaks, look here.
+    if (mCvarRenderer != NULL)
     {
-    case ts_Kind.PlainText:   return piece.text;
-    case ts_Kind.Value:       return string.format("%d", piece.value);
-    case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
-    case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
+      int renderer = mCvarRenderer.getInt();
+      mProjection = (renderer == 0 || renderer == 1)
+        ? (ts_ProjScreen)(mSwProjection)
+        : (ts_ProjScreen)(mGlProjection);
+      return;
     }
-    return "";
+
+    mProjection = mGlProjection;
   }
 
-  static private ui void drawText(Font aFont,
-                                  string text,
-                                  int xCenter,
-                                  int y,
-                                  double alpha,
-                                  double scale)
+  ui vector2 makePosition(RenderEvent event, vector3 worldPosition) const
   {
-    int x = xCenter - int(round(aFont.stringWidth(text) * scale / 2));
-    Screen.drawText(aFont,
-                    Font.CR_Gray,
-                    x,
-                    y,
-                    text,
-                    DTA_ScaleX,
-                    scale,
-                    DTA_ScaleY,
-                    scale,
-                    DTA_Alpha,
-                    alpha);
+    PlayerInfo player = players[consolePlayer];
+
+    mProjection.cacheResolution();
+    mProjection.cacheFov(player.fov);
+    mProjection.orientForRenderOverlay(event);
+    mProjection.beginProjection();
+    mProjection.projectWorldPos(worldPosition);
+
+    ts_Viewport viewport;
+    viewport.fromHud();
+
+    return viewport.sceneToWindow(mProjection.projectToNormal());
   }
 
-  const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
+  private ts_GlScreen   mGlProjection;
+  private ts_SwScreen   mSwProjection;
+  private CVar          mCvarRenderer;
+  private ts_ProjScreen mProjection;
 }
 #+end_src
 
@@ -1567,6 +1712,7 @@ version 4.14.3
 <<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
 
 #include "zscript/ts_StringUtils.zs"
+#include "zscript/ts_libeye.zs"
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/language.txt
@@ -1584,9 +1730,9 @@ class ts_Options
     <<options-cvar-initialization>>
   }
 
-  <<options-cvar-getter>>
+  <<ts_Options.functions>>
 
-  <<options-cvar-definition>>
+  <<ts_Options.members>>
 }
 #+end_src
 
