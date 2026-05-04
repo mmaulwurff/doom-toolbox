@@ -24,7 +24,10 @@ This class acts as a namespace for free functions.
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
 
-class NAMESPACE_su { <<StringUtilsBody>> }
+class NAMESPACE_su
+{
+  <<StringUtilsBody>>
+}
 #+end_src
 
 *** ~join~
@@ -430,8 +433,12 @@ NAMESPACE_Description addCvar(string name)
 #+begin_src c :noweb-ref TestsBody
 {
   let d = new("Description");
-  d.addCvar("autoaim").addCvar("dmflags2");
-  it("description: cvar", Assert(d.compose() == "autoaim: 35.00, dmflags2: 0"));
+  Array<string> cvars = { "su_bool", "su_int", "su_float", "su_string" };
+  foreach (aCvar : cvars) d.addCvar(aCvar);
+  bool isPassing = d.compose()
+    == "su_bool: true, su_int: 3, su_float: -7.5, su_string: \"♥test\"";
+  it("description: cvar", Assert(isPassing));
+  if (!isPassing) Console.printf("%s", d.compose());
 }
 #+end_src
 
