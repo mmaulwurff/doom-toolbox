@@ -1131,6 +1131,9 @@ private clearscope void checkOtherEventHandlers()
         ? EventHandler.find(eventHandlerClass)
         : StaticEventHandler.find(eventHandlerClass);
 
+      // Ignore the test class.
+      if (instance is "dd_LoggerTestRunner") continue;
+
       if (instance == NULL)
         {
           logWarning("event handler %s is defined but not activated in MAPINFO",
