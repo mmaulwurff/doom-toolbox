@@ -202,7 +202,8 @@ class ts_EventHandler : StaticEventHandler
     mProjector.prepare();
     findTargets();
     filterTargets();
-    collectInformation(chooseCurrentTarget());
+    chooseCurrentTarget();
+    collectInformation();
     mFader.tick();
   }
 
@@ -241,6 +242,31 @@ class ts_EventHandler : StaticEventHandler
   clearscope ts_Projector getProjector() { return mProjector; }
 
   ts_ClassList getBlocklist() { return mBlocklist; }
+
+  ui vector2 interpolateScreenPosition(vector2 screenPosition)
+  {
+    if (mLastInterpolatedTarget != mCurrentTarget)
+    {
+      mLastInterpolatedTarget = mCurrentTarget;
+      mOldScreenPosition = screenPosition;
+      return screenPosition;
+    }
+
+    vector2 diff = (screenPosition - mOldScreenPosition) / 2;
+    mOldScreenPosition.x += round(diff.x);
+    mOldScreenPosition.y += round(diff.y);
+
+    return mOldScreenPosition;
+  }
+
+  private ui bool isInformationEmpty() const
+  {
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
+      if (mInformationPieces[i].kind != ts_Kind.Empty) return false;
+
+    return true;
+  }
 
   private void findTargets()
   {
@@ -286,7 +312,7 @@ class ts_EventHandler : StaticEventHandler
     }
   }
 
-  private Actor chooseCurrentTarget()
+  private void chooseCurrentTarget()
   {
     Actor closestTarget = NULL;
     double minDistance = double.max;
@@ -307,12 +333,12 @@ class ts_EventHandler : StaticEventHandler
       mLastTargetPosition = closestTarget.pos;
     }
 
-    return closestTarget;
+    mCurrentTarget = closestTarget;
   }
 
-  private void collectInformation(Actor currentTarget)
+  private void collectInformation()
   {
-    if (currentTarget == NULL) return;
+    if (mCurrentTarget == NULL) return;
 
     clearInformation();
     mFader.reset();
@@ -331,7 +357,7 @@ class ts_EventHandler : StaticEventHandler
         [mInformationPieces[i].kind,
          mInformationPieces[i].text,
          mInformationPieces[i].value,
-         mInformationPieces[i].max] = mGetters[i].call(currentTarget);
+         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
       }
     }
 
@@ -484,6 +510,8 @@ class ts_EventHandler : StaticEventHandler
   private Array<string> mFinderClasses;
   private Array<Actor> mTargets;
 
+  private Actor mCurrentTarget;
+
   private Array< Function<play bool(Actor)> > mFilters;
   private Array<string> mFilterClasses;
 
@@ -504,6 +532,9 @@ class ts_EventHandler : StaticEventHandler
   private ts_ClassList mFollowers;
   private ts_Fader mFader;
   private ts_Projector mProjector;
+
+  private ui vector2 mOldScreenPosition;
+  private ui Actor mLastInterpolatedTarget;
 }
 #+end_src
 
@@ -1133,6 +1164,8 @@ static ui void draw (Array<ts_InformationPiece> informationPieces,
     if (line.length() != 0) lines.push(line);
   }
 
+  if (lines.size() == 0) return;
+
   Font aFont = Font.findFont("NewSmallFont");
   double scale = options.getScale();
   double lineHeight = aFont.getHeight() * scale;
@@ -1169,10 +1202,12 @@ static ui vector2 getPosition(ts_Options options,
     return (options.getXPosition() * Screen.getWidth(),
       options.getYPosition() * Screen.getHeight());
 
-  ts_Projector projector = ts_EventHandler.getInstance().getProjector();
+  ts_EventHandler eventHandler = ts_EventHandler.getInstance();
+  ts_Projector projector = eventHandler.getProjector();
 
   if (place == ts_Options.PlaceAboveTarget) targetPosition.z += targetSize.y;
-  return projector.makePosition(event, targetPosition);
+  return eventHandler
+    .interpolateScreenPosition(projector.makePosition(event, targetPosition));
 }
 #+end_src
 
