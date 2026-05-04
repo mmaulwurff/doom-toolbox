@@ -576,6 +576,10 @@ HeadshotHitboxHeavyeadshotHitbox
 
 ** Finders
 
+#+begin_src c :noweb-ref RANGE
+4000.0
+#+end_src
+
 *** Aim targets
 
 #+begin_src c :noweb-ref strings
@@ -596,7 +600,7 @@ class tsFinder_Aim : Actor
 *** Shootable
 
 #+begin_src c :noweb-ref strings
-tsFinder_Shootable = "Shootable";
+tsFinder_Shootable = "Shootable only";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
@@ -611,8 +615,7 @@ class tsFinder_Shootable : Actor
     double angle = pawn.angle;
     double pitch = pawn.pitch;
     double viewHeight = player.viewHeight;
-    // TODO: move 4000.0 to a constant?
-    pawn.lineTrace(angle, 4000.0, pitch, 0, viewHeight, 0.0, 0.0, lineTraceData);
+    pawn.lineTrace(angle, <<RANGE>>, pitch, 0, viewHeight, 0.0, 0.0, lineTraceData);
 
     return lineTraceData.hitActor;
   }
@@ -622,7 +625,7 @@ class tsFinder_Shootable : Actor
 *** Non-shootable
 
 #+begin_src c :noweb-ref strings
-tsFinder_NonShootable = "Non-shootable";
+tsFinder_NonShootable = "Non-shootable too";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
@@ -633,7 +636,7 @@ class tsFinder_NonShootable : Actor
   {
     PlayerPawn pawn = players[consolePlayer].mo;
     FTranslatedLineTarget lineTarget;
-    pawn.aimLineAttack(pawn.angle, 2048.0, lineTarget, 0, AIM_FLAGS);
+    pawn.aimLineAttack(pawn.angle, <<RANGE>>, lineTarget, 0, AIM_FLAGS);
     return lineTarget.lineTarget;
   }
 
@@ -644,7 +647,7 @@ class tsFinder_NonShootable : Actor
 *** Noblockmap actor finder
 
 #+begin_src c :noweb-ref strings
-tsFinder_Noblockmap = "Noblockmap";
+tsFinder_Noblockmap = "Everything";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
@@ -662,7 +665,7 @@ class tsFinder_Noblockmap : Actor
   static Actor lineAttackNoBlockmap(Actor a, double offsetz)
   {
     FLineTraceData lineTraceData;
-    a.LineTrace(a.angle, 4000.0, a.pitch, 0, offsetz, 0.0, 0.0, lineTraceData);
+    a.LineTrace(a.angle, <<RANGE>>, a.pitch, 0, offsetz, 0.0, 0.0, lineTraceData);
 
     if (lineTraceData.HitType == TRACE_HitActor)
     {
@@ -1486,6 +1489,8 @@ class ts_Projector
 ** Menu classes
 
 *** Toggles
+
+TODO: disable some classes by default.
 
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
