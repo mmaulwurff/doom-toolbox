@@ -242,6 +242,36 @@ it("highlight end", Assert("мыш\cgь\c-" == su.highlight("мышь",  3, Font
 it("highlight 4" ,  Assert("мышь"       == su.highlight("мышь",  4, Font.CR_Tan)));
 #+end_src
 
+*** ~getCodePointAt~
+
+Finds a Unicode character by index. Attention: O(n).
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope int getCodePointAt(string aString, int index)
+{
+  int letterCode = 0;
+  int position = 0;
+  int stringLength = aString.length();
+  for (int i = 0; i <= index && position <= stringLength; ++i)
+    [letterCode, position] = aString.getNextCodePoint(position);
+
+  return letterCode;
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  int codePoint0 = 0x43C; // 'м'
+  int codePoint1 = 0x44B; // 'ы'
+  int codePoint3 = 0x44C; // 'ь'
+  it("getCodePointAt 0", AssertEval(su.getCodePointAt("мышь", 0), "==", codePoint0));
+  it("getCodePointAt 1", AssertEval(su.getCodePointAt("мышь", 1), "==", codePoint1));
+  it("getCodePointAt 3", AssertEval(su.getCodePointAt("мышь", 3), "==", codePoint3));
+  it("getCodePointAt -1", AssertEval(su.getCodePointAt("мышь", -1), "==", 0));
+  it("getCodePointAt end", AssertEval(su.getCodePointAt("мышь", 4), "==", 0));
+}
+#+end_src
+
 ** ~Description~
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs

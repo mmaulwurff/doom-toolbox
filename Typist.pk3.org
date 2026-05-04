@@ -3381,25 +3381,12 @@ class tt_RandomCharactersLesson : tt_Lesson
     for (int i = 0; i < number; ++i)
     {
       int randomIndex = random[typist](0, lastCharacter);
-      int character   = getCodePointAt(characters, randomIndex);
+      int character   = tt_su_su.getCodePointAt(characters, randomIndex);
 
       result.appendFormat("%c", character);
     }
 
     return result;
-  }
-
-  // Attention! O(n)
-  private static int getCodePointAt(String str, int index)
-  {
-    int letterCode;
-    int charPos = 0;
-    for (int i = 0; i <= index; ++i)
-    {
-      [letterCode, charPos] = str.GetNextCodePoint(charPos);
-    }
-
-    return letterCode;
   }
 
   const LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";

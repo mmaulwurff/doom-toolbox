@@ -5,6 +5,10 @@
 
 * About
 
+TODO: latching to:
+- NC HUD
+- Guncaster
+
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
@@ -1299,25 +1303,13 @@ int getEmptyColor(int percent) const
 }
 int getFilledCharacter() const
 {
-  return getCharacter(max(mFilledCharacterIndex.getInt(), 0));
+  return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                              max(mFilledCharacterIndex.getInt(), 0));
 }
 int getEmptyCharacter() const
 {
-  return getCharacter(max(mEmptyCharacterIndex.getInt(), 0));
-}
-private int getCharacter(int index) const
-{
-  // TODO: move this to StringUtils?
-  string characters = mCharactersCvar.getString();
-  int charactersLength = characters.length();
-  int i = 0;
-  for (int position = 0; position < charactersLength; ++i)
-  {
-    int result;
-    [result, position] = characters.getNextCodePoint(position);
-    if (i == index) return result;
-  }
-  return 0;
+  return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                              max(mEmptyCharacterIndex.getInt(), 0));
 }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
