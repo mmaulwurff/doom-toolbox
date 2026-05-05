@@ -4,7 +4,8 @@
 #+title: Where Are The Project Files?
 
 DoomToolbox projects are written as Emacs Org mode literate project files. See [[../README.org::Build][Build]]
-section in the Readme for how to extract
+section in the Readme for how to extract source files from .org files. See [[file:OrgCheatSheet.org][Org Cheat
+Sheet]] for Org mode syntax.
 
 * Pros
 

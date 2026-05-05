@@ -142,3 +142,4 @@ Documentation:
 - [[file:documentation/CodeOfConduct.org][Code of conduct]]
 - [[file:documentation/CodeStyle.org][Code style]]
 - [[file:documentation/MadeWith.org][Made with]]
+- [[file:documentation/OrgCheatSheet.org][Org Cheat Sheet]]

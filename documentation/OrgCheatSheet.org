@@ -1,0 +1,46 @@
+# Lines starting with # are comments, they are not exported to HTML.
+# Some comments have special meaning, like "#+title:", "#+begin_src", "#+end_src".
+#+title: Org Cheat Sheet
+
+Formatting: *bold* _underlined_ ~monospace~ +strikethrough+ /italics/ */_+combined+_/*
+
+Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html][Org mode quickstart]].
+
+Unordered lists:
+- one
+- two
+
+Ordered lists:
+1. one
+2. two
+
+Code block example. ~#+begin_src~ starts a code block. ~#+end_src~ ends it.
+The code inside this block will be put into ~main.c~ file when tangled.
+#+begin_src c :tangle main.c
+int main() { return 0; }
+#+end_src
+
+Macro example. When exported or tangled, the following blocks are automatically put
+inside this block:
+#+begin_src c :noweb yes
+// <<text-to-insert-here-name>>
+#+end_src
+
+#+begin_src c :exports none :noweb-ref text-to-insert-here-name
+SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+#+end_src
+
+#+begin_src c :exports none :noweb-ref text-to-insert-here-name
+SPDX-License-Identifier: CC0-1.0
+#+end_src
+
+* Heading
+** Second level heading
+*** Third level heading
+
+-----
+
+This block puts this .org file into the exported HTML page verbatim for comparison.
+#+begin_src elisp :exports both
+(print (org-file-contents "OrgCheatSheet.org"))
+#+end_src
