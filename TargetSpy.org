@@ -26,6 +26,8 @@ SPDX-License-Identifier: GPL-3.0-only
 ts_OptionsTitle = "Target Spy \cd⌖";
 #+end_src
 
+TODO: add PlainTranslator?
+
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$ts_OptionsTitle", ts_Options }
@@ -39,30 +41,38 @@ OptionMenu ts_Options
   Submenu "Finders", ts_FinderToggles
   Submenu "Filters", ts_FilterToggles
   Submenu "Getters", ts_GetterToggles
+  Submenu "Views",   ts_ViewToggles
 
   StaticText ""
   Submenu "Filter options", ts_FilterOptions
   Submenu "Getters order",  ts_GettersOrder
   Submenu "Bar options",    ts_BarOptions
-  Submenu "View options",   ts_ViewOptions
+  Submenu "Text view options", ts_ViewOptions
+  Submenu "Frame options", ts_FrameOptions
 }
 
 OptionMenu ts_FinderToggles
 {
-  Class ts_FinderToggles
+  Class tsFinder_Toggles
   Title "Finder Toggles"
 }
 
 OptionMenu ts_FilterToggles
 {
-  Class ts_FilterToggles
+  Class tsFilter_Toggles
   Title "Filter Toggles"
 }
 
 OptionMenu ts_GetterToggles
 {
-  Class ts_GetterToggles
+  Class tsGetter_Toggles
   Title "Getter Toggles"
+}
+
+OptionMenu ts_ViewToggles
+{
+  Class tsView_Toggles
+  Title "View toggles"
 }
 
 OptionMenu ts_FilterOptions
@@ -190,12 +200,19 @@ class ts_EventHandler : StaticEventHandler
 {
   override void onRegister()
   {
-    initializeOptions();
-    collectClasses();
-    mFader = new("ts_Fader");
+    (mOptions = new("ts_Options")).initialize();
+    mDisabledFindersCvar = Cvar.findCvar("ts_disabled_finders");
+    mDisabledFiltersCvar = Cvar.findCvar("ts_disabled_filters");
+    mDisabledGettersCvar = Cvar.findCvar("ts_disabled_getters");
+    mDisabledViewsCvar   = Cvar.findCvar("ts_disabled_views");
+    (mFader = new("ts_Fader")).initialize();
     (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
     (mFollowers = new("ts_ClassList")).initialize("ts_followers");
     (mProjector = new("ts_Projector")).initialize();
+    mTextInterpolator  = new("ts_TargetScreenPositionInterpolator");
+    mFrameInterpolator = new("ts_TargetScreenPositionInterpolator");
+
+    collectClasses();
   }
 
   override void worldTick()
@@ -223,7 +240,18 @@ class ts_EventHandler : StaticEventHandler
     double alpha = mFader.getAlpha(event.fracTic);
     if (alpha <= 0.0) return;
 
-    mView.call(mInformationPieces, alpha, event, mLastTargetPosition, mLastTargetSize);
+    Array<string> disabledClasses;
+    mDisabledViewsCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
+
+    int viewsCount = mViews.size();
+    for (int i = 0; i < viewsCount; ++i)
+    {
+      bool isEnabled = disabledClasses.find(mViewClasses[i]) == disabledClassesSize;
+      if (!isEnabled) continue;
+      mViews[i].
+        call(mInformationPieces, alpha, event, mLastTargetPosition, mLastTargetSize);
+    }
   }
 
   override void networkProcess(ConsoleEvent event)
@@ -240,26 +268,21 @@ class ts_EventHandler : StaticEventHandler
   clearscope void getFinders(out Array<string> result) { result.copy(mFinderClasses); }
   clearscope void getFilters(out Array<string> result) { result.copy(mFilterClasses); }
   clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
+  clearscope void getViews(out Array<string> result) { result.copy(mViewClasses); }
 
   clearscope ts_Options getOptions() { return mOptions; }
   clearscope ts_Projector getProjector() { return mProjector; }
 
   ts_ClassList getBlocklist() { return mBlocklist; }
 
-  ui vector2 interpolateScreenPosition(vector2 screenPosition)
+  ui vector2 interpolateTextScreenPosition(vector2 position)
   {
-    if (mLastInterpolatedTarget != mCurrentTarget)
-    {
-      mLastInterpolatedTarget = mCurrentTarget;
-      mOldScreenPosition = screenPosition;
-      return screenPosition;
-    }
+    return mTextInterpolator.interpolateScreenPosition(position, mCurrentTarget);
+  }
 
-    vector2 diff = (screenPosition - mOldScreenPosition) / 2;
-    mOldScreenPosition.x += round(diff.x);
-    mOldScreenPosition.y += round(diff.y);
-
-    return mOldScreenPosition;
+  ui vector2 interpolateFrameScreenPosition(vector2 position)
+  {
+    return mFrameInterpolator.interpolateScreenPosition(position, mCurrentTarget);
   }
 
   private ui bool isInformationEmpty() const
@@ -363,8 +386,6 @@ class ts_EventHandler : StaticEventHandler
          mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
       }
     }
-
-    // TODO: add priorities, sort information pieces according to priorities.
   }
 
   private void clearInformation()
@@ -372,15 +393,6 @@ class ts_EventHandler : StaticEventHandler
     int gettersCount = mGetters.size();
     for (int i = 0; i < gettersCount; ++i)
       mInformationPieces[i].kind = ts_Kind.Empty;
-  }
-
-  private void initializeOptions()
-  {
-    (mOptions = new("ts_Options")).initialize();
-
-    mDisabledFindersCvar = Cvar.findCvar("ts_disabled_finders");
-    mDisabledFiltersCvar = Cvar.findCvar("ts_disabled_filters");
-    mDisabledGettersCvar = Cvar.findCvar("ts_disabled_getters");
   }
 
   private void collectGetters()
@@ -445,8 +457,7 @@ class ts_EventHandler : StaticEventHandler
 
   private static string shorten(string className)
   {
-    // Length of "tsFinder_", "tsFilter_", and "tsGetter_".
-    return className.mid(9);
+    return className.mid(className.indexOf("_") + 1);
   }
 
   private bool tryAddFinder(class<Object> aClass)
@@ -487,13 +498,15 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddView(class<Object> aClass)
   {
-    // TODO: make sure external view always overrides the internal one.
-    let view = (Function<ui void(Array<ts_InformationPiece>,
-                                 double,
-                                 RenderEvent,
-                                 vector3,
-                                 vector2)>)(findFunction(aClass, "draw"));
-    if (view != NULL) mView = view;
+    let view =
+      (Function
+       <ui void (Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>)
+      (findFunction(aClass, "draw"));
+    if (view != NULL)
+    {
+      mViews.push(view);
+      mViewClasses.push(shorten(aClass.getClassName()));
+    }
     return view != NULL;
   }
 
@@ -508,6 +521,7 @@ class ts_EventHandler : StaticEventHandler
   private Cvar mDisabledFindersCvar;
   private Cvar mDisabledFiltersCvar;
   private Cvar mDisabledGettersCvar;
+  private Cvar mDisabledViewsCvar;
 
   private Array< Function<play Actor()> > mFinders;
   private Array<string> mFinderClasses;
@@ -525,16 +539,42 @@ class ts_EventHandler : StaticEventHandler
   private Array<string> mGetterClasses;
   private Array<ts_InformationPiece> mInformationPieces;
 
-  private Function <ui void(Array<ts_InformationPiece>,
-                            double,
-                            RenderEvent,
-                            vector3,
-                            vector2)> mView;
+  private Array< Function
+    <ui void(Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>
+    > mViews;
+  private Array<string> mViewClasses;
 
   private ts_ClassList mBlocklist;
   private ts_ClassList mFollowers;
   private ts_Fader mFader;
   private ts_Projector mProjector;
+
+  private ts_TargetScreenPositionInterpolator mTextInterpolator;
+  private ts_TargetScreenPositionInterpolator mFrameInterpolator;
+}
+#+end_src
+
+*** Target screen position interpolator
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_TargetScreenPositionInterpolator
+{
+  ui vector2 interpolateScreenPosition(vector2 screenPosition, Actor currentTarget)
+  {
+    if (mLastInterpolatedTarget != currentTarget)
+    {
+      mLastInterpolatedTarget = currentTarget;
+      mOldScreenPosition = screenPosition;
+      return screenPosition;
+    }
+
+    vector2 diff = (screenPosition - mOldScreenPosition) / 2;
+    mOldScreenPosition.x += round(diff.x);
+    mOldScreenPosition.y += round(diff.y);
+
+    return mOldScreenPosition;
+  }
 
   private ui vector2 mOldScreenPosition;
   private ui Actor mLastInterpolatedTarget;
@@ -957,6 +997,8 @@ class tsFilter_Active : Actor
 
 ** Getters
 
+TODO: add armor bar.
+
 *** Utilities
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1124,6 +1166,8 @@ class tsGetter_TagNotClass : Actor
 
 class ts_Fader
 {
+  void initialize() { mElapsed = FADE_TIME_TICS; }
+
   double getAlpha(double fracTic) const
   {
     return min(1, (FADE_TIME_TICS - (mElapsed + fracTic)) / FADE_TIME_TICS);
@@ -1132,7 +1176,7 @@ class ts_Fader
   void reset() { mElapsed = -2; } // -2 for one-tick buffer to prevent flickering.
   void tick() { ++mElapsed; }
 
-  const FADE_TIME_TICS = TICRATE / 2;
+  const FADE_TIME_TICS = TICRATE / 3;
   private double mElapsed;
 }
 #+end_src
@@ -1140,7 +1184,7 @@ class ts_Fader
 *** Text view
 
 #+begin_src c :noweb-ref strings
-tsView_Text = "Always text";
+tsView_Text = "Plain text";
 #+end_src
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
@@ -1160,6 +1204,8 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
                     vector3 targetPosition,
                     vector2 targetSize)
 {
+  if (informationPieces.size() == 0) return;
+
   ts_Options options = ts_EventHandler.getInstance().getOptions();
   Font aFont = Font.findFont("NewSmallFont");
   double scale = options.getScale();
@@ -1202,7 +1248,7 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   {
     if (isBackgroundEnabled)
       drawBackground(widths[i] + additionalWidth, lineHeight, position, alpha);
-    drawText(aFont, lines[i], widths[i], position, alpha, scale);
+    ts_ViewUtils.drawText(aFont, lines[i], widths[i], position, alpha, scale);
     position.y += lineHeight;
   }
 }
@@ -1220,9 +1266,11 @@ static ui vector2 getPosition(ts_Options options,
   ts_EventHandler eventHandler = ts_EventHandler.getInstance();
   ts_Projector projector = eventHandler.getProjector();
 
-  if (place == ts_Options.PlaceAboveTarget) targetPosition.z += targetSize.y;
+  if (place == ts_Options.PlaceAboveTarget)
+    targetPosition.z += targetSize.y * 1.1; // Room for sprites above height.
+
   return eventHandler
-    .interpolateScreenPosition(projector.makePosition(event, targetPosition));
+    .interpolateTextScreenPosition(projector.makePosition(event, targetPosition));
 }
 #+end_src
 
@@ -1281,6 +1329,8 @@ OptionValue ts_Places
 #+end_src
 
 **** ~makeBar~
+
+TODO: add separate configurations for different bars by identifier.
 
 #+begin_src c :noweb-ref tsView_Text.functions
 
@@ -1419,24 +1469,6 @@ static private ui string toText(ts_InformationPiece piece, ts_Options options)
   return "";
 }
 
-static private ui void drawText(Font aFont,
-                                string text,
-                                double textWidth,
-                                vector2 position,
-                                double alpha,
-                                double scale)
-{
-  position.x -= int(round(textWidth / 2));
-  Screen.drawText(aFont,
-                  Font.CR_Gray,
-                  position.x,
-                  position.y,
-                  text,
-                  DTA_ScaleX, scale,
-                  DTA_ScaleY, scale,
-                  DTA_Alpha,  alpha);
-}
-
 static private ui void drawBackground(double textWidth,
                                       double textHeight,
                                       vector2 position,
@@ -1454,7 +1486,162 @@ static private ui void drawBackground(double textWidth,
 const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
 #+end_src
 
-*** Projector
+*** Frame
+
+#+begin_src c :noweb-ref strings
+tsView_Frame = "Frame";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class tsView_Frame : Actor
+{
+  static ui void draw(Array<ts_InformationPiece> informationPieces,
+                      double alpha,
+                      RenderEvent event,
+                      vector3 targetPosition,
+                      vector2 targetSize)
+  {
+    PlayerInfo player = players[consolePlayer];
+    ts_EventHandler eventHandler = ts_EventHandler.getInstance();
+    ts_Projector projector = eventHandler.getProjector();
+    ts_Options options = eventHandler.getOptions();
+
+    targetPosition.z += targetSize.y * 0.6;
+    vector2 rawPosition = projector.makePosition(event, targetPosition);
+    vector2 centerPosition = eventHandler
+      .interpolateFrameScreenPosition(rawPosition);
+    vector2 visibleSize = getVisibleSize(targetPosition, targetSize);
+
+    double  halfWidth  = visibleSize.x;
+    double  halfHeight = visibleSize.y * 0.5;
+    double  scale      = options.getFrameScale();
+    Font    aFont      = Font.findFont("NewSmallFont");
+
+    double left   = centerPosition.x - halfWidth;
+    double right  = centerPosition.x + halfWidth;
+    double top    = centerPosition.y - halfHeight;
+    double bottom = centerPosition.y + halfHeight;
+
+    Array<double> xs = {left, right, left,   right};
+    Array<double> ys = {top,  top,   bottom, bottom};
+
+    for (int i = 0; i < 4; ++i)
+    {
+      string part = options.getFrame(i);
+      double width = aFont.stringWidth(part) * scale;
+      ts_ViewUtils.drawText(aFont, part, width, (xs[i], ys[i]), alpha, scale);
+    }
+  }
+
+  static ui vector2 getVisibleSize(vector3 targetPosition, vector2 targetSize)
+  {
+    PlayerInfo player = players[consolePlayer];
+
+    double distance = level.vec3diff(player.mo.pos, targetPosition).length();
+    if (distance == 0) return (0, 0);
+
+    double zoomFactor = abs(sin(player.fov));
+    if (zoomFactor == 0) return (0, 0);
+
+    return targetSize * 400.0 / distance / zoomFactor;
+  }
+}
+#+end_src
+
+#+begin_src c :noweb-ref ts_Options.functions
+
+string getFrame(int i) const
+{
+  if (mCustomFrameEnabled.getInt())
+  {
+    switch (i)
+    {
+      case 0: return mCustomFrameTopLeft.getString();
+      case 1: return mCustomFrameTopRight.getString();
+      case 2: return mCustomFrameBottomLeft.getString();
+      case 3: return mCustomFrameBottomRight.getString();
+      default: return ".";
+    }
+  }
+
+  int selectedFrame = clamp(mSelectedFrame.getInt(), 0, 7);
+  switch (selectedFrame)
+  {
+    case 0: return mFrames0[i];
+    case 1: return mFrames1[i];
+    case 2: return mFrames2[i];
+    case 3: return mFrames3[i];
+    case 4: return mFrames4[i];
+    case 5: return mFrames5[i];
+    case 6: return mFrames6[i];
+    case 7: return mFrames7[i];
+  }
+  return "";
+}
+
+double getFrameScale() const { return mFrameScale.getFloat(); }
+#+end_src
+#+begin_src c :noweb-ref ts_Options.members
+
+private Cvar mCustomFrameEnabled;
+private Cvar mSelectedFrame;
+private Cvar mCustomFrameTopLeft;
+private Cvar mCustomFrameTopRight;
+private Cvar mCustomFrameBottomLeft;
+private Cvar mCustomFrameBottomRight;
+private Cvar mFrameScale;
+
+static const string mFrames0[] = {"▛", "▜", "▙", "▟"};
+static const string mFrames1[] = {"┌", "┐", "└", "┘"};
+static const string mFrames2[] = {"┏", "┓", "┗", "┛"};
+static const string mFrames3[] = {"▞", "▚", "▚", "▞"};
+static const string mFrames4[] = {"╔", "╗", "╚", "╝"};
+static const string mFrames5[] = {"╭", "╮", "╰", "╯"};
+static const string mFrames6[] = {"/", '\', '\', "/"};
+static const string mFrames7[] = {"↘", "↙", "↗", "↖"};
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+
+mCustomFrameEnabled     = Cvar.findCvar("ts_frame_custom_enabled");
+mSelectedFrame          = Cvar.findCvar("ts_selected_frame");
+mCustomFrameTopLeft     = Cvar.findCvar("ts_frame_custom_top_left");
+mCustomFrameTopRight    = Cvar.findCvar("ts_frame_custom_top_right");
+mCustomFrameBottomLeft  = Cvar.findCvar("ts_frame_custom_bottom_left");
+mCustomFrameBottomRight = Cvar.findCvar("ts_frame_custom_bottom_right");
+mFrameScale             = Cvar.findCvar("ts_frame_scale");
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user bool   ts_frame_custom_enabled = false;
+user int    ts_frame_selected = 0;
+user string ts_frame_custom_top_left     = ".";
+user string ts_frame_custom_top_right    = ".";
+user string ts_frame_custom_bottom_left  = ".";
+user string ts_frame_custom_bottom_right = ".";
+user float  ts_frame_scale = 1.0;
+#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+
+OptionMenu ts_FrameOptions
+{
+  Title "Frame options"
+
+  Slider "Scale",  ts_frame_scale, 0.1, 4.0, 0.1, 1
+  Option "Custom", ts_frame_custom_enabled, OnOff
+
+  StaticText ""
+  Slider "Style", ts_selected_frame, 0, 7, 1, 0, ts_frame_custom_enabled, 1
+
+  StaticText ""
+  StaticText "Custom characters"
+  TextField "Top left",     ts_frame_custom_top_left,     ts_frame_custom_enabled, 0
+  TextField "Top right",    ts_frame_custom_top_right,    ts_frame_custom_enabled, 0
+  TextField "Bottom left",  ts_frame_custom_bottom_left,  ts_frame_custom_enabled, 0
+  TextField "Bottom right", ts_frame_custom_bottom_right, ts_frame_custom_enabled, 0
+}
+#+end_src
+
+* Projector
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
@@ -1509,6 +1696,33 @@ class ts_Projector
 }
 #+end_src
 
+*** View utilities
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class ts_ViewUtils ui
+{
+  static void drawText(Font aFont,
+                       string text,
+                       double textWidth,
+                       vector2 position,
+                       double alpha,
+                       double scale)
+  {
+    position.x -= int(round(textWidth / 2));
+    position.y -= int(round(aFont.getHeight() / 2));
+    Screen.drawText(aFont,
+                    Font.CR_Gray,
+                    position.x,
+                    position.y,
+                    text,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale,
+                    DTA_Alpha,  alpha);
+  }
+}
+#+end_src
+
 ** Menu classes
 
 *** Toggles
@@ -1520,6 +1734,7 @@ TODO: disable some classes by default.
 user string ts_disabled_finders = "";
 user string ts_disabled_filters = "";
 user string ts_disabled_getters = "";
+user string ts_disabled_views   = "";
 #+end_src
 
 #+begin_src c :noweb-ref strings
@@ -1593,25 +1808,26 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   private string mClass;
 }
 
-<<define-toggles("ts_FinderToggles", "getFinders", "tsFinder_", "ts_disabled_finders")>>
-<<define-toggles("ts_FilterToggles", "getFilters", "tsFilter_", "ts_disabled_filters")>>
-<<define-toggles("ts_GetterToggles", "getGetters", "tsGetter_", "ts_disabled_getters")>>
+<<define-toggles("getFinders", "tsFinder_", "ts_disabled_finders")>>
+<<define-toggles("getFilters", "tsFilter_", "ts_disabled_filters")>>
+<<define-toggles("getGetters", "tsGetter_", "ts_disabled_getters")>>
+<<define-toggles("getViews", "tsView_", "ts_disabled_views")>>
 #+end_src
 
 #+name: define-toggles
-#+begin_src elisp :var definition-name="" classes-getter="" class-prefix="" disabled-classes-cvar-name="" :exports none
+#+begin_src elisp :var getter="" prefix="" cvar-name="" :exports none
 
 (format "
-class %s : ts_ClassToggles
+class %2$sToggles : ts_ClassToggles
 {
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
     Super.init(parent, descriptor);
     Array<string> classes;
-    ts_EventHandler.getInstance().%s(classes);
-    Super.fill(classes, \"%s\", \"%s\");
+    ts_EventHandler.getInstance().%1$s(classes);
+    Super.fill(classes, \"%2$s\", \"%3$s\");
   }
-}" definition-name classes-getter class-prefix disabled-classes-cvar-name)
+}" getter prefix cvar-name)
 #+end_src
 
 *** Highlighted character static text
@@ -1800,13 +2016,6 @@ class ts_Options
 #+end_src
 
 * Tests
-
-#+begin_src c :tangle build/TargetSpyTest/zscript.zs
-
-version 4.14.3
-
-<<tools/scripts.org:include("TargetSpy.org", "build/TargetSpyTest/\\(zscript/.*zs\\)")>>
-#+end_src
 
 #+begin_src text :tangle build/TargetSpyTest/commands.txt
 wait 2; map map01; wait 2; quit
