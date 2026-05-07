@@ -47,7 +47,7 @@ OptionMenu ts_Options
   Submenu "Filter options", ts_FilterOptions
   Submenu "Getters order",  ts_GettersOrder
   Submenu "Bar options",    ts_BarOptions
-  Submenu "Text view options", ts_ViewOptions
+  Submenu "Text view options", ts_TextViewOptions
   Submenu "Frame options", ts_FrameOptions
 }
 
@@ -1309,9 +1309,9 @@ user bool  ts_background = false;
 #+end_src
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
-OptionMenu ts_ViewOptions
+OptionMenu ts_TextViewOptions
 {
-  Title "View options"
+  Title "Text view options"
 
   Slider "Scale",      ts_scale, 0.1, 4.0, 0.1, 1
   Slider "X position", ts_x_position, 0, 1.0, 0.01, 2
@@ -1334,7 +1334,7 @@ TODO: add separate configurations for different bars by identifier.
 
 #+begin_src c :noweb-ref tsView_Text.functions
 
-static ui string makeBar(int value, int max, ts_Options options)
+static ui string makeBar(int value, int max, ts_BarOptions options)
 {
   int length = int(round(log(max) * 2));
   int filledCount = (max < 1)
@@ -1355,49 +1355,63 @@ static ui string makeBar(int value, int max, ts_Options options)
 }
 #+end_src
 
+#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+
+class ts_BarOptions
+{
+  void initialize()
+  {
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
+    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
+
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
+    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
+
+    mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
+    mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
+    mCharactersCvar       = Cvar.findCvar("ts_text_characters");
+  }
+
+  int getFilledColor(int percent) const
+  {
+    return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
+  }
+  int getEmptyColor(int percent) const
+  {
+    return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
+  }
+  int getFilledCharacter() const
+  {
+    return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                                max(mFilledCharacterIndex.getInt(), 0));
+  }
+  int getEmptyCharacter() const
+  {
+    return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                                max(mEmptyCharacterIndex.getInt(), 0));
+  }
+
+  private Array<Cvar> mFilledColorCvars;
+  private Array<Cvar> mEmptyColorCvars;
+  private Cvar mFilledCharacterIndex;
+  private Cvar mEmptyCharacterIndex;
+  private Cvar mCharactersCvar;
+}
+#+end_src
 #+begin_src c :noweb-ref ts_Options.functions
-int getFilledColor(int percent) const
-{
-  return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
-}
-int getEmptyColor(int percent) const
-{
-  return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
-}
-int getFilledCharacter() const
-{
-  return ts_su.getCodePointAt(mCharactersCvar.getString(),
-                              max(mFilledCharacterIndex.getInt(), 0));
-}
-int getEmptyCharacter() const
-{
-  return ts_su.getCodePointAt(mCharactersCvar.getString(),
-                              max(mEmptyCharacterIndex.getInt(), 0));
-}
+  ts_BarOptions getBarOptions() { return mBarOptions; }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
-private Array<Cvar> mFilledColorCvars;
-private Array<Cvar> mEmptyColorCvars;
-private Cvar mFilledCharacterIndex;
-private Cvar mEmptyCharacterIndex;
-private Cvar mCharactersCvar;
+  private ts_BarOptions mBarOptions;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
-mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
-mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
-mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
-mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
-mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
-
-mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
-mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
-mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
-mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
-mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
-
-mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
-mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
-mCharactersCvar       = Cvar.findCvar("ts_characters");
+  (mBarOptions = new("ts_BarOptions")).initialize();
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 user int ts_text_filled_25_color  = 3; // green
@@ -1414,7 +1428,7 @@ user int ts_text_empty_100_color  = 6;
 
 user int ts_text_filled_character_index = 0;
 user int ts_text_empty_character_index  = 0;
-user string ts_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
+user string ts_text_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
 #+end_src
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 OptionMenu ts_BarOptions
@@ -1425,7 +1439,7 @@ OptionMenu ts_BarOptions
   ts_HighlightedCharacter    ts_text_filled_character_index
   Slider "Empty character",  ts_text_empty_character_index, 0, 99, 1, 0
   ts_HighlightedCharacter    ts_text_empty_character_index
-  TextField "Characters",    ts_characters
+  TextField "Characters",    ts_text_characters
 
   StaticText ""
   ts_BarPreview 0
@@ -1464,7 +1478,8 @@ static private ui string toText(ts_InformationPiece piece, ts_Options options)
   case ts_Kind.PlainText:   return piece.text;
   case ts_Kind.Value:       return string.format("%d", piece.value);
   case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
-  case ts_Kind.Bar:         return makeBar(piece.value, piece.max, options);
+  case ts_Kind.Bar:
+    return makeBar(piece.value, piece.max, options.getBarOptions());
   }
   return "";
 }
@@ -1839,7 +1854,7 @@ class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 	OptionMenuItemStaticText init(Name command)
   {
     mCvar = Cvar.findCvar(command);
-    mCharactersCvar = Cvar.findCvar("ts_characters");
+    mCharactersCvar = Cvar.findCvar("ts_text_characters");
     return Super.init("", -1);
   }
 
@@ -1872,7 +1887,8 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 
 	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
 	{
-    ts_Options options = ts_EventHandler.getInstance().getOptions();
+    ts_BarOptions options =
+      ts_EventHandler.getInstance().getOptions().getBarOptions();
     int value = int(round(double(mPercent) * 64 / 100));
     mLabel = string.format("%3d%% ", mPercent)
       .. tsView_Text.makeBar(value, 64, options);
