@@ -997,8 +997,6 @@ class tsFilter_Active : Actor
 
 ** Getters
 
-TODO: add armor bar.
-
 *** Utilities
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1076,6 +1074,29 @@ class tsGetter_HealthBar : Actor
   {
     int maxHealth = ts_GetterUtilities.getActorMaxHealth(anActor);
     return ts_Kind.Bar, "", anActor.health, maxHealth;
+  }
+}
+#+end_src
+
+*** Armor bar
+
+#+begin_src c :noweb-ref strings
+tsGetter_ArmorBar = "Armor bar";
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+
+class tsGetter_ArmorBar : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    PlayerPawn pawn = players[consolePlayer].mo;
+    let armor = BasicArmor(pawn.FindInventory("BasicArmor"));
+
+    if (armor == NULL)
+      return ts_Kind.Bar, "", 0, 0;
+
+    return ts_Kind.Bar, "", armor.amount, armor.actualSaveAmount;
   }
 }
 #+end_src
@@ -1336,10 +1357,18 @@ TODO: add separate configurations for different bars by identifier.
 
 static ui string makeBar(int value, int max, ts_BarOptions options)
 {
-  int length = int(round(log(max) * 2));
-  int filledCount = (max < 1)
-    ? 0
-    : clamp(int(round(double(value) * length / max)), 0, length);
+  int length = max(1, int(round(log(max) * 2)));
+  int filledCount = 0;
+
+  if (max < 1)
+  {
+    filledCount = 0;
+    max = 1;
+  }
+  else
+  {
+    filledCount = clamp(int(round(double(value) * length / max)), 0, length);
+  }
 
   int percent = int(round(double(value) * 100 / max));
   int filledColor = options.getFilledColor(percent);
