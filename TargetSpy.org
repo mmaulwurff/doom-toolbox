@@ -46,7 +46,6 @@ OptionMenu ts_Options
   StaticText ""
   Submenu "Filter options", ts_FilterOptions
   Submenu "Getters order",  ts_GettersOrder
-  Submenu "Bar options",    ts_BarOptions
   Submenu "Text view options", ts_TextViewOptions
   Submenu "Frame options", ts_FrameOptions
 }
@@ -415,13 +414,13 @@ class ts_EventHandler : StaticEventHandler
     foreach (aClass : AllActorClasses)
     {
       string className = aClass.getClassName();
-      string shortName = shorten(className);
+      string shortName = ts_Classes.shorten(className);
       if (mGetterClasses.find(shortName) != mGetterClasses.size()) continue;
       if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
         Console.printf("ERROR: %s: invalid tsGetter", className);
     }
 
-    warnTooLongList(mGetterClasses, "getters");
+    ts_Classes.warnTooLongList(mGetterClasses, "getters");
   }
 
   private void collectClasses()
@@ -439,25 +438,11 @@ class ts_EventHandler : StaticEventHandler
         Console.printf("ERROR: %s: invalid tsView", className);
     }
 
-    warnTooLongList(mFinderClasses, "finders");
-    warnTooLongList(mFilterClasses, "filters");
+    ts_Classes.warnTooLongList(mFinderClasses, "finders");
+    ts_Classes.warnTooLongList(mFilterClasses, "filters");
+    ts_Classes.warnTooLongList(mViewClasses, "views");
 
     collectGetters();
-  }
-
-  private static void warnTooLongList(out Array<string> classes, string listName)
-  {
-    string disabledClasses = ts_su.join(classes, ",");
-    if (disabledClasses.length() > 256)
-      Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
-                     listName,
-                     disabledClasses.length(),
-                     disabledClasses);
-  }
-
-  private static string shorten(string className)
-  {
-    return className.mid(className.indexOf("_") + 1);
   }
 
   private bool tryAddFinder(class<Object> aClass)
@@ -466,7 +451,7 @@ class ts_EventHandler : StaticEventHandler
     if (finder != NULL)
     {
       mFinders.push(finder);
-      mFinderClasses.push(shorten(aClass.getClassName()));
+      mFinderClasses.push(ts_Classes.shorten(aClass.getClassName()));
       mTargets.push(NULL);
     }
     return finder != NULL;
@@ -478,7 +463,7 @@ class ts_EventHandler : StaticEventHandler
     if (filter != NULL)
     {
       mFilters.push(filter);
-      mFilterClasses.push(shorten(aClass.getClassName()));
+      mFilterClasses.push(ts_Classes.shorten(aClass.getClassName()));
     }
     return filter != NULL;
   }
@@ -490,7 +475,7 @@ class ts_EventHandler : StaticEventHandler
     if (getter != NULL)
     {
       mGetters.push(getter);
-      mGetterClasses.push(shorten(aClass.getClassName()));
+      mGetterClasses.push(ts_Classes.shorten(aClass.getClassName()));
       mInformationPieces.push(new("ts_InformationPiece"));
     }
     return getter != NULL;
@@ -505,7 +490,7 @@ class ts_EventHandler : StaticEventHandler
     if (view != NULL)
     {
       mViews.push(view);
-      mViewClasses.push(shorten(aClass.getClassName()));
+      mViewClasses.push(ts_Classes.shorten(aClass.getClassName()));
     }
     return view != NULL;
   }
@@ -578,6 +563,29 @@ class ts_TargetScreenPositionInterpolator
 
   private ui vector2 mOldScreenPosition;
   private ui Actor mLastInterpolatedTarget;
+}
+#+end_src
+
+*** Class utilities
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_Classes
+{
+  static void warnTooLongList(out Array<string> classes, string listName)
+  {
+    string disabledClasses = ts_su.join(classes, ",");
+    if (disabledClasses.length() > 256)
+      Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
+                     listName,
+                     disabledClasses.length(),
+                     disabledClasses);
+  }
+
+  static string shorten(string className)
+  {
+    return className.mid(className.indexOf("_") + 1);
+  }
 }
 #+end_src
 
@@ -1339,6 +1347,11 @@ OptionMenu ts_TextViewOptions
   Slider "Y position", ts_y_position, 0, 1.0, 0.01, 2
   Option "Place",      ts_place, ts_Places
   Option "Background", ts_background, OnOff
+
+  StaticText ""
+  Submenu "Default bar options", ts_DefaultBarOptions
+  Submenu "Health bar options",  ts_HealthBarOptions
+  Submenu "Armor bar options",   ts_ArmorBarOptions
 }
 
 OptionValue ts_Places
@@ -1350,8 +1363,6 @@ OptionValue ts_Places
 #+end_src
 
 **** ~makeBar~
-
-TODO: add separate configurations for different bars by identifier.
 
 #+begin_src c :noweb-ref tsView_Text.functions
 
@@ -1388,23 +1399,32 @@ static ui string makeBar(int value, int max, ts_BarOptions options)
 
 class ts_BarOptions
 {
-  void initialize()
+  ts_BarOptions initialize(string tag)
   {
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_25_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_50_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_75_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_100_color"));
-    mFilledColorCvars.push(Cvar.findCvar("ts_text_filled_101_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_25_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_50_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_75_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_100_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_101_color"));
 
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_0_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_25_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_50_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_75_color"));
-    mEmptyColorCvars.push(Cvar.findCvar("ts_text_empty_100_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_0_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_25_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_50_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_75_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_100_color"));
 
-    mFilledCharacterIndex = Cvar.findCvar("ts_text_filled_character_index");
-    mEmptyCharacterIndex  = Cvar.findCvar("ts_text_empty_character_index");
-    mCharactersCvar       = Cvar.findCvar("ts_text_characters");
+    mFilledCharacterIndex = findCvar(tag, "filled_character_index");
+    mEmptyCharacterIndex  = findCvar(tag, "empty_character_index");
+    mCharactersCvar       = findCvar(tag, "characters");
+
+    return self;
+  }
+
+  private Cvar findCvar(string tag, string name)
+  {
+    let fullName = "ts_" .. tag .. "_" .. name;
+    let aCvar = Cvar.findCvar(fullName);
+    return (aCvar != NULL) ? aCvar : Cvar.findCvar("ts_DefaultBar_" .. name);
   }
 
   int getFilledColor(int percent) const
@@ -1434,66 +1454,104 @@ class ts_BarOptions
 }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.functions
-  ts_BarOptions getBarOptions() { return mBarOptions; }
+
+ts_BarOptions getBarOptions(string aClass) { return mBarOptions.get(aClass); }
+
+private static void findGetters(out Array<string> result)
+{
+  foreach (aClass : AllActorClasses)
+  {
+    string className = aClass.getClassName();
+    if (className.indexOf("tsGetter_") != -1)
+      result.push(ts_Classes.shorten(className));
+  }
+}
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
-  private ts_BarOptions mBarOptions;
+
+Map<string, ts_BarOptions> mBarOptions;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
-  (mBarOptions = new("ts_BarOptions")).initialize();
+
+mBarOptions.insert("DefaultBar", (new("ts_BarOptions")).initialize("DefaultBar"));
+
+Array<string> getterClasses;
+findGetters(getterClasses);
+foreach (aClass : getterClasses)
+  mBarOptions.insert(aClass, (new("ts_BarOptions")).initialize(aClass));
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
-user int ts_text_filled_25_color  = 3; // green
-user int ts_text_filled_50_color  = 3;
-user int ts_text_filled_75_color  = 3;
-user int ts_text_filled_100_color = 3;
-user int ts_text_filled_101_color = 3;
 
-user int ts_text_empty_0_color    = 6; // red
-user int ts_text_empty_25_color   = 6;
-user int ts_text_empty_50_color   = 6;
-user int ts_text_empty_75_color   = 6;
-user int ts_text_empty_100_color  = 6;
+<<bar-cvars-definition("DefaultBar")>>
+<<bar-cvars-definition("HealthBar")>>
+<<bar-cvars-definition("ArmorBar")>>
+#+end_src
+#+name: bar-cvars-definition
+#+begin_src elisp :var class="" :exports none
+(format "
 
-user int ts_text_filled_character_index = 0;
-user int ts_text_empty_character_index  = 0;
-user string ts_text_characters = "❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙";
+user int ts_%1$s_filled_25_color  = 3; // green
+user int ts_%1$s_filled_50_color  = 3;
+user int ts_%1$s_filled_75_color  = 3;
+user int ts_%1$s_filled_100_color = 3;
+user int ts_%1$s_filled_101_color = 3;
+
+user int ts_%1$s_empty_0_color    = 6; // red
+user int ts_%1$s_empty_25_color   = 6;
+user int ts_%1$s_empty_50_color   = 6;
+user int ts_%1$s_empty_75_color   = 6;
+user int ts_%1$s_empty_100_color  = 6;
+
+user int ts_%1$s_filled_character_index = 0;
+user int ts_%1$s_empty_character_index  = 0;
+user string ts_%1$s_characters = \"❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙\";
+" class)
 #+end_src
 #+begin_src c :tangle build/TargetSpy/menudef.txt
-OptionMenu ts_BarOptions
+
+<<bar-options-definition("DefaultBar")>>
+<<bar-options-definition("HealthBar")>>
+<<bar-options-definition("ArmorBar")>>
+#+end_src
+#+name: bar-options-definition
+#+begin_src elisp :var class="" :exports none
+(string-replace "'" "\"" (format "\
+
+OptionMenu ts_%1$sOptions
 {
-  Title "Bar options"
+  Title '%1$s options'
 
-  Slider "Filled character", ts_text_filled_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_text_filled_character_index
-  Slider "Empty character",  ts_text_empty_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_text_empty_character_index
-  TextField "Characters",    ts_text_characters
+  Slider 'Filled character', ts_%1$s_filled_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_%1$s_filled_character_index
+  Slider 'Empty character',  ts_%1$s_empty_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_%1$s_empty_character_index
+  TextField 'Characters',    ts_%1$s_characters
 
-  StaticText ""
-  ts_BarPreview 0
-  ts_BarPreview 25
-  ts_BarPreview 50
-  ts_BarPreview 75
-  ts_BarPreview 100
-  ts_BarPreview 101
+  StaticText ''
+  ts_BarPreview 0,   '%1$s'
+  ts_BarPreview 25,  '%1$s'
+  ts_BarPreview 50,  '%1$s'
+  ts_BarPreview 75,  '%1$s'
+  ts_BarPreview 100, '%1$s'
+  ts_BarPreview 101, '%1$s'
 
-  StaticText ""
-  StaticText "Colors for filled characters"
-  Option "1-25%" ,  ts_text_filled_25_color,  TextColors
-  Option "26-50%",  ts_text_filled_50_color,  TextColors
-  Option "51-75%",  ts_text_filled_75_color,  TextColors
-  Option "76-100%", ts_text_filled_100_color, TextColors
-  Option "> 100%",  ts_text_filled_101_color, TextColors
+  StaticText ''
+  StaticText 'Colors for filled characters'
+  Option '1-25%%' ,  ts_%1$s_filled_25_color,  TextColors
+  Option '26-50%%',  ts_%1$s_filled_50_color,  TextColors
+  Option '51-75%%',  ts_%1$s_filled_75_color,  TextColors
+  Option '76-100%%', ts_%1$s_filled_100_color, TextColors
+  Option '> 100%%',  ts_%1$s_filled_101_color, TextColors
 
-  StaticText ""
-  StaticText "Colors for empty characters"
-  Option "≤ 0",     ts_text_empty_0_color,   TextColors
-  Option "1-25%",   ts_text_empty_25_color,  TextColors
-  Option "26-50%",  ts_text_empty_50_color,  TextColors
-  Option "51-75%",  ts_text_empty_75_color,  TextColors
-  Option "76-100%", ts_text_empty_100_color, TextColors
+  StaticText ''
+  StaticText 'Colors for empty characters'
+  Option '≤ 0',      ts_%1$s_empty_0_color,   TextColors
+  Option '1-25%%',   ts_%1$s_empty_25_color,  TextColors
+  Option '26-50%%',  ts_%1$s_empty_50_color,  TextColors
+  Option '51-75%%',  ts_%1$s_empty_75_color,  TextColors
+  Option '76-100%%', ts_%1$s_empty_100_color, TextColors
 }
+" class))
 #+end_src
 
 **** Helper functions
@@ -1508,7 +1566,7 @@ static private ui string toText(ts_InformationPiece piece, ts_Options options)
   case ts_Kind.Value:       return string.format("%d", piece.value);
   case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
   case ts_Kind.Bar:
-    return makeBar(piece.value, piece.max, options.getBarOptions());
+    return makeBar(piece.value, piece.max, options.getBarOptions(piece.id));
   }
   return "";
 }
@@ -1908,16 +1966,17 @@ class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 
 class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 {
-	OptionMenuItemStaticText init(int percent)
+	OptionMenuItemStaticText init(int percent, string aClass)
   {
     mPercent = percent;
+    mClass = aClass;
     return Super.init("", -1);
   }
 
 	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
 	{
     ts_BarOptions options =
-      ts_EventHandler.getInstance().getOptions().getBarOptions();
+      ts_EventHandler.getInstance().getOptions().getBarOptions(mClass);
     int value = int(round(double(mPercent) * 64 / 100));
     mLabel = string.format("%3d%% ", mPercent)
       .. tsView_Text.makeBar(value, 64, options);
@@ -1926,6 +1985,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 	}
 
   private int mPercent;
+  private string mClass;
 }
 #+end_src
 
