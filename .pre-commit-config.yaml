@@ -38,13 +38,13 @@ repos:
 
 # https://docs.astral.sh/ruff/
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.10
+    rev: v0.15.12
     hooks:
     -   id: ruff-check
     -   id: ruff-format
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.45.0
+    rev: v1.46.1
     hooks:
     -   id: typos
         stages: [pre-commit]
