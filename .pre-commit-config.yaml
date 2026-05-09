@@ -47,6 +47,10 @@ repos:
     rev: v1.45.0
     hooks:
     -   id: typos
+        stages: [pre-commit]
+        args: []
+    -   id: typos
+        stages: [commit-msg]
         args: []
 
 -   repo: https://github.com/asottile/pyupgrade
@@ -65,6 +69,6 @@ repos:
           --verbose,
           --force-scope,
           --scopes,
-          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project',
+          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
           build, chore, docs, feat, fix, refactor, style, test
           ]
