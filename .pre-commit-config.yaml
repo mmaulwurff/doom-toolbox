@@ -1,10 +1,13 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-exclude: 'LICENSES/.*|tools/aspell\.en\.pws'
-
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
+exclude: 'LICENSES/.*|tools/aspell\.en\.pws'
+
+default_install_hook_types: [pre-commit, commit-msg]
+
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -51,3 +54,17 @@ repos:
     hooks:
     -   id: pyupgrade
         args: [--py313-plus]
+
+-   repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args:
+          [--strict,
+          --verbose,
+          --force-scope,
+          --scopes,
+          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project',
+          build, chore, docs, feat, fix, refactor, style, test
+          ]
