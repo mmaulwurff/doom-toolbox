@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
+# This file contains pre-commit checks.
+# See https://github.com/j178/prek for details.
 
 exclude: 'LICENSES/.*|tools/aspell\.en\.pws'
 
