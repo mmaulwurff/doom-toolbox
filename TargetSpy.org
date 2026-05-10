@@ -1486,6 +1486,9 @@ foreach (aClass : getterClasses)
 <<bar-cvars-definition("HealthBar")>>
 <<bar-cvars-definition("ArmorBar")>>
 #+end_src
+
+TODO: tweak these defaults.
+
 #+name: bar-cvars-definition
 #+begin_src elisp :var class="" :exports none
 (format "
@@ -2122,6 +2125,8 @@ class ts_Options
 
 * Tests
 
+Check that the add-on at least can be loaded and doesn't error out on a target.
+
 #+begin_src text :tangle build/TargetSpyTest/commands.txt
-wait 2; map map01; wait 2; quit
+wait 2; map map01; wait 2; summon doomimp; wait 2; quit
 #+end_src
