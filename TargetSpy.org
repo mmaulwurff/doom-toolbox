@@ -1610,6 +1610,7 @@ class tsView_Frame : Actor
     ts_EventHandler eventHandler = ts_EventHandler.getInstance();
     ts_Projector projector = eventHandler.getProjector();
     ts_Options options = eventHandler.getOptions();
+    int color = getColor(options, informationPieces);
 
     targetPosition.z += targetSize.y * 0.6;
     vector2 rawPosition = projector.makePosition(event, targetPosition);
@@ -1634,7 +1635,8 @@ class tsView_Frame : Actor
     {
       string part = options.getFrame(i);
       double width = aFont.stringWidth(part) * scale;
-      ts_ViewUtils.drawText(aFont, part, width, (xs[i], ys[i]), alpha, scale);
+      vector2 position = (xs[i], ys[i]);
+      ts_ViewUtils.drawText(aFont, part, width, position, alpha, scale, color);
     }
   }
 
@@ -1649,6 +1651,33 @@ class tsView_Frame : Actor
     if (zoomFactor == 0) return (0, 0);
 
     return targetSize * 400.0 / distance / zoomFactor;
+  }
+
+  static ui int getColor(ts_Options options, Array<ts_InformationPiece> pieces)
+  {
+    if (!options.isFrameUsingHealthBarColors()) return Font.CR_Gray;
+
+    double value;
+    double max;
+    bool   found = false;
+    foreach (piece : pieces)
+    {
+      if ((piece.kind == ts_Kind.Bar || piece.kind == ts_Kind.ValueAndMax)
+          && piece.id.indexOf("Health") != -1)
+      {
+        found = true;
+        value = piece.value;
+        max   = piece.max;
+        break;
+      }
+    }
+
+    if (!found) return Font.CR_Gray;
+
+    ts_BarOptions healthBarOptions = options.getBarOptions("HealthBar");
+    int percent = int(round(value * 100 / max));
+    if (percent <= 0) return healthBarOptions.getEmptyColor(percent);
+    return healthBarOptions.getFilledColor(percent);
   }
 }
 #+end_src
@@ -1685,6 +1714,7 @@ string getFrame(int i) const
 }
 
 double getFrameScale() const { return mFrameScale.getFloat(); }
+bool isFrameUsingHealthBarColors() const { return mFrameWithHealthColors.getInt(); }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
 
@@ -1695,6 +1725,7 @@ private Cvar mCustomFrameTopRight;
 private Cvar mCustomFrameBottomLeft;
 private Cvar mCustomFrameBottomRight;
 private Cvar mFrameScale;
+private Cvar mFrameWithHealthColors;
 
 static const string mFrames0[] = {"▛", "▜", "▙", "▟"};
 static const string mFrames1[] = {"┌", "┐", "└", "┘"};
@@ -1714,6 +1745,7 @@ mCustomFrameTopRight    = Cvar.findCvar("ts_frame_custom_top_right");
 mCustomFrameBottomLeft  = Cvar.findCvar("ts_frame_custom_bottom_left");
 mCustomFrameBottomRight = Cvar.findCvar("ts_frame_custom_bottom_right");
 mFrameScale             = Cvar.findCvar("ts_frame_scale");
+mFrameWithHealthColors  = Cvar.findCvar("ts_frame_using_health_bar_colors");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
@@ -1724,6 +1756,7 @@ user string ts_frame_custom_top_right    = ".";
 user string ts_frame_custom_bottom_left  = ".";
 user string ts_frame_custom_bottom_right = ".";
 user float  ts_frame_scale = 1.0;
+user bool   ts_frame_using_health_bar_colors = true;
 #+end_src
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
@@ -1732,7 +1765,11 @@ OptionMenu ts_FrameOptions
   Title "Frame options"
 
   Slider "Scale",  ts_frame_scale, 0.1, 4.0, 0.1, 1
-  Option "Custom", ts_frame_custom_enabled, OnOff
+  Option "Use health bar colors", ts_frame_using_health_bar_colors, OnOff
+  StaticText "(health bar or health and max health must be enabled)"
+
+  StaticText ""
+  Option "Custom characters", ts_frame_custom_enabled, OnOff
 
   StaticText ""
   Slider "Style", ts_selected_frame, 0, 7, 1, 0, ts_frame_custom_enabled, 1
@@ -1812,12 +1849,13 @@ class ts_ViewUtils ui
                        double textWidth,
                        vector2 position,
                        double alpha,
-                       double scale)
+                       double scale,
+                       int color = Font.CR_Gray)
   {
     position.x -= int(round(textWidth / 2));
     position.y -= int(round(aFont.getHeight() / 2));
     Screen.drawText(aFont,
-                    Font.CR_Gray,
+                    color,
                     position.x,
                     position.y,
                     text,
