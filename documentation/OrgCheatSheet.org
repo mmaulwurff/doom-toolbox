@@ -2,6 +2,10 @@
 # Some comments have special meaning, like "#+title:", "#+begin_src", "#+end_src".
 #+title: Org Cheat Sheet
 
+If you are reading this file on GitHub or Codeberg: not all Org features may be
+supported here. See HTML export for this file:
+https://mmaulwurff.github.io/doom-toolbox/documentation/OrgCheatSheet.html
+
 Formatting: *bold* _underlined_ ~monospace~ +strikethrough+ /italics/ */_+combined+_/*
 
 Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html][Org mode quickstart]].
