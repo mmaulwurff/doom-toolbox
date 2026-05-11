@@ -5,9 +5,8 @@
 
 * About
 
-TODO: latching to:
-- NC HUD
-- Guncaster
+Features:
+- text crosshair with options and PreciseCrosshair support.
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
@@ -44,10 +43,11 @@ OptionMenu ts_Options
   Submenu "Views",   ts_ViewToggles
 
   StaticText ""
-  Submenu "Filter options", ts_FilterOptions
-  Submenu "Getters order",  ts_GettersOrder
+  Submenu "Filter options",    ts_FilterOptions
+  Submenu "Getters order",     ts_GettersOrder
   Submenu "Text view options", ts_TextViewOptions
-  Submenu "Frame options", ts_FrameOptions
+  Submenu "Frame options",     ts_FrameOptions
+  Submenu "Crosshair options", ts_CrosshairOptions
 }
 
 OptionMenu ts_FinderToggles
@@ -255,7 +255,6 @@ class ts_EventHandler : StaticEventHandler
     if (players[consolePlayer].mo == NULL) return;
 
     double alpha = mFader.getAlpha(event.fracTic);
-    if (alpha <= 0.0) return;
 
     Array<string> disabledClasses;
     mDisabledViewsCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
@@ -381,7 +380,11 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectInformation()
   {
-    if (mCurrentTarget == NULL) return;
+    if (mCurrentTarget == NULL)
+    {
+      if (mFader.getAlpha(1.0) <= 0.0) clearInformation();
+      return;
+    }
 
     clearInformation();
     mFader.reset();
@@ -1023,34 +1026,6 @@ class tsFilter_Active : Actor
 
 ** Getters
 
-*** Utilities
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
-
-class ts_GetterUtilities
-{
-  static play int getActorMaxHealth(Actor anActor)
-  {
-    if (anActor.player != NULL && anActor.player.mo != NULL)
-      return anActor.player.mo.getMaxHealth();
-
-    int result = anActor.spawnHealth();
-
-    string drpgToken = "DRPGMonsterStatsHandler";
-    bool isDRPG = (anActor.countInv(drpgToken) > 0);
-    if (isDRPG)
-      result = anActor.ACS_scriptCall("GetMonsterHealthMax");
-
-    string legendaryToken = "LDLegendaryMonsterToken";
-    bool isLegenDoom = (anActor.countInv(legendaryToken) > 0);
-    if (isLegenDoom && !isDRPG)
-      result *= Cvar.getCvar("LD_legendaryHealth").getInt() / 100;
-
-    return result;
-  }
-}
-#+end_src
-
 *** Health
 
 #+begin_src c :noweb-ref strings
@@ -1080,7 +1055,7 @@ class tsGetter_HealthAndMax : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    int maxHealth = ts_GetterUtilities.getActorMaxHealth(anActor);
+    int maxHealth = ts_Utils.getActorMaxHealth(anActor);
     return ts_Kind.ValueAndMax, "", anActor.health, maxHealth;
   }
 }
@@ -1098,7 +1073,7 @@ class tsGetter_HealthBar : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    int maxHealth = ts_GetterUtilities.getActorMaxHealth(anActor);
+    int maxHealth = ts_Utils.getActorMaxHealth(anActor);
     return ts_Kind.Bar, "", anActor.health, maxHealth;
   }
 }
@@ -1226,6 +1201,7 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
                     vector3 targetPosition,
                     vector2 targetSize)
 {
+  if (alpha <= 0.0) return;
   if (informationPieces.size() == 0) return;
 
   ts_Options options = ts_EventHandler.getInstance().getOptions();
@@ -1601,11 +1577,14 @@ class tsView_Frame : Actor
                       vector3 targetPosition,
                       vector2 targetSize)
   {
+    if (alpha <= 0.0) return;
     PlayerInfo player = players[consolePlayer];
     ts_EventHandler eventHandler = ts_EventHandler.getInstance();
     ts_Projector projector = eventHandler.getProjector();
     ts_Options options = eventHandler.getOptions();
-    int color = getColor(options, informationPieces);
+    int color = options.isFrameUsingHealthBarColors()
+      ? ts_Utils.getHealthColor(options, informationPieces)
+      : Font.CR_Gray;
 
     targetPosition.z += targetSize.y * 0.6;
     vector2 rawPosition = projector.makePosition(event, targetPosition);
@@ -1623,15 +1602,19 @@ class tsView_Frame : Actor
     double top    = centerPosition.y - halfHeight;
     double bottom = centerPosition.y + halfHeight;
 
-    Array<double> xs = {left, right, left,   right};
-    Array<double> ys = {top,  top,   bottom, bottom};
+    vector2 positions[4] =
+    {
+      (left,  top),
+      (right, top),
+      (left,  bottom),
+      (right, bottom)
+    };
 
     for (int i = 0; i < 4; ++i)
     {
       string part = options.getFrame(i);
       double width = aFont.stringWidth(part) * scale;
-      vector2 position = (xs[i], ys[i]);
-      ts_ViewUtils.drawText(aFont, part, width, position, alpha, scale, color);
+      ts_ViewUtils.drawText(aFont, part, width, positions[i], alpha, scale, color);
     }
   }
 
@@ -1646,33 +1629,6 @@ class tsView_Frame : Actor
     if (zoomFactor == 0) return (0, 0);
 
     return targetSize * 400.0 / distance / zoomFactor;
-  }
-
-  static ui int getColor(ts_Options options, Array<ts_InformationPiece> pieces)
-  {
-    if (!options.isFrameUsingHealthBarColors()) return Font.CR_Gray;
-
-    double value;
-    double max;
-    bool   found = false;
-    foreach (piece : pieces)
-    {
-      if ((piece.kind == ts_Kind.Bar || piece.kind == ts_Kind.ValueAndMax)
-          && piece.id.indexOf("Health") != -1)
-      {
-        found = true;
-        value = piece.value;
-        max   = piece.max;
-        break;
-      }
-    }
-
-    if (!found) return Font.CR_Gray;
-
-    ts_BarOptions healthBarOptions = options.getBarOptions("HealthBar");
-    int percent = int(round(value * 100 / max));
-    if (percent <= 0) return healthBarOptions.getEmptyColor(percent);
-    return healthBarOptions.getFilledColor(percent);
   }
 }
 #+end_src
@@ -1767,7 +1723,7 @@ OptionMenu ts_FrameOptions
   Option "Custom characters", ts_frame_custom_enabled, OnOff
 
   StaticText ""
-  Slider "Style", ts_selected_frame, 0, 7, 1, 0, ts_frame_custom_enabled, 1
+  Slider "Style", ts_frame_selected, 0, 7, 1, 0, ts_frame_custom_enabled, 1
 
   StaticText ""
   StaticText "Custom characters"
@@ -1775,6 +1731,191 @@ OptionMenu ts_FrameOptions
   TextField "Top right",    ts_frame_custom_top_right,    ts_frame_custom_enabled, 0
   TextField "Bottom left",  ts_frame_custom_bottom_left,  ts_frame_custom_enabled, 0
   TextField "Bottom right", ts_frame_custom_bottom_right, ts_frame_custom_enabled, 0
+}
+#+end_src
+
+*** Crosshair
+
+#+begin_src c :noweb-ref strings
+tsView_Crosshair = "Crosshair";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class tsView_Crosshair : Actor
+{
+  static ui void draw(Array<ts_InformationPiece> informationPieces,
+                      double alpha,
+                      RenderEvent event,
+                      vector3 targetPosition,
+                      vector2 targetSize)
+  {
+    ts_Options options = ts_EventHandler.getInstance().getOptions();
+
+    if (options.getCrosshairAlways())
+      alpha = 1.0;
+    else if (alpha <= 0.0)
+      return;
+
+    vector2 center = (Screen.getWidth() / 2, options.getCrosshairY());
+    double  height = options.getCrosshairHeight();
+    vector2 positions[3] = { center - (0, height), center, center + (0, height) };
+    string  parts[3] =
+    {
+      options.getCrosshairTop(),
+      options.getCrosshairCenter(),
+      options.getCrosshairBottom()
+    };
+    Font   aFont = Font.findFont("NewSmallFont");
+    double scale = options.getCrosshairScale();
+    int    color = options.getCrosshairHealth()
+      ? ts_Utils.getHealthColor(options, informationPieces)
+      : Font.CR_Gray;
+
+    for (int i = 0; i < 3; ++i)
+    {
+      string part  = parts[i];
+      double width = aFont.stringWidth(part) * scale;
+      ts_ViewUtils.drawText(aFont, part, width, positions[i], alpha, scale, color);
+    }
+  }
+}
+#+end_src
+#+begin_src c :noweb-ref ts_Options.functions
+
+double getCrosshairHeight() const { return mCrosshairHeight.getFloat(); }
+double getCrosshairScale()  const { return mCrosshairScale.getFloat(); }
+string getCrosshairTop()    const { return mCrosshairTop   .getString(); }
+string getCrosshairCenter() const { return mCrosshairCenter.getString(); }
+string getCrosshairBottom() const { return mCrosshairBottom.getString(); }
+bool   getCrosshairAlways() const { return mCrosshairAlways.getInt(); }
+bool   getCrosshairHealth() const { return mCrosshairHealth.getInt(); }
+
+double getCrosshairY() const
+{
+  // TODO: cache this Cvar. Cannot be cached like others because
+  // it doesn't exist yet if loaded before PreciseCrosshair.
+  Cvar crosshairY = Cvar.getCvar("pc_y", players[consolePlayer]);
+  if (crosshairY) return crosshairY.getFloat();
+
+  let [x, y, width, height] = Screen.getViewWindow();
+  return y + height / 2;
+}
+#+end_src
+#+begin_src c :noweb-ref ts_Options.members
+
+private Cvar mCrosshairHeight;
+private Cvar mCrosshairScale;
+private Cvar mCrosshairTop;
+private Cvar mCrosshairCenter;
+private Cvar mCrosshairBottom;
+private Cvar mCrosshairAlways;
+private Cvar mCrosshairHealth;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+
+mCrosshairHeight = ts_ExistingCvar.find("ts_crosshair_height");
+mCrosshairScale  = ts_ExistingCvar.find("ts_crosshair_scale");
+mCrosshairTop    = ts_ExistingCvar.find("ts_crosshair_top");
+mCrosshairCenter = ts_ExistingCvar.find("ts_crosshair_center");
+mCrosshairBottom = ts_ExistingCvar.find("ts_crosshair_bottom");
+mCrosshairAlways = ts_ExistingCvar.find("ts_crosshair_always");
+mCrosshairHealth = ts_ExistingCvar.find("ts_crosshair_health");
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user float  ts_crosshair_height = 10.0;
+user float  ts_crosshair_scale  = 1.0;
+user string ts_crosshair_top    = "v";
+user string ts_crosshair_center = "> <";
+user string ts_crosshair_bottom = "^";
+user bool   ts_crosshair_always = false;
+user bool   ts_crosshair_health = true;
+#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+
+OptionMenu ts_CrosshairOptions
+{
+  Title "Crosshair options"
+
+  StaticText ""
+  Option "Always enabled", ts_crosshair_always, OnOff
+  Option "Use health bar colors", ts_crosshair_health, OnOff
+
+  StaticText ""
+  Slider "Height", ts_crosshair_height, 0.5, 40, 0.1
+  Slider "Scale",  ts_crosshair_scale,  0.5,  4, 0.1
+
+  StaticText ""
+  TextField "Top",    ts_crosshair_top
+  TextField "Center", ts_crosshair_center
+  TextField "Bottom", ts_crosshair_bottom
+}
+#+end_src
+
+** Utilities
+
+Functions in ~ts_Utils~ class.
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs :exports none
+
+class ts_Utils
+{
+  <<utils-functions>>
+}
+#+end_src
+
+*** ~getActorMaxHealth~
+
+#+begin_src c :noweb-ref utils-functions
+
+static play int getActorMaxHealth(Actor anActor)
+{
+  if (anActor.player != NULL && anActor.player.mo != NULL)
+    return anActor.player.mo.getMaxHealth();
+
+  int result = anActor.spawnHealth();
+
+  string drpgToken = "DRPGMonsterStatsHandler";
+  bool isDRPG = (anActor.countInv(drpgToken) > 0);
+  if (isDRPG)
+    result = anActor.ACS_scriptCall("GetMonsterHealthMax");
+
+  string legendaryToken = "LDLegendaryMonsterToken";
+  bool isLegenDoom = (anActor.countInv(legendaryToken) > 0);
+  if (isLegenDoom && !isDRPG)
+    result *= Cvar.getCvar("LD_legendaryHealth").getInt() / 100;
+
+  return result;
+}
+#+end_src
+
+*** ~getColor~
+
+#+begin_src c :noweb-ref utils-functions
+
+static ui int getHealthColor(ts_Options options, Array<ts_InformationPiece> pieces)
+{
+  double value;
+  double max;
+  bool   found = false;
+  foreach (piece : pieces)
+  {
+    if ((piece.kind == ts_Kind.Bar || piece.kind == ts_Kind.ValueAndMax)
+        && piece.id.indexOf("Health") != -1)
+    {
+      found = true;
+      value = piece.value;
+      max   = piece.max;
+      break;
+    }
+  }
+
+  if (!found) return Font.CR_Gray;
+
+  ts_BarOptions healthBarOptions = options.getBarOptions("HealthBar");
+  int percent = int(round(value * 100 / max));
+  if (percent <= 0) return healthBarOptions.getEmptyColor(percent);
+  return healthBarOptions.getFilledColor(percent);
 }
 #+end_src
 
@@ -2161,5 +2302,7 @@ class ts_Options
 Check that the add-on at least can be loaded and doesn't error out on a target.
 
 #+begin_src text :tangle build/TargetSpyTest/commands.txt
-wait 2; map map01; wait 2; summon doomimp; wait 2; quit
+wait 2; map map01
+wait 4; summon doomimp
+wait 8; quit
 #+end_src
