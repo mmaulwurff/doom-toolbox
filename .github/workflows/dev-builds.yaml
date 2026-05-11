@@ -46,7 +46,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libfuse2t64 libpulse0
-          sudo snap install emacs --classic
+          sudo snap install --classic emacs
 
       - name: Cache UZDoom
         id: cache-uzdoom
