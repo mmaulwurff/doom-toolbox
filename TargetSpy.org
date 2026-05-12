@@ -191,6 +191,24 @@ class ts_ClassList
 }
 #+end_src
 
+*** Existing Cvar
+
+TODO: move to a module?
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs
+
+class ts_ExistingCvar
+{
+  static Cvar find(Name name)
+  {
+    Cvar result = Cvar.findCvar(name);
+    if (result == NULL)
+      throwAbortException("ERROR: TargetSpy: %s Cvar not found.", name);
+    return result;
+  }
+}
+#+end_src
+
 ** Event handler
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
@@ -200,10 +218,10 @@ class ts_EventHandler : StaticEventHandler
   override void onRegister()
   {
     (mOptions = new("ts_Options")).initialize();
-    mDisabledFindersCvar = Cvar.findCvar("ts_disabled_finders");
-    mDisabledFiltersCvar = Cvar.findCvar("ts_disabled_filters");
-    mDisabledGettersCvar = Cvar.findCvar("ts_disabled_getters");
-    mDisabledViewsCvar   = Cvar.findCvar("ts_disabled_views");
+    mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
+    mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
+    mDisabledGettersCvar = ts_ExistingCvar.find("ts_disabled_getters");
+    mDisabledViewsCvar   = ts_ExistingCvar.find("ts_disabled_views");
     (mFader = new("ts_Fader")).initialize();
     (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
     (mFollowers = new("ts_ClassList")).initialize("ts_followers");
@@ -400,7 +418,7 @@ class ts_EventHandler : StaticEventHandler
     mGetterClasses.clear();
 
     Array<string> orderedGetters;
-    Cvar.findCvar("ts_getters_order").getString()
+    ts_ExistingCvar.find("ts_getters_order").getString()
       .split(orderedGetters, ",", TOK_SkipEmpty);
 
     foreach (getter : orderedGetters)
@@ -926,7 +944,7 @@ int getMinLightLevel() const { return mMinLightLevelCvar.getInt(); }
 private Cvar mMinLightLevelCvar;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
-mMinLightLevelCvar = Cvar.findCvar("ts_min_light_level");
+mMinLightLevelCvar = ts_ExistingCvar.find("ts_min_light_level");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 user int ts_min_light_level = 120;
@@ -1297,11 +1315,11 @@ private Cvar mBackgroundCvar;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
 
-mScaleCvar      = Cvar.findCvar("ts_scale");
-mXPositionCvar  = Cvar.findCvar("ts_x_position");
-mYPositionCvar  = Cvar.findCvar("ts_y_position");
-mPlaceCvar      = Cvar.findCvar("ts_place");
-mBackgroundCvar = Cvar.findCvar("ts_background");
+mScaleCvar      = ts_ExistingCvar.find("ts_scale");
+mXPositionCvar  = ts_ExistingCvar.find("ts_x_position");
+mYPositionCvar  = ts_ExistingCvar.find("ts_y_position");
+mPlaceCvar      = ts_ExistingCvar.find("ts_place");
+mBackgroundCvar = ts_ExistingCvar.find("ts_background");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
@@ -1399,7 +1417,9 @@ class ts_BarOptions
   {
     let fullName = "ts_" .. tag .. "_" .. name;
     let aCvar = Cvar.findCvar(fullName);
-    return (aCvar != NULL) ? aCvar : Cvar.findCvar("ts_DefaultBar_" .. name);
+    return (aCvar != NULL)
+      ? aCvar
+      : ts_ExistingCvar.find("ts_DefaultBar_" .. name);
   }
 
   int getFilledColor(int percent) const
@@ -1500,9 +1520,9 @@ OptionMenu ts_%1$sOptions
   Title '%1$s options'
 
   Slider 'Filled character', ts_%1$s_filled_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_%1$s_filled_character_index
+  ts_HighlightedCharacter    ts_%1$s_filled_character_index, %1$s
   Slider 'Empty character',  ts_%1$s_empty_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_%1$s_empty_character_index
+  ts_HighlightedCharacter    ts_%1$s_empty_character_index, %1$s
   TextField 'Characters',    ts_%1$s_characters
 
   StaticText ''
@@ -1713,14 +1733,14 @@ static const string mFrames7[] = {"↘", "↙", "↗", "↖"};
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
 
-mCustomFrameEnabled     = Cvar.findCvar("ts_frame_custom_enabled");
-mSelectedFrame          = Cvar.findCvar("ts_selected_frame");
-mCustomFrameTopLeft     = Cvar.findCvar("ts_frame_custom_top_left");
-mCustomFrameTopRight    = Cvar.findCvar("ts_frame_custom_top_right");
-mCustomFrameBottomLeft  = Cvar.findCvar("ts_frame_custom_bottom_left");
-mCustomFrameBottomRight = Cvar.findCvar("ts_frame_custom_bottom_right");
-mFrameScale             = Cvar.findCvar("ts_frame_scale");
-mFrameWithHealthColors  = Cvar.findCvar("ts_frame_using_health_bar_colors");
+mCustomFrameEnabled     = ts_ExistingCvar.find("ts_frame_custom_enabled");
+mSelectedFrame          = ts_ExistingCvar.find("ts_frame_selected");
+mCustomFrameTopLeft     = ts_ExistingCvar.find("ts_frame_custom_top_left");
+mCustomFrameTopRight    = ts_ExistingCvar.find("ts_frame_custom_top_right");
+mCustomFrameBottomLeft  = ts_ExistingCvar.find("ts_frame_custom_bottom_left");
+mCustomFrameBottomRight = ts_ExistingCvar.find("ts_frame_custom_bottom_right");
+mFrameScale             = ts_ExistingCvar.find("ts_frame_scale");
+mFrameWithHealthColors  = ts_ExistingCvar.find("ts_frame_using_health_bar_colors");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
@@ -1768,7 +1788,7 @@ class ts_Projector
   {
     mGlProjection = new("ts_GlScreen");
     mSwProjection = new("ts_SwScreen");
-    mCvarRenderer = Cvar.findCvar("vid_rendermode");
+    mCvarRenderer = ts_ExistingCvar.find("vid_rendermode");
     if (mCvarRenderer == NULL)
       Console.printf("TargetSpy: WARNING: vid_rendermode CVar not found");
   }
@@ -1895,7 +1915,7 @@ class ts_ClassToggle : OptionMenuItemOptionBase
   void initialize(string aClass, string classPrefix, string disabledClassesCvarName)
   {
     mClass = aClass;
-    mCvar  = Cvar.findCvar(disabledClassesCvarName);
+    mCvar  = ts_ExistingCvar.find(disabledClassesCvarName);
     Super.init("$" .. classPrefix .. aClass, '', "OnOff", NULL, 0);
   }
 
@@ -1954,10 +1974,10 @@ class %2$sToggles : ts_ClassToggles
 
 class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 {
-	OptionMenuItemStaticText init(Name command)
+	OptionMenuItemStaticText init(Name command, string tag)
   {
-    mCvar = Cvar.findCvar(command);
-    mCharactersCvar = Cvar.findCvar("ts_text_characters");
+    mCvar = ts_ExistingCvar.find(command);
+    mCharactersCvar = ts_ExistingCvar.find(string.format("ts_%s_characters", tag));
     return Super.init("", -1);
   }
 
@@ -2039,7 +2059,7 @@ class ts_GettersOrderMenu : OptionMenu
     }
 
     mDesc.mSelectedItem = clamp(mDesc.mSelectedItem, 0, mDesc.mItems.size() - 1);
-    mOrderCvar = Cvar.findCvar("ts_getters_order");
+    mOrderCvar = ts_ExistingCvar.find("ts_getters_order");
   }
 
   void moveDown(int i)
