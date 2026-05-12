@@ -1036,7 +1036,7 @@ class ts_GetterUtilities
 *** Health
 
 #+begin_src c :noweb-ref strings
-tsGetter_Health = "Health (number)";
+tsGetter_Health = "Health";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1053,7 +1053,7 @@ class tsGetter_Health : Actor
 *** Health and max health
 
 #+begin_src c :noweb-ref strings
-tsGetter_HealthAndMax = "Health and max health (numbers)";
+tsGetter_HealthAndMax = "Health and max health";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1114,7 +1114,6 @@ class tsGetter_ArmorBar : Actor
 #+begin_src c :noweb-ref strings
 tsGetter_Class = "Class name";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Class : Actor
@@ -1126,34 +1125,11 @@ class tsGetter_Class : Actor
 }
 #+end_src
 
-*** Class (only if differs from tag)
-
-#+begin_src c :noweb-ref strings
-tsGetter_ClassNotTag = "Class name (only if differs from tag)";
-#+end_src
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
-
-class tsGetter_ClassNotTag : Actor
-{
-  static int, string, int, int makeInformation(Actor anActor)
-  {
-    string tag = anActor.getTag();
-    string aClass = anActor.getClassName();
-    if (aClass != tag)
-      return ts_Kind.PlainText, aClass, 0, 0;
-    else
-      return ts_Kind.Empty, "", 0, 0;
-  }
-}
-#+end_src
-
 *** Tag
 
 #+begin_src c :noweb-ref strings
 tsGetter_Tag = "Tag";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Tag : Actor
@@ -1165,24 +1141,23 @@ class tsGetter_Tag : Actor
 }
 #+end_src
 
-*** Tag (only if differs from class)
+*** Tag and class
 
 #+begin_src c :noweb-ref strings
-tsGetter_TagNotClass = "Tag (only if differs from class name)";
+tsGetter_TagAndClass = "Tag (class)";
 #+end_src
-
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
 
-class tsGetter_TagNotClass : Actor
+class tsGetter_TagAndClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    string tag = anActor.getTag();
+    string tag    = anActor.getTag();
     string aClass = anActor.getClassName();
-    if (aClass != tag)
-      return ts_Kind.PlainText, tag, 0, 0;
-    else
-      return ts_Kind.Empty, "", 0, 0;
+    string result = (aClass != tag)
+      ? string.format("%s (%s)", tag, aClass)
+      : string.format("%s", aClass);
+    return ts_Kind.PlainText, result, 0, 0;
   }
 }
 #+end_src
