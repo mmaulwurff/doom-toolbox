@@ -69,6 +69,6 @@ repos:
           --verbose,
           --force-scope,
           --scopes,
-          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
+          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,HitImpact,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
           build, chore, docs, feat, fix, refactor, style, test
           ]

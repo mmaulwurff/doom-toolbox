@@ -1,0 +1,118 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: HitImpact
+# #+version: v0.0.0
+
+* About
+
+* License
+
+[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+* Source
+
+#+begin_src c :tangle build/HitImpact/mapinfo.zs
+
+GameInfo { EventHandlers = "hi_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle build/HitImpact/zscript.zs
+
+version 4.14.3
+#+end_src
+
+#+begin_src c :tangle build/HitImpact/zscript.zs
+
+class hi_EventHandler : StaticEventHandler
+{
+  override void worldThingSpawned(WorldEvent event)
+  {
+    Actor puff = event.thing;
+    if (!puff || !puff.bIsPuff || !puff.damageSource) return;
+
+    Actor source = puff.damageSource;
+
+    FLineTraceData traceData;
+    double angle = source.angleTo(puff);
+    double offsetZ = getShootOffsetZ(source);
+    double pitch = source.pitchTo(puff, offsetZ);
+    int    flags = TRF_NoSky;
+    bool   isHit = source.lineTrace(angle, 999, pitch, flags, offsetZ, data: traceData);
+
+    int hitType = traceData.hitType;
+    if (!isHit || hitType == FLineTraceData.TRACE_HitNone) return;
+    if (!traceData.hitTexture) return;
+
+    // TODO: add 3D floors support. All directions?
+    vector3 normal = getNormal(traceData);
+
+    if (normal == (0, 0, 0)) return;
+    vector3 incidence = traceData.hitDir;
+    vector3 reflected = incidence - 2 * normal * (normal dot incidence);
+
+    for (int i = 0; i < 10; ++i)
+    {
+      FSpawnParticleParams parameters;
+      parameters.color1  = "";
+      parameters.texture = traceData.hitTexture;
+      parameters.style   = STYLE_Normal;
+      parameters.size    = frandom[hi](1, 4);
+      parameters.flags   = SPF_FaceCamera | SPF_Roll;
+
+      parameters.lifetime   = TICRATE;
+      parameters.startAlpha = 1.0;
+      parameters.fadeStep   = parameters.startAlpha / parameters.lifetime;
+
+      parameters.pos = traceData.hitLocation;
+      parameters.vel = reflected * 2
+        + (frandom[hi](-2, 2), frandom[hi](-2, 2), frandom[hi](-2, 2));
+      parameters.accel = (0, 0, -0.25);
+
+      parameters.startRoll = frandom[hi](0, 360);
+      parameters.rollVel   = frandom[hi](30, 60);
+
+      level.spawnParticle(parameters);
+    }
+  }
+
+  private static vector3 getNormal(FLineTraceData data)
+  {
+    switch (data.hitType)
+    {
+      case FLineTraceData.TRACE_HitFloor:   return data.hitSector.floorPlane.normal;
+      case FLineTraceData.TRACE_HitCeiling: return data.hitSector.ceilingPlane.normal;
+      case FLineTraceData.TRACE_HitWall:
+      {
+        Line    line = data.hitLine;
+        vector2 diff = (data.lineSide == Line.front)
+          ? line.v2.p - line.v1.p
+          : line.v1.p - line.v2.p;
+
+        return (diff.y, -diff.x, 0).unit();
+      }
+    }
+
+    return (0, 0, 0);
+  }
+
+  private static double getShootOffsetZ(Actor actor)
+  {
+    let pawn = (PlayerPawn)(actor);
+    return actor.height * 0.5
+      + (pawn ? pawn.attackZOffset * pawn.player.crouchFactor - pawn.floorclip : 0);
+  }
+}
+#+end_src
+
+* Tests
+
+Check that the add-on at least can be loaded.
+
+#+begin_src text :tangle build/HitImpactTest/commands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
