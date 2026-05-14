@@ -16,6 +16,7 @@
 !*.css
 !*.el
 !*.en.pws
+!*.gif
 !*.ini
 !*.md
 !*.ogg

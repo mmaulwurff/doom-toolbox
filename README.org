@@ -73,6 +73,10 @@ Gearbox:
 [[file:media/screenshots/Gearbox-wheel.png]]
 [[file:media/screenshots/Gearbox-blocks.png]]
 
+HitImpact (with BTSX E1 MAP01):
+
+[[file:media/screenshots/HitImpact.gif]]
+
 SoundToScreen:
 
 [[file:media/screenshots/SoundToScreen.png]]
