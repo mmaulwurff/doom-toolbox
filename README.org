@@ -33,6 +33,7 @@ This project doesn't use any AI tools or resources.
 - [[file:DoomDoctor.org][DoomDoctor]] - mod development and debugging utilities
 - [[file:FinalCustomDoom.org][FinalCustomDoom]] - gameplay customization options ([[https://forum.zdoom.org/viewtopic.php?t=64678][forum topic]])
 - [[file:Gearbox.org][Gearbox]] - more convenient ways to select weapons and items ([[https://forum.zdoom.org/viewtopic.php?t=71086][forum topic]])
+- [[file:HitImpact.org][HitImpact]] - textured particles when level geometry is hit
 - [[file:Nomina.org][Nomina]] - enemy names helper ([[https://forum.zdoom.org/viewtopic.php?p=1150645][forum topic]])
 - [[file:SoundToScreen.org][SoundToScreen]] - shows where sounds come from ([[https://forum.zdoom.org/viewtopic.php?p=1219682][forum topic]])
 - [[file:Typist.pk3.org][Typist.pk3]] - turns FPS games into typing exercises ([[https://forum.zdoom.org/viewtopic.php?t=66042][forum topic]])

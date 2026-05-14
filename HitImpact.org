@@ -5,6 +5,22 @@
 
 * About
 
+HitImpact spawns textured particles when a wall, a floor, or a ceiling is hit.
+
+Features:
+- works for hitscan and projectile attacks,
+- works for all games and mods (in theory),
+- works even when loaded with old saves.
+
+Known issues:
+- Performance. HitImpact tries to minimize the amount of particles created when a lot
+  of hits happen in a short period of time, but performance drop is still inevitable.
+- Silliness. Basically, an impact particle has a miniature version of
+  wall/floor/ceiling texture, and for some textures this may look silly.
+
+Todo:
+- 3D floor support.
+
 * License
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
@@ -12,6 +28,13 @@
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle build/HitImpact/mapinfo.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/HitImpact/zscript.zs
+// <<license>>
 #+end_src
 
 * Source
