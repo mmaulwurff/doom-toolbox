@@ -33,86 +33,107 @@ class hi_EventHandler : StaticEventHandler
   override void worldThingDestroyed(WorldEvent event)
   {
     int found = mMissiles.find(event.thing);
-    if (found != mMissiles.size()) mMissiles.delete(found);
+    if (found != mMissiles.size()) mMissiles[found] = NULL;
   }
 
   override void worldTick()
   {
-    foreach (missile : mMissiles)
+    int missileCount = mMissiles.size();
+    for (int i = 0; i < missileCount; ++i)
     {
-      if (missile.vel != (0, 0, 0)) return;
+      Actor missile = mMissiles[i];
+      if (!missile || missile.vel != mNullVector) continue;
 
       spawnDebris(missile.target, missile, 3);
-
-      int found = mMissiles.find(missile);
-      if (found != mMissiles.size()) mMissiles.delete(found);
+      mMissiles[i] = NULL;
     }
+
+    // Clean up.
+    if ((level.time % TICRATE) == 0 && missileCount > 0)
+    {
+      mNewMissiles.clear();
+      foreach (missile : mMissiles)
+        if (missile) mNewMissiles.push(missile);
+
+      mMissiles.move(mNewMissiles);
+    }
+
+    mAmountFactor = max(0, mAmountFactor - 0.5);
   }
 
   private Array<Actor> mMissiles;
+  private Array<Actor> mNewMissiles;
+  private double mAmountFactor;
 
   override void worldThingSpawned(WorldEvent event)
   {
-    if (event.thing && event.thing.bMissile)
+    Actor thing = event.thing;
+    if (thing)
     {
-      mMissiles.push(event.thing);
-      return;
+      if (thing.bMissile && thing.damage)
+        mMissiles.push(thing);
+
+      else if (thing.bIsPuff && thing.damageSource)
+        spawnDebris(thing.damageSource, thing, 1);
     }
-
-    Actor puff = event.thing;
-    if (!puff || !puff.bIsPuff || !puff.damageSource) return;
-
-    spawnDebris(puff.damageSource, puff, 1);
   }
 
-  private static void spawnDebris(Actor source, Actor impact, int intensity)
+  override void onRegister()
+  {
+    mParticleParameters.color1     = "";
+    mParticleParameters.style      = STYLE_Normal;
+    mParticleParameters.flags      = SPF_FaceCamera | SPF_Roll;
+    mParticleParameters.startAlpha = START_ALPHA;
+    mParticleParameters.accel      = (0, 0, -0.15);
+
+    mNullVector = (0, 0, 0);
+  }
+
+  private FSpawnParticleParams mParticleParameters;
+  private vector3 mNullVector;
+  const FLAGS = TRF_NoSky;
+  const START_ALPHA = 1.0;
+
+  private void spawnDebris(Actor source, Actor impact, double intensity)
   {
     FLineTraceData traceData;
     double angle = source.angleTo(impact);
     double offsetZ = getShootOffsetZ(source);
     double pitch = source.pitchTo(impact, offsetZ);
-    int    flags = TRF_NoSky;
-    bool   isHit = source.lineTrace(angle, 999, pitch, flags, offsetZ, data: traceData);
+    bool   isHit = source.lineTrace(angle, 999, pitch, FLAGS, offsetZ, data: traceData);
 
-    int hitType = traceData.hitType;
-    if (!isHit || hitType == FLineTraceData.TRACE_HitNone) return;
+    if (!isHit || traceData.hitType == FLineTraceData.TRACE_HitNone) return;
     if (!traceData.hitTexture) return;
 
-    // TODO: add 3D floors support. All directions?
     vector3 normal = getNormal(traceData);
+    if (normal == mNullVector) return;
 
-    if (normal == (0, 0, 0)) return;
     vector3 incidence = traceData.hitDir;
     vector3 reflected = incidence - 2 * normal * (normal dot incidence);
-    double velSpread = intensity;
+    int     amount    = max(1, int(10 * intensity / (mAmountFactor + 1)));
 
-    for (int i = 0; i < 10 * intensity; ++i)
+    mParticleParameters.texture  = traceData.hitTexture;
+    mParticleParameters.lifetime = int(TICRATE * 2 * intensity);
+    mParticleParameters.fadeStep = START_ALPHA / mParticleParameters.lifetime;
+    mParticleParameters.pos      = traceData.hitLocation;
+
+    for (int i = 0; i < amount; ++i)
     {
-      FSpawnParticleParams parameters;
-      parameters.color1  = "";
-      parameters.texture = traceData.hitTexture;
-      parameters.style   = STYLE_Normal;
-      parameters.size    = frandom[hi](1, 4 * intensity);
-      parameters.flags   = SPF_FaceCamera | SPF_Roll;
+      mParticleParameters.size = frandom[hi](1, 4 * intensity);
+      mParticleParameters.vel  = reflected * 2 * intensity
+        + (frandom[hi](-intensity, intensity),
+           frandom[hi](-intensity, intensity),
+           frandom[hi](-intensity, intensity));
+      mParticleParameters.startRoll = frandom[hi](0, 360);
+      mParticleParameters.rollVel   = frandom[hi](30, 60);
 
-      parameters.lifetime   = TICRATE * intensity;
-      parameters.startAlpha = 1.0;
-      parameters.fadeStep   = parameters.startAlpha / parameters.lifetime;
-
-      parameters.pos = traceData.hitLocation;
-      parameters.vel = reflected * 2 * intensity
-        + (frandom[hi](-velSpread, velSpread),
-           frandom[hi](-velSpread, velSpread),
-           frandom[hi](-velSpread, velSpread));
-      parameters.accel = (0, 0, -0.15);
-
-      parameters.startRoll = frandom[hi](0, 360);
-      parameters.rollVel   = frandom[hi](30, 60);
-
-      level.spawnParticle(parameters);
+      level.spawnParticle(mParticleParameters);
     }
+
+    if (amount > 1) mAmountFactor += 3;
   }
 
+  // TODO: improve 3D floors support.
   private static vector3 getNormal(FLineTraceData data)
   {
     switch (data.hitType)
