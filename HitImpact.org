@@ -36,6 +36,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/HitImpact/zscript.zs
 // <<license>>
 #+end_src
+#+begin_src text :tangle build/HitImpact/animdefs.txt
+// <<license>>
+#+end_src
 
 * Source
 
@@ -110,6 +113,13 @@ class hi_EventHandler : StaticEventHandler
     mParticleParameters.accel      = (0, 0, -0.15);
 
     mNullVector = (0, 0, 0);
+
+    for (int i = 0; i < CANVAS_COUNT; ++i)
+    {
+      string canvasName  = string.format("hi_texture%d", i);
+      mCanvases[i]       = TexMan.getCanvas(canvasName);
+      mCanvasTextures[i] = TexMan.checkForTexture(canvasName);
+    }
   }
 
   private FSpawnParticleParams mParticleParameters;
@@ -160,13 +170,23 @@ class hi_EventHandler : StaticEventHandler
     vector3 reflected = incidence - 2 * normal * (normal dot incidence);
     int     amount    = max(1, int(10 * intensity / (mAmountFactor + 1)));
 
-    mParticleParameters.texture  = texture;
-    mParticleParameters.lifetime = int(TICRATE * 2 * intensity);
+    mParticleParameters.lifetime = int(TICRATE * intensity);
     mParticleParameters.fadeStep = START_ALPHA / mParticleParameters.lifetime;
     mParticleParameters.pos      = hitLocation;
 
+    let [textureWidth, textureHeight] = TexMan.getSize(texture);
+    int minDrawTextureX = CANVAS_SIZE - textureWidth;
+    int minDrawTextureY = CANVAS_SIZE - textureHeight;
+
     for (int i = 0; i < amount; ++i)
     {
+      mCanvasIndex = (mCanvasIndex + 1) % CANVAS_COUNT;
+      mCanvases[mCanvasIndex].drawTexture(texture,
+                                          false,
+                                          random[hi](minDrawTextureX, 0),
+                                          random[hi](minDrawTextureY, 0));
+
+      mParticleParameters.texture = mCanvasTextures[mCanvasIndex];
       mParticleParameters.size = frandom[hi](1, 4 * intensity);
       mParticleParameters.vel  = reflected * 2 * intensity
         + (frandom[hi](-intensity, intensity),
@@ -180,6 +200,12 @@ class hi_EventHandler : StaticEventHandler
 
     if (amount > 1) mAmountFactor += 3;
   }
+
+  private int mCanvasIndex;
+  private Canvas mCanvases[CANVAS_COUNT];
+  private TextureId mCanvasTextures[CANVAS_COUNT];
+  const CANVAS_COUNT = <<canvas-count()>>;
+  const CANVAS_SIZE = 12;
 
   // TODO: add 3D floors support.
   private static vector3 getNormalFromTrace(FLineTraceData data)
@@ -243,6 +269,24 @@ class hi_EventHandler : StaticEventHandler
       + (pawn ? pawn.attackZOffset * pawn.player.crouchFactor - pawn.floorclip : 0);
   }
 }
+#+end_src
+
+#+name: canvas-count
+#+begin_src elisp :var print="true"
+(setq hi-canvas-count 512)
+(if (string-equal print "true") hi-canvas-count "")
+#+end_src
+
+#+name: generate-canvas-textures
+#+begin_src elisp
+(mapconcat
+ (lambda (x) (format "CanvasTexture hi_texture%d 12 12\n" x))
+ (number-sequence 0 (- hi-canvas-count 1)))
+#+end_src
+
+#+begin_src text :tangle build/HitImpact/animdefs.txt
+<<canvas-count("false")>>
+<<generate-canvas-textures()>>
 #+end_src
 
 * Tests
