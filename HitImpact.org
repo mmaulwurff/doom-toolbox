@@ -17,9 +17,8 @@ Known issues:
   of hits happen in a short period of time, but performance drop is still inevitable.
 - Silliness. Basically, an impact particle has a miniature version of
   wall/floor/ceiling texture, and for some textures this may look silly.
-
-Todo:
-- 3D floor support.
+- Accuracy. Don't expect physical simulation level of precision. Some collisions
+  cannot be cleanly handled.
 
 * License
 
@@ -68,9 +67,12 @@ class hi_EventHandler : StaticEventHandler
     for (int i = 0; i < missileCount; ++i)
     {
       Actor missile = mMissiles[i];
-      if (!missile || missile.vel != mNullVector) continue;
+      if (!missile || !missile.target || missile.vel != mNullVector) continue;
 
-      spawnDebrisMissile(missile.target, missile, 3);
+      ts_HitData hitData;
+      getMissileHitData(missile.target, missile, hitData);
+      if (hitData.isHit) spawnDebris(hitData, INTENSITY_MISSILE);
+
       mMissiles[i] = NULL;
     }
 
@@ -100,7 +102,11 @@ class hi_EventHandler : StaticEventHandler
         mMissiles.push(thing);
 
       else if (thing.bIsPuff && thing.damageSource)
-        spawnDebrisPuff(thing.damageSource, thing, 1);
+      {
+        ts_HitData hitData;
+        getPuffHitData(thing.damageSource, thing, hitData);
+        if (hitData.isHit) spawnDebris(hitData, INTENSITY_PUFF);
+      }
     }
   }
 
@@ -124,68 +130,140 @@ class hi_EventHandler : StaticEventHandler
 
   private FSpawnParticleParams mParticleParameters;
   private vector3 mNullVector;
-  const FLAGS = TRF_NoSky;
+  const TRACE_FLAGS = TRF_NoSky;
   const START_ALPHA = 1.0;
+  const INTENSITY_PUFF = 1.0;
+  const INTENSITY_MISSILE = 3.0;
 
-  private void spawnDebrisPuff(Actor source, Actor puff, double intensity)
+  private static void getPuffHitData(Actor source, Actor puff, out ts_HitData result)
   {
+    result.isHit = false;
+
     FLineTraceData traceData;
     double angle = source.angleTo(puff);
     double offsetZ = getShootOffsetZ(source);
     double pitch = source.pitchTo(puff, offsetZ);
-    bool   isHit = source.lineTrace(angle, 999, pitch, FLAGS, offsetZ, data: traceData);
+    bool   isHit =
+      source.lineTrace(angle, 999, pitch, TRACE_FLAGS, offsetZ, data: traceData);
 
     if (!isHit || traceData.hitType == FLineTraceData.TRACE_HitNone) return;
     if (!traceData.hitTexture) return;
 
     vector3 normal = getNormalFromTrace(traceData);
-    if (normal == mNullVector) return;
+    if (normal.x == 0 && normal.y == 0 && normal.z == 0) return;
 
     Color color = getColorFromTrace(traceData);
-    spawnDebris(normal,
-                traceData.hitDir,
-                traceData.hitLocation,
-                traceData.hitTexture,
-                intensity,
-                color);
+
+    result.isHit = true;
+    result.normal = normal;
+    result.incidence = traceData.hitDir;
+    result.location = traceData.hitLocation;
+    result.texture = traceData.hitTexture;
+    result.color = color;
   }
 
-  private void spawnDebrisMissile(Actor source, Actor missile, double intensity)
+  private static void
+    getMissileHitData(Actor source, Actor missile, out ts_HitData result)
   {
-    vector3 normal = getNormalFromActor(missile);
-    if (normal == mNullVector) return;
+    result.isHit = false;
 
-    vector3 hitDir = level.vec3Diff(source.pos, missile.pos).unit();
-    TextureId texture = getTextureFromActor(missile);
+    if (missile.blockingMobj) return;
+
+    vector3 normal;
+    TextureId texture;
+    Color aColor;
+
+    if (missile.blockingFloor)
+    {
+      normal  = missile.blockingFloor.floorPlane.normal;
+      texture = missile.blockingFloor.getTexture(Sector.floor);
+      aColor  = missile.blockingFloor.specialColors[Sector.floor];
+    }
+    else if (missile.blockingCeiling)
+    {
+      normal  = missile.blockingCeiling.ceilingPlane.normal;
+      texture = missile.blockingCeiling.getTexture(Sector.ceiling);
+      aColor  = missile.blockingCeiling.specialColors[Sector.ceiling];
+    }
+    else if (missile.blockingLine)
+    {
+      normal = getNormalFromLine(missile.blockingLine, Line.front);
+
+      // Walls have bottom, middle and top textures, trace to know where we hit.
+      FLineTraceData traceData;
+      vector2 lineCenter = (missile.blockingLine.v1.p + missile.blockingLine.v2.p) / 2;
+      double  offsetZ    = missile.height / 2;
+      vector2 dir        = lineCenter - missile.pos.xy;
+      double  angle      = atan2(dir.y, dir.x);
+      double  distance   = missile.blockingLine.delta.length() + missile.radius * 2;
+      bool    isHit =
+        missile.lineTrace(angle, distance, 0, TRACE_FLAGS, offsetZ, data: traceData);
+
+      if (!isHit || traceData.hitType == FLineTraceData.TRACE_HitNone) return;
+      texture = traceData.hitTexture;
+
+      aColor = Color("");
+    }
+    else // Assuming 3D floor.
+    {
+      // Trace will miss the 3D floor if a missile just brushes against it.
+      FLineTraceData traceData;
+      double offsetZ  = missile.height / 2;
+      double angle    = missile.angle;
+      double distance = missile.radius * 2;
+      bool isHit =
+        missile.lineTrace(angle, distance, 0, TRACE_FLAGS, offsetZ, data: traceData);
+
+      if (isHit
+          && (traceData.hitType == FLineTraceData.TRACE_HitFloor
+              || traceData.hitType == FLineTraceData.TRACE_HitCeiling)
+          && traceData.hit3dFloor)
+      {
+        normal = (traceData.hitType == FLineTraceData.TRACE_HitFloor)
+          ? traceData.hit3dFloor.top.normal
+          : traceData.hit3dFloor.bottom.normal;
+
+        texture = traceData.hitTexture;
+
+        aColor = (traceData.hitType == FLineTraceData.TRACE_HitFloor)
+          ? traceData.hit3dFloor.model.specialColors[Sector.floor]
+          : traceData.hit3dFloor.model.specialColors[Sector.ceiling];
+      }
+      else return;
+    }
+
+    if (normal.x == 0 && normal.y == 0 && normal.z == 0) return;
     if (!texture) return;
 
-    Color color = getColorFromActor(missile);
-    spawnDebris(normal, hitDir, missile.pos, texture, intensity, color);
+    result.isHit = true;
+    result.normal = normal;
+    // This isn't accurate if missile trajectory is not straight.
+    result.incidence = level.vec3Diff(source.pos, missile.pos).unit();
+    result.location = missile.pos;
+    result.texture = texture;
+    result.color = aColor;
   }
 
-  private void spawnDebris(vector3 normal,
-                           vector3 incidence,
-                           vector3 hitLocation,
-                           TextureId texture,
-                           double intensity,
-                           Color color)
+  private void spawnDebris(ts_HitData data, double intensity)
   {
+    vector3 normal    = data.normal;
+    vector3 incidence = data.incidence;
     vector3 reflected = incidence - 2 * normal * (normal dot incidence);
     int     amount    = max(1, int(10 * intensity / (mAmountFactor + 1)));
 
     mParticleParameters.lifetime = int(TICRATE * intensity);
     mParticleParameters.fadeStep = START_ALPHA / mParticleParameters.lifetime;
-    mParticleParameters.pos      = hitLocation;
-    mParticleParameters.color1   = color;
+    mParticleParameters.pos      = data.location;
+    mParticleParameters.color1   = data.color;
 
-    let [textureWidth, textureHeight] = TexMan.getSize(texture);
+    let [textureWidth, textureHeight] = TexMan.getSize(data.texture);
     int minDrawTextureX = CANVAS_SIZE - textureWidth;
     int minDrawTextureY = CANVAS_SIZE - textureHeight;
 
     for (int i = 0; i < amount; ++i)
     {
       mCanvasIndex = (mCanvasIndex + 1) % CANVAS_COUNT;
-      mCanvases[mCanvasIndex].drawTexture(texture,
+      mCanvases[mCanvasIndex].drawTexture(data.texture,
                                           false,
                                           random[hi](minDrawTextureX, 0),
                                           random[hi](minDrawTextureY, 0));
@@ -211,13 +289,18 @@ class hi_EventHandler : StaticEventHandler
   const CANVAS_COUNT = <<canvas-count()>>;
   const CANVAS_SIZE = 12;
 
-  // TODO: add 3D floors support.
   private static vector3 getNormalFromTrace(FLineTraceData data)
   {
     switch (data.hitType)
     {
-      case FLineTraceData.TRACE_HitFloor:   return data.hitSector.floorPlane.normal;
-      case FLineTraceData.TRACE_HitCeiling: return data.hitSector.ceilingPlane.normal;
+      case FLineTraceData.TRACE_HitFloor: return data.hit3dFloor
+        ? data.hit3dFloor.top.normal
+        : data.hitSector.floorPlane.normal;
+
+      case FLineTraceData.TRACE_HitCeiling: return data.hit3dFloor
+        ? data.hit3dFloor.bottom.normal
+        : data.hitSector.ceilingPlane.normal;
+
       case FLineTraceData.TRACE_HitWall:
         return getNormalFromLine(data.hitLine, data.lineSide);
     }
@@ -225,58 +308,17 @@ class hi_EventHandler : StaticEventHandler
     return (0, 0, 0);
   }
 
-  // TODO: add 3D floors support.
   private static color getColorFromTrace(FLineTraceData data)
   {
     switch (data.hitType)
     {
-      case FLineTraceData.TRACE_HitFloor:
-        return data.hitSector.specialColors[Sector.floor];
-      case FLineTraceData.TRACE_HitCeiling:
-        return data.hitSector.specialColors[Sector.ceiling];
+      case FLineTraceData.TRACE_HitFloor: return data.hit3dFloor
+        ? data.hit3dFloor.model.specialColors[Sector.floor]
+        : data.hitSector.specialColors[Sector.floor];
+      case FLineTraceData.TRACE_HitCeiling: return data.hit3dFloor
+        ? data.hit3dFloor.model.specialColors[Sector.ceiling]
+        : data.hitSector.specialColors[Sector.ceiling];
     }
-
-    return Color("");
-  }
-
-  // TODO: add 3D floors support.
-  private static vector3 getNormalFromActor(Actor actor)
-  {
-    if (actor.blockingFloor)   return actor.blockingFloor.floorPlane.normal;
-    if (actor.blockingCeiling) return actor.blockingCeiling.ceilingPlane.normal;
-    if (actor.blockingLine)
-      return getNormalFromLine(actor.blockingLine, Line.front);
-
-    return (0, 0, 0);
-  }
-
-  // TODO: add 3D floors support.
-  private static TextureId getTextureFromActor(Actor actor)
-  {
-    if (actor.blockingFloor)   return actor.blockingFloor.getTexture(Sector.floor);
-    if (actor.blockingCeiling) return actor.blockingCeiling.getTexture(Sector.ceiling);
-    if (actor.blockingLine)
-    {
-      FLineTraceData traceData;
-      vector2 lineCenter = (actor.blockingLine.v1.p + actor.blockingLine.v2.p) / 2;
-      double offsetZ = actor.height / 2;
-      vector2 dir = lineCenter - actor.pos.xy;
-      double angle = atan2(dir.y, dir.x);
-      bool   isHit = actor.lineTrace(angle, 999, 0, FLAGS, offsetZ, data: traceData);
-
-      if (!isHit || traceData.hitType == FLineTraceData.TRACE_HitNone) return NULL;
-      return traceData.hitTexture;
-    }
-
-    return NULL;
-  }
-
-  private static Color getColorFromActor(Actor actor)
-  {
-    if (actor.blockingFloor)
-      return actor.blockingFloor.specialColors[Sector.floor];
-    if (actor.blockingCeiling)
-      return actor.blockingCeiling.specialColors[Sector.ceiling];
 
     return Color("");
   }
@@ -296,6 +338,19 @@ class hi_EventHandler : StaticEventHandler
     return actor.height * 0.5
       + (pawn ? pawn.attackZOffset * pawn.player.crouchFactor - pawn.floorclip : 0);
   }
+}
+#+end_src
+
+#+begin_src c :tangle build/HitImpact/zscript.zs
+
+struct ts_HitData
+{
+  bool isHit;
+  vector3 normal;
+  vector3 incidence;
+  vector3 location;
+  TextureId texture;
+  Color color;
 }
 #+end_src
 
