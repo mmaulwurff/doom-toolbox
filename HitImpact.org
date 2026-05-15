@@ -200,8 +200,8 @@ class hi_EventHandler : StaticEventHandler
   {
     if (actor.blockingFloor)   return actor.blockingFloor.floorPlane.normal;
     if (actor.blockingCeiling) return actor.blockingCeiling.ceilingPlane.normal;
-    if (actor.movementBlockingLine)
-      return getNormalFromLine(actor.movementBlockingLine, Line.front);
+    if (actor.blockingLine)
+      return getNormalFromLine(actor.blockingLine, Line.front);
 
     return (0, 0, 0);
   }
@@ -211,10 +211,10 @@ class hi_EventHandler : StaticEventHandler
   {
     if (actor.blockingFloor)   return actor.blockingFloor.getTexture(Sector.floor);
     if (actor.blockingCeiling) return actor.blockingCeiling.getTexture(Sector.ceiling);
-    if (actor.movementBlockingLine)
+    if (actor.blockingLine)
     {
       FLineTraceData traceData;
-      vector2 lineCenter = (actor.movementBlockingLine.v1.p + actor.movementBlockingLine.v2.p) / 2;
+      vector2 lineCenter = (actor.blockingLine.v1.p + actor.blockingLine.v2.p) / 2;
       double offsetZ = actor.height / 2;
       vector2 dir = lineCenter - actor.pos.xy;
       double angle = atan2(dir.y, dir.x);
