@@ -5,7 +5,7 @@
 
 * About
 
-HitImpact spawns textured particles when a wall, a floor, or a ceiling is hit.
+HitImpact spawns textured particles when a surface is hit.
 
 Features:
 - works for hitscan and projectile attacks,
@@ -15,8 +15,8 @@ Features:
 Known issues:
 - Performance. HitImpact tries to minimize the amount of particles created when a lot
   of hits happen in a short period of time, but performance drop is still inevitable.
-- Silliness. Basically, an impact particle has a miniature version of
-  wall/floor/ceiling texture, and for some textures this may look silly.
+- Silliness. Basically, an impact particle has a version of a surface texture, and for
+  some textures this may look silly.
 - Accuracy. Don't expect physical simulation level of precision. Some collisions
   cannot be cleanly handled.
 
