@@ -191,16 +191,20 @@ class hi_EventHandler : StaticEventHandler
 
       // Walls have bottom, middle and top textures, trace to know where we hit.
       FLineTraceData traceData;
-      vector2 lineCenter = (missile.blockingLine.v1.p + missile.blockingLine.v2.p) / 2;
+      Line    line       = missile.blockingLine;
+      vector2 lineCenter = (line.v1.p + line.v2.p) / 2;
       double  offsetZ    = missile.height / 2;
       vector2 dir        = lineCenter - missile.pos.xy;
       double  angle      = atan2(dir.y, dir.x);
-      double  distance   = missile.blockingLine.delta.length() + missile.radius * 2;
+      double  distance   = dir.length() + 1;
       bool    isHit =
         missile.lineTrace(angle, distance, 0, TRACE_FLAGS, offsetZ, data: traceData);
 
-      if (!isHit || traceData.hitType == FLineTraceData.TRACE_HitNone) return;
-      texture = traceData.hitTexture;
+      // Not sure why, trace sometimes misses when near the line center.
+      // In that case, use a fallback. Hopefully it's wrong not too often.
+      texture = (isHit && traceData.hitType != FLineTraceData.TRACE_HitNone)
+        ? traceData.hitTexture
+        : line.sidedef[Line.front].getTexture(Side.mid);
 
       aColor = Color("");
     }
