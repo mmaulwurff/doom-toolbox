@@ -1,7 +1,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: HitImpact
-# #+version: v0.1.0
+#+version: v1.0.0
 
 * About
 
