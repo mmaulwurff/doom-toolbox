@@ -20,6 +20,8 @@ Known issues:
 - Accuracy. Don't expect physical simulation level of precision. It's approximations
   and compromises salad.
 
+There is room for improvement, help appreciated!
+
 * License
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
@@ -67,7 +69,11 @@ class hi_EventHandler : StaticEventHandler
     for (int i = 0; i < missileCount; ++i)
     {
       Actor missile = mMissiles[i];
-      if (!missile || !missile.target || missile.vel != mNullVector) continue;
+      if (!missile
+          || !missile.target
+          || missile.vel.x != 0
+          || missile.vel.y != 0
+          || missile.vel.z != 0) continue;
 
       ts_HitData hitData;
       getMissileHitData(missile.target, missile, hitData);
@@ -118,8 +124,6 @@ class hi_EventHandler : StaticEventHandler
     mParticleParameters.startAlpha = START_ALPHA;
     mParticleParameters.accel      = (0, 0, -0.15);
 
-    mNullVector = (0, 0, 0);
-
     for (int i = 0; i < CANVAS_COUNT; ++i)
     {
       string canvasName  = string.format("hi_texture%d", i);
@@ -129,7 +133,6 @@ class hi_EventHandler : StaticEventHandler
   }
 
   private FSpawnParticleParams mParticleParameters;
-  private vector3 mNullVector;
   const TRACE_FLAGS = TRF_NoSky;
   const START_ALPHA = 1.0;
   const INTENSITY_PUFF = 1.0;
