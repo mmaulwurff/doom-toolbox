@@ -17,8 +17,8 @@ Known issues:
   of hits happen in a short period of time, but performance drop is still inevitable.
 - Silliness. Basically, an impact particle has a version of a surface texture, and for
   some textures this may look silly.
-- Accuracy. Don't expect physical simulation level of precision. Some collisions
-  cannot be cleanly handled.
+- Accuracy. Don't expect physical simulation level of precision. It's approximations
+  and compromises salad.
 
 * License
 
@@ -239,10 +239,15 @@ class hi_EventHandler : StaticEventHandler
     if (normal.x == 0 && normal.y == 0 && normal.z == 0) return;
     if (!texture) return;
 
+    // This isn't accurate if missile source changed Z position since firing or
+    // missile position isn't straight.
+    vector2 incidenceXy = Actor.rotateVector((1, 0), missile.angle);
+    vector3 difference  = level.vec3Diff(source.pos, missile.pos).unit();
+    vector3 incidence   = (incidenceXy.x, incidenceXy.y, difference.z).unit();
+
     result.isHit = true;
     result.normal = normal;
-    // This isn't accurate if missile trajectory is not straight.
-    result.incidence = level.vec3Diff(source.pos, missile.pos).unit();
+    result.incidence = incidence;
     result.location = missile.pos;
     result.texture = texture;
     result.color = aColor;
