@@ -13,6 +13,7 @@ repos:
     rev: v6.0.0
     hooks:
     -   id: check-added-large-files
+        args: [--enforce-all]
     -   id: check-case-conflict
     -   id: check-illegal-windows-names
     -   id: check-merge-conflict
@@ -38,13 +39,13 @@ repos:
 
 # https://docs.astral.sh/ruff/
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.15.13
     hooks:
     -   id: ruff-check
     -   id: ruff-format
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.46.1
+    rev: v1.46.2
     hooks:
     -   id: typos
         stages: [pre-commit]

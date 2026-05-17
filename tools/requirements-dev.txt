@@ -8,7 +8,7 @@ GitPython ~= 3.1
 
 # prek: framework to run hooks
 # https://prek.j178.dev/
-prek ~= 0.3
+prek ~= 0.4
 
 # REUSE: open source licenses helper tool
 # https://reuse.software/
