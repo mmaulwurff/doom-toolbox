@@ -7,6 +7,7 @@
 
 # Devbuilds release creation steps are based on UZDoom workflow.
 
+---
 name: dev-builds
 
 on:
@@ -41,7 +42,8 @@ jobs:
       - name: Check out
         uses: actions/checkout@v6
 
-      # TODO: when Ubuntu 26.04 is available as GitHub runner, install Emacs with apt.
+      # TODO: when Ubuntu 26.04 is available as GitHub runner, install Emacs with
+      # apt.
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -170,20 +172,20 @@ jobs:
           choco install emacs --version ${{ env.emacs-version }}
 
       # No point if I cannot run UZDoom (see comments below).
-      #- name: Cache UZDoom
-      #  id: cache-uzdoom
-      #  uses: actions/cache@v5
-      #  with:
-      #    path: ~/UZDoom
-      #    key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+      # - name: Cache UZDoom
+      #   id: cache-uzdoom
+      #   uses: actions/cache@v5
+      #   with:
+      #     path: ~/UZDoom
+      #     key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
       #
-      #- if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
-      #  name: Install UZDoom
-      #  shell: bash
-      #  run: |
-      #    curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
-      #    mkdir -p ~/UZDoom
-      #    unzip ~/UZDoom.zip -d ~/UZDoom
+      # - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
+      #   name: Install UZDoom
+      #   shell: bash
+      #   run: |
+      #     curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
+      #     mkdir -p ~/UZDoom
+      #     unzip ~/UZDoom.zip -d ~/UZDoom
 
       - name: Install Python
         uses: actions/setup-python@v6
@@ -210,11 +212,11 @@ jobs:
           prek run -a
 
       # I couldn't make UZDoom work here. Most probably because of missing video drivers.
-      #- name: try UZDoom
-      #  run: |
-      #    ~/UZDoom/uzdoom.exe -stdout -nosound -nodraw -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
+      # - name: try UZDoom
+      #   run: |
+      #     ~/UZDoom/uzdoom.exe -stdout -nosound -nodraw -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
 
-      # At least check that scons works.
+      #  At least check that scons works.
       - name: Build
         run: |
           scons -j 4 Pk3All

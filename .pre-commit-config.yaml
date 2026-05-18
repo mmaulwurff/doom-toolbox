@@ -4,78 +4,91 @@
 # This file contains pre-commit checks.
 # See https://github.com/j178/prek for details.
 
+---
 exclude: 'LICENSES/.*|tools/aspell\.en\.pws'
 
 default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-    -   id: check-added-large-files
-        args: [--enforce-all]
-    -   id: check-case-conflict
-    -   id: check-illegal-windows-names
-    -   id: check-merge-conflict
-    -   id: check-toml
-    -   id: check-vcs-permalinks
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: fix-byte-order-marker
-    -   id: forbid-submodules
-    -   id: requirements-txt-fixer
-    -   id: trailing-whitespace
+ - repo: https://github.com/pre-commit/pre-commit-hooks
+   rev: v6.0.0
+   hooks:
+    - id: check-added-large-files
+      args: [--enforce-all]
+    - id: check-case-conflict
+    - id: check-illegal-windows-names
+    - id: check-merge-conflict
+    - id: check-toml
+    - id: check-vcs-permalinks
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: fix-byte-order-marker
+    - id: forbid-submodules
+    - id: requirements-txt-fixer
+    - id: trailing-whitespace
 
--   repo: meta
-    hooks:
-    -   id: check-hooks-apply
-    -   id: check-useless-excludes
+ - repo: meta
+   hooks:
+    - id: check-hooks-apply
+    - id: check-useless-excludes
 
-# https://reuse.software/
--   repo: https://github.com/fsfe/reuse-tool
-    rev: v6.2.0
-    hooks:
-    -   id: reuse
+ # https://reuse.software/
+ - repo: https://github.com/fsfe/reuse-tool
+   rev: v6.2.0
+   hooks:
+    - id: reuse
 
-# https://docs.astral.sh/ruff/
--   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.13
-    hooks:
-    -   id: ruff-check
-    -   id: ruff-format
+ # https://docs.astral.sh/ruff/
+ - repo: https://github.com/astral-sh/ruff-pre-commit
+   rev: v0.15.13
+   hooks:
+    - id: ruff-check
+    - id: ruff-format
 
--   repo: https://github.com/crate-ci/typos
-    rev: v1.46.2
-    hooks:
-    -   id: typos
-        stages: [pre-commit]
-        args: []
-    -   id: typos
-        stages: [commit-msg]
-        args: []
+ - repo: https://github.com/crate-ci/typos
+   rev: v1.46.2
+   hooks:
+    - id: typos
+      stages: [pre-commit]
+      args: []
+    - id: typos
+      stages: [commit-msg]
+      args: []
 
--   repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
-    hooks:
-    -   id: pyupgrade
-        args: [--py313-plus]
+ - repo: https://github.com/asottile/pyupgrade
+   rev: v3.21.2
+   hooks:
+    - id: pyupgrade
+      args: [--py313-plus]
 
--   repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.4.0
-    hooks:
-    -   id: conventional-pre-commit
-        stages: [commit-msg]
-        args:
-          [--strict,
-          --verbose,
-          --force-scope,
-          --scopes,
-          '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,HitImpact,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
-          build, chore, docs, feat, fix, refactor, style, test
-          ]
+ - repo: https://github.com/compilerla/conventional-pre-commit
+   rev: v4.4.0
+   hooks:
+    - id: conventional-pre-commit
+      stages: [commit-msg]
+      args:
+       [--strict,
+        --verbose,
+        --force-scope,
+        --scopes,
+        '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,HitImpact,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
+        build, chore, docs, feat, fix, refactor, style, test
+       ]
 
--   repo: https://github.com/oxipng/oxipng
-    rev: v10.1.1
-    hooks:
-    -   id: oxipng
-        args: ["-o", "4", "--alpha"]
+ - repo: https://github.com/oxipng/oxipng
+   rev: v10.1.1
+   hooks:
+    - id: oxipng
+      args: ["-o", "4", "--alpha"]
+
+ - repo: https://github.com/rhysd/actionlint
+   rev: v1.7.12
+   hooks:
+    - id: actionlint
+
+ - repo: https://github.com/adrienverge/yamllint.git
+   rev: v1.29.0
+   hooks:
+    - id: yamllint
+      exclude: '.clang-format'
+      args: [-d, "{extends: default, rules: {line-length: disable, truthy: disable}}", --strict]
