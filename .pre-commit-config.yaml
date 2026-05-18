@@ -63,7 +63,7 @@ repos:
 -   repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.4.0
     hooks:
-      - id: conventional-pre-commit
+    -   id: conventional-pre-commit
         stages: [commit-msg]
         args:
           [--strict,
@@ -73,3 +73,9 @@ repos:
           '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,HitImpact,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
           build, chore, docs, feat, fix, refactor, style, test
           ]
+
+-   repo: https://github.com/oxipng/oxipng
+    rev: v10.1.1
+    hooks:
+    -   id: oxipng
+        args: ["-o", "4", "--alpha"]
