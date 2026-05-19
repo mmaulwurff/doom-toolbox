@@ -111,7 +111,7 @@ jobs:
           zip -r build/DoomToolbox build -i \*.pk3
 
       - name: Devbuilds - upload
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v3.0.0
         with:
           name: DoomToolbox Devbuilds
           tag_name: dev-builds
