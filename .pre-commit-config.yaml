@@ -87,7 +87,7 @@ repos:
     - id: actionlint
 
  - repo: https://github.com/adrienverge/yamllint.git
-   rev: v1.29.0
+   rev: v1.38.0
    hooks:
     - id: yamllint
       exclude: '.clang-format'
