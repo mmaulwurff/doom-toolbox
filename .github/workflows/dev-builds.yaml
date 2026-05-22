@@ -74,10 +74,14 @@ jobs:
           path: ~/lzdoom.deb
           key: ${{ runner.os }}-${{ matrix.engine }}
 
-      - name: Install LZDoom
+      - name: Download LZDoom
         if: ${{ matrix.engine == 'lzdoom-v4.14.3a' && steps.cache-lzdoom.outputs.cache-hit != 'true' }}
         run: |
           wget -qO- https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a_amd64.deb > ~/lzdoom.deb
+
+      - name: Install LZDoom
+        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' }}
+        run: |
           sudo dpkg -i ~/lzdoom.deb
 
       - name: Install Python
