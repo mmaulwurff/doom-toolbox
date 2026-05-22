@@ -114,12 +114,12 @@ jobs:
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           scons Pk3All
 
       - name: Devbuilds - prepare
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           git tag -d dev-builds || true
           git push origin :refs/tags/dev-builds || true
@@ -128,6 +128,7 @@ jobs:
           zip -r build/DoomToolbox build -i \*.pk3
 
       - name: Devbuilds - upload
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: DoomToolbox Devbuilds
@@ -141,28 +142,28 @@ jobs:
             Warning: these packages may contain bugs or unfinished features.
 
       - name: Clean up build
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           rm -r build
 
       - name: Export to HTML
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           scons HtmlAll
 
       - name: Configure pages
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         uses: actions/configure-pages@v6
 
       - name: Upload pages
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
           path: '.'
 
       - name: Deploy pages to GitHub Pages
-        if: ${{ success() }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
         id: deployment
         uses: actions/deploy-pages@v5
 
