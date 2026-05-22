@@ -97,6 +97,7 @@ jobs:
           pip install -r tools/requirements-dev.txt;
 
       - name: Cache prek
+        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         id: prek
         uses: actions/cache@v5
         with:
@@ -104,6 +105,7 @@ jobs:
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Check prek hooks
+        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           prek run -a
 
