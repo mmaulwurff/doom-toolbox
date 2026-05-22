@@ -49,7 +49,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libfuse2t64 libpulse0
+          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0
           sudo snap install --classic emacs
 
       - name: Cache UZDoom
