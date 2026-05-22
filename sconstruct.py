@@ -37,7 +37,11 @@ Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
 emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/bin/emacs.exe')
-uzdoom = environ['DT_ENGINE'] if 'DT_ENGINE' in environ else which('uzdoom')
+uzdoom = (
+  path.expanduser(environ['DT_ENGINE'])
+  if 'DT_ENGINE' in environ
+  else which('uzdoom')
+)
 
 
 # Common functions
