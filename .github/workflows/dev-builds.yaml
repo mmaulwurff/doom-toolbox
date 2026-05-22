@@ -25,9 +25,6 @@ concurrency:
   group: 'dev-build'
   cancel-in-progress: false
 
-env:
-  uzdoom-version: '4.14.3'
-
 jobs:
   build:
     permissions:
@@ -38,6 +35,11 @@ jobs:
       id-token: write
       pages: write
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        engine: [uzdoom-v4.14.3, lzdoom-v4.14.3a]
+    env:
+      DT_ENGINE: ${{ case(matrix.engine == 'uzdoom-v4.14.3', '~/UZDoom.AppImage', 'lzdoom') }}
     steps:
       - name: Check out
         uses: actions/checkout@v6
@@ -51,17 +53,32 @@ jobs:
           sudo snap install --classic emacs
 
       - name: Cache UZDoom
+        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         id: cache-uzdoom
         uses: actions/cache@v5
         with:
           path: ~/UZDoom.AppImage
-          key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+          key: ${{ runner.os }}-${{ matrix.engine }}
 
-      - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
-        name: Install UZDoom
+      - name: Install UZDoom
+        if: ${{ matrix.engine == 'uzdoom-v4.14.3' && steps.cache-uzdoom.outputs.cache-hit != 'true' }}
         run: |
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Linux-UZDoom-${{ env.uzdoom-version }}.AppImage > ~/UZDoom.AppImage
+          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Linux-UZDoom-4.14.3.AppImage > ~/UZDoom.AppImage
           chmod +x ~/UZDoom.AppImage
+
+      - name: Cache LZDoom
+        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' }}
+        id: cache-lzdoom
+        uses: actions/cache@v5
+        with:
+          path: ~/lzdoom.deb
+          key: ${{ runner.os }}-${{ matrix.engine }}
+
+      - name: Install LZDoom
+        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' && steps.cache-lzdoom.outputs.cache-hit != 'true' }}
+        run: |
+          wget -qO- https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a.and64.deb > ~/lzdoom.deb
+          sudo dpkg -i ~/lzdoom.deb
 
       - name: Install Python
         uses: actions/setup-python@v6
@@ -177,13 +194,13 @@ jobs:
       #   uses: actions/cache@v5
       #   with:
       #     path: ~/UZDoom
-      #     key: ${{ runner.os }}-uzdoom-v${{ env.uzdoom-version }}
+      #     key: ${{ runner.os }}-uzdoom-v4.14.3
       #
       # - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
       #   name: Install UZDoom
       #   shell: bash
       #   run: |
-      #     curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/${{ env.uzdoom-version }}/Windows-UZDoom-${{ env.uzdoom-version }}.zip -o ~/UZDoom.zip
+      #     curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Windows-UZDoom-4.14.3.zip -o ~/UZDoom.zip
       #     mkdir -p ~/UZDoom
       #     unzip ~/UZDoom.zip -d ~/UZDoom
 

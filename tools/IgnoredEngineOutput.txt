@@ -30,6 +30,7 @@
 ^S_Init: Setting up sound.
 ^S_InitData: Load sound definitions.
 ^Script error, "gzdoom.pk3:menudef.txt"
+^Script error, "lzdoom.pk3:menudef.txt"
 ^Script error, "uzdoom.pk3:menudef.txt"
 ^Texman.Init: Init texture manager.
 ^UZDoom version g

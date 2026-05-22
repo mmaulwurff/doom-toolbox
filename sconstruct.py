@@ -7,10 +7,6 @@
 # TODO: move autoadvance to config.ini?
 # +wi_autoadvance 1\
 
-# TODO: add targets to build all packages and to run all tests.
-
-# TODO: fix parallel builds (-j 4). Check with moules of Typist.pk3.
-# May be a problem with cleaning, if main target is built after a module.
 
 from os import environ, makedirs, path
 from pathlib import Path
@@ -41,7 +37,7 @@ Default(None)
 DefaultEnvironment(ENV=environ.copy())
 
 emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/bin/emacs.exe')
-uzdoom = which('uzdoom') or Path(path.expanduser('~')) / 'UZDoom.AppImage'
+uzdoom = environ['DT_ENGINE'] if 'DT_ENGINE' in environ else which('uzdoom')
 
 
 # Common functions
