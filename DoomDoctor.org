@@ -1132,7 +1132,8 @@ private clearscope void checkOtherEventHandlers()
         : StaticEventHandler.find(eventHandlerClass);
 
       // Ignore the test class.
-      if (instance is "dd_LoggerTestRunner") continue;
+      string loggerTestClass = "dd_LoggerTestRunner";
+      if (instance is loggerTestClass) continue;
 
       if (instance == NULL)
         {
