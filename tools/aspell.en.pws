@@ -1,4 +1,5 @@
-personal_ws-1.1 en 116 
+personal_ws-1.1 en 127 
+BTSX
 CVar
 Cacowards
 Codeberg
@@ -17,26 +18,33 @@ GLES
 GPL
 GZDoom
 Guncaster
+HitImpact
 HtmlAll
 Http
 IWAD
 JSON
 Keyconf
+LZDoom
 LazyPoints
+LispOnZscript
 MTF
 Mapinfo
 Menudef
 Nomina
 PlainTranslator
 Powerup
+PreviousWeapon
 RANDOMIZE
 Randomizer
 SPDX
+SoundToScreen
 StringUtils
 TODO
 UX
 UZDoom
 VM
+VmAbortReporter
+WarmReception
 ZDoom
 ZScript
 Zandronum
@@ -62,6 +70,7 @@ eval
 foreach
 freesound
 gameplay
+gif
 gitattributes
 gitignore
 gmail
@@ -83,6 +92,7 @@ noweb
 ogg
 ons
 os
+playtesting
 png
 pos
 pre
@@ -91,6 +101,7 @@ pws
 randomizers
 readonly
 replacers
+replayability
 rhs
 scons
 sed

@@ -6,7 +6,7 @@
 * About
 
 DoomToolbox is a collection of add-ons for Doom-based game engines which support
-ZScript, like [[https://zdoom.org/downloads][UZDoom]].
+ZScript, like [[https://zdoom.org/downloads][UZDoom and LZDoom]].
 
 The goal of DoomToolbox is to increase replayability of compatible games and mods,
 make gameplay more enjoyable, and to have fun both while playing and developing this
