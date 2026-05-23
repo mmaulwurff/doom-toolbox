@@ -8,8 +8,7 @@ path = "sneserrors.ogg"
 SPDX-FileCopyrightText = "© 2013 Felfa"
 SPDX-License-Identifier = "CC0-1.0"
 
-# TODO: replace with a sound with a license that is in SPDX
-# feeeelllgood.wav https://freesound.org/people/Matthus/sounds/41245/
+# level up.wav https://freesound.org/people/MakoFox/sounds/126422/
 [[annotations]]
 path = "safe2.ogg"
 SPDX-FileCopyrightText = "© 2011 MakoFox"
@@ -45,7 +44,8 @@ path = "danger2.ogg"
 SPDX-FileCopyrightText = "© 2010 Black Snow"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# Menu Interface - Confirm 004.wav https://freesound.org/people/DWOBoyle/sounds/143606/
+# Menu Interface - Confirm 004.wav
+# https://freesound.org/people/DWOBoyle/sounds/143606/
 [[annotations]]
 path = "danger2.ogg"
 SPDX-FileCopyrightText = "© 2012 DWOBoyle"

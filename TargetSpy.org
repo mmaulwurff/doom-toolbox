@@ -1974,22 +1974,22 @@ class %2$sToggles : ts_ClassToggles
 
 class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 {
-	OptionMenuItemStaticText init(Name command, string tag)
+  OptionMenuItemStaticText init(Name command, string tag)
   {
     mCvar = ts_ExistingCvar.find(command);
     mCharactersCvar = ts_ExistingCvar.find(string.format("ts_%s_characters", tag));
     return Super.init("", -1);
   }
 
-	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
-	{
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
     string characters = mCharactersCvar.getString();
     mLabel = ts_su.highlight(characters,
                              clamp(mCvar.getInt(), 0, characters.length() - 1),
                              Font.CR_Teal);
     drawLabel(indent, y, Font.CR_White);
     return -1;
-	}
+  }
 
   private Cvar mCvar;
   private Cvar mCharactersCvar;
@@ -2002,15 +2002,15 @@ class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 
 class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 {
-	OptionMenuItemStaticText init(int percent, string aClass)
+  OptionMenuItemStaticText init(int percent, string aClass)
   {
     mPercent = percent;
     mClass = aClass;
     return Super.init("", -1);
   }
 
-	override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
-	{
+  override int draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
     ts_BarOptions options =
       ts_EventHandler.getInstance().getOptions().getBarOptions(mClass);
     int value = int(round(double(mPercent) * 64 / 100));
@@ -2018,7 +2018,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
       .. tsView_Text.makeBar(value, 64, options);
     drawLabel(indent, y, Font.CR_White);
     return -1;
-	}
+  }
 
   private int mPercent;
   private string mClass;
@@ -2102,7 +2102,7 @@ class ts_GettersOrderElement : OptionMenuItemCommand
     return self;
   }
 
-	override bool Activate()
+  override bool activate()
   {
     mMenu.moveDown(mIndex);
     return true;

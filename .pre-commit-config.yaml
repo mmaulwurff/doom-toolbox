@@ -40,7 +40,7 @@ repos:
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.15.13
+   rev: v0.15.14
    hooks:
     - id: ruff-check
     - id: ruff-format
@@ -72,14 +72,13 @@ repos:
         --force-scope,
         --scopes,
         '10.5x,DoomDoctor,FinalCustomDoom,Gearbox,HitImpact,Nomina,SoundToScreen,TargetSpy,Typist.pk3,WarmReception,project,Hint,LazyPoints,libeye,LispOnZscript,MD5,PlainTranslator,PreviousWeapon,StringUtils,VmAbortReporter',
-        build, chore, docs, feat, fix, refactor, style, test
-       ]
+        build, chore, docs, feat, fix, refactor, style, test]
 
  - repo: https://github.com/oxipng/oxipng
    rev: v10.1.1
    hooks:
     - id: oxipng
-      args: ["-o", "4", "--alpha"]
+      args: [-o, '4', --alpha]
 
  - repo: https://github.com/rhysd/actionlint
    rev: v1.7.12
@@ -91,4 +90,14 @@ repos:
    hooks:
     - id: yamllint
       exclude: '.clang-format'
-      args: [-d, "{extends: default, rules: {line-length: disable, truthy: disable}}", --strict]
+      args:
+       [-d,
+        '{extends: default, rules: {line-length: disable, truthy: disable}}',
+        --strict]
+
+ - repo: https://github.com/editorconfig-checker/editorconfig-checker
+   rev: v3.6.1
+   hooks:
+    - id: editorconfig-checker
+      exclude: 'modules/libeye.org|modules/MD5.org|tools/htmlize.el|tools/.*.wad'
+      args: [-disable-indent-size, -disable-max-line-length]

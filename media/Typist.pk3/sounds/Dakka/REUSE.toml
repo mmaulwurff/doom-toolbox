@@ -20,7 +20,8 @@ path = "safe4.ogg"
 SPDX-FileCopyrightText = "© 2014 Diboz"
 SPDX-License-Identifier = "CC0-1.0"
 
-# Victory Percussion Music Cue https://freesound.org/people/joshuaempyre/sounds/404024/
+# Victory Percussion Music Cue
+# https://freesound.org/people/joshuaempyre/sounds/404024/
 [[annotations]]
 path = "safe4.ogg"
 SPDX-FileCopyrightText = "© 2017 joshuaempyre"
@@ -44,7 +45,8 @@ path = "danger4.ogg"
 SPDX-FileCopyrightText = "© 2018 tyops"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# Pistol Manipulation 01.wav https://freesound.org/people/GreenFireSound/sounds/348155/
+# Pistol Manipulation 01.wav
+# https://freesound.org/people/GreenFireSound/sounds/348155/
 [[annotations]]
 path = "danger4.ogg"
 SPDX-FileCopyrightText = "© 2016 GreenFireSound"
