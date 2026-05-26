@@ -27,31 +27,31 @@ have ZDoom forums threads.
 
 This project doesn't use any AI tools or resources.
 
-|                    |                                                  | Forum |
-| Add-ons            | Description                                      | topic |
-|--------------------+--------------------------------------------------+-------|
-| [[file:10.5x.org][10.5x]]              | enemy number multiplier                          | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]  |
-| [[file:DoomDoctor.org][DoomDoctor]]         | mod development and debugging utilities          |       |
-| [[file:FinalCustomDoom.org][FinalCustomDoom]]    | gameplay customization options                   | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]  |
-| [[file:Gearbox.org][Gearbox]]            | more convenient ways to select weapons and items | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]  |
-| [[file:HitImpact.org][HitImpact]]          | textured particles when level geometry is hit    | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]  |
-| [[file:Nomina.org][Nomina]]             | enemy names helper                               | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]  |
-| [[file:SoundToScreen.org][SoundToScreen]]      | shows where sounds come from                     | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]  |
-| [[file:TargetSpy.org][TargetSpy]]          | enemy health bar                                 | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]  |
-| [[file:Typist.pk3.org][Typist.pk3]]         | turns FPS games into typing exercises            | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]  |
-| [[file:WarmReception.org][WarmReception]]      | alters enemy behavior on level start             | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]  |
-|--------------------+--------------------------------------------------+-------|
-| *Modules*          |                                                  |       |
-|--------------------+--------------------------------------------------+-------|
-| [[file:modules/Hint.org][Hint]]               | hints for menu items                             |       |
-| [[file:modules/LazyPoints.org][LazyPoints]]         | points scoring                                   |       |
-| [[file:modules/libeye.org][libeye]] by KeksDose | level and screen projections                     |       |
-| [[file:modules/LispOnZscript.org][LispOnZscript]]      | toy Lisp-like language on top of ZScript         | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]  |
-| [[file:modules/MD5.org][MD5]] by 3saster     | MD5 Implementation in ZScript                    |       |
-| [[file:modules/PlainTranslator.org][PlainTranslator]]    | enables translation for plain text menu items    |       |
-| [[file:modules/PreviousWeapon.org][PreviousWeapon]]     | provides a key to select a previous weapon       |       |
-| [[file:modules/StringUtils.org][StringUtils]]        | string manipulation library                      |       |
-| [[file:modules/VmAbortReporter.org][VmAbortReporter]]    | prints a report when VM abort happens            |       |
+| Add-ons            | Description                                      | Forum topic |
+|--------------------+--------------------------------------------------+-------------|
+| [[file:10.5x.org][10.5x]]              | enemy number multiplier                          | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]        |
+| [[file:ClematisM.org][ClematisM]]          | ZScript unit test framework                      |             |
+| [[file:DoomDoctor.org][DoomDoctor]]         | mod development and debugging utilities          |             |
+| [[file:FinalCustomDoom.org][FinalCustomDoom]]    | gameplay customization options                   | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]        |
+| [[file:Gearbox.org][Gearbox]]            | more convenient ways to select weapons and items | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]        |
+| [[file:HitImpact.org][HitImpact]]          | textured particles when level geometry is hit    | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]        |
+| [[file:Nomina.org][Nomina]]             | enemy names helper                               | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]        |
+| [[file:SoundToScreen.org][SoundToScreen]]      | shows where sounds come from                     | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]        |
+| [[file:TargetSpy.org][TargetSpy]]          | enemy health bar                                 | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]        |
+| [[file:Typist.pk3.org][Typist.pk3]]         | turns FPS games into typing exercises            | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]        |
+| [[file:WarmReception.org][WarmReception]]      | alters enemy behavior on level start             | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]        |
+|--------------------+--------------------------------------------------+-------------|
+| *Modules*          |                                                  |             |
+|--------------------+--------------------------------------------------+-------------|
+| [[file:modules/Hint.org][Hint]]               | hints for menu items                             |             |
+| [[file:modules/LazyPoints.org][LazyPoints]]         | points scoring                                   |             |
+| [[file:modules/libeye.org][libeye]] by KeksDose | level and screen projections                     |             |
+| [[file:modules/LispOnZscript.org][LispOnZscript]]      | toy Lisp-like language on top of ZScript         | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]        |
+| [[file:modules/MD5.org][MD5]] by 3saster     | MD5 Implementation in ZScript                    |             |
+| [[file:modules/PlainTranslator.org][PlainTranslator]]    | enables translation for plain text menu items    |             |
+| [[file:modules/PreviousWeapon.org][PreviousWeapon]]     | provides a key to select a previous weapon       |             |
+| [[file:modules/StringUtils.org][StringUtils]]        | string manipulation library                      |             |
+| [[file:modules/VmAbortReporter.org][VmAbortReporter]]    | prints a report when VM abort happens            |             |
 
 Add-ons can be included and used in your own projects. However, this is not
 recommended, because when add-ons update, players won't be able to use new versions
@@ -127,9 +127,7 @@ files and directories there.
 - Org files may contain code, extracting the source files may execute it. Only
   extract files from Org files from the sources you trust.
 
-Tests use internally:
-- [[https://github.com/fragglet/miniwad][Miniwad]]: minimalist IWAD
-- [[https://github.com/mmaulwurff/clematis][ClematisM]]: ZScript unit test framework
+Tests use [[https://github.com/fragglet/miniwad][Miniwad]]: minimalist IWAD internally.
 
 * Development
 

@@ -15,15 +15,16 @@ zscript file name. Example: ~"build/MyMod/\\(zscript/.*zs\\)"~.
 
 (mapconcat
  (lambda (string) (format "#include \"%s\"" string))
- (let ((contents (with-temp-buffer
-                   (insert-file-contents (concat "../" org-file))
-                   (buffer-string)))
-       (position 0)
-       result)
-   (while (string-match regexp contents position)
-     (cl-pushnew (match-string 1 contents) result :test #'string=)
-     (setq position (match-end 0)))
-   result)
+ (reverse
+  (let ((contents (with-temp-buffer
+                    (insert-file-contents (concat "../" org-file))
+                    (buffer-string)))
+        (position 0)
+        result)
+    (while (string-match regexp contents position)
+      (cl-pushnew (match-string 1 contents) result :test #'string=)
+      (setq position (match-end 0)))
+    result))
  "\n")
 #+end_src
 

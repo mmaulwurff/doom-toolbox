@@ -100,7 +100,7 @@ def add_test_target(org_file, main_target):
       '-iwad',
       './tools/miniwad.wad',
       '-file',
-      './tools/ClematisM-v2.1.0.pk3',
+      './build/ClematisM',
       f'./build/{name}',
       f'./build/{name}Test',
       f'+exec {f"./build/{name}Test/commands.txt"}',
@@ -227,11 +227,13 @@ def make_index(target, source, env):
 # Targets
 pk3_all = Alias('Pk3All', None, None)
 test_all = Alias('TestAll', None, None)
+clematis_target = add_main_target('ClematisM.org', 'build/{0}/zscript.zs')
 
 module_targets = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
   test_target = add_test_target(org_file, main_target)
+  Depends(test_target, clematis_target)
   Depends(test_all, test_target)
   module_targets.append(f'{main_target[0]}, {test_target[0]}')
 
@@ -243,6 +245,8 @@ for org_file in Glob('*.org'):
     test_target = add_test_target(org_file, main_target)
     pack_target = add_pack_target(org_file, html_target)
 
+    if org_file != 'ClematisM.org':
+      Depends(test_target, clematis_target)
     Depends(test_all, test_target)
     Depends(pk3_all, pack_target)
     project_targets.append(

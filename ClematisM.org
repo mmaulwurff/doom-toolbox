@@ -1,0 +1,1308 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: ClematisM
+# #+version: v2.1.0
+
+* About
+
+Basic ZScript unit test framework for UZDoom. Inspired by [[https://github.com/chesko256/Lilac][Lilac]] by [[https://github.com/chesko256][Chesko]].
+
+Clematis is made by ZippeyKeys12, modified and renamed to ClematisM by m8f.
+
+** Making Test Suites
+
+#+begin_src c
+
+class ClematisExample : Clematis {
+    override
+    void TestSuites() {
+        //////////////////
+        // Assert-style //
+        //////////////////
+
+        Describe('Testing Player Stats');
+            It('MaxHealth', AssertEval(20, '<', 100), LOG_Warning);
+            It('Math', AssertEval(1+1, '==', 2), LOG_Fatal);
+            It('Woot', Assert(true), LOG_Fatal);
+        EndDescribe();
+
+        let x = new('Object');
+        let y = new('Object');
+
+        Describe('Testing Math');
+            It('Calculus', AssertFalse(0*1!=0), LOG_Error);
+            It('Math', AssertSame(x, y, "Custom error message using values (%p and %p)"), LOG_Warning);
+        EndDescribe();
+
+        //////////////////
+        // Expect-style //
+        //////////////////
+
+        Describe('Testing 123');
+            It('Lorum', ExpectNum(12).to.be.lessThan().thisNum(30), LOG_Error);
+            It('Ipsum', ExpectObj(new('Object')).to.be.instance().of.thisCls('Object'), LOG_Error);
+            It('Call explicit matchers which can be added', ExpectNum(0, 'not >=').thisNum(42), LOG_Info);
+        EndDescribe();
+    }
+}
+#+end_src
+
+Override TestSuites and put in your own! Suites are started with ~Describe~ and end
+with ~EndDescribe~.
+
+** How to Run Tests
+
+*** On Instantiation
+
+Tests run on instantiation by default, which can be disabled by overriding ~Init()~.
+
+**** Factory Method
+
+src_c{Clematis.Create('ClematisExample');}
+
+**** Network Event
+
+src_c{EventHandler.SendNetworkEvent('test:ClematisExample');}
+
+**** Console Command
+
+~netevent test:ClematisExample~
+
+*** On Method Call
+
+#+begin_src c
+Clematis Tester=Clematis.Create('ClematisExample');
+Tester.Run();
+#+end_src
+
+* License
+
+License: [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2018 ZippeyKeys12, © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
+#+begin_src c :tangle build/ClematisM/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/mapinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs
+// <<license>>
+#+end_src
+
+* Options
+
+#+begin_src c :tangle build/ClematisM/cvarinfo.txt
+
+server int  cl_logging_level = 1;
+server bool cl_debugging = true;
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle build/ClematisM/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "ClematisTestHandler", "Cl_ExpectExtensions"
+}
+#+end_src
+
+#+begin_src c :tangle build/ClematisM/zscript.zs
+// <<license>>
+
+version 4.14.3
+
+<<tools/scripts.org:include("ClematisM.org", "build/ClematisM/\\(zscript/.*zs\\)")>>
+#+end_src
+
+* Source
+
+** Clematis
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs
+
+class Clematis abstract{
+    bool VerboseEnabled;
+
+    Array<uint> Failures;
+    Array<uint> Successes;
+    Array<uint> StartTimes;
+    Array<uint> StartResultIndex;
+
+    Array<Name> TestSuiteNames;
+
+    Array<Cl_Result> Results;
+
+    static
+    Clematis Create(Class<Clematis> Type)
+    {return Clematis(new(Type)).Init();}
+
+    /* How to run
+     * Runs test upon creation by default
+     * With that setup one has 3 options
+     *
+     * 1. Console Command
+     *     netevent test:ClematisExample
+     * 2. EventHandler call
+     *     EventHandler.SendNetworkEvent('test:ClematisExample');
+     * 3. Factory method
+     *     Clematis.Create('ClematisExample');
+     *
+     * Otherwise one can instantiate the test and call run on it
+     *     Clematis TestSuite=Clematis.Create('ClematisExample');
+     *     TestSuite.Run();
+     */
+
+    virtual
+    Clematis Init(){
+        Run();
+        return self;
+    }
+
+    virtual
+    void Run(){
+        Reset();
+        BeforeAll();
+        TestSuites();
+        AfterAll();
+    }
+
+    virtual
+    void Reset(){}
+
+    virtual
+    void BeforeAll(){}
+
+    virtual
+    void BeforeEachSuite(){}
+
+    virtual
+    void BeforeEachTask(){}
+
+    virtual
+    void TestSuites(){
+        /* Example
+         * Describe('Testing Player Stats');
+         *     It('MaxHealth', AssertEval(MaxHealth, '<', 100), LOG_Warning);
+         *     It('Math', AssertEval(1+1, '==', 2), LOG_Fatal);
+         *     It('Woot', AssertTrue(exampleBool), LOG_Fatal);
+         * EndDescribe();
+         */
+    }
+
+    virtual
+    void AfterEachSuite(){}
+
+    virtual
+    void AfterEachTask(){}
+
+    virtual
+    void AfterAll(){}
+
+    void Describe(Name TestSuiteName){
+        BeforeEachSuite();
+
+        TestSuiteNames.Push(TestSuiteName);
+        StartResultIndex.Push(Results.Size());
+        Failures.Push(0);
+        Successes.Push(0);
+        StartTimes.Push(MSTime());
+
+        TabbedLog(LOG_None, "START SUITE: "..TestSuiteName);
+    }
+
+    void EndDescribe(){
+        uint EndTime=MSTime()-StartTimes[StartTimes.Size()-1];
+        StartTimes.Pop();
+        uint StartIndex=StartResultIndex[StartResultIndex.Size()-1];
+        StartResultIndex.Pop();
+
+        TabbedLog(LOG_None, "END SUITE: "..TestSuiteNames[TestSuiteNames.Size()-1].." - Took ~"..EndTime.." ms");
+        TabbedLog(LOG_None, TestsRunTotal().." Tests Run, "..SuccessesTotal().." Tests Succeeded, "..FailuresTotal().." Test Failed");
+
+        TestSuiteNames.Pop();
+        Successes.Pop();
+        Failures.Pop();
+
+        AfterEachSuite();
+    }
+
+    void It(Name TestCaseName, Cl_Assertion Assertion, Cl_ELogSeverity Severity = LOG_Error){
+        BeforeEachTask();
+
+        uint TimeBefore=MSTime();
+        bool Condition=Assertion.Eval();
+        uint TimeAfter=MSTime();
+        uint DeltaTime=TimeAfter-TimeBefore;
+
+        Cl_Result Result=Cl_Result.Create(TestCaseName, Condition, Severity, Assertion.ErrorMsg, DeltaTime);
+        String Suff;
+        if(Result.Success){
+            Suff="Successful";
+            Result.Severity=LOG_Info;
+        }else
+            Suff="Failure";
+        TabbedLog(Result.Severity, "Task "..Result.Name..": "..Suff.." - Took ~"..Result.DeltaTime.." ms", 1);
+        if(!Result.Success)
+            TabbedLog(Result.Severity, Result.ErrorMsg, 1);
+        AddTestsRunTotal(Result.Success);
+
+        AfterEachTask();
+    }
+
+    void AddTestsRunTotal(bool Success){
+        if(Success)
+            for(int i=0; i<Successes.Size(); i++)
+                Successes[i]++;
+        else
+            for(int i=0; i<Failures.Size(); i++)
+                Failures[i]++;
+    }
+
+    uint SuccessesTotal() const
+    {return Successes[Successes.Size()-1];}
+
+    uint FailuresTotal() const
+    {return Failures[Failures.Size()-1];}
+
+    uint TestsRunTotal() const
+    {return SuccessesTotal()+FailuresTotal();}
+
+    void Log(Cl_ELogSeverity Severity, String LogText, uint Offset=0, bool Verbose=false){
+        if(!Verbose || VerboseEnabled)
+            Cl_Util.Log(GetClassName(), Severity, LogText, Offset);
+    }
+
+    void TabbedLog(Cl_ELogSeverity Severity, String LogText, uint Offset=0, bool Verbose=false){
+        if(!Verbose || VerboseEnabled)
+            Cl_Util.Log(GetClassName(), Severity, LogText, TestSuiteNames.Size()+Offset-1, true);
+    }
+}
+#+end_src
+
+** Commands
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs
+
+class ClematisTestHandler:StaticEventHandler{
+    override
+    void NetworkProcess(ConsoleEvent e){
+        String TestName=e.Name.MakeLower();
+        if(TestName.IndexOf("test:")!=-1)
+            Clematis.Create(TestName.Mid(5));
+    }
+}
+#+end_src
+
+** Assertions
+
+*** Base
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs
+
+enum Cl_EAssertType {
+    ASSERT_Bool,
+    ASSERT_Num,
+    ASSERT_Obj,
+    ASSERT_Cls,
+}
+
+class Cl_Assertion abstract{
+    String ErrorMsg;
+
+    virtual
+    bool Eval()
+    {return false;}
+}
+#+end_src
+
+*** Boolean
+
+**** False
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+
+class Cl_AssertFalse:Cl_Assertion{
+    bool Condition;
+
+    static
+    Cl_Assertion Create(bool Condition, String ErrorMsg=""){
+        Cl_AssertFalse Result=new('Cl_AssertFalse');
+        Result.Condition=Condition;
+        if(ErrorMsg=="")
+            Result.ErrorMsg = "Value was not false";
+        else
+            Result.ErrorMsg = String.Format(ErrorMsg, Condition);
+        return Result;
+    }
+
+    override
+    bool Eval()
+    {return !Condition;}
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertFalse(bool Condition, String ErrorMsg="")
+    {return Cl_AssertFalse.Create(Condition, ErrorMsg);}
+}
+#+end_src
+
+**** True
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+
+class Cl_AssertTrue:Cl_Assertion{
+    bool Condition;
+
+    static
+    Cl_Assertion Create(bool Condition, String ErrorMsg=""){
+        Cl_AssertTrue Result=new('Cl_AssertTrue');
+        Result.Condition=Condition;
+        if(ErrorMsg=="")
+            Result.ErrorMsg = "Value was not true";
+        else
+            Result.ErrorMsg = String.Format(ErrorMsg, Condition);
+        return Result;
+    }
+
+    override
+    bool Eval()
+    {return Condition;}
+}
+
+extend
+class Clematis{
+    // TODO: Change to AssertTrue
+    Cl_Assertion Assert(bool Condition, String ErrorMsg="")
+    {return Cl_AssertTrue.Create(Condition, ErrorMsg);}
+}
+#+end_src
+
+*** Eval
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs
+
+class Cl_AssertEval:Cl_Assertion{
+    double Val1,
+           Val2;
+
+    String Operator;
+
+    static
+    Cl_Assertion Create(double Val1, String Operator, double Val2, String ErrorMsg=""){
+        Cl_AssertEval Result=new('Cl_AssertEval');
+        Result.Val1=Val1;
+        Result.Operator=Operator;
+        Result.Val2=Val2;
+        if(ErrorMsg==""){
+            if (Operator=="=" || Operator=="==")
+                Result.ErrorMsg = String.Format("%f does not equal %f", Val1, Val2);
+            else if (Operator == "!=")
+                Result.ErrorMsg = String.Format("%f equals %f", Val1, Val2);
+            else if (Operator == "<")
+                Result.ErrorMsg = String.Format("%f was not less than %f", Val1, Val2);
+            else if (Operator==">")
+                Result.ErrorMsg = String.Format("%f was not greater than %f", Val1, Val2);
+            else if (Operator=="<=")
+                Result.ErrorMsg = String.Format("%f was not less than or equal to %f", Val1, Val2);
+            else if (Operator==">=")
+                Result.ErrorMsg = String.Format("%f was not greater than or equal to %f", Val1, Val2);
+        }else
+            Result.ErrorMsg = String.Format(ErrorMsg, Val1, Val2);
+        return Result;
+    }
+
+    override
+    bool Eval(){
+        if(Operator=="=" || Operator=="==")
+            return Val1==Val2;
+        else if (Operator == '!=')
+            return Val1 != Val2;
+        else if(Operator=="<")
+            return Val1<Val2;
+        else if(Operator==">")
+            return Val1>Val2;
+        else if(Operator=="<=")
+            return Val1<=Val2;
+        else if(Operator==">=")
+            return Val1>=Val2;
+        else if(Operator=="~=" || Operator=="~==")
+            return Val1~==Val2;
+        else
+            return false;
+    }
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertEval(double Val1, String Operator, double Val2, String ErrorMsg="")
+    {return Cl_AssertEval.Create(Val1, Operator, Val2, ErrorMsg);}
+}
+#+end_src
+
+*** Object
+
+**** Diff
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+class Cl_AssertDiff:Cl_Assertion{
+    Object Val1,
+           Val2;
+
+    static
+    Cl_Assertion Create(Object Val1, Object Val2, String ErrorMsg=""){
+        let ret = new('Cl_AssertDiff');
+        ret.Val1 = Val1;
+        ret.Val2 = Val2;
+
+        if(ErrorMsg=="")
+            ret.ErrorMsg = "Values are the same";
+        else
+            ret.ErrorMsg = String.Format(ErrorMsg, Val1, Val2);
+
+        return ret;
+    }
+
+    override
+    bool Eval()
+    { return Val1 != Val2; }
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertDiff(Object Val1, Object Val2, String ErrorMsg="")
+    {return Cl_AssertDiff.Create(Val1, Val2, ErrorMsg);}
+}
+#+end_src
+
+**** Is A
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+class Cl_AssertIsA : Cl_Assertion{
+    Object Value;
+
+    Class ClassName;
+
+    static
+    Cl_Assertion Create(Object Value, Class ClassName, String ErrorMsg = ""){
+        let result = new('Cl_AssertIsA');
+        result.ClassName = ClassName;
+        result.Value = Value;
+
+        if(ErrorMsg=="")
+            result.ErrorMsg = "Object is not a "..ClassName;
+        else
+            result.ErrorMsg = String.Format(ErrorMsg, Value, ClassName);
+
+        return result;
+    }
+
+    override
+    bool Eval()
+    {return Value is ClassName;}
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertIsA(Object Value, Class ClassName, String ErrorMsg="")
+    {return Cl_AssertIsA.Create(Value, ClassName, ErrorMsg);}
+}
+#+end_src
+
+**** Is Not A
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+class Cl_AssertIsNotA : Cl_Assertion{
+    Object Value;
+
+    Class ClassName;
+
+    static
+    Cl_Assertion Create(Object Value, Class ClassName, String ErrorMsg = ""){
+        let result = new('Cl_AssertIsNotA');
+        result.ClassName = ClassName;
+        result.Value = Value;
+
+        if(ErrorMsg=="")
+            result.ErrorMsg = "Object is a "..ClassName;
+        else
+            result.ErrorMsg = String.Format(ErrorMsg, Value, ClassName);
+
+        return result;
+    }
+
+    override
+    bool Eval()
+    { return !(Value is ClassName); }
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertIsNotA(Object Value, Class ClassName, String ErrorMsg="")
+    {return Cl_AssertIsNotA.Create(Value, ClassName, ErrorMsg);}
+}
+#+end_src
+
+**** Not null
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+// TODO: Use AssertSame/Diff
+class Cl_AssertNotNull:Cl_Assertion{
+    Object Value;
+
+    static
+    Cl_Assertion Create(Object Value, String ErrorMsg=""){
+        Cl_AssertNotNull Result=new('Cl_AssertNotNull');
+        Result.Value=Value;
+        if(ErrorMsg=="")
+            Result.ErrorMsg = "Value was null";
+        else
+            Result.ErrorMsg = String.Format(ErrorMsg, Value);
+        return Result;
+    }
+
+    override
+    bool Eval()
+    {return Value;}
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertNotNull(Object Value, String ErrorMsg="")
+    {return Cl_AssertNotNull.Create(Value, ErrorMsg);}
+}
+#+end_src
+
+**** Null
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+// TODO: Use AssertSame
+class Cl_AssertNull:Cl_Assertion{
+    Object Value;
+
+    static
+    Cl_Assertion Create(Object Value, String ErrorMsg=""){
+        Cl_AssertNull Result=new('Cl_AssertNull');
+        Result.Value=Value;
+        if(ErrorMsg=="")
+            Result.ErrorMsg = "Value was not null";
+        else
+            Result.ErrorMsg = String.Format(ErrorMsg, Value);
+        return Result;
+    }
+
+    override
+    bool Eval()
+    {return !Value;}
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertNull(Object Value, String ErrorMsg="")
+    {return Cl_AssertNull.Create(Value, ErrorMsg);}
+}
+#+end_src
+
+**** Same
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+
+class Cl_AssertSame:Cl_Assertion{
+    Object Val1,
+           Val2;
+
+    static
+    Cl_Assertion Create(Object Val1, Object Val2, String ErrorMsg=""){
+        Cl_AssertSame Result=new('Cl_AssertSame');
+        Result.Val1=Val1;
+        Result.Val2=Val2;
+        if(ErrorMsg=="")
+            Result.ErrorMsg = "Values are not the same";
+        else
+            Result.ErrorMsg = String.Format(ErrorMsg, Val1, Val2);
+        return Result;
+    }
+
+    override
+    bool Eval()
+    {return Val1==Val2;}
+}
+
+extend
+class Clematis{
+    Cl_Assertion AssertSame(Object Val1, Object Val2, String ErrorMsg="")
+    {return Cl_AssertSame.Create(Val1, Val2, ErrorMsg);}
+}
+#+end_src
+
+** Styles
+
+*** Expect
+
+**** Interface
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs
+
+extend
+class Clematis {
+    Cl_ExpectBuilder ExpectBool(bool ref, String condition = "") {
+        return Cl_ExpectBuilder.CreateBool(ref, condition);
+    }
+
+    Cl_ExpectBuilder ExpectNum(double ref, String condition = "") {
+        return Cl_ExpectBuilder.CreateNum(ref, condition);
+    }
+
+    Cl_ExpectBuilder ExpectObj(Object ref, String condition = "") {
+        return Cl_ExpectBuilder.CreateObj(ref, condition);
+    }
+
+    Cl_ExpectBuilder ExpectCls(Class ref, String condition = "") {
+        return Cl_ExpectBuilder.CreateCls(ref, condition);
+    }
+}
+#+end_src
+
+**** Handlers
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs
+
+class Cl_ExpectHandler abstract {
+    virtual
+    Name ID() {return '';}
+}
+#+end_src
+
+***** Matchers
+
+****** Base
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+
+class Cl_ExpectMatcher : Cl_ExpectHandler abstract {
+    virtual
+    Cl_EAssertType SecType() { return -1; }
+
+    virtual
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg = "") { return null; }
+}
+#+end_src
+
+****** Equal
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+
+class Cl_EMatchEqual : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return '='; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.refType != builder.secType)
+            Cl_Util.Log("Clematis", LOG_Error, "Equal requires that both arguments are the same type");
+
+        let sym = "=";
+
+        if (builder.neg)
+            sym = '!=';
+
+        switch (builder.refType) {
+            case ASSERT_Bool:
+            return Cl_AssertEval.Create(builder.refBool, sym, builder.secBool, ErrorMsg);
+
+            case ASSERT_Num:
+            return Cl_AssertEval.Create(builder.refNum, sym, builder.secNum, ErrorMsg);
+
+            case ASSERT_Obj:
+            if (builder.neg)
+                return Cl_AssertDiff.Create(builder.refObj, builder.secObj, ErrorMsg);
+            else
+                return Cl_AssertSame.Create(builder.refObj, builder.secObj, ErrorMsg);
+
+            case ASSERT_Cls:
+            // TODO
+
+            default: return null;
+        }
+    }
+}
+#+end_src
+
+****** Eval
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+
+class Cl_EMatchLess : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return '<'; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.secType != ASSERT_Num)
+            Cl_Util.Log("Clematis", LOG_Error, "LessThan requires a number for its second arg");
+
+        if (builder.neg)
+            return Cl_AssertEval.Create(builder.refNum, ">=", builder.secNum, ErrorMsg);
+        else
+            return Cl_AssertEval.Create(builder.refNum, "<", builder.secNum, ErrorMsg);
+    }
+}
+
+class Cl_EMatchLessEqual : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return '<='; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.secType != ASSERT_Num)
+            Cl_Util.Log("Clematis", LOG_Error, "LessThanOrEqual requires a number for its second arg");
+
+        if (builder.neg)
+            return Cl_AssertEval.Create(builder.refNum, "<", builder.secNum, ErrorMsg);
+        else
+            return Cl_AssertEval.Create(builder.refNum, "<=", builder.secNum, ErrorMsg);
+    }
+}
+
+class Cl_EMatchGreater : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return '>'; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.secType != ASSERT_Num)
+            Cl_Util.Log("Clematis", LOG_Error, "GreaterThan requires a number for its second arg");
+
+        if (builder.neg)
+            return Cl_AssertEval.Create(builder.refNum, "<=", builder.secNum, ErrorMsg);
+        else
+            return Cl_AssertEval.Create(builder.refNum, ">", builder.secNum, ErrorMsg);
+    }
+}
+
+class Cl_EMatchGreaterEqual : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return '>='; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.secType != ASSERT_Num)
+            Cl_Util.Log("Clematis", LOG_Error, "GreaterThanOrEqual requires a number for its second arg");
+
+        if (builder.neg)
+            return Cl_AssertEval.Create(builder.refNum, "<", builder.secNum, ErrorMsg);
+        else
+            return Cl_AssertEval.Create(builder.refNum, ">=", builder.secNum, ErrorMsg);
+    }
+}
+#+end_src
+
+****** Instance
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+
+class Cl_EMatchInstance : Cl_ExpectMatcher {
+    override
+    Name ID()
+    { return 'instance'; }
+
+    override
+    Cl_Assertion Match(Cl_ExpectBuilder builder, String ErrorMsg) {
+        if (builder.secType != ASSERT_Cls)
+            Cl_Util.Log("Clematis", LOG_Error, "InstanceOf requires a class for its second arg");
+
+        if (builder.neg)
+            return Cl_AssertIsNotA.Create(builder.refObj, builder.secCls, ErrorMsg);
+        else
+            return Cl_AssertIsA.Create(builder.refObj, builder.secCls, ErrorMsg);
+    }
+}
+#+end_src
+
+**** Builder
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs
+
+class Cl_ExpectBuilder {
+    bool neg,
+         refBool,
+         secBool,
+         finished;
+
+    double refNum,
+           secNum;
+
+    Object refObj,
+           secObj;
+
+    Class refCls,
+          secCls;
+
+    Cl_EAssertType refType,
+                   secType;
+
+    protected
+    Cl_ExpectMatcher matcher;
+
+    Cl_ExpectBuilder to, be, of;
+
+    static
+    Cl_ExpectBuilder Create(Cl_EAssertType refType, String condition) {
+        let ret = new('Cl_ExpectBuilder');
+        ret.refType = refType;
+        ret.to = ret.be = ret.of = ret;
+
+        Array<String> conditions;
+        condition.Split(conditions, ' ');
+
+        static const Name fillerNames[] = {
+            'to', 'be', 'than', 'of'
+        };
+
+        for (let i=0; i<fillerNames.Size(); i++) {
+            let index = conditions.Find(fillerNames[i]);
+
+            if (index != conditions.Size()) {
+                conditions.Delete(index);
+                i--;
+            }
+        }
+
+        let index = conditions.Find('not');
+        if (index != conditions.Size()) {
+            conditions.Delete(index);
+            ret.not();
+        }
+
+        if (conditions.Size() > 1) {
+            let tot = "[ ";
+            for (let i=0; i<conditions.Size()-1; i++)
+                tot = tot..conditions[i]..", ";
+            tot = tot..conditions[conditions.Size()-1].."]";
+
+            Cl_Util.Log('Clematis', LOG_Error, "Unresolved conditions: "..tot);
+        }
+
+        if (conditions.Size() == 1)
+            ret.SetMatcher(conditions[0]);
+
+        return ret;
+    }
+
+    static
+    Cl_ExpectBuilder CreateBool(bool ref, String condition) {
+        while (condition.IndexOf('  ') != -1)
+            condition.Replace('  ', ' ');
+
+        let ret = Cl_ExpectBuilder.Create(ASSERT_Bool, condition);
+        ret.refType = ASSERT_Bool;
+        ret.refBool = ref;
+
+        return ret;
+    }
+
+    static
+    Cl_ExpectBuilder CreateNum(double ref, String condition) {
+        while (condition.IndexOf('  ') != -1)
+            condition.Replace('  ', ' ');
+
+        let ret = Cl_ExpectBuilder.Create(ASSERT_Num, condition);
+        ret.refType = ASSERT_Num;
+        ret.refNum = ref;
+
+        return ret;
+    }
+
+    static
+    Cl_ExpectBuilder CreateObj(Object ref, String condition) {
+        while (condition.IndexOf('  ') != -1)
+            condition.Replace('  ', ' ');
+
+        let ret = Cl_ExpectBuilder.Create(ASSERT_Obj, condition);
+        ret.refType = ASSERT_Obj;
+        ret.refObj = ref;
+
+        return ret;
+    }
+
+    static
+    Cl_ExpectBuilder CreateCls(Class ref, String condition) {
+        while (condition.IndexOf('  ') != -1)
+            condition.Replace('  ', ' ');
+
+        let ret = Cl_ExpectBuilder.Create(ASSERT_Cls, condition);
+        ret.refType = ASSERT_Cls;
+        ret.refCls = ref;
+
+        return ret;
+    }
+
+    virtual
+    Cl_ExpectBuilder Clone() const {
+        let ret = Cl_ExpectBuilder(new(getClassName()));
+        ret.neg = neg;
+        ret.refBool = refBool;
+        ret.secBool = secBool;
+        ret.finished = finished;
+        ret.refNum = refNum;
+        ret.secNum = secNum;
+        ret.refObj = refObj;
+        ret.secObj = secObj;
+        ret.refCls = refCls;
+        ret.secCls = secCls;
+        ret.refType = refType;
+        ret.secType = secType;
+        ret.matcher = matcher;
+        ret.to = ret.be = ret.of = ret;
+        return ret;
+    }
+
+    void CheckStatus() {
+        if (finished)
+            Cl_Util.Log("Clematis", LOG_Fatal,
+                "Expectation was already completed, make a new one if you want to run a second test");
+    }
+
+    void SetMatcher(Name id) {
+        finished = true;
+        matcher = Cl_ExpectExtensions.Get().ResolveMatcher(refType, id);
+    }
+
+    Cl_ExpectBuilder not() {
+        neg = !neg;
+        return self;
+    }
+
+    Cl_ExpectBuilder equal() {
+        SetMatcher('=');
+        return self;
+    }
+
+    Cl_ExpectBuilder lessThan() {
+        SetMatcher('<');
+        return self;
+    }
+
+    Cl_ExpectBuilder lessThanOrEqual() {
+        SetMatcher('<=');
+        return self;
+    }
+
+    Cl_ExpectBuilder greaterThan() {
+        SetMatcher('>');
+        return self;
+    }
+
+    Cl_ExpectBuilder greaterThanOrEqual() {
+        SetMatcher('>=');
+        return self;
+    }
+
+    Cl_ExpectBuilder instance() {
+        SetMatcher('instance');
+        return self;
+    }
+
+    Cl_Assertion thisBool(bool sec) {
+        secBool = sec;
+        secType = ASSERT_Bool;
+        return matcher.Match(self);
+    }
+
+    Cl_Assertion thisNum(double sec) {
+        secNum = sec;
+        secType = ASSERT_Num;
+        return matcher.Match(self);
+    }
+
+    Cl_Assertion thisObj(Object sec) {
+        secObj = sec;
+        secType = ASSERT_Obj;
+        return matcher.Match(self);
+    }
+
+    Cl_Assertion thisCls(Class sec) {
+        secCls = sec;
+        secType = ASSERT_Cls;
+        return matcher.Match(self);
+    }
+}
+#+end_src
+
+**** Complex
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs
+
+extend
+class Cl_ExpectBuilder {
+    Cl_Assertion nullPointer() {
+        return equal().thisObj(null);
+    }
+}
+#+end_src
+
+**** Extensions
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs
+
+class Cl_ExpectExtensions : StaticEventHandler {
+    Array<Cl_ExpectMatcher> boolMatchers;
+    Array<Cl_ExpectMatcher> numMatchers;
+    Array<Cl_ExpectMatcher> objMatchers;
+    Array<Cl_ExpectMatcher> clsMatchers;
+
+    static
+    clearscope
+    Cl_ExpectExtensions Get() {
+        return Cl_ExpectExtensions(StaticEventHandler.Find('Cl_ExpectExtensions'));
+    }
+
+    override
+    void OnRegister() {
+        super.OnRegister();
+        console.printf('cc');
+
+        let val = new('Cl_EMatchEqual');
+        AddMatcher(ASSERT_Bool, val);
+        AddMatcher(ASSERT_Num, val);
+        AddMatcher(ASSERT_Obj, val);
+
+        AddMatcher(ASSERT_Num, new('Cl_EMatchLess'));
+        AddMatcher(ASSERT_Num, new('Cl_EMatchLessEqual'));
+        AddMatcher(ASSERT_Num, new('Cl_EMatchGreater'));
+        AddMatcher(ASSERT_Num, new('Cl_EMatchGreaterEqual'));
+
+        AddMatcher(ASSERT_Obj, new('Cl_EMatchInstance'));
+    }
+
+    bool AddMatcher(Cl_EAssertType refType, Cl_ExpectMatcher matcher) {
+        switch (refType) {
+            case ASSERT_Bool:
+            return boolMatchers.Push(matcher);
+
+            case ASSERT_Num:
+            return numMatchers.Push(matcher);
+
+            case ASSERT_Obj:
+            return objMatchers.Push(matcher);
+
+            case ASSERT_Cls:
+            return clsMatchers.Push(matcher);
+
+            default: return false;
+        }
+    }
+
+    clearscope
+    Cl_ExpectMatcher ResolveMatcher(Cl_EAssertType type, Name id) const {
+        switch (type) {
+            case ASSERT_Bool:
+            for (let i=0; i<boolMatchers.Size(); i++)
+                if (boolMatchers[i].ID() == id)
+                    return boolMatchers[i];
+            break;
+
+            case ASSERT_Num:
+            for (let i=0; i<5; i++)
+                if (numMatchers[i].ID() == id)
+                    return numMatchers[i];
+            break;
+
+            case ASSERT_Obj:
+            for (let i=0; i<objMatchers.Size(); i++)
+                if (objMatchers[i].ID() == id)
+                    return objMatchers[i];
+            break;
+
+            case ASSERT_Cls:
+            for (let i=0; i<clsMatchers.Size(); i++)
+                if (clsMatchers[i].ID() == id)
+                    return clsMatchers[i];
+            break;
+        }
+
+        return null;
+    }
+}
+#+end_src
+
+** Data
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs
+
+class Cl_Result{
+    bool Success;
+
+    uint DeltaTime;
+
+    Name Name;
+
+    String ErrorMsg;
+
+    Cl_ELogSeverity Severity;
+
+    static
+    Cl_Result Create(Name Name, bool Success, Cl_ELogSeverity Severity, String ErrorMsg, uint DeltaTime){
+        Cl_Result Result=new('Cl_Result');
+        Result.Name=Name;
+        Result.Success=Success;
+        Result.Severity=Severity;
+        Result.ErrorMsg=ErrorMsg;
+        Result.DeltaTime=DeltaTime;
+        return Result;
+    }
+}
+#+end_src
+
+** Utilities
+
+#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs
+
+enum Cl_ELogSeverity{
+    LOG_Fatal,
+    LOG_Error,      // cl_logging_level = 1
+    LOG_Warning,    // cl_logging_level = 2
+    LOG_Info,       // cl_logging_level = 3
+    LOG_Debug,      // cl_debugging = true
+
+    // DEPRECATED
+    LOG_None = LOG_Info
+}
+
+class Cl_Util{
+    static
+    clearscope
+    void Print(String Output, Name CVarName, bool Mid=false){
+        if(CVar.FindCVar(CVarName).GetBool()){
+            if(Mid)
+                Console.MidPrint(SmallFont, Output);
+            else
+                Console.PrintF(Output);
+        }
+    }
+
+    static
+    clearscope
+    bool Log(Name Owner, Cl_ELogSeverity severity, String LogText,
+        uint Offset=0, bool overrideLogLevel=false){
+        if (!overrideLogLevel){
+            if (severity > CVar.FindCVar('cl_logging_level').GetInt()
+                && severity != LOG_Fatal && severity != LOG_Debug)
+                return false;
+
+            if (severity == LOG_Debug && !CVar.FindCVar('cl_debugging').GetBool())
+                return false;
+        }
+
+        String Color, Result;
+        [Color, Result]=LogLabel(severity);
+
+        if (Result!="")
+            Result=Result.." - ";
+
+        for (uint i=0; i<Offset; i++)
+            Result=" "..Result;
+
+        if (Owner!='')
+            Result="["..Owner.."] "..Result;
+
+        LogText=Color..Result..LogText;
+        Console.PrintF(LogText);
+        if(severity == LOG_Fatal)
+            ThrowAbortException(LogText);
+
+        return true;
+    }
+
+    static
+    clearscope
+    String, String LogLabel(Cl_ELogSeverity Severity){
+        switch(Severity){
+            case LOG_Info:      return "",      "INFO";
+            case LOG_Warning:   return "\cx",   "WARN";
+            case LOG_Error:     return "\cr",   "ERROR";
+            case LOG_Fatal:     return "\cy",   "FATAL";
+            default:            return "",      "";
+        }
+    }
+}
+#+end_src
+* Tests
+
+Tests for tests.
+
+#+begin_src c :tangle build/ClematisMTest/zscript.zs
+
+version 4.14.3
+
+class cl_Test : Clematis
+{
+  override void testSuites()
+  {
+    describe("Clematis self-test");
+    it("true", Assert(true));
+    endDescribe();
+  }
+}
+#+end_src
+
+#+begin_src c :tangle build/ClematisMTest/commands.txt
+wait 2; map map01
+wait 4; netevent test:cl_Test
+wait 6; quit
+#+end_src

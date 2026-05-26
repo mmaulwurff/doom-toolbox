@@ -42,7 +42,6 @@
 ^adding .*gzdoom.pk3, .* lumps
 ^adding .*miniwad.wad, .* lumps
 ^adding .*uzdoom.pk3, .* lumps
-^adding tools/ClematisM-v.*\.pk3, .* lumps
 ^cc$
 ^player 1 of 1 \(1 nodes\)
 ^script parsing took
