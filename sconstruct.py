@@ -308,8 +308,8 @@ add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
 
 add_dependency('SoundToScreen', 'PlainTranslator', 'st_')
 
-add_dependency('TargetSpy', 'StringUtils', 'ts_')
-add_dependency('TargetSpy', 'libeye', 'ts_')
+for dependency in ['StringUtils', 'libeye', 'PlainTranslator']:
+  add_dependency('TargetSpy', dependency, 'ts_')
 
 add_dependency('Typist.pk3', 'libeye', 'tt_le_')
 add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
