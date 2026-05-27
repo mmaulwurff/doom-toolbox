@@ -186,7 +186,7 @@ def make_check_compatibility_target():
       './build/config.ini',
       '-iwad',
       './tools/miniwad.wad',
-      '+map map01; wait 2; quit',
+      '+wait 2; map map01; wait 2; quit',
       '-file',
     ]
 
