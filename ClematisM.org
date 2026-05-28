@@ -77,59 +77,59 @@ Tester.Run();
 
 * License
 
-License: [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+[[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2018 ZippeyKeys12, © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
-#+begin_src c :tangle build/ClematisM/cvarinfo.txt
+#+begin_src c :tangle build/ClematisM/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/mapinfo.txt
+#+begin_src c :tangle build/ClematisM/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs
+#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs :exports none
 // <<license>>
 #+end_src
 

@@ -160,8 +160,36 @@ def add_pack_target(org_file, main_target):
     licenses_path = build_path / 'LICENSES'
     makedirs(licenses_path, exist_ok=True)
     project = reuse.project.Project.from_directory(build_path)
-    for license in reuse.report.ProjectReport.generate(project).used_licenses:
+    report = reuse.report.ProjectReport.generate(project)
+    for license in report.used_licenses:
       copy('LICENSES/' + license + '.txt', licenses_path)
+
+    # Note: project and report are duplicated intentionally
+    # to re-read the directory after copying licenses.
+    project = reuse.project.Project.from_directory(build_path)
+    report = reuse.report.ProjectReport.generate(project)
+    if not report.is_compliant:
+      print(
+        [
+          'ERROR',
+          name,
+          ' '.join(report.recommendations),
+          'bad licenses',
+          report.bad_licenses,
+          'deprecated licenses',
+          report.deprecated_licenses,
+          'unused licenses',
+          report.unused_licenses,
+          'missing licenses',
+          report.missing_licenses,
+          'invalid SPDX expressions',
+          report.invalid_spdx_expressions,
+          'files without licenses',
+          report.files_without_licenses,
+          'files without copyright',
+          report.files_without_copyright,
+        ]
+      )
 
     archive = make_archive(Path(str(build_path) + '-' + version), 'zip', build_path)
     move(archive, Path(archive).with_suffix('.pk3'))

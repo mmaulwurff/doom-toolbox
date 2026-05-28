@@ -23,9 +23,13 @@ Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]]
 
 [[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-#+begin_src c :tangle build/Nomina/zscript.zs
-// SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
-// SPDX-License-Identifier: GPL-3.0-only
+#+begin_src c :noweb-ref GPL
+SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle build/Nomina/zscript.zs :exports none
+// <<GPL>>
 #+end_src
 
 [[file:LICENSES/CC0-1.0.txt][CC0-1.0]]

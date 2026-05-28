@@ -19,6 +19,64 @@ SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/language.txt :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/mapinfo.txt :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs :exports none
+<<license>>
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript.zs :exports none
+<<license>>
+#+end_src
+
+#+begin_src toml :tangle build/TargetSpy/REUSE.toml :exports none
+
+# https://reuse.software/
+
+version = 1
+
+[[annotations]]
+path = "ts_blocklist.txt"
+SPDX-FileCopyrightText = "© 2026 Alexander Kromm <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC0-1.0"
+#+end_src
+
 * Options
 
 #+begin_src c :noweb-ref strings
