@@ -58,11 +58,15 @@ Tests run on instantiation by default, which can be disabled by overriding ~Init
 
 **** Factory Method
 
-src_c{Clematis.Create('ClematisExample');}
+#+begin_src c
+Clematis.Create('ClematisExample');
+#+end_src
 
 **** Network Event
 
-src_c{EventHandler.SendNetworkEvent('test:ClematisExample');}
+#+begin_src c
+EventHandler.SendNetworkEvent('test:ClematisExample');
+#+end_src
 
 **** Console Command
 
