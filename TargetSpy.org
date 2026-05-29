@@ -141,7 +141,7 @@ SPDX-License-Identifier = "CC0-1.0"
 * Options
 
 #+begin_src c :noweb-ref strings
-ts_OptionsTitle = "Target Spy \cd⌖";
+ts_OptionsTitle = "TargetSpy \cd⌖";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/menudef.txt
@@ -588,6 +588,9 @@ class tsFilter_Active : Actor
 
 #+begin_src c :noweb-ref strings
 tsGetter_Health = "Health";
+#+end_src
+#+begin_src c :noweb-ref strings-ru
+tsGetter_Health = "Здоровье";
 #+end_src
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1067,8 +1070,6 @@ foreach (aClass : getterClasses)
 <<bar-cvars-definition("ArmorBar")>>
 #+end_src
 
-TODO: tweak these defaults.
-
 #+name: bar-cvars-definition
 #+begin_src elisp :var class="" :exports none
 (format "
@@ -1087,7 +1088,7 @@ user int ts_%1$s_empty_100_color  = 6;
 
 user int ts_%1$s_filled_character_index = 0;
 user int ts_%1$s_empty_character_index  = 0;
-user string ts_%1$s_characters = \"❤♡█▓▒░☻☹⛧⛤☣✚⛊▬●⚰☐☒☑⚙\";
+user string ts_%1$s_characters = \"█▓▒░❤♡☻☹⛧⛤☣✚⛊●☐☒☑⚙\";
 " class)
 #+end_src
 #+begin_src c :tangle build/TargetSpy/menudef.txt
@@ -1446,7 +1447,6 @@ OptionMenu ts_CrosshairOptions
 {
   Title "Crosshair options"
 
-  StaticText ""
   Option "Always enabled", ts_crosshair_always, OnOff
   Option "Use health bar colors", ts_crosshair_health, OnOff
 
@@ -2142,14 +2142,12 @@ class ts_ViewUtils ui
 
 **** Toggles
 
-TODO: disable some classes by default.
-
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
-user string ts_disabled_finders = "";
-user string ts_disabled_filters = "";
-user string ts_disabled_getters = "";
-user string ts_disabled_views   = "";
+user string ts_disabled_finders = "NonShootable,Noblockmap";
+user string ts_disabled_filters = "LightLevel,Enemies,Dormant,Active";
+user string ts_disabled_getters = "Health,ArmorBar,Class,Tag,Flags";
+user string ts_disabled_views   = "Frame,Crosshair";
 #+end_src
 
 #+begin_src c :noweb-ref strings
