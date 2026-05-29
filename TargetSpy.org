@@ -1212,6 +1212,57 @@ class tsGetter_TagAndClass : Actor
 }
 #+end_src
 
+*** Flags
+
+#+begin_src c :noweb-ref strings
+tsGetter_Flags = "Flags";
+
+ts_Friendly = "Friendly";
+ts_Invulnerable = "Invulnerable";
+ts_Boss = "Boss";
+ts_Dormant = "Dormant";
+ts_Buddha = "Buddha";
+ts_Undamageable = "Undamageable";
+ts_NoBlockmap = "No blockmap";
+#+end_src
+#+begin_src c :noweb-ref strings-ru
+ts_Boss = "Босс";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+
+class tsGetter_Flags : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    string result;
+
+    if (anActor.bFriendly && !anActor.player)
+      append(result, translate("ts_Friendly"));
+    if (anActor.bInvulnerable) append(result, translate("ts_Invulnerable"));
+    if (anActor.bBoss        ) append(result, translate("ts_Boss"));
+    if (anActor.bDormant     ) append(result, translate("ts_Dormant"));
+    if (anActor.bBuddha      ) append(result, translate("ts_Buddha"));
+    if (anActor.bNoDamage    ) append(result, translate("ts_Undamageable"));
+    if (anActor.bNoBlockmap  ) append(result, translate("ts_NoBlockmap"));
+
+    return ts_Kind.PlainText, result, 0, 0;
+  }
+
+  private static string translate(string tag)
+  {
+    return StringTable.localize(tag, false);
+  }
+
+  private static void append(out string result, string appendix)
+  {
+    if (result.length() == 0)
+      result = appendix;
+    else
+      result.appendFormat(", %s", appendix);
+  }
+}
+#+end_src
+
 ** Views
 
 *** Fader
@@ -2342,6 +2393,7 @@ version 4.14.3
 <<strings>>
 
 [ru]
+<<strings-ru>>
 ts_Toggles = "Переключатели";
 #+end_src
 
