@@ -5,8 +5,69 @@
 
 * About
 
+TargetSpy shows enemy health, tag, and other things.
+
+TargetSpy is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
 Features:
+- extensible modular structure;
+- target finders: autoaim, shootable, non-shootable, no blockmap;
+- target filters: blocklist, monsters, light level, health, hidden, enemies, dormant,
+  active;
+- target information: health, max health, armor, class, tag, flags;
+- target frame;
 - text crosshair with options and PreciseCrosshair support.
+
+** Extending TargetSpy
+
+*** Finders, filters, getters, and views
+
+TargetSpy can be extended by declaring special classes. To be detected by TargetSpy,
+a class must inherit Actor and meet specific requirements, listed below.
+
+There are four types of TargetSpy extension classes:
+
+1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and
+   have ~static Actor find()~ function.
+
+2. *Filters* remove unwanted targets. They must have a name that starts with
+   ~tsFilter_~ and have ~static bool isAllowed(Actor)~ function.
+
+3. *Getters* collect information about a target. They must have a name that starts
+   with ~tsGetter_~ and have ~static int, string, int, int makeInformation(Actor)~
+   function. This function returns:
+   - int: value of ~ts_Kind~ enum, which tells what kind of information is provided;
+   - string: string value, used only for ~ts_Kind.Text~;
+   - int: current value, used for ~ts_Kind.Value~, ~ts_Kind.ValueAndMax~, and
+     ~ts_Kind.Bar~;
+   - int: max value, used for ~ts_Kind.ValueAndMax~ and ~ts_Kind.Bar~.
+
+4. *Views* show information on screen. They must have a name that starts with
+   ~tsView_~ and have ~static ui void draw(Array<ts_InformationPiece>~
+   ~informationPieces, double alpha, RenderEvent event, vector3 targetPosition,~
+   ~vector2 targetSize)~ function.
+
+Note that Finders, Filters, and Getters classes don't depend on TargetSpy types in
+any way, and therefore can be safely included in other mods to provide TargetSpy
+integration when loaded together.
+
+Extension classes are not meant to be instantiated, only their static functions are
+used. Extension classes can have a translatable user string defined in ~LANGUAGE~
+lump. The string key is simply a class name. Extension classes are automatically
+added to TargetSpy option menus, and their toggle state is saved in game
+configuration.
+
+All extensions are automatically added to the corresponding toggle menus, from where
+they can be turned on and off.
+
+In fact, all out-of-the-box TargetSpy finders, filters, getters, and views are
+implemented as extensions, and can be used as examples for implementing custom
+extensions.
+
+*** Blocklist
+
+To make TargetSpy ignore classes, put them into ~ts_blocklist~ lump. Any number of
+~ts_blocklist~ lumps can be loaded. Blocklist filter must be enabled.
 
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
@@ -106,6 +167,9 @@ OptionMenu ts_Options
   Submenu "Frame options",     ts_FrameOptions
   Submenu "Crosshair options", ts_CrosshairOptions
 }
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/menudef.txt :exports none
 
 OptionMenu ts_FinderToggles
 {
@@ -134,574 +198,11 @@ OptionMenu ts_ViewToggles
 OptionMenu ts_FilterOptions
 {
   Title "Filter options"
-
   <<filter-options>>
 }
 #+end_src
 
 * Source
-
-** Extending TargetSpy
-
-*** Finders, filters, and getters
-
-TargetSpy can be extended by declaring special classes. To be detected by TargetSpy,
-a class must inherit Actor and meet specific requirements, listed below.
-
-There are three types of TargetSpy extension classes:
-1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and
-   have ~static Actor find()~ function.
-2. *Filters* remove unwanted targets. They must have a name that starts with
-   ~tsFilter_~ and have ~static bool isAllowed(Actor)~ function.
-3. *Getters* collect information about a target. They must have a name that starts
-   with ~tsGetter_~ and have ~static int, string, int, int makeInformation(Actor)~
-   function. This function returns:
-   - int: value of ~ts_Kind~ enum, which tells what kind of information is provided;
-   - string: string value, used only for ~ts_Kind.Text~;
-   - int: current value, used for ~ts_Kind.Value~, ~ts_Kind.ValueAndMax~, and
-     ~ts_Kind.Bar~;
-   - int: max value, used for ~ts_Kind.ValueAndMax~ and ~ts_Kind.Bar~.
-
-Extension classes are not meant to be instantiated, only their static functions are
-used. Extension classes can have a translatable user string defined in ~LANGUAGE~
-lump. The string key is simply a class name. Extension classes are automatically
-added to TargetSpy option menus, and their toggle state is saved in game
-configuration.
-
-In fact, all out-of-the-box TargetSpy finders, filters, and getters are implemented
-as extensions, and can be used as examples for implementing custom extensions.
-
-*** Blocklist
-
-To make TargetSpy ignore classes, put them into ~ts_blocklist~ lump. Any number of
-~ts_blocklist~ lumps can be loaded. Blocklist filter must be enabled.
-
-** Common types
-
-*** Information piece
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
-
-class ts_Kind
-{
-  enum _
-  {
-    Empty,
-    PlainText,
-    Value,
-    ValueAndMax,
-    Bar,
-  }
-}
-
-class ts_InformationPiece
-{
-  string id;
-  int kind;
-  string text;
-  int value;
-  int max;
-}
-#+end_src
-
-*** Class list
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
-
-class ts_ClassList
-{
-  void initialize(string lumpName)
-  {
-    for (int i = Wads.findLump(lumpName);
-         i != -1;
-         i = Wads.findLump(lumpName, i + 1))
-    {
-      string contents = Wads.readLump(i);
-      contents.replace("\r", "");
-      Array<string> lines;
-      contents.split(lines, "\n", TOK_SkipEmpty);
-      int linesCount = lines.size();
-      for (int l = 0; l < linesCount; ++l)
-      {
-        mClasses.insert(lines[l].makeLower(), 0);
-      }
-    }
-  }
-
-  bool contains(string className) const
-  {
-    return mClasses.checkKey(className.makeLower());
-  }
-
-  bool containsParent(class<Object> aClass)
-  {
-    for (class<Object> parent = aClass;
-         parent.getClassName() != "Thinker";
-         parent = parent.getParentClass())
-    {
-      if (contains(parent.getClassName())) return true;
-    }
-    return false;
-  }
-
-  Map<string, int> mClasses;
-}
-#+end_src
-
-*** Existing Cvar
-
-TODO: move to a module?
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs
-
-class ts_ExistingCvar
-{
-  static Cvar find(Name name)
-  {
-    Cvar result = Cvar.findCvar(name);
-    if (result == NULL)
-      throwAbortException("ERROR: TargetSpy: %s Cvar not found.", name);
-    return result;
-  }
-}
-#+end_src
-
-** Event handler
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
-
-class ts_EventHandler : StaticEventHandler
-{
-  override void onRegister()
-  {
-    (mOptions = new("ts_Options")).initialize();
-    mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
-    mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
-    mDisabledGettersCvar = ts_ExistingCvar.find("ts_disabled_getters");
-    mDisabledViewsCvar   = ts_ExistingCvar.find("ts_disabled_views");
-    (mFader = new("ts_Fader")).initialize();
-    (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
-    (mFollowers = new("ts_ClassList")).initialize("ts_followers");
-    (mProjector = new("ts_Projector")).initialize();
-    mTextInterpolator  = new("ts_TargetScreenPositionInterpolator");
-    mFrameInterpolator = new("ts_TargetScreenPositionInterpolator");
-
-    collectClasses();
-  }
-
-  override void worldTick()
-  {
-    if (players[consolePlayer].mo == NULL) return;
-    if (level.mapName ~== "titlemap") return;
-
-    mProjector.prepare();
-    findTargets();
-    filterTargets();
-    chooseCurrentTarget();
-    collectInformation();
-    mFader.tick();
-  }
-
-  override void worldLoaded(WorldEvent event)
-  {
-    clearInformation();
-  }
-
-  override void renderOverlay(RenderEvent event)
-  {
-    if (players[consolePlayer].mo == NULL) return;
-
-    double alpha = mFader.getAlpha(event.fracTic);
-
-    Array<string> disabledClasses;
-    mDisabledViewsCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
-    int disabledClassesSize = disabledClasses.size();
-
-    int viewsCount = mViews.size();
-    for (int i = 0; i < viewsCount; ++i)
-    {
-      bool isEnabled = disabledClasses.find(mViewClasses[i]) == disabledClassesSize;
-      if (!isEnabled) continue;
-      mViews[i].
-        call(mInformationPieces, alpha, event, mLastTargetPosition, mLastTargetSize);
-    }
-  }
-
-  override void networkProcess(ConsoleEvent event)
-  {
-    if (event.player == consolePlayer && event.name == "ts_read_getters")
-      collectGetters();
-  }
-
-  static clearscope ts_EventHandler getInstance()
-  {
-    return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
-  }
-
-  clearscope void getFinders(out Array<string> result) { result.copy(mFinderClasses); }
-  clearscope void getFilters(out Array<string> result) { result.copy(mFilterClasses); }
-  clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
-  clearscope void getViews(out Array<string> result) { result.copy(mViewClasses); }
-
-  clearscope ts_Options getOptions() { return mOptions; }
-  clearscope ts_Projector getProjector() { return mProjector; }
-
-  ts_ClassList getBlocklist() { return mBlocklist; }
-
-  ui vector2 interpolateTextScreenPosition(vector2 position)
-  {
-    return mTextInterpolator.interpolateScreenPosition(position, mCurrentTarget);
-  }
-
-  ui vector2 interpolateFrameScreenPosition(vector2 position)
-  {
-    return mFrameInterpolator.interpolateScreenPosition(position, mCurrentTarget);
-  }
-
-  private ui bool isInformationEmpty() const
-  {
-    int gettersCount = mGetters.size();
-    for (int i = 0; i < gettersCount; ++i)
-      if (mInformationPieces[i].kind != ts_Kind.Empty) return false;
-
-    return true;
-  }
-
-  private void findTargets()
-  {
-    Array<string> disabledClasses;
-    mDisabledFindersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
-    int disabledClassesSize = disabledClasses.size();
-
-    int findersCount = mFinders.size();
-    for (int i = 0; i < findersCount; ++i)
-    {
-      bool isEnabled = disabledClasses.find(mFinderClasses[i]) == disabledClassesSize;
-      Actor target = isEnabled ? mFinders[i].call() : NULL;
-      if (target != NULL && mFollowers.containsParent(target.getClass()))
-        target = target.master;
-
-      mTargets[i] = target;
-    }
-  }
-
-  private void filterTargets()
-  {
-    int filtersCount = mFilters.size();
-    int targetsCount = mTargets.size();
-
-    Array<string> disabledClasses;
-    mDisabledFiltersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
-    int disabledClassesSize = disabledClasses.size();
-
-    for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
-    {
-      if (mTargets[targetIndex] == NULL) continue;
-
-      for (int i = 0; i < filtersCount; ++i)
-      {
-        bool isEnabled = disabledClasses.find(mFilterClasses[i])
-          == disabledClassesSize;
-        if (!isEnabled) continue;
-        if (mFilters[i].call(mTargets[targetIndex])) continue;
-
-        mTargets[targetIndex] = NULL;
-        break;
-      }
-    }
-  }
-
-  private void chooseCurrentTarget()
-  {
-    Actor closestTarget = NULL;
-    double minDistance = double.max;
-    foreach (target : mTargets)
-    {
-      if (target == NULL) continue;
-      double distance = distanceTo(target);
-      if (distance < minDistance)
-      {
-        closestTarget = target;
-        minDistance = distance;
-      }
-    }
-
-    if (closestTarget != NULL)
-    {
-      mLastTargetSize = (closestTarget.radius, closestTarget.height);
-      mLastTargetPosition = closestTarget.pos;
-    }
-
-    mCurrentTarget = closestTarget;
-  }
-
-  private void collectInformation()
-  {
-    if (mCurrentTarget == NULL)
-    {
-      if (mFader.getAlpha(1.0) <= 0.0) clearInformation();
-      return;
-    }
-
-    clearInformation();
-    mFader.reset();
-
-    Array<string> disabledClasses;
-    mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
-    int disabledClassesSize = disabledClasses.size();
-
-    int gettersCount = mGetters.size();
-    for (int i = 0; i < gettersCount; ++i)
-    {
-      bool isEnabled = disabledClasses.find(mGetterClasses[i]) == disabledClassesSize;
-      if (isEnabled)
-      {
-        mInformationPieces[i].id = mGetterClasses[i];
-        [mInformationPieces[i].kind,
-         mInformationPieces[i].text,
-         mInformationPieces[i].value,
-         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
-      }
-    }
-  }
-
-  private void clearInformation()
-  {
-    int gettersCount = mGetters.size();
-    for (int i = 0; i < gettersCount; ++i)
-      mInformationPieces[i].kind = ts_Kind.Empty;
-  }
-
-  private void collectGetters()
-  {
-    mGetters.clear();
-    mGetterClasses.clear();
-
-    Array<string> orderedGetters;
-    ts_ExistingCvar.find("ts_getters_order").getString()
-      .split(orderedGetters, ",", TOK_SkipEmpty);
-
-    foreach (getter : orderedGetters)
-    {
-      string className = "tsGetter_" .. getter;
-      Class<Object> aClass = className;
-      if (aClass != NULL && !tryAddGetter(aClass))
-        Console.printf("ERROR: %s: invalid tsGetter", className);
-    }
-
-    foreach (aClass : AllActorClasses)
-    {
-      string className = aClass.getClassName();
-      string shortName = ts_Classes.shorten(className);
-      if (mGetterClasses.find(shortName) != mGetterClasses.size()) continue;
-      if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
-        Console.printf("ERROR: %s: invalid tsGetter", className);
-    }
-
-    ts_Classes.warnTooLongList(mGetterClasses, "getters");
-  }
-
-  private void collectClasses()
-  {
-    foreach (aClass : AllActorClasses)
-    {
-      string className = aClass.getClassName();
-      if (className.indexOf("tsFinder_") != -1 && !tryAddFinder(aClass))
-        Console.printf("ERROR: %s: invalid tsFinder", className);
-
-      if (className.indexOf("tsFilter_") != -1 && !tryAddFilter(aClass))
-        Console.printf("ERROR: %s: invalid tsFilter", className);
-
-      if (className.indexOf("tsView_") != -1 && !tryAddView(aClass))
-        Console.printf("ERROR: %s: invalid tsView", className);
-    }
-
-    ts_Classes.warnTooLongList(mFinderClasses, "finders");
-    ts_Classes.warnTooLongList(mFilterClasses, "filters");
-    ts_Classes.warnTooLongList(mViewClasses, "views");
-
-    collectGetters();
-  }
-
-  private bool tryAddFinder(class<Object> aClass)
-  {
-    let finder = (Function<play Actor()>)(findFunction(aClass, "find"));
-    if (finder != NULL)
-    {
-      mFinders.push(finder);
-      mFinderClasses.push(ts_Classes.shorten(aClass.getClassName()));
-      mTargets.push(NULL);
-    }
-    return finder != NULL;
-  }
-
-  private bool tryAddFilter(class<Object> aClass)
-  {
-    let filter = (Function<play bool(Actor)>)(findFunction(aClass, "isAllowed"));
-    if (filter != NULL)
-    {
-      mFilters.push(filter);
-      mFilterClasses.push(ts_Classes.shorten(aClass.getClassName()));
-    }
-    return filter != NULL;
-  }
-
-  private bool tryAddGetter(class<Object> aClass)
-  {
-    let getter = (Function<play int, string, int, int(Actor)>)
-      (findFunction(aClass, "makeInformation"));
-    if (getter != NULL)
-    {
-      mGetters.push(getter);
-      mGetterClasses.push(ts_Classes.shorten(aClass.getClassName()));
-      mInformationPieces.push(new("ts_InformationPiece"));
-    }
-    return getter != NULL;
-  }
-
-  private bool tryAddView(class<Object> aClass)
-  {
-    let view =
-      (Function
-       <ui void (Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>)
-      (findFunction(aClass, "draw"));
-    if (view != NULL)
-    {
-      mViews.push(view);
-      mViewClasses.push(ts_Classes.shorten(aClass.getClassName()));
-    }
-    return view != NULL;
-  }
-
-  private static double distanceTo(Actor anActor)
-  {
-    return (anActor != NULL)
-      ? players[consolePlayer].mo.distance3d(anActor)
-      : 0;
-  }
-
-  private ts_Options mOptions;
-  private Cvar mDisabledFindersCvar;
-  private Cvar mDisabledFiltersCvar;
-  private Cvar mDisabledGettersCvar;
-  private Cvar mDisabledViewsCvar;
-
-  private Array< Function<play Actor()> > mFinders;
-  private Array<string> mFinderClasses;
-  private Array<Actor> mTargets;
-
-  private Actor mCurrentTarget;
-
-  private Array< Function<play bool(Actor)> > mFilters;
-  private Array<string> mFilterClasses;
-
-  private vector3 mLastTargetPosition;
-  private vector2 mLastTargetSize;
-
-  private Array< Function<play int, string, int, int(Actor)> > mGetters;
-  private Array<string> mGetterClasses;
-  private Array<ts_InformationPiece> mInformationPieces;
-
-  private Array< Function
-    <ui void(Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>
-    > mViews;
-  private Array<string> mViewClasses;
-
-  private ts_ClassList mBlocklist;
-  private ts_ClassList mFollowers;
-  private ts_Fader mFader;
-  private ts_Projector mProjector;
-
-  private ts_TargetScreenPositionInterpolator mTextInterpolator;
-  private ts_TargetScreenPositionInterpolator mFrameInterpolator;
-}
-#+end_src
-
-*** Target screen position interpolator
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
-
-class ts_TargetScreenPositionInterpolator
-{
-  ui vector2 interpolateScreenPosition(vector2 screenPosition, Actor currentTarget)
-  {
-    if (mLastInterpolatedTarget != currentTarget)
-    {
-      mLastInterpolatedTarget = currentTarget;
-      mOldScreenPosition = screenPosition;
-      return screenPosition;
-    }
-
-    vector2 diff = (screenPosition - mOldScreenPosition) / 2;
-    mOldScreenPosition.x += round(diff.x);
-    mOldScreenPosition.y += round(diff.y);
-
-    return mOldScreenPosition;
-  }
-
-  private ui vector2 mOldScreenPosition;
-  private ui Actor mLastInterpolatedTarget;
-}
-#+end_src
-
-*** Class utilities
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
-
-class ts_Classes
-{
-  static void warnTooLongList(out Array<string> classes, string listName)
-  {
-    string disabledClasses = ts_su.join(classes, ",");
-    if (disabledClasses.length() > 256)
-      Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
-                     listName,
-                     disabledClasses.length(),
-                     disabledClasses);
-  }
-
-  static string shorten(string className)
-  {
-    return className.mid(className.indexOf("_") + 1);
-  }
-}
-#+end_src
-
-*** Follower classes
-
-???
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
-HeadshotTargetZombie
-HeadshotTargetEliteZombie
-HeadshotTargetImp
-HeadshotTargetAngryImp
-HeadshotTargetNoble
-HeadshotTargetEliteNoble
-HeadshotTargetBossNoble
-HeadshotTargetArchvile
-HeadshotTargetEliteArchvile
-HeadshotTargetRevenant
-HeadshotTargetEliteRevenant
-HeadshotTargetMancubus
-HeadshotTargetSoulCommander
-HeadshotTargetCacodemon
-HeadshotTargetPainElemental
-HeadshotTargetDemon
-HeadshotTargetCyberdemon
-#+end_src
-
-Brutal Doom
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
-HeadshotTargetBase
-#+end_src
-
-Venturous
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
-HeadshotHitbox
-HeadshotHitboxDouble
-HeadshotHitboxHigher
-HeadshotHitboxHeavyeadshotHitbox
-#+end_src
 
 ** Finders
 
@@ -1960,7 +1461,448 @@ OptionMenu ts_CrosshairOptions
 }
 #+end_src
 
-** Utilities
+** Core
+
+*** Event handler
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_EventHandler : StaticEventHandler
+{
+  override void onRegister()
+  {
+    (mOptions = new("ts_Options")).initialize();
+    mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
+    mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
+    mDisabledGettersCvar = ts_ExistingCvar.find("ts_disabled_getters");
+    mDisabledViewsCvar   = ts_ExistingCvar.find("ts_disabled_views");
+    (mFader = new("ts_Fader")).initialize();
+    (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
+    (mFollowers = new("ts_ClassList")).initialize("ts_followers");
+    (mProjector = new("ts_Projector")).initialize();
+    mTextInterpolator  = new("ts_TargetScreenPositionInterpolator");
+    mFrameInterpolator = new("ts_TargetScreenPositionInterpolator");
+
+    collectClasses();
+  }
+
+  override void worldTick()
+  {
+    if (players[consolePlayer].mo == NULL) return;
+    if (level.mapName ~== "titlemap") return;
+
+    mProjector.prepare();
+    findTargets();
+    filterTargets();
+    chooseCurrentTarget();
+    collectInformation();
+    mFader.tick();
+  }
+
+  override void worldLoaded(WorldEvent event)
+  {
+    clearInformation();
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    if (players[consolePlayer].mo == NULL) return;
+
+    double alpha = mFader.getAlpha(event.fracTic);
+
+    Array<string> disabledClasses;
+    mDisabledViewsCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
+
+    int viewsCount = mViews.size();
+    for (int i = 0; i < viewsCount; ++i)
+    {
+      bool isEnabled = disabledClasses.find(mViewClasses[i]) == disabledClassesSize;
+      if (!isEnabled) continue;
+      mViews[i].
+        call(mInformationPieces, alpha, event, mLastTargetPosition, mLastTargetSize);
+    }
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (event.player == consolePlayer && event.name == "ts_read_getters")
+      collectGetters();
+  }
+
+  static clearscope ts_EventHandler getInstance()
+  {
+    return (ts_EventHandler)(StaticEventHandler.find("ts_EventHandler"));
+  }
+
+  clearscope void getFinders(out Array<string> result) { result.copy(mFinderClasses); }
+  clearscope void getFilters(out Array<string> result) { result.copy(mFilterClasses); }
+  clearscope void getGetters(out Array<string> result) { result.copy(mGetterClasses); }
+  clearscope void getViews(out Array<string> result) { result.copy(mViewClasses); }
+
+  clearscope ts_Options getOptions() { return mOptions; }
+  clearscope ts_Projector getProjector() { return mProjector; }
+
+  ts_ClassList getBlocklist() { return mBlocklist; }
+
+  ui vector2 interpolateTextScreenPosition(vector2 position)
+  {
+    return mTextInterpolator.interpolateScreenPosition(position, mCurrentTarget);
+  }
+
+  ui vector2 interpolateFrameScreenPosition(vector2 position)
+  {
+    return mFrameInterpolator.interpolateScreenPosition(position, mCurrentTarget);
+  }
+
+  private ui bool isInformationEmpty() const
+  {
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
+      if (mInformationPieces[i].kind != ts_Kind.Empty) return false;
+
+    return true;
+  }
+
+  private void findTargets()
+  {
+    Array<string> disabledClasses;
+    mDisabledFindersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
+
+    int findersCount = mFinders.size();
+    for (int i = 0; i < findersCount; ++i)
+    {
+      bool isEnabled = disabledClasses.find(mFinderClasses[i]) == disabledClassesSize;
+      Actor target = isEnabled ? mFinders[i].call() : NULL;
+      if (target != NULL && mFollowers.containsParent(target.getClass()))
+        target = target.master;
+
+      mTargets[i] = target;
+    }
+  }
+
+  private void filterTargets()
+  {
+    int filtersCount = mFilters.size();
+    int targetsCount = mTargets.size();
+
+    Array<string> disabledClasses;
+    mDisabledFiltersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
+
+    for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
+    {
+      if (mTargets[targetIndex] == NULL) continue;
+
+      for (int i = 0; i < filtersCount; ++i)
+      {
+        bool isEnabled = disabledClasses.find(mFilterClasses[i])
+          == disabledClassesSize;
+        if (!isEnabled) continue;
+        if (mFilters[i].call(mTargets[targetIndex])) continue;
+
+        mTargets[targetIndex] = NULL;
+        break;
+      }
+    }
+  }
+
+  private void chooseCurrentTarget()
+  {
+    Actor closestTarget = NULL;
+    double minDistance = double.max;
+    foreach (target : mTargets)
+    {
+      if (target == NULL) continue;
+      double distance = distanceTo(target);
+      if (distance < minDistance)
+      {
+        closestTarget = target;
+        minDistance = distance;
+      }
+    }
+
+    if (closestTarget != NULL)
+    {
+      mLastTargetSize = (closestTarget.radius, closestTarget.height);
+      mLastTargetPosition = closestTarget.pos;
+    }
+
+    mCurrentTarget = closestTarget;
+  }
+
+  private void collectInformation()
+  {
+    if (mCurrentTarget == NULL)
+    {
+      if (mFader.getAlpha(1.0) <= 0.0) clearInformation();
+      return;
+    }
+
+    clearInformation();
+    mFader.reset();
+
+    Array<string> disabledClasses;
+    mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    int disabledClassesSize = disabledClasses.size();
+
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
+    {
+      bool isEnabled = disabledClasses.find(mGetterClasses[i]) == disabledClassesSize;
+      if (isEnabled)
+      {
+        mInformationPieces[i].id = mGetterClasses[i];
+        [mInformationPieces[i].kind,
+         mInformationPieces[i].text,
+         mInformationPieces[i].value,
+         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
+      }
+    }
+  }
+
+  private void clearInformation()
+  {
+    int gettersCount = mGetters.size();
+    for (int i = 0; i < gettersCount; ++i)
+      mInformationPieces[i].kind = ts_Kind.Empty;
+  }
+
+  private void collectGetters()
+  {
+    mGetters.clear();
+    mGetterClasses.clear();
+
+    Array<string> orderedGetters;
+    ts_ExistingCvar.find("ts_getters_order").getString()
+      .split(orderedGetters, ",", TOK_SkipEmpty);
+
+    foreach (getter : orderedGetters)
+    {
+      string className = "tsGetter_" .. getter;
+      Class<Object> aClass = className;
+      if (aClass != NULL && !tryAddGetter(aClass))
+        Console.printf("ERROR: %s: invalid tsGetter", className);
+    }
+
+    foreach (aClass : AllActorClasses)
+    {
+      string className = aClass.getClassName();
+      string shortName = ts_Classes.shorten(className);
+      if (mGetterClasses.find(shortName) != mGetterClasses.size()) continue;
+      if (className.indexOf("tsGetter_") != -1 && !tryAddGetter(aClass))
+        Console.printf("ERROR: %s: invalid tsGetter", className);
+    }
+
+    ts_Classes.warnTooLongList(mGetterClasses, "getters");
+  }
+
+  private void collectClasses()
+  {
+    foreach (aClass : AllActorClasses)
+    {
+      string className = aClass.getClassName();
+      if (className.indexOf("tsFinder_") != -1 && !tryAddFinder(aClass))
+        Console.printf("ERROR: %s: invalid tsFinder", className);
+
+      if (className.indexOf("tsFilter_") != -1 && !tryAddFilter(aClass))
+        Console.printf("ERROR: %s: invalid tsFilter", className);
+
+      if (className.indexOf("tsView_") != -1 && !tryAddView(aClass))
+        Console.printf("ERROR: %s: invalid tsView", className);
+    }
+
+    ts_Classes.warnTooLongList(mFinderClasses, "finders");
+    ts_Classes.warnTooLongList(mFilterClasses, "filters");
+    ts_Classes.warnTooLongList(mViewClasses, "views");
+
+    collectGetters();
+  }
+
+  private bool tryAddFinder(class<Object> aClass)
+  {
+    let finder = (Function<play Actor()>)(findFunction(aClass, "find"));
+    if (finder != NULL)
+    {
+      mFinders.push(finder);
+      mFinderClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mTargets.push(NULL);
+    }
+    return finder != NULL;
+  }
+
+  private bool tryAddFilter(class<Object> aClass)
+  {
+    let filter = (Function<play bool(Actor)>)(findFunction(aClass, "isAllowed"));
+    if (filter != NULL)
+    {
+      mFilters.push(filter);
+      mFilterClasses.push(ts_Classes.shorten(aClass.getClassName()));
+    }
+    return filter != NULL;
+  }
+
+  private bool tryAddGetter(class<Object> aClass)
+  {
+    let getter = (Function<play int, string, int, int(Actor)>)
+      (findFunction(aClass, "makeInformation"));
+    if (getter != NULL)
+    {
+      mGetters.push(getter);
+      mGetterClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mInformationPieces.push(new("ts_InformationPiece"));
+    }
+    return getter != NULL;
+  }
+
+  private bool tryAddView(class<Object> aClass)
+  {
+    let view =
+      (Function
+       <ui void (Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>)
+      (findFunction(aClass, "draw"));
+    if (view != NULL)
+    {
+      mViews.push(view);
+      mViewClasses.push(ts_Classes.shorten(aClass.getClassName()));
+    }
+    return view != NULL;
+  }
+
+  private static double distanceTo(Actor anActor)
+  {
+    return (anActor != NULL)
+      ? players[consolePlayer].mo.distance3d(anActor)
+      : 0;
+  }
+
+  private ts_Options mOptions;
+  private Cvar mDisabledFindersCvar;
+  private Cvar mDisabledFiltersCvar;
+  private Cvar mDisabledGettersCvar;
+  private Cvar mDisabledViewsCvar;
+
+  private Array< Function<play Actor()> > mFinders;
+  private Array<string> mFinderClasses;
+  private Array<Actor> mTargets;
+
+  private Actor mCurrentTarget;
+
+  private Array< Function<play bool(Actor)> > mFilters;
+  private Array<string> mFilterClasses;
+
+  private vector3 mLastTargetPosition;
+  private vector2 mLastTargetSize;
+
+  private Array< Function<play int, string, int, int(Actor)> > mGetters;
+  private Array<string> mGetterClasses;
+  private Array<ts_InformationPiece> mInformationPieces;
+
+  private Array< Function
+    <ui void(Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>
+    > mViews;
+  private Array<string> mViewClasses;
+
+  private ts_ClassList mBlocklist;
+  private ts_ClassList mFollowers;
+  private ts_Fader mFader;
+  private ts_Projector mProjector;
+
+  private ts_TargetScreenPositionInterpolator mTextInterpolator;
+  private ts_TargetScreenPositionInterpolator mFrameInterpolator;
+}
+#+end_src
+
+*** Information piece
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
+
+class ts_Kind
+{
+  enum _
+  {
+    Empty,
+    PlainText,
+    Value,
+    ValueAndMax,
+    Bar,
+  }
+}
+
+class ts_InformationPiece
+{
+  string id;
+  int kind;
+  string text;
+  int value;
+  int max;
+}
+#+end_src
+
+*** Class list
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class ts_ClassList
+{
+  void initialize(string lumpName)
+  {
+    for (int i = Wads.findLump(lumpName);
+         i != -1;
+         i = Wads.findLump(lumpName, i + 1))
+    {
+      string contents = Wads.readLump(i);
+      contents.replace("\r", "");
+      Array<string> lines;
+      contents.split(lines, "\n", TOK_SkipEmpty);
+      int linesCount = lines.size();
+      for (int l = 0; l < linesCount; ++l)
+      {
+        mClasses.insert(lines[l].makeLower(), 0);
+      }
+    }
+  }
+
+  bool contains(string className) const
+  {
+    return mClasses.checkKey(className.makeLower());
+  }
+
+  bool containsParent(class<Object> aClass)
+  {
+    for (class<Object> parent = aClass;
+         parent.getClassName() != "Thinker";
+         parent = parent.getParentClass())
+    {
+      if (contains(parent.getClassName())) return true;
+    }
+    return false;
+  }
+
+  Map<string, int> mClasses;
+}
+#+end_src
+
+*** Existing Cvar
+
+TODO: move to a module?
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs
+
+class ts_ExistingCvar
+{
+  static Cvar find(Name name)
+  {
+    Cvar result = Cvar.findCvar(name);
+    if (result == NULL)
+      throwAbortException("ERROR: TargetSpy: %s Cvar not found.", name);
+    return result;
+  }
+}
+#+end_src
+
+*** Utilities
 
 Functions in ~ts_Utils~ class.
 
@@ -1972,7 +1914,7 @@ class ts_Utils
 }
 #+end_src
 
-*** ~getActorMaxHealth~
+**** ~getActorMaxHealth~
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -1997,7 +1939,7 @@ static play int getActorMaxHealth(Actor anActor)
 }
 #+end_src
 
-*** ~getColor~
+**** ~getColor~
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -2027,7 +1969,93 @@ static ui int getHealthColor(ts_Options options, Array<ts_InformationPiece> piec
 }
 #+end_src
 
-* Projector
+*** Target screen position interpolator
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_TargetScreenPositionInterpolator
+{
+  ui vector2 interpolateScreenPosition(vector2 screenPosition, Actor currentTarget)
+  {
+    if (mLastInterpolatedTarget != currentTarget)
+    {
+      mLastInterpolatedTarget = currentTarget;
+      mOldScreenPosition = screenPosition;
+      return screenPosition;
+    }
+
+    vector2 diff = (screenPosition - mOldScreenPosition) / 2;
+    mOldScreenPosition.x += round(diff.x);
+    mOldScreenPosition.y += round(diff.y);
+
+    return mOldScreenPosition;
+  }
+
+  private ui vector2 mOldScreenPosition;
+  private ui Actor mLastInterpolatedTarget;
+}
+#+end_src
+
+*** Class utilities
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+
+class ts_Classes
+{
+  static void warnTooLongList(out Array<string> classes, string listName)
+  {
+    string disabledClasses = ts_su.join(classes, ",");
+    if (disabledClasses.length() > 256)
+      Console.printf("WARNING: %s list may be too long (%d) for a user cvar:\n%s",
+                     listName,
+                     disabledClasses.length(),
+                     disabledClasses);
+  }
+
+  static string shorten(string className)
+  {
+    return className.mid(className.indexOf("_") + 1);
+  }
+}
+#+end_src
+
+*** Follower classes
+
+???
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotTargetZombie
+HeadshotTargetEliteZombie
+HeadshotTargetImp
+HeadshotTargetAngryImp
+HeadshotTargetNoble
+HeadshotTargetEliteNoble
+HeadshotTargetBossNoble
+HeadshotTargetArchvile
+HeadshotTargetEliteArchvile
+HeadshotTargetRevenant
+HeadshotTargetEliteRevenant
+HeadshotTargetMancubus
+HeadshotTargetSoulCommander
+HeadshotTargetCacodemon
+HeadshotTargetPainElemental
+HeadshotTargetDemon
+HeadshotTargetCyberdemon
+#+end_src
+
+Brutal Doom
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotTargetBase
+#+end_src
+
+Venturous
+#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+HeadshotHitbox
+HeadshotHitboxDouble
+HeadshotHitboxHigher
+HeadshotHitboxHeavyeadshotHitbox
+#+end_src
+
+*** Projector
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
@@ -2110,9 +2138,9 @@ class ts_ViewUtils ui
 }
 #+end_src
 
-** Menu classes
+*** Menu classes
 
-*** Toggles
+**** Toggles
 
 TODO: disable some classes by default.
 
@@ -2217,7 +2245,7 @@ class %2$sToggles : ts_ClassToggles
 }" getter prefix cvar-name)
 #+end_src
 
-*** Highlighted character static text
+**** Highlighted character static text
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
 
@@ -2245,7 +2273,7 @@ class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 }
 #+end_src
 
-*** Bar preview
+**** Bar preview
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
 
@@ -2274,7 +2302,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 }
 #+end_src
 
-*** Getters order
+**** Getters order
 
 #+begin_src c :tangle build/TargetSpy/menudef.txt
 
