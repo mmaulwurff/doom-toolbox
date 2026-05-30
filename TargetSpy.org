@@ -825,7 +825,7 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
 
   foreach (piece : informationPieces)
   {
-    string line = toText(piece, options);
+    string line = ts_ViewUtils.toText(piece, options);
     if (line.length() == 0) continue;
 
     lines.push(line);
@@ -835,7 +835,7 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   int linesCount = lines.size();
   if (linesCount == 0) return;
 
-  double lineHeight = aFont.getHeight() * scale;
+  double lineHeight = round(aFont.getHeight() * scale);
 
   double totalHeight = lineHeight * lines.size();
   double totalWidth = 0;
@@ -850,15 +850,25 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   if (options.getPlace() == ts_Options.PlaceAboveTarget)
     position.y -= totalHeight;
   position.x = clamp(position.x, totalWidth / 2, screenWidth - totalWidth / 2);
-  position.y = clamp(position.y, 0, screenHeight - totalHeight);
+  position.y = clamp(position.y, lineHeight / 2,
+                     screenHeight - totalHeight + lineHeight / 2);
 
   double additionalWidth = aFont.stringWidth("  ") * scale;
   bool isBackgroundEnabled = options.isBackgroundEnabled();
   for (int i = 0; i < linesCount; ++i)
   {
     if (isBackgroundEnabled)
-      drawBackground(widths[i] + additionalWidth, lineHeight, position, alpha);
-    ts_ViewUtils.drawText(aFont, lines[i], widths[i], position, alpha, scale);
+      ts_ViewUtils.drawBackground(widths[i] + additionalWidth,
+                                  lineHeight,
+                                  position,
+                                  alpha);
+    ts_ViewUtils.drawText(aFont,
+                          lines[i],
+                          widths[i],
+                          lineHeight,
+                          position,
+                          alpha,
+                          scale);
     position.y += lineHeight;
   }
 }
@@ -943,235 +953,6 @@ OptionValue ts_Places
 }
 #+end_src
 
-**** ~makeBar~
-
-#+begin_src c :noweb-ref tsView_Text.functions
-
-static ui string makeBar(int value, int max, ts_BarOptions options)
-{
-  int length = max(1, int(round(log(max) * 2)));
-  int filledCount = 0;
-
-  if (max < 1)
-  {
-    filledCount = 0;
-    max = 1;
-  }
-  else
-  {
-    filledCount = clamp(int(round(double(value) * length / max)), 0, length);
-  }
-
-  int percent = int(round(double(value) * 100 / max));
-  int filledColor = options.getFilledColor(percent);
-  int emptyColor  = options.getEmptyColor(percent);
-  string filled = string.format("%c", options.getFilledCharacter());
-  string empty  = string.format("%c", options.getEmptyCharacter());
-
-  return string.format("\c%c%s\c%c%s",
-                        SMALL_A + filledColor,
-                        ts_su.repeat(filled, filledCount),
-                        SMALL_A + emptyColor,
-                        ts_su.repeat(empty, length - filledCount));
-}
-#+end_src
-
-#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
-
-class ts_BarOptions
-{
-  ts_BarOptions initialize(string tag)
-  {
-    mFilledColorCvars.push(findCvar(tag, "filled_25_color"));
-    mFilledColorCvars.push(findCvar(tag, "filled_50_color"));
-    mFilledColorCvars.push(findCvar(tag, "filled_75_color"));
-    mFilledColorCvars.push(findCvar(tag, "filled_100_color"));
-    mFilledColorCvars.push(findCvar(tag, "filled_101_color"));
-
-    mEmptyColorCvars.push(findCvar(tag, "empty_0_color"));
-    mEmptyColorCvars.push(findCvar(tag, "empty_25_color"));
-    mEmptyColorCvars.push(findCvar(tag, "empty_50_color"));
-    mEmptyColorCvars.push(findCvar(tag, "empty_75_color"));
-    mEmptyColorCvars.push(findCvar(tag, "empty_100_color"));
-
-    mFilledCharacterIndex = findCvar(tag, "filled_character_index");
-    mEmptyCharacterIndex  = findCvar(tag, "empty_character_index");
-    mCharactersCvar       = findCvar(tag, "characters");
-
-    return self;
-  }
-
-  private Cvar findCvar(string tag, string name)
-  {
-    let fullName = "ts_" .. tag .. "_" .. name;
-    let aCvar = Cvar.findCvar(fullName);
-    return (aCvar != NULL)
-      ? aCvar
-      : ts_ExistingCvar.find("ts_DefaultBar_" .. name);
-  }
-
-  int getFilledColor(int percent) const
-  {
-    return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
-  }
-  int getEmptyColor(int percent) const
-  {
-    return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
-  }
-  int getFilledCharacter() const
-  {
-    return ts_su.getCodePointAt(mCharactersCvar.getString(),
-                                max(mFilledCharacterIndex.getInt(), 0));
-  }
-  int getEmptyCharacter() const
-  {
-    return ts_su.getCodePointAt(mCharactersCvar.getString(),
-                                max(mEmptyCharacterIndex.getInt(), 0));
-  }
-
-  private Array<Cvar> mFilledColorCvars;
-  private Array<Cvar> mEmptyColorCvars;
-  private Cvar mFilledCharacterIndex;
-  private Cvar mEmptyCharacterIndex;
-  private Cvar mCharactersCvar;
-}
-#+end_src
-#+begin_src c :noweb-ref ts_Options.functions
-
-ts_BarOptions getBarOptions(string aClass) { return mBarOptions.get(aClass); }
-
-private static void findGetters(out Array<string> result)
-{
-  foreach (aClass : AllActorClasses)
-  {
-    string className = aClass.getClassName();
-    if (className.indexOf("tsGetter_") != -1)
-      result.push(ts_Classes.shorten(className));
-  }
-}
-#+end_src
-#+begin_src c :noweb-ref ts_Options.members
-
-Map<string, ts_BarOptions> mBarOptions;
-#+end_src
-#+begin_src c :noweb-ref options-cvar-initialization
-
-mBarOptions.insert("DefaultBar", (new("ts_BarOptions")).initialize("DefaultBar"));
-
-Array<string> getterClasses;
-findGetters(getterClasses);
-foreach (aClass : getterClasses)
-  mBarOptions.insert(aClass, (new("ts_BarOptions")).initialize(aClass));
-#+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
-
-<<bar-cvars-definition("DefaultBar")>>
-<<bar-cvars-definition("HealthBar")>>
-<<bar-cvars-definition("ArmorBar")>>
-#+end_src
-
-#+name: bar-cvars-definition
-#+begin_src elisp :var class="" :exports none
-(format "
-
-user int ts_%1$s_filled_25_color  = 3; // green
-user int ts_%1$s_filled_50_color  = 3;
-user int ts_%1$s_filled_75_color  = 3;
-user int ts_%1$s_filled_100_color = 3;
-user int ts_%1$s_filled_101_color = 3;
-
-user int ts_%1$s_empty_0_color    = 6; // red
-user int ts_%1$s_empty_25_color   = 6;
-user int ts_%1$s_empty_50_color   = 6;
-user int ts_%1$s_empty_75_color   = 6;
-user int ts_%1$s_empty_100_color  = 6;
-
-user int ts_%1$s_filled_character_index = 0;
-user int ts_%1$s_empty_character_index  = 0;
-user string ts_%1$s_characters = \"█▓▒░❤♡☻☹⛧⛤☣✚⛊●☐☒☑⚙\";
-" class)
-#+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt
-
-<<bar-options-definition("DefaultBar")>>
-<<bar-options-definition("HealthBar")>>
-<<bar-options-definition("ArmorBar")>>
-#+end_src
-#+name: bar-options-definition
-#+begin_src elisp :var class="" :exports none
-(string-replace "'" "\"" (format "\
-
-OptionMenu ts_%1$sOptions
-{
-  Title '%1$s options'
-
-  Slider 'Filled character', ts_%1$s_filled_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_%1$s_filled_character_index, %1$s
-  Slider 'Empty character',  ts_%1$s_empty_character_index, 0, 99, 1, 0
-  ts_HighlightedCharacter    ts_%1$s_empty_character_index, %1$s
-  TextField 'Characters',    ts_%1$s_characters
-
-  StaticText ''
-  ts_BarPreview 0,   '%1$s'
-  ts_BarPreview 25,  '%1$s'
-  ts_BarPreview 50,  '%1$s'
-  ts_BarPreview 75,  '%1$s'
-  ts_BarPreview 100, '%1$s'
-  ts_BarPreview 101, '%1$s'
-
-  StaticText ''
-  StaticText 'Colors for filled characters'
-  Option '1-25%%' ,  ts_%1$s_filled_25_color,  TextColors
-  Option '26-50%%',  ts_%1$s_filled_50_color,  TextColors
-  Option '51-75%%',  ts_%1$s_filled_75_color,  TextColors
-  Option '76-100%%', ts_%1$s_filled_100_color, TextColors
-  Option '> 100%%',  ts_%1$s_filled_101_color, TextColors
-
-  StaticText ''
-  StaticText 'Colors for empty characters'
-  Option '≤ 0',      ts_%1$s_empty_0_color,   TextColors
-  Option '1-25%%',   ts_%1$s_empty_25_color,  TextColors
-  Option '26-50%%',  ts_%1$s_empty_50_color,  TextColors
-  Option '51-75%%',  ts_%1$s_empty_75_color,  TextColors
-  Option '76-100%%', ts_%1$s_empty_100_color, TextColors
-}
-" class))
-#+end_src
-
-**** Helper functions
-
-#+begin_src c :noweb-ref tsView_Text.functions
-
-static private ui string toText(ts_InformationPiece piece, ts_Options options)
-{
-  switch (piece.kind)
-  {
-  case ts_Kind.PlainText:   return piece.text;
-  case ts_Kind.Value:       return string.format("%d", piece.value);
-  case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
-  case ts_Kind.Bar:
-    return makeBar(piece.value, piece.max, options.getBarOptions(piece.id));
-  }
-  return "";
-}
-
-static private ui void drawBackground(double textWidth,
-                                      double textHeight,
-                                      vector2 position,
-                                      double alpha)
-{
-  position.x -= int(round(textWidth / 2));
-  Screen.dim(0x000000,
-             alpha / 2,
-             int(round(position.x)),
-             int(round(position.y)),
-             int(round(textwidth)),
-             int(round(textheight)));
-}
-
-const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
-#+end_src
-
 *** Frame
 
 #+begin_src c :noweb-ref strings
@@ -1206,6 +987,7 @@ class tsView_Frame : Actor
     double  halfHeight = visibleSize.y * 0.5;
     double  scale      = options.getFrameScale();
     Font    aFont      = Font.findFont("NewSmallFont");
+    double  lineHeight = round(aFont.getHeight() * scale);
 
     double left   = centerPosition.x - halfWidth;
     double right  = centerPosition.x + halfWidth;
@@ -1224,7 +1006,14 @@ class tsView_Frame : Actor
     {
       string part = options.getFrame(i);
       double width = aFont.stringWidth(part) * scale;
-      ts_ViewUtils.drawText(aFont, part, width, positions[i], alpha, scale, color);
+      ts_ViewUtils.drawText(aFont,
+                            part,
+                            width,
+                            lineHeight,
+                            positions[i],
+                            alpha,
+                            scale,
+                            color);
     }
   }
 
@@ -1380,12 +1169,20 @@ class tsView_Crosshair : Actor
     int    color = options.getCrosshairHealth()
       ? ts_Utils.getHealthColor(options, informationPieces)
       : Font.CR_Gray;
+    double lineHeight = round(aFont.getHeight() * scale);
 
     for (int i = 0; i < 3; ++i)
     {
       string part  = parts[i];
       double width = aFont.stringWidth(part) * scale;
-      ts_ViewUtils.drawText(aFont, part, width, positions[i], alpha, scale, color);
+      ts_ViewUtils.drawText(aFont,
+                            part,
+                            width,
+                            lineHeight,
+                            positions[i],
+                            alpha,
+                            scale,
+                            color);
     }
   }
 }
@@ -2116,26 +1913,262 @@ class ts_Projector
 
 class ts_ViewUtils ui
 {
-  static void drawText(Font aFont,
-                       string text,
-                       double textWidth,
-                       vector2 position,
-                       double alpha,
-                       double scale,
-                       int color = Font.CR_Gray)
+  <<ts_ViewUtils.functions>>
+}
+#+end_src
+
+**** ~drawText~
+
+#+begin_src c :noweb-ref ts_ViewUtils.functions
+
+static void drawText(Font aFont,
+                     string text,
+                     double textWidth,
+                     double textHeight,
+                     vector2 position,
+                     double alpha,
+                     double scale,
+                     int color = Font.CR_Gray)
+{
+  position -= (textWidth, textHeight) / 2;
+  Screen.drawText(aFont,
+                  color,
+                  int(round(position.x)),
+                  int(round(position.y)),
+                  text,
+                  DTA_ScaleX, scale,
+                  DTA_ScaleY, scale,
+                  DTA_Alpha,  alpha);
+}
+#+end_src
+
+**** ~drawBackground~
+
+#+begin_src c :noweb-ref ts_ViewUtils.functions
+
+static void drawBackground(double textWidth,
+                           double textHeight,
+                           vector2 position,
+                           double alpha)
+{
+  position -= (textWidth, textHeight) / 2;
+  Screen.dim(0x000000,
+             alpha / 2,
+             int(round(position.x)),
+             int(round(position.y)),
+             int(round(textwidth)),
+             int(round(textheight)));
+}
+
+static string toText(ts_InformationPiece piece, ts_Options options)
+{
+  switch (piece.kind)
   {
-    position.x -= int(round(textWidth / 2));
-    position.y -= int(round(aFont.getHeight() / 2));
-    Screen.drawText(aFont,
-                    color,
-                    position.x,
-                    position.y,
-                    text,
-                    DTA_ScaleX, scale,
-                    DTA_ScaleY, scale,
-                    DTA_Alpha,  alpha);
+  case ts_Kind.PlainText:   return piece.text;
+  case ts_Kind.Value:       return string.format("%d", piece.value);
+  case ts_Kind.ValueAndMax: return string.format("%d/%d", piece.value, piece.max);
+  case ts_Kind.Bar:
+    return makeBar(piece.value, piece.max, options.getBarOptions(piece.id));
+  }
+  return "";
+}
+#+end_src
+
+**** ~makeBar~
+
+#+begin_src c :noweb-ref ts_ViewUtils.functions
+
+static string makeBar(int value, int max, ts_BarOptions options)
+{
+  int length = max(1, int(round(log(max) * 2)));
+  int filledCount = 0;
+
+  if (max < 1)
+  {
+    filledCount = 0;
+    max = 1;
+  }
+  else
+  {
+    filledCount = clamp(int(round(double(value) * length / max)), 0, length);
+  }
+
+  int percent = int(round(double(value) * 100 / max));
+  int filledColor = options.getFilledColor(percent);
+  int emptyColor  = options.getEmptyColor(percent);
+  string filled = string.format("%c", options.getFilledCharacter());
+  string empty  = string.format("%c", options.getEmptyCharacter());
+
+  return string.format("\c%c%s\c%c%s",
+                        SMALL_A + filledColor,
+                        ts_su.repeat(filled, filledCount),
+                        SMALL_A + emptyColor,
+                        ts_su.repeat(empty, length - filledCount));
+}
+
+const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+
+class ts_BarOptions
+{
+  ts_BarOptions initialize(string tag)
+  {
+    mFilledColorCvars.push(findCvar(tag, "filled_25_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_50_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_75_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_100_color"));
+    mFilledColorCvars.push(findCvar(tag, "filled_101_color"));
+
+    mEmptyColorCvars.push(findCvar(tag, "empty_0_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_25_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_50_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_75_color"));
+    mEmptyColorCvars.push(findCvar(tag, "empty_100_color"));
+
+    mFilledCharacterIndex = findCvar(tag, "filled_character_index");
+    mEmptyCharacterIndex  = findCvar(tag, "empty_character_index");
+    mCharactersCvar       = findCvar(tag, "characters");
+
+    return self;
+  }
+
+  private Cvar findCvar(string tag, string name)
+  {
+    let fullName = "ts_" .. tag .. "_" .. name;
+    let aCvar = Cvar.findCvar(fullName);
+    return (aCvar != NULL)
+      ? aCvar
+      : ts_ExistingCvar.find("ts_DefaultBar_" .. name);
+  }
+
+  int getFilledColor(int percent) const
+  {
+    return mFilledColorCvars[clamp(percent + 24, 25, 125) / 25 - 1].getInt();
+  }
+  int getEmptyColor(int percent) const
+  {
+    return mEmptyColorCvars[clamp(percent + 24, 0, 100) / 25].getInt();
+  }
+  int getFilledCharacter() const
+  {
+    return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                                max(mFilledCharacterIndex.getInt(), 0));
+  }
+  int getEmptyCharacter() const
+  {
+    return ts_su.getCodePointAt(mCharactersCvar.getString(),
+                                max(mEmptyCharacterIndex.getInt(), 0));
+  }
+
+  private Array<Cvar> mFilledColorCvars;
+  private Array<Cvar> mEmptyColorCvars;
+  private Cvar mFilledCharacterIndex;
+  private Cvar mEmptyCharacterIndex;
+  private Cvar mCharactersCvar;
+}
+#+end_src
+#+begin_src c :noweb-ref ts_Options.functions
+
+ts_BarOptions getBarOptions(string aClass) { return mBarOptions.get(aClass); }
+
+private static void findGetters(out Array<string> result)
+{
+  foreach (aClass : AllActorClasses)
+  {
+    string className = aClass.getClassName();
+    if (className.indexOf("tsGetter_") != -1)
+      result.push(ts_Classes.shorten(className));
   }
 }
+#+end_src
+#+begin_src c :noweb-ref ts_Options.members
+
+Map<string, ts_BarOptions> mBarOptions;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+
+mBarOptions.insert("DefaultBar", (new("ts_BarOptions")).initialize("DefaultBar"));
+
+Array<string> getterClasses;
+findGetters(getterClasses);
+foreach (aClass : getterClasses)
+  mBarOptions.insert(aClass, (new("ts_BarOptions")).initialize(aClass));
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+<<bar-cvars-definition("DefaultBar")>>
+<<bar-cvars-definition("HealthBar")>>
+<<bar-cvars-definition("ArmorBar")>>
+#+end_src
+
+#+name: bar-cvars-definition
+#+begin_src elisp :var class="" :exports none
+(format "
+
+user int ts_%1$s_filled_25_color  = 3; // green
+user int ts_%1$s_filled_50_color  = 3;
+user int ts_%1$s_filled_75_color  = 3;
+user int ts_%1$s_filled_100_color = 3;
+user int ts_%1$s_filled_101_color = 3;
+
+user int ts_%1$s_empty_0_color    = 6; // red
+user int ts_%1$s_empty_25_color   = 6;
+user int ts_%1$s_empty_50_color   = 6;
+user int ts_%1$s_empty_75_color   = 6;
+user int ts_%1$s_empty_100_color  = 6;
+
+user int ts_%1$s_filled_character_index = 0;
+user int ts_%1$s_empty_character_index  = 0;
+user string ts_%1$s_characters = \"█▓▒░❤♡☻☹⛧⛤☣✚⛊●☐☒☑⚙\";
+" class)
+#+end_src
+#+begin_src c :tangle build/TargetSpy/menudef.txt
+
+<<bar-options-definition("DefaultBar")>>
+<<bar-options-definition("HealthBar")>>
+<<bar-options-definition("ArmorBar")>>
+#+end_src
+#+name: bar-options-definition
+#+begin_src elisp :var class="" :exports none
+(string-replace "'" "\"" (format "\
+
+OptionMenu ts_%1$sOptions
+{
+  Title '%1$s options'
+
+  Slider 'Filled character', ts_%1$s_filled_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_%1$s_filled_character_index, %1$s
+  Slider 'Empty character',  ts_%1$s_empty_character_index, 0, 99, 1, 0
+  ts_HighlightedCharacter    ts_%1$s_empty_character_index, %1$s
+  TextField 'Characters',    ts_%1$s_characters
+
+  StaticText ''
+  ts_BarPreview 0,   '%1$s'
+  ts_BarPreview 25,  '%1$s'
+  ts_BarPreview 50,  '%1$s'
+  ts_BarPreview 75,  '%1$s'
+  ts_BarPreview 100, '%1$s'
+  ts_BarPreview 101, '%1$s'
+
+  StaticText ''
+  StaticText 'Colors for filled characters'
+  Option '1-25%%' ,  ts_%1$s_filled_25_color,  TextColors
+  Option '26-50%%',  ts_%1$s_filled_50_color,  TextColors
+  Option '51-75%%',  ts_%1$s_filled_75_color,  TextColors
+  Option '76-100%%', ts_%1$s_filled_100_color, TextColors
+  Option '> 100%%',  ts_%1$s_filled_101_color, TextColors
+
+  StaticText ''
+  StaticText 'Colors for empty characters'
+  Option '≤ 0',      ts_%1$s_empty_0_color,   TextColors
+  Option '1-25%%',   ts_%1$s_empty_25_color,  TextColors
+  Option '26-50%%',  ts_%1$s_empty_50_color,  TextColors
+  Option '51-75%%',  ts_%1$s_empty_75_color,  TextColors
+  Option '76-100%%', ts_%1$s_empty_100_color, TextColors
+}
+" class))
 #+end_src
 
 *** Menu classes
@@ -2290,7 +2323,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
       ts_EventHandler.getInstance().getOptions().getBarOptions(mClass);
     int value = int(round(double(mPercent) * 64 / 100));
     mLabel = string.format("%3d%% ", mPercent)
-      .. tsView_Text.makeBar(value, 64, options);
+      .. ts_ViewUtils.makeBar(value, 64, options);
     drawLabel(indent, y, Font.CR_White);
     return -1;
   }
