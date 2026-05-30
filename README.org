@@ -89,6 +89,10 @@ SoundToScreen:
 
 [[file:media/screenshots/SoundToScreen.png]]
 
+TargetSpy:
+
+[[file:media/screenshots/TargetSpy.png]]
+
 Typist.pk3:
 
 [[file:media/screenshots/Typist.pk3.png]]
