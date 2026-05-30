@@ -5,8 +5,8 @@
 
 Many people helped development of Doom Toolbox or projects that have become parts of
 it, directly or indirectly. These people have submitted bug reports, feature
-suggestions, code contributions, or helped in other ways, like providing examples and
-documentation.
+suggestions, code contributions, translations, or helped in other ways, like
+providing code examples and documentation.
 
 If you are missing from this list, or want your name removed, please let me (m8f)
 know!
@@ -18,21 +18,27 @@ The order is alphabetical.
 # spellchecker:off
 
 - Ac!d
+- Ahpiox
 - Apollucas
 - Arkezuli
 - Beed28
 - Blueberryy
+- bogus
 - Caligari87
 - Captain J
 - Carrascado
+- Churrupez
 - Colerx
+- CthulhuInACan
 - Cutmanmike
+- Cyanide
 - DabbingSquidward
 - dard22
 - Dark-Assassin
 - Doctrine Dark
 - drogga (Commado Pen)
 - DrPyspy
+- Dutchygamer
 - Enjay
 - Eruanna
 - FaggoStorm
@@ -41,7 +47,9 @@ The order is alphabetical.
 - ghost
 - HDV
 - HexFlareheart
+- Icarus
 - IKA
+- isaacpop23
 - Jarewill
 - Jekyll Grim Payne (Agent Ash)
 - Jimmy
@@ -51,10 +59,13 @@ The order is alphabetical.
 - kadu522
 - kondoriyano
 - krutomisi
+- Lagi
 - Lippeth
 - lucker42
+- Major Cooke
 - mamaluigisbagel
 - Mr. Blazkowicz
+- MsrSgtShooterPerson
 - murka
 - Nems
 - Nightsentinel
@@ -62,12 +73,15 @@ The order is alphabetical.
 - Phantom Allies
 - Player701
 - Proydoha
+- ProydohaRupert
 - przemko27
+- ramon.dexter
 - Rowsol
 - rparhkdtp
 - Samarai1000
 - SandPoot
 - sebastianpanetta
+- Silentdarkness12
 - Someone64
 - Spaceman333
 - spectrefps
@@ -78,10 +92,13 @@ The order is alphabetical.
 - StroggVorbis
 - Talon1024
 - Tapwave
+- Teagan Watson
+- Tesculpture
 - The Zombie Killer
 - TheRailgunner
 - thugsta
 - UndeadZeratul
+- vapidscum
 - wildweasel
 - Zhs2
 - ZikShadow
@@ -100,6 +117,7 @@ The order is alphabetical.
 - 3saster: [[file:../modules/MD5.org][MD5]]
 - Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
 - fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]
+- Gutawer: [[https://gitlab.com/Gutawer/gzdoom-gutamatics][Gutamatics]] (used in old versions)
 - KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566][libeye]], the concept of VM abort handler
 - Kinsie: [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]]
 - Lud (Accensus): [[https://forum.zdoom.org/viewtopic.php?t=51446][Custom Doom]], Dictionary testing
