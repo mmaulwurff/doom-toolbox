@@ -69,6 +69,12 @@ extensions.
 To make TargetSpy ignore classes, put them into ~ts_blocklist~ lump. Any number of
 ~ts_blocklist~ lumps can be loaded. Blocklist filter must be enabled.
 
+*** Follower classes
+
+To make TargetSpy to recognize actors that represent parts of another actors, like
+headshots and enemy parts in some mods, put follower classes in ~ts_followers~ lump.
+Follower classes must have the real enemy actor set in their ~master~ field.
+
 * [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
@@ -206,6 +212,7 @@ OptionMenu ts_FilterOptions
 
 ** Finders
 
+Range for finding targets:
 #+begin_src c :noweb-ref RANGE
 4000.0
 #+end_src
@@ -411,6 +418,21 @@ class tsFinder_Noblockmap : Actor
 
 *** Blocklist
 
+#+begin_src c :noweb-ref strings
+tsFilter_Blocklist = "Blocklist";
+#+end_src
+#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+
+class tsFilter_Blocklist : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    string className = anActor.getClassName();
+    return !ts_EventHandler.getInstance().getBlocklist().contains(className);
+  }
+}
+#+end_src
+
 # spellchecker:off
 
 Autoautosave
@@ -445,21 +467,6 @@ UGGib_Corpse_Shootable
 #+end_src
 
 # spellchecker:on
-
-#+begin_src c :noweb-ref strings
-tsFilter_Blocklist = "Blocklist";
-#+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
-
-class tsFilter_Blocklist : Actor
-{
-  static bool isAllowed(Actor anActor)
-  {
-    string className = anActor.getClassName();
-    return !ts_EventHandler.getInstance().getBlocklist().contains(className);
-  }
-}
-#+end_src
 
 *** Monsters
 
@@ -719,17 +726,19 @@ class tsGetter_TagAndClass : Actor
 *** Flags
 
 #+begin_src c :noweb-ref strings
-tsGetter_Flags = "Flags";
 
-ts_Friendly = "Friendly";
+tsGetter_Flags  = "Flags";
+
+ts_Friendly     = "Friendly";
 ts_Invulnerable = "Invulnerable";
-ts_Boss = "Boss";
-ts_Dormant = "Dormant";
-ts_Buddha = "Buddha";
+ts_Boss         = "Boss";
+ts_Dormant      = "Dormant";
+ts_Buddha       = "Buddha";
 ts_Undamageable = "Undamageable";
-ts_NoBlockmap = "No blockmap";
+ts_NoBlockmap   = "No blockmap";
 #+end_src
 #+begin_src c :noweb-ref strings-ru
+
 ts_Boss = "Босс";
 #+end_src
 #+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
@@ -1630,10 +1639,10 @@ class ts_Kind
 class ts_InformationPiece
 {
   string id;
-  int kind;
+  int    kind;
   string text;
-  int value;
-  int max;
+  int    value;
+  int    max;
 }
 #+end_src
 
@@ -2446,6 +2455,7 @@ version 4.14.3
 
 [[file:modules/PlainTranslator.org][PlainTranslator]]
 
+Translatable strings:
 #+begin_src c :tangle build/TargetSpy/language.txt
 
 [enu default]
