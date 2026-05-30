@@ -89,6 +89,9 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
+#+begin_src c :tangle build/TargetSpy/keyconf.txt :exports none
+// <<license>>
+#+end_src
 #+begin_src c :tangle build/TargetSpy/language.txt :exports none
 // <<license>>
 #+end_src
@@ -160,6 +163,9 @@ OptionMenu ts_Options
   Title "$ts_OptionsTitle"
   ts_PlainTranslator
 
+  Option "TargetSpy on", ts_on, OnOff
+
+  StaticText ""
   StaticText "Toggles"
   Submenu "Finders", ts_FinderToggles
   Submenu "Filters", ts_FilterToggles
@@ -812,8 +818,6 @@ class tsView_Text : Actor
 }
 #+end_src
 
-**** ~draw~
-
 #+begin_src c :noweb-ref tsView_Text.functions
 
 static ui void draw(Array<ts_InformationPiece> informationPieces,
@@ -1298,11 +1302,18 @@ class ts_EventHandler : StaticEventHandler
     if (level.mapName ~== "titlemap") return;
 
     mProjector.prepare();
+    mFader.tick();
+
+    if (!mOptions.isOn())
+    {
+      mCurrentTarget = NULL;
+      return;
+    }
+
     findTargets();
     filterTargets();
     chooseCurrentTarget();
     collectInformation();
-    mFader.tick();
   }
 
   override void worldLoaded(WorldEvent event)
@@ -1618,6 +1629,45 @@ class ts_EventHandler : StaticEventHandler
   private ts_TargetScreenPositionInterpolator mTextInterpolator;
   private ts_TargetScreenPositionInterpolator mFrameInterpolator;
 }
+#+end_src
+
+*** Turn on/off
+
+#+begin_src c :noweb-ref ts_Options.functions
+
+bool isOn() const { return mIsOn.getInt(); }
+#+end_src
+#+begin_src c :noweb-ref ts_Options.members
+
+private Cvar mIsOn;
+#+end_src
+#+begin_src c :noweb-ref options-cvar-initialization
+
+mIsOn = ts_ExistingCvar.find("ts_on");
+#+end_src
+#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+
+user bool ts_on = true;
+#+end_src
+#+begin_src c :tangle build/TargetSpy/keyconf.txt
+
+AddKeySection "$ts_Keys" ts_Keys
+
+Alias ts_turn_on  "ts_on true"
+Alias ts_turn_off "ts_on false"
+Alias +ts_hold ts_turn_on
+Alias -ts_hold ts_turn_off
+
+AddMenuKey "$ts_Hold" +ts_hold
+AddMenuKey "$ts_On"  ts_turn_on
+AddMenuKey "$ts_Off" ts_turn_off
+#+end_src
+#+begin_src c :noweb-ref strings
+
+ts_Keys = "TargeSpy keys";
+ts_Hold = "Hold to turn on";
+ts_On   = "Turn on";
+ts_Off  = "Turn off";
 #+end_src
 
 *** Information piece
