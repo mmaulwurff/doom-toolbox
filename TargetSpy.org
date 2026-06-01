@@ -2114,7 +2114,7 @@ static string makeBar(int value, int max, ts_BarOptions options)
   }
   else
   {
-    filledCount = clamp(int(round(double(value) * length / max)), 0, length);
+    filledCount = clamp(int(ceil(double(value) * length / max)), 0, length);
   }
 
   int percent = int(round(double(value) * 100 / max));
