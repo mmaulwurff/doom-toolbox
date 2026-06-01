@@ -982,30 +982,48 @@ class tsView_Frame : Actor
                       vector2 targetSize)
   {
     if (alpha <= 0.0) return;
-    PlayerInfo player = players[consolePlayer];
     ts_EventHandler eventHandler = ts_EventHandler.getInstance();
-    ts_Projector projector = eventHandler.getProjector();
-    ts_Options options = eventHandler.getOptions();
-    int color = options.isFrameUsingHealthBarColors()
+    ts_FrameMemory  memory       = eventHandler.getFrameMemory();
+    ts_Projector    projector    = eventHandler.getProjector();
+    ts_Options      options      = eventHandler.getOptions();
+
+    double scale      = options.getFrameScale();
+    Font   aFont      = memory.getFont();
+    double lineHeight = round(aFont.getHeight() * scale);
+    int    color      = options.isFrameUsingHealthBarColors()
       ? ts_Utils.getHealthColor(options, informationPieces)
       : Font.CR_Gray;
 
-    targetPosition.z += targetSize.y * 0.6;
-    vector2 rawPosition = projector.makePosition(event, targetPosition);
-    vector2 centerPosition = eventHandler
-      .interpolateFrameScreenPosition(rawPosition);
-    vector2 visibleSize = getVisibleSize(targetPosition, targetSize);
+    vector3 worldPositions[8] =
+    {
+      targetPosition + ( targetSize.x,  targetSize.x, 0),
+      targetPosition + ( targetSize.x, -targetSize.x, 0),
+      targetPosition + (-targetSize.x,  targetSize.x, 0),
+      targetPosition + (-targetSize.x, -targetSize.x, 0),
+      targetPosition + ( targetSize.x,  targetSize.x, targetSize.y),
+      targetPosition + ( targetSize.x, -targetSize.x, targetSize.y),
+      targetPosition + (-targetSize.x,  targetSize.x, targetSize.y),
+      targetPosition + (-targetSize.x, -targetSize.x, targetSize.y)
+    };
 
-    double  halfWidth  = visibleSize.x;
-    double  halfHeight = visibleSize.y * 0.5;
-    double  scale      = options.getFrameScale();
-    Font    aFont      = Font.findFont("NewSmallFont");
-    double  lineHeight = round(aFont.getHeight() * scale);
+    vector2 allScreenPositions[8];
 
-    double left   = centerPosition.x - halfWidth;
-    double right  = centerPosition.x + halfWidth;
-    double top    = centerPosition.y - halfHeight;
-    double bottom = centerPosition.y + halfHeight;
+    for (int i = 0; i < 8; ++i)
+      allScreenPositions[i] = projector.makePosition(event, worldPositions[i]);
+
+    double left   = double.max;
+    double right  = -1;
+    double top    = double.max;
+    double bottom = -1;
+
+    for (int i = 0; i < 8; ++i)
+    {
+      vector2 screenPosition = allScreenPositions[i];
+      left   = min(left,   screenPosition.x);
+      right  = max(right,  screenPosition.x);
+      top    = min(top,    screenPosition.y);
+      bottom = max(bottom, screenPosition.y);
+    }
 
     vector2 positions[4] =
     {
@@ -1014,6 +1032,9 @@ class tsView_Frame : Actor
       (left,  bottom),
       (right, bottom)
     };
+
+    for (int i = 0; i < 4; ++i)
+      positions[i] = memory.interpolateScreenPosition(positions[i], i);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -1029,20 +1050,45 @@ class tsView_Frame : Actor
                             color);
     }
   }
-
-  static ui vector2 getVisibleSize(vector3 targetPosition, vector2 targetSize)
-  {
-    PlayerInfo player = players[consolePlayer];
-
-    double distance = level.vec3diff(player.mo.pos, targetPosition).length();
-    if (distance == 0) return (0, 0);
-
-    double zoomFactor = abs(sin(player.fov));
-    if (zoomFactor == 0) return (0, 0);
-
-    return targetSize * 400.0 / distance / zoomFactor;
-  }
 }
+#+end_src
+
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+
+class ts_FrameMemory
+{
+  void initialize(ts_TargetSource targetSource)
+  {
+    mFont = Font.findFont("NewSmallFont");
+
+    for (int i = 0; i < 4; ++i)
+    {
+      (mInterpolators[i] = new("ts_TargetScreenPositionInterpolator"))
+        .initialize(targetSource);
+    }
+  }
+
+  ui vector2 interpolateScreenPosition(vector2 position, int index)
+  {
+    return mInterpolators[index].interpolateScreenPosition(position);
+  }
+
+  ui Font getFont() const { return mFont; }
+
+  private Font mFont;
+  private ts_TargetScreenPositionInterpolator[4] mInterpolators;
+}
+#+end_src
+
+#+begin_src c :noweb-ref ts_EventHandler.onRegister
+
+(mFrameMemory = new("ts_FrameMemory")).initialize(mCurrentTarget);
+#+end_src
+
+#+begin_src c :noweb-ref ts_EventHandler.extensions
+
+private ts_FrameMemory mFrameMemory;
+clearscope ts_FrameMemory getFrameMemory() { return mFrameMemory; }
 #+end_src
 
 #+begin_src c :noweb-ref ts_Options.functions
@@ -1282,16 +1328,21 @@ class ts_EventHandler : StaticEventHandler
   override void onRegister()
   {
     (mOptions = new("ts_Options")).initialize();
+    (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
+    (mFollowers = new("ts_ClassList")).initialize("ts_followers");
+
+    (mFader = new("ts_Fader")).initialize();
+    (mProjector = new("ts_Projector")).initialize();
+
+    mCurrentTarget = new("ts_TargetSource");
+
     mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
     mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
     mDisabledGettersCvar = ts_ExistingCvar.find("ts_disabled_getters");
     mDisabledViewsCvar   = ts_ExistingCvar.find("ts_disabled_views");
-    (mFader = new("ts_Fader")).initialize();
-    (mBlocklist = new("ts_ClassList")).initialize("ts_blocklist");
-    (mFollowers = new("ts_ClassList")).initialize("ts_followers");
-    (mProjector = new("ts_Projector")).initialize();
-    mTextInterpolator  = new("ts_TargetScreenPositionInterpolator");
-    mFrameInterpolator = new("ts_TargetScreenPositionInterpolator");
+
+    (mTextInterpolator  = new("ts_TargetScreenPositionInterpolator")).initialize(mCurrentTarget);
+    <<ts_EventHandler.onRegister>>
 
     collectClasses();
   }
@@ -1306,7 +1357,7 @@ class ts_EventHandler : StaticEventHandler
 
     if (!mOptions.isOn())
     {
-      mCurrentTarget = NULL;
+      mCurrentTarget.target = NULL;
       return;
     }
 
@@ -1364,12 +1415,7 @@ class ts_EventHandler : StaticEventHandler
 
   ui vector2 interpolateTextScreenPosition(vector2 position)
   {
-    return mTextInterpolator.interpolateScreenPosition(position, mCurrentTarget);
-  }
-
-  ui vector2 interpolateFrameScreenPosition(vector2 position)
-  {
-    return mFrameInterpolator.interpolateScreenPosition(position, mCurrentTarget);
+    return mTextInterpolator.interpolateScreenPosition(position);
   }
 
   private ui bool isInformationEmpty() const
@@ -1446,12 +1492,12 @@ class ts_EventHandler : StaticEventHandler
       mLastTargetPosition = closestTarget.pos;
     }
 
-    mCurrentTarget = closestTarget;
+    mCurrentTarget.target = closestTarget;
   }
 
   private void collectInformation()
   {
-    if (mCurrentTarget == NULL)
+    if (mCurrentTarget.target == NULL)
     {
       if (mFader.getAlpha(1.0) <= 0.0) clearInformation();
       return;
@@ -1474,7 +1520,7 @@ class ts_EventHandler : StaticEventHandler
         [mInformationPieces[i].kind,
          mInformationPieces[i].text,
          mInformationPieces[i].value,
-         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget);
+         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget.target);
       }
     }
   }
@@ -1604,7 +1650,7 @@ class ts_EventHandler : StaticEventHandler
   private Array<string> mFinderClasses;
   private Array<Actor> mTargets;
 
-  private Actor mCurrentTarget;
+  private ts_TargetSource mCurrentTarget;
 
   private Array< Function<play bool(Actor)> > mFilters;
   private Array<string> mFilterClasses;
@@ -1627,7 +1673,8 @@ class ts_EventHandler : StaticEventHandler
   private ts_Projector mProjector;
 
   private ts_TargetScreenPositionInterpolator mTextInterpolator;
-  private ts_TargetScreenPositionInterpolator mFrameInterpolator;
+
+  <<ts_EventHandler.extensions>>
 }
 #+end_src
 
@@ -1829,10 +1876,21 @@ static ui int getHealthColor(ts_Options options, Array<ts_InformationPiece> piec
 
 #+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
 
+class ts_TargetSource
+{
+  Actor target;
+}
+
 class ts_TargetScreenPositionInterpolator
 {
-  ui vector2 interpolateScreenPosition(vector2 screenPosition, Actor currentTarget)
+  void initialize(ts_TargetSource targetSource)
   {
+    mTargetSource = targetSource;
+  }
+
+  ui vector2 interpolateScreenPosition(vector2 screenPosition)
+  {
+    Object currentTarget = mTargetSource.target;
     if (mLastInterpolatedTarget != currentTarget)
     {
       mLastInterpolatedTarget = currentTarget;
@@ -1847,8 +1905,9 @@ class ts_TargetScreenPositionInterpolator
     return mOldScreenPosition;
   }
 
+  private ts_TargetSource mTargetSource;
   private ui vector2 mOldScreenPosition;
-  private ui Actor mLastInterpolatedTarget;
+  private ui Object mLastInterpolatedTarget;
 }
 #+end_src
 
