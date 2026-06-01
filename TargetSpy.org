@@ -665,11 +665,10 @@ class tsGetter_ArmorBar : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    PlayerPawn pawn = players[consolePlayer].mo;
-    let armor = BasicArmor(pawn.FindInventory("BasicArmor"));
+    let armor = BasicArmor(anActor.findInventory("BasicArmor"));
 
-    if (armor == NULL)
-      return ts_Kind.Bar, "", 0, 0;
+    if (armor == NULL || armor.amount == 0)
+      return ts_Kind.Empty, "", 0, 0;
 
     return ts_Kind.Bar, "", armor.amount, armor.actualSaveAmount;
   }
@@ -1422,15 +1421,6 @@ class ts_EventHandler : StaticEventHandler
   ui vector2 interpolateTextScreenPosition(vector2 position)
   {
     return mTextInterpolator.interpolateScreenPosition(position);
-  }
-
-  private ui bool isInformationEmpty() const
-  {
-    int gettersCount = mGetters.size();
-    for (int i = 0; i < gettersCount; ++i)
-      if (mInformationPieces[i].kind != ts_Kind.Empty) return false;
-
-    return true;
   }
 
   private void findTargets()
