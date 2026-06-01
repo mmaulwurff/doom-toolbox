@@ -985,13 +985,14 @@ class tsView_Frame : Actor
     ts_EventHandler eventHandler = ts_EventHandler.getInstance();
     ts_FrameMemory  memory       = eventHandler.getFrameMemory();
     ts_Projector    projector    = eventHandler.getProjector();
-    ts_Options      options      = eventHandler.getOptions();
+    ts_FrameOptions options      = memory.getOptions();
+    ts_Options      mainOptions  = eventHandler.getOptions();
 
-    double scale      = options.getFrameScale();
+    double scale      = options.getScale();
     Font   aFont      = memory.getFont();
     double lineHeight = round(aFont.getHeight() * scale);
-    int    color      = options.isFrameUsingHealthBarColors()
-      ? ts_Utils.getHealthColor(options, informationPieces)
+    int    color      = options.isUsingHealthBarColors()
+      ? ts_Utils.getHealthColor(mainOptions, informationPieces)
       : Font.CR_Gray;
 
     vector3 worldPositions[8] =
@@ -1060,6 +1061,7 @@ class ts_FrameMemory
   void initialize(ts_TargetSource targetSource)
   {
     mFont = Font.findFont("NewSmallFont");
+    (mOptions = new("ts_FrameOptions")).initialize();
 
     for (int i = 0; i < 4; ++i)
     {
@@ -1074,9 +1076,11 @@ class ts_FrameMemory
   }
 
   ui Font getFont() const { return mFont; }
+  ui ts_FrameOptions getOptions() const { return mOptions; }
 
   private Font mFont;
   private ts_TargetScreenPositionInterpolator[4] mInterpolators;
+  private ts_FrameOptions mOptions;
 }
 #+end_src
 
@@ -1091,70 +1095,72 @@ private ts_FrameMemory mFrameMemory;
 clearscope ts_FrameMemory getFrameMemory() { return mFrameMemory; }
 #+end_src
 
-#+begin_src c :noweb-ref ts_Options.functions
+#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
 
-string getFrame(int i) const
+class ts_FrameOptions
 {
-  if (mCustomFrameEnabled.getInt())
+  void initialize()
   {
-    switch (i)
+    mCustomEnabled     = ts_ExistingCvar.find("ts_frame_custom_enabled");
+    mSelected          = ts_ExistingCvar.find("ts_frame_selected");
+    mCustomTopLeft     = ts_ExistingCvar.find("ts_frame_custom_top_left");
+    mCustomTopRight    = ts_ExistingCvar.find("ts_frame_custom_top_right");
+    mCustomBottomLeft  = ts_ExistingCvar.find("ts_frame_custom_bottom_left");
+    mCustomBottomRight = ts_ExistingCvar.find("ts_frame_custom_bottom_right");
+    mScale             = ts_ExistingCvar.find("ts_frame_scale");
+    mWithHealthColors  = ts_ExistingCvar.find("ts_frame_using_health_bar_colors");
+  }
+
+  string getFrame(int i) const
+  {
+    if (mCustomEnabled.getInt())
     {
-      case 0: return mCustomFrameTopLeft.getString();
-      case 1: return mCustomFrameTopRight.getString();
-      case 2: return mCustomFrameBottomLeft.getString();
-      case 3: return mCustomFrameBottomRight.getString();
-      default: return ".";
+      switch (i)
+      {
+        case 0: return mCustomTopLeft.getString();
+        case 1: return mCustomTopRight.getString();
+        case 2: return mCustomBottomLeft.getString();
+        case 3: return mCustomBottomRight.getString();
+        default: return ".";
+      }
     }
+
+    int selectedFrame = clamp(mSelected.getInt(), 0, 7);
+    switch (selectedFrame)
+    {
+      case 0: return mFrames0[i];
+      case 1: return mFrames1[i];
+      case 2: return mFrames2[i];
+      case 3: return mFrames3[i];
+      case 4: return mFrames4[i];
+      case 5: return mFrames5[i];
+      case 6: return mFrames6[i];
+      case 7: return mFrames7[i];
+    }
+    return "";
   }
 
-  int selectedFrame = clamp(mSelectedFrame.getInt(), 0, 7);
-  switch (selectedFrame)
-  {
-    case 0: return mFrames0[i];
-    case 1: return mFrames1[i];
-    case 2: return mFrames2[i];
-    case 3: return mFrames3[i];
-    case 4: return mFrames4[i];
-    case 5: return mFrames5[i];
-    case 6: return mFrames6[i];
-    case 7: return mFrames7[i];
-  }
-  return "";
+  double getScale() const { return mScale.getFloat(); }
+  bool isUsingHealthBarColors() const { return mWithHealthColors.getInt(); }
+
+  private Cvar mCustomEnabled;
+  private Cvar mSelected;
+  private Cvar mCustomTopLeft;
+  private Cvar mCustomTopRight;
+  private Cvar mCustomBottomLeft;
+  private Cvar mCustomBottomRight;
+  private Cvar mScale;
+  private Cvar mWithHealthColors;
+
+  static const string mFrames0[] = {"▛", "▜", "▙", "▟"};
+  static const string mFrames1[] = {"┌", "┐", "└", "┘"};
+  static const string mFrames2[] = {"┏", "┓", "┗", "┛"};
+  static const string mFrames3[] = {"▞", "▚", "▚", "▞"};
+  static const string mFrames4[] = {"╔", "╗", "╚", "╝"};
+  static const string mFrames5[] = {"╭", "╮", "╰", "╯"};
+  static const string mFrames6[] = {"/", '\', '\', "/"};
+  static const string mFrames7[] = {"↘", "↙", "↗", "↖"};
 }
-
-double getFrameScale() const { return mFrameScale.getFloat(); }
-bool isFrameUsingHealthBarColors() const { return mFrameWithHealthColors.getInt(); }
-#+end_src
-#+begin_src c :noweb-ref ts_Options.members
-
-private Cvar mCustomFrameEnabled;
-private Cvar mSelectedFrame;
-private Cvar mCustomFrameTopLeft;
-private Cvar mCustomFrameTopRight;
-private Cvar mCustomFrameBottomLeft;
-private Cvar mCustomFrameBottomRight;
-private Cvar mFrameScale;
-private Cvar mFrameWithHealthColors;
-
-static const string mFrames0[] = {"▛", "▜", "▙", "▟"};
-static const string mFrames1[] = {"┌", "┐", "└", "┘"};
-static const string mFrames2[] = {"┏", "┓", "┗", "┛"};
-static const string mFrames3[] = {"▞", "▚", "▚", "▞"};
-static const string mFrames4[] = {"╔", "╗", "╚", "╝"};
-static const string mFrames5[] = {"╭", "╮", "╰", "╯"};
-static const string mFrames6[] = {"/", '\', '\', "/"};
-static const string mFrames7[] = {"↘", "↙", "↗", "↖"};
-#+end_src
-#+begin_src c :noweb-ref options-cvar-initialization
-
-mCustomFrameEnabled     = ts_ExistingCvar.find("ts_frame_custom_enabled");
-mSelectedFrame          = ts_ExistingCvar.find("ts_frame_selected");
-mCustomFrameTopLeft     = ts_ExistingCvar.find("ts_frame_custom_top_left");
-mCustomFrameTopRight    = ts_ExistingCvar.find("ts_frame_custom_top_right");
-mCustomFrameBottomLeft  = ts_ExistingCvar.find("ts_frame_custom_bottom_left");
-mCustomFrameBottomRight = ts_ExistingCvar.find("ts_frame_custom_bottom_right");
-mFrameScale             = ts_ExistingCvar.find("ts_frame_scale");
-mFrameWithHealthColors  = ts_ExistingCvar.find("ts_frame_using_health_bar_colors");
 #+end_src
 #+begin_src c :tangle build/TargetSpy/cvarinfo.txt
 
