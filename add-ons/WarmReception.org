@@ -5,10 +5,12 @@
 
 * About
 
-Warm Reception is a minimod for UZDoom that alters enemy behavior on level start.
+WarmReception is a minimod for UZDoom that alters enemy behavior on level start.
 
 With this mod, you can either make your life harder by aggravating every enemy from
 the start, or effectively disable hot starts.
+
+WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 ** Options
 
@@ -17,31 +19,34 @@ the start, or effectively disable hot starts.
 - Turn away enemies that look at you at level start, or
 - Turn enemies to you at level start.
 
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/WarmReception/menudef.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/language.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs :exports none
+#+begin_src c :tangle ../build/WarmReception/zscript/wr_EventHandler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/WarmReception/zscript.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/zscript.txt :exports none
 // <<license>>
 #+end_src
 
@@ -49,7 +54,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 TODO: use PlainTranslator?
 
-#+begin_src c :tangle build/WarmReception/menudef.txt
+#+begin_src c :tangle ../build/WarmReception/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$wr_Title", wr_Menu }
 AddOptionMenu OptionsMenuSimple { Submenu "$wr_Title", wr_Menu }
@@ -84,7 +89,7 @@ OptionValue wr_SafeActions
 }
 #+end_src
 
-#+begin_src c :tangle build/WarmReception/language.txt
+#+begin_src c :tangle ../build/WarmReception/language.txt
 
 [enu default]
 
@@ -105,7 +110,7 @@ wr_Other       = "Other enemies";
 
 * Source
 
-#+begin_src c :tangle build/WarmReception/cvarinfo.txt
+#+begin_src c :tangle ../build/WarmReception/cvarinfo.txt
 
 // See wr_EventHandler.Mode enum for values.
 server int wr_start  = 2;
@@ -113,7 +118,7 @@ server int wr_other  = 0;
 server int wr_ambush = 0;
 #+end_src
 
-#+begin_src c :tangle build/WarmReception/zscript/wr_EventHandler.zs
+#+begin_src c :tangle ../build/WarmReception/zscript/wr_EventHandler.zs
 
 class wr_EventHandler : EventHandler
 {
@@ -230,7 +235,7 @@ class wr_Killer : Actor
 
 * Project setup
 
-#+begin_src c :tangle build/WarmReception/mapinfo.txt
+#+begin_src c :tangle ../build/WarmReception/mapinfo.txt
 
 GameInfo
 {
@@ -238,7 +243,7 @@ GameInfo
 }
 #+end_src
 
-#+begin_src c :tangle build/WarmReception/zscript.txt
+#+begin_src c :tangle ../build/WarmReception/zscript.txt
 
 version 4.14.3
 
@@ -249,6 +254,6 @@ version 4.14.3
 
 Basic check: the mod can be loaded without errors.
 
-#+begin_src text :tangle build/WarmReceptionTest/commands.txt
+#+begin_src text :tangle ../build/WarmReceptionTest/commands.txt
 wait 2; map map01; wait 2; quit
 #+end_src

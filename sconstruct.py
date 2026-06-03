@@ -199,9 +199,8 @@ def add_pack_target(org_file, main_target):
 
 def make_check_compatibility_target():
   names = []
-  for org_file in Glob('*.org'):
-    if str(org_file) != 'README.org':
-      names.append(make_project_name(org_file))
+  for org_file in Glob('add-ons/*.org'):
+    names.append(make_project_name(org_file))
 
   projects = ['./build/' + name for name in names]
 
@@ -255,7 +254,7 @@ def make_index(target, source, env):
 # Targets
 pk3_all = Alias('Pk3All', None, None)
 test_all = Alias('TestAll', None, None)
-clematis_target = add_main_target('ClematisM.org', 'build/{0}/zscript.zs')
+clematis_target = add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
 
 module_targets = []
 for org_file in Glob('modules/*.org'):
@@ -266,20 +265,19 @@ for org_file in Glob('modules/*.org'):
   module_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 project_targets = []
-for org_file in Glob('*.org'):
-  if str(org_file) != 'README.org':
-    main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
-    html_target = add_html_target(org_file, main_target)
-    test_target = add_test_target(org_file, main_target)
-    pack_target = add_pack_target(org_file, html_target)
+for org_file in Glob('add-ons/*.org'):
+  main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
+  html_target = add_html_target(org_file, main_target)
+  test_target = add_test_target(org_file, main_target)
+  pack_target = add_pack_target(org_file, html_target)
 
-    if org_file != 'ClematisM.org':
-      Depends(test_target, clematis_target)
-    Depends(test_all, test_target)
-    Depends(pk3_all, pack_target)
-    project_targets.append(
-      f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}'
-    )
+  if org_file != 'ClematisM.org':
+    Depends(test_target, clematis_target)
+  Depends(test_all, test_target)
+  Depends(pk3_all, pack_target)
+  project_targets.append(
+    f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}'
+  )
 
 html_all = Alias('HtmlAll', None, make_index)
 for org_file in Glob('*/*.org') + Glob('*.org'):
@@ -301,9 +299,8 @@ AlwaysBuild(
 )
 
 AlwaysBuild(Alias('CheckCompatibility', None, make_check_compatibility_target()))
-for org_file in Glob('*.org'):
-  if str(org_file) != 'README.org':
-    Depends('CheckCompatibility', make_project_name(org_file))
+for org_file in Glob('add-ons/*.org'):
+  Depends('CheckCompatibility', make_project_name(org_file))
 
 
 # Dependencies

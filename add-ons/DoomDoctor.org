@@ -3,45 +3,47 @@
 #+title: DoomDoctor
 # #+version: v1.0.0
 
+* About
+
 DoomDoctor contains tools for mod debugging.
 
 DoomDoctor is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * Licenses
 
-[[file:LICENSES/CC0-1.0.txt][CC0-1.0]]
+[[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
 #+begin_src text :exports none :noweb-ref CC
 SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt :exports none
+#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle build/DoomDoctor/keyconf.txt :exports none
+#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle build/DoomDoctor/mapinfo.txt :exports none
+#+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+begin_src text :noweb-ref GPL
 SPDX-FileCopyrightText: © 2021 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctor/zscript.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Troublemaker.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Troublemaker.zs :exports none
 // <<GPL>>
 #+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * Tests preamble
 
@@ -52,7 +54,7 @@ Notes:
   interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
-#+begin_src text :tangle build/DoomDoctorTest/commands.txt
+#+begin_src text :tangle ../build/DoomDoctorTest/commands.txt
 
 dd_logging_engine_events_enabled  true;
 dd_logging_replace_events_enabled true;
@@ -73,11 +75,11 @@ wait 16; resurrect; warp 60 -128 0; +use;
 wait 19; quit
 #+end_src
 
-#+begin_src text :tangle build/DoomDoctorTest/mapinfo.txt :exports none
+#+begin_src text :tangle ../build/DoomDoctorTest/mapinfo.txt :exports none
 GameInfo { EventHandlers = "dd_LoggerTestRunner" }
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs :exports none
 version 4.14.3
 
 class dd_LoggerTest : Clematis {}
@@ -131,7 +133,7 @@ class dd_LoggerTestRunner : StaticEventHandler
 
 * Source code preamble
 
-#+begin_src text :tangle build/DoomDoctor/mapinfo.txt :exports none
+#+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
 GameInfo
 {
   EventHandlers = "dd_VmAbortHandler",
@@ -141,10 +143,10 @@ GameInfo
 }
 #+end_src
 
-#+begin_src c :tangle build/DoomDoctor/zscript.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript.zs :exports none
 version 4.14.3
 
-<<tools/scripts.org:include("DoomDoctor.org", "build/DoomDoctor/\\(zscript/.*zs\\)")>>
+<<../tools/scripts.org:include("add-ons/DoomDoctor.org", "build/DoomDoctor/\\(zscript/.*zs\\)")>>
 
 #include "zscript/dd_StringUtils.zs"
 #include "zscript/dd_VmAbortReporter.zs"
@@ -152,21 +154,21 @@ version 4.14.3
 
 Note: ~dd_StringUtils.zs~ must be installed externally.
 
-[[file:modules/StringUtils.org][StringUtils]]
+[[file:../modules/StringUtils.org][StringUtils]]
 
 * VM Abort Handling
 
-[[file:modules/VmAbortReporter.org][VmAbortReporter]]
+[[file:../modules/VmAbortReporter.org][VmAbortReporter]]
 
 ** Settings
 
-#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt
+#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
 ** Console commands
 
-#+begin_src text :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_report "event dd_report"
 #+end_src
 
@@ -178,7 +180,7 @@ events.
 ** Console commands
 
 *** Commands to cause problematic events
-#+begin_src text :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_nullify_player        "netevent dd_nullify_player"
 Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
 Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
@@ -187,7 +189,7 @@ Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNo
 #+end_src
 
 *** Helper commands
-#+begin_src text :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_revive_everything     "netevent dd_revive_everything"
 Alias dd_force_lightning       "netevent dd_force_lightning"
 #+end_src
@@ -196,7 +198,7 @@ Alias dd_force_lightning       "netevent dd_force_lightning"
 
 TODO: make ~dd_Troublemaker~ savefile-compatible (~StaticEventHandler~).
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Troublemaker.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Troublemaker.zs
 
 mixin class dd_Volatile { override void Tick() { if (GetAge() > 0) destroy(); }  }
 
@@ -284,7 +286,7 @@ class dd_Troublemaker : EventHandler
 
 ** Settings
 
-#+begin_src text :tangle build/DoomDoctor/cvarinfo.txt
+#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt
 server bool dd_logging_engine_events_enabled  = false;
 server bool dd_logging_replace_events_enabled = false;
 
@@ -295,7 +297,7 @@ user bool dd_logging_process_events_enabled = false;
 
 ** Console commands
 
-#+begin_src text :tangle build/DoomDoctor/keyconf.txt
+#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
 
 Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
 #+end_src
@@ -307,7 +309,7 @@ prints level time.
 
 ~StaticEventHandler~ used as a Singleton.
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 
 class dd_BufferedConsole : StaticEventHandler
 {
@@ -345,17 +347,17 @@ Notes
 - Most events are followed by the test code that also works as an example of what an
   event report contains.
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 class dd_Logger : StaticEventHandler
 #+end_src
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs :exports none
 {
 #+end_src
 
 *** Engine events
 
 **** ~OnRegister~
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnRegister()
 {
   if (!dd_logging_engine_events_enabled) return;
@@ -367,7 +369,7 @@ override void OnRegister()
   logInfo();
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 void OnRegisterTest()
 {
   assert("log: OnRegister", mConsole.contains("OnRegister"));
@@ -377,7 +379,7 @@ void OnRegisterTest()
 
 **** ~OnUnregister~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnUnregister()
 {
   if (!dd_logging_engine_events_enabled) return;
@@ -391,7 +393,7 @@ Note: event order for ~OnUnregister~ is reversed.
 
 **** ~OnEngineInitialize~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnEngineInitialize()
 {
   if (!dd_logging_engine_events_enabled) return;
@@ -400,7 +402,7 @@ override void OnEngineInitialize()
   logInfo();
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void OnEngineInitialize()
 {
   assert("log: OnEngineInitialize", mConsole.contains("OnEngineInitialize"));
@@ -410,7 +412,7 @@ override void OnEngineInitialize()
 
 **** ~NewGame~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void NewGame()
 {
   if (!dd_logging_engine_events_enabled) return;
@@ -419,7 +421,7 @@ override void NewGame()
   logInfo();
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void NewGame()
 {
   <<only-once()>>;
@@ -432,7 +434,7 @@ override void NewGame()
 *** World events
 
 **** ~WorldLoaded~
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLoaded(WorldEvent event)
 {
   // To load Cvars when the game is loaded from a save.
@@ -445,7 +447,7 @@ override void WorldLoaded(WorldEvent event)
   check(OtherHandlers | PlayerChecks, event);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldLoaded(WorldEvent event)
 {
   <<only-once()>>;
@@ -459,7 +461,7 @@ override void WorldLoaded(WorldEvent event)
 
 **** ~WorldUnloaded~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldUnloaded(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -473,7 +475,7 @@ Note: event order for ~WorldUnloaded~ is reversed.
 
 **** ~WorldThingSpawned~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingSpawned(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -483,7 +485,7 @@ override void WorldThingSpawned(WorldEvent event)
   check(PlayerChecks | ThingNull | NoTag, event);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldThingSpawned(WorldEvent event)
 {
   <<only-once()>>;
@@ -496,7 +498,7 @@ override void WorldThingSpawned(WorldEvent event)
 
 **** ~WorldThingDied~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDied(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -509,7 +511,7 @@ override void WorldThingDied(WorldEvent event)
 
 The player is killed by console commands in [[Tests preamble]] section.
 
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldThingDied(WorldEvent event)
 {
   assert("log: WorldThingDied", mConsole.contains("WorldThingDied"));
@@ -521,7 +523,7 @@ override void WorldThingDied(WorldEvent event)
 
 **** ~WorldThingGround~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingGround(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -536,7 +538,7 @@ TODO: how to test this?
 
 **** ~WorldThingRevived~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingRevived(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -549,7 +551,7 @@ override void WorldThingRevived(WorldEvent event)
 
 The player is resurrected by console commands in [[Tests preamble]] section.
 
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldThingRevived(WorldEvent event)
 {
   assert("log: WorldThingRevived", mConsole.contains("WorldThingRevived"));
@@ -560,7 +562,7 @@ override void WorldThingRevived(WorldEvent event)
 
 **** ~WorldThingDamaged~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDamaged(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -574,7 +576,7 @@ override void WorldThingDamaged(WorldEvent event)
 
 The player is damaged by console commands in [[Tests preamble]] section.
 
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldThingDamaged(WorldEvent event)
 {
   <<only-once()>>;
@@ -588,7 +590,7 @@ override void WorldThingDamaged(WorldEvent event)
 
 **** ~WorldThingDestroyed~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDestroyed(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -604,7 +606,7 @@ Note: event order for ~WorldThingDestroyed~ is reversed.
 
 **** ~WorldLinePreActivated~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLinePreActivated(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -614,7 +616,7 @@ override void WorldLinePreActivated(WorldEvent event)
   check(PlayerChecks | ThingNull, event);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldLinePreActivated(WorldEvent event)
 {
   assert("log: WorldLinePreActivated", mConsole.contains("WorldLinePreActivated"));
@@ -627,7 +629,7 @@ override void WorldLinePreActivated(WorldEvent event)
 
 **** ~WorldLineActivated~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLineActivated(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -637,7 +639,7 @@ override void WorldLineActivated(WorldEvent event)
   check(PlayerChecks | ThingNull, event);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldLineActivated(WorldEvent event)
 {
   assert("log: WorldLineActivated", mConsole.contains("WorldLineActivated"));
@@ -649,7 +651,7 @@ override void WorldLineActivated(WorldEvent event)
 
 **** ~WorldSectorDamaged~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldSectorDamaged(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -663,7 +665,7 @@ override void WorldSectorDamaged(WorldEvent event)
 
 **** ~WorldLineDamaged~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLineDamaged(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -677,7 +679,7 @@ override void WorldLineDamaged(WorldEvent event)
 
 **** ~WorldLightning~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLightning(WorldEvent event)
 {
   if (!dd_logging_world_events_enabled.getBool()) return;
@@ -687,7 +689,7 @@ override void WorldLightning(WorldEvent event)
   check(PlayerChecks, event);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void WorldLightning(WorldEvent event)
 {
   assert("log: WorldLightning", mConsole.contains("WorldLightning"));
@@ -697,7 +699,7 @@ override void WorldLightning(WorldEvent event)
 
 **** ~WorldTick~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldTick()
 {
   mFunctionName = "WorldTick";
@@ -710,7 +712,7 @@ override void WorldTick()
 
 **** ~PlayerEntered~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerEntered(PlayerEvent event)
 {
   if (!dd_logging_player_events_enabled.getBool()) return;
@@ -720,7 +722,7 @@ override void PlayerEntered(PlayerEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void PlayerEntered(PlayerEvent event)
 {
   <<only-once()>>;
@@ -734,7 +736,7 @@ override void PlayerEntered(PlayerEvent event)
 
 **** ~PlayerSpawned~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerSpawned(PlayerEvent event)
 {
   loadCvars();
@@ -746,7 +748,7 @@ override void PlayerSpawned(PlayerEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void PlayerSpawned(PlayerEvent event)
 {
   <<only-once()>>;
@@ -758,7 +760,7 @@ override void PlayerSpawned(PlayerEvent event)
 
 **** ~PlayerRespawned~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerRespawned(PlayerEvent event)
 {
   if (!dd_logging_player_events_enabled.getBool()) return;
@@ -768,7 +770,7 @@ override void PlayerRespawned(PlayerEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void PlayerRespawned(PlayerEvent event)
 {
   assert("log: PlayerRespawned", mConsole.contains("PlayerRespawned"));
@@ -778,7 +780,7 @@ override void PlayerRespawned(PlayerEvent event)
 
 **** ~PlayerDied~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerDied(PlayerEvent event)
 {
   if (!dd_logging_player_events_enabled.getBool()) return;
@@ -788,7 +790,7 @@ override void PlayerDied(PlayerEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void PlayerDied(PlayerEvent event)
 {
   assert("log: PlayerDied", mConsole.contains("PlayerDied"));
@@ -798,7 +800,7 @@ override void PlayerDied(PlayerEvent event)
 
 **** ~PlayerDisconnected~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerDisconnected(PlayerEvent event)
 {
   if (!dd_logging_player_events_enabled.getBool()) return;
@@ -815,7 +817,7 @@ TODO: test this.
 
 **** ~ConsoleProcess~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void ConsoleProcess(ConsoleEvent event)
 {
   if (!dd_logging_process_events_enabled.getBool()) return;
@@ -825,7 +827,7 @@ override void ConsoleProcess(ConsoleEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void ConsoleProcess(ConsoleEvent event)
 {
   assert("log: ConsoleProcess", mConsole.contains("ConsoleProcess"));
@@ -836,7 +838,7 @@ override void ConsoleProcess(ConsoleEvent event)
 
 **** ~InterfaceProcess~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void InterfaceProcess(ConsoleEvent event)
 {
   if (!dd_logging_process_events_enabled.getBool()) return;
@@ -846,7 +848,7 @@ override void InterfaceProcess(ConsoleEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void InterfaceProcess(ConsoleEvent event)
 {
   assert("log: InterfaceProcess", mConsole.contains("InterfaceProcess"));
@@ -858,7 +860,7 @@ override void InterfaceProcess(ConsoleEvent event)
 
 **** ~NetworkProcess~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void NetworkProcess(ConsoleEvent event)
 {
   if (!dd_logging_process_events_enabled.getBool()) return;
@@ -868,7 +870,7 @@ override void NetworkProcess(ConsoleEvent event)
   check(PlayerChecks);
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void NetworkProcess(ConsoleEvent event)
 {
   <<only-once()>>;
@@ -884,7 +886,7 @@ override void NetworkProcess(ConsoleEvent event)
 
 **** ~CheckReplacement~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void CheckReplacement(ReplaceEvent event)
 {
   if (!dd_logging_replace_events_enabled) return;
@@ -893,7 +895,7 @@ override void CheckReplacement(ReplaceEvent event)
   logInfo(describeReplaceEvent(event));
 }
 #+end_src
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 override void CheckReplacement(ReplaceEvent event)
 {
   <<only-once()>>;
@@ -906,7 +908,7 @@ override void CheckReplacement(ReplaceEvent event)
 
 **** ~CheckReplacee~
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void CheckReplacee(ReplacedEvent event)
 {
   if (!dd_logging_replace_events_enabled) return;
@@ -920,7 +922,7 @@ Note: nothing is replaced, so no such event in the base game.
 
 *** Constants
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 enum CheckFlags
   {
     Nothing       = 1 << 0,
@@ -970,7 +972,7 @@ const LineProperties = ActivatedLine | ActivationType;
 TODO: move checks to somewhere where they are move visible.
 TODO: add a check if weapons have icons. Filter by weapons that player can have.
 
-#+begin_src c :tangle build/DoomDoctor/zscript/dd_Logger.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 
 private clearscope void check(int checks, WorldEvent aWorldEvent = NULL)
 {
@@ -1205,7 +1207,7 @@ private dd_BufferedConsole console;
 
 * Tests end :noexport:
 
-#+begin_src c :tangle build/DoomDoctorTest/zscript.zs
+#+begin_src c :tangle ../build/DoomDoctorTest/zscript.zs
 <<only-once-park-flags()>>
 
 } // class dd_LoggerTestRunner

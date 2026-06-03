@@ -31,15 +31,15 @@ This project doesn't use any AI tools or resources.
 |--------------------+--------------------------------------------------+-------------|
 | *Add-ons*          |                                                  |             |
 |--------------------+--------------------------------------------------+-------------|
-| [[file:10.5x.org][10.5x]]              | enemy number multiplier                          | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]        |
-| [[file:FinalCustomDoom.org][FinalCustomDoom]]    | gameplay customization options                   | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]        |
-| [[file:Gearbox.org][Gearbox]]            | more convenient ways to select weapons and items | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]        |
-| [[file:HitImpact.org][HitImpact]]          | textured particles when level geometry is hit    | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]        |
-| [[file:Nomina.org][Nomina]]             | enemy names helper                               | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]        |
-| [[file:SoundToScreen.org][SoundToScreen]]      | shows where sounds come from                     | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]        |
-| [[file:TargetSpy.org][TargetSpy]]          | enemy health bar                                 | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]        |
-| [[file:Typist.pk3.org][Typist.pk3]]         | turns FPS games into typing exercises            | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]        |
-| [[file:WarmReception.org][WarmReception]]      | alters enemy behavior on level start             | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]        |
+| [[file:add-ons/10.5x.org][10.5x]]              | enemy number multiplier                          | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]        |
+| [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]    | gameplay customization options                   | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]        |
+| [[file:add-ons/Gearbox.org][Gearbox]]            | more convenient ways to select weapons and items | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]        |
+| [[file:add-ons/HitImpact.org][HitImpact]]          | textured particles when level geometry is hit    | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]        |
+| [[file:add-ons/Nomina.org][Nomina]]             | enemy names helper                               | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]        |
+| [[file:add-ons/SoundToScreen.org][SoundToScreen]]      | shows where sounds come from                     | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]        |
+| [[file:add-ons/TargetSpy.org][TargetSpy]]          | enemy health bar                                 | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]        |
+| [[file:add-ons/Typist.pk3.org][Typist.pk3]]         | turns FPS games into typing exercises            | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]        |
+| [[file:add-ons/WarmReception.org][WarmReception]]      | alters enemy behavior on level start             | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]        |
 |--------------------+--------------------------------------------------+-------------|
 | *Modules*          |                                                  |             |
 |--------------------+--------------------------------------------------+-------------|
@@ -55,8 +55,8 @@ This project doesn't use any AI tools or resources.
 |--------------------+--------------------------------------------------+-------------|
 | *Tools*            |                                                  |             |
 |--------------------+--------------------------------------------------+-------------|
-| [[file:ClematisM.org][ClematisM]]          | ZScript unit test framework                      |             |
-| [[file:DoomDoctor.org][DoomDoctor]]         | mod development and debugging utilities          |             |
+| [[file:add-ons/ClematisM.org][ClematisM]]          | ZScript unit test framework                      |             |
+| [[file:add-ons/DoomDoctor.org][DoomDoctor]]         | mod development and debugging utilities          |             |
 
 Add-ons can be included and used in your own projects. However, this is not
 recommended, because when add-ons update, players won't be able to use new versions

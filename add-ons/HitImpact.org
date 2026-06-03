@@ -22,38 +22,40 @@ Known issues:
 
 There is room for improvement, help appreciated!
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/HitImpact/mapinfo.zs :exports none
+#+begin_src c :tangle ../build/HitImpact/mapinfo.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/HitImpact/zscript.zs :exports none
+#+begin_src c :tangle ../build/HitImpact/zscript.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src text :tangle build/HitImpact/animdefs.txt :exports none
+#+begin_src text :tangle ../build/HitImpact/animdefs.txt :exports none
 // <<license>>
 #+end_src
 
 * Source
 
-#+begin_src c :tangle build/HitImpact/mapinfo.zs
+#+begin_src c :tangle ../build/HitImpact/mapinfo.zs
 
 GameInfo { EventHandlers = "hi_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle build/HitImpact/zscript.zs
+#+begin_src c :tangle ../build/HitImpact/zscript.zs
 
 version 4.14.3
 #+end_src
 
-#+begin_src c :tangle build/HitImpact/zscript.zs
+#+begin_src c :tangle ../build/HitImpact/zscript.zs
 
 class hi_EventHandler : StaticEventHandler
 {
@@ -353,7 +355,7 @@ class hi_EventHandler : StaticEventHandler
 }
 #+end_src
 
-#+begin_src c :tangle build/HitImpact/zscript.zs
+#+begin_src c :tangle ../build/HitImpact/zscript.zs
 
 struct ts_HitData
 {
@@ -381,7 +383,7 @@ Animdefs:
  (number-sequence 0 (- hi-canvas-count 1)))
 #+end_src
 
-#+begin_src text :tangle build/HitImpact/animdefs.txt :exports none
+#+begin_src text :tangle ../build/HitImpact/animdefs.txt :exports none
 <<canvas-count("false")>>
 <<generate-canvas-textures()>>
 #+end_src
@@ -391,7 +393,7 @@ Animdefs:
 Check that the add-on at least can be loaded, and both hitscan and projectile attacks
 don't cause critical issues.
 
-#+begin_src text :tangle build/HitImpactTest/commands.txt
+#+begin_src text :tangle ../build/HitImpactTest/commands.txt
 wait   1; map map01
 wait  10; give all
 wait  20; +attack

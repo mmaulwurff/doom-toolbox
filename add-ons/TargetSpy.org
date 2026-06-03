@@ -79,67 +79,67 @@ To make TargetSpy to recognize actors that represent parts of another actors, li
 headshots and enemy parts in some mods, put follower classes in ~ts_followers~ lump.
 Follower classes must have the real enemy actor set in their ~master~ field.
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/keyconf.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/language.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/ts_followers.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_common.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_event_handler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_finders.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_options.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_types.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript.zs :exports none
 // <<license>>
 #+end_src
 
-#+begin_src toml :tangle build/TargetSpy/REUSE.toml :exports none
+#+begin_src toml :tangle ../build/TargetSpy/REUSE.toml :exports none
 
 # https://reuse.software/
 
@@ -157,7 +157,7 @@ SPDX-License-Identifier = "CC0-1.0"
 ts_OptionsTitle = "TargetSpy \cd⌖";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$ts_OptionsTitle", ts_Options }
 AddOptionMenu OptionsMenuSimple { Submenu "$ts_OptionsTitle", ts_Options }
@@ -185,7 +185,7 @@ OptionMenu ts_Options
 }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/menudef.txt :exports none
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt :exports none
 
 OptionMenu ts_FinderToggles
 {
@@ -233,7 +233,7 @@ Range for finding targets:
 tsFinder_Aim = "Aim target";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_finders.zs
 
 class tsFinder_Aim : Actor
 {
@@ -250,7 +250,7 @@ class tsFinder_Aim : Actor
 tsFinder_Shootable = "Shootable only";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_finders.zs
 
 class tsFinder_Shootable : Actor
 {
@@ -275,7 +275,7 @@ class tsFinder_Shootable : Actor
 tsFinder_NonShootable = "Non-shootable too";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_finders.zs
 
 class tsFinder_NonShootable : Actor
 {
@@ -297,7 +297,7 @@ class tsFinder_NonShootable : Actor
 tsFinder_Noblockmap = "Everything";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_finders.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_finders.zs
 
 // SPDX-FileCopyrightText: © 2020 proydoha
 
@@ -431,7 +431,7 @@ class tsFinder_Noblockmap : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Blocklist = "Blocklist";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Blocklist : Actor
 {
@@ -446,7 +446,7 @@ class tsFilter_Blocklist : Actor
 # spellchecker:off
 
 Autoautosave
-#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+#+begin_src text :tangle ../build/TargetSpy/ts_blocklist.txt
 AutoautosaveAlertToken
 AutoautosaveAlerter
 AutoautosaveBossAlerter
@@ -455,7 +455,7 @@ m8f_aas_token
 #+end_src
 
 The Adventures of Square
-#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+#+begin_src text :tangle ../build/TargetSpy/ts_blocklist.txt
 Cow
 CowboyCow
 MummyCow
@@ -465,14 +465,14 @@ SpaceCowFloating
 #+end_src
 
 ???
-#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+#+begin_src text :tangle ../build/TargetSpy/ts_blocklist.txt
 ShieldDefense
 ShieldDefense2
 VoidField
 #+end_src
 
 Universal Gibs
-#+begin_src text :tangle build/TargetSpy/ts_blocklist.txt
+#+begin_src text :tangle ../build/TargetSpy/ts_blocklist.txt
 UGGib_Corpse_Shootable
 #+end_src
 
@@ -483,7 +483,7 @@ UGGib_Corpse_Shootable
 #+begin_src c :noweb-ref strings
 tsFilter_Monsters = "Monsters only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Monsters : Actor
 {
@@ -496,7 +496,7 @@ class tsFilter_Monsters : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_LightLevel = "Lit only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_LightLevel : Actor
 {
@@ -524,7 +524,7 @@ private Cvar mMinLightLevelCvar;
 #+begin_src c :noweb-ref options-cvar-initialization
 mMinLightLevelCvar = ts_ExistingCvar.find("ts_min_light_level");
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 user int ts_min_light_level = 120;
 #+end_src
 #+begin_src c :noweb-ref filter-options
@@ -536,7 +536,7 @@ Slider "Minimal light level", ts_min_light_level, 0, 250, 10, 0
 #+begin_src c :noweb-ref strings
 tsFilter_Health = "Positive health only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Health : Actor
 {
@@ -549,7 +549,7 @@ class tsFilter_Health : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Hidden = "Not hidden only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Hidden : Actor
 {
@@ -565,7 +565,7 @@ class tsFilter_Hidden : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Enemies = "Enemies only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Enemies : Actor
 {
@@ -578,7 +578,7 @@ class tsFilter_Enemies : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Dormant = "Not dormant only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Dormant : Actor
 {
@@ -591,7 +591,7 @@ class tsFilter_Dormant : Actor
 #+begin_src c :noweb-ref strings
 tsFilter_Active = "Active only";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class tsFilter_Active : Actor
 {
@@ -610,7 +610,7 @@ tsGetter_Health = "Health";
 tsGetter_Health = "Здоровье";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Health : Actor
 {
@@ -627,7 +627,7 @@ class tsGetter_Health : Actor
 tsGetter_HealthAndMax = "Health and max health";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_HealthAndMax : Actor
 {
@@ -645,7 +645,7 @@ class tsGetter_HealthAndMax : Actor
 tsGetter_HealthBar = "Health bar";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_HealthBar : Actor
 {
@@ -663,7 +663,7 @@ class tsGetter_HealthBar : Actor
 tsGetter_ArmorBar = "Armor bar";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_ArmorBar : Actor
 {
@@ -684,7 +684,7 @@ class tsGetter_ArmorBar : Actor
 #+begin_src c :noweb-ref strings
 tsGetter_Class = "Class name";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Class : Actor
 {
@@ -700,7 +700,7 @@ class tsGetter_Class : Actor
 #+begin_src c :noweb-ref strings
 tsGetter_Tag = "Tag";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Tag : Actor
 {
@@ -722,7 +722,7 @@ class tsGetter_Tag : Actor
 #+begin_src c :noweb-ref strings
 tsGetter_TagAndClass = "Tag (class)";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_TagAndClass : Actor
 {
@@ -756,7 +756,7 @@ ts_NoBlockmap   = "No blockmap";
 
 ts_Boss = "Босс";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
 
 class tsGetter_Flags : Actor
 {
@@ -795,7 +795,7 @@ class tsGetter_Flags : Actor
 
 *** Fader
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class ts_Fader
 {
@@ -819,7 +819,7 @@ class ts_Fader
 #+begin_src c :noweb-ref strings
 tsView_Text = "Plain text";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class tsView_Text : Actor
 {
@@ -946,7 +946,7 @@ mYPositionCvar  = ts_ExistingCvar.find("ts_y_position");
 mPlaceCvar      = ts_ExistingCvar.find("ts_place");
 mBackgroundCvar = ts_ExistingCvar.find("ts_background");
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 user float ts_scale = 1.0;
 user float ts_x_position = 0.5;
@@ -954,7 +954,7 @@ user float ts_y_position = 0.2;
 user int   ts_place = 0;
 user bool  ts_background = false;
 #+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 OptionMenu ts_TextViewOptions
 {
@@ -985,7 +985,7 @@ OptionValue ts_Places
 #+begin_src c :noweb-ref strings
 tsView_Frame = "Frame";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class tsView_Frame : Actor
 {
@@ -1067,7 +1067,7 @@ class tsView_Frame : Actor
 }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class ts_FrameMemory
 {
@@ -1108,7 +1108,7 @@ private ts_FrameMemory mFrameMemory;
 clearscope ts_FrameMemory getFrameMemory() { return mFrameMemory; }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class ts_FrameOptions
 {
@@ -1175,7 +1175,7 @@ class ts_FrameOptions
   static const string mFrames7[] = {"↘", "↙", "↗", "↖"};
 }
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 user bool   ts_frame_custom_enabled = false;
 user int    ts_frame_selected = 0;
@@ -1186,7 +1186,7 @@ user string ts_frame_custom_bottom_right = ".";
 user float  ts_frame_scale = 1.0;
 user bool   ts_frame_using_health_bar_colors = true;
 #+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 OptionMenu ts_FrameOptions
 {
@@ -1216,7 +1216,7 @@ OptionMenu ts_FrameOptions
 #+begin_src c :noweb-ref strings
 tsView_Crosshair = "Crosshair";
 #+end_src
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class tsView_Crosshair : Actor
 {
@@ -1310,7 +1310,7 @@ mCrosshairBottom = ts_ExistingCvar.find("ts_crosshair_bottom");
 mCrosshairAlways = ts_ExistingCvar.find("ts_crosshair_always");
 mCrosshairHealth = ts_ExistingCvar.find("ts_crosshair_health");
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 user float  ts_crosshair_height = 10.0;
 user float  ts_crosshair_scale  = 1.0;
@@ -1320,7 +1320,7 @@ user string ts_crosshair_bottom = "^";
 user bool   ts_crosshair_always = false;
 user bool   ts_crosshair_health = true;
 #+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 OptionMenu ts_CrosshairOptions
 {
@@ -1344,7 +1344,7 @@ OptionMenu ts_CrosshairOptions
 
 *** Event handler
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_event_handler.zs
 
 class ts_EventHandler : StaticEventHandler
 {
@@ -1715,11 +1715,11 @@ private Cvar mIsOn;
 
 mIsOn = ts_ExistingCvar.find("ts_on");
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 user bool ts_on = true;
 #+end_src
-#+begin_src c :tangle build/TargetSpy/keyconf.txt
+#+begin_src c :tangle ../build/TargetSpy/keyconf.txt
 
 AddKeySection "$ts_Keys" ts_Keys
 
@@ -1742,7 +1742,7 @@ ts_Off  = "Turn off";
 
 *** Information piece
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_types.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_types.zs
 
 class ts_Kind
 {
@@ -1769,7 +1769,7 @@ class ts_InformationPiece
 
 *** Class list
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_filters.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_filters.zs
 
 class ts_ClassList
 {
@@ -1815,7 +1815,7 @@ class ts_ClassList
 
 TODO: move to a module?
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_common.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_common.zs
 
 class ts_ExistingCvar
 {
@@ -1833,7 +1833,7 @@ class ts_ExistingCvar
 
 Functions in ~ts_Utils~ class.
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_getters.zs :exports none
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs :exports none
 
 class ts_Utils
 {
@@ -1898,7 +1898,7 @@ static ui int getHealthColor(ts_Options options, Array<ts_InformationPiece> piec
 
 *** Target screen position interpolator
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_event_handler.zs
 
 class ts_TargetSource
 {
@@ -1937,7 +1937,7 @@ class ts_TargetScreenPositionInterpolator
 
 *** Class utilities
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_event_handler.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_event_handler.zs
 
 class ts_Classes
 {
@@ -1961,7 +1961,7 @@ class ts_Classes
 *** Follower classes
 
 ???
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+#+begin_src c :tangle ../build/TargetSpy/ts_followers.txt
 HeadshotTargetZombie
 HeadshotTargetEliteZombie
 HeadshotTargetImp
@@ -1982,12 +1982,12 @@ HeadshotTargetCyberdemon
 #+end_src
 
 Brutal Doom
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+#+begin_src c :tangle ../build/TargetSpy/ts_followers.txt
 HeadshotTargetBase
 #+end_src
 
 Venturous
-#+begin_src c :tangle build/TargetSpy/ts_followers.txt
+#+begin_src c :tangle ../build/TargetSpy/ts_followers.txt
 HeadshotHitbox
 HeadshotHitboxDouble
 HeadshotHitboxHigher
@@ -1996,7 +1996,7 @@ HeadshotHitboxHeavyeadshotHitbox
 
 *** Projector
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class ts_Projector
 {
@@ -2051,7 +2051,7 @@ class ts_Projector
 
 *** View utilities
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_views.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_views.zs
 
 class ts_ViewUtils ui
 {
@@ -2150,7 +2150,7 @@ static string makeBar(int value, int max, ts_BarOptions options)
 const SMALL_A = ts_Ascii.LATIN_SMALL_LETTER_A;
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_options.zs
 
 class ts_BarOptions
 {
@@ -2237,7 +2237,7 @@ findGetters(getterClasses);
 foreach (aClass : getterClasses)
   mBarOptions.insert(aClass, (new("ts_BarOptions")).initialize(aClass));
 #+end_src
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 <<bar-cvars-definition("DefaultBar")>>
 <<bar-cvars-definition("HealthBar")>>
@@ -2265,7 +2265,7 @@ user int ts_%1$s_empty_character_index  = 0;
 user string ts_%1$s_characters = \"█▓▒░❤♡☻☹⛧⛤☣✚⛊●☐☒☑⚙\";
 " class)
 #+end_src
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 <<bar-options-definition("DefaultBar")>>
 <<bar-options-definition("HealthBar")>>
@@ -2316,7 +2316,7 @@ OptionMenu ts_%1$sOptions
 
 **** Toggles
 
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
 user string ts_disabled_finders = "NonShootable,Noblockmap";
 user string ts_disabled_filters = "LightLevel,Enemies,Dormant,Active";
@@ -2329,7 +2329,7 @@ ts_AllOn  = "Activate all";
 ts_AllOff = "Deactivate all";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs
 
 class ts_ClassToggles : OptionMenu
 {
@@ -2419,7 +2419,7 @@ class %2$sToggles : ts_ClassToggles
 
 **** Highlighted character static text
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs
 
 class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 {
@@ -2447,7 +2447,7 @@ class OptionMenuItemts_HighlightedCharacter : OptionMenuItemStaticText
 
 **** Bar preview
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs
 
 class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 {
@@ -2476,7 +2476,7 @@ class OptionMenuItemts_BarPreview : OptionMenuItemStaticText
 
 **** Getters order
 
-#+begin_src c :tangle build/TargetSpy/menudef.txt
+#+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
 OptionMenu ts_GettersOrder
 {
@@ -2485,11 +2485,11 @@ OptionMenu ts_GettersOrder
 }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/cvarinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 user string ts_getters_order = "";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs
 
 class ts_GettersOrderMenu : OptionMenu
 {
@@ -2539,7 +2539,7 @@ class ts_GettersOrderMenu : OptionMenu
 }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_menus.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_menus.zs
 
 class ts_GettersOrderElement : OptionMenuItemCommand
 {
@@ -2566,7 +2566,7 @@ class ts_GettersOrderElement : OptionMenuItemCommand
 
 * Project setup
 
-#+begin_src c :tangle build/TargetSpy/mapinfo.txt
+#+begin_src c :tangle ../build/TargetSpy/mapinfo.txt
 
 GameInfo
 {
@@ -2574,21 +2574,21 @@ GameInfo
 }
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript.zs
 
 version 4.14.3
 
-<<tools/scripts.org:include("TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
+<<../tools/scripts.org:include("add-ons/TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
 
 #include "zscript/ts_PlainTranslator.zs"
 #include "zscript/ts_StringUtils.zs"
 #include "zscript/ts_libeye.zs"
 #+end_src
 
-[[file:modules/PlainTranslator.org][PlainTranslator]]
+[[file:../modules/PlainTranslator.org][PlainTranslator]]
 
 Translatable strings:
-#+begin_src c :tangle build/TargetSpy/language.txt
+#+begin_src c :tangle ../build/TargetSpy/language.txt
 
 [enu default]
 <<strings>>
@@ -2598,7 +2598,7 @@ Translatable strings:
 ts_Toggles = "Переключатели";
 #+end_src
 
-#+begin_src c :tangle build/TargetSpy/zscript/ts_options.zs
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_options.zs
 
 class ts_Options
 {
@@ -2617,7 +2617,7 @@ class ts_Options
 
 Check that the add-on at least can be loaded and doesn't error out on a target.
 
-#+begin_src text :tangle build/TargetSpyTest/commands.txt
+#+begin_src text :tangle ../build/TargetSpyTest/commands.txt
 wait 2; map map01
 wait 4; summon doomimp
 wait 8; quit

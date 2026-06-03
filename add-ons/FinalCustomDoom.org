@@ -12,7 +12,7 @@ FinalCustomDoom is a successor to Ultimate Custom Doom and Custom Doom.
 
 FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
@@ -21,40 +21,40 @@ SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt :exports none
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt :exports none
+#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt :exports none
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/language.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt :exports none
+#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt :exports none
+#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt :exports none
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs :exports none
 // <<license>>
 #+end_src
 
@@ -62,7 +62,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 ** Player
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Player
 {
@@ -87,7 +87,7 @@ OptionMenu cd_Player
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Player : cd_EffectsBase
 {
@@ -193,7 +193,7 @@ extend class cd_Player
 
 ** Actors
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Actors
 {
@@ -214,7 +214,7 @@ OptionMenu cd_Actors
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Actors : cd_EffectsBase
 {
@@ -352,7 +352,7 @@ class cd_Actors : cd_EffectsBase
 
 ** Powerup
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Powerups
 {
@@ -389,7 +389,7 @@ OptionMenu cd_Powerups
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_Powerups : cd_EffectsBase
 {
@@ -445,7 +445,7 @@ class cd_Powerups : cd_EffectsBase
 
 ** Health regeneration/degeneration
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_HealthRegeneration
 {
@@ -467,7 +467,7 @@ OptionMenu cd_HealthRegeneration
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_HealthRegeneration : cd_EffectsBase
 {
@@ -495,7 +495,7 @@ class cd_HealthRegeneration : cd_EffectsBase
 }
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 #+end_src
@@ -504,7 +504,7 @@ cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 
 ** Armor regeneration/degeneration
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_ArmorRegeneration
 {
@@ -526,7 +526,7 @@ OptionMenu cd_ArmorRegeneration
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_ArmorRegeneration : cd_EffectsBase
 {
@@ -566,7 +566,7 @@ class cd_ArmorBonus : BasicArmorBonus
 }
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 #+end_src
@@ -575,7 +575,7 @@ cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 
 ** Ammo regeneration
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_AmmoRegeneration
 {
@@ -594,7 +594,7 @@ OptionMenu cd_AmmoRegeneration
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_AmmoRegeneration : cd_EffectsBase
 {
@@ -632,7 +632,7 @@ class cd_AmmoRegeneration : cd_EffectsBase
   }
 }
 #+end_src
-#+begin_src prog :tangle build/FinalCustomDoom/sndinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
 #+end_src
@@ -641,7 +641,7 @@ cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024
 
 * Commands
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 OptionMenu cd_Commands
 {
@@ -663,7 +663,7 @@ OptionMenu cd_Commands
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src prog :tangle build/FinalCustomDoom/keyconf.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
 
 Alias cd_reset_to_defaults "cd_settings \"\""
 
@@ -677,14 +677,14 @@ Alias cd_backup_options3  "cd_settings_profile3 $cd_settings"
 Alias cd_restore_options3 "cd_settings $cd_settings_profile3"
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 server string cd_settings_profile1;
 server string cd_settings_profile2;
 server string cd_settings_profile3;
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/language.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/language.txt
 
 [enu default]
 cd_ResetOptions    = "Reset options to defaults";
@@ -709,7 +709,7 @@ cd_Player = "Игрок";
 
 ** Menus
 
-#+begin_src c :tangle build/FinalCustomDoom/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$cd_Title", cd_Menu }
 AddOptionMenu OptionsMenuSimple { Submenu "$cd_Title", cd_Menu }
@@ -739,7 +739,7 @@ OptionValue cd_RegenerationType
 }
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/textcolor.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
 
 CDLightBlue { #111111 #99CCFF }
 #+end_src
@@ -760,7 +760,7 @@ StaticText \"%s\", CDLightBlue
 StaticText \"\"" note)
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/language.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/language.txt
 
 // Translation note: most FCD menu items have their strings written in plain English
 // and not as $, but are still translatable, for example:
@@ -779,26 +779,26 @@ cd_Weapon_damage_multiplier = "Множитель урона от оружия";
 
 ** Project setup :noexport:
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
 
 version 4.14.3
 
-<<tools/scripts.org:include("FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
+<<../tools/scripts.org:include("add-ons/FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
 
 #include "zscript/cd_PlainTranslator.zs"
 #+end_src
 
 Note: ~cd_PlainTranslator.zs~ must be installed externally.
 
-[[file:modules/PlainTranslator.org][PlainTranslator]]
+[[file:../modules/PlainTranslator.org][PlainTranslator]]
 
-#+begin_src text :tangle build/tmp.txt :exports none
-<<tools/scripts.org:copy-media("FinalCustomDoom")>>
+#+begin_src text :tangle ../build/tmp.txt :exports none
+<<../tools/scripts.org:copy-media("FinalCustomDoom")>>
 #+end_src
 
 ** Menu item replacements
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs
 
 class cd_Menu : OptionMenu
 {
@@ -878,12 +878,12 @@ mixin class cd_SettingItem
 }
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 server string cd_settings;
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Menu.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs
 
 class cd_NumberField : OptionMenuItemTextField
 {
@@ -1048,19 +1048,19 @@ class cd_ColorPickerMenu : ColorPickerMenu
 }
 #+end_src
 
-#+begin_src prog :tangle build/FinalCustomDoom/cvarinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 user color cd_proxy_color;
 #+end_src
 
 ** Event handler
 
-#+begin_src prog :tangle build/FinalCustomDoom/mapinfo.txt
+#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
 
 GameInfo { EventHandlers = "cd_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_EventHandler.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
 
 class cd_EventHandler : StaticEventHandler
 {
@@ -1192,7 +1192,7 @@ class cd_OldGameMarker : Inventory
 
 ** Effects base
 
-#+begin_src c :tangle build/FinalCustomDoom/zscript/cd_Effects.zs
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 
 class cd_EffectsBase play
 {
@@ -1284,7 +1284,7 @@ differences are:
 
 See the example below.
 
-#+begin_src c :tangle build/FinalCustomDoomExtensionExample/menudef.txt
+#+begin_src c :tangle ../build/FinalCustomDoomExtensionExample/menudef.txt
 
 // Note: naming everything related to the Custom Doom extension with "cde" prefix.
 OptionMenu cd_Menu
@@ -1319,7 +1319,7 @@ OptionValue cde_Values
 }
 #+end_src
 
-#+begin_src c :tangle build/FinalCustomDoomExtensionExample/zscript.zs
+#+begin_src c :tangle ../build/FinalCustomDoomExtensionExample/zscript.zs
 version 4.14.3
 
 class cde_Effects
@@ -1374,7 +1374,7 @@ class cde_Effects
 
 * Run :noexport:
 
-#+begin_src text :tangle build/FinalCustomDoomTest/commands.txt
+#+begin_src text :tangle ../build/FinalCustomDoomTest/commands.txt
 wait 2; openmenu cd_menu
 wait 2; quit
 #+end_src

@@ -9,6 +9,8 @@ Basic ZScript unit test framework for UZDoom. Inspired by [[https://github.com/c
 
 Clematis is made by ZippeyKeys12, modified and renamed to ClematisM by m8f.
 
+ClematisM is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
 ** Making Test Suites
 
 #+begin_src c
@@ -79,67 +81,69 @@ Clematis Tester=Clematis.Create('ClematisExample');
 Tester.Run();
 #+end_src
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * License
 
-[[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2018 ZippeyKeys12, © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
-#+begin_src c :tangle build/ClematisM/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/ClematisM/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/ClematisM/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/clematis.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/commands.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/base.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/boolean.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/eval.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/data.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/utilities.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/interface.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/builder.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/complex.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs :exports none
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/extensions.zs :exports none
 // <<license>>
 #+end_src
 
 * Options
 
-#+begin_src c :tangle build/ClematisM/cvarinfo.txt
+#+begin_src c :tangle ../build/ClematisM/cvarinfo.txt
 
 server int  cl_logging_level = 1;
 server bool cl_debugging = true;
@@ -147,7 +151,7 @@ server bool cl_debugging = true;
 
 * Project setup
 
-#+begin_src c :tangle build/ClematisM/mapinfo.txt
+#+begin_src c :tangle ../build/ClematisM/mapinfo.txt
 
 GameInfo
 {
@@ -155,19 +159,19 @@ GameInfo
 }
 #+end_src
 
-#+begin_src c :tangle build/ClematisM/zscript.zs
+#+begin_src c :tangle ../build/ClematisM/zscript.zs
 // <<license>>
 
 version 4.14.3
 
-<<tools/scripts.org:include("ClematisM.org", "build/ClematisM/\\(zscript/.*zs\\)")>>
+<<../tools/scripts.org:include("add-ons/ClematisM.org", "../build/ClematisM/\\(zscript/.*zs\\)")>>
 #+end_src
 
 * Source
 
 ** Clematis
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/clematis.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/clematis.zs
 
 class Clematis abstract{
     bool VerboseEnabled;
@@ -330,7 +334,7 @@ class Clematis abstract{
 
 ** Commands
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/commands.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/commands.zs
 
 class ClematisTestHandler:StaticEventHandler{
     override
@@ -346,7 +350,7 @@ class ClematisTestHandler:StaticEventHandler{
 
 *** Base
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/base.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/base.zs
 
 enum Cl_EAssertType {
     ASSERT_Bool,
@@ -368,7 +372,7 @@ class Cl_Assertion abstract{
 
 **** False
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/boolean.zs
 
 class Cl_AssertFalse:Cl_Assertion{
     bool Condition;
@@ -398,7 +402,7 @@ class Clematis{
 
 **** True
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/boolean.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/boolean.zs
 
 class Cl_AssertTrue:Cl_Assertion{
     bool Condition;
@@ -429,7 +433,7 @@ class Clematis{
 
 *** Eval
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/eval.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/eval.zs
 
 class Cl_AssertEval:Cl_Assertion{
     double Val1,
@@ -493,7 +497,7 @@ class Clematis{
 
 **** Diff
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 class Cl_AssertDiff:Cl_Assertion{
     Object Val1,
@@ -527,7 +531,7 @@ class Clematis{
 
 **** Is A
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 class Cl_AssertIsA : Cl_Assertion{
     Object Value;
@@ -562,7 +566,7 @@ class Clematis{
 
 **** Is Not A
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 class Cl_AssertIsNotA : Cl_Assertion{
     Object Value;
@@ -597,7 +601,7 @@ class Clematis{
 
 **** Not null
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 // TODO: Use AssertSame/Diff
 class Cl_AssertNotNull:Cl_Assertion{
@@ -628,7 +632,7 @@ class Clematis{
 
 **** Null
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 // TODO: Use AssertSame
 class Cl_AssertNull:Cl_Assertion{
@@ -659,7 +663,7 @@ class Clematis{
 
 **** Same
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/assertions/object.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
 class Cl_AssertSame:Cl_Assertion{
     Object Val1,
@@ -695,7 +699,7 @@ class Clematis{
 
 **** Interface
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/interface.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/interface.zs
 
 extend
 class Clematis {
@@ -719,7 +723,7 @@ class Clematis {
 
 **** Handlers
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/base.zs
 
 class Cl_ExpectHandler abstract {
     virtual
@@ -731,7 +735,7 @@ class Cl_ExpectHandler abstract {
 
 ****** Base
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
 
 class Cl_ExpectMatcher : Cl_ExpectHandler abstract {
     virtual
@@ -744,7 +748,7 @@ class Cl_ExpectMatcher : Cl_ExpectHandler abstract {
 
 ****** Equal
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
 
 class Cl_EMatchEqual : Cl_ExpectMatcher {
     override
@@ -785,7 +789,7 @@ class Cl_EMatchEqual : Cl_ExpectMatcher {
 
 ****** Eval
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
 
 class Cl_EMatchLess : Cl_ExpectMatcher {
     override
@@ -858,7 +862,7 @@ class Cl_EMatchGreaterEqual : Cl_ExpectMatcher {
 
 ****** Instance
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/handlers/matchers.zs
 
 class Cl_EMatchInstance : Cl_ExpectMatcher {
     override
@@ -880,7 +884,7 @@ class Cl_EMatchInstance : Cl_ExpectMatcher {
 
 **** Builder
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/builder.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/builder.zs
 
 class Cl_ExpectBuilder {
     bool neg,
@@ -1090,7 +1094,7 @@ class Cl_ExpectBuilder {
 
 **** Complex
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/complex.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/complex.zs
 
 extend
 class Cl_ExpectBuilder {
@@ -1102,7 +1106,7 @@ class Cl_ExpectBuilder {
 
 **** Extensions
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/styles/expect/extensions.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/styles/expect/extensions.zs
 
 class Cl_ExpectExtensions : StaticEventHandler {
     Array<Cl_ExpectMatcher> boolMatchers;
@@ -1187,7 +1191,7 @@ class Cl_ExpectExtensions : StaticEventHandler {
 
 ** Data
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/data.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/data.zs
 
 class Cl_Result{
     bool Success;
@@ -1215,7 +1219,7 @@ class Cl_Result{
 
 ** Utilities
 
-#+begin_src c :tangle build/ClematisM/zscript/clematis/utilities.zs
+#+begin_src c :tangle ../build/ClematisM/zscript/clematis/utilities.zs
 
 enum Cl_ELogSeverity{
     LOG_Fatal,
@@ -1290,7 +1294,7 @@ class Cl_Util{
 
 Tests for tests.
 
-#+begin_src c :tangle build/ClematisMTest/zscript.zs
+#+begin_src c :tangle ../build/ClematisMTest/zscript.zs
 
 version 4.14.3
 
@@ -1305,7 +1309,7 @@ class cl_Test : Clematis
 }
 #+end_src
 
-#+begin_src c :tangle build/ClematisMTest/commands.txt
+#+begin_src c :tangle ../build/ClematisMTest/commands.txt
 wait 2; map map01
 wait 4; netevent test:cl_Test
 wait 6; quit

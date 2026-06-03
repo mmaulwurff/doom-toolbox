@@ -8,6 +8,8 @@
 SoundToScreen shows where sounds come from. It may be useful for people who play
 without sound, with mono sound, or people with hearing impairment.
 
+SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
 ** Features
 
 - Three types of sound: noise (harmless), level (doors, elevators), danger (threats).
@@ -23,33 +25,35 @@ without sound, with mono sound, or people with hearing impairment.
 - [[https://forum.zdoom.org/viewtopic.php?f=4&t=71349][Toby Accessibility Mod]] by Alando1.
 - [[https://youtu.be/4NGe4dzlukc][Making Games Better for the Deaf and Hard of Hearing]] by Game Maker's Toolkit.
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2022 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
-#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/SoundToScreen/language.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/SoundToScreen/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/SoundToScreen/menudef.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/SoundToScreen/zscript.zs :exports none
+#+begin_src c :tangle ../build/SoundToScreen/zscript.zs :exports none
 // <<license>>
 #+end_src
 
 * Options
 
-#+begin_src c :tangle build/SoundToScreen/menudef.txt
+#+begin_src c :tangle ../build/SoundToScreen/menudef.txt
 
 OptionMenu st_Menu
 {
@@ -81,9 +85,9 @@ AddOptionMenu OptionsMenu       { Submenu "$ST_MENU_NAME", st_Menu }
 AddOptionMenu OptionsMenuSimple { Submenu "$ST_MENU_NAME", st_Menu }
 #+end_src
 
-[[file:modules/PlainTranslator.org][PlainTranslator]]
+[[file:../modules/PlainTranslator.org][PlainTranslator]]
 
-#+begin_src c :tangle build/SoundToScreen/language.txt
+#+begin_src c :tangle ../build/SoundToScreen/language.txt
 
 [enu default]
 ST_MENU_NAME  = "SoundToScreen \cj⚞";
@@ -92,7 +96,7 @@ ST_MENU_NAME  = "SoundToScreen \cj⚞";
 ST_DANGER = "Опасность";
 #+end_src
 
-#+begin_src c :tangle build/SoundToScreen/cvarinfo.txt
+#+begin_src c :tangle ../build/SoundToScreen/cvarinfo.txt
 
 user float st_x_position = 0.5;
 user float st_y_position = 0.3;
@@ -109,12 +113,12 @@ user color st_color_danger   = "FF0000"; // red
 
 * Code
 
-#+begin_src c :tangle build/SoundToScreen/mapinfo.txt
+#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt
 
 GameInfo { EventHandlers = "st_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle build/SoundToScreen/zscript.zs
+#+begin_src c :tangle ../build/SoundToScreen/zscript.zs
 
 version 4.14.3
 
@@ -406,12 +410,12 @@ class st_SectorMemory
 
 * Test
 
-#+begin_src c :tangle build/SoundToScreenTest/mapinfo.txt
+#+begin_src c :tangle ../build/SoundToScreenTest/mapinfo.txt
 
 GameInfo { EventHandlers = "stt_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle build/SoundToScreenTest/zscript.zs
+#+begin_src c :tangle ../build/SoundToScreenTest/zscript.zs
 
 version 4.14.3
 
@@ -430,7 +434,7 @@ class stt_EventHandler : StaticEventHandler
 }
 #+end_src
 
-#+begin_src text :tangle build/SoundToScreenTest/commands.txt
+#+begin_src text :tangle ../build/SoundToScreenTest/commands.txt
 
 wait 2; map map01; wait 2; quit
 #+end_src

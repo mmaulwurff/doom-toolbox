@@ -65,11 +65,11 @@ In sndinfo.txt, add
 And you're done! Just select "Custom Soundpack" in the Gearbox UI options, and check
 if your sounds work.
 
-* [[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
-[[file:LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
 SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
@@ -79,173 +79,173 @@ SPDX-FileCopyrightText: © 2025 SandPoot
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/menudef.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/sndinfo.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/sndinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/language.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/keyconf.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/mapinfo.txt :exports none
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/zscript/activity.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/activity.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/changer.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/changer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/custom_weapon_order_storage.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/event_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/font_selector.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/freezer.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/freezer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/input.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/input.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/input_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/inventory_menu.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/inventory_user.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/netevent_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/options.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/options.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/printer.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/printer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/sender.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/sender.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/sounds.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/sounds.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/view_model.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_data.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_data_loader.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_menu.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/blocky_view.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/blur.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/gldefs.txt :exports none
+#+begin_src c :tangle ../build/Gearbox/gldefs.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp :exports none
+#+begin_src c :tangle ../build/Gearbox/shaders/mfx_bss_blur.fp :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/caption.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/dim.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/fade_in_out.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/display/text_view.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/level.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/player.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/weapon_watcher.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/event_handler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/service.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/service/service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/service/icon_service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/service/hide_service.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/ammo.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/cvar.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/log.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/texture_cache.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller_model.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/indexer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/inner_indexer.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel_mode.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/screen.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/text.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs :exports none
 // <<license>>
 #+end_src
 
 * Options
 
-#+begin_src c :tangle build/Gearbox/menudef.txt
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$GB_OPTIONS", gb_Options }
 AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
@@ -431,7 +431,7 @@ OptionString gb_FontValues
 
 * Sounds
 
-#+begin_src c :tangle build/Gearbox/sndinfo.txt
+#+begin_src c :tangle ../build/Gearbox/sndinfo.txt
 
 // Gearbox
 
@@ -471,7 +471,7 @@ $volume gearbox/notfound 0.5
 
 ** English
 
-#+begin_src c :tangle build/Gearbox/language.txt
+#+begin_src c :tangle ../build/Gearbox/language.txt
 
 // SPDX-FileCopyrightText: © 2022 generic name guy
 
@@ -577,7 +577,7 @@ GB_BIG_FONT       = "Big font";
 ** Brazilian Portuguese
 
 # spellchecker:off
-#+begin_src c :tangle build/Gearbox/language.txt
+#+begin_src c :tangle ../build/Gearbox/language.txt
 
 [pt]
 
@@ -675,7 +675,7 @@ GB_BIG_FONT       = "Fonte grande";
 
 * Keys
 
-#+begin_src c :tangle build/Gearbox/keyconf.txt
+#+begin_src c :tangle ../build/Gearbox/keyconf.txt
 
 // Aliases
 
@@ -711,11 +711,11 @@ AddMenuKey "$GB_ROTATE_WEAPON_SLOT"     gb_rotate_weapon_slot
 
 * Project setup :noexport:
 
-#+begin_src c :tangle build/Gearbox/zscript.zs
+#+begin_src c :tangle ../build/Gearbox/zscript.zs
 
 version 4.14.3
 
-<<tools/scripts.org:include("Gearbox.org", "build/Gearbox/\\(zscript/.*zs\\)")>>
+<<../tools/scripts.org:include("add-ons/Gearbox.org", "build/Gearbox/\\(zscript/.*zs\\)")>>
 
 #include "zscript/gb_MD5.zs"
 #include "zscript/gb_PreviousWeapon.zs"
@@ -724,17 +724,17 @@ version 4.14.3
 #include "zscript/gb_PlainTranslator.zs"
 #+end_src
 
-#+begin_src text :tangle build/tmp.txt :exports none
-<<tools/scripts.org:copy-media("Gearbox")>>
+#+begin_src text :tangle ../build/tmp.txt :exports none
+<<../tools/scripts.org:copy-media("Gearbox")>>
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+#+begin_src c :tangle ../build/Gearbox/cvarinfo.txt
 
 // VmAbortReporter
 user bool gb_vm_abort_report_enabled = true;
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/mapinfo.txt
+#+begin_src c :tangle ../build/Gearbox/mapinfo.txt
 
 Gameinfo
 {
@@ -752,7 +752,7 @@ Gameinfo
 
 *** ~Activity~
 
-#+begin_src c :tangle build/Gearbox/zscript/activity.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/activity.zs
 
 // This class stores top-level Gearbox state.
 // It can be either Weapons, Inventory, or None.
@@ -796,7 +796,7 @@ class gb_Activity
 
 *** ~Changer~
 
-#+begin_src c :tangle build/Gearbox/zscript/changer.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/changer.zs
 
 class gb_Changer play
 {
@@ -872,7 +872,7 @@ class gb_Changer play
 
 *** ~CustomWeaponOrderStorage~
 
-#+begin_src c :tangle build/Gearbox/zscript/custom_weapon_order_storage.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/custom_weapon_order_storage.zs
 
 class gb_WeaponOrderOperations
 {
@@ -1027,7 +1027,7 @@ class gb_CustomWeaponOrderStorage
 }
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+#+begin_src c :tangle ../build/Gearbox/cvarinfo.txt
 
 // Custom weapon order storage
 nosave string gb_custom_weapon_order = "";
@@ -1035,7 +1035,7 @@ nosave string gb_custom_weapon_order = "";
 
 *** ~EventProcessor~
 
-#+begin_src c :tangle build/Gearbox/zscript/event_processor.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/event_processor.zs
 
 class gb_EventProcessor
 {
@@ -1058,7 +1058,7 @@ class gb_EventProcessor
 
 *** ~FontSelector~
 
-#+begin_src c :tangle build/Gearbox/zscript/font_selector.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/font_selector.zs
 
 class gb_FontSelector
 {
@@ -1096,7 +1096,7 @@ class gb_FontSelector
 
 *** ~Freezer~
 
-#+begin_src c :tangle build/Gearbox/zscript/freezer.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/freezer.zs
 
 class gb_Freezer play
 {
@@ -1199,7 +1199,7 @@ class gb_Freezer play
 
 *** ~Input~
 
-#+begin_src c :tangle build/Gearbox/zscript/input.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/input.zs
 
 enum gb_Inputs
 {
@@ -1239,7 +1239,7 @@ class gb_Input
 
 *** ~InputProcessor~
 
-#+begin_src c :tangle build/Gearbox/zscript/input_processor.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/input_processor.zs
 
 class gb_InputProcessor
 {
@@ -1279,7 +1279,7 @@ class gb_InputProcessor
 
 *** ~InventoryMenu~
 
-#+begin_src c :tangle build/Gearbox/zscript/inventory_menu.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/inventory_menu.zs
 
 class gb_InventoryMenu
 {
@@ -1417,7 +1417,7 @@ class gb_InventoryMenu
 
 *** ~InventoryUser~
 
-#+begin_src c :tangle build/Gearbox/zscript/inventory_user.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/inventory_user.zs
 
 // We could use inventory items directly, but player cannot use items when
 // totally frozen. Therefore, we have to wait until player is not frozen.
@@ -1478,7 +1478,7 @@ class gb_InventoryUser play
 
 *** ~NeteventProcessor~
 
-#+begin_src c :tangle build/Gearbox/zscript/netevent_processor.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/netevent_processor.zs
 
 class gb_NeteventProcessor play
 {
@@ -1524,7 +1524,7 @@ class gb_NeteventProcessor play
 
 *** ~Options~
 
-#+begin_src c :tangle build/Gearbox/cvarinfo.txt
+#+begin_src c :tangle ../build/Gearbox/cvarinfo.txt
 
 // When adding new options, don't forget to add them to:
 // - keyconf.txt:Alias gb_reset.
@@ -1582,7 +1582,7 @@ user float gb_mouse_sensitivity_x = 1.0;
 user float gb_mouse_sensitivity_y = 1.0;
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/zscript/options.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/options.zs
 
 class gb_Options
 {
@@ -1749,7 +1749,7 @@ class gb_Options
 
 *** ~Printer~
 
-#+begin_src c :tangle build/Gearbox/zscript/printer.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/printer.zs
 
 class gb_Printer
 {
@@ -1775,7 +1775,7 @@ class gb_Printer
 
 *** ~Sender~
 
-#+begin_src c :tangle build/Gearbox/zscript/sender.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/sender.zs
 
 class gb_Sender
 {
@@ -1814,7 +1814,7 @@ class gb_Sender
 
 *** ~Sounds~
 
-#+begin_src c :tangle build/Gearbox/zscript/sounds.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/sounds.zs
 
 class gb_Sounds
 {
@@ -1904,7 +1904,7 @@ class gb_Sounds
 
 *** ~ViewModel~
 
-#+begin_src c :tangle build/Gearbox/zscript/view_model.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs
 
 struct gb_ViewModel
 {
@@ -1928,7 +1928,7 @@ struct gb_ViewModel
 
 *** ~WeaponData~
 
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_data.zs
 
 struct gb_WeaponData
 {
@@ -1939,7 +1939,7 @@ struct gb_WeaponData
 
 *** ~WeaponDataLoader~
 
-#+begin_src c :tangle build/Gearbox/zscript/weapon_data_loader.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_data_loader.zs
 
 class gb_WeaponDataLoader play
 {
@@ -2063,7 +2063,7 @@ struct gb_WeaponInfo
 
 *** ~WeaponMenu~
 
-#+begin_src c :tangle build/Gearbox/zscript/weapon_menu.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/weapon_menu.zs
 
 class gb_WeaponMenu
 {
@@ -2490,7 +2490,7 @@ class gb_WeaponMenu
 
 *** ~BlockyView~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/blocky_view.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/blocky_view.zs
 
 class gb_BlockyView
 {
@@ -2957,7 +2957,7 @@ class gb_BlockyView
 
 *** ~Blur~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/blur.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/blur.zs
 
 class gb_Blur
 {
@@ -2968,7 +2968,7 @@ class gb_Blur
 }
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/gldefs.txt
+#+begin_src c :tangle ../build/Gearbox/gldefs.txt
 
 HardwareShader postprocess scene
 {
@@ -2977,7 +2977,7 @@ HardwareShader postprocess scene
 }
 #+end_src
 
-#+begin_src c :tangle build/Gearbox/shaders/mfx_bss_blur.fp
+#+begin_src c :tangle ../build/Gearbox/shaders/mfx_bss_blur.fp
 
 // SPDX-FileCopyrightText: © 2012-2019 Marisa Kirisame
 
@@ -3017,7 +3017,7 @@ void main()
 
 *** ~Caption~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/caption.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/caption.zs
 
 class gb_Caption
 {
@@ -3047,7 +3047,7 @@ class gb_Caption
 
 *** ~Dim~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/dim.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/dim.zs
 
 class gb_Dim
 {
@@ -3067,7 +3067,7 @@ class gb_Dim
 
 *** ~FadeInOut~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/fade_in_out.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/fade_in_out.zs
 
 class gb_FadeInOut
 {
@@ -3094,7 +3094,7 @@ class gb_FadeInOut
 
 *** ~TextView~
 
-#+begin_src c :tangle build/Gearbox/zscript/display/text_view.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/text_view.zs
 
 class gb_TextView
 {
@@ -3284,7 +3284,7 @@ class gb_TextView
 
 *** ~Level~
 
-#+begin_src c :tangle build/Gearbox/zscript/engine/level.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/level.zs
 
 class gb_Level
 {
@@ -3305,7 +3305,7 @@ class gb_Level
 
 *** ~Player~
 
-#+begin_src c :tangle build/Gearbox/zscript/engine/player.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/player.zs
 
 class gb_Player
 {
@@ -3318,7 +3318,7 @@ class gb_Player
 
 *** ~WeaponWatcher~
 
-#+begin_src c :tangle build/Gearbox/zscript/engine/weapon_watcher.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/engine/weapon_watcher.zs
 
 // This class provides information on what weapon the players hold.
 class gb_WeaponWatcher
@@ -3343,7 +3343,7 @@ class gb_WeaponWatcher
 
 ** EventHandler
 
-#+begin_src c :tangle build/Gearbox/zscript/event_handler.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/event_handler.zs
 
 // This class is the core of Gearbox.
 //
@@ -3874,7 +3874,7 @@ class gb_EventHandler : EventHandler
 
 *** ~Service~
 
-#+begin_src c :tangle build/Gearbox/zscript/service/service.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/service/service.zs
 
 // This is Service interface.
 class gb_Service abstract
@@ -3970,7 +3970,7 @@ class gb_ServiceIterator
 
 *** ~IconService~
 
-#+begin_src c :tangle build/Gearbox/zscript/service/icon_service.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/service/icon_service.zs
 
 class gb_IconService : gb_Service
 {
@@ -4019,7 +4019,7 @@ class gb_IconService : gb_Service
 
 *** ~HideService~
 
-#+begin_src c :tangle build/Gearbox/zscript/service/hide_service.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/service/hide_service.zs
 
 class gb_HideService : gb_Service
 {
@@ -4050,7 +4050,7 @@ class gb_HideService : gb_Service
 
 *** ~Ammo~
 
-#+begin_src c :tangle build/Gearbox/zscript/tools/ammo.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/ammo.zs
 
 class gb_Ammo
 {
@@ -4063,7 +4063,7 @@ class gb_Ammo
 
 *** ~Cvar~
 
-#+begin_src c :tangle build/Gearbox/zscript/tools/cvar.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/cvar.zs
 
 // This class provides access to a user or server Cvar.
 //
@@ -4100,7 +4100,7 @@ class gb_Cvar
 
 *** ~Log~
 
-#+begin_src c :tangle build/Gearbox/zscript/tools/log.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/log.zs
 
 class gb_Log
 {
@@ -4140,7 +4140,7 @@ class gb_Log
 
 *** ~TextureCache~
 
-#+begin_src c :tangle build/Gearbox/zscript/tools/texture_cache.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/tools/texture_cache.zs
 
 class gb_TextureCache
 {
@@ -4200,7 +4200,7 @@ class gb_TextureCache
 
 *** ~Controller~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller.zs
 
 class gb_WheelController
 {
@@ -4283,7 +4283,7 @@ class gb_WheelController
 
 *** ~WheelControllerModel~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/controller_model.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller_model.zs
 
 struct gb_WheelControllerModel
 {
@@ -4294,7 +4294,7 @@ struct gb_WheelControllerModel
 
 *** ~WheelIndexer~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/indexer.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/indexer.zs
 
 class gb_WheelIndexer
 {
@@ -4523,7 +4523,7 @@ class gb_WheelIndexer
 
 *** ~WheelInnerIndexer~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/inner_indexer.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/inner_indexer.zs
 
 class gb_WheelInnerIndexer
 {
@@ -4544,7 +4544,7 @@ class gb_WheelInnerIndexer
 
 *** ~MultiWheel~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel.zs
 
 struct gb_MultiWheelModel
 {
@@ -4595,7 +4595,7 @@ class gb_MultiWheel
 
 *** ~MultiWheelMode~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/multiwheel_mode.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel_mode.zs
 
 class gb_MultiWheelMode
 {
@@ -4619,7 +4619,7 @@ class gb_MultiWheelMode
 
 *** ~Screen~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/screen.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/screen.zs
 
 // This class provides helper functions for screen position and sizes.
 class gb_Screen
@@ -4671,7 +4671,7 @@ class gb_Screen
 
 *** ~Text~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/text.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/text.zs
 
 // This class helps displaying text on screen.
 class gb_Text
@@ -4774,7 +4774,7 @@ class gb_Text
 
 *** ~WheelView~
 
-#+begin_src c :tangle build/Gearbox/zscript/wheel/view.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs
 
 class gb_WheelView
 {
@@ -5347,6 +5347,6 @@ class gb_WheelView
 
 Basic check: the mod can be loaded without errors.
 
-#+begin_src text :tangle build/GearboxTest/commands.txt
+#+begin_src text :tangle ../build/GearboxTest/commands.txt
 wait 2; map map01; wait 2; quit
 #+end_src
