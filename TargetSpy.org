@@ -42,10 +42,14 @@ There are four types of TargetSpy extension classes:
      ~ts_Kind.Bar~;
    - int: max value, used for ~ts_Kind.ValueAndMax~ and ~ts_Kind.Bar~.
 
+   Additionally, a getter can have ~static Font getFont(Actor)~ function to select a
+   font for an actor.
+
 4. *Views* show information on screen. They must have a name that starts with
    ~tsView_~ and have ~static ui void draw(Array<ts_InformationPiece>~
    ~informationPieces, double alpha, RenderEvent event, vector3 targetPosition,~
-   ~vector2 targetSize)~ function.
+   ~vector2 targetSize)~ function. See [[Information piece][here]] for reference what ~ts_InformationPiece~
+   contains.
 
 Note that Finders, Filters, and Getters classes don't depend on TargetSpy types in
 any way, and therefore can be safely included in other mods to provide TargetSpy
@@ -704,6 +708,12 @@ class tsGetter_Tag : Actor
   {
     return ts_Kind.PlainText, anActor.getTag(), 0, 0;
   }
+
+  // Example:
+  //static Font getFont(Actor anActor)
+  //{
+  //  return Font.findFont(anActor is "Zombieman" ? "BigFont" : "NewSmallFont");
+  //}
 }
 #+end_src
 
@@ -829,11 +839,15 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   if (informationPieces.size() == 0) return;
 
   ts_Options options = ts_EventHandler.getInstance().getOptions();
-  Font aFont = Font.findFont("NewSmallFont");
   double scale = options.getScale();
 
   Array<string> lines;
-  Array<double> widths;
+  Array<double> lineWidths;
+  Array<double> lineHeights;
+  Array<Font>   fonts;
+
+  double totalWidth  = 0;
+  double totalHeight = 0;
 
   foreach (piece : informationPieces)
   {
@@ -841,18 +855,20 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
     if (line.length() == 0) continue;
 
     lines.push(line);
-    widths.push(aFont.stringWidth(line) * scale);
+    double lineWidth  = round(scale * piece.font.stringWidth(line));
+    double lineHeight = round(scale * piece.font.getHeight());
+
+    totalWidth = max(totalWidth, piece.font.stringWidth(line));
+    totalHeight += lineHeight;
+
+    lineWidths.push(lineWidth);
+    lineHeights.push(lineHeight);
+    fonts.push(piece.font);
   }
 
   int linesCount = lines.size();
   if (linesCount == 0) return;
 
-  double lineHeight = round(aFont.getHeight() * scale);
-
-  double totalHeight = lineHeight * lines.size();
-  double totalWidth = 0;
-  foreach (line : lines)
-    totalWidth = max(totalWidth, aFont.stringWidth(line));
   // Note: stringWidth underestimates.
   totalWidth = totalWidth * 1.1 * scale;
 
@@ -862,25 +878,24 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   if (options.getPlace() == ts_Options.PlaceAboveTarget)
     position.y -= totalHeight;
   position.x = clamp(position.x, totalWidth / 2, screenWidth - totalWidth / 2);
-  position.y = clamp(position.y, lineHeight / 2,
-                     screenHeight - totalHeight + lineHeight / 2);
 
-  double additionalWidth = aFont.stringWidth("  ") * scale;
   bool isBackgroundEnabled = options.isBackgroundEnabled();
   for (int i = 0; i < linesCount; ++i)
   {
+    double lineHeight = lineHeights[i];
+    position.y = clamp(position.y, 0, screenHeight - totalHeight + lineHeight);
+
     if (isBackgroundEnabled)
-      ts_ViewUtils.drawBackground(widths[i] + additionalWidth,
+    {
+      double additionalWidth = fonts[i].stringWidth("  ") * scale;
+      ts_ViewUtils.drawBackground(lineWidths[i] + additionalWidth,
                                   lineHeight,
                                   position,
                                   alpha);
-    ts_ViewUtils.drawText(aFont,
-                          lines[i],
-                          widths[i],
-                          lineHeight,
-                          position,
-                          alpha,
-                          scale);
+    }
+
+    ts_ViewUtils.drawText(fonts[i], lines[i], lineWidths[i], position, alpha, scale);
+
     position.y += lineHeight;
   }
 }
@@ -987,12 +1002,12 @@ class tsView_Frame : Actor
     ts_FrameOptions options      = memory.getOptions();
     ts_Options      mainOptions  = eventHandler.getOptions();
 
-    double scale      = options.getScale();
-    Font   aFont      = memory.getFont();
-    double lineHeight = round(aFont.getHeight() * scale);
-    int    color      = options.isUsingHealthBarColors()
+    Font   aFont = memory.getFont();
+    double scale = options.getScale();
+    int    color = options.isUsingHealthBarColors()
       ? ts_Utils.getHealthColor(mainOptions, informationPieces)
       : Font.CR_Gray;
+    double halfLineHeight = aFont.getHeight() * scale / 2;
 
     vector3 worldPositions[8] =
     {
@@ -1027,10 +1042,10 @@ class tsView_Frame : Actor
 
     vector2 positions[4] =
     {
-      (left,  top),
-      (right, top),
-      (left,  bottom),
-      (right, bottom)
+      (left,  top    - halfLineHeight),
+      (right, top    - halfLineHeight),
+      (left,  bottom - halfLineHeight),
+      (right, bottom - halfLineHeight)
     };
 
     for (int i = 0; i < 4; ++i)
@@ -1043,7 +1058,6 @@ class tsView_Frame : Actor
       ts_ViewUtils.drawText(aFont,
                             part,
                             width,
-                            lineHeight,
                             positions[i],
                             alpha,
                             scale,
@@ -1219,21 +1233,26 @@ class tsView_Crosshair : Actor
     else if (alpha <= 0.0)
       return;
 
+    Font    aFont  = Font.findFont("NewSmallFont");
+    double  scale  = options.getCrosshairScale();
+    double  halfLineHeight = aFont.getHeight() * scale / 2;
     vector2 center = (Screen.getWidth() / 2, options.getCrosshairY());
     double  height = options.getCrosshairHeight();
-    vector2 positions[3] = { center - (0, height), center, center + (0, height) };
+    vector2 positions[3] =
+    {
+      (0, -halfLineHeight) + center - (0, height),
+      (0, -halfLineHeight) + center,
+      (0, -halfLineHeight) + center + (0, height)
+    };
     string  parts[3] =
     {
       options.getCrosshairTop(),
       options.getCrosshairCenter(),
       options.getCrosshairBottom()
     };
-    Font   aFont = Font.findFont("NewSmallFont");
-    double scale = options.getCrosshairScale();
     int    color = options.getCrosshairHealth()
       ? ts_Utils.getHealthColor(options, informationPieces)
       : Font.CR_Gray;
-    double lineHeight = round(aFont.getHeight() * scale);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -1242,7 +1261,6 @@ class tsView_Crosshair : Actor
       ts_ViewUtils.drawText(aFont,
                             part,
                             width,
-                            lineHeight,
                             positions[i],
                             alpha,
                             scale,
@@ -1340,6 +1358,7 @@ class ts_EventHandler : StaticEventHandler
     (mProjector = new("ts_Projector")).initialize();
 
     mCurrentTarget = new("ts_TargetSource");
+    mDefaultFont   = Font.findFont("NewSmallFont");
 
     mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
     mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
@@ -1517,6 +1536,9 @@ class ts_EventHandler : StaticEventHandler
          mInformationPieces[i].text,
          mInformationPieces[i].value,
          mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget.target);
+        mInformationPieces[i].font = mFontGetters[i]
+          ? mFontGetters[i].call(mCurrentTarget.target)
+          : mDefaultFont;
       }
     }
   }
@@ -1611,6 +1633,9 @@ class ts_EventHandler : StaticEventHandler
       mGetters.push(getter);
       mGetterClasses.push(ts_Classes.shorten(aClass.getClassName()));
       mInformationPieces.push(new("ts_InformationPiece"));
+
+      mFontGetters.
+        push((Function<play Font(Actor)>)(findFunction(aClass, "getFont")));
     }
     return getter != NULL;
   }
@@ -1655,6 +1680,7 @@ class ts_EventHandler : StaticEventHandler
   private vector2 mLastTargetSize;
 
   private Array< Function<play int, string, int, int(Actor)> > mGetters;
+  private Array< Function<play Font(Actor)> > mFontGetters;
   private Array<string> mGetterClasses;
   private Array<ts_InformationPiece> mInformationPieces;
 
@@ -1662,6 +1688,7 @@ class ts_EventHandler : StaticEventHandler
     <ui void(Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>
     > mViews;
   private Array<string> mViewClasses;
+  private Font mDefaultFont;
 
   private ts_ClassList mBlocklist;
   private ts_ClassList mFollowers;
@@ -1731,11 +1758,12 @@ class ts_Kind
 
 class ts_InformationPiece
 {
-  string id;
-  int    kind;
-  string text;
-  int    value;
-  int    max;
+  string id;    // identifier for the getter that created this piece.
+  int    kind;  // see ts_Kind.
+  string text;  // defined only for ts_Kind.PlainText.
+  int    value; // defined for ts_Kind.Value, ts_Kind.ValueAndMax, and ts_Kind.Bar.
+  int    max;   // defined for ts_Kind.ValueAndMax and ts_Kind.Bar.
+  Font   font;  // font for this piece.
 }
 #+end_src
 
@@ -2038,13 +2066,12 @@ class ts_ViewUtils ui
 static void drawText(Font aFont,
                      string text,
                      double textWidth,
-                     double textHeight,
                      vector2 position,
                      double alpha,
                      double scale,
                      int color = Font.CR_Gray)
 {
-  position -= (textWidth, textHeight) / 2;
+  position.x -= textWidth / 2;
   Screen.drawText(aFont,
                   color,
                   int(round(position.x)),
@@ -2065,7 +2092,7 @@ static void drawBackground(double textWidth,
                            vector2 position,
                            double alpha)
 {
-  position -= (textWidth, textHeight) / 2;
+  position.x -= textWidth / 2;
   Screen.dim(0x000000,
              alpha / 2,
              int(round(position.x)),
