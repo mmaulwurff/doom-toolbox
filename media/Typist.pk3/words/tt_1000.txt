@@ -153,7 +153,7 @@ coat
 coin
 cold
 collect
-colour
+color
 comb
 come
 common

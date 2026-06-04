@@ -445,7 +445,7 @@ class NAMESPACE_ProjScreen {
 
 		// kd: This holds: aspect ratio = tan(horizontal fov) / tan(ver fov).
 		// gzd always uses hor fov, but the fov only holds in 4:3 (in a 4:3 box
-		// in your screen centre), so we just extend it.
+		// in your screen center), so we just extend it.
 		tan_fov_2.x	= tan(hor_fov / 2) * aspect_ratio / (4.0 / 3);
 		tan_fov_2.y	= tan_fov_2.x / aspect_ratio;
 	}
@@ -1117,7 +1117,7 @@ It merely demonstrates it works.)
 	will cause a desync in multiplayer.
 
 	You can fix this by restricting the cursor to a certain fov value, like 90°
-	which would be the 4:3 box in the screen centre (assuming you didn't zoom
+	which would be the 4:3 box in the screen center (assuming you didn't zoom
 	or anything).
 
 	*/
