@@ -51,10 +51,9 @@ def make_project_name(org_file):
 
 def make_export(source):
   build_el_path = path.abspath('tools/build.el')
-  level = len(path.normpath(source).split(path.sep))
   return f'{emacs} {source} --quick --batch \
-    --load {build_el_path}\
-    --eval "(dt-export {level})"'
+    --load {build_el_path} \
+    --eval "(dt-export)"'
 
 
 # Target setup functions
@@ -79,7 +78,7 @@ def add_html_target(org_file, main_target):
   html_name = f'{name}Html'
 
   def putHtml(target, source, env):
-    move(f'{name}.html', f'build/{name}/{name}.html')
+    move(f'add-ons/{name}.html', f'build/{name}/{name}.html')
     makedirs(f'build/{name}/tools/', exist_ok=True)
     copy('tools/org-adwaita.css', f'build/{name}/tools/org-adwaita.css')
 
@@ -155,7 +154,7 @@ def add_pack_target(org_file, main_target):
     version = foundVersion.group(1) if foundVersion is not None else commit_sha
 
     copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
-    copy(org_file, build_path / org_file)
+    copy(org_file, (build_path / name).with_suffix('.org'))
 
     licenses_path = build_path / 'LICENSES'
     makedirs(licenses_path, exist_ok=True)

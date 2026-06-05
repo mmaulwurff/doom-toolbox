@@ -29,15 +29,14 @@
   (set-language-environment "UTF-8")
   (org-babel-tangle))
 
-(defun dt-export (level)
+(defun dt-export ()
   (load (concat (file-name-directory dt-build-file-name) "htmlize.el"))
   (require 'htmlize)
   (setq org-confirm-babel-evaluate nil)
   (set-language-environment "UTF-8")
   (setq org-html-htmlize-output-type 'css)
   (setq org-html-validation-link nil)
-  (setq relative-part (if (eq level 1) "" "../"))
-  (setq css-path (concat relative-part "tools/org-adwaita.css"))
+  (setq css-path "../tools/org-adwaita.css")
   (setq org-html-head-extra
     (format "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\"/>" css-path))
   (org-html-export-to-html))
