@@ -159,6 +159,7 @@ GameInfo { EventHandlers = "tl_TestEventHandler" }
 #+begin_src c :tangle ../build/LispOnZscript/zscript.zs
 
 #include "LispOnZscript.zs"
+#include "zscript/tl_StringUtils.zs"
 
 class tl_TestEventHandler : StaticEventHandler
 {
@@ -170,6 +171,8 @@ class tl_TestEventHandler : StaticEventHandler
 #+end_src
 
 * Parser
+
+TODO: change namespace to ~NAMESPACE_~.
 
 #+begin_src c :noweb-ref source
 
@@ -220,72 +223,73 @@ class tl_Parser
     bool isInString = false;
     string currentToken;
 
-    uint length = input.length();
-    for (uint i = 0; i < length;)
+    int length = input.length();
+    for (int i = 0; i < length;)
     {
-      let [character, next] = input.getNextCodePoint(i);
+      int character;
+      [character, i] = input.getNextCodePoint(i);
+      int kind = getCharacterKind(character);
+      bool wasInString = isInString;
+      isInString ^= kind == CharacterDoubleQuote;
 
-      if (isInString)
+      if (wasInString || kind == CharacterNormal)
       {
         currentToken.appendCharacter(character);
 
-        if (character == 0x22) // '"'
-        {
-          isInString = false;
-          tokens.push(currentToken);
-          currentToken = "";
-        }
-      }
-      else
-      {
-        if (isSpace(character))
-        {
-          if (currentToken.length() != 0)
-          {
-            tokens.push(currentToken);
-            currentToken = "";
-          }
-        }
-        else if (character == 0x28 || character == 0x29) // '(', ')'
-        {
-          if (currentToken.length() != 0)
-          {
-            tokens.push(currentToken);
-            currentToken = "";
-          }
+        if (kind == CharacterDoubleQuote)
+          currentToken = commit(currentToken, tokens);
 
-          tokens.push(string.format("%c", character));
-        }
-        else if (character == 0x22) // '"'
-        {
-          if (currentToken.length() != 0)
-          {
-            tokens.push(currentToken);
-            currentToken = "";
-          }
-
-          isInString = true;
-          currentToken.appendCharacter(0x22);
-        }
-        else
-        {
-          currentToken.appendCharacter(character);
-        }
+        continue;
       }
 
-      i = next;
+      if (currentToken.length() != 0)
+        currentToken = commit(currentToken, tokens);
+
+      if (kind == CharacterDoubleQuote)
+        currentToken.appendCharacter(character);
+
+      else if (kind == CharacterDelimiter)
+        commit(string.format("%c", character), tokens);
     }
 
     if (currentToken.length() != 0)
-      tokens.push(currentToken);
+      commit(currentToken, tokens);
+  }
+
+  private static string commit(string token, out Array<string> tokens)
+  {
+    tokens.push(token);
+    return "";
+  }
+
+  enum _
+  {
+    CharacterSpace,
+    CharacterDelimiter,
+    CharacterDoubleQuote,
+    CharacterNormal,
+  }
+
+  private static int getCharacterKind(int character)
+  {
+    if (isSpace(character)) return CharacterSpace;
+    if (isDelimiter(character)) return CharacterDelimiter;
+    if (character == 0x22) return CharacterDoubleQuote;
+    return CharacterNormal;
+  }
+
+  private static bool isDelimiter(int character)
+  {
+    return character == tl_Ascii.LEFT_PARENTHESIS
+      || character == tl_Ascii.RIGHT_PARENTHESIS;
   }
 
   private static bool isSpace(int character)
   {
-    return character == 0x20 // ' '
-      || character == 0x9    // '\t'
-      || character == 0xA    // '\n'
-      || character == 0xD;   // '\r'
+    return character == tl_Ascii.SPACE
+      || character == tl_Ascii.CHARACTER_TABULATION
+      || character == tl_Ascii.CARRIAGE_RETURN_CR
+      || character == tl_Ascii.LINE_FEED_LF;
   }
 
   private static bool isInt(string token)
@@ -869,6 +873,11 @@ class tl_AutoFunction : tl_Function
                                " signature not supported",
                                name,
                                exps.size()));
+  }
+
+  override string toString() const
+  {
+    return string.format("function %s", name);
   }
 
   private static tl_Expression trySignatures(Function<void> aFunction,

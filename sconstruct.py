@@ -322,6 +322,7 @@ def add_dependency(project, module, namespace):
 
 
 add_dependency('VmAbortReporter', 'StringUtils', 'NAMESPACE_')
+add_dependency('LispOnZscript', 'StringUtils', 'tl_')
 
 add_dependency('DoomDoctor', 'StringUtils', 'dd_')
 add_dependency('DoomDoctor', 'VmAbortReporter', 'dd_')

@@ -630,12 +630,13 @@ class NAMESPACE_Ascii
 #+name: generate-table
 #+begin_src elisp
 (defun number-to-ascii-enum (number)
-  (format "%s = %d" (string-replace "(" ""
-                    (string-replace ")" ""
-                    (string-replace "-" "_"
-                    (string-replace " " "_" (char-to-name number))))) number))
+  (format "%s = %d, // 0x%X" (string-replace "(" ""
+                             (string-replace ")" ""
+                             (string-replace "-" "_"
+                             (string-replace " " "_"
+                                             (char-to-name number))))) number number))
 
-(mapconcat 'number-to-ascii-enum (number-sequence 1 127) ",\n")
+(mapconcat 'number-to-ascii-enum (number-sequence 1 127) "\n")
 #+end_src
 #+begin_src c :noweb-ref TestsBody
 {
