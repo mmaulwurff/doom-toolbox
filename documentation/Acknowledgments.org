@@ -8,8 +8,7 @@ it, directly or indirectly. These people have submitted bug reports, feature
 suggestions, code contributions, translations, or helped in other ways, like
 providing code examples and documentation.
 
-If you are missing from this list, or want your name removed, please let me (m8f)
-know!
+If you are missing from this list, or want your name removed, please submit an issue.
 
 The order is alphabetical.
 

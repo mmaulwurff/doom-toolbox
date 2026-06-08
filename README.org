@@ -53,7 +53,7 @@ This project doesn't use any AI tools or resources.
 | [[file:modules/StringUtils.org][StringUtils]]        | string manipulation library                      |             |
 | [[file:modules/VmAbortReporter.org][VmAbortReporter]]    | prints a report when VM abort happens            |             |
 |--------------------+--------------------------------------------------+-------------|
-| *Tools*            |                                                  |             |
+| *Development*      |                                                  |             |
 |--------------------+--------------------------------------------------+-------------|
 | [[file:add-ons/ClematisM.org][ClematisM]]          | ZScript unit test framework                      |             |
 | [[file:add-ons/DoomDoctor.org][DoomDoctor]]         | mod development and debugging utilities          |             |
