@@ -1,5 +1,6 @@
-----------------------------------------
 ^$
+^----------------------------------------
+^.?ZDoom version g
 ^Adding dehacked patch miniwad.wad:DEHACKED
 ^Checking cmd-line parameters...
 ^Compiled on
@@ -13,7 +14,6 @@
 ^GL_SHADING_LANGUAGE_VERSION:
 ^GL_VENDOR:
 ^GL_VERSION:
-^GZDoom version g
 ^G_ParseMapInfo: Load map definitions.
 ^I_Init: Setting up machine state.
 ^LoadActors: Load actor definitions.
@@ -29,19 +29,15 @@
 ^ST_Init: Init startup screen.
 ^S_Init: Setting up sound.
 ^S_InitData: Load sound definitions.
-^Script error, "gzdoom.pk3:menudef.txt"
-^Script error, "lzdoom.pk3:menudef.txt"
-^Script error, "uzdoom.pk3:menudef.txt"
+^Script error, ".?zdoom.pk3:menudef.txt"
 ^Texman.Init: Init texture manager.
-^UZDoom version g
 ^Unknown texture M_EPISOD
 ^Using video driver x11
 ^V_Init: allocate screen.
 ^W_Init: Init WADfiles.
 ^adding .*game_support.pk3, .* lumps
-^adding .*gzdoom.pk3, .* lumps
 ^adding .*miniwad.wad, .* lumps
-^adding .*uzdoom.pk3, .* lumps
+^adding .*zdoom.pk3, .* lumps
 ^cc$
 ^player 1 of 1 \(1 nodes\)
 ^script parsing took
