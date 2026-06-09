@@ -12,7 +12,7 @@ prek ~= 0.4
 
 # REUSE: open source licenses helper tool
 # https://reuse.software/
-reuse ~= 6.2
+reuse[charset-normalizer] ~= 6.2
 
 # SCons: software construction tool
 # http://www.scons.org/documentation.html
