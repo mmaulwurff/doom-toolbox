@@ -180,14 +180,18 @@ class hi_EventHandler : StaticEventHandler
 
     if (missile.blockingFloor)
     {
-      normal  = missile.blockingFloor.floorPlane.normal;
       texture = missile.blockingFloor.getTexture(Sector.floor);
+      if (texture == skyFlatNum) return;
+
+      normal  = missile.blockingFloor.floorPlane.normal;
       aColor  = missile.blockingFloor.specialColors[Sector.floor];
     }
     else if (missile.blockingCeiling)
     {
-      normal  = missile.blockingCeiling.ceilingPlane.normal;
       texture = missile.blockingCeiling.getTexture(Sector.ceiling);
+      if (texture == skyFlatNum) return;
+
+      normal  = missile.blockingCeiling.ceilingPlane.normal;
       aColor  = missile.blockingCeiling.specialColors[Sector.ceiling];
     }
     else if (missile.blockingLine)
