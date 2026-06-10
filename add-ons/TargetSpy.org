@@ -2004,7 +2004,7 @@ class ts_Projector
   {
     mGlProjection = new("ts_GlScreen");
     mSwProjection = new("ts_SwScreen");
-    mCvarRenderer = ts_ExistingCvar.find("vid_rendermode");
+    mCvarRenderer = Cvar.findCvar("vid_rendermode");
     if (mCvarRenderer == NULL)
       Console.printf("TargetSpy: WARNING: vid_rendermode CVar not found");
   }
