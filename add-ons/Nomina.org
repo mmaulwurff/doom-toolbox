@@ -53,9 +53,6 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src text :tangle ../build/Nomina/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle ../build/NominaTest/mapinfo.txt :exports none
-// <<CC>>
-#+end_src
 
 * Source code
 
@@ -75,6 +72,7 @@ GameInfo { EventHandlers = "na_EventHandler" }
 #+end_src
 
 #+begin_src c :tangle ../build/Nomina/zscript.zs
+
 class na_EventHandler : StaticEventHandler
 {
   // Renames the spawned thing, if needed.
@@ -104,9 +102,26 @@ class na_EventHandler : StaticEventHandler
     bool hasTag = thing.getTag(".") != ".";
     if (hasTag) return;
 
+    {
+      let[found, name] = findNameInCast(thing.getClassName());
+      if (found)
+      {
+        thing.setTag(name);
+        return;
+      }
+    }
+
     string name = makeAutoName(thing.getClassName());
     thing.setTag(name);
   }
+
+  <<na_EventHandler.functions>>
+
+  override void onEngineInitialize()
+  {
+    <<na_EventHandler.initialize>>
+  }
+}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class nat_Imp : DoomImp {}
@@ -118,46 +133,47 @@ class nat_Imp : DoomImp {}
 
 ** Automatic tags
 
-#+begin_src c :tangle ../build/Nomina/zscript.zs
-  /// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
-  /// splits camelCase.
-  private static string makeAutoName(string className)
+#+begin_src c :noweb-ref na_EventHandler.functions
+
+// Turns '_' to spaces, capitalizes words, trims and removes duplicate spaces,
+// splits camelCase.
+private static string makeAutoName(string className)
+{
+  className.replace("_", " ");
+
+  Array<string> words;
+  className.split(words, " ", TOK_SkipEmpty);
+
+  string result;
+
+  foreach (word : words)
   {
-    className.replace("_", " ");
+    // It seems that non-latin characters are not allowed in class names. Overkill?
+    let[firstChar, firstLength] = word.getNextCodepoint(0);
 
-    Array<string> words;
-    className.split(words, " ", TOK_SkipEmpty);
-
-    string result;
-
-    foreach (word : words)
+    string split = string.format("%c", string.charUpper(firstChar));
+    for (uint i = firstLength; i < word.length();)
     {
-      // It seems that non-latin characters are not allowed in class names. Overkill?
-      let[firstChar, firstLength] = word.getNextCodepoint(0);
+      let[letter, next] = word.getNextCodepoint(i);
 
-      string split = string.format("%c", string.charUpper(firstChar));
-      for (uint i = firstLength; i < word.length();)
-      {
-        let[letter, next] = word.getNextCodepoint(i);
+      bool mustSplit = isUpper(letter)
+        && uint(next) < word.length()
+        && isLower(word.getNextCodepoint(next));
 
-        bool mustSplit = isUpper(letter)
-          && uint(next) < word.length()
-          && isLower(word.getNextCodepoint(next));
+      split.appendFormat(mustSplit ? " %c" : "%c", letter);
 
-        split.appendFormat(mustSplit ? " %c" : "%c", letter);
-
-        i = next;
-      }
-
-      bool isFirst = result.length() == 0;
-      result.appendFormat(isFirst ? "%s" : " %s", split);
+      i = next;
     }
 
-    return result;
+    bool isFirst = result.length() == 0;
+    result.appendFormat(isFirst ? "%s" : " %s", split);
   }
 
-  private static bool isUpper(int letter) { return string.charLower(letter) != letter; }
-  private static bool isLower(int letter) { return string.charUpper(letter) != letter; }
+  return result;
+}
+
+private static bool isUpper(int letter) { return string.charLower(letter) != letter; }
+private static bool isLower(int letter) { return string.charUpper(letter) != letter; }
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class _nat__nameless1_   : nat_Monster {}
@@ -180,14 +196,15 @@ class NAT_BFG9000        : nat_Monster {}
 server nosave string na_config = "";
 #+end_src
 
-#+begin_src c :tangle ../build/Nomina/zscript.zs
-  private static bool, string findNameInConfig(string className)
-  {
-    let config    = Dictionary.fromString(na_config);
-    string newTag = config.at(className);
+#+begin_src c :noweb-ref na_EventHandler.functions
 
-    return newTag.length() != 0, newTag;
-  }
+private static bool, string findNameInConfig(string className)
+{
+  let config    = Dictionary.fromString(na_config);
+  string newTag = config.at(className);
+
+  return newTag.length() != 0, newTag;
+}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class nat_NamelessByConfig : nat_Monster {}
@@ -215,36 +232,36 @@ NA_USAGE = "Usage";
 NA_USAGE = "Использование";
 #+end_src
 
-#+begin_src c :tangle ../build/Nomina/zscript.zs
+#+begin_src c :noweb-ref na_EventHandler.functions
 
-  // Handles `na_rename` command.
-  override void networkProcess(ConsoleEvent event)
+// Handles `na_rename` command.
+override void networkProcess(ConsoleEvent event)
+{
+  Array<string> parts;
+  event.name.split(parts, ":");
+
+  if (parts.size() == 0 || parts[0] != "na_rename") return;
+
+  string className = parts[1];
+  string newTag    = parts[2];
+  for (int i = 3; i < parts.size(); ++i)
+    if (parts[i].length() != 0) newTag.appendFormat(" %s", parts[i]);
+
+  if (parts.size() < 3 || className.length() == 0 || newTag.length() == 0)
   {
-    Array<string> parts;
-    event.name.split(parts, ":");
-
-    if (parts.size() == 0 || parts[0] != "na_rename") return;
-
-    string className = parts[1];
-    string newTag    = parts[2];
-    for (int i = 3; i < parts.size(); ++i)
-      if (parts[i].length() != 0) newTag.appendFormat(" %s", parts[i]);
-
-    if (parts.size() < 3 || className.length() == 0 || newTag.length() == 0)
-    {
-      Console.printf("%s:\nna_rename ClassName NewTag",
-                     StringTable.localize("$NA_USAGE"));
-      return;
-    }
-
-    let config = Dictionary.fromString(na_config);
-    config.insert(className, newTag);
-    Cvar.getCvar("na_config").setString(config.toString());
-
-    let i = ThinkerIterator.create(className);
-    for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
-      anActor.setTag(newTag);
+    Console.printf("%s:\nna_rename ClassName NewTag",
+                   StringTable.localize("$NA_USAGE"));
+    return;
   }
+
+  let config = Dictionary.fromString(na_config);
+  config.insert(className, newTag);
+  Cvar.getCvar("na_config").setString(config.toString());
+
+  let i = ThinkerIterator.create(className);
+  for (Actor anActor = Actor(i.next()); anActor != NULL; anActor = Actor(i.next()))
+    anActor.setTag(newTag);
+}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
 class nat_NamelessToRename : Actor { Default { Monster; } }
@@ -255,33 +272,32 @@ class nat_NamelessToRename : Actor { Default { Monster; } }
 
 ** Tag databases
 
-#+begin_src c :tangle ../build/Nomina/zscript.zs
-  private bool, string findNameInData(string className)
+#+begin_src c :noweb-ref na_EventHandler.functions
+
+private bool, string findNameInData(string className)
+{
+  string newTag = mData.at(className);
+
+  return newTag.length() != 0, newTag;
+}
+
+private Dictionary mData;
+#+end_src
+
+#+begin_src c :noweb-ref na_EventHandler.initialize
+
+mData = Dictionary.create();
+
+string dataLump = "na_data";
+for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
+     i != -1;
+     i = Wads.findLump(dataLump, i + 1, Wads.AnyNamespace))
+{
+  let data = Dictionary.fromString(Wads.readLump(i));
+  for (let i = DictionaryIterator.create(data); i.next();)
   {
-    string newTag = mData.at(className);
-
-    return newTag.length() != 0, newTag;
+    mData.insert(i.key(), i.value());
   }
-
-  // Initializes the event handler.
-  override void OnEngineInitialize()
-  {
-    mData = Dictionary.create();
-
-    string dataLump = "na_data";
-    for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
-         i != -1;
-         i = Wads.findLump(dataLump, i + 1, Wads.AnyNamespace))
-    {
-      let data = Dictionary.fromString(Wads.readLump(i));
-      for (let i = DictionaryIterator.create(data); i.next();)
-      {
-        mData.insert(i.key(), i.value());
-      }
-    }
-  }
-
-  private Dictionary mData;
 }
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
@@ -308,9 +324,125 @@ class nat_NamelessByData3: nat_Monster {}
     mExpectedNames.insert("nat_NamelessByData3", "TestData3-2");
 #+end_src
 
+** Cast
+
+#+begin_src c :noweb-ref na_EventHandler.functions
+
+private bool, string findNameInCast(string className)
+{
+  string newTag = mCastData.at(className.makeLower());
+  return newTag.length() != 0, newTag;
+}
+
+private Dictionary collectCastData()
+{
+  let result = Dictionary.create();
+
+  string mapinfoLumps[] = { "mapinfo", "zmapinfo" };
+  foreach (mapinfoLump : mapinfoLumps)
+  {
+    for (int i = Wads.findLump(mapinfoLump, 0, Wads.AnyNamespace);
+        i != -1;
+        i = Wads.findLump(mapinfoLump, i + 1, Wads.AnyNamespace))
+    {
+      string contents = Wads.readLump(i);
+      addCastFrom(contents, result);
+    }
+  }
+
+  return result;
+}
+
+// Not bothering with writing a proper parser. This will suffice for now.
+// Note: this doesn't understand comments.
+private void addCastFrom(string contents, out Dictionary result)
+{
+  // make a lowercase copy so token search is case-independent.
+  string lowerContents = contents.makeLower();
+
+  // iterate over all CastClass.
+  int contentsLength = contents.length();
+  for (int castClassStart = lowerContents.indexOf("castclass");
+       castClassStart < contentsLength && castClassStart != -1;
+       castClassStart = lowerContents.indexOf("castclass", castClassStart + 1))
+  {
+    int classStart = lowerContents.indexOf("\"", castClassStart) + 1;
+    int classEnd   = lowerContents.indexOf("\"", classStart + 1);
+
+    if (classStart == -1 || classEnd == -1) continue;
+
+    int blockStart = lowerContents.rightIndexOf("{", castClassStart);
+    int blockEnd   = lowerContents.indexOf("}", classEnd);
+
+    if (blockStart == -1 || blockEnd == -1) continue;
+    if (lowerContents.rightIndexOf("{", blockEnd) != blockStart) continue;
+    if (lowerContents.indexOf("}", blockStart) != blockEnd) continue;
+
+    // CastName is either before or after CastClass.
+    int castNameStart = lowerContents.rightIndexOf("castname", castClassStart);
+    if (castNameStart == -1 || castNameStart < blockStart)
+      castNameStart = lowerContents.indexOf("castname", castClassStart);
+
+    if (castNameStart == -1) continue;
+
+    int nameStart = lowerContents.indexOf("\"", castNameStart) + 1;
+    int nameEnd   = lowerContents.indexOf("\"", nameStart + 1);
+
+    string className = lowerContents.mid(classStart, classEnd - classStart);
+    string name = contents.mid(nameStart, nameEnd - nameStart);
+    result.insert(className, name);
+  }
+}
+
+private Dictionary mCastData;
+#+end_src
+#+begin_src c :noweb-ref na_EventHandler.initialize
+
+mCastData = collectCastData();
+
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+
+class nat_NamelessInCast1: nat_Monster {}
+class nat_NamelessInCast2: nat_Monster {}
+class nat_NamelessInCast3: nat_Monster {}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/mapinfo.txt
+
+Intermission Doom2Cast
+{
+
+  // Out of block:
+  // CastClass = "nat_NamelessInCast3"
+  // CastName  = "Cast Enemy 3"
+
+  Cast
+  {
+    CastClass = "nat_NamelessInCast1"
+    CastName  = "Cast Enemy 1"
+  }
+  cast
+  {
+    castname  = "Cast Enemy 2"
+    castclass = "nat_NamelessInCast2"
+  }
+
+  // Out of block:
+  // CastClass = "nat_NamelessInCast3"
+  // CastName  = "Cast Enemy 3"
+
+  Link = Doom2Cast // restart cast call
+}
+#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    mExpectedNames.insert("nat_NamelessInCast1", "Cast Enemy 1");
+    mExpectedNames.insert("nat_NamelessInCast2", "Cast Enemy 2");
+    mExpectedNames.insert("nat_NamelessInCast3", "Nat Nameless In Cast3");
+#+end_src
+
 * Tests
 
-#+begin_src text :tangle ../build/NominaTest/mapinfo.txt
+#+begin_src c :tangle ../build/NominaTest/mapinfo.txt
 GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
 
