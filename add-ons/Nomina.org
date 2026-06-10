@@ -58,7 +58,6 @@ SPDX-License-Identifier: CC0-1.0
 
 #+begin_src c :tangle ../build/NominaTest/zscript.zs
 version 4.14.3
-<<tests-preamble>>
 #+end_src
 
 #+begin_src c :tangle ../build/Nomina/zscript.zs
@@ -123,12 +122,14 @@ class na_EventHandler : StaticEventHandler
   }
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+#+begin_src c :noweb-ref nat-actors
+
 class nat_Imp : DoomImp {}
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-    mExpectedNames.insert("DoomImp", "Imp");
-    mExpectedNames.insert("nat_Imp", "Imp");
+#+begin_src c :noweb-ref expect-before-spawn
+
+mExpectedNames.insert("DoomImp", "Imp");
+mExpectedNames.insert("nat_Imp", "Imp");
 #+end_src
 
 ** Automatic tags
@@ -175,17 +176,19 @@ private static string makeAutoName(string className)
 private static bool isUpper(int letter) { return string.charLower(letter) != letter; }
 private static bool isLower(int letter) { return string.charUpper(letter) != letter; }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+#+begin_src c :noweb-ref nat-actors
+
 class _nat__nameless1_   : nat_Monster {}
 class nat_CamelCaseEnemy : nat_Monster {}
 class nat_BFGZombie      : nat_Monster {}
 class NAT_BFG9000        : nat_Monster {}
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-    mExpectedNames.insert("_nat__nameless1_", "Nat Nameless1");
-    mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
-    mExpectedNames.insert("nat_BFGZombie", "Nat BFG Zombie");
-    mExpectedNames.insert("NAT_BFG9000", "NAT BFG9000");
+#+begin_src c :noweb-ref expect-before-spawn
+
+mExpectedNames.insert("_nat__nameless1_", "Nat Nameless1");
+mExpectedNames.insert("nat_CamelCaseEnemy", "Nat Camel Case Enemy");
+mExpectedNames.insert("nat_BFGZombie", "Nat BFG Zombie");
+mExpectedNames.insert("NAT_BFG9000", "NAT BFG9000");
 #+end_src
 
 ** In-game enemy tag correction
@@ -206,15 +209,17 @@ private static bool, string findNameInConfig(string className)
   return newTag.length() != 0, newTag;
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+#+begin_src c :noweb-ref nat-actors
+
 class nat_NamelessByConfig : nat_Monster {}
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-    // Cannot set a string value with " in the console, have to do it programmatically.
-    Cvar.getCvar("na_config").setString(
-      "{\"nat_NamelessByConfig\":\"TestName\", \"Zombieman\":\"TestZombie\"}");
-    mExpectedNames.insert("nat_NamelessByConfig", "TestName");
-    mExpectedNames.insert("Zombieman", "TestZombie");
+#+begin_src c :noweb-ref expect-before-spawn
+
+// Cannot set a string value with " in the console, have to do it programmatically.
+Cvar.getCvar("na_config").setString(
+  "{\"nat_NamelessByConfig\":\"TestName\", \"Zombieman\":\"TestZombie\"}");
+mExpectedNames.insert("nat_NamelessByConfig", "TestName");
+mExpectedNames.insert("Zombieman", "TestZombie");
 #+end_src
 
 *** ~na_rename~ console command
@@ -263,11 +268,13 @@ override void networkProcess(ConsoleEvent event)
     anActor.setTag(newTag);
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class nat_NamelessToRename : Actor { Default { Monster; } }
+#+begin_src c :noweb-ref nat-actors
+
+class nat_NamelessToRename : nat_Monster {}
 #+end_src
 #+begin_src c :noweb-ref expect-after-spawn
-    mExpectedNames.insert("nat_NamelessToRename", "Renamed To Several Words");
+
+mExpectedNames.insert("nat_NamelessToRename", "Renamed To Several Words");
 #+end_src
 
 ** Tag databases
@@ -300,10 +307,11 @@ for (int i = Wads.findLump(dataLump, 0, Wads.AnyNamespace);
   }
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class nat_NamelessByData1: nat_Monster {}
-class nat_NamelessByData2: nat_Monster {}
-class nat_NamelessByData3: nat_Monster {}
+#+begin_src c :noweb-ref nat-actors
+
+class nat_NamelessByData1 : nat_Monster {}
+class nat_NamelessByData2 : nat_Monster {}
+class nat_NamelessByData3 : nat_Monster {}
 #+end_src
 #+begin_src js :tangle ../build/NominaTest/1/na_data.json
 {
@@ -318,10 +326,11 @@ class nat_NamelessByData3: nat_Monster {}
   "nat_NamelessByData4": "TestData4"
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-    mExpectedNames.insert("nat_NamelessByData1", "TestData1");
-    mExpectedNames.insert("nat_NamelessByData2", "TestData2");
-    mExpectedNames.insert("nat_NamelessByData3", "TestData3-2");
+#+begin_src c :noweb-ref expect-before-spawn
+
+mExpectedNames.insert("nat_NamelessByData1", "TestData1");
+mExpectedNames.insert("nat_NamelessByData2", "TestData2");
+mExpectedNames.insert("nat_NamelessByData3", "TestData3-2");
 #+end_src
 
 ** Cast
@@ -401,11 +410,11 @@ private Dictionary mCastData;
 mCastData = collectCastData();
 
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
+#+begin_src c :noweb-ref nat-actors
 
-class nat_NamelessInCast1: nat_Monster {}
-class nat_NamelessInCast2: nat_Monster {}
-class nat_NamelessInCast3: nat_Monster {}
+class nat_NamelessInCast1 : nat_Monster {}
+class nat_NamelessInCast2 : nat_Monster {}
+class nat_NamelessInCast3 : nat_Monster {}
 #+end_src
 #+begin_src c :tangle ../build/NominaTest/mapinfo.txt
 
@@ -434,10 +443,11 @@ Intermission Doom2Cast
   Link = Doom2Cast // restart cast call
 }
 #+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
-    mExpectedNames.insert("nat_NamelessInCast1", "Cast Enemy 1");
-    mExpectedNames.insert("nat_NamelessInCast2", "Cast Enemy 2");
-    mExpectedNames.insert("nat_NamelessInCast3", "Nat Nameless In Cast3");
+#+begin_src c :noweb-ref expect-before-spawn
+
+mExpectedNames.insert("nat_NamelessInCast1", "Cast Enemy 1");
+mExpectedNames.insert("nat_NamelessInCast2", "Cast Enemy 2");
+mExpectedNames.insert("nat_NamelessInCast3", "Nat Nameless In Cast3");
 #+end_src
 
 * Tests
@@ -446,12 +456,10 @@ Intermission Doom2Cast
 GameInfo { EventHandlers = "nat_EventHandler" }
 #+end_src
 
-#+begin_src c :tangle ../build/NominaTest/zscript/nat_Actors.zs
-class nat_Monster : Actor { Default { Monster; } }
-#+end_src
+#+begin_src c :tangle ../build/NominaTest/zscript.zs
 
-#+begin_src c :noweb-ref tests-preamble
-#include "zscript/nat_Actors.zs"
+class nat_Monster : Actor { Default { Monster; } }
+<<nat-actors>>
 
 class nat_Test : Clematis {}
 
@@ -465,8 +473,8 @@ class nat_EventHandler : StaticEventHandler
     mExpectedNames = Dictionary.create();
 
     // Setting expectations goes here.
-#+end_src
-#+begin_src c :tangle ../build/NominaTest/zscript.zs
+    <<expect-before-spawn>>
+
     vector3 spawnPoint = players[consolePlayer].mo.pos + (100, 0, 0);
 
     for (let i = DictionaryIterator.create(mExpectedNames); i.next();)
