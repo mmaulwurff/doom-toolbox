@@ -706,7 +706,8 @@ class tsGetter_Tag : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    return ts_Kind.PlainText, anActor.getTag(), 0, 0;
+    string tag = anActor.player ? anActor.player.getUserName() : anActor.getTag();
+    return ts_Kind.PlainText, tag, 0, 0;
   }
 
   // Example:
@@ -728,7 +729,7 @@ class tsGetter_TagAndClass : Actor
 {
   static int, string, int, int makeInformation(Actor anActor)
   {
-    string tag    = anActor.getTag();
+    string tag    = anActor.player ? anActor.player.getUserName() : anActor.getTag();
     string aClass = anActor.getClassName();
     string result = (aClass != tag)
       ? string.format("%s (%s)", tag, aClass)
