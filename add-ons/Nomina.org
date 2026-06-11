@@ -41,16 +41,16 @@ SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src text :tangle ../build/Nomina/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/Nomina/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle ../build/Nomina/keyconf.txt :exports none
+#+begin_src c :tangle ../build/Nomina/keyconf.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src c :tangle ../build/Nomina/language.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle ../build/Nomina/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/Nomina/mapinfo.txt :exports none
 // <<CC>>
 #+end_src
 
@@ -66,7 +66,7 @@ version 4.14.3
 
 ** Event handler
 
-#+begin_src text :tangle ../build/Nomina/mapinfo.txt
+#+begin_src c :tangle ../build/Nomina/mapinfo.txt
 GameInfo { EventHandlers = "na_EventHandler" }
 #+end_src
 
@@ -78,40 +78,34 @@ class na_EventHandler : StaticEventHandler
   override void worldThingSpawned(WorldEvent event)
   {
     Actor thing = event.thing;
+    if (thing == NULL || !thing.bIsMonster || thing is "Weapon") return;
 
-    if (thing == NULL || !(thing.bIsMonster || thing is "Weapon")) return;
+    thing.setTag(makeTag(thing));
+  }
 
-    {
-      let[found, name] = findNameInConfig(thing.getClassName());
-      if (found)
-      {
-        thing.setTag(name);
-        return;
-      }
-    }
-    {
-      let[found, name] = findNameInData(thing.getClassName());
-      if (found)
-      {
-        thing.setTag(name);
-        return;
-      }
-    }
-
-    bool hasTag = thing.getTag(".") != ".";
-    if (hasTag) return;
+  private string makeTag(Actor anActor)
+  {
+    string className = anActor.getClassName();
 
     {
-      let[found, name] = findNameInCast(thing.getClassName());
-      if (found)
-      {
-        thing.setTag(name);
-        return;
-      }
+      let[found, name] = findNameInConfig(className);
+      if (found) return name;
+    }
+    {
+      let[found, name] = findNameInData(className);
+      if (found) return name;
     }
 
-    string name = makeAutoName(thing.getClassName());
-    thing.setTag(name);
+    bool hasTag = anActor.getTag(".") != ".";
+    if (hasTag) return anActor.getTag();
+
+    {
+      let[found, name] = findNameInCast(className);
+      if (found) return name;
+    }
+
+    string name = makeAutoName(className);
+    return name;
   }
 
   <<na_EventHandler.functions>>
@@ -195,7 +189,7 @@ mExpectedNames.insert("NAT_BFG9000", "NAT BFG9000");
 
 *** ~na_config~ Cvar
 
-#+begin_src text :tangle ../build/Nomina/cvarinfo.txt
+#+begin_src c :tangle ../build/Nomina/cvarinfo.txt
 server nosave string na_config = "";
 #+end_src
 
@@ -224,7 +218,7 @@ mExpectedNames.insert("Zombieman", "TestZombie");
 
 *** ~na_rename~ console command
 
-#+begin_src text :tangle ../build/Nomina/keyconf.txt
+#+begin_src c :tangle ../build/Nomina/keyconf.txt
 // Limited to 10 words. For more words, use the external name data (na_data.json).
 Alias na_rename "netevent na_rename:%1:%2:%3:%4:%5:%6:%7:%8:%9:%10"
 #+end_src
