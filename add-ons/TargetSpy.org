@@ -1380,7 +1380,7 @@ class ts_EventHandler : StaticEventHandler
     mProjector.prepare();
     mFader.tick();
 
-    if (!mOptions.isOn())
+    if (automapactive || !mOptions.isOn())
     {
       mCurrentTarget.target = NULL;
       return;
