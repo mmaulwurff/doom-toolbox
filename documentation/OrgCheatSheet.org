@@ -6,9 +6,8 @@ If you are reading this file on GitHub or Codeberg: not all Org features may be
 supported here. See HTML export for this file:
 https://mmaulwurff.github.io/doom-toolbox/documentation/OrgCheatSheet.html
 
-Formatting: *bold* _underlined_ ~monospace~ +strikethrough+ /italics/ */_+combined+_/*
-
-Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html][Org mode quickstart]].
+Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html][Org mode quickstart]]. Formatting:
+*bold* _underlined_ ~monospace~ +strikethrough+ /italics/ */_+combined+_/*.
 
 Unordered lists:
 - one
@@ -18,14 +17,14 @@ Ordered lists:
 1. one
 2. two
 
-Code block example. ~#+begin_src~ starts a code block. ~#+end_src~ ends it.
-The code inside this block will be put into ~main.c~ file when tangled.
+Code block are between ~#+begin_src~ and ~#+end_src~. The code inside this block will
+be put into ~main.c~ file when tangled.
 #+begin_src c :tangle main.c
 int main() { return 0; }
 #+end_src
 
-Macro example. When exported or tangled, the following blocks are automatically put
-inside this block:
+Macro. When exported or tangled, the following blocks are automatically put inside
+this block:
 #+begin_src c :noweb yes
 // <<text-to-insert-here-name>>
 #+end_src
@@ -43,8 +42,7 @@ SPDX-License-Identifier: CC0-1.0
 *** Third level heading
 
 -----
-
 This block puts this .org file into the exported HTML page verbatim for comparison.
 #+begin_src elisp :exports both
-(print (org-file-contents "OrgCheatSheet.org"))
+(buffer-string)
 #+end_src
