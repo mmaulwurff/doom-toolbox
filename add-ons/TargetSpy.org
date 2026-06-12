@@ -639,6 +639,31 @@ class tsGetter_HealthAndMax : Actor
 }
 #+end_src
 
+*** Silent health and max health
+
+This getter is somewhat special. It is intended to:
+- carry health and max health even when other health getters are disabled.
+- be invisible.
+- be always on.
+
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
+
+class tsGetter_SilentHealth : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    int maxHealth = ts_Utils.getActorMaxHealth(anActor);
+    return ts_Kind.Empty, "", anActor.health, maxHealth;
+  }
+}
+#+end_src
+
+#+begin_src js :tangle ../bild/TargetSpy/ts_config.json
+{
+  "tsGetter_SilentHealth": "on"
+}
+#+end_src
+
 *** Health bar
 
 #+begin_src c :noweb-ref strings
@@ -880,6 +905,10 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
     position.y -= totalHeight;
   position.x = clamp(position.x, totalWidth / 2, screenWidth - totalWidth / 2);
 
+  int color = options.isUsingHealthBarColors()
+    ? ts_Utils.getHealthColor(options, informationPieces)
+    : Font.CR_Gray;
+
   bool isBackgroundEnabled = options.isBackgroundEnabled();
   for (int i = 0; i < linesCount; ++i)
   {
@@ -895,7 +924,13 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
                                   alpha);
     }
 
-    ts_ViewUtils.drawText(fonts[i], lines[i], lineWidths[i], position, alpha, scale);
+    ts_ViewUtils.drawText(fonts[i],
+                          lines[i],
+                          lineWidths[i],
+                          position,
+                          alpha,
+                          scale,
+                          color);
 
     position.y += lineHeight;
   }
@@ -930,6 +965,7 @@ double getYPosition() const { return mYPositionCvar.getFloat(); }
 enum Places { PlaceFixed, PlaceAboveTarget, PlaceBelowTarget }
 int getPlace() const { return mPlaceCvar.getInt(); }
 bool isBackgroundEnabled() const { return mBackgroundCvar.getInt(); }
+bool isUsingHealthBarColors() const { return mHealthColors.getInt(); }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
 
@@ -938,6 +974,7 @@ private Cvar mXPositionCvar;
 private Cvar mYPositionCvar;
 private Cvar mPlaceCvar;
 private Cvar mBackgroundCvar;
+private Cvar mHealthColors;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
 
@@ -946,6 +983,7 @@ mXPositionCvar  = ts_ExistingCvar.find("ts_x_position");
 mYPositionCvar  = ts_ExistingCvar.find("ts_y_position");
 mPlaceCvar      = ts_ExistingCvar.find("ts_place");
 mBackgroundCvar = ts_ExistingCvar.find("ts_background");
+mHealthColors   = ts_ExistingCvar.find("ts_using_health_bar_colors");
 #+end_src
 #+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
@@ -954,6 +992,7 @@ user float ts_x_position = 0.5;
 user float ts_y_position = 0.2;
 user int   ts_place = 0;
 user bool  ts_background = false;
+user bool  ts_using_health_bar_colors = false;
 #+end_src
 #+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
@@ -966,6 +1005,7 @@ OptionMenu ts_TextViewOptions
   Slider "Y position", ts_y_position, 0, 1.0, 0.01, 2
   Option "Place",      ts_place, ts_Places
   Option "Background", ts_background, OnOff
+  Option "Use health bar colors", ts_using_health_bar_colors, OnOff
 
   StaticText ""
   Submenu "Default bar options", ts_DefaultBarOptions
@@ -1195,7 +1235,6 @@ OptionMenu ts_FrameOptions
 
   Slider "Scale",  ts_frame_scale, 0.1, 4.0, 0.1, 1
   Option "Use health bar colors", ts_frame_using_health_bar_colors, OnOff
-  StaticText "(health bar or health and max health must be enabled)"
 
   StaticText ""
   Option "Custom characters", ts_frame_custom_enabled, OnOff
@@ -1882,8 +1921,7 @@ static ui int getHealthColor(ts_Options options, Array<ts_InformationPiece> piec
   bool   found = false;
   foreach (piece : pieces)
   {
-    if ((piece.kind == ts_Kind.Bar || piece.kind == ts_Kind.ValueAndMax)
-        && piece.id.indexOf("Health") != -1)
+    if (piece.id == "SilentHealth")
     {
       found = true;
       value = piece.value;
@@ -2074,7 +2112,7 @@ static void drawText(Font aFont,
                      vector2 position,
                      double alpha,
                      double scale,
-                     int color = Font.CR_Gray)
+                     int color)
 {
   position.x -= textWidth / 2;
   Screen.drawText(aFont,
