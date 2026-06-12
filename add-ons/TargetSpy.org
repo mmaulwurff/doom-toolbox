@@ -2583,8 +2583,9 @@ and hidden from option menus.
 Several configurations may be loaded at once. If more than one configuration
 configures a class, the last loaded configuration wins.
 
-Configuration is in JSON object format. Key is full class name, value is "off", "on",
-or "user". "user" can be used to override previous configuration.
+Configuration lump has name ~ts_config~ and is in JSON object format. Key is full
+class name, value is "off", "on", or "user". "user" can be used to override previous
+configuration.
 
 Example:
 
