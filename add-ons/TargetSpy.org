@@ -1405,6 +1405,7 @@ class ts_EventHandler : StaticEventHandler
 
     Array<string> disabledClasses;
     mDisabledViewsCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    applyConfiguration("tsView_", disabledClasses);
     int disabledClassesSize = disabledClasses.size();
 
     int viewsCount = mViews.size();
@@ -1447,6 +1448,7 @@ class ts_EventHandler : StaticEventHandler
   {
     Array<string> disabledClasses;
     mDisabledFindersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    applyConfiguration("tsFinder_", disabledClasses);
     int disabledClassesSize = disabledClasses.size();
 
     int findersCount = mFinders.size();
@@ -1468,6 +1470,7 @@ class ts_EventHandler : StaticEventHandler
 
     Array<string> disabledClasses;
     mDisabledFiltersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    applyConfiguration("tsFilter_", disabledClasses);
     int disabledClassesSize = disabledClasses.size();
 
     for (int targetIndex = 0; targetIndex < targetsCount; ++targetIndex)
@@ -1524,6 +1527,7 @@ class ts_EventHandler : StaticEventHandler
 
     Array<string> disabledClasses;
     mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
+    applyConfiguration("tsGetter_", disabledClasses);
     int disabledClassesSize = disabledClasses.size();
 
     int gettersCount = mGetters.size();
@@ -2338,10 +2342,13 @@ class ts_ClassToggles : OptionMenu
             string classPrefix,
             string disabledClassesCvarName)
   {
+    let eventHandler = ts_EventHandler.getInstance();
+
     mDesc.mItems.clear();
     int classesCount = classes.size();
     for (int i = 0; i < classesCount; ++i)
     {
+      if (eventHandler.isInConfig(classPrefix .. classes[i])) continue;
       let toggle = new("ts_ClassToggle");
       toggle.initialize(classes[i], classPrefix, disabledClassesCvarName);
       mDesc.mItems.push(toggle);
@@ -2565,6 +2572,112 @@ class ts_GettersOrderElement : OptionMenuItemCommand
 }
 #+end_src
 
+*** Configuration
+
+Configuration is a way to customize how TargetSpy processes finders, filters, getters
+and views. By default these classes are enabled or disabled by user choice.
+Configuration can force them to be on or off. If a class is forced on, it is always
+active and hidden from option menus. If a class is forced off, it is always disabled
+and hidden from option menus.
+
+Several configurations may be loaded at once. If more than one configuration
+configures a class, the last loaded configuration wins.
+
+Configuration is in JSON object format. Key is full class name, value is "off", "on",
+or "user". "user" can be used to override previous configuration.
+
+Example:
+
+#+begin_src c :noweb-ref zscript-test
+
+class tsFilter_Abc : Actor
+{
+  static bool isAllowed(Actor anActor)
+  {
+    return true;
+  }
+}
+
+class tsGetter_Def : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    return ts_Kind.PlainText, "Def", 0, 0;
+  }
+}
+#+end_src
+
+#+begin_src js :tangle ../build/TargetSpyTest/ts_config.json
+{
+  "tsFilter_Abc": "on",
+  "tsGetter_Def": "off",
+  "tsGetter_Health": "user"
+}
+#+end_src
+
+**** Implementation
+
+#+begin_src c :noweb-ref ts_EventHandler.onRegister
+
+collectConfigurations();
+#+end_src
+
+#+begin_src c :noweb-ref ts_EventHandler.extensions
+
+clearscope bool isInConfig(string className)
+{
+  return mConfiguration.checkKey(className);
+}
+
+private void collectConfigurations()
+{
+  string lumpName = "ts_config";
+
+  for (int i = Wads.findLump(lumpName);
+       i != -1;
+       i = Wads.findLump(lumpName, i + 1))
+  {
+    let configuration = Dictionary.fromString(Wads.readLump(i));
+    let iterator      = DictionaryIterator.create(configuration);
+
+    while (iterator.next())
+    {
+      string key   = iterator.key();
+      string value = iterator.value().makeLower();
+
+      if      (value == "on")   mConfiguration.insert(key, 1);
+      else if (value == "off")  mConfiguration.insert(key, 0);
+      else if (value == "user") mConfiguration.remove(key);
+    }
+  }
+}
+
+private clearscope void applyConfiguration(string prefix,
+                                           out Array<string> disabledClasses)
+{
+  foreach (className, isEnabled : mConfiguration)
+  {
+    if (className.left(prefix.length()) != prefix) continue;
+
+    string shortClassName = ts_Classes.shorten(className);
+    int index = disabledClasses.find(shortClassName);
+
+    if (isEnabled)
+    {
+      if (index != disabledClasses.size())
+        disabledClasses.delete(index);
+    }
+    else
+    {
+      if (index == disabledClasses.size())
+        disabledClasses.push(shortClassName);
+    }
+  }
+}
+
+private Map<string, int> mConfiguration;
+#+end_src
+
 * Project setup
 
 #+begin_src c :tangle ../build/TargetSpy/mapinfo.txt
@@ -2584,6 +2697,13 @@ version 4.14.3
 #include "zscript/ts_PlainTranslator.zs"
 #include "zscript/ts_StringUtils.zs"
 #include "zscript/ts_libeye.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/TargetSpyTest/zscript.zs
+
+version 4.14.3
+
+<<zscript-test>>
 #+end_src
 
 [[file:../modules/PlainTranslator.org][PlainTranslator]]
