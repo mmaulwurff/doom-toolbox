@@ -7,6 +7,8 @@
 
 HitImpact spawns textured particles when a surface is hit.
 
+HitImpact is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
 Features:
 - works for hitscan and projectile attacks,
 - works for all games and mods (in theory),

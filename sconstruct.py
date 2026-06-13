@@ -73,18 +73,6 @@ def add_main_target(org_file, target_format):
   )
 
 
-def add_html_target(org_file, main_target):
-  name = make_project_name(org_file)
-  html_name = f'{name}Html'
-
-  def putHtml(target, source, env):
-    move(f'add-ons/{name}.html', f'build/{name}/{name}.html')
-    makedirs(f'build/{name}/tools/', exist_ok=True)
-    copy('tools/org-adwaita.css', f'build/{name}/tools/org-adwaita.css')
-
-  return AlwaysBuild(Alias(html_name, main_target, [make_export(org_file), putHtml]))
-
-
 def add_test_target(org_file, main_target):
   name = make_project_name(org_file)
   test_name = f'{name}Test'
@@ -154,7 +142,7 @@ def add_pack_target(org_file, main_target):
     version = foundVersion.group(1) if foundVersion is not None else commit_sha
 
     copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
-    copy(org_file, (build_path / name).with_suffix('.org'))
+    copy(org_file, build_path / 'README.org')
 
     licenses_path = build_path / 'LICENSES'
     makedirs(licenses_path, exist_ok=True)
@@ -264,17 +252,14 @@ for org_file in Glob('modules/*.org'):
 project_targets = []
 for org_file in Glob('add-ons/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
-  html_target = add_html_target(org_file, main_target)
   test_target = add_test_target(org_file, main_target)
-  pack_target = add_pack_target(org_file, html_target)
+  pack_target = add_pack_target(org_file, main_target)
 
   if org_file != 'ClematisM.org':
     Depends(test_target, clematis_target)
   Depends(test_all, test_target)
   Depends(pk3_all, pack_target)
-  project_targets.append(
-    f'{main_target[0]}, {html_target[0]}, {test_target[0]}, {pack_target[0]}'
-  )
+  project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
 
 html_all = Alias('HtmlAll', None, make_index)
 for org_file in Glob('*/*.org') + Glob('*.org'):
