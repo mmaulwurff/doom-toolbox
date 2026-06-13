@@ -658,7 +658,7 @@ class tsGetter_SilentHealth : Actor
 }
 #+end_src
 
-#+begin_src js :tangle ../bild/TargetSpy/ts_config.json
+#+begin_src js :tangle ../build/TargetSpy/ts_config.json
 {
   "tsGetter_SilentHealth": "on"
 }
