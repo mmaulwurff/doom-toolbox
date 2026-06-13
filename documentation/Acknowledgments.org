@@ -30,6 +30,7 @@ The order is alphabetical.
 - Carrascado
 - Churrupez
 - Colerx
+- cosmos10040
 - CthulhuInACan
 - CursedCorona
 - Cutmanmike
