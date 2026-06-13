@@ -109,7 +109,7 @@ class hi_EventHandler : StaticEventHandler
       if (thing.bMissile && thing.damage)
         mMissiles.push(thing);
 
-      else if (thing.bIsPuff && thing.damageSource)
+      else if (thing.bIsPuff && !thing.bNoTrigger && thing.damageSource)
       {
         ts_HitData hitData;
         getPuffHitData(thing.damageSource, thing, hitData);
