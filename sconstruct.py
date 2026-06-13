@@ -4,16 +4,16 @@
 # This is build definitions for DoomToolbox.
 # See https://scons.github.io/docs/scons-user.html for details.
 
-# TODO: move autoadvance to config.ini?
-# +wi_autoadvance 1\
-
 
 from os import environ, makedirs, path
 from pathlib import Path
-from re import search, sub, MULTILINE
+from re import MULTILINE, search, sub
 from shutil import copy, copytree, make_archive, move, rmtree, which
 from subprocess import PIPE, STDOUT, TimeoutExpired, run
 
+import git
+import reuse.project
+import reuse.report
 from SCons.Script import (
   Alias,
   AlwaysBuild,
@@ -25,11 +25,6 @@ from SCons.Script import (
   Glob,
   Help,
 )
-
-import git
-import reuse.project
-import reuse.report
-
 
 # General setup
 Decider('timestamp-match')

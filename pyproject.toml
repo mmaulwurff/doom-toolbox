@@ -7,6 +7,7 @@ line-length = 85
 indent-width = 2
 target-version = "py313"
 format.quote-style = "single"
+lint.extend-select = ["I"]
 
 # https://github.com/crate-ci/typos/blob/master/docs/reference.md
 [tool.typos]
