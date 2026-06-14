@@ -122,3 +122,22 @@ repos:
     - id: editorconfig-checker
       exclude: 'modules/libeye.org|modules/MD5.org|tools/htmlize.el|tools/.*.wad'
       args: [-disable-indent-size, -disable-max-line-length]
+
+ - repo: local
+   hooks:
+    - id: punctuation
+      exclude: '.*\.gif|.*\.ogg|.*\.png|.*\.wad'
+      name: punctuation
+      language: pygrep
+      # Forbidden characters:
+      # - U+FFFD UTF-8 Unicode replacement character
+      # - U+2018 LEFT SINGLE QUOTATION MARK
+      # - U+2019 RIGHT SINGLE QUOTATION MARK
+      # - U+201A SINGLE LOW-9 QUOTATION MARK
+      # - U+201B SINGLE HIGH-REVERSED-9 QUOTATION MARK
+      # - U+201C LEFT DOUBLE QUOTATION MARK
+      # - U+201D RIGHT DOUBLE QUOTATION MARK
+      # - U+201E DOUBLE LOW-9 QUOTATION MARK
+      # - U+201F DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+      # - U+2E42 DOUBLE LOW-REVERSED-9 QUOTATION MARK
+      entry: "\uFFFD|\u2018|\u2019|\u201A|\u201B|\u201C|\u201D|\u201E|\u201F|\u2E42"

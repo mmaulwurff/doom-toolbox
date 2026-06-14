@@ -23,7 +23,7 @@ to be done to make LispOnZscript more usable.
 Key function is ~tl_Eval.eval~ function. It takes a parsed expression (from
 ~tl_Parser.parse~) and an environment (normally from ~tl_Env.makeGlobalEnv~).
 
-Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell’s equations of software]] by Michael Nielsen.
+Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell's equations of software]] by Michael Nielsen.
 
 TODO: add loading LispOnZscript code from a lump.
 
