@@ -1,7 +1,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: HitImpact
-# #+version: v1.0.0
+#+version: v1.0.1
 
 * About
 
@@ -23,6 +23,21 @@ Known issues:
   and compromises salad.
 
 There is room for improvement, help appreciated!
+
+* Changelog
+
+v1.0.1:
+- fix: projectiles that explode when hitting sky no longer create debris
+- fix: NoTrigger puffs no longer create debris
+
+v1.0.0:
+- feature: use texture parts
+- feature: special sector color support
+- feature: 3D floor support
+- fix: improve hit detection
+- fix: explosion direction
+
+v0.1.0: initial release.
 
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
