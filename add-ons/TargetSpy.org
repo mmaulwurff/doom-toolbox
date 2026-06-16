@@ -2575,7 +2575,10 @@ class ts_GettersOrderMenu : OptionMenu
   override void init(Menu parent, OptionMenuDescriptor descriptor)
   {
     Super.init(parent, descriptor);
-    ts_EventHandler.getInstance().getGetters(mClasses);
+
+    ts_EventHandler eventHandler = ts_EventHandler.getInstance();
+    eventHandler.getGetters(mClasses);
+    eventHandler.applyConfiguration("tsGetter_", mClasses);
 
     mDesc.mItems.clear();
     int classesCount = mClasses.size();
@@ -2724,8 +2727,8 @@ private void collectConfigurations()
   }
 }
 
-private clearscope void applyConfiguration(string prefix,
-                                           out Array<string> disabledClasses)
+clearscope void applyConfiguration(string prefix,
+                                   out Array<string> disabledClasses)
 {
   foreach (className, isEnabled : mConfiguration)
   {
