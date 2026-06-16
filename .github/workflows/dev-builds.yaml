@@ -120,12 +120,12 @@ jobs:
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
           scons Pk3All
 
       - name: Devbuilds - prepare
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
           git tag -d dev-builds || true
           git push origin :refs/tags/dev-builds || true
@@ -134,7 +134,7 @@ jobs:
           zip -r build/DoomToolbox build -i \*.pk3
 
       - name: Devbuilds - upload
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: DoomToolbox Devbuilds
@@ -148,28 +148,28 @@ jobs:
             Warning: these packages may contain bugs or unfinished features.
 
       - name: Clean up build
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
           rm -r build
 
       - name: Export to HTML
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
           scons HtmlAll
 
       - name: Configure pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         uses: actions/configure-pages@v6
 
       - name: Upload pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
           path: '.'
 
       - name: Deploy pages to GitHub Pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' }}
+        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         id: deployment
         uses: actions/deploy-pages@v5
 
