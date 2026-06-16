@@ -34,7 +34,7 @@ jobs:
       # Allow deployment to GitHub Pages:
       id-token: write
       pages: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         engine: [uzdoom-v4.14.3, lzdoom-v4.14.3a]
@@ -44,13 +44,10 @@ jobs:
       - name: Check out
         uses: actions/checkout@v6
 
-      # TODO: when Ubuntu 26.04 is available as GitHub runner, install Emacs with
-      # apt.
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0
-          sudo snap install --classic emacs
+          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox
 
       - name: Cache UZDoom
         if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
@@ -112,17 +109,17 @@ jobs:
       - name: Check compatibility
         if: ${{ success() }}
         run: |
-          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons CheckCompatibility
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 CheckCompatibility
 
       - name: Test
         if: ${{ success() }}
         run: |
-          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 TestAll
 
       - name: Build
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
-          scons Pk3All
+          scons -j 4 Pk3All
 
       - name: Devbuilds - prepare
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
@@ -155,7 +152,7 @@ jobs:
       - name: Export to HTML
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
-          scons HtmlAll
+          scons -j 4 HtmlAll
 
       - name: Configure pages
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}

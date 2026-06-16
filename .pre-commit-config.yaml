@@ -105,6 +105,7 @@ repos:
    rev: v1.7.12
    hooks:
     - id: actionlint
+      args: [-ignore, 'label ".+" is unknown']
 
  - repo: https://github.com/adrienverge/yamllint.git
    rev: v1.38.0
