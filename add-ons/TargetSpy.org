@@ -1611,7 +1611,7 @@ class ts_EventHandler : StaticEventHandler
     foreach (getter : orderedGetters)
     {
       string className = "tsGetter_" .. getter;
-      Class<Object> aClass = className;
+      Class<Actor> aClass = className;
       if (aClass != NULL && !tryAddGetter(aClass))
         Console.printf("ERROR: %s: invalid tsGetter", className);
     }
@@ -1650,37 +1650,58 @@ class ts_EventHandler : StaticEventHandler
     collectGetters();
   }
 
-  private bool tryAddFinder(class<Object> aClass)
+  private bool tryAddFinder(class<Actor> aClass)
   {
+    // This class replaces something: skip, it is handled on replacee side.
+    if (Actor.getReplacee(aClass) != aClass) return true;
+
+    // If this class is replaced, use that replacement but keep the original name.
+    string className = aClass.getClassName();
+    aClass = Actor.getReplacement(aClass);
+
     let finder = (Function<play Actor()>)(findFunction(aClass, "find"));
     if (finder != NULL)
     {
       mFinders.push(finder);
-      mFinderClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mFinderClasses.push(ts_Classes.shorten(className));
       mTargets.push(NULL);
     }
     return finder != NULL;
   }
 
-  private bool tryAddFilter(class<Object> aClass)
+  private bool tryAddFilter(class<Actor> aClass)
   {
+    // This class replaces something: skip, it is handled on replacee side.
+    if (Actor.getReplacee(aClass) != aClass) return true;
+
+    // If this class is replaced, use that replacement but keep the original name.
+    string className = aClass.getClassName();
+    aClass = Actor.getReplacement(aClass);
+
     let filter = (Function<play bool(Actor)>)(findFunction(aClass, "isAllowed"));
     if (filter != NULL)
     {
       mFilters.push(filter);
-      mFilterClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mFilterClasses.push(ts_Classes.shorten(className));
     }
     return filter != NULL;
   }
 
-  private bool tryAddGetter(class<Object> aClass)
+  private bool tryAddGetter(class<Actor> aClass)
   {
+    // This class replaces something: skip, it is handled on replacee side.
+    if (Actor.getReplacee(aClass) != aClass) return true;
+
+    // If this class is replaced, use that replacement but keep the original name.
+    string className = aClass.getClassName();
+    aClass = Actor.getReplacement(aClass);
+
     let getter = (Function<play int, string, int, int(Actor)>)
       (findFunction(aClass, "makeInformation"));
     if (getter != NULL)
     {
       mGetters.push(getter);
-      mGetterClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mGetterClasses.push(ts_Classes.shorten(className));
       mInformationPieces.push(new("ts_InformationPiece"));
 
       mFontGetters.
@@ -1689,8 +1710,15 @@ class ts_EventHandler : StaticEventHandler
     return getter != NULL;
   }
 
-  private bool tryAddView(class<Object> aClass)
+  private bool tryAddView(class<Actor> aClass)
   {
+    // This class replaces something: skip, it is handled on replacee side.
+    if (Actor.getReplacee(aClass) != aClass) return true;
+
+    // If this class is replaced, use that replacement but keep the original name.
+    string className = aClass.getClassName();
+    aClass = Actor.getReplacement(aClass);
+
     let view =
       (Function
        <ui void (Array<ts_InformationPiece>, double, RenderEvent, vector3, vector2)>)
@@ -1698,7 +1726,7 @@ class ts_EventHandler : StaticEventHandler
     if (view != NULL)
     {
       mViews.push(view);
-      mViewClasses.push(ts_Classes.shorten(aClass.getClassName()));
+      mViewClasses.push(ts_Classes.shorten(className));
     }
     return view != NULL;
   }
@@ -2720,6 +2748,28 @@ private clearscope void applyConfiguration(string prefix,
 }
 
 private Map<string, int> mConfiguration;
+#+end_src
+
+*** Extension replacements
+
+Example:
+
+#+begin_src ini :tangle ../build/TargetSpyTest/language.txt
+
+[enu default]
+tsGetter_Class = "Class name test";
+#+end_src
+
+#+begin_src c :noweb-ref zscript-test
+
+class tsGetter_TestClass : Actor replaces tsGetter_Class
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    let [kind, text, value, max] = tsGetter_Class.makeInformation(anActor);
+    return kind, text .. " - test", value, max;
+  }
+}
 #+end_src
 
 * Project setup
