@@ -114,7 +114,7 @@ jobs:
       - name: Test
         if: ${{ success() }}
         run: |
-          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 TestAll
+          xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
