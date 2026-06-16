@@ -2755,13 +2755,7 @@ private Map<string, int> mConfiguration;
 
 *** Extension replacements
 
-Example:
-
-#+begin_src ini :tangle ../build/TargetSpyTest/language.txt
-
-[enu default]
-tsGetter_Class = "Class name test";
-#+end_src
+Use either ~replaces~ keyword:
 
 #+begin_src c :noweb-ref zscript-test
 
@@ -2770,9 +2764,48 @@ class tsGetter_TestClass : Actor replaces tsGetter_Class
   static int, string, int, int makeInformation(Actor anActor)
   {
     let [kind, text, value, max] = tsGetter_Class.makeInformation(anActor);
-    return kind, text .. " - test", value, max;
+    return kind, text .. " - class test", value, max;
   }
 }
+#+end_src
+
+Or replace classes with an ~EventHandler~:
+
+#+begin_src c :noweb-ref zscript-test
+
+class tsGetter_TestTag : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    let [kind, text, value, max] = tsGetter_Tag.makeInformation(anActor);
+    return kind, text .. " - name test", value, max;
+  }
+}
+
+class tst_EventHandler : StaticEventHandler
+{
+  override void CheckReplacement(ReplaceEvent event)
+  {
+    if (event.replacee.getClassName() == "tsGetter_Tag")
+      event.replacement = "tsGetter_TestTag";
+  }
+}
+#+end_src
+
+#+begin_src c :tangle ../build/TargetSpyTest/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "tst_EventHandler"
+}
+#+end_src
+
+Optional: replace user-visible class name with a new one:
+
+#+begin_src ini :tangle ../build/TargetSpyTest/language.txt
+
+[enu default]
+tsGetter_Class = "Class name test";
 #+end_src
 
 * Project setup
