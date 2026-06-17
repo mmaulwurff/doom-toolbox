@@ -233,7 +233,7 @@ wait 2; map map01; wait 2; event NAMESPACE_report; wait 2; quit
 <<cvarinfo>>
 #+end_src
 
-#+begin_src c :tangle ../build/VmAbortReporter/zscript.txt
+#+begin_src c :tangle ../build/VmAbortReporter/zscript.zs
 
 version 4.14.3
 

@@ -119,7 +119,7 @@ jobs:
       - name: Build
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
-          scons -j 4 Pk3All
+          scons Pk3All
 
       - name: Devbuilds - prepare
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}

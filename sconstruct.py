@@ -232,19 +232,19 @@ def make_index(target, source, env):
 
 
 # Targets
-pk3_all = Alias('Pk3All', None, None)
-test_all = Alias('TestAll', None, None)
 clematis_target = add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
 
+test_targets = []
 module_targets = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
   test_target = add_test_target(org_file, main_target)
   Depends(test_target, clematis_target)
-  Depends(test_all, test_target)
+  test_targets.append(test_target)
   module_targets.append(f'{main_target[0]}, {test_target[0]}')
 
 project_targets = []
+pack_targets = []
 for org_file in Glob('add-ons/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
   test_target = add_test_target(org_file, main_target)
@@ -252,17 +252,21 @@ for org_file in Glob('add-ons/*.org'):
 
   if org_file != 'ClematisM.org':
     Depends(test_target, clematis_target)
-  Depends(test_all, test_target)
-  Depends(pk3_all, pack_target)
+
+  test_targets.append(test_target)
+  pack_targets.append(pack_target)
   project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
 
-html_all = Alias('HtmlAll', None, make_index)
+html_targets = []
 for org_file in Glob('*/*.org') + Glob('*.org'):
   html_name = f'{path.splitext(org_file)[0]}.html'
-  Depends(
-    html_all,
-    Command(target=html_name, source=org_file, action=make_export(org_file)),
+  html_targets.append(
+    Command(target=html_name, source=org_file, action=make_export(org_file))
   )
+
+Alias('Pk3All', pack_targets, None)
+Alias('TestAll', test_targets, None)
+Alias('HtmlAll', html_targets, make_index)
 
 AlwaysBuild(
   Alias(
