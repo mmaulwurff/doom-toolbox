@@ -118,10 +118,7 @@ To build:
    ~pip install -r tools/requirements-dev.txt~
 5. In console in project directory, see what can be built with command:
    ~scons --help~
-
-#+begin_src elisp :exports results
-(mapconcat #'identity (process-lines "scons" "--help") "\n")
-#+end_src
+6. Build what you need.
 
 To build an add-on PK3, for example FinalCustomDoom, use this command: ~scons
 FinalCustomDoom.pk3~. It will create FinalCustomDoom-NNNN.pk3 in directory ~build~.
