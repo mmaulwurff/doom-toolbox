@@ -75,13 +75,13 @@ FinalCustomDoom:
 
 [[file:media/screenshots/FinalCustomDoom.png]]
 
-Gearbox:
+Gearbox (with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]] and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
 
 [[file:media/screenshots/Gearbox-wheel.png]]
 
 [[file:media/screenshots/Gearbox-blocks.png]]
 
-HitImpact (with BTSX E1 MAP01):
+HitImpact (with [[https://www.doomwiki.org/wiki/Back_to_Saturn_X][BTSX]] E1 MAP01):
 
 [[file:media/screenshots/HitImpact.gif]]
 
