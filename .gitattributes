@@ -17,6 +17,4 @@
 *.txt  eol=lf
 *.yaml eol=lf
 
-*.css -linguist-detectable
-*.el  -linguist-detectable
-*.org -linguist-documentation
+tools/htmlize.el -linguist-detectable
