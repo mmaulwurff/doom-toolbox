@@ -2822,7 +2822,7 @@ GameInfo
 
 Optional: replace user-visible class name with a new one:
 
-#+begin_src ini :tangle ../build/TargetSpyTest/language.txt
+#+begin_src c :tangle ../build/TargetSpyTest/language.txt
 
 [enu default]
 tsGetter_Class = "Class name test";
