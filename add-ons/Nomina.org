@@ -14,10 +14,18 @@ Features:
   assign a tag to a class manually.
 - [[Tag databases]]: load ~na_data.json~ JSON lump (file) that contains class-tag pairs.
   See examples in tests below.
-
-  TODO: add command to export current in-game enemy tag corrections to na_data.json.
+  - TODO: add command to export current in-game enemy tag corrections to na_data.json.
+- If an enemy without a tag has a name in a sequence definitions, Nomina uses it.
 
 Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+* Changelog
+
+v2.1.0:
+- new: read names from cast sequence definitions
+
+v2.0.0:
+- rewritten from scratch.
 
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
