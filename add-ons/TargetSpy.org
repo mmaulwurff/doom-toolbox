@@ -79,6 +79,26 @@ To make TargetSpy to recognize actors that represent parts of another actors, li
 headshots and enemy parts in some mods, put follower classes in ~ts_followers~ lump.
 Follower classes must have the real enemy actor set in their ~master~ field.
 
+* Changelog
+
+v3.1.0:
+- new:
+  - keys to turn on/off and hold
+  - option for health color for all lines
+  - font customization
+  - extension configuration
+  - extension replacing
+- fixed:
+  - frame position
+  - bar values are rounded up now
+  - armor bar
+  - vid_rendermode is optional again
+  - user name for players
+  - disabled on automap
+
+v3.0.0:
+- rewritten from scratch.
+
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
