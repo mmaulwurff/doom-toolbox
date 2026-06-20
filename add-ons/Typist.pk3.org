@@ -7154,7 +7154,11 @@ version 4.14.3
 #include "zscript/tt_PlainTranslator.zs"
 #+end_src
 
-Modules: [[file:../modules/libeye.org][libeye]], [[file:../modules/LazyPoints.org][LazyPoints]], [[file:../modules/StringUtils.org][StringUtils]], [[file:../modules/PlainTranslator.org][PlainTranslator]].
+Modules:
+- [[file:../modules/libeye.org][libeye]]
+- [[file:../modules/LazyPoints.org][LazyPoints]]
+- [[file:../modules/StringUtils.org][StringUtils]]
+- [[file:../modules/PlainTranslator.org][PlainTranslator]]
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
 <<../tools/scripts.org:copy-media("Typist.pk3")>>

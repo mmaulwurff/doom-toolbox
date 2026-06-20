@@ -75,7 +75,9 @@ FinalCustomDoom:
 
 [[file:media/screenshots/FinalCustomDoom.png]]
 
-Gearbox (with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]] and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
+Gearbox
+(with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]]
+and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
 
 [[file:media/screenshots/Gearbox-wheel.png]]
 

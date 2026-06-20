@@ -696,7 +696,7 @@ Alias gb_report "event gd_report"
 Alias gb_copy_player_color "gb_color $color"
 
 // TODO: do this programmatically.
-Alias gb_reset "ResetCvar gb_scale; ResetCvar gb_color; ResetCvar gb_dim_color; ResetCvar gb_show_tags; ResetCvar gb_view_type; ResetCvar gb_enable_dim; ResetCvar gb_enable_blur; ResetCvar gb_wheel_position; ResetCvar gb_wheel_scale; ResetCvar gb_wheel_tint; ResetCvar gb_multiwheel_limit; ResetCvar gb_blocks_position_x; ResetCvar gb_blocks_position_y; ResetCvar gb_text_scale; ResetCvar gb_text_position_x; ResetCvar gb_text_position_y; ResetCvar gb_text_position_y_max; ResetCvar gb_text_usual_color; ResetCvar gb_text_selected_color; ResetCvar gb_open_on_scroll; ResetCvar gb_open_on_slot; ResetCvar gb_reverse_slot_cycle_order; ResetCvar gb_select_first_slot_weapon; ResetCvar gb_mouse_in_wheel; ResetCvar gb_select_on_key_up; ResetCvar gb_no_menu_if_one; ResetCvar gb_on_automap; ResetCvar gb_lock_positions; ResetCvar gb_enable_sounds; ResetCvar gb_frozen_can_open; ResetCvar gb_time_freeze; ResetCvar gb_mouse_sensitivity_x; ResetCvar gb_mouse_sensitivity_y"
+Alias gb_reset "<<gb_reset()>>"
 
 // Keys
 
@@ -707,6 +707,47 @@ AddMenuKey "$GB_TOGGLE_INVENTORY_MENU" +gb_toggle_inventory_menu
 AddMenuKey "$GB_PREV_WEAPON"            gb_prev_weapon
 AddMenuKey "$GB_ROTATE_WEAPON_PRIORITY" gb_rotate_weapon_priority
 AddMenuKey "$GB_ROTATE_WEAPON_SLOT"     gb_rotate_weapon_slot
+#+end_src
+
+# This is just to put ResetCvar entries on a single line in code.
+#+name: gb_reset
+#+begin_src elisp :exports none :noweb-prefix no
+(org-trim (string-replace "\n" " " "
+
+ResetCvar gb_scale;
+ResetCvar gb_color;
+ResetCvar gb_dim_color;
+ResetCvar gb_show_tags;
+ResetCvar gb_view_type;
+ResetCvar gb_enable_dim;
+ResetCvar gb_enable_blur;
+ResetCvar gb_wheel_position;
+ResetCvar gb_wheel_scale;
+ResetCvar gb_wheel_tint;
+ResetCvar gb_multiwheel_limit;
+ResetCvar gb_blocks_position_x;
+ResetCvar gb_blocks_position_y;
+ResetCvar gb_text_scale;
+ResetCvar gb_text_position_x;
+ResetCvar gb_text_position_y;
+ResetCvar gb_text_position_y_max;
+ResetCvar gb_text_usual_color;
+ResetCvar gb_text_selected_color;
+ResetCvar gb_open_on_scroll;
+ResetCvar gb_open_on_slot;
+ResetCvar gb_reverse_slot_cycle_order;
+ResetCvar gb_select_first_slot_weapon;
+ResetCvar gb_mouse_in_wheel;
+ResetCvar gb_select_on_key_up;
+ResetCvar gb_no_menu_if_one;
+ResetCvar gb_on_automap;
+ResetCvar gb_lock_positions;
+ResetCvar gb_enable_sounds;
+ResetCvar gb_frozen_can_open;
+ResetCvar gb_time_freeze;
+ResetCvar gb_mouse_sensitivity_x;
+ResetCvar gb_mouse_sensitivity_y;
+"))
 #+end_src
 
 * Project setup :noexport:

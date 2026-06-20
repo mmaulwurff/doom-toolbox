@@ -20,7 +20,7 @@ SPDX-License-Identifier: CC0-1.0
 #+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt :exports none
 // <<CC>>
 #+end_src
-#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt :exports none
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt :exports none
 // <<CC>>
 #+end_src
 #+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
@@ -168,7 +168,7 @@ user bool dd_vm_abort_report_enabled = true;
 
 ** Console commands
 
-#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_report "event dd_report"
 #+end_src
 
@@ -180,7 +180,7 @@ events.
 ** Console commands
 
 *** Commands to cause problematic events
-#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_nullify_player        "netevent dd_nullify_player"
 Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
 Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
@@ -189,7 +189,7 @@ Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNo
 #+end_src
 
 *** Helper commands
-#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
 Alias dd_revive_everything     "netevent dd_revive_everything"
 Alias dd_force_lightning       "netevent dd_force_lightning"
 #+end_src
@@ -297,9 +297,22 @@ user bool dd_logging_process_events_enabled = false;
 
 ** Console commands
 
-#+begin_src text :tangle ../build/DoomDoctor/keyconf.txt
+# This is just to put ResetCvar entries on a single line in code.
+#+name: dd_logging_disable
+#+begin_src elisp :exports none :noweb-prefix no
+(org-trim (string-replace "\n" " " "
 
-Alias dd_logging_disable "ResetCvar dd_logging_engine_events_enabled; ResetCvar dd_logging_replace_events_enabled; ResetCvar dd_logging_world_events_enabled; ResetCvar dd_logging_player_events_enabled; ResetCvar dd_logging_process_events_enabled"
+ResetCvar dd_logging_engine_events_enabled;
+ResetCvar dd_logging_replace_events_enabled;
+ResetCvar dd_logging_world_events_enabled;
+ResetCvar dd_logging_player_events_enabled;
+ResetCvar dd_logging_process_events_enabled;
+"))
+#+end_src
+
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
+
+Alias dd_logging_disable "<<dd_logging_disable()>>"
 #+end_src
 
 ** ~dd_BufferedConsole~

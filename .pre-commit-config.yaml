@@ -122,7 +122,7 @@ repos:
    hooks:
     - id: editorconfig-checker
       exclude: 'modules/libeye.org|modules/MD5.org|tools/htmlize.el|tools/.*.wad'
-      args: [-disable-indent-size, -disable-max-line-length]
+      args: [-disable-indent-size]
 
  - repo: local
    hooks:
