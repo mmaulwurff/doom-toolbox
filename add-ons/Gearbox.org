@@ -43,6 +43,8 @@ for your weapons! Tag property is also nice to have.
 - Mouse input in wheel in multiplayer causes screen shake.
 - Cheat codes that contain keys assigned for weapon slots are not supported as
   Gearbox blocks them.
+- Freezing enemies when menu is opened doesn't play well with ~freeze~ console
+  command: everything may stay frozen.
 
 ** Creating a Soundpack
 
@@ -888,17 +890,13 @@ class gb_Changer play
     player.cmd.pitch = 0;
   }
 
-  static void freezePlayer( PlayerInfo player
-                   , int        cheats
-                   , double     velocityX
-                   , double     velocityY
-                   , double     velocityZ
-                   , double     gravity
-                   )
+  static void freezePlayer(PlayerInfo player,
+                           int        cheats,
+                           vector3    velocity,
+                           double     gravity)
   {
     if (player.mo == NULL) return;
 
-    vector3 velocity  = (velocityX, velocityY, velocityZ);
     player.cheats     = cheats;
     player.vel        = velocity.xy;
     player.mo.vel     = velocity;
@@ -1549,9 +1547,9 @@ class gb_NeteventProcessor play
     {
       mChanger.freezePlayer(player,
                             args[1].toInt(),
-                            args[2].toInt(),
-                            args[3].toDouble(),
-                            args[4].toDouble(),
+                            (args[2].toDouble(),
+                             args[3].toDouble(),
+                             args[4].toDouble()),
                             args[5].toDouble());
     }
     else if (args[0] == "gb_reset_custom_order") return InputResetCustomOrder;
