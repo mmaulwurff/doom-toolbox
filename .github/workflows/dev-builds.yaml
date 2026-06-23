@@ -42,7 +42,7 @@ jobs:
       DT_ENGINE: ${{ case(matrix.engine == 'uzdoom-v4.14.3', '~/UZDoom.AppImage', 'lzdoom') }}
     steps:
       - name: Check out
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install system dependencies
         run: |
@@ -177,7 +177,7 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache Emacs
         id: cache-emacs
