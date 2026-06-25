@@ -1,0 +1,865 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: Precise Crosshair
+# #+version: v1.4.1
+
+* About
+
+PreciseCrosshair makes a crosshair point to where you actually shoot*
+instead of the center of the screen.
+
+*If your weapons shoots straight and not from an angle.
+
+PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+** How to use
+
+1. HUD Options -> Crosshair must be OFF.**
+2. HUD Options -> Default crosshair must be not "None".
+
+** Features
+
+- Shows where you shoot;
+- Respects autoaim;
+- Supports custom crosshairs;
+- Respects engine crosshair options*;
+- Options to mirror crosshairs;
+- Options to disable crosshair on slot 1 and when weapon is not ready;
+- Option to show target health.
+
+*Except "Enable Crosshair". This option will disable only the standard crosshair.
+
+** Credits
+
+- Color calculation and crosshair code is ripped from GZDoom.
+
+* Changelog
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* License
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/menudef.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/language.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/xhairs.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/mapinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript.zs
+// <<license>>
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_event_handler.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_puff.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_bool_setting.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_cvar_setting.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_base.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_pack.zs
+// <<license>>
+#+end_src
+
+* Menus
+
+#+begin_src c :tangle ../build/PreciseCrosshair/menudef.txt
+
+AddOptionMenu OptionsMenu       { Submenu "$PC_TITLE", pc_Menu }
+AddOptionMenu OptionsMenuSimple { Submenu "$PC_TITLE", pc_Menu }
+
+OptionMenu pc_Menu
+{
+  Title      "$PC_TITLE"
+
+  StaticText "$PC_ENGINE"          , 1
+
+  StaticText ""
+  StaticText "$PC_OFF"
+  Option     "$HUDMNU_CROSSHAIRON" , crosshairon, OnOff
+
+  StaticText ""
+  StaticText "$PC_NONE"
+  Option     "$HUDMNU_CROSSHAIR"   , crosshair, Crosshairs
+
+  StaticText ""
+  StaticText "$PC_OTHER"
+  Submenu    "$OPTMNU_HUD"         , HUDOptions
+
+  StaticText ""
+  StaticText "$PC_OPTIONS"         , 1
+  StaticText ""
+  Option     "$PC_ENABLE"          , pc_enable            , YesNo
+
+  StaticText ""
+  Option     "$PC_MIRROR_H"        , pc_flip_x            , YesNo
+  Option     "$PC_MIRROR_V"        , pc_flip_y            , YesNo
+
+  StaticText ""
+  Option     "$PC_SLOT_1"          , pc_disable_slot_1    , YesNo
+  Option     "$PC_NOT_READY"       , pc_disable_not_ready , YesNo
+  Option     "$PC_NO_WEAPON"       , pc_disable_no_weapon , YesNo
+  Option     "$PC_DISTANCE_SCALE"  , pc_distance_scale    , YesNo
+
+  StaticText ""
+  Option     "$PC_TARGET_COLOR"    , pc_target_health     , YesNo
+}
+#+end_src
+
+* Options
+
+#+begin_src c :tangle ../build/PreciseCrosshair/cvarinfo.txt
+
+server bool pc_enable = true;
+
+user bool pc_flip_y = false;
+user bool pc_flip_x = false;
+
+user bool pc_disable_slot_1    = false;
+user bool pc_disable_not_ready = false;
+user bool pc_disable_no_weapon = true;
+user bool pc_distance_scale = true;
+
+user bool pc_target_health = false;
+
+// Precise External Interface
+
+user float pc_y;
+user float pc_scale;
+#+end_src
+
+* Language
+
+#+begin_src c :tangle ../build/PreciseCrosshair/language.txt
+
+[enu default]
+
+// Option menus
+
+PC_TITLE  = "Precise Crosshair";
+
+PC_ENGINE = "Engine Crosshair Options";
+PC_OFF    = "This must be OFF:";
+PC_NONE   = "This must be not None:";
+PC_OTHER  = "Other crosshair options also apply to Precise Crosshair:";
+
+PC_OPTIONS = "Precise Crosshair Options";
+PC_ENABLE  = "Enabled";
+
+PC_MIRROR_H = "Mirror horizontally";
+PC_MIRROR_V = "Mirror vertically";
+PC_SLOT_1   = "Disable on slot 1";
+PC_NOT_READY = "Disable when weapon is not ready";
+PC_NO_WEAPON = "Disable when there is no weapon";
+PC_TARGET_COLOR = "Show target color instead of player";
+PC_DISTANCE_SCALE = "Scale crosshair by distance";
+
+// Crosshair names
+
+PC_PIXEL = "Pixel";
+PC_BIG   = "Precise Big";
+PC_SMALL = "Precise Small";
+#+end_src
+
+* Additional crosshairs
+
+#+begin_src c :tangle ../build/PreciseCrosshair/xhairs.txt
+
+97 "$PC_PIXEL"
+98 "$PC_BIG"
+99 "$PC_SMALL"
+#+end_src
+
+#+begin_src text :tangle ../build/tmp.txt :exports none
+<<../tools/scripts.org:copy-media("PreciseCrosshair")>>
+#+end_src
+
+* Source
+
+** Event handler
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_event_handler.zs
+
+class pc_EventHandler : EventHandler
+{
+  override void WorldTick()
+  {
+    if (!_isInitialized) { initialize(); }
+    prepareProjection();
+  }
+
+  override void RenderOverlay(RenderEvent event)
+  {
+    if (!_isInitialized || !_isPrepared) { return; }
+
+    PlayerInfo player = players[consolePlayer];
+
+    if (player == NULL) { return; }
+
+    loadTarget(event.viewAngle, event.viewPitch);
+    loadCrosshair(player);
+    drawCrosshair(player, event);
+  }
+
+  private void initialize()
+  {
+    PlayerInfo player = players[consolePlayer];
+
+    _glProjection  = new("pc_GlScreen");
+    _swProjection  = new("pc_SwScreen");
+    _cvarRenderer  = Cvar.GetCvar("vid_rendermode", player);
+    _settings      = new("pc_Settings").init(player);
+
+    _yPositionInterpolator = DynamicValueInterpolator.Create(Screen.GetHeight() / 2, 0.5, 1, 1000000);
+
+    _isInitialized = true;
+  }
+
+  private void prepareProjection ()
+  {
+    if(_cvarRenderer)
+    {
+      switch (_cvarRenderer.GetInt())
+      {
+      default:
+        _projection = _glProjection;
+        break;
+
+      case 0:
+      case 1:
+        _projection = _swProjection;
+        break;
+      }
+    }
+    else
+    {
+      console.printf("warning, cannot get render mode");
+      _projection = _glProjection;
+    }
+
+    _isPrepared = (_projection != NULL);
+  }
+
+  private void loadTarget(double angle, double pitch) const
+  {
+    PlayerInfo p = players[consolePlayer];
+    PlayerPawn a = p.mo;
+    pitch = a.AimTarget() ? a.BulletSlope(NULL, ALF_PORTALRESTRICT) : pitch;
+
+    FLineTraceData data;
+    double hitHeight = a.height / 2 + a.AttackZOffset * p.crouchFactor;
+    _hasTargetPos    = a.LineTrace(angle, 4000.0, pitch, 0, hitHeight, 0, 0, data);
+    if (_hasTargetPos)
+    {
+      _targetPos = data.hitlocation;
+      _distToTarget = data.distance;
+    }
+  }
+
+  private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
+  {
+    Vector2 drawPos = makeDrawPos(player, event);
+
+    setExternalY(player, drawPos.y);
+
+    if (  !_isCrossExisting
+       || gamestate == GS_TITLELEVEL
+       || player.mo.health <= 0
+       || automapactive
+       || !pc_enable
+       || disabledOnSlot1(player)
+       || disableWhenNotReady(player)
+       || disableOnNoWeapon(player)
+       )
+    {
+      return;
+    }
+
+    int screenWidth  = Screen.GetWidth();
+    int screenHeight = Screen.GetHeight();
+
+    double size = (crosshairscale > 0.0f)
+                ? screenHeight * crosshairscale / 200.0
+                : 1.0;
+
+    if (crosshairgrow) { size *= StatusBar.CrosshairSize; }
+
+    Vector2 textureSize = TexMan.GetScaledSize(_crosshairTexture);
+    double width  = textureSize.x * size;
+    double height = textureSize.y * size;
+    if (_settings.isScaledByDistance())
+    {
+      double distFac = GetDistanceScale(0, 512);
+      width *= distFac;
+      height *= distFac;
+    }
+
+    bool hasHealth;
+    int  health, maxHealth;
+    [hasHealth, health, maxHealth] = getHealths(player);
+    int crossColor = makeCrosshairColor(hasHealth, health, maxHealth);
+
+    _yPositionInterpolator.Update(int(drawPos.y));
+
+    Screen.DrawTexture( _crosshairTexture
+                      , false
+                      , screenWidth / 2
+                      , _yPositionInterpolator.GetValue()
+                      , DTA_DestWidthF    , width
+                      , DTA_DestHeightF   , height
+                      , DTA_AlphaChannel , true
+                      , DTA_KeepRatio    , true
+                      , DTA_FillColor    , crossColor & 0xFFFFFF
+                      , DTA_FlipX        , _settings.isFlipX()
+                      , DTA_FlipY        , _settings.isFlipY()
+                      );
+  }
+
+  // Returns noHealth flag, current health, max health.
+  private ui bool, int, int getHealths(PlayerInfo player)
+  {
+    if (_settings.isTargetHealth())
+    {
+      let aimTarget = getAimTarget(player.mo);
+      if (aimTarget)
+      {
+        return true, aimTarget.health, aimTarget.GetSpawnHealth();
+      }
+      else
+      {
+        return false, 0, 0;
+      }
+    }
+
+    int health     = player.health;
+    int maxHealth  = getDefaultHealth(player);
+
+    return true, health, maxHealth;
+  }
+
+  private play Actor getAimTarget(Actor a) const
+  {
+    return a.AimTarget();
+  }
+
+  private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHealth)
+  {
+    if (!hasHealth)
+    {
+      return crosshaircolor;
+    }
+
+    if (crosshairhealth == 1)
+    {
+      // "Standard" crosshair health (green-red)
+      int health = scale(health, 100, maxHealth);
+
+      if (health >= 85)
+      {
+        return 0x00ff00;
+      }
+      else
+      {
+        int red;
+        int green;
+
+        health -= 25;
+        if (health <  0) { health = 0; }
+        if (health < 30)
+        {
+          red   = 255;
+          green = health * 255 / 30;
+        }
+        else
+        {
+          red   = (60 - health) * 255 / 30;
+          green = 255;
+        }
+        return (red<<16) | (green<<8);
+      }
+    }
+    else if (crosshairhealth == 2)
+    {
+      // "Enhanced" crosshair health (blue-green-yellow-red)
+      int health = clamp(scale(health, 100, maxHealth), 0, 200);
+      double rr;
+      double gg;
+      double bb;
+
+      double saturation = health < 150 ? 1.0 : 1.0 - (health - 150) / 100.0;
+
+      HSVtoRGB(rr, gg, bb, health * 1.2f, saturation, 1);
+      int red   = int(rr * 255);
+      int green = int(gg * 255);
+      int blue  = int(bb * 255);
+
+      return (red<<16) | (green<<8) | blue;
+    }
+
+    return crosshaircolor;
+  }
+
+  private ui Vector2 makeDrawPos(PlayerInfo player, RenderEvent event)
+  {
+    if (!_hasTargetPos)
+    {
+      int x, y, width, height;
+      [x, y, width, height] = Screen.GetViewWindow();
+      int screenHeight      = Screen.GetHeight();
+      int statusBarHeight   = screenHeight - height - x;
+      return (Screen.GetWidth() / 2, (Screen.GetHeight() - statusBarHeight) / 2);
+    }
+
+    _projection.CacheResolution();
+    _projection.CacheFov(player.fov);
+    _projection.OrientForRenderOverlay(event);
+    _projection.BeginProjection();
+
+    _projection.ProjectWorldPos(_targetPos);
+
+    pc_Viewport viewport;
+    viewport.FromHud();
+
+    Vector2 drawPos = viewport.SceneToWindow(_projection.ProjectToNormal());
+
+    return drawPos;
+  }
+
+  private ui void loadCrosshair(PlayerInfo player)
+  {
+    int num = 0;
+
+    if (  !crosshairforce
+       && NULL != player.camera
+       && NULL != player.camera.player
+       && NULL != player.camera.player.readyWeapon
+       )
+    {
+      num = player.camera.player.readyWeapon.crosshair;
+    }
+    if (num == 0)
+    {
+      num = crosshair;
+    }
+    if (_crosshairnum == num && _isCrossExisting)
+    {
+      return;
+    }
+
+    if (num == 0)
+    {
+      _crosshairNum    = 0;
+      _isCrossExisting = false;
+      return;
+    }
+    if (num < 0)
+    {
+      num = -num;
+    }
+    string size = (Screen.GetWidth() < 640) ? "S" : "B";
+
+    string texName = String.Format("XHAIR%s%d", size, num);
+    TextureID texId = checkTexture(texName);
+    if (!texId.isValid())
+    {
+      texName = String.Format("XHAIR%s1", size);
+      texId = checkTexture(texName);
+      if (!texId.isValid())
+      {
+        texId = checkTexture("XHAIRS1");
+      }
+    }
+
+    _crosshairNum     = num;
+    _crosshairTexture = texId;
+    _isCrossExisting  = true;
+  }
+
+  private ui TextureId checkTexture(string name)
+  {
+    return TexMan.CheckForTexture( name
+                                 , TexMan.Type_MiscPatch
+                                 , TexMan.TryAny | TexMan.ShortNameOnly
+                                 );
+  }
+
+  private play void setExternalY(PlayerInfo player, double y) const
+  {
+    if (_externalY == NULL)
+    {
+      _externalY = Cvar.GetCVar("pc_y", player);
+    }
+
+    _externalY.SetFloat(y);
+  }
+
+  private play void setExternalScale (PlayerInfo player, double scale) const
+  {
+    if (_externalScale == NULL)
+    {
+      _externalScale = Cvar.GetCVar("pc_scale", player);
+    }
+
+    _externalScale.SetFloat(scale);
+  }
+
+  private ui static int scale(int value, int scaleMax, int valueMax)
+  {
+    return value * scaleMax / valueMax;
+  }
+
+  private ui static int getDefaultHealth(PlayerInfo player)
+  {
+    class<PlayerPawn> type = player.mo.GetClassName();
+    let default = GetDefaultByType(type);
+    return default.health;
+  }
+
+  private play bool disabledOnSlot1(PlayerInfo player) const
+  {
+    return _settings.isDisabledOnSlot1() && isSlot1(player);
+  }
+
+  private play bool disableWhenNotReady(PlayerInfo player) const
+  {
+    return _settings.isDisabledOnNotReady() && !isWeaponReady(player);
+  }
+
+  private play bool disableOnNoWeapon(PlayerInfo player) const
+  {
+    return _settings.isDisabledOnNoWeapon() && isNoWeapon(player);
+  }
+
+  private static bool isSlot1(PlayerInfo player)
+  {
+    Weapon w = player.readyWeapon;
+    if (w == NULL) { return false; }
+
+    int located;
+    int slot;
+    [located, slot] = player.weapons.LocateWeapon(w.GetClassName());
+
+    bool slot1 = (slot == 1);
+    return slot1;
+  }
+
+  private static bool isWeaponReady(PlayerInfo player)
+  {
+    bool isReady
+       = player.WeaponState & WF_WEAPONREADY
+      || player.WeaponState & WF_WEAPONREADYALT
+      || player.WeaponState & WF_WEAPONZOOMOK
+      || player.cmd.buttons & BT_ATTACK
+      || player.cmd.buttons & BT_ALTATTACK
+       ;
+
+    return isReady;
+  }
+
+  private static bool isNoWeapon(PlayerInfo player)
+  {
+    Weapon w    = player.readyWeapon;
+    bool   isNo = (w == NULL) || (w.GetClassName() == "m8f_wm_Holstered");
+
+    return isNo;
+  }
+
+  private static ui void HSVtoRGB (out double r,
+                                   out double g,
+                                   out double b,
+                                   double h,
+                                   double s,
+                                   double v)
+  {
+    int i;
+    double f, p, q, t;
+
+    if (s == 0)
+    { // achromatic (grey)
+      r = g = b = v;
+      return;
+    }
+
+    h /= 60;                                    // sector 0 to 5
+    i = int(floor(h));
+    f = h - i;                                  // factorial part of h
+    p = v * (1 - s);
+    q = v * (1 - s * f);
+    t = v * (1 - s * (1 - f));
+
+    switch (i)
+    {
+    case 0:     r = v; g = t; b = p; break;
+    case 1:     r = q; g = v; b = p; break;
+    case 2:     r = p; g = v; b = t; break;
+    case 3:     r = p; g = q; b = v; break;
+    case 4:     r = t; g = p; b = v; break;
+    default:    r = v; g = p; b = q; break;
+    }
+  }
+
+  private static clearscope double LinearMap(double val,
+                                             double source_min,
+                                             double source_max,
+                                             double out_min,
+                                             double out_max)
+  {
+    return (val - source_min) * (out_max - out_min) / (source_max - source_min) + out_min;
+  }
+
+  private ui double GetDistanceScale(double minDist = 0,
+                                     double maxDist = 1024,
+                                     double minScale = 1.0,
+                                     double maxScale = 4.0)
+  {
+    double scale = minScale;
+    if (_distToTarget < maxDist)
+    {
+      double dist = Clamp(_distToTarget, minDist, maxDist);
+      scale = LinearMap(dist, maxdist, mindist, minscale, maxscale);
+    }
+    setExternalScale(players[consoleplayer], scale);
+    return scale;
+  }
+
+  private Vector3          _targetPos;
+  private double           _distToTarget;
+  private bool             _hasTargetPos;
+
+  private ui int           _crosshairNum;
+  private ui bool          _isCrossExisting;
+  private ui TextureID     _crosshairTexture;
+
+  private transient bool   _isInitialized;
+  private transient bool   _isPrepared;
+  private transient Cvar   _cvarRenderer;
+  private transient Cvar   _externalY;
+  private transient Cvar   _externalScale;
+
+  private pc_ProjScreen _projection;
+  private pc_GlScreen   _glProjection;
+  private pc_SwScreen   _swProjection;
+
+  private pc_Settings      _settings;
+
+  private DynamicValueInterpolator _yPositionInterpolator;
+}
+#+end_src
+
+** Puff
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_puff.zs
+
+class pc_Puff : Actor
+{
+  Default
+  {
+    Mass   0;
+    Radius 1;
+    Height 2;
+
+    +NOBLOCKMAP
+    +NOGRAVITY
+    +BLOODLESSIMPACT
+    +PUFFONACTORS
+    +DONTSPLASH
+    +NOTRIGGER
+    +NOTONAUTOMAP
+    +SKYEXPLODE
+  }
+
+  States
+  {
+    Spawn:
+      TNT1 A 0;
+      Stop;
+  }
+
+}
+#+end_src
+
+** Settings
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_bool_setting.zs
+
+// This class represents a single boolean setting.
+class pc_BoolSetting : pc_CvarSetting
+{
+
+  // public: ///////////////////////////////////////////////////////////////////
+
+  bool value() { return variable().GetInt(); }
+
+  pc_BoolSetting init(string cvarName, PlayerInfo p)
+  {
+    super.init(cvarName, p);
+    return self;
+  }
+
+}
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_cvar_setting.zs
+
+/// This class represents a single setting.
+class pc_CvarSetting : pc_SettingsBase
+{
+  pc_CvarSetting init(string cvarName, PlayerInfo p)
+  {
+    _cvar = CVar.GetCvar(cvarName, p);
+    return self;
+  }
+
+  override void resetCvarsToDefaults()
+  {
+    _cvar.ResetToDefault();
+  }
+
+  protected Cvar variable() { return _cvar; }
+
+  private transient CVar _cvar;
+
+}
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings.zs
+
+class pc_Settings : pc_SettingsPack
+{
+  pc_Settings init(PlayerInfo player)
+  {
+    _player = player;
+    return self;
+  }
+
+  bool isFlipX() { checkInit(); return _flipX.value(); }
+  bool isFlipY() { checkInit(); return _flipY.value(); }
+
+  bool isDisabledOnSlot1   () { checkInit(); return _disableOnSlot1   .value(); }
+  bool isDisabledOnNotReady() { checkInit(); return _disableOnNotReady.value(); }
+  bool isDisabledOnNoWeapon() { checkInit(); return _disableNoWeapon  .value(); }
+  bool isScaledByDistance  () { checkInit(); return _distanceScale    .value(); }
+
+  bool isTargetHealth() { checkInit(); return _targetHealth.value(); }
+
+  private void checkInit()
+  {
+    if (_isInitialized) { return; }
+
+    clear();
+
+    push(_flipX             = newBoolSetting("pc_flip_x"           ));
+    push(_flipY             = newBoolSetting("pc_flip_y"           ));
+    push(_disableOnSlot1    = newBoolSetting("pc_disable_slot_1"   ));
+    push(_disableOnNotReady = newBoolSetting("pc_disable_not_ready"));
+    push(_disableNoWeapon   = newBoolSetting("pc_disable_no_weapon"));
+    push(_targetHealth      = newBoolSetting("pc_target_health"    ));
+    push(_distanceScale     = newBoolSetting("pc_distance_scale"   ));
+
+    _isInitialized = true;
+  }
+
+  private pc_BoolSetting newBoolSetting(String name)
+  {
+    return new("pc_BoolSetting").init(name, _player);
+  }
+
+  private pc_BoolSetting _flipX;
+  private pc_BoolSetting _flipY;
+  private pc_BoolSetting _disableOnSlot1;
+  private pc_BoolSetting _disableOnNotReady;
+  private pc_BoolSetting _disableNoWeapon;
+  private pc_BoolSetting _targetHealth;
+  private pc_BoolSetting _distanceScale;
+
+  private PlayerInfo     _player;
+  private transient bool _isInitialized;
+
+}
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_base.zs
+
+// This class provides the base functions for various settings classes.
+class pc_SettingsBase
+{
+  // Reset CVars to their default values.
+  virtual void resetCvarsToDefaults()
+  {
+    console.printf("%s: reset is not implemented!", GetClassName());
+  }
+}
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_pack.zs
+
+// This class represents a pack of settings.
+class pc_SettingsPack : pc_SettingsBase
+{
+  override void resetCvarsToDefaults()
+  {
+    int nSettings = _settings.size();
+    for (int i = 0; i < nSettings; ++i)
+    {
+      _settings[i].resetCvarsToDefaults();
+    }
+  }
+
+  protected void push(pc_SettingsBase setting) { _settings.push(setting); }
+  protected void clear()                       { _settings.clear();       }
+
+  private Array<pc_SettingsBase> _settings;
+}
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle ../build/PreciseCrosshair/mapinfo.txt
+
+GameInfo { EventHandlers = "pc_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript.zs
+
+version 4.14.3
+
+<<../tools/scripts.org:include("add-ons/PreciseCrosshair.org", "build/PreciseCrosshair/\\(zscript/.*zs\\)")>>
+
+#include "zscript/pc_libeye.zs"
+#+end_src
+
+* Tests
+
+Check that the add-on at least can be loaded and doesn't error out on a target.
+
+#+begin_src text :tangle ../build/PreciseCrosshairTest/commands.txt
+wait 2; map map01
+wait 4; summon doomimp
+wait 8; quit
+#+end_src

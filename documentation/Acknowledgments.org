@@ -18,6 +18,7 @@ The order is alphabetical.
 
 - AbsolutePsycho
 - Ac!d
+- Agitatio
 - Ahpiox
 - Apollucas
 - Arkezuli
@@ -47,6 +48,7 @@ The order is alphabetical.
 - Eruanna
 - FaggoStorm
 - FoxBoy
+- Frax Boomer
 - generic name guy
 - ghost
 - HDV
@@ -86,6 +88,7 @@ The order is alphabetical.
 - Samarai1000
 - SandPoot
 - sebastianpanetta
+- ShockwaveS08
 - Silentdarkness12
 - Someone64
 - Someone65

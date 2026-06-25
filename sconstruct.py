@@ -330,6 +330,8 @@ add_dependency('Gearbox', 'StringUtils', 'gb_')
 add_dependency('Gearbox', 'VmAbortReporter', 'gb_')
 add_dependency('Gearbox', 'PlainTranslator', 'gb_')
 
+add_dependency('PreciseCrosshair', 'libeye', 'pc_')
+
 # Help
 Help(
   f"""

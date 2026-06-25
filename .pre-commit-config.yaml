@@ -84,6 +84,7 @@ repos:
         MD5,\
         Nomina,\
         PlainTranslator,\
+        PreciseCrosshair,\
         PreviousWeapon,\
         SoundToScreen,\
         StringUtils,\
