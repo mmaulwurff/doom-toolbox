@@ -62,6 +62,7 @@ def add_main_target(org_file, target_format):
 
   def clean(target, source, env):
     rmtree(f'build/{name}', True)
+    rmtree(f'build/{name}Test', True)
 
   return Alias(
     name, Command(target=zscript_name, source=org_file, action=[clean, tangle])
