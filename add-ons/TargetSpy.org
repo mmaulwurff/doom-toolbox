@@ -1673,11 +1673,11 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddFinder(class<Actor> aClass)
   {
     // This class replaces something: skip, it is handled on replacee side.
-    if (Actor.getReplacee(aClass) != aClass) return true;
+    if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
     string className = aClass.getClassName();
-    aClass = Actor.getReplacement(aClass);
+    aClass = getReplacement(aClass);
 
     let finder = (Function<play Actor()>)(findFunction(aClass, "find"));
     if (finder != NULL)
@@ -1692,11 +1692,11 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddFilter(class<Actor> aClass)
   {
     // This class replaces something: skip, it is handled on replacee side.
-    if (Actor.getReplacee(aClass) != aClass) return true;
+    if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
     string className = aClass.getClassName();
-    aClass = Actor.getReplacement(aClass);
+    aClass = getReplacement(aClass);
 
     let filter = (Function<play bool(Actor)>)(findFunction(aClass, "isAllowed"));
     if (filter != NULL)
@@ -1710,11 +1710,11 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddGetter(class<Actor> aClass)
   {
     // This class replaces something: skip, it is handled on replacee side.
-    if (Actor.getReplacee(aClass) != aClass) return true;
+    if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
     string className = aClass.getClassName();
-    aClass = Actor.getReplacement(aClass);
+    aClass = getReplacement(aClass);
 
     let getter = (Function<play int, string, int, int(Actor)>)
       (findFunction(aClass, "makeInformation"));
@@ -1733,11 +1733,11 @@ class ts_EventHandler : StaticEventHandler
   private bool tryAddView(class<Actor> aClass)
   {
     // This class replaces something: skip, it is handled on replacee side.
-    if (Actor.getReplacee(aClass) != aClass) return true;
+    if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
     string className = aClass.getClassName();
-    aClass = Actor.getReplacement(aClass);
+    aClass = getReplacement(aClass);
 
     let view =
       (Function
@@ -2668,18 +2668,18 @@ class ts_GettersOrderElement : OptionMenuItemCommand
 
 *** Configuration
 
-Configuration is a way to customize how TargetSpy processes finders, filters, getters
-and views. By default these classes are enabled or disabled by user choice.
-Configuration can force them to be on or off. If a class is forced on, it is always
-active and hidden from option menus. If a class is forced off, it is always disabled
-and hidden from option menus.
+Configuration is a way to customize how TargetSpy processes finders, filters,
+getters and views. By default these classes are enabled or disabled by user choice.
+Configuration can force them to be on or off, and replace them with another class.
+If a class is forced on, it is always active and hidden from option menus.
+If a class is forced off, it is always disabled and hidden from option menus.
 
 Several configurations may be loaded at once. If more than one configuration
 configures a class, the last loaded configuration wins.
 
-Configuration lump has name ~ts_config~ and is in JSON object format. Key is full
-class name, value is "off", "on", or "user". "user" can be used to override previous
-configuration.
+Configuration lump has name ~ts_config~ and is in JSON object format.
+Key is full class name, value is "off", "on", "user", or another class name.
+"user" can be used to override previous configuration.
 
 Example:
 
@@ -2700,13 +2700,31 @@ class tsGetter_Def : Actor
     return ts_Kind.PlainText, "Def", 0, 0;
   }
 }
+
+class tsGetter_TestTag : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    let [kind, text, value, max] = tsGetter_Tag.makeInformation(anActor);
+    return kind, text .. " - name test", value, max;
+  }
+}
 #+end_src
 
 #+begin_src js :tangle ../build/TargetSpyTest/ts_config.json
 {
   "tsFilter_Abc": "on",
   "tsGetter_Def": "off",
-  "tsGetter_Health": "user"
+  "tsGetter_Health": "user",
+  "tsGetter_Tag": "tsGetter_TestTag"
+}
+#+end_src
+
+If a replaced class must be turned on or off, a second configuration is needed:
+
+#+begin_src js :tangle ../build/TargetSpyTest/ts_config.2.json
+{
+  "tsGetter_Tag": "on"
 }
 #+end_src
 
@@ -2722,6 +2740,24 @@ collectConfigurations();
 clearscope bool isInConfig(string className)
 {
   return mConfiguration.checkKey(className);
+}
+
+clearscope class<Actor> getReplacement(class<Actor> aClass)
+{
+  string className = aClass.getClassName();
+  string lowerClassName = className.makeLower();
+  let [replacement, hasReplacement] = mReplacements.checkValue(lowerClassName);
+  class<Actor> result = replacement;
+  return hasReplacement && result ? result : aClass;
+}
+
+clearscope class<Actor> getReplacee(class<Actor> aClass)
+{
+  string className = aClass.getClassName();
+  string lowerClassName = className.makeLower();
+  let [replacee, hasReplacee] = mReplacees.checkValue(lowerClassName);
+  class<Actor> result = replacee;
+  return hasReplacee && result ? result : aClass;
 }
 
 private void collectConfigurations()
@@ -2743,6 +2779,13 @@ private void collectConfigurations()
       if      (value == "on")   mConfiguration.insert(key, 1);
       else if (value == "off")  mConfiguration.insert(key, 0);
       else if (value == "user") mConfiguration.remove(key);
+      else
+      {
+        // TODO: make key lower in mConfiguration too.
+        string lowerKey = key.makeLower();
+        mReplacements.insert(lowerKey, value);
+        mReplacees.insert(value, lowerKey);
+      }
     }
   }
 }
@@ -2771,61 +2814,8 @@ clearscope void applyConfiguration(string prefix,
 }
 
 private Map<string, int> mConfiguration;
-#+end_src
-
-*** Extension replacements
-
-Use either ~replaces~ keyword:
-
-#+begin_src c :noweb-ref zscript-test
-
-class tsGetter_TestClass : Actor replaces tsGetter_Class
-{
-  static int, string, int, int makeInformation(Actor anActor)
-  {
-    let [kind, text, value, max] = tsGetter_Class.makeInformation(anActor);
-    return kind, text .. " - class test", value, max;
-  }
-}
-#+end_src
-
-Or replace classes with an ~EventHandler~:
-
-#+begin_src c :noweb-ref zscript-test
-
-class tsGetter_TestTag : Actor
-{
-  static int, string, int, int makeInformation(Actor anActor)
-  {
-    let [kind, text, value, max] = tsGetter_Tag.makeInformation(anActor);
-    return kind, text .. " - name test", value, max;
-  }
-}
-
-class tst_EventHandler : StaticEventHandler
-{
-  override void CheckReplacement(ReplaceEvent event)
-  {
-    if (event.replacee.getClassName() == "tsGetter_Tag")
-      event.replacement = "tsGetter_TestTag";
-  }
-}
-#+end_src
-
-#+begin_src c :tangle ../build/TargetSpyTest/mapinfo.txt
-
-GameInfo
-{
-  EventHandlers = "tst_EventHandler"
-}
-#+end_src
-
-Optional: replace user-visible class name with a new one:
-
-#+begin_src c :tangle ../build/TargetSpyTest/language.txt
-
-[enu default]
-tsGetter_Class = "Class name test";
+private Map<string, string> mReplacements;
+private Map<string, string> mReplacees;
 #+end_src
 
 * Project setup
