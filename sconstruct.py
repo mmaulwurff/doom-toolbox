@@ -288,10 +288,10 @@ for org_file in Glob('add-ons/*.org'):
 # Dependencies
 def add_dependency(project, module, namespace):
   target_directory = f'build/{project}/zscript'
+  destination = f'{target_directory}/{namespace}{module}.zs'
 
   def export_module(target, source, env):
     makedirs(target_directory, exist_ok=True)
-    destination = f'{target_directory}/{namespace}{module}.zs'
     with open(destination, 'w', encoding='utf-8') as target_file:
       with open(source[0], encoding='utf-8') as module_file:
         target_file.write(module_file.read().replace('NAMESPACE_', namespace))
@@ -299,7 +299,7 @@ def add_dependency(project, module, namespace):
   Depends(
     project,
     Command(
-      target=project + module,
+      target=destination,
       source=f'build/{module}/{module}.zs',
       action=export_module,
     ),
