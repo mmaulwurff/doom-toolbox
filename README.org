@@ -25,36 +25,37 @@ There is a [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld
 
 This project doesn't use any AI tools or resources.
 
-| Name            | Description                                           | Forum topic |
-|-----------------+-------------------------------------------------------+-------------|
-| *Add-ons*       |                                                       |             |
-|-----------------+-------------------------------------------------------+-------------|
-| [[file:add-ons/10.5x.org][10.5x]]           | enemy number multiplier                               | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]        |
-| [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]] | gameplay customization options                        | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]        |
-| [[file:add-ons/Gearbox.org][Gearbox]]         | more convenient ways to select weapons and items      | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]        |
-| [[file:add-ons/HitImpact.org][HitImpact]]       | textured particles when level geometry is hit         | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]        |
-| [[file:add-ons/Nomina.org][Nomina]]          | enemy names helper                                    | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]        |
-| [[file:add-ons/SoundToScreen.org][SoundToScreen]]   | shows where sounds come from                          | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]        |
-| [[file:add-ons/TargetSpy.org][TargetSpy]]       | enemy health bar                                      | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]        |
-| [[file:add-ons/Typist.pk3.org][Typist.pk3]]      | turns FPS games into typing exercises                 | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]        |
-| [[file:add-ons/WarmReception.org][WarmReception]]   | alters enemy behavior on level start                  | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]        |
-|-----------------+-------------------------------------------------------+-------------|
-| *Modules*       |                                                       |             |
-|-----------------+-------------------------------------------------------+-------------|
-| [[file:modules/Hint.org][Hint]]            | hints for menu items                                  |             |
-| [[file:modules/LazyPoints.org][LazyPoints]]      | points scoring                                        |             |
-| [[file:modules/libeye.org][libeye]]          | (originally by KeksDose) level and screen projections |             |
-| [[file:modules/LispOnZscript.org][LispOnZscript]]   | toy Lisp-like language on top of ZScript              | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]        |
-| [[file:modules/MD5.org][MD5]]             | (originally by 3saster) MD5 implementation in ZScript |             |
-| [[file:modules/PlainTranslator.org][PlainTranslator]] | enables translation for plain text menu items         |             |
-| [[file:modules/PreviousWeapon.org][PreviousWeapon]]  | provides a key to select a previous weapon            |             |
-| [[file:modules/StringUtils.org][StringUtils]]     | string manipulation library                           |             |
-| [[file:modules/VmAbortReporter.org][VmAbortReporter]] | prints a report when VM abort happens                 |             |
-|-----------------+-------------------------------------------------------+-------------|
-| *Development*   |                                                       |             |
-|-----------------+-------------------------------------------------------+-------------|
-| [[file:add-ons/ClematisM.org][ClematisM]]       | ZScript unit test framework                           |             |
-| [[file:add-ons/DoomDoctor.org][DoomDoctor]]      | mod development and debugging utilities               |             |
+| Name             | Description                                           | Forum |
+|------------------+-------------------------------------------------------+-------|
+| *Add-ons*        |                                                       |       |
+|------------------+-------------------------------------------------------+-------|
+| [[file:add-ons/10.5x.org][10.5x]]            | enemy number multiplier                               | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]  |
+| [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]  | gameplay customization options                        | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]  |
+| [[file:add-ons/Gearbox.org][Gearbox]]          | more convenient ways to select weapons and items      | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]  |
+| [[file:add-ons/HitImpact.org][HitImpact]]        | textured particles when level geometry is hit         | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]  |
+| [[file:add-ons/Nomina.org][Nomina]]           | enemy names helper                                    | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]  |
+| [[file:add-ons/PreciseCrosshair.org][PreciseCrosshair]] | makes a crosshair point to where you actually shoot   | [[https://forum.zdoom.org/viewtopic.php?f=43&t=64788][link]]  |
+| [[file:add-ons/SoundToScreen.org][SoundToScreen]]    | shows where sounds come from                          | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]  |
+| [[file:add-ons/TargetSpy.org][TargetSpy]]        | enemy health bar                                      | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]  |
+| [[file:add-ons/Typist.pk3.org][Typist.pk3]]       | turns FPS games into typing exercises                 | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]  |
+| [[file:add-ons/WarmReception.org][WarmReception]]    | alters enemy behavior on level start                  | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]  |
+|------------------+-------------------------------------------------------+-------|
+| *Modules*        |                                                       |       |
+|------------------+-------------------------------------------------------+-------|
+| [[file:modules/Hint.org][Hint]]             | hints for menu items                                  |       |
+| [[file:modules/LazyPoints.org][LazyPoints]]       | points scoring                                        |       |
+| [[file:modules/libeye.org][libeye]]           | (originally by KeksDose) level and screen projections |       |
+| [[file:modules/LispOnZscript.org][LispOnZscript]]    | toy Lisp-like language on top of ZScript              | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]  |
+| [[file:modules/MD5.org][MD5]]              | (originally by 3saster) MD5 implementation in ZScript |       |
+| [[file:modules/PlainTranslator.org][PlainTranslator]]  | enables translation for plain text menu items         |       |
+| [[file:modules/PreviousWeapon.org][PreviousWeapon]]   | provides a key to select a previous weapon            |       |
+| [[file:modules/StringUtils.org][StringUtils]]      | string manipulation library                           |       |
+| [[file:modules/VmAbortReporter.org][VmAbortReporter]]  | prints a report when VM abort happens                 |       |
+|------------------+-------------------------------------------------------+-------|
+| *Development*    |                                                       |       |
+|------------------+-------------------------------------------------------+-------|
+| [[file:add-ons/ClematisM.org][ClematisM]]        | ZScript unit test framework                           |       |
+| [[file:add-ons/DoomDoctor.org][DoomDoctor]]       | mod development and debugging utilities               |       |
 
 Add-ons can be included and used in your own projects. However, this is not
 recommended, because when add-ons update, players won't be able to use new versions
@@ -62,6 +63,8 @@ with your project until you update the included add-on inside your project.
 
 Modules are intended to be included as a part of other projects. Some DoomToolbox
 add-ons include them.
+
+Some of DoomToolbox add-ons were the part of so called "m8f's toolbox".
 
 * Gallery
 
