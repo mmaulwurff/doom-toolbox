@@ -233,6 +233,9 @@ def make_index(target, source, env):
 
 
 # Targets
+compatibility_target = AlwaysBuild(
+  Alias('CheckCompatibility', None, make_check_compatibility_target())
+)
 clematis_target = add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
 
 test_targets = []
@@ -257,6 +260,7 @@ for org_file in Glob('add-ons/*.org'):
   test_targets.append(test_target)
   pack_targets.append(pack_target)
   project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+  Depends(compatibility_target, main_target)
 
 html_targets = []
 for org_file in Glob('*/*.org') + Glob('*.org'):
@@ -279,10 +283,6 @@ AlwaysBuild(
     ],
   )
 )
-
-AlwaysBuild(Alias('CheckCompatibility', None, make_check_compatibility_target()))
-for org_file in Glob('add-ons/*.org'):
-  Depends('CheckCompatibility', make_project_name(org_file))
 
 
 # Dependencies
