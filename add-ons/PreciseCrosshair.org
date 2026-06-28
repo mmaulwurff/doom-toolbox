@@ -1,6 +1,6 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
-#+title: Precise Crosshair
+#+title: PreciseCrosshair
 # #+version: v1.4.1
 
 * About
@@ -162,14 +162,14 @@ user float pc_scale;
 
 // Option menus
 
-PC_TITLE  = "Precise Crosshair";
+PC_TITLE  = "PreciseCrosshair \ck⚀";
 
 PC_ENGINE = "Engine Crosshair Options";
 PC_OFF    = "This must be OFF:";
 PC_NONE   = "This must be not None:";
-PC_OTHER  = "Other crosshair options also apply to Precise Crosshair:";
+PC_OTHER  = "Other crosshair options also apply to PreciseCrosshair:";
 
-PC_OPTIONS = "Precise Crosshair Options";
+PC_OPTIONS = "PreciseCrosshair Options";
 PC_ENABLE  = "Enabled";
 
 PC_MIRROR_H = "Mirror horizontally";
