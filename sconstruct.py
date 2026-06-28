@@ -8,7 +8,7 @@
 from os import environ, makedirs, path
 from pathlib import Path
 from re import MULTILINE, search, sub
-from shutil import copy, copytree, make_archive, move, rmtree, which
+from shutil import copy, copytree, make_archive, move, which
 from subprocess import PIPE, STDOUT, TimeoutExpired, run
 
 import git
@@ -60,13 +60,7 @@ def add_main_target(org_file, target_format):
     --load {build_el_path} \
     --eval "(dt-tangle)"'
 
-  def clean(target, source, env):
-    rmtree(f'build/{name}', True)
-    rmtree(f'build/{name}Test', True)
-
-  return Alias(
-    name, Command(target=zscript_name, source=org_file, action=[clean, tangle])
-  )
+  return Alias(name, Command(target=zscript_name, source=org_file, action=tangle))
 
 
 def add_test_target(org_file, main_target):
