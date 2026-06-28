@@ -35,6 +35,65 @@ PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doo
 
 * Changelog
 
+v1.5.0:
+- Added writing of result to external cvar
+- Fixed GetDistanceScale was missing a return
+- Added distance-based crosshair scaling option
+
+v1.4.1:
+- update Readme
+- close #11: fix disabled crosshair on certain weapons
+- move menu strings to language lump
+- add Pixel crosshair
+- update Readme
+
+v1.4:
+- fix #10: weirdness with max distance
+- make crosshair y position change slightly smoother
+- update Readme
+- close #7: option to color crosshair depending on target health
+- port Enhanced crosshair health color from GZDoom
+- fix #4: aim when crouching
+- update build script
+- ask Github not to recognize *.zs as an unrelated language
+
+v1.3:
+- resolve #2: option to hide crosshair when no weapon is selected/weapon is holstered
+- resolve #3: add minimalistic crosshairs
+
+v1.2.3:
+- fix menu
+- update Readme
+
+v1.2.2:
+- fix ZScript version
+- update Readme
+- add GZDoom version to Readme
+- improve weapon ready detection
+- update menudef
+- update Readme
+
+v1.2.1:
+- bump minimal ZScript version
+- add links to Readme
+- fix #1: update LibEye
+- fix memory leak on game loading
+
+v1.2:
+- add options to disable precise crosshair on slot 1 and when weapon is not ready
+- add options to flip the crosshair horizontally and vertically
+- remove debug output
+- update Readme
+- add a cvar with Y position for other mods to read
+- add an on/off switch
+
+v1.1:
+- added prefix to libeye to avoid conflicts with other mods
+- update libeye to support different screen sizes
+- add license file
+
+v1.0: initial release
+
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
