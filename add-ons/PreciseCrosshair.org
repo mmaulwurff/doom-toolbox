@@ -355,6 +355,7 @@ class pc_EventHandler : EventHandler
        || disabledOnSlot1(player)
        || disableWhenNotReady(player)
        || disableOnNoWeapon(player)
+       || event.camera != player.mo
        )
     {
       return;
