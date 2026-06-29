@@ -532,15 +532,11 @@ class pc_EventHandler : EventHandler
       return;
     }
 
-    if (num == 0)
+    if (num <= 0)
     {
       _crosshairNum    = 0;
       _isCrossExisting = false;
       return;
-    }
-    if (num < 0)
-    {
-      num = -num;
     }
     string size = (Screen.GetWidth() < 640) ? "S" : "B";
 
