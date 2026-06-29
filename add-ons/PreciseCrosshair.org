@@ -635,6 +635,7 @@ class pc_EventHandler : EventHandler
        = player.WeaponState & WF_WEAPONREADY
       || player.WeaponState & WF_WEAPONREADYALT
       || player.WeaponState & WF_WEAPONZOOMOK
+      || player.WeaponState & WF_WEAPONSWITCHOK
       || player.cmd.buttons & BT_ATTACK
       || player.cmd.buttons & BT_ALTATTACK
        ;
