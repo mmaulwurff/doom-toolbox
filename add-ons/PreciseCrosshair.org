@@ -36,9 +36,13 @@ PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doo
 * Changelog
 
 v1.5.0:
-- Added writing of result to external cvar
-- Fixed GetDistanceScale was missing a return
-- Added distance-based crosshair scaling option
+- added writing of result to external cvar
+- fixed GetDistanceScale was missing a return
+- added distance-based crosshair scaling option
+- added options menu icon
+- hide crosshair when looking through a camera
+- fix ready state detection
+- respect A_SetCrosshair(-1)
 
 v1.4.1:
 - update Readme
