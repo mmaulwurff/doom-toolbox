@@ -119,7 +119,7 @@ repos:
         --strict]
 
  - repo: https://github.com/editorconfig-checker/editorconfig-checker
-   rev: v3.7.0
+   rev: v3.8.0
    hooks:
     - id: editorconfig-checker
       exclude: 'modules/libeye.org|modules/MD5.org|tools/htmlize.el|tools/.*.wad'
