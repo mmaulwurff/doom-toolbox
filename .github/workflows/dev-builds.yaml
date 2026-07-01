@@ -52,7 +52,7 @@ jobs:
       - name: Cache UZDoom
         if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         id: cache-uzdoom
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/UZDoom.AppImage
           key: ${{ runner.os }}-${{ matrix.engine }}
@@ -66,7 +66,7 @@ jobs:
       - name: Cache LZDoom
         if: ${{ matrix.engine == 'lzdoom-v4.14.3a' }}
         id: cache-lzdoom
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/lzdoom.deb
           key: ${{ runner.os }}-${{ matrix.engine }}
@@ -96,7 +96,7 @@ jobs:
       - name: Cache prek
         if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         id: prek
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
@@ -181,7 +181,7 @@ jobs:
 
       - name: Cache Emacs
         id: cache-emacs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: c:\tools\emacs
           key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
@@ -195,7 +195,7 @@ jobs:
       # No point if I cannot run UZDoom (see comments below).
       # - name: Cache UZDoom
       #   id: cache-uzdoom
-      #   uses: actions/cache@v5
+      #   uses: actions/cache@v6
       #   with:
       #     path: ~/UZDoom
       #     key: ${{ runner.os }}-uzdoom-v4.14.3
@@ -223,7 +223,7 @@ jobs:
 
       - name: Cache prek
         id: prek
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
