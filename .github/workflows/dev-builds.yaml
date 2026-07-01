@@ -132,7 +132,7 @@ jobs:
 
       - name: Devbuilds - upload
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v3.0.1
         with:
           name: DoomToolbox Devbuilds
           tag_name: dev-builds
