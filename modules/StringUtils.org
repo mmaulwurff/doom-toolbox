@@ -2,21 +2,35 @@
 
 #+title: StringUtils
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* About
 
-* Description
+#+begin_src org :noweb-ref description
 
-License: [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+StringUtils module version: 1.4.0
 
-#+begin_src c :tangle ../build/StringUtils/StringUtils.zs
-// SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
-// SPDX-License-Identifier: BSD-3-Clause
-
-// StringUtils module version: 1.4.0
-// StringUtils is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+StringUtils is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
 #+end_src
 
-* Classes
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* License
+
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+begin_src c :noweb-ref license
+SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
+* Source
+
+#+begin_src c :tangle ../build/StringUtils/StringUtils.zs :exports none
+
+// <<license>>
+// <<description>>
+#+end_src
 
 ** ~StringUtils~
 

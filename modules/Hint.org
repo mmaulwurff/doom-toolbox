@@ -2,25 +2,40 @@
 
 #+title: Hint
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* About
+
+#+begin_src org :noweb-ref description
+
+This is Hint - option menu item for displaying hints.
+
+Hint module version: 1.1.0
+
+Hint is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
+#+end_src
 
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
-#+begin_src text :noweb-ref license
+#+begin_src org :noweb-ref description
+
 SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+
 * Source
 
-#+begin_src c :tangle ../build/Hint/Hint.zs
+#+begin_src c :tangle ../build/Hint/Hint.zs :exports none
 
 // <<license>>
+// <<description>>
+#+end_src
 
-// Hint module version: 1.1.0
-// Hint is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+#+begin_src c :tangle ../build/Hint/Hint.zs
 
 // This class provides the Hint Option Menu item.
 // Hint is a static text that is visible only if the items above are selected.

@@ -4,8 +4,7 @@
 
 * About
 
-#+name: description
-#+begin_src org
+#+begin_src org :noweb-ref description
 
 VM abort reports:
 - system time
@@ -30,6 +29,12 @@ To use (besides ZScript code):
 
 - add event handlers in mapinfo:
   <<mapinfo>>
+
+VmAbortReporter module version: 1.0.0
+
+VmAbortReporter is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
 #+end_src
 
 #+name: cvarinfo
@@ -47,11 +52,13 @@ GameInfo
 }
 #+end_src
 
-#+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs
-// <<license>>
+#+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs :exports none
 
+// <<license>>
 // <<description>>
 #+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 

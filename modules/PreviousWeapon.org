@@ -4,8 +4,7 @@
 
 * About
 
-#+name: description
-#+begin_src org
+#+begin_src org :noweb-ref description
 
 Provides a key to select a previous weapon.
 
@@ -15,6 +14,12 @@ To use (besides ZScript code):
 
 - add an alias and a key in keyconf:
   <<keyconf>>
+
+PreviousWeapon module version: 1.0.0
+
+PreviousWeapon is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
 #+end_src
 
 * License
@@ -28,10 +33,13 @@ SPDX-License-Identifier: BSD-3-Clause
 
 * Source
 
-#+begin_src c :tangle ../build/PreviousWeapon/PreviousWeapon.zs
-// <<license>>
+#+begin_src c :tangle ../build/PreviousWeapon/PreviousWeapon.zs :exports none
 
+// <<license>>
 // <<description>>
+#+end_src
+
+#+begin_src c :tangle ../build/PreviousWeapon/PreviousWeapon.zs
 
 // To save data into savegame.
 class NAMESPACE_PreviousWeaponStorage : EventHandler

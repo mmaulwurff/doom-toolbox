@@ -4,101 +4,101 @@
 
 * About
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+#+begin_src org :noweb-ref description
 
-#+begin_src c :tangle ../build/libeye/libeye.zs
-// <<license>>
+> Use this zscript library I've made to deal with screen and world projections. It
+> allows you to:
 
-// > Use this zscript library I've made to deal with screen and world projections. It
-// > allows you to:
-//
-// > 1. Find an actor's screen position (maybe to draw text over a target, like
-// >    HudMessageOnActor)
-// > 2. Click a screen location to fire a bullet in that direction
-// > 3. Determine if a location is in your view
-//
-// > in both opengl and old software render modes. You don't need to know any of the
-// > involved maths, and it runs very very fast, too.
-//
-// --- KeksDose
+> 1. Find an actor's screen position (maybe to draw text over a target, like
+>    HudMessageOnActor)
+> 2. Click a screen location to fire a bullet in that direction
+> 3. Determine if a location is in your view
 
-// libeye module version: 1.0.0
-// libeye is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+> in both opengl and old software render modes. You don't need to know any of the
+> involved maths, and it runs very very fast, too.
 
-// Original post: https://forum.zdoom.org/viewtopic.php?t=64566
-// Level and screen projections (now with resize handling)
+--- KeksDose
 
-// libeye is written by KeksDose / MemeDose in 2019, and repackaged as a
-// DoomToolbox module by Alexander Kromm in 2025.
-//
-// Note on the license: the requirement to "leave this note intact" is
-// incompatible with GPLv3:
-//
-// > You may not impose any further restrictions on the exercise of the rights
-// granted or affirmed under this License.
-//
-// This note seems to be compatible with BSD licenses, barring that the license
-// for any software that includes libeye must also include the note below.
+libeye module version: 1.0.0
 
-//                  libeye (for projection and deprojection)
-// 				 written by KeksDose / MemeDose (May 2019)
-// 						   (updated July 2019)
-//
-// All rights etc. etc. who cares, you may reuse this as you wish and edit it, and
-// leave this note intact.
-//
-//           //
-//           //
-//         /////((
-//    @@//////////  ((
-//  ((  %////((/////   ((     ((              ((
-//    (( @@//(((///////    (((  //////////////       ((
-//      (  /////////////////////////(((((((//////////   ((
-//         @@///@@@@@@//////////(((((((((//@@@//////////    ((
-//       ((  /////  /////((((((((((((((//@@%  %%@///////////   ((
-//           //////////((((((((((((((//////((((( %%@@//////////  ((
-//         ((%%//////////@@%% @@//(((((((///    (  (((( %%/////////  (
-//         ((  ////////@@  (((  @@//(((((((///// ((    (  @@/////////
-//         ((/////////@  ((   ((  @@/(((((((/////    (( ((  @@/((((///((
-//       ((  ///((//@@ ((       ((  %@@@@@@//////////   ((((  /((((///  ((
-//       ((/////((//%%(              ////%%%@@//////////      @//((((///
-//         ////(((//            /////////   //@@/////////////////(((((//
-//      (  ////(((////(    //////////////////////@@@@////////////(((((////((
-//       ////(((((((//   ////////////////////////////   %%@@///(((((((((//  (
-//       //(((((((((///////////////////    ////////////     %%@//(((((((//// ((
-//       //(((((((((((////////////((///    ///////////////     @@//(((((((///
-//       //(((((((((((////////((     /////////((////////////  (  //(((((((///////
-//       //(((((((  ((///////(  #####  ////(       ((///////  (  @@//(((((///////
-//       //(((((((  (((//////(((  ###  ((((   #####  ((/////// ((  //(((///////@@
-//       //((((((((((((@@/////////(((((((((((((((((((((/////     ///////////%  ((
-//       //((((((((((((%%    ///////((((((((((((////////  //////////////@@%% ((
-//       @@//(((((((((/%%((   ///////////////////////  /////////////////  (((
-//      (  //(((((((((/    ((                    ///////////////////////
-//         %%//(((((((///((   ((                //////////////@///////%%
-//       ((  @@/((((((///((            ((   //////////////@@%% ///////  ((
-//         ((  /(((((((//           (    //////////////@%%     //////%((
-//           (( @@//(((////(( ((  /////(((((((///@@  (((    ///////  (
-//             (  @@(((((//  (  ////(((((((///@@%  (((( /////////%%((
-//              ((%%//(((/////////(((((((//@%%       //////////%%  ((
-//              ((////(((((///////(((((///////////////////////%  ((
-//             (  ////(((((/////(((((((((//////////((((///@@%% ((
-//              ////(((//////@//////(((((((((((((////@@@%%    (
-//           (( /////////@@%% %%@@@@@@@@@@@@@@@@@@@%%     ((
-//         ((  @@@@@%%   ((
-//         ((       (((
-//
-//
-//
-//                                     %%//%
-//                                  (  //((/  ((
-//                                  (  ///////((
-//                                  (  ///////((
-//                                     /////  ((
-//                                       //
-//                                       //
-//
-//                         ((          /////         ((
+libeye is written by KeksDose / MemeDose in 2019, and repackaged as a
+DoomToolbox module by Alexander Kromm in 2025.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
+
+Original post: https://forum.zdoom.org/viewtopic.php?t=64566
+Level and screen projections (now with resize handling)
+
+Note on the license: the requirement to "leave this note intact" is
+incompatible with GPLv3:
+
+> You may not impose any further restrictions on the exercise of the rights
+granted or affirmed under this License.
+
+This note seems to be compatible with BSD licenses, barring that the license
+for any software that includes libeye must also include the note below.
+
+                 libeye (for projection and deprojection)
+				 written by KeksDose / MemeDose (May 2019)
+						   (updated July 2019)
+
+All rights etc. etc. who cares, you may reuse this as you wish and edit it, and
+leave this note intact.
+
+          //
+          //
+        /////((
+   @@//////////  ((
+ ((  %////((/////   ((     ((              ((
+   (( @@//(((///////    (((  //////////////       ((
+     (  /////////////////////////(((((((//////////   ((
+        @@///@@@@@@//////////(((((((((//@@@//////////    ((
+      ((  /////  /////((((((((((((((//@@%  %%@///////////   ((
+          //////////((((((((((((((//////((((( %%@@//////////  ((
+        ((%%//////////@@%% @@//(((((((///    (  (((( %%/////////  (
+        ((  ////////@@  (((  @@//(((((((///// ((    (  @@/////////
+        ((/////////@  ((   ((  @@/(((((((/////    (( ((  @@/((((///((
+      ((  ///((//@@ ((       ((  %@@@@@@//////////   ((((  /((((///  ((
+      ((/////((//%%(              ////%%%@@//////////      @//((((///
+        ////(((//            /////////   //@@/////////////////(((((//
+     (  ////(((////(    //////////////////////@@@@////////////(((((////((
+      ////(((((((//   ////////////////////////////   %%@@///(((((((((//  (
+      //(((((((((///////////////////    ////////////     %%@//(((((((//// ((
+      //(((((((((((////////////((///    ///////////////     @@//(((((((///
+      //(((((((((((////////((     /////////((////////////  (  //(((((((///////
+      //(((((((  ((///////(  #####  ////(       ((///////  (  @@//(((((///////
+      //(((((((  (((//////(((  ###  ((((   #####  ((/////// ((  //(((///////@@
+      //((((((((((((@@/////////(((((((((((((((((((((/////     ///////////%  ((
+      //((((((((((((%%    ///////((((((((((((////////  //////////////@@%% ((
+      @@//(((((((((/%%((   ///////////////////////  /////////////////  (((
+     (  //(((((((((/    ((                    ///////////////////////
+        %%//(((((((///((   ((                //////////////@///////%%
+      ((  @@/((((((///((            ((   //////////////@@%% ///////  ((
+        ((  /(((((((//           (    //////////////@%%     //////%((
+          (( @@//(((////(( ((  /////(((((((///@@  (((    ///////  (
+            (  @@(((((//  (  ////(((((((///@@%  (((( /////////%%((
+             ((%%//(((/////////(((((((//@%%       //////////%%  ((
+             ((////(((((///////(((((///////////////////////%  ((
+            (  ////(((((/////(((((((((//////////((((///@@%% ((
+             ////(((//////@//////(((((((((((((////@@@%%    (
+          (( /////////@@%% %%@@@@@@@@@@@@@@@@@@@%%     ((
+        ((  @@@@@%%   ((
+        ((       (((
+
+
+
+                                    %%//%
+                                 (  //((/  ((
+                                 (  ///////((
+                                 (  ///////((
+                                    /////  ((
+                                      //
+                                      //
+
+                        ((          /////         ((
 #+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
@@ -108,7 +108,13 @@ SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: LicenseRef-libeye
 #+end_src
 
-* libeye
+* Source
+
+#+begin_src c :tangle ../build/libeye/libeye.zs :exports none
+
+// <<license>>
+// <<description>>
+#+end_src
 
 ** GlScreen
 

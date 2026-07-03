@@ -226,6 +226,12 @@ def make_index(target, source, env):
   copy('README.html', 'index.html')
 
 
+def pack_module(target, source, env):
+  makedirs('build/modules', exist_ok=True)
+  for one_source in source:
+    copy(one_source.sources[0], 'build/modules')
+
+
 # Targets
 compatibility_target = AlwaysBuild(
   Alias('CheckCompatibility', None, make_check_compatibility_target())
@@ -234,14 +240,16 @@ clematis_target = add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs
 
 test_targets = []
 module_targets = []
+module_targets_names = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
   test_target = add_test_target(org_file, main_target)
   Depends(test_target, clematis_target)
   test_targets.append(test_target)
-  module_targets.append(f'{main_target[0]}, {test_target[0]}')
+  module_targets_names.append(f'{main_target[0]}, {test_target[0]}')
+  module_targets.append(main_target)
 
-project_targets = []
+addon_targets_names = []
 pack_targets = []
 for org_file in Glob('add-ons/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
@@ -253,7 +261,7 @@ for org_file in Glob('add-ons/*.org'):
 
   test_targets.append(test_target)
   pack_targets.append(pack_target)
-  project_targets.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+  addon_targets_names.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
   Depends(compatibility_target, main_target)
 
 html_targets = []
@@ -263,6 +271,7 @@ for org_file in Glob('*/*.org') + Glob('*.org'):
     Command(target=html_name, source=org_file, action=make_export(org_file))
   )
 
+AlwaysBuild(Alias('PackModules', module_targets, pack_module))
 Alias('Pk3All', pack_targets, None)
 Alias('TestAll', test_targets, None)
 Alias('HtmlAll', html_targets, make_index)
@@ -331,18 +340,19 @@ Help(
   f"""
 Modules:
 
-- {'\n- '.join(module_targets)}
+- {'\n- '.join(module_targets_names)}
 
-Projects:
+Add-ons:
 
-- {'\n- '.join(project_targets)}
+- {'\n- '.join(addon_targets_names)}
 
 General targets:
 
-- Pk3All: build packages for all mods
-- TestAll: test all packages and modules
+- Pk3All: build packages for all add-ons
+- TestAll: test all add-ons and modules
 - LintAll: run org-lint for all Org files
-- CheckCompatibility: check that all projects can be loaded together
+- CheckCompatibility: check that all add-ons can be loaded together
+- PackModules: pack all modules to build/modules directory
 
 Type 'scons <target>' to build a target.
 """,

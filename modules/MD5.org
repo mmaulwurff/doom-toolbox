@@ -1,25 +1,39 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
+#+title: MD5
+
 * About
+
+#+begin_src org :noweb-ref description
 
 This is MD5 ZScript library by 3saster, repackaged as a DoomToolbox module by m8f.
 Also, truncation parameter is removed, and signed integer warning fixed.
+
+MD5 module version: 1.0.0
+
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
+#+end_src
 
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
-#+begin_src text :noweb-ref license
+#+begin_src org :noweb-ref description
+
 SPDX-FileCopyrightText: © 2020 3saster
 SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
 * Source
 
-#+begin_src c :tangle ../build/MD5/MD5.zs
+#+begin_src c :tangle ../build/MD5/MD5.zs :exports none
 
-// <<license>>
+// <<license>
+// <<description>>
 
 // Copyright 2020 3saster
 // All rights reserved.
@@ -46,6 +60,9 @@ SPDX-License-Identifier: BSD-3-Clause
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#+end_src
+
+#+begin_src c :tangle ../build/MD5/MD5.zs
 
 //===========================================================================
 //
@@ -213,7 +230,7 @@ Class NAMESPACE_MD5
 
 * Test
 
-#+begin_src c :tangle ../build/MD5/mapinfo.txt
+#+begin_src c :tangle ../build/MD5Test/mapinfo.txt
 
 GameInfo { EventHandlers = "md5_TestEventHandler" }
 #+end_src
@@ -223,6 +240,11 @@ GameInfo { EventHandlers = "md5_TestEventHandler" }
 version 4.14.3
 
 #include "MD5.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/MD5Test/zscript.zs
+
+version 4.14.3
 
 class md5_TestEventHandler : StaticEventHandler
 {

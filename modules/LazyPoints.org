@@ -2,20 +2,16 @@
 
 #+title: LazyPoints
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
-
 * About
 
-#+name: description
-#+begin_src org
+#+begin_src org :noweb-ref description
 
 LazyPoints module version: 0.6.5
-LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+LazyPoints is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
 
 Point scoring for UZDoom. Do things, get points!
-
-License:
-<<license>>
 
 Scoring:
 - Damage: equal to damage amount.
@@ -67,16 +63,19 @@ OptionMenu NAMESPACE_TopMenu
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs :exports none
-// <<license>>
 
+// <<license>>
 // <<description>>
 #+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
 #+begin_src text :noweb-ref license
+
 SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src

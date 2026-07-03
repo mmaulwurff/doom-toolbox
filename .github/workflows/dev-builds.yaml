@@ -120,6 +120,7 @@ jobs:
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
         run: |
           scons Pk3All
+          scons PackModules
 
       - name: Devbuilds - prepare
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
@@ -128,7 +129,7 @@ jobs:
           git push origin :refs/tags/dev-builds || true
           git tag dev-builds ${{ github.event.workflow_run.head_sha }}
           git push origin dev-builds
-          zip -r build/DoomToolbox build -i \*.pk3
+          zip -r build/DoomToolbox build -i \*.pk3 build/modules/\*.zs
 
       - name: Devbuilds - upload
         if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}

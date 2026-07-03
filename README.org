@@ -22,6 +22,7 @@ files, see ~REUSE.toml~ files in their directories for licenses.
 HTML pages for DoomToolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]].
 The source code is available on [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
 There is a [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
+The latest development builds of add-ons and modules and can be found [[https://github.com/mmaulwurff/doom-toolbox/releases/tag/dev-builds][here]].
 
 This project doesn't use any AI tools or resources.
 

@@ -2,7 +2,55 @@
 
 #+title: PlainTranslator
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+* About
+
+#+begin_src text :noweb-ref description
+
+PlainTranslator module version: 1.1.0
+
+PlainTranslator is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
+
+In you had two options for putting text in your menu items:
+
+1. Plain text:
+  - in `menudef`: `StaticText "Hello, world!"`
+
+2. String id:
+  - in `menudef`: `StaticText "$HELLO_WORLD"`,
+  - in `language`, for each desired language: `HELLO_WORLD = "Hello, world!`;"
+
+The first option is more readable, but such item labels aren't translated.
+PlainTranslator makes the first option translatable too. It creates string
+ids for plain strings automatically.
+
+How to use:
+
+1. Write label for your menu items in plain text: `StaticText "Hello, world!"`.
+2. Add NAMESPACE_PlainTranslator menu item in your menu as the first item.
+3. Add translations in `language`, if needed. String id is derived from the
+   plain text string: `NAMESPACE_Hello__world_ = "¡Hola Mundo!";`
+
+Features:
+
+- Automatic submenu translation: it's enough to only put Translator in the
+  top-level menu.
+- Supports item labels and menu titles.
+
+Limitations:
+
+- Doesn't support dynamic menus: if the number of menu item changes in
+  runtime, the translation stops updating.
+- Translator doesn't work if it's the last item in a menu, works best if it's
+  the first.
+- After the language is changed, the old string is shown for one frame.
+- Plain text must contain only numbers, latin letters, spaces, ',', '.', '!',
+  '?', '-'. In string id spaces and punctuation are replaced with "_".
+- Translator takes one line.
+#+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
 * License
 
@@ -15,48 +63,14 @@ SPDX-License-Identifier: BSD-3-Clause
 
 * Source
 
-#+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
-// <<license>>
+#+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs :exports none
 
-// PlainTranslator module version: 1.1.0
-// PlainTranslator is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
-//
-// In you had two options for putting text in your menu items:
-//
-// 1. Plain text:
-//   - in `menudef`: `StaticText "Hello, world!"`
-//
-// 2. String id:
-//   - in `menudef`: `StaticText "$HELLO_WORLD"`,
-//   - in `language`, for each desired language: `HELLO_WORLD = "Hello, world!`;"
-//
-// The first option is more readable, but such item labels aren't translated.
-// PlainTranslator makes the first option translatable too. It creates string
-// ids for plain strings automatically.
-//
-// How to use:
-//
-// 1. Write label for your menu items in plain text: `StaticText "Hello, world!"`.
-// 2. Add NAMESPACE_PlainTranslator menu item in your menu as the first item.
-// 3. Add translations in `language`, if needed. String id is derived from the
-//    plain text string: `NAMESPACE_Hello__world_ = "¡Hola Mundo!";`
-//
-// Features:
-//
-// - Automatic submenu translation: it's enough to only put Translator in the
-//   top-level menu.
-// - Supports item labels and menu titles.
-//
-// Limitations:
-//
-// - Doesn't support dynamic menus: if the number of menu item changes in
-//   runtime, the translation stops updating.
-// - Translator doesn't work if it's the last item in a menu, works best if it's
-//   the first.
-// - After the language is changed, the old string is shown for one frame.
-// - Plain text must contain only numbers, latin letters, spaces, ',', '.', '!',
-//   '?', '-'. In string id spaces and punctuation are replaced with "_".
-// - Translator takes one line.
+// <<license>>
+// <<description>>
+#+end_src
+
+#+begin_src c :tangle ../build/PlainTranslator/PlainTranslator.zs
+
 class OptionMenuItemNAMESPACE_PlainTranslator : OptionMenuItem
 {
   override int draw(OptionMenuDescriptor descriptor, int y, int indent, bool selected)
