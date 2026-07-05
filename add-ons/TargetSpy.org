@@ -92,7 +92,7 @@ v3.1.0:
   - frame position
   - bar values are rounded up now
   - armor bar
-  - vid_rendermode is optional again
+  - ~vid_rendermode~ is optional again
   - user name for players
   - disabled on automap
 
@@ -1938,7 +1938,7 @@ class ts_Utils
 }
 #+end_src
 
-**** ~getActorMaxHealth~
+**** getActorMaxHealth
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -1963,7 +1963,7 @@ static play int getActorMaxHealth(Actor anActor)
 }
 #+end_src
 
-**** ~getColor~
+**** getColor
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -2155,7 +2155,7 @@ class ts_ViewUtils ui
 }
 #+end_src
 
-**** ~drawText~
+**** drawText
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 
@@ -2179,7 +2179,7 @@ static void drawText(Font aFont,
 }
 #+end_src
 
-**** ~drawBackground~
+**** drawBackground
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 
@@ -2211,7 +2211,7 @@ static string toText(ts_InformationPiece piece, ts_Options options)
 }
 #+end_src
 
-**** ~makeBar~
+**** makeBar
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 

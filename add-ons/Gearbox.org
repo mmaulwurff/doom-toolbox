@@ -793,7 +793,7 @@ Gameinfo
 
 ** Behavior
 
-*** ~Activity~
+*** Activity
 
 #+begin_src c :tangle ../build/Gearbox/zscript/activity.zs
 
@@ -837,7 +837,7 @@ class gb_Activity
 }
 #+end_src
 
-*** ~Changer~
+*** Changer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/changer.zs
 
@@ -909,7 +909,7 @@ class gb_Changer play
 }
 #+end_src
 
-*** ~CustomWeaponOrderStorage~
+*** CustomWeaponOrderStorage
 
 #+begin_src c :tangle ../build/Gearbox/zscript/custom_weapon_order_storage.zs
 
@@ -1072,7 +1072,7 @@ class gb_CustomWeaponOrderStorage
 nosave string gb_custom_weapon_order = "";
 #+end_src
 
-*** ~EventProcessor~
+*** EventProcessor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/event_processor.zs
 
@@ -1095,7 +1095,7 @@ class gb_EventProcessor
 }
 #+end_src
 
-*** ~FontSelector~
+*** FontSelector
 
 #+begin_src c :tangle ../build/Gearbox/zscript/font_selector.zs
 
@@ -1133,7 +1133,7 @@ class gb_FontSelector
 }
 #+end_src
 
-*** ~Freezer~
+*** Freezer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/freezer.zs
 
@@ -1236,7 +1236,7 @@ class gb_Freezer play
 }
 #+end_src
 
-*** ~Input~
+*** Input
 
 #+begin_src c :tangle ../build/Gearbox/zscript/input.zs
 
@@ -1276,7 +1276,7 @@ class gb_Input
 }
 #+end_src
 
-*** ~InputProcessor~
+*** InputProcessor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/input_processor.zs
 
@@ -1316,7 +1316,7 @@ class gb_InputProcessor
 }
 #+end_src
 
-*** ~InventoryMenu~
+*** InventoryMenu
 
 #+begin_src c :tangle ../build/Gearbox/zscript/inventory_menu.zs
 
@@ -1454,7 +1454,7 @@ class gb_InventoryMenu
 }
 #+end_src
 
-*** ~InventoryUser~
+*** InventoryUser
 
 #+begin_src c :tangle ../build/Gearbox/zscript/inventory_user.zs
 
@@ -1515,7 +1515,7 @@ class gb_InventoryUser play
 }
 #+end_src
 
-*** ~NeteventProcessor~
+*** NeteventProcessor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/netevent_processor.zs
 
@@ -1561,7 +1561,7 @@ class gb_NeteventProcessor play
 }
 #+end_src
 
-*** ~Options~
+*** Options
 
 #+begin_src c :tangle ../build/Gearbox/cvarinfo.txt
 
@@ -1786,7 +1786,7 @@ class gb_Options
 }
 #+end_src
 
-*** ~Printer~
+*** Printer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/printer.zs
 
@@ -1812,7 +1812,7 @@ class gb_Printer
 }
 #+end_src
 
-*** ~Sender~
+*** Sender
 
 #+begin_src c :tangle ../build/Gearbox/zscript/sender.zs
 
@@ -1851,7 +1851,7 @@ class gb_Sender
 }
 #+end_src
 
-*** ~Sounds~
+*** Sounds
 
 #+begin_src c :tangle ../build/Gearbox/zscript/sounds.zs
 
@@ -1941,7 +1941,7 @@ class gb_Sounds
 }
 #+end_src
 
-*** ~ViewModel~
+*** ViewModel
 
 #+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs
 
@@ -1965,7 +1965,7 @@ struct gb_ViewModel
 }
 #+end_src
 
-*** ~WeaponData~
+*** WeaponData
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_data.zs
 
@@ -1976,7 +1976,7 @@ struct gb_WeaponData
 }
 #+end_src
 
-*** ~WeaponDataLoader~
+*** WeaponDataLoader
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_data_loader.zs
 
@@ -2100,7 +2100,7 @@ struct gb_WeaponInfo
 }
 #+end_src
 
-*** ~WeaponMenu~
+*** WeaponMenu
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_menu.zs
 
@@ -2527,7 +2527,7 @@ class gb_WeaponMenu
 
 ** Display
 
-*** ~BlockyView~
+*** BlockyView
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/blocky_view.zs
 
@@ -2994,7 +2994,7 @@ class gb_BlockyView
 }
 #+end_src
 
-*** ~Blur~
+*** Blur
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/blur.zs
 
@@ -3054,7 +3054,7 @@ void main()
 }
 #+end_src
 
-*** ~Caption~
+*** Caption
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/caption.zs
 
@@ -3084,7 +3084,7 @@ class gb_Caption
 }
 #+end_src
 
-*** ~Dim~
+*** Dim
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/dim.zs
 
@@ -3104,7 +3104,7 @@ class gb_Dim
 }
 #+end_src
 
-*** ~FadeInOut~
+*** FadeInOut
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/fade_in_out.zs
 
@@ -3131,7 +3131,7 @@ class gb_FadeInOut
 }
 #+end_src
 
-*** ~TextView~
+*** TextView
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/text_view.zs
 
@@ -3321,7 +3321,7 @@ class gb_TextView
 
 ** Engine
 
-*** ~Level~
+*** Level
 
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/level.zs
 
@@ -3342,7 +3342,7 @@ class gb_Level
 }
 #+end_src
 
-*** ~Player~
+*** Player
 
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/player.zs
 
@@ -3355,7 +3355,7 @@ class gb_Player
 }
 #+end_src
 
-*** ~WeaponWatcher~
+*** WeaponWatcher
 
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/weapon_watcher.zs
 
@@ -3911,7 +3911,7 @@ class gb_EventHandler : EventHandler
 
 ** Service
 
-*** ~Service~
+*** Service
 
 #+begin_src c :tangle ../build/Gearbox/zscript/service/service.zs
 
@@ -4007,7 +4007,7 @@ class gb_ServiceIterator
 }
 #+end_src
 
-*** ~IconService~
+*** IconService
 
 #+begin_src c :tangle ../build/Gearbox/zscript/service/icon_service.zs
 
@@ -4056,7 +4056,7 @@ class gb_IconService : gb_Service
 }
 #+end_src
 
-*** ~HideService~
+*** HideService
 
 #+begin_src c :tangle ../build/Gearbox/zscript/service/hide_service.zs
 
@@ -4087,7 +4087,7 @@ class gb_HideService : gb_Service
 
 ** Tools
 
-*** ~Ammo~
+*** Ammo
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/ammo.zs
 
@@ -4100,7 +4100,7 @@ class gb_Ammo
 }
 #+end_src
 
-*** ~Cvar~
+*** Cvar
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/cvar.zs
 
@@ -4137,7 +4137,7 @@ class gb_Cvar
 }
 #+end_src
 
-*** ~Log~
+*** Log
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/log.zs
 
@@ -4177,7 +4177,7 @@ class gb_Log
 }
 #+end_src
 
-*** ~TextureCache~
+*** TextureCache
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/texture_cache.zs
 
@@ -4237,7 +4237,7 @@ class gb_TextureCache
 
 ** Wheel
 
-*** ~Controller~
+*** Controller
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller.zs
 
@@ -4320,7 +4320,7 @@ class gb_WheelController
 }
 #+end_src
 
-*** ~WheelControllerModel~
+*** WheelControllerModel
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller_model.zs
 
@@ -4331,7 +4331,7 @@ struct gb_WheelControllerModel
 }
 #+end_src
 
-*** ~WheelIndexer~
+*** WheelIndexer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/indexer.zs
 
@@ -4560,7 +4560,7 @@ class gb_WheelIndexer
 }
 #+end_src
 
-*** ~WheelInnerIndexer~
+*** WheelInnerIndexer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/inner_indexer.zs
 
@@ -4581,7 +4581,7 @@ class gb_WheelInnerIndexer
 }
 #+end_src
 
-*** ~MultiWheel~
+*** MultiWheel
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel.zs
 
@@ -4632,7 +4632,7 @@ class gb_MultiWheel
 }
 #+end_src
 
-*** ~MultiWheelMode~
+*** MultiWheelMode
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel_mode.zs
 
@@ -4656,7 +4656,7 @@ class gb_MultiWheelMode
 }
 #+end_src
 
-*** ~Screen~
+*** Screen
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/screen.zs
 
@@ -4708,7 +4708,7 @@ class gb_Screen
 }
 #+end_src
 
-*** ~Text~
+*** Text
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/text.zs
 
@@ -4811,7 +4811,7 @@ class gb_Text
 }
 #+end_src
 
-*** ~WheelView~
+*** WheelView
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs
 

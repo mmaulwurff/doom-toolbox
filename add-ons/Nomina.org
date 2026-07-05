@@ -195,7 +195,7 @@ mExpectedNames.insert("NAT_BFG9000", "NAT BFG9000");
 
 ** In-game enemy tag correction
 
-*** ~na_config~ Cvar
+*** na_config Cvar
 
 #+begin_src c :tangle ../build/Nomina/cvarinfo.txt
 server nosave string na_config = "";
@@ -224,7 +224,7 @@ mExpectedNames.insert("nat_NamelessByConfig", "TestName");
 mExpectedNames.insert("Zombieman", "TestZombie");
 #+end_src
 
-*** ~na_rename~ console command
+*** na_rename console command
 
 #+begin_src c :tangle ../build/Nomina/keyconf.txt
 // Limited to 10 words. For more words, use the external name data (na_data.json).

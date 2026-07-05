@@ -109,44 +109,44 @@ SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/PreciseCrosshair/menudef.txt
+#+begin_src c :tangle ../build/PreciseCrosshair/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/cvarinfo.txt
+#+begin_src c :tangle ../build/PreciseCrosshair/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/language.txt
+#+begin_src c :tangle ../build/PreciseCrosshair/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/xhairs.txt
+#+begin_src c :tangle ../build/PreciseCrosshair/xhairs.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/mapinfo.txt
+#+begin_src c :tangle ../build/PreciseCrosshair/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript.zs :exports none
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_event_handler.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_event_handler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_puff.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_puff.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_bool_setting.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_bool_setting.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_cvar_setting.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_cvar_setting.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_base.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_base.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_pack.zs
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_pack.zs :exports none
 // <<license>>
 #+end_src
 

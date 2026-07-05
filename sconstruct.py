@@ -44,11 +44,11 @@ def make_project_name(org_file):
   return path.splitext(path.basename(org_file))[0]
 
 
-def make_export(source):
+def make_export(source, prefix):
   build_el_path = path.abspath('tools/build.el')
   return f'{emacs} {source} --quick --batch \
     --load {build_el_path} \
-    --eval "(dt-export)"'
+    --eval "(dt-export \\"{prefix}\\")"'
 
 
 # Target setup functions
@@ -265,10 +265,15 @@ for org_file in Glob('add-ons/*.org'):
   Depends(compatibility_target, main_target)
 
 html_targets = []
-for org_file in Glob('*/*.org') + Glob('*.org'):
+for org_file in Glob('*.org'):
   html_name = f'{path.splitext(org_file)[0]}.html'
   html_targets.append(
-    Command(target=html_name, source=org_file, action=make_export(org_file))
+    Command(target=html_name, source=org_file, action=make_export(org_file, ''))
+  )
+for org_file in Glob('*/*.org'):
+  html_name = f'{path.splitext(org_file)[0]}.html'
+  html_targets.append(
+    Command(target=html_name, source=org_file, action=make_export(org_file, '../'))
   )
 
 AlwaysBuild(Alias('PackModules', module_targets, pack_module))

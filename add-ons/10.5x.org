@@ -91,7 +91,7 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 
-* ~x5_EventHandler~
+* x5_EventHandler
 
 #+begin_src c :tangle ../build/10.5x/mapinfo.txt
 
@@ -395,7 +395,7 @@ class x5_SpawnPoint
 }
 #+end_src
 
-* ~x5_Freezer~
+* x5_Freezer
 
 #+begin_src c :tangle ../build/10.5x/zscript/x5_Freezer.zs
 
@@ -478,7 +478,7 @@ class x5_Freezer play
 }
 #+end_src
 
-* ~x5_WalkAbilityWatcher~
+* x5_WalkAbilityWatcher
 
 This inventory item resets ~bThruActors~ flag if the actor is able to move without it.
 
@@ -506,7 +506,7 @@ class x5_WalkAbilityWatcher : Inventory
 }
 #+end_src
 
-* ~x5_Killer~
+* x5_Killer
 
 This class kills an enemy when the enemy becomes active. Such an enemy is marked with
 a floating icon. Whether an enemy killed by ~x5_Killer~ can be resurrected is
@@ -573,7 +573,7 @@ class x5_Killer : Actor
 }
 #+end_src
 
-* ~language~
+* language
 
 #+begin_src c :tangle ../build/10.5x/language.txt
 
@@ -594,7 +594,7 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 
 * Global multiplier
 
-** ~OptionMenuItemX5Slider~
+** OptionMenuItemX5Slider
 
 #+begin_src text :tangle ../build/10.5x/menudef.txt
 
@@ -638,7 +638,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
 * Type multipliers
 
-** ~x5_TypeMultipliersMenu~
+** x5_TypeMultipliersMenu
 
 #+begin_src text :tangle ../build/10.5x/menudef.txt
 
@@ -784,7 +784,7 @@ class x5_TypeSortElement
 }
 #+end_src
 
-** ~OptionMenuItemX5TypeSlider~
+** OptionMenuItemX5TypeSlider
 
 #+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 
