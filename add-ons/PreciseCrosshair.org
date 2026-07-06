@@ -42,28 +42,27 @@ v1.5.0:
 - added options menu icon
 - hide crosshair when looking through a camera
 - fix ready state detection
-- respect A_SetCrosshair(-1)
+- try to respect ~A_SetCrosshair(-1)~
 
 v1.4.1:
 - update Readme
-- close #11: fix disabled crosshair on certain weapons
+- fix disabled crosshair on certain weapons
 - move menu strings to language lump
 - add Pixel crosshair
 - update Readme
 
 v1.4:
-- fix #10: weirdness with max distance
+- fix weirdness with max distance
 - make crosshair y position change slightly smoother
 - update Readme
-- close #7: option to color crosshair depending on target health
+- add option to color crosshair depending on target health
 - port Enhanced crosshair health color from GZDoom
-- fix #4: aim when crouching
+- fix aim when crouching
 - update build script
-- ask Github not to recognize *.zs as an unrelated language
 
 v1.3:
-- resolve #2: option to hide crosshair when no weapon is selected/weapon is holstered
-- resolve #3: add minimalistic crosshairs
+- add option to hide crosshair when no weapon is selected/weapon is holstered
+- add minimalistic crosshairs
 
 v1.2.3:
 - fix menu
@@ -80,7 +79,7 @@ v1.2.2:
 v1.2.1:
 - bump minimal ZScript version
 - add links to Readme
-- fix #1: update LibEye
+- update LibEye
 - fix memory leak on game loading
 
 v1.2:
