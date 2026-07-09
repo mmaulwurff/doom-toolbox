@@ -26,20 +26,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  test:
     permissions:
       actions: read
-      # Allow to create dev-builds tag:
-      contents: write
-      # Allow deployment to GitHub Pages:
-      id-token: write
-      pages: write
     runs-on: ubuntu-26.04
     strategy:
       matrix:
-        engine: [uzdoom-v4.14.3, lzdoom-v4.14.3a]
+        engine:
+          - name: uzdoom-v4.14.3
+            url: https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Linux-UZDoom-4.14.3.AppImage
+            download-target: ~/UZDoom.AppImage
+            bin: ~/UZDoom.AppImage
+          - name: lzdoom-v4.14.3a
+            url: https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a_amd64.deb
+            download-target: ~/lzdoom.deb
+            bin: lzdoom
+          - name: uzdoom-preview
+            url: https://github.com/UZDoom/UZDoom/releases/download/x-preview/Linux-UZDoom-Preview-x86_64.AppImage
+            download-target: ~/UZDoom.AppImage
+            bin: ~/UZDoom.AppImage
+
     env:
-      DT_ENGINE: ${{ case(matrix.engine == 'uzdoom-v4.14.3', '~/UZDoom.AppImage', 'lzdoom') }}
+      DT_ENGINE: ${{ matrix.engine.bin }}
+
     steps:
       - name: Check out
         uses: actions/checkout@v7
@@ -49,37 +58,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox
 
-      - name: Cache UZDoom
-        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
-        id: cache-uzdoom
-        uses: actions/cache@v5
+      - name: Cache engine
+        id: cache-engine
+        if: ${{ !contains(matrix.engine.name, 'preview') }}
+        uses: actions/cache@v6
         with:
-          path: ~/UZDoom.AppImage
-          key: ${{ runner.os }}-${{ matrix.engine }}
+          path: ${{ matrix.engine.download-target }}
+          key: ${{ runner.os }}-${{ matrix.engine.name }}
 
-      - name: Install UZDoom
-        if: ${{ matrix.engine == 'uzdoom-v4.14.3' && steps.cache-uzdoom.outputs.cache-hit != 'true' }}
+      - name: Download engine
+        if: ${{ steps.cache-engine.outputs.cache-hit != 'true' }}
         run: |
-          wget -qO- https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Linux-UZDoom-4.14.3.AppImage > ~/UZDoom.AppImage
-          chmod +x ~/UZDoom.AppImage
+          wget -qO- ${{ matrix.engine.url }} > ${{ matrix.engine.download-target }}
 
-      - name: Cache LZDoom
-        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' }}
-        id: cache-lzdoom
-        uses: actions/cache@v5
-        with:
-          path: ~/lzdoom.deb
-          key: ${{ runner.os }}-${{ matrix.engine }}
-
-      - name: Download LZDoom
-        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' && steps.cache-lzdoom.outputs.cache-hit != 'true' }}
+      - name: Set up engine with dpkg
+        if: ${{ contains(matrix.engine.download-target, '.deb') }}
         run: |
-          wget -qO- https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a_amd64.deb > ~/lzdoom.deb
+          sudo dpkg -i ${{ matrix.engine.download-target }}
 
-      - name: Install LZDoom
-        if: ${{ matrix.engine == 'lzdoom-v4.14.3a' }}
+      - name: Set up engine with chmod
+        if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
         run: |
-          sudo dpkg -i ~/lzdoom.deb
+          chmod +x ${{ matrix.engine.download-target }}
 
       - name: Install Python
         uses: actions/setup-python@v6
@@ -94,15 +94,13 @@ jobs:
           pip install -r tools/requirements-dev.txt;
 
       - name: Cache prek
-        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         id: prek
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Check prek hooks
-        if: ${{ matrix.engine == 'uzdoom-v4.14.3' }}
         run: |
           prek run -a
 
@@ -116,14 +114,47 @@ jobs:
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
+  build:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: test
+    permissions:
+      actions: read
+      # Allow to create dev-builds tag:
+      contents: write
+      # Allow deployment to GitHub Pages:
+      id-token: write
+      pages: write
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: 'tools/requirements-dev.txt'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt;
+
       - name: Build
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         run: |
           scons Pk3All
           scons PackModules
 
       - name: Devbuilds - prepare
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         run: |
           git tag -d dev-builds || true
           git push origin :refs/tags/dev-builds || true
@@ -132,7 +163,7 @@ jobs:
           zip -r build/DoomToolbox build -i \*.pk3 build/modules/\*.zs
 
       - name: Devbuilds - upload
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         uses: softprops/action-gh-release@v2.5.0
         with:
           name: DoomToolbox Devbuilds
@@ -146,28 +177,28 @@ jobs:
             Warning: these packages may contain bugs or unfinished features.
 
       - name: Clean up build
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         run: |
           rm -r build
 
       - name: Export to HTML
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         run: |
           scons -j 4 HtmlAll
 
       - name: Configure pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         uses: actions/configure-pages@v6
 
       - name: Upload pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
           path: '.'
 
       - name: Deploy pages to GitHub Pages
-        if: ${{ success() && matrix.engine == 'uzdoom-v4.14.3' && github.ref == 'refs/heads/main' }}
+        if: ${{ success() }}
         id: deployment
         uses: actions/deploy-pages@v5
 
@@ -182,7 +213,7 @@ jobs:
 
       - name: Cache Emacs
         id: cache-emacs
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: c:\tools\emacs
           key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
@@ -196,7 +227,7 @@ jobs:
       # No point if I cannot run UZDoom (see comments below).
       # - name: Cache UZDoom
       #   id: cache-uzdoom
-      #   uses: actions/cache@v5
+      #   uses: actions/cache@v6
       #   with:
       #     path: ~/UZDoom
       #     key: ${{ runner.os }}-uzdoom-v4.14.3
@@ -224,7 +255,7 @@ jobs:
 
       - name: Cache prek
         id: prek
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
