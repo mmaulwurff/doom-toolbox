@@ -40,14 +40,14 @@ repos:
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.15.20
+   rev: v0.15.21
    hooks:
     - id: ruff-check
       args: [--fix]
     - id: ruff-format
 
  - repo: https://github.com/crate-ci/typos
-   rev: v1.47.2
+   rev: v1.48.0
    hooks:
     - id: typos
       stages: [pre-commit]
