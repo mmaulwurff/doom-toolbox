@@ -68,6 +68,8 @@ def add_test_target(org_file, main_target):
   test_name = f'{name}Test'
 
   def run_test(target, source, env):
+    print('------------------------------------------------------------')
+
     args = [
       uzdoom,
       '-noautoload',
