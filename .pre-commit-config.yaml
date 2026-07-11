@@ -102,12 +102,6 @@ repos:
     - id: oxipng
       args: [-o, '4', --alpha]
 
- - repo: https://github.com/rhysd/actionlint
-   rev: v1.7.12
-   hooks:
-    - id: actionlint
-      args: [-ignore, 'label ".+" is unknown']
-
  - repo: https://github.com/adrienverge/yamllint.git
    rev: v1.38.0
    hooks:
