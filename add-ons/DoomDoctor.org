@@ -315,7 +315,7 @@ ResetCvar dd_logging_process_events_enabled;
 Alias dd_logging_disable "<<dd_logging_disable()>>"
 #+end_src
 
-** dd_BufferedConsole
+** BufferedConsole
 
 Prints to the engine console and saves the messages so they can be checked. Also
 prints level time.
@@ -350,7 +350,7 @@ class dd_BufferedConsole : StaticEventHandler
 } // class dd_BufferedConsole
 #+end_src
 
-** dd_Logger
+** Logger
 
 Notes
 - The following events are not logged, because nothing interesting can change here:
