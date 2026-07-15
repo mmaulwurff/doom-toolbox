@@ -344,7 +344,7 @@ class ClematisTestHandler:StaticEventHandler{
     override
     void NetworkProcess(ConsoleEvent e){
         String TestName=e.Name.MakeLower();
-        if(TestName.IndexOf("test:")!=-1)
+        if(TestName.IndexOf("test:")==0)
             Clematis.Create(TestName.Mid(5));
     }
 }
@@ -1294,6 +1294,7 @@ class Cl_Util{
     }
 }
 #+end_src
+
 * Tests
 
 Tests for tests.

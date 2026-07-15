@@ -32,6 +32,7 @@ and doesn't use "AI" tools for development.
 | *Add-ons*        |                                                       |       |
 |------------------+-------------------------------------------------------+-------|
 | [[file:add-ons/10.5x.org][10.5x]]            | enemy number multiplier                               | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]  |
+| [[file:add-ons/Autoautosave.org][Autoautosave]]     | universal autosaver                                   | [[https://forum.zdoom.org/viewtopic.php?t=59889][link]]  |
 | [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]  | gameplay customization options                        | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]  |
 | [[file:add-ons/Gearbox.org][Gearbox]]          | more convenient ways to select weapons and items      | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]  |
 | [[file:add-ons/HitImpact.org][HitImpact]]        | textured particles when level geometry is hit         | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]  |

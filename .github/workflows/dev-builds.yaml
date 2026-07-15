@@ -53,7 +53,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r tools/requirements-dev.txt;
+          pip install -r tools/requirements-dev.txt
 
       - name: Check prek hooks
         run: |
@@ -90,8 +90,9 @@ jobs:
       - parallel:
           - name: Install system dependencies
             run: |
+              # espeak-ng, libespeak1: for pyttsx3
               sudo apt-get update
-              sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox
+              sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1
 
           - name: Cache engine
             id: cache-engine
@@ -127,7 +128,7 @@ jobs:
           - name: Install Python dependencies
             run: |
               python -m pip install --upgrade pip
-              pip install -r tools/requirements-dev.txt;
+              pip install -r tools/requirements-dev.txt
 
       - name: Check compatibility
         run: |
@@ -169,7 +170,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r tools/requirements-dev.txt;
+          pip install -r tools/requirements-dev.txt
 
       - name: Build
         run: |
@@ -260,7 +261,7 @@ jobs:
             shell: bash
             run: |
               python -m pip install --upgrade pip
-              pip install -r tools/requirements-dev.txt;
+              pip install -r tools/requirements-dev.txt
 
       # No point if I cannot run UZDoom (see comments below).
       # - name: Cache UZDoom

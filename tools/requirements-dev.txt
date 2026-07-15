@@ -10,6 +10,13 @@ GitPython ~= 3.1
 # https://prek.j178.dev/
 prek ~= 0.4
 
+# https://github.com/jonghwanhyeon/python-ffmpeg
+python-ffmpeg ~= 2.0
+
+# Text to speech
+# https://github.com/nateshmbhat/pyttsx3
+pyttsx3 ~= 2.99
+
 # REUSE: open source licenses helper tool
 # https://reuse.software/
 reuse[charset-normalizer] ~= 6.2

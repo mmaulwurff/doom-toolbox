@@ -16,6 +16,7 @@ The order is alphabetical.
 
 # spellchecker:off
 
+- 4thcharacter
 - AbsolutePsycho
 - Ac!d
 - Agitatio
@@ -32,6 +33,7 @@ The order is alphabetical.
 - Churrupez
 - Colerx
 - cosmos10040
+- Crimsondrgn
 - CthulhuInACan
 - CursedCorona
 - Cutmanmike
@@ -39,6 +41,8 @@ The order is alphabetical.
 - DabbingSquidward
 - dard22
 - Dark-Assassin
+- darkness
+- dawnbreez
 - Derpford
 - Doctrine Dark
 - drogga (Commado Pen)
@@ -53,9 +57,11 @@ The order is alphabetical.
 - generic name guy
 - ghost
 - HDV
+- HexaDoken
 - HexFlareheart
 - Icarus
 - IKA
+- insightguy
 - isaacpop23
 - Jarewill
 - Jekyll Grim Payne (Agent Ash)
@@ -74,6 +80,7 @@ The order is alphabetical.
 - Mr. Blazkowicz
 - MsrSgtShooterPerson
 - murka
+- namsan
 - Nems
 - Nightsentinel
 - Paul Fioravanti
@@ -84,6 +91,7 @@ The order is alphabetical.
 - ProydohaRupert
 - przemko27
 - ramon.dexter
+- retronutcase
 - Rodman909
 - Rowsol
 - rparhkdtp
@@ -91,6 +99,7 @@ The order is alphabetical.
 - SandPoot
 - sebastianpanetta
 - ShockwaveS08
+- SiFi270
 - Silentdarkness12
 - Someone64
 - Someone65

@@ -1,0 +1,2566 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: Autoautosave
+
+#+name: meta
+#+begin_src js
+{ "old_version": "2.0.0" }
+#+end_src
+
+* About
+
+Universal autosaver.
+
+It works as a configurable checkpoint system.
+It is designed to be compatible with any monster and weapon mod, and any map.
+
+Features:
+- autosave on various events: enemies alerted and killed, health or armor drops
+  or rises, items are found, etc.
+- periodic autosave.
+- autosave on every event is optional.
+- some events have fine-tuning options.
+- optional screenshot taking when events happen.
+- three options for event reporting: console, on-screen, and voice.
+
+Autoautosave is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+* License
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2018 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle ../build/Autoautosave/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/keyconf.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/language.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/mapinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/menudef.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/sndinfo.txt
+// <<license>>
+#+end_src
+
+#+begin_src c :tangle ../build/Autoautosave/zscript.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_active_enemies_checker.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_clock.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_cvar.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event_source.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_function.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_action_scheduler.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_actions.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_log.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_main.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_precache_sounds.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_save_timer.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_timestamp.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_token.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_universal_token_examples.zs
+// <<license>>
+#+end_src
+
+#+begin_src toml :tangle ../build/Autoautosave/REUSE.toml
+
+# https://reuse.software/
+
+version = 1
+
+[[annotations]]
+path = "events.json"
+SPDX-FileCopyrightText = "© 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC0-1.0"
+
+<<list-events("[[annotations]]\npath \= \"sounds/aas%1$s.ogg\"\nSPDX-FileCopyrightText \= \"© 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>\"\nSPDX-License-Identifier \= \"CC0-1.0\"\n")>>
+#+end_src
+
+* Changelog
+
+v2.0.0
+- cleaned up Cvar and event names
+- removed voice types
+
+v1.6.3
+- 2025-03-08 fix compatibility with GZDoom 4.14.1
+- 2022-08-13 A few language.txt changes
+- 2022-08-13 Localize aas_event.zs strings
+
+v1.6.2
+- 2022-08-10 fix VM abort with Corruption Cards
+
+v1.6.1
+- 2022-08-08 fix floating point truncation
+- 2022-08-06 fixed Brazilian Portuguese language code
+
+v1.6.0
+- 2022-08-05 add missing language string
+- 2022-08-05 precache new voices
+- 2022-08-05 inline queue class
+- 2022-08-05 add voice volume slider
+- 2022-08-04 add menu icon
+- 2022-07-30 add Brazilian Portuguese localization
+
+v1.5.0
+- 2022-07-29 add minor cvar performance optimization
+- 2022-07-29 replace hardcoded timeout with real voice length
+- 2022-07-29 add new voice packs
+- 2022-07-29 fix: Time passed event fires when player is dead
+- 2022-07-29 optimize titlemap check
+- 2022-07-25 clean up code
+- 2020-08-06 fix doc for aas_logger
+
+v1.4.2
+- 2020-08-06 add an option for log message color
+- 2020-08-06 fix percent kill showing on quiet log setting
+- 2020-08-05 unify aas_logger and aas_printer
+- 2020-08-05 don't emit active enemies events if player is dead
+
+v1.4.1
+- 2020-07-15 wrap TICRATE with a more meaningful name
+- 2020-07-12 don't trigger Armor Low event on death
+- 2020-07-12 don't trigger Health Low event on death
+
+v1.4
+- 2020-07-12 add some descriptions
+- 2020-07-11 add support for custom tokens
+- 2020-07-11 rearrange options menu a bit
+- 2020-07-11 add commands to disable/enable all voice and screenshots
+- 2020-07-11 remove voice level option, move voice options to top menu
+- 2020-07-11 remove never used pomodoro event
+- 2020-07-11 add submenu for voice toggles
+- 2020-07-11 add saving when % of enemies is killed
+- 2020-07-11 shorten down kill notifications
+- 2020-07-10 make major healing value configurable
+- 2020-07-09 fix saving on items that fly in the air
+- 2020-07-09 initialize counters with actual values instead of zeroes
+- 2020-07-09 update Readme
+- 2020-07-09 put handlers to a directory
+- 2020-07-09 tick objects explicitly instead of them being Thinkers: avoid object duplication
+- 2020-07-06 don't count items in hubs as dropped
+- 2020-07-06 move clock classes to a separate directory
+- 2020-07-04 disable autoautosave on titlemaps
+- 2020-07-04 make log and voice options user-scoped
+- 2020-07-04 fix console log level cvar default
+- 2020-07-04 fix: Unknown event type
+- 2020-07-04 fix emitting Time passed event after picking up stuff
+- 2020-07-04 add two new voices
+- 2020-07-04 precache sounds
+- 2020-07-04 remove random pitch shift on voice sounds
+- 2020-07-04 apply active enemies check logic to bosses too
+- 2020-07-04 fix multiple new active enemies event emission
+- 2020-07-03 move active enemies checker into a separate class
+- 2020-07-03 update espeak for better quality sounds
+- 2020-07-01 minor refactoring for some checks
+- 2020-07-01 fixed some event descriptions
+- 2020-07-01 refactor enemy-related events
+- 2020-06-30 make core class a thinker so it can be profiled for performance
+- 2020-06-29 make sound queue
+- 2020-06-29 make event descriptions shorter
+- 2020-06-27 update Readme
+- 2020-06-27 clean up build scripts
+- 2020-06-26 fix periodic save triggering after each autosave
+- 2020-06-25 move strings from menudef to language, menu cleanup
+- 2020-06-25 output all strings only through aas_log functions
+- 2020-06-25 move strings from keyconf to language lump
+- 2020-06-24 minor refactoring
+- 2020-06-24 don't trigger save timer on zero time
+- 2020-06-24 wrap one more cvar access
+- 2020-06-24 separate saver and save timer
+- 2020-06-23 make time dependency explicit
+- 2020-06-23 wrap more cvar access
+- 2020-06-23 wrap cvar access in event source
+- 2020-06-22 make all checks every tick
+- 2020-06-22 inject game_actions interface into saver and screenshooter
+- 2020-06-22 make screenshot through a dedicated class
+- 2020-06-21 code style
+- 2020-06-21 replace virtual aas_event_handler.init() with constructors
+- 2020-06-21 minor refactoring
+- 2020-06-21 make a constructor for aas_event_source
+- 2020-06-21 separate EventHandler and aas_event_source
+- 2020-06-21 more code formatting
+- 2020-06-21 get rid of OnRegister
+- 2020-06-21 fix sound files changing on each build
+- 2020-06-20 make different implementation of manual autosave
+- 2020-06-20 more code formatting
+- 2020-06-19 reformat code
+- 2020-06-19 add copyright notice to source code files
+- 2020-06-19 replace deprecated function
+- 2020-06-19 rename more classes
+- 2020-06-19 rename sound files
+- 2020-06-19 rename some classes
+- 2020-06-19 disable compression
+- 2020-06-19 move scripts to a directory
+- 2020-06-19 bump required engine version
+- 2020-06-19 rename files
+- 2020-05-05 update Readme
+- 2020-05-05 menudef cleanup
+- 2020-05-05 add a note on Hideous Destructor keys
+- 2020-05-05 make items not derived from Inventory spawn autosave tokens too
+- 2020-05-05 cleanup build script and gitignore
+- 2019-10-28 update Readme
+
+v1.3
+- 2019-10-28 fix autosave on things that replace keys
+- 2019-10-25 add gitattributes
+
+v1.2.2
+- 2019-10-25 remove unnecessary spaces in menus
+- 2019-10-25 fix: not being able to exit if autosave is in progress
+- 2019-04-11 minor readability changes
+- 2019-03-24 bump up minimal required ZScript version
+
+v1.2.1
+- 2019-03-24 add armor pickup event
+- 2019-03-24 rename ZScript files to .zs
+- 2019-03-24 add a toggle for voice on teleport
+- 2019-03-20 add global screenshots toggle to screenshot options menu
+
+v1.2
+- 2019-03-03 use of experimental game action access
+
+v1.1
+- 2019-02-18 added an option to make a screenshot on last health percent
+- 2019-02-18 fixed repeating "Time Passed" messages
+- 2019-01-19 add an option to make a screenshot on level start
+
+v1.0.2
+- 2018-12-30 fix save token spawning in not exact places
+
+v1.0.1
+- 2018-12-23 fix not being able to take a screen shot and save on a single event
+
+v1.0
+- 2018-12-08 change to GPLv3 license, update Readme
+- 2018-12-08 introduce code structure
+- 2018-12-08 add saving on QCDE keys
+- 2018-11-18 fix not saving on Final Doomer keys
+
+v0.12
+- 2018-09-29 add optional screen shots on events
+
+v0.11
+- 2018-07-28 update readme
+- 2018-07-28 add Rebel Rumble powerups
+- 2018-07-27 update README
+
+v0.10.5
+- 2018-07-27 add null checks in WorldThingSpawned event
+
+v0.10.4
+- 2018-07-21 fix sounds AGAIN
+
+v0.10.3
+- 2018-07-02 fix voice, add forgotten options, add autosave on GS Big Coins
+- 2018-07-01 make changelog pretty
+
+v0.10.2
+- 2018-07-01 remove saving right after loading from game saved by manual save
+
+v0.10.1
+- 2018-07-01 fix manual autosave, update README
+- 2018-07-01 remove debug output
+
+v0.10
+- 2018-06-24 fixed: secret found event was triggered after loading
+- 2018-06-24 fix bug with logging time passing when periodic saving is off
+
+v0.9.5
+- 2018-06-24 minor fixes
+- 2018-06-24 add add sndinfo and sound generation to gen-files.sh
+- 2018-06-22 add event types table, generate files from it
+- 2018-06-21 add interface for pomodoro, fix manual save
+- 2018-06-20 code refactoring, better structure
+- 2018-06-17 comment out debug output
+
+v0.9.4
+- 2018-06-17 minor fixes
+- 2018-06-17 add forgotten "Save on dropped items" menu toggle
+
+v0.9.3
+- 2018-06-17 fix crash with NC HUD and alternative GZDoom HUD
+- 2018-06-17 remove leftovers
+
+v0.9.2
+- 2018-06-17 remove remaining ACS code (thanks to Zhs2)
+- 2018-06-17 update sounds?
+- 2018-06-17 fix Trailblazer backpack
+
+v0.9.1
+- 2018-06-16 format sounds to ogg
+- 2018-06-16 add sounds to repo
+- 2018-06-16 update README
+- 2018-06-16 add changelog to archive
+- 2018-06-16 tune default cvar value
+
+v0.9
+- 2018-06-16 restore keyconf
+- 2018-06-16 added menudef, changed default cvar values
+- 2018-06-16 fix messages
+- 2018-06-16 fix min_save_wait
+- 2018-06-16 add voice, add cvars
+- 2018-06-16 add big healing event
+- 2018-06-16 add new armor event
+- 2018-06-15 add armor rise and drop events
+- 2018-06-14 add two health events
+- 2018-06-14 rewrite in progress
+- 2018-06-09 add mods to build script
+- 2018-05-13 add logging option
+
+v0.8.1
+- 2018-04-10 add Adventures of Square Goonades as weapon
+- 2018-04-10 set default min seconds to 10
+
+v0.8
+- 2018-04-02 update README
+- 2018-04-02 add autosave on teleport (default off)
+- 2018-03-29 add trailblazer powerups support
+
+v0.7
+- 2018-03-28 add option to save on backpack and save or not on dropped things
+
+v0.5
+- 2018-03-25 fix enabled/disabled autoautosave
+- 2018-03-25 improve and fix health/armor drop/rise settings
+- 2018-03-24 make autosave on keys, weapons, and powerups instantaneous
+
+v0.4
+- 2018-03-24 fix save on boss kill (all monsters were considered bosses)
+
+v0.3
+- 2018-03-24 add save on alert
+- 2018-03-23 add key options for quicksave and quickload
+- 2018-03-22 add option to disable save on health/armor change
+
+v0.2
+- 2018-03-22 increase max health and armor in options
+- 2018-03-22 update README
+- 2018-03-22 autosave even if things are spawned directly in inventory
+- 2018-03-22 more options
+- 2018-03-22 add toggle
+- 2018-03-22 more options
+- 2018-03-22 implement options
+- 2018-03-22 implement autosave on reaching health/armor level
+- 2018-03-22 add autosave on key pickup and manual autosave key
+- 2018-03-22 make universal save on boss kill
+- 2018-03-21 implement autosave on key pickup
+- 2018-03-21 implement autosave on BFG pickup
+- 2018-03-21 implement autosave health limit
+- 2018-03-21 implement autosave on killing cyber and spider
+- 2018-03-21 implement autosave with period
+- 2018-03-21 implement autosave on radsuit pickup
+- 2018-03-21 implement autosave on heal > 25
+- 2018-03-21 implement autosave on armor type change
+- 2018-03-21 do not autosave if 30 seconds didn't pass
+- 2018-03-21 implement autosave on secret found
+- 2018-03-21 implement autosave on all monsters killed and all items found
+
+* Options
+
+#+begin_src c :tangle ../build/Autoautosave/menudef.txt
+
+AddOptionMenu OptionsMenu
+{
+  Submenu "$AAS_OPTIONS_TITLE", aas_Options
+}
+
+OptionValue aas_log_level_options
+{
+   -1, "$AAS_LEVEL_NOTHING"
+   13, "$AAS_LEVEL_QUIET"
+  199, "$AAS_LEVEL_VERBOSE"
+  999, "$AAS_LEVEL_EVERYTHING"
+}
+
+OptionMenu aas_Options
+{
+  Title "$AAS_OPTIONS_TITLE"
+
+  StaticText ""
+  StaticText "$AAS_MUST_ALWAYS"         , Black
+  StaticText "$OPTVAL_ALWAYS"           , Black
+  Option     "$MISCMNU_EnableAutosaves" , disableAutosave, Autosave
+  Slider     "$MISCMNU_AutosaveCount"   , autosaveCount, 1, 20, 1, 0
+
+  StaticText ""
+  StaticText "$AAS_GLOBAL_TOGGLE" , 1
+  Option     "$AAS_TITLE"         , aas_enabled, OnOff
+
+  StaticText ""
+  StaticText "$AAS_CONTROLS"            , 1
+  Control    "$AAS_MANUAL_CONTROL_NAME" , aas_manual_autosave
+  Control    "$AAS_TOGGLE_CONTROL_NAME" , aas_toggle
+
+  StaticText ""
+  Submenu    "$AAS_EVENT_TUNING_TITLE"       , aas_EventTuningMenu
+  Submenu    "$AAS_REPORT_OPTIONS_TITLE"     , aas_LogOptions
+
+  StaticText ""
+  Submenu    "$AAS_INDIVIDUAL_TOGGLES_TITLE" , aas_EventTogglesMenu
+  Submenu    "$AAS_SCREENSHOT_TOGGLES_TITLE" , aas_ScreenshotOptions
+  Submenu    "$AAS_VOICE_OPTIONS_TITLE"      , aas_VoiceOptions
+}
+
+OptionMenu aas_ScreenshotOptions
+{
+  Title "$AAS_SCREENSHOT_TOGGLES_TITLE"
+
+  StaticText "$AAS_SCREENSHOTS_WARNING" , Black
+
+  StaticText ""
+  Option     "$MISCMNU_EnableScriptScreenshots" , enableScriptScreenshot , OnOff
+  StaticText "$AAS_SCREENSHOTS_SCRIPT_NOTE"     , Black
+
+  StaticText ""
+  SafeCommand "$AAS_ENABLE_ALL"        , aas_set_screenshots_on
+  SafeCommand "$AAS_DISABLE_ALL"       , aas_set_screenshots_off
+
+  StaticText ""
+  Option     "$AAS_EVENT_MANUAL"       , aas_screenshot_on_manual          , OnOff
+  Option     "$AAS_EVENT_START"        , aas_screenshot_on_level_start     , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_BOSS_ALERT"   , aas_screenshot_on_boss_alert      , OnOff
+  Option     "$AAS_EVENT_BOSS_KILL"    , aas_screenshot_on_boss_kill       , OnOff
+  Option     "$AAS_EVENT_GROUP_ALERT"  , aas_screenshot_on_group_alert     , OnOff
+  Option     "$AAS_EVENT_GROUP_KILL"   , aas_screenshot_on_group_kill      , OnOff
+  Option     "$AAS_EVENT_ALL_KILL"     , aas_screenshot_on_all_kill        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_ALL_ITEMS_FOUND", aas_screenshot_on_all_items_found , OnOff
+  Option     "$AAS_EVENT_TIME_PERIOD"  , aas_screenshot_on_time_period     , OnOff
+  Option     "$AAS_EVENT_TELEPORT"     , aas_screenshot_on_teleport        , OnOff
+  Option     "$AAS_EVENT_SECRET_FOUND" , aas_screenshot_on_secret_found    , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_HEALTH_DROP"  , aas_screenshot_on_health_drop     , OnOff
+  Option     "$AAS_EVENT_ONE_PERCENT"  , aas_screenshot_on_one_percent     , OnOff
+  Option     "$AAS_EVENT_HEALTH_RISE"  , aas_screenshot_on_health_rise     , OnOff
+  Option     "$AAS_EVENT_BIG_HEAL"     , aas_screenshot_on_big_heal        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_NEW_ARMOR"    , aas_screenshot_on_new_armor       , OnOff
+  Option     "$AAS_EVENT_ARMOR"        , aas_screenshot_on_armor           , OnOff
+  Option     "$AAS_EVENT_ARMOR_DROP"   , aas_screenshot_on_armor_drop      , OnOff
+  Option     "$AAS_EVENT_ARMOR_RISE"   , aas_screenshot_on_armor_rise      , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_POWERUP"      , aas_screenshot_on_powerup         , OnOff
+  Option     "$AAS_EVENT_WEAPON"       , aas_screenshot_on_weapon          , OnOff
+  Option     "$AAS_EVENT_KEY"          , aas_screenshot_on_key             , OnOff
+  Option     "$AAS_EVENT_BACKPACK"     , aas_screenshot_on_backpack        , OnOff
+  Option     "$AAS_EVENT_IMPORTANT"    , aas_screenshot_on_important       , OnOff
+  StaticText "$AAS_IMPORTANT_NOTE_1" , Black
+  StaticText "$AAS_IMPORTANT_NOTE_2" , Black
+
+  StaticText ""
+  Option     "$AAS_EVENT_ENEMIES_10" , aas_screenshot_on_enemies_10 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_20" , aas_screenshot_on_enemies_20 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_30" , aas_screenshot_on_enemies_30 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_40" , aas_screenshot_on_enemies_40 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_50" , aas_screenshot_on_enemies_50 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_60" , aas_screenshot_on_enemies_60 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_70" , aas_screenshot_on_enemies_70 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_80" , aas_screenshot_on_enemies_80 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_90" , aas_screenshot_on_enemies_90 , OnOff
+}
+
+OptionMenu aas_LogOptions
+{
+  Title "$AAS_REPORT_OPTIONS_TITLE"
+
+  StaticText ""
+  Option     "$AAS_LOG_CONSOLE" , aas_console_log_level , aas_log_level_options
+  Option     "$AAS_LOG_SCREEN"  , aas_screen_level      , aas_log_level_options
+
+  StaticText ""
+  StaticText "$AAS_LOG_QUIET_NOTE_1"   , Black
+  StaticText "$AAS_LOG_QUIET_NOTE_2"   , Black
+  StaticText ""
+  StaticText "$AAS_LOG_VERBOSE_NOTE_1" , Black
+  StaticText "$AAS_LOG_VERBOSE_NOTE_2" , Black
+
+  StaticText ""
+  Option     "$AAS_PRINT_COLOR" , aas_print_color , TextColors
+}
+
+OptionMenu aas_VoiceOptions
+{
+  Title "$AAS_VOICE_OPTIONS_TITLE"
+
+  Slider     "$AAS_VOICE_VOLUME"       , aas_voice_volume, 1, 10, 1, 0
+
+  StaticText ""
+  SafeCommand "$AAS_ENABLE_ALL"        , aas_set_voice_on
+  SafeCommand "$AAS_DISABLE_ALL"       , aas_set_voice_off
+
+  StaticText ""
+  Option     "$AAS_EVENT_MANUAL"       , aas_voice_on_manual          , OnOff
+  Option     "$AAS_EVENT_START"        , aas_voice_on_level_start     , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_BOSS_ALERT"   , aas_voice_on_boss_alert      , OnOff
+  Option     "$AAS_EVENT_BOSS_KILL"    , aas_voice_on_boss_kill       , OnOff
+  Option     "$AAS_EVENT_GROUP_ALERT"  , aas_voice_on_group_alert     , OnOff
+  Option     "$AAS_EVENT_GROUP_KILL"   , aas_voice_on_group_kill      , OnOff
+  Option     "$AAS_EVENT_ALL_KILL"     , aas_voice_on_all_kill        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_ALL_ITEMS_FOUND", aas_voice_on_all_items_found , OnOff
+  Option     "$AAS_EVENT_TIME_PERIOD"  , aas_voice_on_time_period     , OnOff
+  Option     "$AAS_EVENT_TELEPORT"     , aas_voice_on_teleport        , OnOff
+  Option     "$AAS_EVENT_SECRET_FOUND" , aas_voice_on_secret_found    , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_HEALTH_DROP"  , aas_voice_on_health_drop     , OnOff
+  Option     "$AAS_EVENT_ONE_PERCENT"  , aas_voice_on_one_percent     , OnOff
+  Option     "$AAS_EVENT_HEALTH_RISE"  , aas_voice_on_health_rise     , OnOff
+  Option     "$AAS_EVENT_BIG_HEAL"     , aas_voice_on_big_heal        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_NEW_ARMOR"    , aas_voice_on_new_armor       , OnOff
+  Option     "$AAS_EVENT_ARMOR"        , aas_voice_on_armor           , OnOff
+  Option     "$AAS_EVENT_ARMOR_DROP"   , aas_voice_on_armor_drop      , OnOff
+  Option     "$AAS_EVENT_ARMOR_RISE"   , aas_voice_on_armor_rise      , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_POWERUP"      , aas_voice_on_powerup         , OnOff
+  Option     "$AAS_EVENT_WEAPON"       , aas_voice_on_weapon          , OnOff
+  Option     "$AAS_EVENT_KEY"          , aas_voice_on_key             , OnOff
+  Option     "$AAS_EVENT_BACKPACK"     , aas_voice_on_backpack        , OnOff
+  Option     "$AAS_EVENT_IMPORTANT"    , aas_voice_on_important       , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_ENEMIES_10" , aas_voice_on_enemies_10 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_20" , aas_voice_on_enemies_20 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_30" , aas_voice_on_enemies_30 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_40" , aas_voice_on_enemies_40 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_50" , aas_voice_on_enemies_50 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_60" , aas_voice_on_enemies_60 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_70" , aas_voice_on_enemies_70 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_80" , aas_voice_on_enemies_80 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_90" , aas_voice_on_enemies_90 , OnOff
+}
+
+OptionMenu aas_EventTuningMenu
+{
+  Title "$AAS_EVENT_TUNING_TITLE"
+
+  StaticText ""
+  Slider     "$AAS_MIN_BOSS_HEALTH"       , aas_min_boss_health , 0, 20000, 200, 0
+  Slider     "$AAS_GROUP_NUMBER"          , aas_group_number    , 1, 50, 1, 0
+  Slider     "$AAS_BOSS_GROUP_NUMBER"     , aas_boss_group_number, 1, 50, 1, 0
+
+  StaticText ""
+  Slider     "$AAS_HEALTH_LIMIT"          , aas_health_limit    , 0, 500, 5, 0
+  Slider     "$AAS_BIG_HEAL_SIZE"         , aas_big_heal            , 5, 200, 5, 0
+
+  StaticText ""
+  TextField  "$AAS_LOW_HEALTH_THRESHOLD"  , aas_health_threshold_down
+  TextField  "$AAS_HIGH_HEALTH_THRESHOLD" , aas_health_threshold_up
+  TextField  "$AAS_LOW_ARMOR_THRESHOLD"   , aas_armor_threshold_down
+  TextField  "$AAS_HIGH_ARMOR_THRESHOLD"  , aas_armor_threshold_up
+
+  StaticText ""
+  Slider     "$AAS_MIN_SAVE_WAIT"         , aas_min_save_wait   , 0, 120, 5, 0
+  Slider     "$AAS_PERIOD"                , aas_autosave_period , 30, 600, 30, 0
+
+  StaticText ""
+  Option     "$AAS_SAVE_ON_DROPPED"       , aas_save_on_dropped , OnOff
+  StaticText "$AAS_SAVE_ON_DROPPED_NOTE"  , Black
+}
+
+OptionMenu aas_EventTogglesMenu
+{
+  Title "$AAS_INDIVIDUAL_TOGGLES_TITLE"
+
+  Option     "$AAS_EVENT_BOSS_ALERT"   , aas_save_on_boss_alert      , OnOff
+  Option     "$AAS_EVENT_BOSS_KILL"    , aas_save_on_boss_kill       , OnOff
+  Option     "$AAS_EVENT_GROUP_ALERT"  , aas_save_on_group_alert     , OnOff
+  Option     "$AAS_EVENT_GROUP_KILL"   , aas_save_on_group_kill      , OnOff
+  Option     "$AAS_EVENT_ALL_KILL"     , aas_save_on_all_kill        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_ALL_ITEMS_FOUND", aas_save_on_all_items_found , OnOff
+  Option     "$AAS_EVENT_TIME_PERIOD"  , aas_save_on_time_period     , OnOff
+  Option     "$AAS_EVENT_TELEPORT"     , aas_save_on_teleport        , OnOff
+  Option     "$AAS_EVENT_SECRET_FOUND" , aas_save_on_secret_found    , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_HEALTH_DROP"  , aas_save_on_health_drop     , OnOff
+  Option     "$AAS_EVENT_HEALTH_RISE"  , aas_save_on_health_rise     , OnOff
+  Option     "$AAS_EVENT_BIG_HEAL"     , aas_save_on_big_heal        , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_NEW_ARMOR"    , aas_save_on_new_armor       , OnOff
+  Option     "$AAS_EVENT_ARMOR"        , aas_save_on_armor           , OnOff
+  Option     "$AAS_EVENT_ARMOR_DROP"   , aas_save_on_armor_drop      , OnOff
+  Option     "$AAS_EVENT_ARMOR_RISE"   , aas_save_on_armor_rise      , OnOff
+
+  StaticText ""
+  Option     "$AAS_EVENT_POWERUP"      , aas_save_on_powerup         , OnOff
+  Option     "$AAS_EVENT_WEAPON"       , aas_save_on_weapon          , OnOff
+  Option     "$AAS_EVENT_KEY"          , aas_save_on_key             , OnOff
+  Option     "$AAS_EVENT_BACKPACK"     , aas_save_on_backpack        , OnOff
+  Option     "$AAS_EVENT_IMPORTANT"    , aas_save_on_important       , OnOff
+  StaticText "$AAS_IMPORTANT_NOTE_1"   , Black
+  StaticText "$AAS_IMPORTANT_NOTE_2"   , Black
+
+  StaticText ""
+  Option     "$AAS_EVENT_ENEMIES_10" , aas_save_on_enemies_10 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_20" , aas_save_on_enemies_20 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_30" , aas_save_on_enemies_30 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_40" , aas_save_on_enemies_40 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_50" , aas_save_on_enemies_50 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_60" , aas_save_on_enemies_60 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_70" , aas_save_on_enemies_70 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_80" , aas_save_on_enemies_80 , OnOff
+  Option     "$AAS_EVENT_ENEMIES_90" , aas_save_on_enemies_90 , OnOff
+}
+#+end_src
+
+* Events
+
+#+name: events-table
+|   N | Enum            | Default | Text                   |
+|-----+-----------------+---------+------------------------|
+|   0 | all_kill        | true    | All enemies down       |
+|   1 | boss_kill       | true    | Boss down              |
+|   2 | group_kill      | false   | No active enemies      |
+|   3 | group_alert     | false   | New active enemies     |
+|   4 | boss_alert      | true    | Boss alerted           |
+|   5 | all_items_found | true    | All items found        |
+|   7 | time_period     | false   | Time passed            |
+|   8 | teleport        | false   | Moved to another place |
+|   9 | manual          | true    | Manual save            |
+|  11 | important       | true    | Something rare!        |
+|  12 | level_start     | false   | Level started          |
+|  13 | one_percent     | false   | Last health percent!   |
+|  14 | enemies_10      | false   | 10% down               |
+|  15 | enemies_20      | false   | 20% down               |
+|  16 | enemies_30      | false   | 30% down               |
+|  17 | enemies_40      | false   | 40% down               |
+|  18 | enemies_50      | false   | 50% down               |
+|  19 | enemies_60      | false   | 60% down               |
+|  20 | enemies_70      | false   | 70% down               |
+|  21 | enemies_80      | false   | 80% down               |
+|  22 | enemies_90      | false   | 90% down               |
+|-----+-----------------+---------+------------------------|
+| 100 | health_drop     | false   | Health low             |
+| 101 | health_rise     | false   | Health high            |
+| 102 | armor_drop      | false   | Armor low              |
+| 103 | armor_rise      | false   | Armor high             |
+| 104 | secret_found    | true    | Secret found           |
+|-----+-----------------+---------+------------------------|
+| 200 | powerup         | true    | Powerup found          |
+| 201 | weapon          | true    | Weapon found           |
+| 202 | key             | true    | Key found              |
+| 203 | backpack        | true    | Backpack found         |
+| 204 | new_armor       | true    | New armor              |
+| 205 | big_heal        | true    | Major healing          |
+| 206 | armor           | false   | Armor found            |
+
+#+name: list-events
+#+begin_src elisp :var format-string="" :var delimiter="\n" :var table=events-table :exports none
+
+(mapconcat
+ (lambda (row) (format format-string (nth 0 row) (nth 1 row) (nth 2 row) (nth 3 row)))
+ (cdr table)
+ delimiter)
+#+end_src
+
+#+begin_src js :tangle ../build/Autoautosave/events.json
+{
+  <<list-events("\"%1$s\": \"%4$s\"", ",\n")>>
+}
+#+end_src
+
+* Cvars
+
+#+begin_src c :tangle ../build/Autoautosave/cvarinfo.txt
+
+// Global toggle
+
+server bool aas_enabled = true;
+
+// Event tuning
+
+server int  aas_min_boss_health = 2000;
+server int  aas_health_limit    = 25;
+server int  aas_min_save_wait   = 10;  // seconds
+server int  aas_autosave_period = 120; // seconds
+server int  aas_group_number    = 10;
+server int  aas_boss_group_number = 1;
+
+server int  aas_health_threshold_down = 50;
+server int  aas_health_threshold_up   = 100;
+server int  aas_armor_threshold_down  = 25;
+server int  aas_armor_threshold_up    = 100;
+
+server bool aas_save_on_dropped = false;
+
+server int aas_big_heal = 50;
+
+// Logs and voice
+
+//  -1 - nothing;
+//  99 - quiet:   enemies, time, teleport, items;
+// 199 - verbose: enemies, time, teleport, items, health, armor;
+// 999 - everything.
+user int aas_console_log_level = -1;
+user int aas_screen_level      = -1;
+
+user int aas_voice_volume = 1;
+
+user int aas_print_color = 0;
+
+// Cvars that set if saving or not
+<<list-events("server bool aas_save_on_%2$-16s \= %3$s;")>>
+
+// Cvars that set if taking a screenshot or not
+<<list-events("server bool aas_screenshot_on_%2$-16s \= false;")>>
+
+// Cvars that set if making a voice announcement or not
+<<list-events("server bool aas_voice_on_%2$-16s \= true;")>>
+#+end_src
+
+* Keys
+
+#+begin_src c :tangle ../build/Autoautosave/keyconf.txt
+
+// Aliases
+
+Alias aas_set_voice_on  "<<list-events("aas_voice_on_%2$s 1", "; ")>>"
+Alias aas_set_voice_off "<<list-events("aas_voice_on_%2$s 0", "; ")>>"
+
+Alias aas_set_screenshots_on  "<<list-events("aas_screenshot_on_%2$s 1", "; ")>>"
+Alias aas_set_screenshots_off "<<list-events("aas_screenshot_on_%2$s 0", "; ")>>"
+
+// Keys
+
+AddKeySection $AAS_TITLE AutoautosaveKeys
+
+Alias aas_manual_autosave "netevent aas_manual_save:9"
+AddMenuKey $AAS_MANUAL_CONTROL_NAME aas_manual_autosave
+
+Alias aas_on  "aas_enabled 1; netevent aas_log:AAS_TOGGLE_ON_MESSAGE"
+Alias aas_off "aas_enabled 0; netevent aas_log:AAS_TOGGLE_OFF_MESSAGE"
+Alias aas_toggle  "test $aas_enabled aas_off aas_on"
+AddMenuKey $AAS_TOGGLE_CONTROL_NAME aas_toggle
+#+end_src
+
+* Strings
+
+** enu
+
+#+begin_src c :tangle ../build/Autoautosave/language.txt
+
+[enu default]
+
+AAS_TITLE = "Autoautosave";
+
+AAS_MANUAL_CONTROL_NAME = "Manual autosave";
+AAS_TOGGLE_CONTROL_NAME = "Toggle Autoautosave";
+
+AAS_TOGGLE_ON_MESSAGE  = "Autoautosave enabled";
+AAS_TOGGLE_OFF_MESSAGE = "Autoautosave disabled";
+
+AAS_LEVEL_NOTHING     = "nothing";
+AAS_LEVEL_QUIET       = "quiet";
+AAS_LEVEL_VERBOSE     = "verbose";
+AAS_LEVEL_EVERYTHING  = "everything";
+
+AAS_OPTIONS_TITLE = "Autoautosave \ct⍗";
+
+AAS_MUST_ALWAYS   = "This must be set to";
+AAS_GLOBAL_TOGGLE = "Global toggle";
+AAS_CONTROLS      = "Controls";
+
+AAS_EVENT_TUNING_TITLE       = "Event Options";
+AAS_REPORT_OPTIONS_TITLE     = "Log Options";
+
+AAS_INDIVIDUAL_TOGGLES_TITLE = "Autosave Toggles";
+AAS_SCREENSHOT_TOGGLES_TITLE = "Screenshot Toggles";
+AAS_VOICE_OPTIONS_TITLE      = "Voice Toggles";
+
+AAS_SCREENSHOTS_WARNING = "Warning: too many screenshot can use up disk space.";
+
+AAS_SCREENSHOTS_SCRIPT_NOTE = "This must be set to \"On\".";
+
+AAS_EVENT_MANUAL = "On manual autosave";
+AAS_EVENT_LEVEL_START  = "On level start";
+
+AAS_EVENT_ALL_KILL     = "All enemies are eliminated";
+AAS_EVENT_BOSS_KILL    = "Boss is eliminated";
+AAS_EVENT_GROUP_KILL   = "No more active enemies (group kill)";
+
+AAS_EVENT_GROUP_ALERT  = "New active enemies (group alert)";
+AAS_EVENT_BOSS_ALERT   = "Boss is alerted";
+
+AAS_EVENT_ALL_ITEMS_FOUND = "All items are found";
+AAS_EVENT_TIME_PERIOD  = "Time has passed";
+AAS_EVENT_TELEPORT     = "You are moved to another place";
+
+AAS_EVENT_HEALTH_DROP  = "Health drops low";
+AAS_EVENT_ONE_PERCENT  = "Health drops to 1%";
+AAS_EVENT_HEALTH_RISE  = "Health rises high";
+AAS_EVENT_ARMOR_DROP   = "Armor drops low";
+AAS_EVENT_ARMOR_RISE   = "Armor rises high";
+AAS_EVENT_SECRET_FOUND = "Secret is found";
+
+AAS_EVENT_POWERUP      = "Powerup is found";
+AAS_EVENT_WEAPON       = "Weapon is found";
+AAS_EVENT_KEY          = "Key is found";
+AAS_EVENT_ARMOR        = "Armor is found";
+AAS_EVENT_BACKPACK     = "Backpack is found";
+AAS_EVENT_IMPORTANT    = "Important item is found";
+AAS_IMPORTANT_NOTE_1   = "Important item list currently includes:";
+AAS_IMPORTANT_NOTE_2   = "The Golden Souls Big Coins.";
+AAS_EVENT_NEW_ARMOR    = "New armor type";
+AAS_EVENT_BIG_HEAL     = "Major healing";
+
+AAS_LOG_CONSOLE = "Log to console";
+AAS_LOG_SCREEN  = "Log to screen";
+
+AAS_PRINT_COLOR = "Log color";
+
+AAS_LOG_QUIET_NOTE_1   = "Quiet:";
+AAS_LOG_QUIET_NOTE_2   = "enemies, time, teleport, items.";
+AAS_LOG_VERBOSE_NOTE_1 = "Verbose:";
+AAS_LOG_VERBOSE_NOTE_2 = "enemies, time, teleport, items, % kills, health, armor.";
+
+AAS_MIN_BOSS_HEALTH   = "Enemy is a boss when health is at least";
+AAS_GROUP_NUMBER      = "Group is at least N enemies";
+AAS_BOSS_GROUP_NUMBER = "Boss group is at least N enemies";
+AAS_HEALTH_LIMIT      = "Don't save when health is less than";
+AAS_BIG_HEAL_SIZE     = "Major healing amount";
+
+AAS_LOW_HEALTH_THRESHOLD  = "Low health threshold";
+AAS_HIGH_HEALTH_THRESHOLD = "High health threshold";
+AAS_LOW_ARMOR_THRESHOLD   = "Low armor threshold";
+AAS_HIGH_ARMOR_THRESHOLD  = "High armor threshold";
+
+AAS_MIN_SAVE_WAIT = "Don't save until seconds passed";
+AAS_PERIOD        = "Autosave every N seconds";
+
+AAS_SAVE_ON_DROPPED      = "Save on dropped items";
+AAS_SAVE_ON_DROPPED_NOTE = "Also picking up Hideous Destructor keys.";
+
+AAS_VOICE_VOLUME  = "Voice volume";
+
+AAS_EVENT_ENEMIES_10 = "Enemies 10% down";
+AAS_EVENT_ENEMIES_20 = "Enemies 20% down";
+AAS_EVENT_ENEMIES_30 = "Enemies 30% down";
+AAS_EVENT_ENEMIES_40 = "Enemies 40% down";
+AAS_EVENT_ENEMIES_50 = "Enemies 50% down";
+AAS_EVENT_ENEMIES_60 = "Enemies 60% down";
+AAS_EVENT_ENEMIES_70 = "Enemies 70% down";
+AAS_EVENT_ENEMIES_80 = "Enemies 80% down";
+AAS_EVENT_ENEMIES_90 = "Enemies 90% down";
+
+AAS_ENABLE_ALL  = "Enable all";
+AAS_DISABLE_ALL = "Disable all";
+
+AAS_EVENT_MANUALSAVE = "Manual save";
+AAS_EVENT_RAREITEMGET = "Something rare!";
+AAS_EVENT_LEVELSTARTED = "Level started";
+#+end_src
+
+** pt
+
+# spellchecker:off
+
+#+begin_src c :tangle ../build/Autoautosave/language.txt
+
+// SPDX-FileCopyrightText: © 2022 generic name guy
+
+[pt]
+
+AAS_MANUAL_CONTROL_NAME = "Autosave manual";
+AAS_TOGGLE_CONTROL_NAME = "Ligar Autoautosave";
+
+AAS_TOGGLE_ON_MESSAGE  = "Autoautosave ligado";
+AAS_TOGGLE_OFF_MESSAGE = "Autoautosave desligado";
+
+AAS_LEVEL_NOTHING     = "nada";
+AAS_LEVEL_QUIET       = "quieto";
+AAS_LEVEL_VERBOSE     = "verboso";
+AAS_LEVEL_EVERYTHING  = "tudo";
+
+AAS_MUST_ALWAYS   = "Isto deve estar definido como";
+AAS_GLOBAL_TOGGLE = "Ligar Mod";
+AAS_CONTROLS      = "Controles";
+
+AAS_EVENT_TUNING_TITLE       = "Opções de Evento";
+AAS_REPORT_OPTIONS_TITLE     = "Opções de registramento";
+
+AAS_INDIVIDUAL_TOGGLES_TITLE = "Opções de Autosave";
+AAS_SCREENSHOT_TOGGLES_TITLE = "Opções de Captura de Tela";
+AAS_VOICE_OPTIONS_TITLE      = "Opções de Voz";
+
+AAS_SCREENSHOTS_WARNING = "Aviso: Muitas capturas de tela podem usar espaço no disco.";
+
+AAS_SCREENSHOTS_SCRIPT_NOTE = "Isto deve estar definido como \"Sim\".";
+
+AAS_EVENT_MANUAL = "No autosave manual";
+AAS_EVENT_START  = "No começo do nível";
+
+AAS_EVENT_ALL_KILL     = "Todos os inimigos foram eliminados";
+AAS_EVENT_BOSS_KILL    = "O chefão foi eliminado";
+AAS_EVENT_GROUP_KILL   = "Sem mais inimigos ativos (abate em grupo)";
+
+AAS_EVENT_GROUP_ALERT  = "Novos inimigos ativos (alerta de grupo)";
+AAS_EVENT_BOSS_ALERT   = "O chefão foi alertado";
+
+AAS_EVENT_ALL_ITEMS_FOUND = "Todos os ítens foram descobertos";
+AAS_EVENT_TIME_PERIOD  = "Tempo movido";
+AAS_EVENT_TELEPORT     = "Você foi movido para outro lugar";
+
+AAS_EVENT_HEALTH_DROP  = "Sua vida caiu baixo";
+AAS_EVENT_ONE_PERCENT  = "Sua vida caiu para 1%";
+AAS_EVENT_HEALTH_RISE  = "Sua vida subiu alto";
+AAS_EVENT_ARMOR_DROP   = "Sua armadura caiu baixo";
+AAS_EVENT_ARMOR_RISE   = "Sua armadura subiu alto";
+AAS_EVENT_SECRET_FOUND = "Um segredo foi encontrado";
+
+AAS_EVENT_POWERUP      = "Um poder foi encontrado";
+AAS_EVENT_WEAPON       = "Uma arma foi encontrada";
+AAS_EVENT_KEY          = "Uma chave foi encontrada";
+AAS_EVENT_ARMOR        = "Armadura foi encontrada";
+AAS_EVENT_BACKPACK     = "Uma mochila foi encontrada";
+AAS_EVENT_IMPORTANT    = "Um item importante foi encontrado";
+AAS_IMPORTANT_NOTE_1   = "Lista de ítens importantes inclui:";
+AAS_IMPORTANT_NOTE_2   = "Moedas grandes do The Golden Souls.";
+AAS_EVENT_NEW_ARMOR    = "Novo tipo de armadura";
+AAS_EVENT_BIG_HEAL     = "Grande cura";
+
+AAS_LOG_CONSOLE = "Registrar no Console";
+AAS_LOG_SCREEN  = "Registrar na Tela";
+
+AAS_PRINT_COLOR = "Cor do registro";
+
+AAS_LOG_QUIET_NOTE_1   = "Quieto:";
+AAS_LOG_QUIET_NOTE_2   = "Inimigos, tempo, teleporte, ítens.";
+AAS_LOG_VERBOSE_NOTE_1 = "Verboso:";
+AAS_LOG_VERBOSE_NOTE_2 = "Inimigos, tempo, teleporte, ítens, % de vítmas, vida, armadura.";
+
+AAS_MIN_BOSS_HEALTH   = "Inimigo é um chefão quando a vida for";
+AAS_GROUP_NUMBER      = "Grupo é pelo menos N inimigos";
+AAS_BOSS_GROUP_NUMBER = "Grupo de chefão é pelo menos N inimigos";
+AAS_HEALTH_LIMIT      = "Não salve quando a vida for menos de";
+AAS_BIG_HEAL_SIZE     = "Tanto de cura grande";
+
+AAS_LOW_HEALTH_THRESHOLD  = "Cota de vida baoxa";
+AAS_HIGH_HEALTH_THRESHOLD = "Cota de vida alta";
+AAS_LOW_ARMOR_THRESHOLD   = "Cota de armadura baixa";
+AAS_HIGH_ARMOR_THRESHOLD  = "Cota de armadura alta";
+
+AAS_MIN_SAVE_WAIT = "Não salve até segundos passados";
+AAS_PERIOD        = "Autosalvar todos N segundos";
+
+AAS_SAVE_ON_DROPPED      = "Salvar nos ítens derrubados";
+AAS_SAVE_ON_DROPPED_NOTE = "Também pegando chaves do Hideous Destructor";
+
+AAS_VOICE_VOLUME  = "Volume de voz";
+
+AAS_EVENT_ENEMIES_10 = "Inimigos 10% mortos";
+AAS_EVENT_ENEMIES_20 = "Inimigos 20% mortos";
+AAS_EVENT_ENEMIES_30 = "Inimigos 30% mortos";
+AAS_EVENT_ENEMIES_40 = "Inimigos 40% mortos";
+AAS_EVENT_ENEMIES_50 = "Inimigos 50% mortos";
+AAS_EVENT_ENEMIES_60 = "Inimigos 60% mortos";
+AAS_EVENT_ENEMIES_70 = "Inimigos 70% mortos";
+AAS_EVENT_ENEMIES_80 = "Inimigos 80% mortos";
+AAS_EVENT_ENEMIES_90 = "Inimigos 90% mortos";
+
+AAS_ENABLE_ALL  = "Habilitar todos";
+AAS_DISABLE_ALL = "Desabilitar todos";
+
+AAS_EVENT_MANUALSAVE = "Save manual";
+AAS_EVENT_RAREITEMGET = "Algo raro!";
+AAS_EVENT_LEVELSTARTED = "Nível começado";
+#+end_src
+
+# spellchecker:on
+
+* Sounds
+
+#+begin_src c :tangle ../build/Autoautosave/sndinfo.txt
+
+$pitchshiftrange 0
+
+<<list-events("aas/voice%s \"sounds/aas%1$s.ogg\"")>>
+#+end_src
+
+* Source
+
+** Event
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event.zs
+
+class aas_event
+{
+  enum _
+  {
+    <<list-events("%2$-16s \= %1$3s,")>>
+  }
+
+  static string message(int type)
+  {
+    switch (type)
+    {
+      <<list-events("case %2$-16s: return StringTable.localize(\"$aas_event_%2$s\");")>>
+      default:
+        aas_log.error(string.format("unknown event: %d", type));
+        return "Unknown event type.";
+    }
+  }
+
+  static string toggle_name(int type)
+  {
+    switch (type)
+    {
+      <<list-events("case %2$-16s : return \"aas_save_on_%2$s\";")>>
+      default:
+        aas_log.error(string.format("unknown event: %d", type));
+        return "aas_unknown";
+    }
+  }
+
+  static string screenshot_toggle_name(int type)
+  {
+    switch (type)
+    {
+      <<list-events("case %2$-16s: return \"aas_screenshot_on_%2$s\";")>>
+      default:
+        aas_log.error(string.format("unknown event: %d", type));
+        return "Unknown event type.";
+    }
+  }
+
+  static string voice_toggle_name(int type)
+  {
+    switch (type)
+    {
+      <<list-events("case %2$-16s: return \"aas_voice_on_%2$s\";")>>
+      default:
+        aas_log.error(string.format("unknown event: %d", type));
+        return "Unknown event type.";
+    }
+  }
+}
+#+end_src
+
+*** Test
+
+#+begin_src c :noweb-ref tests
+
+class aas_event_test : Clematis
+{
+  override void testSuites()
+  {
+    describe("Testing event messages");
+    <<list-events("it(\"%2$s has string\", Assert(aas_event.message(%1$s) != \"aas_event_%2$s\"));")>>
+    endDescribe();
+  }
+}
+#+end_src
+
+#+begin_src c :noweb-ref tests-call
+netevent test:aas_event_test
+#+end_src
+
+** Precache
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_precache_sounds.zs
+
+class aas_precache_sounds
+{
+  static void precache_sounds()
+  {
+    <<list-events("markSound(\"aas/voice%1$s\");")>>
+  }
+}
+#+end_src
+
+** Cvar
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_cvar.zs
+
+// This class provides access to a user or server Cvar.
+//
+// Accessing Cvars through this class is faster because calling Cvar.GetCvar()
+// is costly. This class caches the result of Cvar.GetCvar() and handles
+// loading a savegame.
+class aas_cvar
+{
+  static aas_cvar of(string name, PlayerInfo player = NULL)
+  {
+    let result = new("aas_cvar");
+
+    result._player = player;
+    result._name   = name;
+    result._cvar   = NULL;
+
+    result.load();
+
+    return result;
+  }
+
+  string get_string() { if (_cvar == NULL) load(); return _cvar.GetString(); }
+  bool   get_bool()   { if (_cvar == NULL) load(); return _cvar.GetInt();    }
+  int    get_int()    { if (_cvar == NULL) load(); return _cvar.GetInt();    }
+  double get_double() { if (_cvar == NULL) load(); return _cvar.GetFloat();  }
+
+  private void load()
+  {
+    _cvar = Cvar.GetCvar(_name, _player);
+
+    if (_cvar == NULL)
+    {
+      aas_log.error(string.Format("cvar %s not found", _name));
+    }
+  }
+
+  private PlayerInfo     _player;
+  private string         _name;
+  private transient Cvar _cvar;
+}
+#+end_src
+
+** Event source
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event_source.zs
+
+// This class represents the core of Autoautosave.
+class aas_event_source play
+{
+  static aas_event_source of()
+  {
+    let result = new("aas_event_source");
+
+    let last_save_time = aas_timestamp.of();
+
+    result._clock      = aas_level_clock.of();
+    result._scheduler  = aas_game_action_scheduler.of();
+    result._voice      = aas_voice.of();
+
+    array<aas_event_handler> handlers;
+    handlers.push(aas_saver .of(result._scheduler, result._clock, last_save_time));
+    handlers.push(aas_logger.of(aas_log_function.of(), "aas_console_log_level"));
+    handlers.push(aas_logger.of(aas_print_function.of(), "aas_screen_level"));
+    handlers.push(result._voice);
+    handlers.push(aas_screenshot_maker.of(result._scheduler));
+    result._handler = aas_event_handlers.of(handlers);
+
+    result._save_timer = aas_save_timer.of(result._clock, last_save_time);
+
+    result._old_kill_count = level.killed_monsters;
+    result._old_item_count = level.found_items;
+
+    PlayerInfo player_info  = players[consolePlayer];
+    let player = PlayerPawn(player_info.mo);
+    result._old_pos    = player.Pos;
+    result._old_health = player.Health;
+    result._old_armor  = player.CountInv("BasicArmor");
+    result._old_secret_count = player_info.secretCount;
+
+    BasicArmor armor = BasicArmor(player.FindInventory("BasicArmor"));
+    if (armor) { result._old_armor_save = armor.SavePercent; }
+    else       { result._old_armor_save = 0.0; }
+
+    result._save_on_dropped = aas_cvar.of("aas_save_on_dropped");
+    result._health_down     = aas_cvar.of("aas_health_threshold_down");
+    result._health_up       = aas_cvar.of("aas_health_threshold_up");
+    result._armor_down      = aas_cvar.of("aas_armor_threshold_down");
+    result._armor_up        = aas_cvar.of("aas_armor_threshold_up");
+    result._major_healing   = aas_cvar.of("aas_big_heal");
+
+    let active_enemies_counter = aas_active_enemies_counter.of();
+    let enemies_group_cvar     = aas_cvar.of("aas_group_number");
+    result._active_enemies_checker = aas_active_enemies_checker.of( result._handler
+                                                                  , active_enemies_counter
+                                                                  , enemies_group_cvar
+                                                                  , aas_event.group_alert
+                                                                  , aas_event.group_kill
+                                                                  );
+    let active_bosses_counter = aas_active_bosses_counter.of();
+    let bosses_group_cvar = aas_cvar.of("aas_boss_group_number");
+    result._active_bosses_checker = aas_active_enemies_checker.of( result._handler
+                                                                 , active_bosses_counter
+                                                                 , bosses_group_cvar
+                                                                 , aas_event.boss_alert
+                                                                 , aas_event.boss_kill
+                                                                 );
+
+    return result;
+  }
+
+  void on_event(int event_type)
+  {
+    _handler.on_event(event_type);
+  }
+
+  void tick()
+  {
+    if (_save_timer.is_periodic_save() && players[consolePlayer].mo.health > 0)
+    {
+      on_event(aas_event.time_period);
+    }
+
+    _voice.tick();
+    _active_enemies_checker.tick();
+    _active_bosses_checker.tick();
+
+    check_secrets();
+    check_all_found();
+    check_player_events();
+
+    check_all_killed();
+    check_kill_percents();
+    _old_kill_count = level.killed_monsters;
+
+    _scheduler.tick();
+  }
+
+  void on_thing_spawned(Actor item)
+  {
+    string class_name = item.getClassName();
+
+    if (class_name == "aas_token") { return; }
+
+    if (class_name.left(11) == "aas_pickup_")
+    {
+      aas_token(Actor.Spawn("aas_token", item.pos)).init(aas_event.important, _handler, item);
+      return;
+    }
+
+    if (class_name.left(12) == "aas_instant_")
+    {
+      on_event(aas_event.important);
+      return;
+    }
+
+    if (!_save_on_dropped.get_bool() && is_loading_finished()) { return; }
+
+    static const string saving_item_classes[] =
+    {
+      "Key",             // keys
+      "FDKeyBase",
+      "QCRedCard",
+      "QCYellowCard",
+      "QCBlueCard",
+      "QCRedSkull",
+      "QCYellowSkull",
+      "QCBlueSkull",
+      "Weapon",          // weapons
+      "Goonades",
+      "SPAMMineItem",
+      "PowerupGiver",    // powerups
+      "TBPowerupBase",
+      "MapRevealer",
+      "Berserk",
+      "Speeders",
+      "IcarusMk8",
+      "ProtectoBand",
+      "BigSPAMMine",
+      "GuardBoi",
+      "BadassGlasses",
+      "Mapisto",
+      "LovebirdTag",
+      "BigScorePresent",
+      "BackpackItem",    // backpacks
+      "Backpack2",
+      "BlueprintItem",
+      "NetronianBackpack",
+      "Big_Coin_pickup", // other
+      "BasicArmorPickup" // armor
+    };
+    static const int types[] =
+    {
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.key,
+      aas_event.weapon,
+      aas_event.weapon,
+      aas_event.weapon,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.powerup,
+      aas_event.backpack,
+      aas_event.backpack,
+      aas_event.backpack,
+      aas_event.backpack,
+      aas_event.important,
+      aas_event.armor
+    };
+
+    int n_saving_items_classes = saving_item_classes.size();
+    if (n_saving_items_classes != types.size())
+    {
+      aas_log.error("invalid saving items");
+    }
+
+    Actor player = players[consolePlayer].mo;
+    Actor owner  = (item is "Inventory") ? Inventory(item).owner : NULL;
+
+    for (int i = 0; i < n_saving_items_classes; ++i)
+    {
+      string saving_class = saving_item_classes[i];
+
+      if (!(item is saving_class || Actor.GetReplacee(class_name) is saving_class))
+      {
+        continue;
+      }
+
+      if (owner == NULL)
+      {
+        aas_token(Actor.Spawn("aas_token", item.pos)).init(types[i], _handler, item);
+      }
+      else if (owner == player && is_loading_finished())
+      {
+        // don't save on obtaining starting weapons
+        string netronianBackpack = "NetronianBackpack";
+        class<Actor> netronianBackpackClass = netronianBackpack;
+
+        // don't save on BackpackItem for Netronian Chaos, save on
+        // Netronian Backpack instead
+        if (saving_class == "BackpackItem" && netronianBackpackClass)
+        {
+          return;
+        }
+
+        on_event(types[i]);
+      }
+
+      break;
+    }
+  }
+
+  private void check_player_events()
+  {
+    PlayerInfo player = players[consolePlayer];
+
+    int health = player.mo.health;
+    if (health <= 0) return;
+
+    {
+      vector3 pos = player.mo.Pos;
+      float x_diff = (pos.x - _old_pos.x);
+      float y_diff = (pos.y - _old_pos.y);
+      float dist = x_diff * x_diff + y_diff * y_diff;
+      if (dist > 2000000.0)
+      {
+        aas_log.debug(string.Format("positions distance: %f", dist));
+        on_event(aas_event.teleport);
+      }
+      _old_pos = pos;
+    }
+
+    {
+      int health_down = _health_down.get_int();
+      int health_up   = _health_up.get_int();
+      if (health < health_down && _old_health >= health_down)
+      {
+        on_event(aas_event.health_drop);
+      }
+      else if (health > health_up && _old_health <= health_up)
+      {
+        on_event(aas_event.health_rise);
+      }
+      else if (health >= _old_health + _major_healing.get_int() && _old_health > 0)
+      {
+        on_event(aas_event.big_heal);
+      }
+      if (health == 1 && _old_health > 1)
+      {
+        on_event(aas_event.one_percent);
+      }
+      _old_health = health;
+    }
+
+    {
+      int armor_count = player.mo.CountInv("BasicArmor");
+      int armor_down  = _armor_down.get_int();
+      int armor_up    = _armor_up.get_int();
+      if (armor_count < armor_down && _old_armor >= armor_down && health > 0)
+      {
+        on_event(aas_event.armor_drop);
+      }
+      else if (armor_count > armor_up && _old_armor <= armor_up)
+      {
+        on_event(aas_event.armor_rise);
+      }
+      _old_armor = armor_count;
+    }
+
+    {
+      BasicArmor armor = BasicArmor(player.mo.FindInventory("BasicArmor"));
+      if (armor != NULL)
+      {
+        double save_percent = armor.SavePercent;
+        if (save_percent != 0.0 && save_percent != _old_armor_save)
+        {
+          on_event(aas_event.new_armor);
+        }
+        _old_armor_save = save_percent;
+      }
+    }
+  }
+
+  private void check_secrets()
+  {
+    PlayerInfo player = players[consolePlayer];
+    int secret_count = player.secretCount;
+    if (secret_count > _old_secret_count)
+    {
+      on_event(aas_event.secret_found);
+    }
+    _old_secret_count = secret_count;
+  }
+
+  private void check_all_killed()
+  {
+    int kill_count = level.killed_monsters;
+    if (kill_count != _old_kill_count && kill_count == level.total_monsters)
+    {
+      on_event(aas_event.all_kill);
+    }
+  }
+
+  private void check_kill_percents()
+  {
+    int kill_count = level.killed_monsters;
+    static const int events[] =
+    {
+      aas_event.enemies_10,
+      aas_event.enemies_20,
+      aas_event.enemies_30,
+      aas_event.enemies_40,
+      aas_event.enemies_50,
+      aas_event.enemies_60,
+      aas_event.enemies_70,
+      aas_event.enemies_80,
+      aas_event.enemies_90
+    };
+
+    for (int i = 0; i < 9; ++i)
+    {
+      int percent = (i + 1) * 10;
+      int ratio   = int(ceil(level.total_monsters * percent / 100.0));
+      if (_old_kill_count < ratio && kill_count >= ratio)
+      {
+        on_event(events[i]);
+      }
+    }
+  }
+
+  private void check_all_found()
+  {
+    int item_count = level.found_items;
+    if (item_count != _old_item_count && item_count == level.total_items)
+    {
+      on_event(aas_event.all_items_found);
+    }
+    _old_item_count = item_count;
+  }
+
+  private bool is_loading_finished()
+  {
+    return (_clock.time() > 0);
+  }
+
+  private aas_clock         _clock;
+  private aas_event_handler _handler;
+  private aas_game_action_scheduler _scheduler;
+  private aas_save_timer    _save_timer;
+  private aas_voice         _voice;
+
+  private int     _old_kill_count;
+  private int     _old_item_count;
+  private int     _old_secret_count;
+
+  private vector3 _old_pos;
+
+  private int     _old_health;
+  private int     _old_armor;
+  private double  _old_armor_save;
+
+  private aas_cvar _save_on_dropped;
+  private aas_cvar _health_down;
+  private aas_cvar _health_up;
+  private aas_cvar _armor_down;
+  private aas_cvar _armor_up;
+  private aas_cvar _major_healing;
+
+  private aas_active_enemies_checker _active_enemies_checker;
+  private aas_active_enemies_checker _active_bosses_checker;
+}
+#+end_src
+
+** Function
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_function.zs
+
+// Makeshift functor object.
+class aas_function
+{
+  virtual void f1(string s) {}
+}
+#+end_src
+
+** Game action scheduler
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_action_scheduler.zs
+
+class aas_game_action_scheduler : aas_game_actions
+{
+  static aas_game_action_scheduler of()
+  {
+    return new("aas_game_action_scheduler");
+  }
+
+  override void save()
+  {
+    _is_save_scheduled = true;
+  }
+
+  override void take_screenshot()
+  {
+    _is_screenshot_scheduled = true;
+  }
+
+  play void tick()
+  {
+    if (gameAction != ga_nothing)
+    {
+      return;
+    }
+
+    if (_is_screenshot_scheduled)
+    {
+      LevelLocals.MakeScreenShot();
+      _is_screenshot_scheduled = false;
+      return;
+    }
+
+    if (_is_save_scheduled)
+    {
+      LevelLocals.MakeAutoSave();
+      _is_save_scheduled = false;
+      return;
+    }
+  }
+
+  private bool _is_save_scheduled;
+  private bool _is_screenshot_scheduled;
+}
+#+end_src
+
+** Game actions
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_actions.zs
+
+class aas_game_actions abstract
+{
+  virtual void save()
+  {
+    aas_log.error("override aas_game_action.save()");
+  }
+
+  virtual void take_screenshot()
+  {
+    aas_log.error("override aas_game_action.take_screenshot()");
+  }
+}
+#+end_src
+
+** Log
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_log.zs
+
+class aas_log
+{
+  static void print(string s)
+  {
+    Console.printf("%s", StringTable.Localize(s, false));
+  }
+
+  static void error(string s)
+  {
+    Console.printf("ERROR: Autoautosave: %s.", s);
+  }
+
+  static void debug(string s)
+  {
+    if (NO_DEBUG) return;
+    Console.printf("DEBUG: Autoautosave: %s.", s);
+  }
+
+  const NO_DEBUG = 1; // == true
+}
+#+end_src
+
+** Main
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_main.zs
+
+// This is an entry point for Autoautosave.
+class aas_main : EventHandler
+{
+  override void NetworkProcess(ConsoleEvent event)
+  {
+    Array<string> command;
+    event.Name.Split(command, ":");
+
+    // All known commands have 1 argument.
+    if (command.Size() != 2) return;
+
+    if (command[0] == "aas_manual_save")
+    {
+      int event_type = command[1].ToInt();
+      _event_source.on_event(event_type);
+    }
+    else if (command[0] == "aas_log")
+    {
+      aas_log.print(command[1]);
+    }
+  }
+
+  override void PlayerEntered(PlayerEvent event)
+  {
+    if (is_titlemap())
+    {
+      destroy();
+      return;
+    }
+
+    if (event.PlayerNumber != consolePlayer) return;
+
+    aas_precache_sounds.precache_sounds();
+
+    _event_source = aas_event_source.of();
+
+    _event_source.on_event(aas_event.level_start);
+  }
+
+  override void WorldThingSpawned(WorldEvent event)
+  {
+    if (event == NULL || event.thing == NULL) return;
+
+    _event_source.on_thing_spawned(event.thing);
+  }
+
+  override void WorldTick()
+  {
+    if (_event_source)
+    {
+      _event_source.tick();
+    }
+  }
+
+  private static bool is_titlemap()
+  {
+    return (level.mapName ~== "TITLEMAP");
+  }
+
+  private aas_event_source _event_source;
+}
+#+end_src
+
+** Save timer
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_save_timer.zs
+
+class aas_save_timer play
+{
+  static aas_save_timer of(aas_clock clock, aas_timestamp timestamp)
+  {
+    let result = new("aas_save_timer");
+
+    result._clock          = clock;
+    result._last_save_time = timestamp;
+
+    result._autosave_period_s   = aas_cvar.of("aas_autosave_period");
+    result._save_on_time_period = aas_cvar.of("aas_save_on_time_period");
+
+    return result;
+  }
+
+  bool is_periodic_save()
+  {
+    int  time_from_last_save = _clock.time() - _last_save_time.get_time();
+    int  autosave_period     = _autosave_period_s.get_int() * TICRATE;
+    bool is_period           = (time_from_last_save % autosave_period) == (autosave_period - 1);
+
+    return is_period
+      && _save_on_time_period.get_int()
+      && _clock.time() > 0;
+  }
+
+  private aas_clock     _clock;
+  private aas_timestamp _last_save_time;
+
+  private aas_cvar _autosave_period_s;
+  private aas_cvar _save_on_time_period;
+}
+#+end_src
+
+** Timestamp
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_timestamp.zs
+
+// Represents a moment in time, in game ticks.
+class aas_timestamp
+{
+  static aas_timestamp of()
+  {
+    let result = new("aas_timestamp");
+    result._time = 0;
+    return result;
+  }
+
+  void set_time(int time)
+  {
+    _time = time;
+  }
+
+  int get_time()
+  {
+    return _time;
+  }
+
+  private int _time;
+}
+#+end_src
+
+** Token
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_token.zs
+
+// Creates an aas_event when pickup up.
+class aas_token : Inventory
+{
+  Default
+  {
+    +Inventory.Quiet;
+    +DontGib;
+  }
+
+  aas_token init(int type, aas_event_handler handler, Actor save_reason)
+  {
+    _event_type = type;
+    _handler    = handler;
+
+    bNoGravity = save_reason.bNoGravity;
+
+    return self;
+  }
+
+  override bool TryPickup(out Actor toucher)
+  {
+    if (_handler != NULL) _handler.on_event(_event_type);
+    GoAwayAndDie();
+    return true;
+  }
+
+  private int _event_type;
+
+  private aas_event_handler _handler;
+}
+#+end_src
+
+** Universal token examples
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_universal_token_examples.zs
+
+// Universal Autoautosave Tokens can be used by map and mod authors. When a
+// player walks over such a token, it causes a generic Autoautosave event (with
+// a message like "Something rare!").
+//
+// Typically, Universal Autoautosave Token is an invisible object.
+//
+// The advantage of saving via a Universal Autoautosave Token instead of other
+// saving scripts is that a token can cause a text or voice message and a
+// screenshot according to player settings. Also, Autoautosave framework ensures
+// that saves aren't happening too often, if the player so desires.
+//
+// A mod that utilizes Universal Autoautosave Tokens doesn't depend on
+// Autoautosave and can be loaded without it.
+//
+// Universal Autosave Tokens come it two flavors:
+// 1. Pickup Tokens;
+// 2. Instant Tokens.
+//
+// How it works: Autoautosave watches for things spawns, and if the beginning of
+// the class name of the spawned thing matches one of the signatures,
+// Autoautosave acts accordingly.
+
+// This is an example of Pickup Universal Autoautosave Token.
+//
+// The Pickup Universal Autoautosave Token class name must start with
+// "aas_pickup_".
+//
+// How to use:
+// 1. Define a class that starts with "aas_pickup_";
+// 2. Spawn this class on a spot, and autoautosave will happen when the player
+//    walks over this spot.
+class aas_pickup_example : Actor
+{
+  // Universal Autoautosave Tokens do not have to exist after being spawned.
+  States
+  {
+  Spawn:
+    TNT1 A 0;
+    stop;
+  }
+}
+
+// This is an example of Instant Universal Autoautosave Instant Token.
+//
+// The Pickup Universal Autoautosave Token class name must start with
+// "aas_instant_".
+//
+// How to use:
+// 1. Define a class that starts with "aas_instant_";
+// 2. Spawn this class, and autoautosave happens immediately.
+class aas_instant_example : Actor
+{
+  // Universal Instant Autoautosave Tokens do not have to exist after being
+  // spawned.
+  States
+  {
+  Spawn:
+    TNT1 A 0;
+    stop;
+  }
+}
+#+end_src
+
+** Active enemies checker
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_active_enemies_checker.zs
+
+// This checker watches for active enemies numbers. When active enemies number
+// exceeds the number specified in aas_group_number CVar, group_alert event
+// is emitted. When active number reaches zero, group_kill event is emitted, but
+// only if active group of enemies was detected before.
+//
+// There is a problem with enemies activating. They don't wake up immediately
+// when they see or hear the player, only when A_Look function happens in their
+// state. This class manages this problem by keeping a short history of
+// activated enemy counts, and setting a timeout before emitting the next
+// group_alert event.
+class aas_active_enemies_checker
+{
+  static aas_active_enemies_checker of(aas_event_handler   handler,
+                                       aas_enemies_counter counter,
+                                       aas_cvar            group_number,
+                                       int alert_event,
+                                       int kill_event)
+  {
+    let result = new("aas_active_enemies_checker");
+
+    result._handler      = handler;
+    result._counter      = counter;
+    result._group_number = group_number;
+    result._alert_event  = alert_event;
+    result._kill_event   = kill_event;
+
+    result._is_group            = false;
+    result._old_active_count    = 0;
+    result._activity_statistics = aas_ring_buffer.of();
+
+    return result;
+  }
+
+  void tick()
+  {
+    if (is_player_dead()) return;
+
+    int active_enemies_count = _counter.count();
+    int group_count          = _group_number.get_int();
+    int newly_active_enemies = max(0, active_enemies_count - _old_active_count);
+
+    _old_active_count = active_enemies_count;
+    _timeout = max(0, _timeout - 1);
+
+    if (_timeout == 0)
+    {
+      _activity_statistics.write(newly_active_enemies);
+    }
+
+    int recently_active_enemies = _activity_statistics.get_sum();
+
+    if (recently_active_enemies >= group_count && _timeout == 0)
+    {
+      _is_group = true;
+      _activity_statistics.clear();
+      _timeout = TIMEOUT;
+
+      on_event(_alert_event);
+    }
+    else if (active_enemies_count == 0 && _is_group)
+    {
+      _is_group = false;
+      _activity_statistics.clear();
+
+      on_event(_kill_event);
+    }
+  }
+
+  private void on_event(int event_type)
+  {
+    _handler.on_event(event_type);
+  }
+
+  private bool is_player_dead()
+  {
+    return players[consolePlayer].Health <= 0;
+  }
+
+  private aas_cvar _group_number;
+  private int      _is_group;
+  private int      _old_active_count;
+
+  private aas_event_handler   _handler;
+  private aas_enemies_counter _counter;
+
+  private aas_ring_buffer _activity_statistics;
+
+  const TIMEOUT = 20;
+  private int _timeout;
+
+  private int _alert_event;
+  private int _kill_event;
+}
+
+class aas_ring_buffer
+{
+  static aas_ring_buffer of()
+  {
+    let result = new("aas_ring_buffer");
+
+    result.clear();
+    result._index = 0;
+
+    return result;
+  }
+
+  void clear()
+  {
+    for (int i = 0; i < SIZE; ++i)
+    {
+      _ring[i] = 0;
+    }
+  }
+
+  void write(int n)
+  {
+    _ring[_index] = n;
+
+    _index = (_index + 1) % SIZE;
+  }
+
+  int get_sum() const
+  {
+    int result = 0;
+    for (int i = 0; i < SIZE; ++i)
+    {
+      result += _ring[i];
+    }
+    return result;
+  }
+
+  const SIZE = 20;
+
+  private int[SIZE] _ring;
+  private int       _index;
+}
+#+end_src
+
+*** Test
+
+#+begin_src c :noweb-ref tests
+
+class aas_mock_handler : aas_event_handler
+{
+  static aas_mock_handler of()
+  {
+    let result = new("aas_mock_handler");
+    result._count = 0;
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    ++_count;
+  }
+
+  int get_count()
+  {
+    return _count;
+  }
+
+  private int _count;
+}
+
+class aas_mock_counter : aas_enemies_counter
+{
+  static aas_mock_counter of()
+  {
+    return new("aas_mock_counter");
+  }
+
+  override int count()
+  {
+    return _count;
+  }
+
+  void set_count(int count)
+  {
+    _count = count;
+  }
+
+  private int _count;
+}
+
+class aas_active_enemies_checker_test : Clematis
+{
+  override void testSuites()
+  {
+    describe("Testing active enemies checker");
+
+    let handler = aas_mock_handler.of();
+    let counter = aas_mock_counter.of();
+    let enemies_group_cvar = aas_cvar.of("aas_group_number");
+    let checker = aas_active_enemies_checker.of(handler,
+                                                counter,
+                                                enemies_group_cvar,
+                                                aas_event.group_alert,
+                                                aas_event.group_kill);
+
+    for (int i = 0; i < 20; ++i)
+    {
+      counter.set_count(i * 10);
+      checker.tick();
+    }
+
+    it("must be only one event", AssertEval(handler.get_count(), "==", 1));
+
+    endDescribe();
+  }
+}
+#+end_src
+
+#+begin_src text :noweb-ref tests-call
+netevent test:aas_active_enemies_checker_test
+#+end_src
+
+** Clocks
+
+*** Clock
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_clock.zs
+
+// Interface for getting time.
+class aas_clock abstract
+{
+  virtual int time()
+  {
+    aas_log.error("override aas_clock.time()");
+    return 0;
+  }
+}
+#+end_src
+
+*** Level clock
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_clock.zs
+
+// Implements aas_clock interface by reading level time.
+class aas_level_clock : aas_clock
+{
+  static aas_level_clock of()
+  {
+    return new("aas_level_clock");
+  }
+
+  override int time()
+  {
+    return level.mapTime;
+  }
+}
+#+end_src
+
+** Counters
+
+*** Enemies Counter
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
+
+// This is a generic interface for reporting how much enemies are on the level.
+class aas_enemies_counter abstract
+{
+  virtual int count()
+  {
+    aas_log.Error("override aas_enemies_counter.count");
+    return 0;
+  }
+}
+#+end_src
+
+*** Active bosses counter
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
+
+// This class implements aas_enemies_counter by counting active bosses.
+class aas_active_bosses_counter : aas_enemies_counter
+{
+  static aas_active_bosses_counter of()
+  {
+    let result = new("aas_active_bosses_counter");
+    result._min_boss_health = aas_cvar.of("aas_min_boss_health");
+    return result;
+  }
+
+  override int count()
+  {
+    int result = 0;
+    let i = ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT);
+    Actor a;
+    int min_boss_health = _min_boss_health.get_int();
+
+    while (a = Actor(i.Next()))
+    {
+      result += (is_active(a) && a.SpawnHealth() >= min_boss_health);
+    }
+
+    return result;
+  }
+
+  static bool is_active(Actor a)
+  {
+    return (a.bIsMonster && a.Target != NULL && a.Health > 0);
+  }
+
+  private aas_cvar _min_boss_health;
+}
+#+end_src
+
+*** Active enemies counter
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
+
+// This class implements aas_enemies_counter by counting the active enemies.
+class aas_active_enemies_counter : aas_enemies_counter
+{
+  static aas_active_enemies_counter of()
+  {
+    return new("aas_active_enemies_counter");
+  }
+
+  override int count()
+  {
+    int result = 0;
+    let i = ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT);
+    Actor a;
+
+    while (a = Actor(i.Next()))
+    {
+      result += is_active(a);
+    }
+
+    return result;
+  }
+
+  private static bool is_active(Actor a)
+  {
+    return (a.bIsMonster && a.Target != NULL && a.Health > 0);
+  }
+}
+#+end_src
+
+** Handlers
+
+*** Event handler
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+// This is an interface for AAS event handlers.
+//
+// Note: This class is unrelated to EventHandler.
+class aas_event_handler abstract
+{
+  // Make an action when event event_type happens.
+  virtual void on_event(int event_type)
+  {
+    aas_log.error("override aas_event_handler.on_event()");
+  }
+}
+#+end_src
+
+*** Event handlers
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+// Implements aas_event_handler by storing and activating several event handlers.
+class aas_event_handlers : aas_event_handler
+{
+  static aas_event_handlers of(array<aas_event_handler> handlers)
+  {
+    let result = new("aas_event_handlers");
+    result._handlers.move(handlers);
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    uint n_handlers = _handlers.Size();
+
+    for (uint i = 0; i < n_handlers; ++i)
+    {
+      _handlers[i].on_event(event_type);
+    }
+  }
+
+  private array<aas_event_handler> _handlers;
+}
+#+end_src
+
+*** Logger
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+class aas_logger : aas_event_handler
+{
+  // Create aas_logger instance.
+  //
+  // log_function: a function that receives one parameter of type string.
+  // level_cvar_name: a name of int CVar that controls verbosity level.
+  static aas_logger of(aas_function log_function, string level_cvar_name)
+  {
+    let result = new("aas_logger");
+
+    PlayerInfo player = players[consolePlayer];
+
+    result._level        = aas_cvar.of(level_cvar_name, player);
+    result._color        = aas_cvar.of("aas_print_color", player);
+    result._log_function = log_function;
+
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    if (is_worth_logging(event_type, _level.get_int()))
+    {
+      int    color   = _color.get_int() + 97; // 97 == 'a'
+      string message = string.Format("\c%c%s", color, aas_event.message(event_type));
+      _log_function.f1(message);
+    }
+  }
+
+  private static bool is_worth_logging(int event_type, int level)
+  {
+    return (event_type <= level);
+  }
+
+  private aas_cvar     _level;
+  private aas_cvar     _color;
+  private aas_function _log_function;
+}
+
+class aas_log_function : aas_function
+{
+  static aas_log_function of() { return new("aas_log_function"); }
+  override void f1(string s) { aas_log.print(s); }
+}
+
+class aas_print_function : aas_function
+{
+  static aas_print_function of() { return new("aas_print_function"); }
+  override void f1(string s) { Console.MidPrint("smallfont", s, true); }
+}
+#+end_src
+
+*** Saver
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+class aas_saver : aas_event_handler
+{
+  static aas_saver of(aas_game_actions game_actions,
+                      aas_clock clock,
+                      aas_timestamp timestamp)
+  {
+    let result = new("aas_saver");
+
+    result._game_actions    = game_actions;
+    result._clock           = clock;
+    result._last_save_time  = timestamp;
+
+    result._min_save_wait_s = aas_cvar.of("aas_min_save_wait");
+    result._is_enabled      = aas_cvar.of("aas_enabled");
+    result._min_health      = aas_cvar.of("aas_health_limit");
+
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    if (is_too_frequent(event_type)) return;
+
+    if (is_save_enabled(event_type))
+    {
+      _last_save_time.set_time(_clock.time());
+      _game_actions.save();
+    }
+  }
+
+  private bool is_too_frequent(int event_type)
+  {
+    // manual saving cannot be too frequent.
+    if (event_type == aas_event.manual) return false;
+
+    int current_time          = _clock.time();
+    int time_from_last_save_s = (current_time - _last_save_time.get_time()) / TICRATE;
+
+    return time_from_last_save_s < _min_save_wait_s.get_int();
+  }
+
+  private bool is_save_enabled(int event_type)
+  {
+    if (event_type == aas_event.manual) return true;
+
+    if (!_is_enabled.get_bool()) return false;
+
+    int health     = players[consolePlayer].Health;
+    int min_health = _min_health.get_int();
+
+    if (health < min_health) return false;
+
+    string toggle_name = aas_event.toggle_name(event_type);
+
+    CVar variable = CVar.GetCVar(toggle_name);
+    if (variable == NULL)
+    {
+      aas_log.error(string.Format("variable %s not found", toggle_name));
+      return false;
+    }
+
+    return variable.GetInt();
+  }
+
+  private aas_game_actions _game_actions;
+  private aas_clock        _clock;
+  private aas_timestamp    _last_save_time;
+
+  private aas_cvar _min_save_wait_s;
+  private aas_cvar _is_enabled;
+  private aas_cvar _min_health;
+}
+#+end_src
+
+*** Screenshot maker
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+// This class implements aas_event_handler by making a screenshots on events.
+class aas_screenshot_maker : aas_event_handler
+{
+  static aas_screenshot_maker of(aas_game_actions game_actions)
+  {
+    let result = new("aas_screenshot_maker");
+
+    result._game_actions   = game_actions;
+    result._shot_on_manual = aas_cvar.of("aas_screenshot_on_manual");
+    result._is_enabled     = aas_cvar.of("aas_enabled");
+
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    if (shot_enabled(event_type))
+    {
+      _game_actions.take_screenshot();
+    }
+  }
+
+  private bool shot_enabled(int event_type)
+  {
+    if (event_type == aas_event.manual) return _shot_on_manual.get_int();
+
+    if (!_is_enabled.get_bool()) return false;
+
+    string toggle_name = aas_event.screenshot_toggle_name(event_type);
+    CVar   variable    = CVar.GetCVar(toggle_name);
+    if (variable == NULL)
+    {
+      aas_log.error(string.format("variable %s not found", toggle_name));
+      return false;
+    }
+
+    return variable.GetInt();
+  }
+
+  private aas_game_actions _game_actions;
+
+  private aas_cvar _shot_on_manual;
+  private aas_cvar _is_enabled;
+}
+#+end_src
+
+*** Voice
+
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
+
+// Implements aas_event_handler by playing a sound when an event happens.
+class aas_voice : aas_event_handler
+{
+  static aas_voice of()
+  {
+    let result = new("aas_voice");
+    result._timeout      = 0;
+    result._voice_volume = aas_cvar.of("aas_voice_volume", players[consolePlayer]);
+    return result;
+  }
+
+  override void on_event(int event_type)
+  {
+    bool is_enabled_for_event = CVar.GetCVar(aas_event.voice_toggle_name(event_type)).GetInt();
+    if (is_enabled_for_event)
+    {
+      _queue.push(event_type);
+    }
+  }
+
+  void tick()
+  {
+    // Should I play something now?
+    if (_timeout == 0)
+    {
+      // Yes, but is there something to play?
+      if (_queue.size() == 0) return;
+
+      int    event_type = _queue[0];
+      string voice_file = string.format("aas/voice%d", event_type);
+      int    volume     = clamp(_voice_volume.get_int(), 1, 10);
+      for (int i = 0; i < volume; ++i)
+      {
+        S_StartSound(voice_file, CHAN_BODY, CHANF_OVERLAP);
+      }
+
+      _queue.delete(0);
+      _timeout = int(ceil(S_GetLength(voice_file) * TICRATE));
+    }
+    else
+    {
+      // No, wait more.
+      --_timeout;
+    }
+  }
+
+  // Event queue stores event types.
+  private array<int> _queue;
+  private int        _timeout;
+  private aas_cvar   _voice_volume;
+}
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle ../build/Autoautosave/zscript.zs
+
+version 4.14.3
+
+<<../tools/scripts.org:include("add-ons/Autoautosave.org", "build/Autoautosave/\\(zscript/.*zs\\)")>>
+#+end_src
+
+#+begin_src c :tangle ../build/Autoautosave/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "aas_main"
+}
+#+end_src
+
+* Tests
+
+** Setup
+
+#+begin_src c :tangle ../build/AutoautosaveTest/zscript.zs
+
+version 4.14.3
+
+<<tests>>
+#+end_src
+
+#+begin_src text :tangle ../build/AutoautosaveTest/commands.txt
+wait 2; map map01
+wait 4; <<tests-call>>
+wait 6; quit
+#+end_src

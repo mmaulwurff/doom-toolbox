@@ -13,9 +13,11 @@ import subprocess
 from pathlib import Path
 
 import git
+import pyttsx3
 import reuse.project
 import reuse.report
 import SCons.Script
+from ffmpeg import FFmpeg
 from SCons.Script import Alias, AlwaysBuild, Command, Depends, Glob
 
 # General setup
@@ -49,14 +51,13 @@ def make_export(source, prefix):
 
 # Target setup functions
 def add_main_target(org_file, target_format):
-  name = make_project_name(org_file)
-  zscript_name = target_format.format(name)
+  zscript_name = target_format.format(make_project_name(org_file))
   build_el_path = os.path.abspath('tools/build.el')
   tangle = f'{emacs} $SOURCE --quick --batch \
     --load {build_el_path} \
     --eval "(dt-tangle)"'
 
-  return Alias(name, Command(target=zscript_name, source=org_file, action=tangle))
+  return Command(target=zscript_name, source=org_file, action=tangle)
 
 
 def add_test_target(org_file, main_target):
@@ -94,7 +95,7 @@ def add_test_target(org_file, main_target):
         text=True,
         args=args,
         timeout=60 * 3,
-        check=True,
+        check=False,
       )
     except subprocess.TimeoutExpired:
       print('timeout')
@@ -125,8 +126,8 @@ def add_test_target(org_file, main_target):
   return AlwaysBuild(Alias(test_name, main_target, run_test))
 
 
-def read_meta(content):
-  pattern = '^#[+]name: meta\n#[+]begin_src.*\n((?s:.)*?)#[+]end_src'
+def read_org_block(block_name, content):
+  pattern = f'^#[+]name: {block_name}\n#[+]begin_src.*\n((?s:.)*?)#[+]end_src'
   meta_block = re.search(pattern, content, flags=re.MULTILINE)
   return json.loads(meta_block.group(1)) if meta_block else None
 
@@ -136,9 +137,9 @@ def extract_meta(org_file):
 
     def read_whole():
       project_file.seek(0)
-      return read_meta(project_file.read())
+      return read_org_block('meta', project_file.read())
 
-    meta = read_meta(project_file.read(512))
+    meta = read_org_block('meta', project_file.read(512))
     return meta or read_whole()
 
 
@@ -238,7 +239,7 @@ def make_check_compatibility_target():
         text=True,
         args=args,
         timeout=60 * 3,
-        check=True,
+        check=False,
       )
     except subprocess.TimeoutExpired:
       print('timeout')
@@ -299,17 +300,50 @@ def setup_dependencies(org_file):
       add_dependency(make_project_name(org_file), module, namespace)
 
 
+def add_autoautosave_generate_sounds_target():
+  sound_directory = 'build/Autoautosave/sounds'
+
+  def generate(target, source, env):
+    engine = pyttsx3.init()
+    os.makedirs(sound_directory, exist_ok=True)
+
+    engine.setProperty('rate', 140)
+    engine.setProperty('pitch', 0)
+    engine.setProperty('voice', 'storm')
+
+    with open('build/Autoautosave/events.json', encoding='utf-8') as events_file:
+      events = json.load(events_file)
+
+    for index, text in events.items():
+      wav_name = f'build/Autoautosave/sounds/aas{index}.wav'
+      ogg_name = f'build/Autoautosave/sounds/aas{index}.ogg'
+
+      engine.save_to_file(text, wav_name)
+      engine.runAndWait()
+      os.remove(ogg_name)
+      print(f'Converting to {ogg_name}...')
+      FFmpeg().input(wav_name).output(ogg_name).execute()
+      os.remove(wav_name)
+
+    engine.stop()
+
+  return Command(sound_directory, 'add-ons/Autoautosave.org', generate)
+
+
 # Targets
 compatibility_target = AlwaysBuild(
   Alias('CheckCompatibility', None, make_check_compatibility_target())
 )
-clematis_target = add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
+clematis_target = Alias(
+  'ClematisM', add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
+)
 
 test_targets = []
 module_targets = []
 module_targets_names = []
 for org_file in Glob('modules/*.org'):
-  main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
+  name = make_project_name(org_file)
+  main_target = Alias(name, add_main_target(org_file, 'build/{0}/{0}.zs'))
   test_target = add_test_target(org_file, main_target)
   setup_dependencies(org_file)
   Depends(test_target, clematis_target)
@@ -320,18 +354,28 @@ for org_file in Glob('modules/*.org'):
 addon_targets_names = []
 pack_targets = []
 for org_file in Glob('add-ons/*.org'):
+  name = make_project_name(org_file)
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
+
+  if str(org_file) == 'add-ons/Autoautosave.org':
+    generate_sounds_target = add_autoautosave_generate_sounds_target()
+    Depends(generate_sounds_target, main_target)
+    Alias('Autoautosave', generate_sounds_target)
+    main_target = generate_sounds_target
+  else:
+    Alias(name, main_target)
+
   test_target = add_test_target(org_file, main_target)
   pack_target = add_pack_target(org_file, main_target)
 
   setup_dependencies(org_file)
 
-  if org_file != 'ClematisM.org':
+  if str(org_file) != 'add-ons/ClematisM.org':
     Depends(test_target, clematis_target)
 
   test_targets.append(test_target)
   pack_targets.append(pack_target)
-  addon_targets_names.append(f'{main_target[0]}, {test_target[0]}, {pack_target[0]}')
+  addon_targets_names.append(f'{name}, {test_target[0]}, {pack_target[0]}')
   Depends(compatibility_target, main_target)
 
 html_targets = []

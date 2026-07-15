@@ -79,6 +79,7 @@ repos:
         --force-scope,
         --scopes,
         "10.5x,\
+        Autoautosave,\
         ClematisM,\
         DoomDoctor,\
         FinalCustomDoom,\

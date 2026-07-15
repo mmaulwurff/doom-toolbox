@@ -18,3 +18,5 @@ default.extend-ignore-re = [
     # Ignore blocks between `# spellchecker:off` and `# spellchecker:on`
     "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",
 ]
+[tool.typos.default.extend-words]
+aas = "aas"
