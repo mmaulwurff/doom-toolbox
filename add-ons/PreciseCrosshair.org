@@ -916,6 +916,26 @@ version 4.14.3
 
 * Tests
 
+#+begin_src c :tangle ../build/PreciseCrosshairTest/zscript.zs
+
+version 4.14.3
+
+class TestPistol : Pistol replaces Pistol
+{
+  States
+  {
+    Ready:
+      PISG A 0 A_SetCrosshair(1);
+      PISG A 1 A_WeaponReady();
+      Loop;
+    Fire:
+      PISG B 1 A_SetCrosshair(-1);
+      PISG C 1 A_Refire();
+      Goto Ready;
+  }
+}
+#+end_src
+
 Check that the add-on at least can be loaded and doesn't error out on a target.
 
 #+begin_src text :tangle ../build/PreciseCrosshairTest/commands.txt
