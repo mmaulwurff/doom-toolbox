@@ -5,6 +5,7 @@
 # See https://scons.github.io/docs/scons-user.html for details.
 
 
+from json import loads
 from os import environ, makedirs, path
 from pathlib import Path
 from re import MULTILINE, search, sub
@@ -120,19 +121,36 @@ def add_test_target(org_file, main_target):
   return AlwaysBuild(Alias(test_name, main_target, run_test))
 
 
+def read_meta(content):
+  pattern = '^#[+]name: meta\n#[+]begin_src.*\n((?s:.)*?)#[+]end_src'
+  meta_block = search(pattern, content, flags=MULTILINE)
+  return loads(meta_block.group(1)) if meta_block else None
+
+
+def extract_meta(org_file):
+  with open(org_file, encoding='utf-8') as project_file:
+
+    def read_whole():
+      project_file.seek(0)
+      return read_meta(project_file.read())
+
+    meta = read_meta(project_file.read(512))
+    return meta if meta else read_whole()
+
+
 def add_pack_target(org_file, main_target):
   name = make_project_name(org_file)
   pack_name = f'{name}.pk3'
   build_path = Path(f'build/{name}')
 
+  def extract_version():
+    meta = extract_meta(org_file)
+    if meta and 'version' in meta:
+      return f'v{meta["version"]}'
+    else:
+      return git.Repo().head.object.hexsha[:10]
+
   def pack(target, source, env):
-    with open(org_file, encoding='utf-8') as project_file:
-      project_content = project_file.read()
-
-    commit_sha = git.Repo().head.object.hexsha[:10]
-    foundVersion = search('^#[+]version: *(.*)$', project_content, flags=MULTILINE)
-    version = foundVersion.group(1) if foundVersion is not None else commit_sha
-
     copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
     copy(org_file, build_path / 'README.org')
 
@@ -170,8 +188,11 @@ def add_pack_target(org_file, main_target):
         ]
       )
 
+    version = extract_version()
     archive = make_archive(Path(str(build_path) + '-' + version), 'zip', build_path)
-    move(archive, Path(archive).with_suffix('.pk3'))
+    result_path = Path(archive).with_suffix('.pk3')
+    move(archive, result_path)
+    print(f'Created {result_path}')
 
   return AlwaysBuild(Alias(pack_name, main_target, pack))
 
@@ -234,6 +255,33 @@ def pack_module(target, source, env):
     copy(one_source.sources[0], 'build/modules')
 
 
+def add_dependency(project, module, namespace):
+  target_directory = f'build/{project}/zscript'
+  destination = f'{target_directory}/{namespace}{module}.zs'
+
+  def export_module(target, source, env):
+    makedirs(target_directory, exist_ok=True)
+    with open(destination, 'w', encoding='utf-8') as target_file:
+      with open(source[0], encoding='utf-8') as module_file:
+        target_file.write(module_file.read().replace('NAMESPACE_', namespace))
+
+  Depends(
+    project,
+    Command(
+      target=destination,
+      source=f'build/{module}/{module}.zs',
+      action=export_module,
+    ),
+  )
+
+
+def setup_dependencies(org_file):
+  meta = extract_meta(org_file)
+  if meta and 'depends' in meta:
+    for module, namespace in meta['depends'].items():
+      add_dependency(make_project_name(org_file), module, namespace)
+
+
 # Targets
 compatibility_target = AlwaysBuild(
   Alias('CheckCompatibility', None, make_check_compatibility_target())
@@ -246,6 +294,7 @@ module_targets_names = []
 for org_file in Glob('modules/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/{0}.zs')
   test_target = add_test_target(org_file, main_target)
+  setup_dependencies(org_file)
   Depends(test_target, clematis_target)
   test_targets.append(test_target)
   module_targets_names.append(f'{main_target[0]}, {test_target[0]}')
@@ -257,6 +306,8 @@ for org_file in Glob('add-ons/*.org'):
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
   test_target = add_test_target(org_file, main_target)
   pack_target = add_pack_target(org_file, main_target)
+
+  setup_dependencies(org_file)
 
   if org_file != 'ClematisM.org':
     Depends(test_target, clematis_target)
@@ -295,54 +346,6 @@ AlwaysBuild(
 )
 
 
-# Dependencies
-def add_dependency(project, module, namespace):
-  target_directory = f'build/{project}/zscript'
-  destination = f'{target_directory}/{namespace}{module}.zs'
-
-  def export_module(target, source, env):
-    makedirs(target_directory, exist_ok=True)
-    with open(destination, 'w', encoding='utf-8') as target_file:
-      with open(source[0], encoding='utf-8') as module_file:
-        target_file.write(module_file.read().replace('NAMESPACE_', namespace))
-
-  Depends(
-    project,
-    Command(
-      target=destination,
-      source=f'build/{module}/{module}.zs',
-      action=export_module,
-    ),
-  )
-
-
-add_dependency('VmAbortReporter', 'StringUtils', 'NAMESPACE_')
-add_dependency('LispOnZscript', 'StringUtils', 'tl_')
-
-add_dependency('DoomDoctor', 'StringUtils', 'dd_')
-add_dependency('DoomDoctor', 'VmAbortReporter', 'dd_')
-
-add_dependency('FinalCustomDoom', 'PlainTranslator', 'cd_')
-
-add_dependency('SoundToScreen', 'PlainTranslator', 'st_')
-
-for dependency in ['StringUtils', 'libeye', 'PlainTranslator']:
-  add_dependency('TargetSpy', dependency, 'ts_')
-
-add_dependency('Typist.pk3', 'libeye', 'tt_le_')
-add_dependency('Typist.pk3', 'LazyPoints', 'tt_lp_')
-add_dependency('Typist.pk3', 'StringUtils', 'tt_su_')
-add_dependency('Typist.pk3', 'PlainTranslator', 'tt_')
-
-add_dependency('Gearbox', 'MD5', 'gb_')
-add_dependency('Gearbox', 'PreviousWeapon', 'gb_')
-add_dependency('Gearbox', 'StringUtils', 'gb_')
-add_dependency('Gearbox', 'VmAbortReporter', 'gb_')
-add_dependency('Gearbox', 'PlainTranslator', 'gb_')
-
-add_dependency('PreciseCrosshair', 'libeye', 'pc_')
-
-# Help
 Help(
   f"""
 Modules:

@@ -1,7 +1,14 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: FinalCustomDoom
-# #+version: v1.0.0-beta
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "1.0.0",
+  "depends": { "PlainTranslator": "cd_" }
+}
+#+end_src
 
 * About
 

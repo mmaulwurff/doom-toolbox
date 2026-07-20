@@ -1,7 +1,20 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Gearbox
-# #+version: v0.8.0
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "0.8.0",
+  "depends": {
+    "MD5":             "gb_",
+    "PreviousWeapon":  "gb_",
+    "StringUtils":     "gb_",
+    "VmAbortReporter": "gb_",
+    "PlainTranslator": "gb_"
+  }
+}
+#+end_src
 
 * About
 

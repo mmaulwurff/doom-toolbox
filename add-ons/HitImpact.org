@@ -1,7 +1,11 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: HitImpact
-# #+version: v1.0.1
+
+#+name: meta
+#+begin_src js
+{ "old_version": "1.0.1" }
+#+end_src
 
 * About
 

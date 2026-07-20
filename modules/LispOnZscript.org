@@ -2,6 +2,11 @@
 
 #+title: LispOnZscript
 
+#+name: meta
+#+begin_src js
+{ "depends": { "StringUtils": "tl_" } }
+#+end_src
+
 * About
 
 [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]

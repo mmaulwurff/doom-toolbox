@@ -1,7 +1,11 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Nomina
-# #+version: v2.1.0
+
+#+name: meta
+#+begin_src js
+{ "old_version": "2.1.0" }
+#+end_src
 
 * About
 

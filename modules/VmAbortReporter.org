@@ -2,6 +2,11 @@
 
 #+title: VmAbortReporter
 
+#+name: meta
+#+begin_src js
+{ "depends": { "StringUtils": "NAMESPACE_" } }
+#+end_src
+
 * About
 
 #+begin_src org :noweb-ref description

@@ -1,7 +1,19 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: Typist.pk3
-# #+version: v0.8.2
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "0.8.2",
+  "depends": {
+    "libeye":          "tt_le_",
+    "LazyPoints":      "tt_lp_",
+    "StringUtils":     "tt_su_",
+    "PlainTranslator": "tt_"
+  }
+}
+#+end_src
 
 * About
 

@@ -1,7 +1,17 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: DoomDoctor
-# #+version: v1.0.0
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "1.0.0",
+  "depends": {
+    "StringUtils":     "dd_",
+    "VmAbortReporter": "dd_"
+  }
+}
+#+end_src
 
 * About
 

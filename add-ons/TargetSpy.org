@@ -1,7 +1,18 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
 
 #+title: TargetSpy
-# #+version: v3.1.1
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "3.1.1",
+  "depends": {
+    "StringUtils":     "ts_",
+    "libeye":          "ts_",
+    "PlainTranslator": "ts_"
+  }
+}
+#+end_src
 
 * About
 
