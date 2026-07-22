@@ -40,7 +40,7 @@ repos:
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.15.22
+   rev: v0.16.0
    hooks:
     - id: ruff-check
       args: [--fix]
@@ -55,12 +55,6 @@ repos:
     - id: typos
       stages: [commit-msg]
       args: []
-
- - repo: https://github.com/asottile/pyupgrade
-   rev: v3.21.2
-   hooks:
-    - id: pyupgrade
-      args: [--py313-plus]
 
  - repo: https://github.com/compilerla/conventional-pre-commit
    rev: v4.4.0

@@ -5,48 +5,43 @@
 # See https://scons.github.io/docs/scons-user.html for details.
 
 
-from json import loads
-from os import environ, makedirs, path
+import json
+import os
+import re
+import shutil
+import subprocess
 from pathlib import Path
-from re import MULTILINE, search, sub
-from shutil import copy, copytree, make_archive, move, which
-from subprocess import PIPE, STDOUT, TimeoutExpired, run
 
 import git
 import reuse.project
 import reuse.report
-from SCons.Script import (
-  Alias,
-  AlwaysBuild,
-  Command,
-  Decider,
-  Default,
-  DefaultEnvironment,
-  Depends,
-  Glob,
-  Help,
-)
+import SCons.Script
+from SCons.Script import Alias, AlwaysBuild, Command, Depends, Glob
 
 # General setup
-Decider('timestamp-match')
-Default(None)
-DefaultEnvironment(ENV=environ.copy())
+SCons.Script.Decider('timestamp-match')
+SCons.Script.Default(None)
+SCons.Script.DefaultEnvironment(ENV=os.environ.copy())
 
-emacs = which('emacs-nox') or which('emacs') or Path('c:/tools/emacs/bin/emacs.exe')
+emacs = (
+  shutil.which('emacs-nox')
+  or shutil.which('emacs')
+  or Path('c:/tools/emacs/bin/emacs.exe')
+)
 uzdoom = (
-  path.expanduser(environ['DT_ENGINE'])
-  if 'DT_ENGINE' in environ
-  else which('uzdoom')
+  os.path.expanduser(os.environ['DT_ENGINE'])
+  if 'DT_ENGINE' in os.environ
+  else shutil.which('uzdoom')
 )
 
 
 # Common functions
 def make_project_name(org_file):
-  return path.splitext(path.basename(org_file))[0]
+  return os.path.splitext(os.path.basename(org_file))[0]
 
 
 def make_export(source, prefix):
-  build_el_path = path.abspath('tools/build.el')
+  build_el_path = os.path.abspath('tools/build.el')
   return f'{emacs} {source} --quick --batch \
     --load {build_el_path} \
     --eval "(dt-export \\"{prefix}\\")"'
@@ -56,7 +51,7 @@ def make_export(source, prefix):
 def add_main_target(org_file, target_format):
   name = make_project_name(org_file)
   zscript_name = target_format.format(name)
-  build_el_path = path.abspath('tools/build.el')
+  build_el_path = os.path.abspath('tools/build.el')
   tangle = f'{emacs} $SOURCE --quick --batch \
     --load {build_el_path} \
     --eval "(dt-tangle)"'
@@ -87,14 +82,21 @@ def add_test_target(org_file, main_target):
     ]
 
     if not Path('build/config.ini').exists():
-      copy('tools/config.ini', 'build/config.ini')
+      shutil.copy('tools/config.ini', 'build/config.ini')
 
     # Script errors cause an error window to appear,
     # and execution waits for user to press the button.
     # To not bother with closing this window programmatically, just time out.
     try:
-      result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args, timeout=60 * 3)
-    except TimeoutExpired:
+      result = subprocess.run(
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        args=args,
+        timeout=60 * 3,
+        check=True,
+      )
+    except subprocess.TimeoutExpired:
       print('timeout')
       return 1
 
@@ -104,13 +106,15 @@ def add_test_target(org_file, main_target):
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
     def printable(line):
-      return not any([search(to_skip, line) for to_skip in lines_to_skip])
+      return not any(re.search(to_skip, line) for to_skip in lines_to_skip)
 
     has_errors = False
     for line in filter(printable, result.stdout.splitlines()):
-      line = sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line)
-      line = sub(r'Script error, \"(.*)/:(.*)\" line (.*)', r'ERROR: \1/\2:\3', line)
-      line = sub(
+      line = re.sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line)
+      line = re.sub(
+        r'Script error, \"(.*)/:(.*)\" line (.*)', r'ERROR: \1/\2:\3', line
+      )
+      line = re.sub(
         r'Script warning, \"(.*)/:(.*)\" line (.*)', r'WARNING: \1/\2:\3', line
       )
       has_errors = has_errors or 'ERROR' in line or 'WARNING' in line
@@ -123,8 +127,8 @@ def add_test_target(org_file, main_target):
 
 def read_meta(content):
   pattern = '^#[+]name: meta\n#[+]begin_src.*\n((?s:.)*?)#[+]end_src'
-  meta_block = search(pattern, content, flags=MULTILINE)
-  return loads(meta_block.group(1)) if meta_block else None
+  meta_block = re.search(pattern, content, flags=re.MULTILINE)
+  return json.loads(meta_block.group(1)) if meta_block else None
 
 
 def extract_meta(org_file):
@@ -135,7 +139,7 @@ def extract_meta(org_file):
       return read_meta(project_file.read())
 
     meta = read_meta(project_file.read(512))
-    return meta if meta else read_whole()
+    return meta or read_whole()
 
 
 def add_pack_target(org_file, main_target):
@@ -151,15 +155,17 @@ def add_pack_target(org_file, main_target):
       return git.Repo().head.object.hexsha[:10]
 
   def pack(target, source, env):
-    copytree('documentation', build_path / 'documentation', dirs_exist_ok=True)
-    copy(org_file, build_path / 'README.org')
+    shutil.copytree(
+      'documentation', build_path / 'documentation', dirs_exist_ok=True
+    )
+    shutil.copy(org_file, build_path / 'README.org')
 
     licenses_path = build_path / 'LICENSES'
-    makedirs(licenses_path, exist_ok=True)
+    os.makedirs(licenses_path, exist_ok=True)
     project = reuse.project.Project.from_directory(build_path)
     report = reuse.report.ProjectReport.generate(project)
     for license in report.used_licenses:
-      copy('LICENSES/' + license + '.txt', licenses_path)
+      shutil.copy('LICENSES/' + license + '.txt', licenses_path)
 
     # Note: project and report are duplicated intentionally
     # to re-read the directory after copying licenses.
@@ -189,9 +195,11 @@ def add_pack_target(org_file, main_target):
       )
 
     version = extract_version()
-    archive = make_archive(Path(str(build_path) + '-' + version), 'zip', build_path)
+    archive = shutil.make_archive(
+      Path(str(build_path) + '-' + version), 'zip', build_path
+    )
     result_path = Path(archive).with_suffix('.pk3')
-    move(archive, result_path)
+    shutil.move(archive, result_path)
     print(f'Created {result_path}')
 
   return AlwaysBuild(Alias(pack_name, main_target, pack))
@@ -218,14 +226,21 @@ def make_check_compatibility_target():
     ] + projects
 
     if not Path('build/config.ini').exists():
-      copy('tools/config.ini', 'build/config.ini')
+      shutil.copy('tools/config.ini', 'build/config.ini')
 
     # Script errors cause an error window to appear,
     # and execution waits for user to press the button.
     # To not bother with closing this window programmatically, just time out.
     try:
-      result = run(stdout=PIPE, stderr=STDOUT, text=True, args=args, timeout=60 * 3)
-    except TimeoutExpired:
+      result = subprocess.run(
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        args=args,
+        timeout=60 * 3,
+        check=True,
+      )
+    except subprocess.TimeoutExpired:
       print('timeout')
       return 1
 
@@ -235,7 +250,7 @@ def make_check_compatibility_target():
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
     def printable(line):
-      return not any([search(to_skip, line) for to_skip in lines_to_skip])
+      return not any(re.search(to_skip, line) for to_skip in lines_to_skip)
 
     for line in filter(printable, result.stdout.splitlines()):
       print(line)
@@ -246,13 +261,13 @@ def make_check_compatibility_target():
 
 
 def make_index(target, source, env):
-  copy('README.html', 'index.html')
+  shutil.copy('README.html', 'index.html')
 
 
 def pack_module(target, source, env):
-  makedirs('build/modules', exist_ok=True)
+  os.makedirs('build/modules', exist_ok=True)
   for one_source in source:
-    copy(one_source.sources[0], 'build/modules')
+    shutil.copy(one_source.sources[0], 'build/modules')
 
 
 def add_dependency(project, module, namespace):
@@ -260,10 +275,12 @@ def add_dependency(project, module, namespace):
   destination = f'{target_directory}/{namespace}{module}.zs'
 
   def export_module(target, source, env):
-    makedirs(target_directory, exist_ok=True)
-    with open(destination, 'w', encoding='utf-8') as target_file:
-      with open(source[0], encoding='utf-8') as module_file:
-        target_file.write(module_file.read().replace('NAMESPACE_', namespace))
+    os.makedirs(target_directory, exist_ok=True)
+    with (
+      open(destination, 'w', encoding='utf-8') as target_file,
+      open(source[0], encoding='utf-8') as module_file,
+    ):
+      target_file.write(module_file.read().replace('NAMESPACE_', namespace))
 
   Depends(
     project,
@@ -319,12 +336,12 @@ for org_file in Glob('add-ons/*.org'):
 
 html_targets = []
 for org_file in Glob('*.org'):
-  html_name = f'{path.splitext(org_file)[0]}.html'
+  html_name = f'{os.path.splitext(org_file)[0]}.html'
   html_targets.append(
     Command(target=html_name, source=org_file, action=make_export(org_file, ''))
   )
 for org_file in Glob('*/*.org'):
-  html_name = f'{path.splitext(org_file)[0]}.html'
+  html_name = f'{os.path.splitext(org_file)[0]}.html'
   html_targets.append(
     Command(target=html_name, source=org_file, action=make_export(org_file, '../'))
   )
@@ -346,7 +363,7 @@ AlwaysBuild(
 )
 
 
-Help(
+SCons.Script.Help(
   f"""
 Modules:
 
