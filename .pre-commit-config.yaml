@@ -14,42 +14,54 @@ repos:
    rev: v6.0.0
    hooks:
     - id: check-added-large-files
+      name: check-added-large-files
       args: [--enforce-all]
     - id: check-case-conflict
+      name: check-case-conflict
     - id: check-illegal-windows-names
+      name: check-illegal-windows-names
     - id: check-merge-conflict
+      name: check-merge-conflict
     - id: check-toml
+      name: check-toml
     - id: check-vcs-permalinks
-    - id: check-yaml
-    - id: end-of-file-fixer
+      name: check-vcs-permalinks
     - id: fix-byte-order-marker
+      name: fix-byte-order-marker
     - id: forbid-submodules
+      name: forbid-submodules
     - id: requirements-txt-fixer
-    - id: trailing-whitespace
+      name: requirements-txt-fixer
 
  - repo: meta
    hooks:
     - id: check-hooks-apply
+      name: check-hooks-apply
     - id: check-useless-excludes
+      name: check-useless-excludes
 
  # https://reuse.software/
  - repo: https://github.com/fsfe/reuse-tool
    rev: v6.2.0
    hooks:
     - id: reuse
+      name: reuse
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
    rev: v0.16.0
    hooks:
     - id: ruff-check
+      name: ruff-check
       args: [--fix]
     - id: ruff-format
+      name: ruff-format
 
  - repo: https://github.com/crate-ci/typos
    rev: v1.48.0
    hooks:
     - id: typos
+      name: typos
       stages: [pre-commit]
       args: []
     - id: typos
@@ -94,12 +106,14 @@ repos:
    rev: v10.1.1
    hooks:
     - id: oxipng
+      name: oxipng
       args: [-o, '4', --alpha]
 
  - repo: https://github.com/adrienverge/yamllint.git
    rev: v1.38.0
    hooks:
     - id: yamllint
+      name: yamllint
       exclude: '.clang-format'
       args:
        [-d,
@@ -110,14 +124,15 @@ repos:
    rev: v3.8.0
    hooks:
     - id: editorconfig-checker
+      name: editorconfig-checker
       exclude: 'modules/libeye.org|modules/MD5.org|tools/htmlize.el|tools/.*.wad'
       args: [-disable-indent-size]
 
  - repo: local
    hooks:
     - id: punctuation
-      exclude: '.*\.gif|.*\.ogg|.*\.png|.*\.wad'
       name: punctuation
+      exclude: '.*\.(gif|ogg|png|wad)'
       language: pygrep
       # Forbidden characters:
       # - U+FFFD UTF-8 Unicode replacement character
