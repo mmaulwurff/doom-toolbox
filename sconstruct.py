@@ -320,7 +320,8 @@ def add_autoautosave_generate_sounds_target():
 
       engine.save_to_file(text, wav_name)
       engine.runAndWait()
-      os.remove(ogg_name)
+      if Path(ogg_name).is_file():
+        os.remove(ogg_name)
       print(f'Converting to {ogg_name}...')
       FFmpeg().input(wav_name).output(ogg_name).execute()
       os.remove(wav_name)
