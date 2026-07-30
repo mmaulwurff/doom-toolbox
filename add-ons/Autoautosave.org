@@ -34,81 +34,81 @@ SPDX-FileCopyrightText: © 2018 Alexander Kromm <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/Autoautosave/cvarinfo.txt
+#+begin_src c :tangle ../build/Autoautosave/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Autoautosave/keyconf.txt
+#+begin_src c :tangle ../build/Autoautosave/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Autoautosave/language.txt
+#+begin_src c :tangle ../build/Autoautosave/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Autoautosave/mapinfo.txt
+#+begin_src c :tangle ../build/Autoautosave/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Autoautosave/menudef.txt
+#+begin_src c :tangle ../build/Autoautosave/menudef.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Autoautosave/sndinfo.txt
-// <<license>>
-#+end_src
-
-#+begin_src c :tangle ../build/Autoautosave/zscript.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_active_enemies_checker.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_clock.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_cvar.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event_source.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_function.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_action_scheduler.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_actions.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_log.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_main.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_precache_sounds.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_save_timer.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_timestamp.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_token.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Autoautosave/zscript/aas_universal_token_examples.zs
+#+begin_src c :tangle ../build/Autoautosave/sndinfo.txt :exports none
 // <<license>>
 #+end_src
 
-#+begin_src toml :tangle ../build/Autoautosave/REUSE.toml
+#+begin_src c :tangle ../build/Autoautosave/zscript.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_active_enemies_checker.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_clock.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_cvar.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event_source.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_event.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_function.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_action_scheduler.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_game_actions.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_handlers.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_log.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_main.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_precache_sounds.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_save_timer.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_timestamp.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_token.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Autoautosave/zscript/aas_universal_token_examples.zs :exports none
+// <<license>>
+#+end_src
+
+#+begin_src toml :tangle ../build/Autoautosave/REUSE.toml :exports none
 
 # https://reuse.software/
 
@@ -669,54 +669,58 @@ OptionMenu aas_EventTogglesMenu
 * Events
 
 #+name: events-table
-|   N | Enum            | Default | Text                   |
-|-----+-----------------+---------+------------------------|
-|   0 | all_kill        | true    | All enemies down       |
-|   1 | boss_kill       | true    | Boss down              |
-|   2 | group_kill      | false   | No active enemies      |
-|   3 | group_alert     | false   | New active enemies     |
-|   4 | boss_alert      | true    | Boss alerted           |
-|   5 | all_items_found | true    | All items found        |
-|   7 | time_period     | false   | Time passed            |
-|   8 | teleport        | false   | Moved to another place |
-|   9 | manual          | true    | Manual save            |
-|  11 | important       | true    | Something rare!        |
-|  12 | level_start     | false   | Level started          |
-|  13 | one_percent     | false   | Last health percent!   |
-|  14 | enemies_10      | false   | 10% down               |
-|  15 | enemies_20      | false   | 20% down               |
-|  16 | enemies_30      | false   | 30% down               |
-|  17 | enemies_40      | false   | 40% down               |
-|  18 | enemies_50      | false   | 50% down               |
-|  19 | enemies_60      | false   | 60% down               |
-|  20 | enemies_70      | false   | 70% down               |
-|  21 | enemies_80      | false   | 80% down               |
-|  22 | enemies_90      | false   | 90% down               |
-|-----+-----------------+---------+------------------------|
-| 100 | health_drop     | false   | Health low             |
-| 101 | health_rise     | false   | Health high            |
-| 102 | armor_drop      | false   | Armor low              |
-| 103 | armor_rise      | false   | Armor high             |
-| 104 | secret_found    | true    | Secret found           |
-|-----+-----------------+---------+------------------------|
-| 200 | powerup         | true    | Powerup found          |
-| 201 | weapon          | true    | Weapon found           |
-| 202 | key             | true    | Key found              |
-| 203 | backpack        | true    | Backpack found         |
-| 204 | new_armor       | true    | New armor              |
-| 205 | big_heal        | true    | Major healing          |
-| 206 | armor           | false   | Armor found            |
+|   N | Enum              | Default | Text                   |
+|-----+-------------------+---------+------------------------|
+|   0 | ~all_kill~        | true    | All enemies down       |
+|   1 | ~boss_kill~       | true    | Boss down              |
+|   2 | ~group_kill~      | false   | No active enemies      |
+|   3 | ~group_alert~     | false   | New active enemies     |
+|   4 | ~boss_alert~      | true    | Boss alerted           |
+|   5 | ~all_items_found~ | true    | All items found        |
+|   7 | ~time_period~     | false   | Time passed            |
+|   8 | ~teleport~        | false   | Moved to another place |
+|   9 | ~manual~          | true    | Manual save            |
+|  11 | ~important~       | true    | Something rare!        |
+|  12 | ~level_start~     | false   | Level started          |
+|  13 | ~one_percent~     | false   | Last health percent!   |
+|  14 | ~enemies_10~      | false   | 10% down               |
+|  15 | ~enemies_20~      | false   | 20% down               |
+|  16 | ~enemies_30~      | false   | 30% down               |
+|  17 | ~enemies_40~      | false   | 40% down               |
+|  18 | ~enemies_50~      | false   | 50% down               |
+|  19 | ~enemies_60~      | false   | 60% down               |
+|  20 | ~enemies_70~      | false   | 70% down               |
+|  21 | ~enemies_80~      | false   | 80% down               |
+|  22 | ~enemies_90~      | false   | 90% down               |
+|-----+-------------------+---------+------------------------|
+| 100 | ~health_drop~     | false   | Health low             |
+| 101 | ~health_rise~     | false   | Health high            |
+| 102 | ~armor_drop~      | false   | Armor low              |
+| 103 | ~armor_rise~      | false   | Armor high             |
+| 104 | ~secret_found~    | true    | Secret found           |
+|-----+-------------------+---------+------------------------|
+| 200 | ~powerup~         | true    | Powerup found          |
+| 201 | ~weapon~          | true    | Weapon found           |
+| 202 | ~key~             | true    | Key found              |
+| 203 | ~backpack~        | true    | Backpack found         |
+| 204 | ~new_armor~       | true    | New armor              |
+| 205 | ~big_heal~        | true    | Major healing          |
+| 206 | ~armor~           | false   | Armor found            |
 
 #+name: list-events
 #+begin_src elisp :var format-string="" :var delimiter="\n" :var table=events-table :exports none
 
 (mapconcat
- (lambda (row) (format format-string (nth 0 row) (nth 1 row) (nth 2 row) (nth 3 row)))
+ (lambda (row) (format format-string
+                       (nth 0 row)
+                       (substring (nth 1 row) 1 -1)
+                       (nth 2 row)
+                       (nth 3 row)))
  (cdr table)
  delimiter)
 #+end_src
 
-#+begin_src js :tangle ../build/Autoautosave/events.json
+#+begin_src js :tangle ../build/Autoautosave/events.json :exports none
 {
   <<list-events("\"%1$s\": \"%4$s\"", ",\n")>>
 }
@@ -1113,7 +1117,7 @@ class aas_event_test : Clematis
 }
 #+end_src
 
-#+begin_src c :noweb-ref tests-call
+#+begin_src c :noweb-ref tests-call :exports none
 netevent test:aas_event_test
 #+end_src
 
@@ -2115,7 +2119,7 @@ class aas_active_enemies_checker_test : Clematis
 }
 #+end_src
 
-#+begin_src text :noweb-ref tests-call
+#+begin_src text :noweb-ref tests-call :exports none
 netevent test:aas_active_enemies_checker_test
 #+end_src
 
@@ -2552,7 +2556,7 @@ GameInfo
 
 ** Setup
 
-#+begin_src c :tangle ../build/AutoautosaveTest/zscript.zs
+#+begin_src c :tangle ../build/AutoautosaveTest/zscript.zs :exports none
 
 version 4.14.3
 
