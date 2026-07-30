@@ -271,7 +271,7 @@ def pack_module(target, source, env):
     shutil.copy(one_source.sources[0], 'build/modules')
 
 
-def add_dependency(project, module, namespace):
+def add_dependency(main_target, project, module, namespace):
   target_directory = f'build/{project}/zscript'
   destination = f'{target_directory}/{namespace}{module}.zs'
 
@@ -284,7 +284,7 @@ def add_dependency(project, module, namespace):
       target_file.write(module_file.read().replace('NAMESPACE_', namespace))
 
   Depends(
-    project,
+    main_target,
     Command(
       target=destination,
       source=f'build/{module}/{module}.zs',
@@ -293,11 +293,11 @@ def add_dependency(project, module, namespace):
   )
 
 
-def setup_dependencies(org_file):
+def setup_dependencies(main_target, org_file):
   meta = extract_meta(org_file)
   if meta and 'depends' in meta:
     for module, namespace in meta['depends'].items():
-      add_dependency(make_project_name(org_file), module, namespace)
+      add_dependency(main_target, make_project_name(org_file), module, namespace)
 
 
 def add_autoautosave_generate_sounds_target():
@@ -346,7 +346,7 @@ for org_file in Glob('modules/*.org'):
   name = make_project_name(org_file)
   main_target = Alias(name, add_main_target(org_file, 'build/{0}/{0}.zs'))
   test_target = add_test_target(org_file, main_target)
-  setup_dependencies(org_file)
+  setup_dependencies(main_target, org_file)
   Depends(test_target, clematis_target)
   test_targets.append(test_target)
   module_targets_names.append(f'{main_target[0]}, {test_target[0]}')
@@ -369,7 +369,7 @@ for org_file in Glob('add-ons/*.org'):
   test_target = add_test_target(org_file, main_target)
   pack_target = add_pack_target(org_file, main_target)
 
-  setup_dependencies(org_file)
+  setup_dependencies(main_target, org_file)
 
   if str(org_file) != 'add-ons/ClematisM.org':
     Depends(test_target, clematis_target)
