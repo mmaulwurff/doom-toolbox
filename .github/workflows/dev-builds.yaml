@@ -79,6 +79,10 @@ jobs:
             url: https://github.com/UZDoom/UZDoom/releases/download/x-preview/Linux-UZDoom-Preview-x86_64.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
+          - name: uzdoom-v5.0.0-rc.1
+            url: https://github.com/UZDoom/UZDoom/releases/download/5.0.0-rc.1/Linux-UZDoom-Release-x86_64.AppImage
+            download-target: ~/UZDoom.AppImage
+            bin: ~/UZDoom.AppImage
 
     env:
       DT_ENGINE: ${{ matrix.engine.bin }}
