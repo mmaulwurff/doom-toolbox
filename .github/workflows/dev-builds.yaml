@@ -162,8 +162,10 @@ jobs:
       - parallel:
           - name: Install system dependencies
             run: |
+              # espeak-ng, libespeak1: for pyttsx3
+              # ffmpeg: for python-ffmpeg
               sudo apt-get update
-              sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox
+              sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
 
           - name: Install Python
             uses: actions/setup-python@v7
