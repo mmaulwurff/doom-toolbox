@@ -4,7 +4,7 @@
 
 #+name: meta
 #+begin_src js
-{ "old_version": "2.1.0" }
+{ "old_version": "2.1.1" }
 #+end_src
 
 * About
@@ -1239,12 +1239,9 @@ enum Cl_ELogSeverity{
 class Cl_Util{
     static
     clearscope
-    void Print(String Output, Name CVarName, bool Mid=false){
+    void Print(String Output, Name CVarName){
         if(CVar.FindCVar(CVarName).GetBool()){
-            if(Mid)
-                Console.MidPrint(SmallFont, Output);
-            else
-                Console.PrintF(Output);
+            Console.PrintF(Output);
         }
     }
 

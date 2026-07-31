@@ -5,11 +5,12 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "3.1.1",
+  "old_version": "3.1.2",
   "depends": {
-    "StringUtils":     "ts_",
+    "Fonts":           "ts_",
     "libeye":          "ts_",
-    "PlainTranslator": "ts_"
+    "PlainTranslator": "ts_",
+    "StringUtils":     "ts_"
   }
 }
 #+end_src
@@ -774,7 +775,7 @@ class tsGetter_Tag : Actor
   // Example:
   //static Font getFont(Actor anActor)
   //{
-  //  return Font.findFont(anActor is "Zombieman" ? "BigFont" : "NewSmallFont");
+  //  return anActor is "Zombieman" ? BigFont : NewSmallFont;
   //}
 }
 #+end_src
@@ -1150,7 +1151,7 @@ class ts_FrameMemory
 {
   void initialize(ts_TargetSource targetSource)
   {
-    mFont = Font.findFont("NewSmallFont");
+    mFont = ts_Fonts.findSmall();
     (mOptions = new("ts_FrameOptions")).initialize();
 
     for (int i = 0; i < 4; ++i)
@@ -1302,14 +1303,15 @@ class tsView_Crosshair : Actor
                       vector3 targetPosition,
                       vector2 targetSize)
   {
-    ts_Options options = ts_EventHandler.getInstance().getOptions();
+    ts_EventHandler eventHandler = ts_EventHandler.getInstance();
+    ts_Options options = eventHandler.getOptions();
 
     if (options.getCrosshairAlways())
       alpha = 1.0;
     else if (alpha <= 0.0)
       return;
 
-    Font    aFont  = Font.findFont("NewSmallFont");
+    Font    aFont  = eventHandler.getDefaultFont();
     double  scale  = options.getCrosshairScale();
     double  halfLineHeight = aFont.getHeight() * scale / 2;
     vector2 center = (Screen.getWidth() / 2, options.getCrosshairY());
@@ -1434,7 +1436,7 @@ class ts_EventHandler : StaticEventHandler
     (mProjector = new("ts_Projector")).initialize();
 
     mCurrentTarget = new("ts_TargetSource");
-    mDefaultFont   = Font.findFont("NewSmallFont");
+    mDefaultFont   = ts_Fonts.findSmall();
 
     mDisabledFindersCvar = ts_ExistingCvar.find("ts_disabled_finders");
     mDisabledFiltersCvar = ts_ExistingCvar.find("ts_disabled_filters");
@@ -1511,6 +1513,7 @@ class ts_EventHandler : StaticEventHandler
 
   clearscope ts_Options getOptions() { return mOptions; }
   clearscope ts_Projector getProjector() { return mProjector; }
+  clearscope Font getDefaultFont() { return mDefaultFont; }
 
   ts_ClassList getBlocklist() { return mBlocklist; }
 
@@ -2845,9 +2848,10 @@ version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/TargetSpy.org", "build/TargetSpy/\\(zscript/.*zs\\)")>>
 
+#include "zscript/ts_Fonts.zs"
+#include "zscript/ts_libeye.zs"
 #include "zscript/ts_PlainTranslator.zs"
 #include "zscript/ts_StringUtils.zs"
-#include "zscript/ts_libeye.zs"
 #+end_src
 
 #+begin_src c :tangle ../build/TargetSpyTest/zscript.zs

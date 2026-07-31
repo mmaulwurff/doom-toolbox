@@ -5,8 +5,9 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "1.0.0",
+  "old_version": "1.1.0",
   "depends": {
+    "Fonts": "dd_",
     "StringUtils":     "dd_",
     "VmAbortReporter": "dd_"
   }
@@ -49,7 +50,7 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs :exports none
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Troublemaker.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_troublemaker.zs :exports none
 // <<GPL>>
 #+end_src
 
@@ -144,6 +145,7 @@ class dd_LoggerTestRunner : StaticEventHandler
 * Source code preamble
 
 #+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
+
 GameInfo
 {
   EventHandlers = "dd_VmAbortHandler",
@@ -154,15 +156,15 @@ GameInfo
 #+end_src
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript.zs :exports none
+
 version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/DoomDoctor.org", "build/DoomDoctor/\\(zscript/.*zs\\)")>>
 
+#include "zscript/dd_Fonts.zs"
 #include "zscript/dd_StringUtils.zs"
 #include "zscript/dd_VmAbortReporter.zs"
 #+end_src
-
-Note: ~dd_StringUtils.zs~ must be installed externally.
 
 [[file:../modules/StringUtils.org][StringUtils]]
 
@@ -190,7 +192,9 @@ events.
 ** Console commands
 
 *** Commands to cause problematic events
+
 #+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
+
 Alias dd_nullify_player        "netevent dd_nullify_player"
 Alias dd_spawn_null_thing      "netevent dd_spawn_null_thing; summon dd_Spawnable"
 Alias dd_nullify_player_weapon "netevent dd_nullify_player_weapon"
@@ -199,16 +203,19 @@ Alias dd_spawn_with_no_tags    "summon dd_WeaponWithNoTag; summon dd_EnemyWithNo
 #+end_src
 
 *** Helper commands
+
 #+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
+
 Alias dd_revive_everything     "netevent dd_revive_everything"
 Alias dd_force_lightning       "netevent dd_force_lightning"
+Alias dd_show_fonts            "netevent dd_show_fonts"
 #+end_src
 
 ** Source
 
 TODO: make ~dd_Troublemaker~ savefile-compatible (~StaticEventHandler~).
 
-#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Troublemaker.zs
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_troublemaker.zs
 
 mixin class dd_Volatile { override void Tick() { if (GetAge() > 0) destroy(); }  }
 
@@ -231,11 +238,14 @@ class dd_Troublemaker : EventHandler
   {
     string command = event.name;
 
+    if (command.left(3) != "dd_") return;
+
     if      (command == "dd_nullify_player") nullifyPlayer();
     else if (command == "dd_spawn_null_thing") nullifySpawnedThing();
     else if (command == "dd_nullify_player_weapon") nullifyPlayerWeapon();
     else if (command == "dd_revive_everything") reviveEverything();
     else if (command == "dd_force_lightning") forceLightning();
+    else if (command == "dd_show_fonts") showFonts();
   }
 
   override void WorldThingSpawned(WorldEvent event)
@@ -245,6 +255,70 @@ class dd_Troublemaker : EventHandler
         mIsScheduledSpawnedThingIsNull = false;
         event.thing.destroy();
       }
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    if (!mIsFontsShown) return;
+
+    Array<string> fontNames =
+    {
+      "smallfont",
+      "smallfont2",
+      "bigfont",
+      "confont",
+      "NewConsoleFont",
+      "NewSmallFont",
+      "AlternativeSmallFont",
+      "AlternativeBigFont",
+      "OriginalSmallFont",
+      "OriginalBigFont",
+      "intermissionfont",
+      "BIGUPPER"
+    };
+    Array<Font> fonts =
+    {
+      smallfont,
+      smallfont2,
+      bigfont,
+      confont,
+      NewConsoleFont,
+      NewSmallFont,
+      AlternativeSmallFont,
+      AlternativeBigFont,
+      OriginalSmallFont,
+      OriginalBigFont,
+      intermissionfont,
+      NULL
+    };
+
+    string lowerText = "sphinx of black quartz, judge my vow!";
+    string upperText = lowerText.makeUpper();
+
+    Font fallbackFont = dd_Fonts.findSmall();
+
+    int y = 0;
+    int fontsCount = fonts.size();
+    for (int i = 0; i < fontsCount; ++i)
+    {
+      string fontName = fontNames[i];
+      Font font = fonts[i];
+
+      if (font == NULL)
+        font = Font.findFont(fontName);
+
+      if (font == NULL)
+      {
+        Screen.drawText(fallbackFont, Font.CR_White, 0, y, fontName .. ": NULL");
+        y += fallbackFont.getHeight();
+        continue;
+      }
+
+      Screen.drawText(font, Font.CR_White, 0, y, fontName .. ": " .. lowerText);
+      y += font.getHeight();
+      Screen.drawText(font, Font.CR_White, 0, y, fontName .. ": " .. upperText);
+      y += font.getHeight();
+    }
   }
 
   private void nullifyPlayer()
@@ -287,9 +361,14 @@ class dd_Troublemaker : EventHandler
       level.ForceLightning(1);
   }
 
-  private bool mIsScheduledSpawnedThingIsNull;
+  private void showFonts()
+  {
+    mIsFontsShown = !mIsFontsShown;
+  }
 
-} // class dd_Troublemaker
+  private bool mIsScheduledSpawnedThingIsNull;
+  private bool mIsFontsShown;
+}
 #+end_src
 
 * Logging

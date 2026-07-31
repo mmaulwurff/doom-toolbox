@@ -2,6 +2,11 @@
 
 #+title: libeye
 
+#+name: meta
+#+begin_src js
+{ "depends": { "Fonts": "le_" } }
+#+end_src
+
 * About
 
 #+begin_src org :noweb-ref description
@@ -801,6 +806,8 @@ version 4.14.3
 #include "free_aim.zs"
 #include "no_turn_player.zs"
 #include "text_candle.zs"
+
+#include "zscript/le_Fonts.zs"
 #+end_src
 
 #+begin_src c :tangle ../build/libeye/zscript.zs
@@ -838,7 +845,11 @@ class ShowBox : EventHandler {
 
 	protected Actor					target;
 
+  protected Font mFont;
+
 	override void OnRegister () {
+    mFont = le_Fonts.findSmall();
+
 		gl_proj			= new("NAMESPACE_GlScreen");
 		sw_proj			= new("NAMESPACE_SwScreen");
 		cvar_renderer	= Cvar.GetCvar("vid_rendermode", players [consoleplayer]);
@@ -1015,7 +1026,7 @@ class ShowBox : EventHandler {
 			}
 
 			Screen.DrawText(
-				smallfont,
+				mFont,
 				str_col,
 				0,
 				0,
@@ -1024,7 +1035,7 @@ class ShowBox : EventHandler {
 
 		else {
 			Screen.DrawText(
-				smallfont,
+				mFont,
 				Font.CR_WHITE,
 				0,
 				0,
@@ -1461,7 +1472,7 @@ class NoTurnRocket : DoomImpBall {
 	This puts a candle with text over it in front of you, but only in opengl.
 	I made this simpler cuz the other examples are a bit overblown.
 
-	*/
+*/
 
 class TextCandleGl : EventHandler {
 	protected NAMESPACE_GlScreen			gl_proj;
@@ -1471,16 +1482,19 @@ class TextCandleGl : EventHandler {
 	protected double				text_offset;
 	protected NAMESPACE_Viewport			viewport;
 	protected vector3				base_pos;
+  protected Font mFont;
 
 	// kd: This prepares the projector and text, which we have to align
 	// ourselves. You have to new the projector, otherwise, you may get a
 	// vm-abort, if you're unfamiliar.
 	override void OnRegister () {
+    mFont = le_Fonts.findSmall();
+
 		gl_proj		= new("NAMESPACE_GlScreen");
 		can_project	= gl_proj != NULL;
 
 		text		= "I'M A CANDLE";
-		text_offset	= 0.5 * smallfont.StringWidth(text);
+		text_offset	= 0.5 * mFont.StringWidth(text);
 	}
 
 	// kd: Move the candle a bit.
@@ -1535,7 +1549,7 @@ class TextCandleGl : EventHandler {
 				resolution);
 
 			Screen.DrawText(
-				smallfont,
+				mFont,
 				Font.CR_ICE,
 				draw_pos.x - text_offset,
 				draw_pos.y,

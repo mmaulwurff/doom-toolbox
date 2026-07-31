@@ -5,13 +5,14 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "0.8.1",
+  "old_version": "0.8.2",
   "depends": {
+    "Fonts":           "gb_",
     "MD5":             "gb_",
+    "PlainTranslator": "gb_",
     "PreviousWeapon":  "gb_",
     "StringUtils":     "gb_",
-    "VmAbortReporter": "gb_",
-    "PlainTranslator": "gb_"
+    "VmAbortReporter": "gb_"
   }
 }
 #+end_src
@@ -437,8 +438,7 @@ OptionValue gb_FreezeValues
 
 OptionString gb_FontValues
 {
-  "NewSmallFont" , "$GB_NEW_SMALL_FONT"
-  "SmallFont"    , "$GB_OLD_SMALL_FONT"
+  "NewSmallFont" , "$GB_SMALL_FONT"
   "ConsoleFont"  , "$GB_CONSOLE_FONT"
   "BigFont"      , "$GB_BIG_FONT"
 }
@@ -583,8 +583,7 @@ GB_ROTATE_WEAPON_PRIORITY = "Cycle weapon priority";
 GB_ROTATE_WEAPON_SLOT     = "Cycle weapon slot";
 GB_SOUNDPACK = "Soundpack";
 
-GB_NEW_SMALL_FONT = "New small font";
-GB_OLD_SMALL_FONT = "Old small font";
+GB_SMALL_FONT     = "Small font";
 GB_CONSOLE_FONT   = "Console font";
 GB_BIG_FONT       = "Big font";
 #+end_src
@@ -681,8 +680,7 @@ GB_ROTATE_WEAPON_PRIORITY = "Circular prioridade de arma";
 GB_ROTATE_WEAPON_SLOT     = "Circular slot de arma";
 GB_SOUNDPACK = "Pacote de sons";
 
-GB_NEW_SMALL_FONT = "Fonte pequena nova";
-GB_OLD_SMALL_FONT = "Fonte pequena antiga";
+GB_SMALL_FONT     = "Fonte pequena";
 GB_CONSOLE_FONT   = "Fonte do console";
 GB_BIG_FONT       = "Fonte grande";
 #+end_src
@@ -773,11 +771,12 @@ version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/Gearbox.org", "build/Gearbox/\\(zscript/.*zs\\)")>>
 
+#include "zscript/gb_Fonts.zs"
 #include "zscript/gb_MD5.zs"
+#include "zscript/gb_PlainTranslator.zs"
 #include "zscript/gb_PreviousWeapon.zs"
 #include "zscript/gb_StringUtils.zs"
 #include "zscript/gb_VmAbortReporter.zs"
-#include "zscript/gb_PlainTranslator.zs"
 #+end_src
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
@@ -1110,7 +1109,7 @@ class gb_EventProcessor
 
 *** FontSelector
 
-#+begin_src c :tangle ../build/Gearbox/zscript/font_selector.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_font_selector.zs
 
 class gb_FontSelector
 {
@@ -1123,26 +1122,38 @@ class gb_FontSelector
 
   Font getFont()
   {
-    Font newFont = Font.getFont(mFontString.getString());
+    string newFontName = mFontString.getString();
+    if (mOldFontName.length() > 0 && mOldFontName == newFontName)
+      return mFont;
 
-    if (newFont == NULL && mOldFont != NULL)
+    if (newFontName == "NewSmallFont")
+      mFont = gb_Fonts.findSmall();
+    else if (newFontName == "ConsoleFont")
+      mFont = gb_Fonts.findConsole();
+    else if (newFontName == "BigFont")
+      mFont = gb_Fonts.findBig();
+    else
+      mFont = Font.getFont(newFontName);
+
+    if (mFont == NULL && mOldFontName.length() > 0)
+      Console.printf(StringTable.localize("$GB_BAD_FONT"), newFontName);
+
+    if (mFont == NULL)
     {
-      Console.printf(StringTable.localize("$GB_BAD_FONT"), mFontString.getString());
+      mFont = gb_Fonts.findSmall();
+      mOldFontName = "";
+    }
+    else
+    {
+      mOldFontName = newFontName;
     }
 
-    mOldFont = newFont;
-
-    if (newFont == NULL)
-    {
-      newFont = NewSmallFont;
-    }
-
-    return newFont;
+    return mFont;
   }
 
-
-  private gb_Cvar        mFontString;
-  private transient Font mOldFont;
+  private gb_Cvar mFontString;
+  private string  mOldFontName;
+  private Font    mFont;
 }
 #+end_src
 

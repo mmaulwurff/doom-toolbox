@@ -1,0 +1,154 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: Fonts
+
+* About
+
+#+begin_src org :noweb-ref description
+
+This module provides functions to find small, big, and console fonts with graceful
+fallback if most suitable fonts are not found.
+
+Fonts module version: 1.0.0
+
+Fonts is a part of DoomToolbox.
+The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
+and Codeberg https://codeberg.org/m8f/doom-toolbox
+#+end_src
+
+* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
+
+* License
+
+[[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
+
+#+begin_src c :noweb-ref license
+SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+SPDX-License-Identifier: BSD-3-Clause
+#+end_src
+
+* Source
+
+#+begin_src c :tangle ../build/Fonts/Fonts.zs :exports none
+
+// <<license>>
+// <<description>>
+#+end_src
+
+#+begin_src c :tangle ../build/Fonts/Fonts.zs
+
+class NAMESPACE_Fonts
+{
+  static Font findSmall()
+  {
+    Array<Font> fonts;
+    addSmallFonts(fonts);
+    addConsoleFonts(fonts);
+    addBigFonts(fonts);
+    return findFont(fonts);
+  }
+
+  static Font findBig()
+  {
+    Array<Font> fonts;
+    addBigFonts(fonts);
+    addConsoleFonts(fonts);
+    addSmallFonts(fonts);
+    return findFont(fonts);
+  }
+
+  static Font findConsole()
+  {
+    Array<Font> fonts;
+    addConsoleFonts(fonts);
+    addSmallFonts(fonts);
+    addBigFonts(fonts);
+    return findFont(fonts);
+  }
+
+  // Returns the first non-NULL font from fonts, and NULL if all of them are NULL.
+  static Font findFont(Array<Font> fonts)
+  {
+    foreach (aFont : fonts)
+    {
+      if (aFont != NULL)
+        return aFont;
+    }
+
+    return NULL;
+  }
+
+  private static void addSmallFonts(out Array<Font> result)
+  {
+    Array<Font> fonts =
+    {
+      NewSmallFont,
+      smallfont,
+      smallfont2,
+      AlternativeSmallFont,
+      OriginalSmallFont
+    };
+    result.append(fonts);
+  }
+
+  private static void addBigFonts(out Array<Font> result)
+  {
+    Array<Font> fonts =
+    {
+      Font.findFont("BIGUPPER"),
+      bigfont,
+      AlternativeBigFont,
+      OriginalBigFont
+    };
+    result.append(fonts);
+  }
+
+  private static void addConsoleFonts(out Array<Font> result)
+  {
+    Array<Font> fonts = { NewConsoleFont, confont };
+    result.append(fonts);
+  }
+}
+#+end_src
+
+#+begin_src c :noweb-ref TestsBody
+
+it("small exists", Assert(NAMESPACE_Fonts.findSmall() != NULL));
+it("small is NewSmallFont", Assert(NAMESPACE_Fonts.findSmall() == NewSmallFont));
+
+// Note: miniwad doesn't have BIGUPPER.
+it("big exists", Assert(NAMESPACE_Fonts.findBig() != NULL));
+it("big is bigfont", Assert(NAMESPACE_Fonts.findBig() == bigfont));
+
+it("console exists", Assert(NAMESPACE_Fonts.findConsole() != NULL));
+it("console is NewConsoleFont", Assert(NAMESPACE_Fonts.findConsole() == NewConsoleFont));
+#+end_src
+
+* Tests :noexport:
+
+#+begin_src c :tangle ../build/Fonts/zscript.zs
+
+version 4.14.3
+
+#include "Fonts.zs"
+#+end_src
+
+#+begin_src c :tangle ../build/FontsTest/zscript.zs
+
+version 4.14.3
+
+class fonts_Test : Clematis
+{
+  override void TestSuites()
+  {
+    describe("Fonts tests");
+    <<TestsBody>>
+    endDescribe();
+  }
+}
+#+end_src
+
+#+begin_src text :tangle ../build/FontsTest/commands.txt
+
+wait 2; map map01; wait 2; netevent test:fonts_Test; wait 2; quit
+#+end_src

@@ -5,12 +5,13 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "0.8.2",
+  "old_version": "0.8.3",
   "depends": {
+    "Fonts":           "tt_",
+    "LazyPoints":      "tt_",
     "libeye":          "tt_le_",
-    "LazyPoints":      "tt_lp_",
-    "StringUtils":     "tt_su_",
-    "PlainTranslator": "tt_"
+    "PlainTranslator": "tt_",
+    "StringUtils":     "tt_su_"
   }
 }
 #+end_src
@@ -548,7 +549,8 @@ class tt_PlayerSupervisor : tt_PlayerHandler
                                     playerInput,
                                     commandDispatcher,
                                     visibleTargetSource,
-                                    scaleSetting);
+                                    scaleSetting,
+                                    tt_Fonts.findSmall());
 
     Array<tt_View> views = {
       tt_TargetOverlay.of(widgetSorter, playerInput, scaleSetting, modeSource),
@@ -6391,7 +6393,8 @@ class tt_InfoPanel : tt_View
                          tt_AnswerSource      answerSource,
                          tt_Activatable       activatable,
                          tt_KnownTargetSource knownTargetSource,
-                         tt_IntSetting        scaleSetting)
+                         tt_IntSetting        scaleSetting,
+                         Font aFont)
   {
     let result = new("tt_InfoPanel");
 
@@ -6400,6 +6403,7 @@ class tt_InfoPanel : tt_View
     result._activatable  = activatable;
     result._targetSource = knownTargetSource;
     result._scaleSetting = scaleSetting;
+    result._font         = aFont;
 
     return result;
   }
@@ -6432,7 +6436,8 @@ class tt_InfoPanel : tt_View
       string hintedAnswer   = question.getHintFor(answer);
       let [width, height]   = tt_Drawing.getBoxSize(questionString,
                                                     hintedAnswer,
-                                                    scale);
+                                                    scale,
+                                                    _font);
 
       tt_Drawing.drawTarget(halfScreen - width / 2,
                             y,
@@ -6441,7 +6446,8 @@ class tt_InfoPanel : tt_View
                             questionString,
                             hintedAnswer,
                             scale,
-                            color);
+                            color,
+                            _font);
 
       xLeft  = halfScreen - width / 2 - scaledMargin;
       xRight = xLeft + width + scaledMargin * 2;
@@ -6456,7 +6462,8 @@ class tt_InfoPanel : tt_View
       string hintedAnswer   = question.getHintFor(answer);
       let [width, height]   = tt_Drawing.getBoxSize(questionString,
                                                     hintedAnswer,
-                                                    scale);
+                                                    scale,
+                                                    _font);
 
       if (xRight + width > screenWidth - frameWidth) break;
 
@@ -6467,7 +6474,8 @@ class tt_InfoPanel : tt_View
                             questionString,
                             hintedAnswer,
                             scale,
-                            color);
+                            color,
+                            _font);
 
       xRight += width + scaledMargin;
     }
@@ -6477,7 +6485,10 @@ class tt_InfoPanel : tt_View
     {
       let  command        = commands.at(c);
       let  hintedAnswer   = tt_Match.getColoredMatch(command, answer);
-      let [width, height] = tt_Drawing.getBoxSize(command, hintedAnswer, scale);
+      let [width, height] = tt_Drawing.getBoxSize(command,
+                                                  hintedAnswer,
+                                                  scale,
+                                                  _font);
       bool isCentered     = targetCount == 0 && c == 0;
       let  x              = isCentered ? halfScreen - width / 2 : xLeft - width;
 
@@ -6490,7 +6501,8 @@ class tt_InfoPanel : tt_View
                             command,
                             hintedAnswer,
                             scale,
-                            color);
+                            color,
+                            _font);
 
       xLeft -= width + scaledMargin;
     }
@@ -6503,7 +6515,8 @@ class tt_InfoPanel : tt_View
       string hintedAnswer   = question.getHintFor(answer);
       let [width, height]   = tt_Drawing.getBoxSize(questionString,
                                                     hintedAnswer,
-                                                    scale);
+                                                    scale,
+                                                    _font);
 
       if (xLeft - width < frameWidth) break;
 
@@ -6514,7 +6527,8 @@ class tt_InfoPanel : tt_View
                             questionString,
                             hintedAnswer,
                             scale,
-                            color);
+                            color,
+                            _font);
 
       xLeft -= width + scaledMargin;
     }
@@ -6527,6 +6541,8 @@ class tt_InfoPanel : tt_View
   private tt_Activatable       _activatable;
   private tt_KnownTargetSource _targetSource;
   private tt_IntSetting        _scaleSetting;
+
+  private Font _font;
 }
 #+end_src
 
@@ -6573,7 +6589,8 @@ class tt_TargetOverlay : tt_View
       let position        = widget.getPosition();
       let [width, height] = tt_Drawing.getBoxSize(questionString,
                                                   hintedAnswer,
-                                                  scale);
+                                                  scale,
+                                                  _font);
 
       int x = int(clamp(position.x - width / 2,
                         frameWidth,
@@ -6589,7 +6606,8 @@ class tt_TargetOverlay : tt_View
                             questionString,
                             hintedAnswer,
                             scale,
-                            color);
+                            color,
+                            _font);
     }
   }
 
@@ -6597,6 +6615,8 @@ class tt_TargetOverlay : tt_View
   private tt_AnswerSource       _answerSource;
   private tt_IntSetting         _scaleSetting;
   private tt_ModeSource         _modeSource;
+
+  private Font _font;
 }
 #+end_src
 
@@ -6614,10 +6634,12 @@ class tt_Drawing ui
       : tt_RgbColors.AnswerExploration;
   }
 
-  static int, int getBoxSize(string question, string answer, int scale)
+  static int, int getBoxSize(string question,
+                             string answer,
+                             int scale,
+                             Font aFont)
   {
     // One extra BORDER for width: stringWidth tends to underestimate the width.
-    let aFont  = NewSmallFont;
     int height = scale * (BORDER * 4 + aFont.getHeight());
     int width  = scale * (BORDER * 5 + max(aFont.stringWidth(question),
                                            aFont.stringWidth(answer)));
@@ -6631,10 +6653,11 @@ class tt_Drawing ui
                          string question,
                          string answer,
                          int    scale,
-                         Color  answerColor)
+                         Color  answerColor,
+                         Font   aFont)
   {
-    drawBox(x, y, width, height, question, scale, tt_RgbColors.Question);
-    drawBox(x, y + height, width, height, answer, scale, answerColor);
+    drawBox(x, y, width, height, question, scale, tt_RgbColors.Question, aFont);
+    drawBox(x, y + height, width, height, answer, scale, answerColor, aFont);
   }
 
   private static void drawBox(int    x,
@@ -6643,7 +6666,8 @@ class tt_Drawing ui
                               int    height,
                               string text,
                               int    scale,
-                              Color  aColor)
+                              Color  aColor,
+                              Font   aFont)
   {
     int scaledBorder = BORDER * scale;
     Color backgroundColor = Color(aColor.r / 2, aColor.g / 2, aColor.b / 2);
@@ -6657,7 +6681,7 @@ class tt_Drawing ui
                height - scaledBorder * 2,
                STYLE_Subtract);
 
-    Screen.drawText(NewSmallFont,
+    Screen.drawText(aFont,
                     tt_TextColors.Base,
                     x + scaledBorder * 2,
                     y + scaledBorder * 2,
@@ -7160,17 +7184,19 @@ version 4.14.3
 <<../tools/scripts.org:include("add-ons/Typist.pk3.org", "build/Typist.pk3/\\(zscript/.*zs\\)")>>
 #include "tt_colors.zs"
 
+#include "zscript/tt_Fonts.zs"
+#include "zscript/tt_LazyPoints.zs"
 #include "zscript/tt_le_libeye.zs"
-#include "zscript/tt_lp_LazyPoints.zs"
-#include "zscript/tt_su_StringUtils.zs"
 #include "zscript/tt_PlainTranslator.zs"
+#include "zscript/tt_su_StringUtils.zs"
 #+end_src
 
 Modules:
-- [[file:../modules/libeye.org][libeye]]
+- [[file:../modules/Fonts.org][Fonts]]
 - [[file:../modules/LazyPoints.org][LazyPoints]]
-- [[file:../modules/StringUtils.org][StringUtils]]
+- [[file:../modules/libeye.org][libeye]]
 - [[file:../modules/PlainTranslator.org][PlainTranslator]]
+- [[file:../modules/StringUtils.org][StringUtils]]
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
 <<../tools/scripts.org:copy-media("Typist.pk3")>>
@@ -7202,14 +7228,16 @@ See [[file:../modules/LazyPoints.org::*Parameters][LazyPoints Parameters documen
 // LazyPoints customization.
 class tt_lp_TypistParameters : tt_lp_Parameters
 {
-  override Font getFont() const { return Font.getFont("NewSmallFont"); }
+  override Font getFont() const { return tt_Fonts.findSmall(); }
 
   override int getBonusCountdown() const { return 3; }
 
   override int getYOffset() const
   {
+    if (mFont == NULL) mFont = tt_Fonts.findSmall();
+
     int scale = max(1, Cvar.getCvar("tt_view_scale", players[consolePlayer]).getInt());
-    let [width, height] = tt_Drawing.getBoxSize("", "", scale);
+    let [width, height] = tt_Drawing.getBoxSize("", "", scale, mFont);
     return height * 2 + tt_InfoPanel.MARGIN;
   }
 
@@ -7225,6 +7253,8 @@ class tt_lp_TypistParameters : tt_lp_Parameters
     let eventHandler = tt_EventHandler(EventHandler.find("tt_EventHandler"));
     return eventHandler.getMode() == tt_Mode.Combat;
   }
+
+  private Font mFont;
 }
 #+end_src
 

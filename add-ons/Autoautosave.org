@@ -4,7 +4,10 @@
 
 #+name: meta
 #+begin_src js
-{ "old_version": "2.0.0" }
+{
+  "old_version": "2.0.0",
+  "depends": { "Fonts": "aas_" }
+}
 #+end_src
 
 * About
@@ -1199,7 +1202,8 @@ class aas_event_source play
     array<aas_event_handler> handlers;
     handlers.push(aas_saver .of(result._scheduler, result._clock, last_save_time));
     handlers.push(aas_logger.of(aas_log_function.of(), "aas_console_log_level"));
-    handlers.push(aas_logger.of(aas_print_function.of(), "aas_screen_level"));
+    handlers.push(aas_logger.of(aas_print_function.of(aas_Fonts.findSmall()),
+                                "aas_screen_level"));
     handlers.push(result._voice);
     handlers.push(aas_screenshot_maker.of(result._scheduler));
     result._handler = aas_event_handlers.of(handlers);
@@ -2345,8 +2349,16 @@ class aas_log_function : aas_function
 
 class aas_print_function : aas_function
 {
-  static aas_print_function of() { return new("aas_print_function"); }
-  override void f1(string s) { Console.MidPrint("smallfont", s, true); }
+  static aas_print_function of(Font aFont)
+  {
+    let result = new("aas_print_function");
+    result._font = aFont;
+    return result;
+  }
+
+  override void f1(string s) { Console.midPrint(_font, s, true); }
+
+  Font _font;
 }
 #+end_src
 
@@ -2542,6 +2554,8 @@ class aas_voice : aas_event_handler
 version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/Autoautosave.org", "build/Autoautosave/\\(zscript/.*zs\\)")>>
+
+#include "zscript/aas_Fonts.zs"
 #+end_src
 
 #+begin_src c :tangle ../build/Autoautosave/mapinfo.txt

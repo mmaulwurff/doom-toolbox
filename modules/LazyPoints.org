@@ -2,11 +2,16 @@
 
 #+title: LazyPoints
 
+#+name: meta
+#+begin_src js
+{ "depends": { "Fonts": "NAMESPACE_" } }
+#+end_src
+
 * About
 
 #+begin_src org :noweb-ref description
 
-LazyPoints module version: 0.6.5
+LazyPoints module version: 0.7.0
 LazyPoints is a part of DoomToolbox.
 The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
 and Codeberg https://codeberg.org/m8f/doom-toolbox
@@ -41,23 +46,23 @@ To use (besides ZScript code):
 #+name: cvarinfo
 #+begin_src c
 
-nosave string NAMESPACE_score = "";
-user   bool   NAMESPACE_show  = true;
-server string NAMESPACE_parameters_class = "NAMESPACE_Parameters";
+nosave string NAMESPACE_lp_score = "";
+user   bool   NAMESPACE_lp_show  = true;
+server string NAMESPACE_lp_parameters_class = "NAMESPACE_lp_Parameters";
 #+end_src
 
 #+name: mapinfo
 #+begin_src c
 
-GameInfo { EventHandlers = "NAMESPACE_Dispatcher", "NAMESPACE_StaticView" }
+GameInfo { EventHandlers = "NAMESPACE_lp_Dispatcher", "NAMESPACE_lp_StaticView" }
 #+end_src
 
 #+name: menudef
 #+begin_src c
 
-OptionMenu NAMESPACE_TopMenu
+OptionMenu NAMESPACE_lp_TopMenu
 {
-  class NAMESPACE_Top
+  class NAMESPACE_lp_Top
   Title "Top Points"
 }
 #+end_src
@@ -87,10 +92,10 @@ SPDX-License-Identifier: BSD-3-Clause
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
 // LazyPoints customization.
-class NAMESPACE_Parameters
+class NAMESPACE_lp_Parameters
 {
   // This font is used for drawing score points and info on bonuses.
-  virtual Font getFont() const { return Font.getFont("BigFont"); }
+  virtual Font getFont() const { return NAMESPACE_Fonts.findBig(); }
 
   // This is a time in seconds, during which kills provide a bonus.
   virtual int getBonusCountdown() const { return 3; }
@@ -114,20 +119,20 @@ class NAMESPACE_Parameters
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
 // This class is an entry point for LazyPoints.
-class NAMESPACE_Dispatcher : EventHandler
+class NAMESPACE_lp_Dispatcher : EventHandler
 {
-  override void onRegister() { _spawner = new ("NAMESPACE_Spawner").init(); }
+  override void onRegister() { _spawner = new ("NAMESPACE_lp_Spawner").init(); }
 
   override void playerEntered(PlayerEvent event)
   {
     if (_parameters == NULL)
-      _parameters = NAMESPACE_Parameters(new(NAMESPACE_parameters_class));
+      _parameters = NAMESPACE_lp_Parameters(new(NAMESPACE_lp_parameters_class));
 
     if (_mapScore == NULL)
-      _mapScore = new ("NAMESPACE_MapScore").init();
+      _mapScore = new ("NAMESPACE_lp_MapScore").init();
 
     _playerScores[event.playerNumber] =
-      new("NAMESPACE_PlayerScore").init(event.playerNumber, _parameters);
+      new("NAMESPACE_lp_PlayerScore").init(event.playerNumber, _parameters);
   }
 
   override void renderOverlay(RenderEvent event)
@@ -177,10 +182,10 @@ class NAMESPACE_Dispatcher : EventHandler
     _mapScore.save();
   }
 
-  private NAMESPACE_Spawner _spawner;
-  private NAMESPACE_PlayerScore _playerScores[MAXPLAYERS];
-  private NAMESPACE_Parameters _parameters;
-  private NAMESPACE_MapScore _mapScore;
+  private NAMESPACE_lp_Spawner _spawner;
+  private NAMESPACE_lp_PlayerScore _playerScores[MAXPLAYERS];
+  private NAMESPACE_lp_Parameters _parameters;
+  private NAMESPACE_lp_MapScore _mapScore;
 }
 #+end_src
 
@@ -188,11 +193,11 @@ class NAMESPACE_Dispatcher : EventHandler
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_BonusView
+class NAMESPACE_lp_BonusView
 {
-  NAMESPACE_BonusView init(NAMESPACE_TimerBonus timerBonus,
-                           NAMESPACE_HealthBonus healthBonus,
-                           NAMESPACE_Parameters parameters)
+  NAMESPACE_lp_BonusView init(NAMESPACE_lp_TimerBonus timerBonus,
+                           NAMESPACE_lp_HealthBonus healthBonus,
+                           NAMESPACE_lp_Parameters parameters)
   {
     _timerBonus  = timerBonus;
     _healthBonus = healthBonus;
@@ -237,10 +242,10 @@ class NAMESPACE_BonusView
 
   const MARGIN = 10;
 
-  mixin NAMESPACE_FontUser;
+  mixin NAMESPACE_lp_FontUser;
 
-  private NAMESPACE_TimerBonus _timerBonus;
-  private NAMESPACE_HealthBonus _healthBonus;
+  private NAMESPACE_lp_TimerBonus _timerBonus;
+  private NAMESPACE_lp_HealthBonus _healthBonus;
 }
 #+end_src
 
@@ -248,12 +253,12 @@ class NAMESPACE_BonusView
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_Counter
+class NAMESPACE_lp_Counter
 {
-  NAMESPACE_Counter init(int playerNumber,
-                         NAMESPACE_TimerBonus timerBonus,
-                         NAMESPACE_HealthBonus healthBonus,
-                         NAMESPACE_Parameters parameters)
+  NAMESPACE_lp_Counter init(int playerNumber,
+                         NAMESPACE_lp_TimerBonus timerBonus,
+                         NAMESPACE_lp_HealthBonus healthBonus,
+                         NAMESPACE_lp_Parameters parameters)
   {
     _player         = players[playerNumber];
     _oldSecretCount = 0;
@@ -303,9 +308,9 @@ class NAMESPACE_Counter
 
   private PlayerInfo _player;
   private int _oldSecretCount;
-  private NAMESPACE_TimerBonus _timerBonus;
-  private NAMESPACE_HealthBonus _healthBonus;
-  private NAMESPACE_Parameters _parameters;
+  private NAMESPACE_lp_TimerBonus _timerBonus;
+  private NAMESPACE_lp_HealthBonus _healthBonus;
+  private NAMESPACE_lp_Parameters _parameters;
 }
 #+end_src
 
@@ -313,7 +318,7 @@ class NAMESPACE_Counter
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-mixin class NAMESPACE_FontUser
+mixin class NAMESPACE_lp_FontUser
 {
   private ui void loadFont()
   {
@@ -321,7 +326,7 @@ mixin class NAMESPACE_FontUser
   }
 
   private transient Font _font;
-  private NAMESPACE_Parameters _parameters;
+  private NAMESPACE_lp_Parameters _parameters;
 }
 #+end_src
 
@@ -336,9 +341,9 @@ mixin class NAMESPACE_FontUser
 // (  0%,  50%) - x1
 //
 // Credits to ZikShadow for an idea.
-class NAMESPACE_HealthBonus
+class NAMESPACE_lp_HealthBonus
 {
-  NAMESPACE_HealthBonus init(int playerNumber)
+  NAMESPACE_lp_HealthBonus init(int playerNumber)
   {
     _player = players[playerNumber];
 
@@ -363,9 +368,9 @@ class NAMESPACE_HealthBonus
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_MapScore
+class NAMESPACE_lp_MapScore
 {
-  NAMESPACE_MapScore init()
+  NAMESPACE_lp_MapScore init()
   {
     _startingScore = players[consolePlayer].mo.score;
     return self;
@@ -376,7 +381,7 @@ class NAMESPACE_MapScore
     int score       = players[consolePlayer].mo.score - _startingScore;
     string checksum = Level.getChecksum();
 
-    NAMESPACE_ScoreStorage.saveScore(checksum, score);
+    NAMESPACE_lp_ScoreStorage.saveScore(checksum, score);
   }
 
   private int _startingScore;
@@ -387,9 +392,9 @@ class NAMESPACE_MapScore
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_MapScoreItem : ScoreItem
+class NAMESPACE_lp_MapScoreItem : ScoreItem
 {
-  NAMESPACE_MapScoreItem init(int n)
+  NAMESPACE_lp_MapScoreItem init(int n)
   {
     amount = n;
 
@@ -469,7 +474,7 @@ class OptionMenuScoreItem : OptionMenuItem
   override bool setString(int i, String s)
   {
     _name = s;
-    NAMESPACE_ScoreStorage.rename(Level.GetChecksum(), _index, _name);
+    NAMESPACE_lp_ScoreStorage.rename(Level.GetChecksum(), _index, _name);
     return true;
   }
 
@@ -516,26 +521,26 @@ class OptionMenuScoreItem : OptionMenuItem
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_PlayerScore
+class NAMESPACE_lp_PlayerScore
 {
-  NAMESPACE_PlayerScore init(int playerNumber, NAMESPACE_Parameters parameters)
+  NAMESPACE_lp_PlayerScore init(int playerNumber, NAMESPACE_lp_Parameters parameters)
   {
     _playerNumber = playerNumber;
     _parameters   = parameters;
 
-    _timer = new ("NAMESPACE_Timer").init(TICRATE * parameters.getBonusCountdown());
-    _timerBonus  = new ("NAMESPACE_TimerBonus").init(_timer);
-    _healthBonus = new ("NAMESPACE_HealthBonus").init(playerNumber);
-    _counter = new("NAMESPACE_Counter").init(playerNumber,
+    _timer = new ("NAMESPACE_lp_Timer").init(TICRATE * parameters.getBonusCountdown());
+    _timerBonus  = new ("NAMESPACE_lp_TimerBonus").init(_timer);
+    _healthBonus = new ("NAMESPACE_lp_HealthBonus").init(playerNumber);
+    _counter = new("NAMESPACE_lp_Counter").init(playerNumber,
                                              _timerBonus,
                                              _healthBonus,
                                              parameters);
 
     if (playerNumber == consolePlayer)
     {
-      _view      = new ("NAMESPACE_View").init(parameters);
-      _timerView = new ("NAMESPACE_TimerView").init(_timer);
-      _bonusView = new ("NAMESPACE_BonusView").init(_timerBonus,
+      _view      = new ("NAMESPACE_lp_View").init(parameters);
+      _timerView = new ("NAMESPACE_lp_TimerView").init(_timer);
+      _bonusView = new ("NAMESPACE_lp_BonusView").init(_timerBonus,
                                                     _healthBonus,
                                                     parameters);
     }
@@ -577,22 +582,22 @@ class NAMESPACE_PlayerScore
   private bool isVisible()
   {
     if (_isVisible == NULL)
-      _isVisible = CVar.GetCVar("NAMESPACE_show", players[_playerNumber]);
+      _isVisible = CVar.GetCVar("NAMESPACE_lp_show", players[_playerNumber]);
 
     return _isVisible.GetBool();
   }
 
   private int _playerNumber;
-  private NAMESPACE_Parameters _parameters;
+  private NAMESPACE_lp_Parameters _parameters;
 
-  private NAMESPACE_Timer _timer;
-  private NAMESPACE_TimerBonus _timerBonus;
-  private NAMESPACE_HealthBonus _healthBonus;
-  private NAMESPACE_Counter _counter;
+  private NAMESPACE_lp_Timer _timer;
+  private NAMESPACE_lp_TimerBonus _timerBonus;
+  private NAMESPACE_lp_HealthBonus _healthBonus;
+  private NAMESPACE_lp_Counter _counter;
 
-  private NAMESPACE_View _view;
-  private NAMESPACE_TimerView _timerView;
-  private NAMESPACE_BonusView _bonusView;
+  private NAMESPACE_lp_View _view;
+  private NAMESPACE_lp_TimerView _timerView;
+  private NAMESPACE_lp_BonusView _bonusView;
 
   transient CVar _isVisible;
 }
@@ -602,7 +607,7 @@ class NAMESPACE_PlayerScore
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_ScoreStorage
+class NAMESPACE_lp_ScoreStorage
 {
   static void saveScore(String mapChecksum, int score)
   {
@@ -719,7 +724,7 @@ class NAMESPACE_ScoreStorage
 
   const N_TOP = 10;
 
-  const STORAGE_CVAR_NAME = "NAMESPACE_score";
+  const STORAGE_CVAR_NAME = "NAMESPACE_lp_score";
 }
 #+end_src
 
@@ -727,20 +732,20 @@ class NAMESPACE_ScoreStorage
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_Spawner
+class NAMESPACE_lp_Spawner
 {
-  NAMESPACE_Spawner init() { return self; }
+  NAMESPACE_lp_Spawner init() { return self; }
 
   play void spawnScoreFor(Actor thing)
   {
     if (thing && thing.bCountItem)
     {
-      NAMESPACE_MapScoreItem(Actor.Spawn("NAMESPACE_MapScoreItem", thing.pos))
+      NAMESPACE_lp_MapScoreItem(Actor.Spawn("NAMESPACE_lp_MapScoreItem", thing.pos))
           .init(5);
     }
     else if (thing is "Key")
     {
-      NAMESPACE_MapScoreItem(Actor.Spawn("NAMESPACE_MapScoreItem", thing.pos))
+      NAMESPACE_lp_MapScoreItem(Actor.Spawn("NAMESPACE_lp_MapScoreItem", thing.pos))
           .init(250);
     }
   }
@@ -751,13 +756,13 @@ class NAMESPACE_Spawner
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_StaticView : StaticEventHandler
+class NAMESPACE_lp_StaticView : StaticEventHandler
 {
-  override void onRegister() { _topHintView = new ("NAMESPACE_TopHintView").init(); }
+  override void onRegister() { _topHintView = new ("NAMESPACE_lp_TopHintView").init(); }
 
   override void uiTick() { _topHintView.show(); }
 
-  private NAMESPACE_TopHintView _topHintView;
+  private NAMESPACE_lp_TopHintView _topHintView;
 }
 #+end_src
 
@@ -766,10 +771,10 @@ class NAMESPACE_StaticView : StaticEventHandler
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
 // This class counts down ticks.
-class NAMESPACE_Timer
+class NAMESPACE_lp_Timer
 {
   // Initializes an object with count - number of ticks to count.
-  NAMESPACE_Timer init(int count)
+  NAMESPACE_lp_Timer init(int count)
   {
     _count        = count;
     _currentCount = 0;
@@ -798,10 +803,10 @@ class NAMESPACE_Timer
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
 // Timer bonus is an additive bonus. It simply provides additional points if a
-// kill is registered in limited time frame (provided by NAMESPACE_Timer).
-class NAMESPACE_TimerBonus
+// kill is registered in limited time frame (provided by NAMESPACE_lp_Timer).
+class NAMESPACE_lp_TimerBonus
 {
-  NAMESPACE_TimerBonus init(NAMESPACE_Timer timer)
+  NAMESPACE_lp_TimerBonus init(NAMESPACE_lp_Timer timer)
   {
     _bonus = 0;
     _timer = timer;
@@ -826,7 +831,7 @@ class NAMESPACE_TimerBonus
   const TIMER_BONUS_STEP = 10;
 
   private int _bonus;
-  private NAMESPACE_Timer _timer;
+  private NAMESPACE_lp_Timer _timer;
 }
 #+end_src
 
@@ -834,9 +839,9 @@ class NAMESPACE_TimerBonus
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_TimerView
+class NAMESPACE_lp_TimerView
 {
-  NAMESPACE_TimerView init(NAMESPACE_Timer timer)
+  NAMESPACE_lp_TimerView init(NAMESPACE_lp_Timer timer)
   {
     _timer = timer;
 
@@ -870,7 +875,7 @@ class NAMESPACE_TimerView
   const BAR_COLOR     = "gray";
   const MARGIN        = 10;
 
-  private NAMESPACE_Timer _timer;
+  private NAMESPACE_lp_Timer _timer;
 }
 #+end_src
 
@@ -878,7 +883,7 @@ class NAMESPACE_TimerView
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_Top : OptionMenu
+class NAMESPACE_lp_Top : OptionMenu
 {
   override void Init(Menu parent, OptionMenuDescriptor desc)
   {
@@ -898,10 +903,10 @@ class NAMESPACE_Top : OptionMenu
     Array<bool> isLatest;
     Array<String> names;
 
-    NAMESPACE_ScoreStorage.loadScores(checksum, scores, isLatest, names);
+    NAMESPACE_lp_ScoreStorage.loadScores(checksum, scores, isLatest, names);
 
     int maxLength = 0;
-    for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
+    for (int i = 0; i < NAMESPACE_lp_ScoreStorage.N_TOP; ++i)
     {
       int length = String.Format("%d", scores[i]).Length();
       if (length > maxLength) maxLength = length;
@@ -910,7 +915,7 @@ class NAMESPACE_Top : OptionMenu
     // %% will become %. Adds spacing to string output.
     String format = String.Format("%%d. %%%dd", maxLength);
 
-    for (int i = 0; i < NAMESPACE_ScoreStorage.N_TOP; ++i)
+    for (int i = 0; i < NAMESPACE_lp_ScoreStorage.N_TOP; ++i)
     {
       String label = String.Format(format, i + 1, scores[i]);
       addCommand(label, names[i], i, isLatest[i]);
@@ -935,10 +940,10 @@ class NAMESPACE_Top : OptionMenu
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_TopHintView
+class NAMESPACE_lp_TopHintView
 {
 
-  NAMESPACE_TopHintView init()
+  NAMESPACE_lp_TopHintView init()
   {
     _showed = false;
 
@@ -959,7 +964,7 @@ class NAMESPACE_TopHintView
 
     int key1;
     int key2;
-    [key1, key2] = Bindings.GetKEysForCommand("NAMESPACE_top");
+    [key1, key2] = Bindings.GetKEysForCommand("NAMESPACE_lp_top");
 
     if (key1 == 0 && key2 == 0) return;
 
@@ -976,9 +981,9 @@ class NAMESPACE_TopHintView
 
 #+begin_src c :tangle ../build/LazyPoints/LazyPoints.zs
 
-class NAMESPACE_View
+class NAMESPACE_lp_View
 {
-  NAMESPACE_View init(NAMESPACE_Parameters parameters)
+  NAMESPACE_lp_View init(NAMESPACE_lp_Parameters parameters)
   {
     _player       = players[consolePlayer];
     _interpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 1000000);
@@ -1015,7 +1020,7 @@ class NAMESPACE_View
 
   const MARGIN = 10;
 
-  mixin NAMESPACE_FontUser;
+  mixin NAMESPACE_lp_FontUser;
 
   private PlayerInfo _player;
 
@@ -1030,9 +1035,9 @@ class NAMESPACE_View
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPointsTest/keyconf.txt
-Alias NAMESPACE_top "OpenMenu NAMESPACE_TopMenu"
-AddKeySection "LazyPoints" "NAMESPACE_keys"
-AddMenuKey    "Open Score" "NAMESPACE_top"
+Alias NAMESPACE_lp_top "OpenMenu NAMESPACE_lp_TopMenu"
+AddKeySection "LazyPoints" "NAMESPACE_lp_keys"
+AddMenuKey    "Open Score" "NAMESPACE_lp_top"
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPointsTest/mapinfo.txt
@@ -1044,8 +1049,11 @@ AddMenuKey    "Open Score" "NAMESPACE_top"
 #+end_src
 
 #+begin_src c :tangle ../build/LazyPoints/zscript.zs
+
 version 4.14.3
+
 #include "LazyPoints.zs"
+#include "zscript/NAMESPACE_Fonts.zs"
 #+end_src
 
 #+begin_src text :tangle ../build/LazyPointsTest/commands.txt

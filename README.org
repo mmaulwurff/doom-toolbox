@@ -45,6 +45,7 @@ and doesn't use "AI" tools for development.
 |------------------+-------------------------------------------------------+-------|
 | *Modules*        |                                                       |       |
 |------------------+-------------------------------------------------------+-------|
+| [[file:modules/Fonts.org][Fonts]]            | fonts finder with graceful fallback                   |       |
 | [[file:modules/Hint.org][Hint]]             | hints for menu items                                  |       |
 | [[file:modules/LazyPoints.org][LazyPoints]]       | points scoring                                        |       |
 | [[file:modules/libeye.org][libeye]]           | (originally by KeksDose) level and screen projections |       |
