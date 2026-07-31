@@ -825,7 +825,7 @@ wait 2; map map01; wait 2; quit
 	you if the bounding box is visible on the screen, even partially. This takes
 	both gl and software into account.
 
-	,*/
+*/
 
 class ShowBox : EventHandler {
 	protected NAMESPACE_ProjScreen			proj;
