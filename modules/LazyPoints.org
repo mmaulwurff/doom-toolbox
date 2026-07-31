@@ -81,7 +81,7 @@ OptionMenu NAMESPACE_lp_TopMenu
 
 #+begin_src text :noweb-ref license
 
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 

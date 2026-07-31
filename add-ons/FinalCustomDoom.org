@@ -24,7 +24,7 @@ FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doom
 * License
 
 #+begin_src text :noweb-ref license
-SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 

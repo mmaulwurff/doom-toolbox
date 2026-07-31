@@ -30,7 +30,7 @@ this block:
 #+end_src
 
 #+begin_src c :exports none :noweb-ref text-to-insert-here-name
-SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 #+end_src
 
 #+begin_src c :exports none :noweb-ref text-to-insert-here-name

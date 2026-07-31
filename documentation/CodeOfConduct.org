@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: © 2025 The Organization for Ethical Source
-# SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
 #+title: Contributor Covenant 3.0 Code of Conduct

@@ -31,7 +31,7 @@ WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
-SPDX-FileCopyrightText: © 2020 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 

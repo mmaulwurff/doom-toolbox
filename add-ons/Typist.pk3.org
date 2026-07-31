@@ -99,7 +99,7 @@ compatible with many UZDoom mods and games.
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
 #+begin_src text :noweb-ref license
-SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2019 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 

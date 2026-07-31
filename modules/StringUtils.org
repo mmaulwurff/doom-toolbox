@@ -20,7 +20,7 @@ and Codeberg https://codeberg.org/m8f/doom-toolbox
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]
 
 #+begin_src c :noweb-ref license
-SPDX-FileCopyrightText: © 2024 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2024 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 

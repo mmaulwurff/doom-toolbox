@@ -50,7 +50,7 @@ v0.1.0: initial release.
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
 #+begin_src text :noweb-ref license
-SPDX-FileCopyrightText: © 2026 Alexander Kromm <mmaulwurff@gmail.com>
+SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
