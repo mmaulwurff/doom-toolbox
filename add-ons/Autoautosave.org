@@ -133,8 +133,8 @@ v2.0.0
 
 v1.6.3
 - 2025-03-08 fix compatibility with GZDoom 4.14.1
-- 2022-08-13 A few language.txt changes
-- 2022-08-13 Localize aas_event.zs strings
+- 2022-08-13 A few ~language.txt~ changes
+- 2022-08-13 Localize ~aas_event.zs~ strings
 
 v1.6.2
 - 2022-08-10 fix VM abort with Corruption Cards
@@ -158,16 +158,16 @@ v1.5.0
 - 2022-07-29 fix: Time passed event fires when player is dead
 - 2022-07-29 optimize titlemap check
 - 2022-07-25 clean up code
-- 2020-08-06 fix doc for aas_logger
+- 2020-08-06 fix doc for ~aas_logger~
 
 v1.4.2
 - 2020-08-06 add an option for log message color
 - 2020-08-06 fix percent kill showing on quiet log setting
-- 2020-08-05 unify aas_logger and aas_printer
+- 2020-08-05 unify ~aas_logger~ and ~aas_printer~
 - 2020-08-05 don't emit active enemies events if player is dead
 
 v1.4.1
-- 2020-07-15 wrap TICRATE with a more meaningful name
+- 2020-07-15 wrap ~TICRATE~ with a more meaningful name
 - 2020-07-12 don't trigger Armor Low event on death
 - 2020-07-12 don't trigger Health Low event on death
 
@@ -211,7 +211,7 @@ v1.4
 - 2020-06-27 clean up build scripts
 - 2020-06-26 fix periodic save triggering after each autosave
 - 2020-06-25 move strings from menudef to language, menu cleanup
-- 2020-06-25 output all strings only through aas_log functions
+- 2020-06-25 output all strings only through ~aas_log~ functions
 - 2020-06-25 move strings from keyconf to language lump
 - 2020-06-24 minor refactoring
 - 2020-06-24 don't trigger save timer on zero time
@@ -221,15 +221,15 @@ v1.4
 - 2020-06-23 wrap more cvar access
 - 2020-06-23 wrap cvar access in event source
 - 2020-06-22 make all checks every tick
-- 2020-06-22 inject game_actions interface into saver and screenshooter
+- 2020-06-22 inject ~game_actions~ interface into saver and screenshooter
 - 2020-06-22 make screenshot through a dedicated class
 - 2020-06-21 code style
-- 2020-06-21 replace virtual aas_event_handler.init() with constructors
+- 2020-06-21 replace virtual ~aas_event_handler.init()~ with constructors
 - 2020-06-21 minor refactoring
-- 2020-06-21 make a constructor for aas_event_source
-- 2020-06-21 separate EventHandler and aas_event_source
+- 2020-06-21 make a constructor for ~aas_event_source~
+- 2020-06-21 separate ~EventHandler~ and ~aas_event_source~
 - 2020-06-21 more code formatting
-- 2020-06-21 get rid of OnRegister
+- 2020-06-21 get rid of ~OnRegister~
 - 2020-06-21 fix sound files changing on each build
 - 2020-06-20 make different implementation of manual autosave
 - 2020-06-20 more code formatting
@@ -295,7 +295,7 @@ v0.11
 - 2018-07-27 update README
 
 v0.10.5
-- 2018-07-27 add null checks in WorldThingSpawned event
+- 2018-07-27 add null checks in ~WorldThingSpawned~ event
 
 v0.10.4
 - 2018-07-21 fix sounds AGAIN
@@ -317,7 +317,7 @@ v0.10
 
 v0.9.5
 - 2018-06-24 minor fixes
-- 2018-06-24 add add sndinfo and sound generation to gen-files.sh
+- 2018-06-24 add sndinfo and sound generation to gen-files.sh
 - 2018-06-22 add event types table, generate files from it
 - 2018-06-21 add interface for pomodoro, fix manual save
 - 2018-06-20 code refactoring, better structure
@@ -338,7 +338,7 @@ v0.9.2
 
 v0.9.1
 - 2018-06-16 format sounds to ogg
-- 2018-06-16 add sounds to repo
+- 2018-06-16 add sounds to repository
 - 2018-06-16 update README
 - 2018-06-16 add changelog to archive
 - 2018-06-16 tune default cvar value
@@ -347,7 +347,7 @@ v0.9
 - 2018-06-16 restore keyconf
 - 2018-06-16 added menudef, changed default cvar values
 - 2018-06-16 fix messages
-- 2018-06-16 fix min_save_wait
+- 2018-06-16 fix ~min_save_wait~
 - 2018-06-16 add voice, add cvars
 - 2018-06-16 add big healing event
 - 2018-06-16 add new armor event
