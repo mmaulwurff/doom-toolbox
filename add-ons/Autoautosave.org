@@ -1139,13 +1139,14 @@ class aas_event_source play
     result._scheduler  = aas_game_action_scheduler.of();
     result._voice      = aas_voice.of();
 
-    array<aas_event_handler> handlers;
-    handlers.push(aas_saver .of(result._scheduler, result._clock, last_save_time));
-    handlers.push(aas_logger.of(aas_log_function.of(), "aas_console_log_level"));
-    handlers.push(aas_logger.of(aas_print_function.of(aas_Fonts.findSmall()),
-                                "aas_screen_level"));
-    handlers.push(result._voice);
-    handlers.push(aas_screenshot_maker.of(result._scheduler));
+    Array<aas_event_handler> handlers =
+    {
+      aas_saver .of(result._scheduler, result._clock, last_save_time),
+      aas_logger.of(aas_log_function.of(), "aas_console_log_level"),
+      aas_logger.of(aas_print_function.of(aas_Fonts.findSmall()), "aas_screen_level"),
+      result._voice,
+      aas_screenshot_maker.of(result._scheduler)
+    };
     result._handler = aas_event_handlers.of(handlers);
 
     result._save_timer = aas_save_timer.of(result._clock, last_save_time);
@@ -1513,9 +1514,9 @@ class aas_event_source play
 #+begin_src c :tangle ../build/Autoautosave/zscript/aas_function.zs
 
 // Makeshift functor object.
-class aas_function
+class aas_function abstract
 {
-  virtual void f1(string s) {}
+  abstract void f1(string s);
 }
 #+end_src
 
@@ -1573,15 +1574,9 @@ class aas_game_action_scheduler : aas_game_actions
 
 class aas_game_actions abstract
 {
-  virtual void save()
-  {
-    aas_log.error("override aas_game_action.save()");
-  }
+  abstract void save();
 
-  virtual void take_screenshot()
-  {
-    aas_log.error("override aas_game_action.take_screenshot()");
-  }
+  abstract void take_screenshot();
 }
 #+end_src
 
@@ -2076,11 +2071,7 @@ netevent test:aas_active_enemies_checker_test
 // Interface for getting time.
 class aas_clock abstract
 {
-  virtual int time()
-  {
-    aas_log.error("override aas_clock.time()");
-    return 0;
-  }
+  abstract int time();
 }
 #+end_src
 
@@ -2112,11 +2103,7 @@ class aas_level_clock : aas_clock
 // This is a generic interface for reporting how much enemies are on the level.
 class aas_enemies_counter abstract
 {
-  virtual int count()
-  {
-    aas_log.Error("override aas_enemies_counter.count");
-    return 0;
-  }
+  abstract int count();
 }
 #+end_src
 
@@ -2203,10 +2190,7 @@ class aas_active_enemies_counter : aas_enemies_counter
 class aas_event_handler abstract
 {
   // Make an action when event event_type happens.
-  virtual void on_event(int event_type)
-  {
-    aas_log.error("override aas_event_handler.on_event()");
-  }
+  abstract void on_event(int event_type);
 }
 #+end_src
 
