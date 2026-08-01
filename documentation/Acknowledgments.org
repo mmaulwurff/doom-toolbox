@@ -48,6 +48,7 @@ The order is alphabetical.
 - drogga (Commado Pen)
 - DrPyspy
 - Dutchygamer
+- efraletti
 - Enjay
 - eqagunn
 - Eruanna
@@ -74,6 +75,7 @@ The order is alphabetical.
 - krutomisi
 - Lagi
 - Lippeth
+- Ltmajordude
 - lucker42
 - Major Cooke
 - mamaluigisbagel
@@ -85,6 +87,7 @@ The order is alphabetical.
 - Nightsentinel
 - Paul Fioravanti
 - Phantom Allies
+- physixcat
 - piano777wzy
 - Player701
 - Proydoha
