@@ -1752,12 +1752,11 @@ class aas_token : Inventory
     +DontGib;
   }
 
-  aas_token init(int type, aas_event_handler handler, Actor save_reason)
+  aas_token init(int type, aas_event_handler handler, Actor origin)
   {
     _event_type = type;
     _handler    = handler;
-
-    bNoGravity = save_reason.bNoGravity;
+    _origin     = origin;
 
     return self;
   }
@@ -1769,8 +1768,22 @@ class aas_token : Inventory
     return true;
   }
 
-  private int _event_type;
+  override void tick()
+  {
+    Super.tick();
 
+    if (_origin == NULL)
+    {
+      destroy();
+      return;
+    }
+
+    setOrigin(_origin.pos, true);
+    a_setSize(_origin.radius, _origin.height);
+  }
+
+  private int _event_type;
+  private Actor _origin;
   private aas_event_handler _handler;
 }
 #+end_src
