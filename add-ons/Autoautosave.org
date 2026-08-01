@@ -467,7 +467,7 @@ OptionMenu aas_ScreenshotOptions
 
   StaticText ""
   Option     "$AAS_EVENT_MANUAL"       , aas_screenshot_on_manual          , OnOff
-  Option     "$AAS_EVENT_START"        , aas_screenshot_on_level_start     , OnOff
+  Option     "$AAS_EVENT_LEVEL_START"  , aas_screenshot_on_level_start     , OnOff
 
   StaticText ""
   Option     "$AAS_EVENT_BOSS_ALERT"   , aas_screenshot_on_boss_alert      , OnOff
@@ -500,8 +500,6 @@ OptionMenu aas_ScreenshotOptions
   Option     "$AAS_EVENT_KEY"          , aas_screenshot_on_key             , OnOff
   Option     "$AAS_EVENT_BACKPACK"     , aas_screenshot_on_backpack        , OnOff
   Option     "$AAS_EVENT_IMPORTANT"    , aas_screenshot_on_important       , OnOff
-  StaticText "$AAS_IMPORTANT_NOTE_1" , Black
-  StaticText "$AAS_IMPORTANT_NOTE_2" , Black
 
   StaticText ""
   Option     "$AAS_EVENT_ENEMIES_10" , aas_screenshot_on_enemies_10 , OnOff
@@ -546,7 +544,7 @@ OptionMenu aas_VoiceOptions
 
   StaticText ""
   Option     "$AAS_EVENT_MANUAL"       , aas_voice_on_manual          , OnOff
-  Option     "$AAS_EVENT_START"        , aas_voice_on_level_start     , OnOff
+  Option     "$AAS_EVENT_LEVEL_START"  , aas_voice_on_level_start     , OnOff
 
   StaticText ""
   Option     "$AAS_EVENT_BOSS_ALERT"   , aas_voice_on_boss_alert      , OnOff
@@ -653,8 +651,6 @@ OptionMenu aas_EventTogglesMenu
   Option     "$AAS_EVENT_KEY"          , aas_save_on_key             , OnOff
   Option     "$AAS_EVENT_BACKPACK"     , aas_save_on_backpack        , OnOff
   Option     "$AAS_EVENT_IMPORTANT"    , aas_save_on_important       , OnOff
-  StaticText "$AAS_IMPORTANT_NOTE_1"   , Black
-  StaticText "$AAS_IMPORTANT_NOTE_2"   , Black
 
   StaticText ""
   Option     "$AAS_EVENT_ENEMIES_10" , aas_save_on_enemies_10 , OnOff
@@ -686,15 +682,15 @@ OptionMenu aas_EventTogglesMenu
 |  11 | ~important~       | true    | Something rare!        |
 |  12 | ~level_start~     | false   | Level started          |
 |  13 | ~one_percent~     | false   | Last health percent!   |
-|  14 | ~enemies_10~      | false   | 10% down               |
-|  15 | ~enemies_20~      | false   | 20% down               |
-|  16 | ~enemies_30~      | false   | 30% down               |
-|  17 | ~enemies_40~      | false   | 40% down               |
-|  18 | ~enemies_50~      | false   | 50% down               |
-|  19 | ~enemies_60~      | false   | 60% down               |
-|  20 | ~enemies_70~      | false   | 70% down               |
-|  21 | ~enemies_80~      | false   | 80% down               |
-|  22 | ~enemies_90~      | false   | 90% down               |
+|  14 | ~enemies_10~      | false   | Enemies 10% down       |
+|  15 | ~enemies_20~      | false   | Enemies 20% down       |
+|  16 | ~enemies_30~      | false   | Enemies 30% down       |
+|  17 | ~enemies_40~      | false   | Enemies 40% down       |
+|  18 | ~enemies_50~      | false   | Enemies 50% down       |
+|  19 | ~enemies_60~      | false   | Enemies 60% down       |
+|  20 | ~enemies_70~      | false   | Enemies 70% down       |
+|  21 | ~enemies_80~      | false   | Enemies 80% down       |
+|  22 | ~enemies_90~      | false   | Enemies 90% down       |
 |-----+-------------------+---------+------------------------|
 | 100 | ~health_drop~     | false   | Health low             |
 | 101 | ~health_rise~     | false   | Health high            |
@@ -841,38 +837,6 @@ AAS_SCREENSHOTS_WARNING = "Warning: too many screenshot can use up disk space.";
 
 AAS_SCREENSHOTS_SCRIPT_NOTE = "This must be set to \"On\".";
 
-AAS_EVENT_MANUAL = "On manual autosave";
-AAS_EVENT_LEVEL_START  = "On level start";
-
-AAS_EVENT_ALL_KILL     = "All enemies are eliminated";
-AAS_EVENT_BOSS_KILL    = "Boss is eliminated";
-AAS_EVENT_GROUP_KILL   = "No more active enemies (group kill)";
-
-AAS_EVENT_GROUP_ALERT  = "New active enemies (group alert)";
-AAS_EVENT_BOSS_ALERT   = "Boss is alerted";
-
-AAS_EVENT_ALL_ITEMS_FOUND = "All items are found";
-AAS_EVENT_TIME_PERIOD  = "Time has passed";
-AAS_EVENT_TELEPORT     = "You are moved to another place";
-
-AAS_EVENT_HEALTH_DROP  = "Health drops low";
-AAS_EVENT_ONE_PERCENT  = "Health drops to 1%";
-AAS_EVENT_HEALTH_RISE  = "Health rises high";
-AAS_EVENT_ARMOR_DROP   = "Armor drops low";
-AAS_EVENT_ARMOR_RISE   = "Armor rises high";
-AAS_EVENT_SECRET_FOUND = "Secret is found";
-
-AAS_EVENT_POWERUP      = "Powerup is found";
-AAS_EVENT_WEAPON       = "Weapon is found";
-AAS_EVENT_KEY          = "Key is found";
-AAS_EVENT_ARMOR        = "Armor is found";
-AAS_EVENT_BACKPACK     = "Backpack is found";
-AAS_EVENT_IMPORTANT    = "Important item is found";
-AAS_IMPORTANT_NOTE_1   = "Important item list currently includes:";
-AAS_IMPORTANT_NOTE_2   = "The Golden Souls Big Coins.";
-AAS_EVENT_NEW_ARMOR    = "New armor type";
-AAS_EVENT_BIG_HEAL     = "Major healing";
-
 AAS_LOG_CONSOLE = "Log to console";
 AAS_LOG_SCREEN  = "Log to screen";
 
@@ -902,22 +866,10 @@ AAS_SAVE_ON_DROPPED_NOTE = "Also picking up Hideous Destructor keys.";
 
 AAS_VOICE_VOLUME  = "Voice volume";
 
-AAS_EVENT_ENEMIES_10 = "Enemies 10% down";
-AAS_EVENT_ENEMIES_20 = "Enemies 20% down";
-AAS_EVENT_ENEMIES_30 = "Enemies 30% down";
-AAS_EVENT_ENEMIES_40 = "Enemies 40% down";
-AAS_EVENT_ENEMIES_50 = "Enemies 50% down";
-AAS_EVENT_ENEMIES_60 = "Enemies 60% down";
-AAS_EVENT_ENEMIES_70 = "Enemies 70% down";
-AAS_EVENT_ENEMIES_80 = "Enemies 80% down";
-AAS_EVENT_ENEMIES_90 = "Enemies 90% down";
-
 AAS_ENABLE_ALL  = "Enable all";
 AAS_DISABLE_ALL = "Disable all";
 
-AAS_EVENT_MANUALSAVE = "Manual save";
-AAS_EVENT_RAREITEMGET = "Something rare!";
-AAS_EVENT_LEVELSTARTED = "Level started";
+<<list-events("AAS_EVENT_%2$s \= \"%4$s\";")>>
 #+end_src
 
 ** pt
@@ -956,38 +908,6 @@ AAS_SCREENSHOTS_WARNING = "Aviso: Muitas capturas de tela podem usar espaço no 
 
 AAS_SCREENSHOTS_SCRIPT_NOTE = "Isto deve estar definido como \"Sim\".";
 
-AAS_EVENT_MANUAL = "No autosave manual";
-AAS_EVENT_START  = "No começo do nível";
-
-AAS_EVENT_ALL_KILL     = "Todos os inimigos foram eliminados";
-AAS_EVENT_BOSS_KILL    = "O chefão foi eliminado";
-AAS_EVENT_GROUP_KILL   = "Sem mais inimigos ativos (abate em grupo)";
-
-AAS_EVENT_GROUP_ALERT  = "Novos inimigos ativos (alerta de grupo)";
-AAS_EVENT_BOSS_ALERT   = "O chefão foi alertado";
-
-AAS_EVENT_ALL_ITEMS_FOUND = "Todos os ítens foram descobertos";
-AAS_EVENT_TIME_PERIOD  = "Tempo movido";
-AAS_EVENT_TELEPORT     = "Você foi movido para outro lugar";
-
-AAS_EVENT_HEALTH_DROP  = "Sua vida caiu baixo";
-AAS_EVENT_ONE_PERCENT  = "Sua vida caiu para 1%";
-AAS_EVENT_HEALTH_RISE  = "Sua vida subiu alto";
-AAS_EVENT_ARMOR_DROP   = "Sua armadura caiu baixo";
-AAS_EVENT_ARMOR_RISE   = "Sua armadura subiu alto";
-AAS_EVENT_SECRET_FOUND = "Um segredo foi encontrado";
-
-AAS_EVENT_POWERUP      = "Um poder foi encontrado";
-AAS_EVENT_WEAPON       = "Uma arma foi encontrada";
-AAS_EVENT_KEY          = "Uma chave foi encontrada";
-AAS_EVENT_ARMOR        = "Armadura foi encontrada";
-AAS_EVENT_BACKPACK     = "Uma mochila foi encontrada";
-AAS_EVENT_IMPORTANT    = "Um item importante foi encontrado";
-AAS_IMPORTANT_NOTE_1   = "Lista de ítens importantes inclui:";
-AAS_IMPORTANT_NOTE_2   = "Moedas grandes do The Golden Souls.";
-AAS_EVENT_NEW_ARMOR    = "Novo tipo de armadura";
-AAS_EVENT_BIG_HEAL     = "Grande cura";
-
 AAS_LOG_CONSOLE = "Registrar no Console";
 AAS_LOG_SCREEN  = "Registrar na Tela";
 
@@ -1017,22 +937,42 @@ AAS_SAVE_ON_DROPPED_NOTE = "Também pegando chaves do Hideous Destructor";
 
 AAS_VOICE_VOLUME  = "Volume de voz";
 
-AAS_EVENT_ENEMIES_10 = "Inimigos 10% mortos";
-AAS_EVENT_ENEMIES_20 = "Inimigos 20% mortos";
-AAS_EVENT_ENEMIES_30 = "Inimigos 30% mortos";
-AAS_EVENT_ENEMIES_40 = "Inimigos 40% mortos";
-AAS_EVENT_ENEMIES_50 = "Inimigos 50% mortos";
-AAS_EVENT_ENEMIES_60 = "Inimigos 60% mortos";
-AAS_EVENT_ENEMIES_70 = "Inimigos 70% mortos";
-AAS_EVENT_ENEMIES_80 = "Inimigos 80% mortos";
-AAS_EVENT_ENEMIES_90 = "Inimigos 90% mortos";
-
 AAS_ENABLE_ALL  = "Habilitar todos";
 AAS_DISABLE_ALL = "Desabilitar todos";
 
-AAS_EVENT_MANUALSAVE = "Save manual";
-AAS_EVENT_RAREITEMGET = "Algo raro!";
-AAS_EVENT_LEVELSTARTED = "Nível começado";
+AAS_EVENT_all_kill     = "Todos os inimigos foram eliminados";
+AAS_EVENT_boss_kill    = "O chefão foi eliminado";
+AAS_EVENT_group_kill   = "Sem mais inimigos ativos (abate em grupo)";
+AAS_EVENT_group_alert  = "Novos inimigos ativos (alerta de grupo)";
+AAS_EVENT_boss_alert   = "O chefão foi alertado";
+AAS_EVENT_all_items_found = "Todos os ítens foram descobertos";
+AAS_EVENT_time_period  = "Tempo movido";
+AAS_EVENT_teleport     = "Você foi movido para outro lugar";
+AAS_EVENT_manual       = "Save manual";
+AAS_EVENT_important    = "Algo raro!";
+AAS_EVENT_level_start  = "Nível começado";
+AAS_EVENT_one_percent  = "Sua vida caiu para 1%";
+AAS_EVENT_enemies_10   = "Inimigos 10% mortos";
+AAS_EVENT_enemies_20   = "Inimigos 20% mortos";
+AAS_EVENT_enemies_30   = "Inimigos 30% mortos";
+AAS_EVENT_enemies_40   = "Inimigos 40% mortos";
+AAS_EVENT_enemies_50   = "Inimigos 50% mortos";
+AAS_EVENT_enemies_60   = "Inimigos 60% mortos";
+AAS_EVENT_enemies_70   = "Inimigos 70% mortos";
+AAS_EVENT_enemies_80   = "Inimigos 80% mortos";
+AAS_EVENT_enemies_90   = "Inimigos 90% mortos";
+AAS_EVENT_health_drop  = "Sua vida caiu baixo";
+AAS_EVENT_health_rise  = "Sua vida subiu alto";
+AAS_EVENT_armor_drop   = "Sua armadura caiu baixo";
+AAS_EVENT_armor_rise   = "Sua armadura subiu alto";
+AAS_EVENT_secret_found = "Um segredo foi encontrado";
+AAS_EVENT_powerup      = "Um poder foi encontrado";
+AAS_EVENT_weapon       = "Uma arma foi encontrada";
+AAS_EVENT_key          = "Uma chave foi encontrada";
+AAS_EVENT_backpack     = "Uma mochila foi encontrada";
+AAS_EVENT_new_armor    = "Novo tipo de armadura";
+AAS_EVENT_big_heal     = "Grande cura";
+AAS_EVENT_armor        = "Armadura foi encontrada";
 #+end_src
 
 # spellchecker:on
