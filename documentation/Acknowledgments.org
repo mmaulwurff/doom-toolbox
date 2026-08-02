@@ -121,6 +121,7 @@ The order is alphabetical.
 - TheDoomSlayer5564-A
 - TheRailgunner
 - thugsta
+- ToxicFrog
 - UndeadZeratul
 - Underqualified-Gunman
 - vapidscum

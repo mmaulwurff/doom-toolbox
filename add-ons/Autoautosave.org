@@ -679,7 +679,7 @@ OptionMenu aas_EventTogglesMenu
 |   7 | ~time_period~     | false   | Time passed            |
 |   8 | ~teleport~        | false   | Moved to another place |
 |   9 | ~manual~          | true    | Manual save            |
-|  11 | ~important~       | true    | Something rare!        |
+|  11 | ~important~       | true    | Something important!   |
 |  12 | ~level_start~     | false   | Level started          |
 |  13 | ~one_percent~     | false   | Last health percent!   |
 |  14 | ~enemies_10~      | false   | Enemies 10% down       |
@@ -801,7 +801,7 @@ AddMenuKey $AAS_TOGGLE_CONTROL_NAME aas_toggle
 
 * Strings
 
-** enu
+** English (US)
 
 #+begin_src c :tangle ../build/Autoautosave/language.txt
 
@@ -872,10 +872,9 @@ AAS_DISABLE_ALL = "Disable all";
 <<list-events("AAS_EVENT_%2$s \= \"%4$s\";")>>
 #+end_src
 
-** pt
+** Brazilian Portuguese
 
 # spellchecker:off
-
 #+begin_src c :tangle ../build/Autoautosave/language.txt
 
 // SPDX-FileCopyrightText: © 2022 generic name guy
@@ -949,7 +948,7 @@ AAS_EVENT_all_items_found = "Todos os ítens foram descobertos";
 AAS_EVENT_time_period  = "Tempo movido";
 AAS_EVENT_teleport     = "Você foi movido para outro lugar";
 AAS_EVENT_manual       = "Save manual";
-AAS_EVENT_important    = "Algo raro!";
+AAS_EVENT_important    = "Algo importante!";
 AAS_EVENT_level_start  = "Nível começado";
 AAS_EVENT_one_percent  = "Sua vida caiu para 1%";
 AAS_EVENT_enemies_10   = "Inimigos 10% mortos";
@@ -974,7 +973,6 @@ AAS_EVENT_new_armor    = "Novo tipo de armadura";
 AAS_EVENT_big_heal     = "Grande cura";
 AAS_EVENT_armor        = "Armadura foi encontrada";
 #+end_src
-
 # spellchecker:on
 
 * Sounds
@@ -1138,10 +1136,11 @@ class aas_event_source play
     result._clock      = aas_level_clock.of();
     result._scheduler  = aas_game_action_scheduler.of();
     result._voice      = aas_voice.of();
+    result._saver = aas_saver.of(result._scheduler, result._clock, last_save_time);
 
     Array<aas_event_handler> handlers =
     {
-      aas_saver .of(result._scheduler, result._clock, last_save_time),
+      result._saver,
       aas_logger.of(aas_log_function.of(), "aas_console_log_level"),
       aas_logger.of(aas_print_function.of(aas_Fonts.findSmall()), "aas_screen_level"),
       result._voice,
@@ -1223,17 +1222,19 @@ class aas_event_source play
   {
     string class_name = item.getClassName();
 
-    if (class_name == "aas_token") { return; }
-
-    if (class_name.left(11) == "aas_pickup_")
+    if (class_name.left(4) == "aas_")
     {
-      aas_token(Actor.Spawn("aas_token", item.pos)).init(aas_event.important, _handler, NULL);
-      return;
-    }
+      if (class_name.left(11) == "aas_pickup_")
+        aas_token(Actor.spawn("aas_token", item.pos)).init(aas_event.important,
+                                                           _handler,
+                                                           NULL);
 
-    if (class_name.left(12) == "aas_instant_")
-    {
-      on_event(aas_event.important);
+      else if (class_name.left(12) == "aas_instant_")
+        on_event(aas_event.important);
+
+      else if (class_name.left(19) == "aas_silent_instant_")
+        _saver.on_event(aas_event.important);
+
       return;
     }
 
@@ -1486,6 +1487,7 @@ class aas_event_source play
   private aas_game_action_scheduler _scheduler;
   private aas_save_timer    _save_timer;
   private aas_voice         _voice;
+  private aas_event_handler _saver;
 
   private int     _old_kill_count;
   private int     _old_item_count;
@@ -1799,7 +1801,8 @@ class aas_token : Inventory
 
 // Universal Autoautosave Tokens can be used by map and mod authors. When a
 // player walks over such a token, it causes a generic Autoautosave event (with
-// a message like "Something rare!").
+// a message like "Something rare!"). In settings, saves caused by tokes fall into
+// "Important" category.
 //
 // Typically, Universal Autoautosave Token is an invisible object.
 //
@@ -1812,17 +1815,15 @@ class aas_token : Inventory
 // Autoautosave and can be loaded without it.
 //
 // Universal Autosave Tokens come it two flavors:
-// 1. Pickup Tokens;
-// 2. Instant Tokens.
+// 1. Pickup Tokens
+// 2. Instant Tokens
+// 3. Silent Instant Tokens
 //
 // How it works: Autoautosave watches for things spawns, and if the beginning of
 // the class name of the spawned thing matches one of the signatures,
 // Autoautosave acts accordingly.
 
 // This is an example of Pickup Universal Autoautosave Token.
-//
-// The Pickup Universal Autoautosave Token class name must start with
-// "aas_pickup_".
 //
 // How to use:
 // 1. Define a class that starts with "aas_pickup_";
@@ -1841,16 +1842,29 @@ class aas_pickup_example : Actor
 
 // This is an example of Instant Universal Autoautosave Instant Token.
 //
-// The Pickup Universal Autoautosave Token class name must start with
-// "aas_instant_".
-//
 // How to use:
 // 1. Define a class that starts with "aas_instant_";
 // 2. Spawn this class, and autoautosave happens immediately.
 class aas_instant_example : Actor
 {
-  // Universal Instant Autoautosave Tokens do not have to exist after being
-  // spawned.
+  // These tokens do not have to exist after being spawned.
+  States
+  {
+  Spawn:
+    TNT1 A 0;
+    stop;
+  }
+}
+
+// This is an example of Silent Instant Universal Autoautosave Instant Token.
+//
+// How to use:
+// 1. Define a class that starts with "aas_instant_";
+// 2. Spawn this class, and autoautosave happens immediately, without playing
+//    the voice notification, and without printing to console and to screen.
+class aas_silent_instant_example : Actor
+{
+  // These tokens do not have to exist after being spawned.
   States
   {
   Spawn:
@@ -2228,12 +2242,8 @@ class aas_event_handlers : aas_event_handler
 
   override void on_event(int event_type)
   {
-    uint n_handlers = _handlers.Size();
-
-    for (uint i = 0; i < n_handlers; ++i)
-    {
-      _handlers[i].on_event(event_type);
-    }
+    foreach (handler : _handlers)
+      handler.on_event(event_type);
   }
 
   private array<aas_event_handler> _handlers;
