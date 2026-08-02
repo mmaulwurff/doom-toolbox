@@ -825,6 +825,8 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/10.5x.org", "build/10.5x/\\(zscript/.*zs\\)")>>
+
+#include "zscript/x5_StringUtils.zs"
 #+end_src
 
 * Sprites
