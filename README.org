@@ -127,8 +127,9 @@ To build:
    ~scons --help~
 6. Build what you need.
 
-To build an add-on PK3, for example FinalCustomDoom, use this command: ~scons
-FinalCustomDoom.pk3~. It will create FinalCustomDoom-NNNN.pk3 in directory ~build~.
+To build an add-on PK3, for example FinalCustomDoom, use this command:
+~scons FinalCustomDoom.pk3~.
+It will create FinalCustomDoom-NNNN.pk3 in directory ~build~.
 
 To build a module so you can use it in your project, for example, ~StringUtils~, use
 this command: ~scons StringUtils~. It will create directory ~StringUtils~ in

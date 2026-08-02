@@ -1804,8 +1804,8 @@ class aas_token : Inventory
 
 // Universal Autoautosave Tokens can be used by map and mod authors. When a
 // player walks over such a token, it causes a generic Autoautosave event (with
-// a message like "Something rare!"). In settings, saves caused by tokes fall into
-// "Important" category.
+// a message like "Something important!").
+// In settings, saves caused by tokens fall into "Important" category.
 //
 // Typically, Universal Autoautosave Token is an invisible object.
 //
@@ -1843,7 +1843,7 @@ class aas_pickup_example : Actor
   }
 }
 
-// This is an example of Instant Universal Autoautosave Instant Token.
+// This is an example of Instant Universal Autoautosave Token.
 //
 // How to use:
 // 1. Define a class that starts with "aas_instant_";
@@ -1859,7 +1859,7 @@ class aas_instant_example : Actor
   }
 }
 
-// This is an example of Silent Instant Universal Autoautosave Instant Token.
+// This is an example of Silent Instant Universal Autoautosave Token.
 //
 // How to use:
 // 1. Define a class that starts with "aas_instant_";
