@@ -24,9 +24,7 @@ Known issues:
 - Silliness. Basically, an impact particle has a version of a surface texture, and for
   some textures this may look silly.
 - Accuracy. Don't expect physical simulation level of precision. It's approximations
-  and compromises salad.
-
-There is room for improvement, help appreciated!
+  and compromises salad. Help appreciated.
 
 * Changelog
 

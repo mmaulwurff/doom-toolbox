@@ -34,7 +34,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 ** ~StringUtils~
 
-This class acts as a namespace for free functions.
+This class acts as a namespace for static functions.
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs :noweb-prefix no
 
@@ -170,7 +170,7 @@ static clearscope bool isWordDelimiter(int character)
 *** ~splitByWords~
 
 Splits a UTF-8 text by words. Characters considered word delimiters: ASCII control
-characters, space, comma (','), period ('.'). Delimiters are not included in the
+characters, space, comma (','), period ('.'). Delimiters aren't included in the
 output.
 
 #+begin_src c :noweb-ref StringUtilsBody
@@ -328,7 +328,7 @@ class NAMESPACE_Description
 #+end_src
 
 Optimization opportunity: add... functions append to a private string, not an array.
-Compose simply returns it.
+Compose just returns it.
 
 *** ~compose~
 
@@ -687,7 +687,7 @@ class NAMESPACE_Ascii
   it("ASCII tab", Assert("\t" == string.format("%c", Ascii.CHARACTER_TABULATION)));
   it("ASCII \\n", Assert("\n" == string.format("%c", Ascii.LINE_FEED_LF)));
 
-  it("ASCII ',' is not a control character",
+  it("ASCII ',' isn't a control character",
      Assert(!Ascii.isControlCharacter(Ascii.COMMA)));
   it("ASCII '\\n' is a control character",
      Assert(Ascii.isControlCharacter(Ascii.LINE_FEED_LF)));

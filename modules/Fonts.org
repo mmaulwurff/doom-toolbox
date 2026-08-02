@@ -7,7 +7,7 @@
 #+begin_src org :noweb-ref description
 
 This module provides functions to find small, big, and console fonts with graceful
-fallback if most suitable fonts are not found.
+fallback if most suitable fonts aren't found.
 
 Fonts module version: 1.0.0
 

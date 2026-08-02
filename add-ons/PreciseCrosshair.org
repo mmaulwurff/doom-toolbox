@@ -32,7 +32,7 @@ PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doo
 - Supports custom crosshairs;
 - Respects engine crosshair options*;
 - Options to mirror crosshairs;
-- Options to disable crosshair on slot 1 and when weapon is not ready;
+- Options to disable crosshair on slot 1 and when weapon isn't ready;
 - Option to show target health.
 
 *Except "Enable Crosshair". This option will disable only the standard crosshair.
@@ -91,7 +91,7 @@ v1.2.1:
 - fix memory leak on game loading
 
 v1.2:
-- add options to disable precise crosshair on slot 1 and when weapon is not ready
+- add options to disable precise crosshair on slot 1 and when weapon isn't ready
 - add options to flip the crosshair horizontally and vertically
 - remove debug output
 - update Readme
@@ -245,7 +245,7 @@ PC_ENABLE  = "Enabled";
 PC_MIRROR_H = "Mirror horizontally";
 PC_MIRROR_V = "Mirror vertically";
 PC_SLOT_1   = "Disable on slot 1";
-PC_NOT_READY = "Disable when weapon is not ready";
+PC_NOT_READY = "Disable when weapon isn't ready";
 PC_NO_WEAPON = "Disable when there is no weapon";
 PC_TARGET_COLOR = "Show target color instead of player";
 PC_DISTANCE_SCALE = "Scale crosshair by distance";
@@ -875,13 +875,10 @@ class pc_Settings : pc_SettingsPack
 #+begin_src c :tangle ../build/PreciseCrosshair/zscript/settings/pc_settings_base.zs
 
 // This class provides the base functions for various settings classes.
-class pc_SettingsBase
+class pc_SettingsBase abstract
 {
   // Reset CVars to their default values.
-  virtual void resetCvarsToDefaults()
-  {
-    console.printf("%s: reset is not implemented!", GetClassName());
-  }
+  abstract void resetCvarsToDefaults();
 }
 #+end_src
 

@@ -1225,7 +1225,7 @@ class cd_EffectsBase play
     return getDefaultByType(pawn().getClass());
   }
 
-  // 0 to 1 multipliers: 0.0 acts as 1.0, both meaning it effectively does nothing.
+  // 0 to 1 multipliers: 0.0 acts as 1.0, both meaning it does nothing.
   protected static double as0to1Multiplier(string stringValue)
   {
     double value = stringValue.toDouble();
@@ -1279,7 +1279,7 @@ can be loaded without errors even without FCD.
 
 Options in ~cd_Menu~ and its submenus don't behave like normal options. The
 differences are:
-- Several item types are transformed into Custom Doom settings:
+- Some item types are transformed into Custom Doom settings:
   - ~TextField~ -> double setting,
   - ~NumberField~, ~Option~ -> int setting,
   - ~ColorPicker~ -> color setting.
@@ -1290,7 +1290,7 @@ differences are:
     and have return type void (meaning it returns nothing).
   - ~EffectTime~: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~,
     ~Periodically~, or left out.
-- Setting labels in some item types are made directly-translatable. See the note in
+- Setting labels in some item types are made directly translatable. See the note in
   language.txt in [[Menus]] section.
 
 See the example below.

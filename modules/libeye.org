@@ -759,7 +759,7 @@ struct NAMESPACE_Viewport {
 #+begin_quote
 Examples included are free aiming (kinda like in Metroid Prime 3), drawing actors'
 bounding boxes and... a candle with some text over it. Just load the pk3 to test
-this. Here's an easy example:
+this. Here's an example:
 
 --- KeksDose
 #+end_quote

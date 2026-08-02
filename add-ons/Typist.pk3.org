@@ -24,7 +24,7 @@ Typist.pk3 is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolb
 
 ** How to play
 
-The default game mode is Exploration. It is like normal game play, except when you
+The default game mode is Exploration. It's like normal game play, except when you
 find enemies. When there are enemies, the game switches to Combat mode. In Combat
 mode, instead of aiming and firing, you type. What to type is displayed on screen.
 When what you type matches with an enemy, Typist.pk3 aims and fires for you. The
@@ -41,11 +41,11 @@ To accommodate the slower pace of the game, the game is automatically changed:
 - enemies move slower
 - weapons damage is increased
 - projectiles that fly towards the player move slower
-- the player cannot die, only lose health only down to 1 point (can be disabled)
+- the player can't die, only lose health only down to 1 point (can be disabled)
 
 ** Features
 
-- several predefined lessons:
+- predefined lessons:
   - 1000 English words
   - random characters (configurable)
   - arithmetic operations
@@ -57,7 +57,7 @@ To accommodate the slower pace of the game, the game is automatically changed:
 - scoring, with high scores table
 - options to enable infinite ammo, to disable enemy infighting, and to configure the
   HUD
-- several sound themes for Typist.pk3 events (can be turned off)
+- sound themes for Typist.pk3 events (can be turned off)
 - configurable colors: copy ~tt_colors.zs~, edit values, and load it together with
   Typist.pk3
 - multiplayer
@@ -69,27 +69,27 @@ it may be worth playing keyboard-only with the following assigned keys. This way
 you'll waste no time switching from mouse to keyboard and back, and your fingers are
 almost at the right typing position.
 
-- E - move forward
-- S - strafe left
-- D - move backward
-- F - strafe right
-- I - center view
-- J - turn left
-- K - turn around
-- L - turn right
+- ~E~ - move forward
+- ~S~ - strafe left
+- ~D~ - move backward
+- ~F~ - strafe right
+- ~I~ - center view
+- ~J~ - turn left
+- ~K~ - turn around
+- ~L~ - turn right
 
 ** Compatibility
 
-Typist.pk3 isn't coded specifically for any game, so there is a chance it is
+Typist.pk3 isn't coded specifically for any game, so there is a chance it's
 compatible with many UZDoom mods and games.
 
 - Typist.pk3 probably won't play well with mods and games which rely on melee combat,
   because Typist.pk3 will only aim and fire, not move.
 - Actors that are normally friendly, but changed their friendliness by scripts, don't
   count as targets.
-- Guncaster and Guncaster Vindicated are not compatible with Typist.pk3. Reason:
-  Guncaster reads player input directly from player, so weapon firing cannot be
-  emulated like for other mods. Guncaster support cannot be added without
+- Guncaster and Guncaster Vindicated aren't compatible with Typist.pk3. Reason:
+  Guncaster reads player input directly from player, so weapon firing can't be
+  emulated like for other mods. Guncaster support can't be added without
   modifications in Guncaster or the game engine.
 
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
@@ -1084,7 +1084,7 @@ class tt_HorizontalAimer : tt_WorldChanger
 
 // Implements tt_WorldChanger interface by adjusting the player pitch
 // (horizontal angle). If freelook is disabled, no pitch adjustment is done.
-// TODO: fix when is an enemy is visible, but its middle is not.
+// TODO: fix when is an enemy is visible, but its middle isn't.
 class tt_VerticalAimer : tt_WorldChanger
 {
   static tt_VerticalAimer of(tt_OriginSource targetOriginSource,
@@ -2632,7 +2632,7 @@ class tt_KnownTargets
   }
 
   // Removes a target from the list.
-  // If the target is not in the list, does nothing.
+  // If the target isn't in the list, does nothing.
   void remove(tt_Target target)
   {
     uint index = find(target);
@@ -2783,7 +2783,7 @@ class tt_TargetRegistry : tt_KnownTargetSource
     pruneNulls();
   }
 
-  // Adds targets that are not already registered to the registry.
+  // Adds targets that aren't already registered to the registry.
   //
   // Given that tt_KnownTargets.contains() is O(n), this function is O(n^2).
   // Optimization possible.
@@ -3052,7 +3052,7 @@ class tt_VisibleKnownTargetSource : tt_KnownTargetSource
     return true;
   }
 
-  // Play-const hack: Actor.isVisible(...) is not const, but should be.
+  // Play-const hack: Actor.isVisible(...) isn't const, but should be.
   private play bool isVisible(tt_KnownTarget target, Actor pawn) const
   {
     return pawn.isVisible(target.getTarget().getActor(), ALL_AROUND);
@@ -3378,7 +3378,7 @@ class tt_RandomCharactersLesson : tt_Lesson
     if (_settings.isPunctuationEnabled()) characters.appendFormat("%s", PUNCTUATION);
     if (_settings.isSymbolsEnabled())
     {
-      // UZDoom cannot handle "\\" in a string, so add it manually.
+      // UZDoom can't handle "\\" in a string, so add it manually.
       characters.AppendFormat("%s%c", SYMBOLS, tt_su_Ascii.REVERSE_SOLIDUS);
     }
     if (_settings.isCustomCharactersEnabled())
@@ -3872,7 +3872,7 @@ class tt_DelayedCombatModeSourceTestEnvironment
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
 // Implements ModeSource by taking the first mode from ModeSources
-// list that is not NONE.
+// list that isn't NONE.
 class tt_ModeCascade : tt_ModeSource
 {
   static tt_ModeCascade of(Array<tt_ModeSource> modeSources)
@@ -4141,7 +4141,7 @@ class tt_AutomapModeSource : tt_ModeSource
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
 // Represents a point in space.
-// Note that the Origin position cannot change once set.
+// Note that the Origin position can't change once set.
 class tt_Origin
 {
   static tt_Origin of(vector3 pos)
@@ -4903,7 +4903,7 @@ class tt_BoolCvar : tt_BoolSetting
     let result = new("tt_BoolCvar");
     result._cvar = Cvar.getCvar(name, playerSource.getInfo());
     if (result._cvar != NULL && result._cvar.getRealType() != Cvar.CVAR_Bool)
-      throwAbortException("%s Cvar is not bool", name);
+      throwAbortException("%s Cvar isn't bool", name);
     return result;
   }
 
@@ -4926,7 +4926,7 @@ class tt_PositiveIntCvar : tt_IntSetting
     let result = new("tt_PositiveIntCvar");
     result._cvar = Cvar.getCvar(name, playerSource.getInfo());
     if (result._cvar != NULL && result._cvar.getRealType() != Cvar.CVAR_Int)
-      throwAbortException("%s Cvar is not int", name);
+      throwAbortException("%s Cvar isn't int", name);
     return result;
   }
 
@@ -4949,7 +4949,7 @@ class tt_IntCvar : tt_IntSetting
     let result = new("tt_IntCvar");
     result._cvar = Cvar.getCvar(name, playerSource.getInfo());
     if (result._cvar != NULL && result._cvar.getRealType() != Cvar.CVAR_Int)
-      throwAbortException("%s Cvar is not int", name);
+      throwAbortException("%s Cvar isn't int", name);
     return result;
   }
 
@@ -4972,7 +4972,7 @@ class tt_FloatCvar : tt_FloatSetting
     let result = new("tt_FloatCvar");
     result._cvar = Cvar.getCvar(name, playerSource.getInfo());
     if (result._cvar != NULL && result._cvar.getRealType() != Cvar.CVAR_Float)
-      throwAbortException("%s Cvar is not float", name);
+      throwAbortException("%s Cvar isn't float", name);
     return result;
   }
 
@@ -4995,7 +4995,7 @@ class tt_StringCvar : tt_StringSetting
     let result = new("tt_StringCvar");
     result._cvar = Cvar.getCvar(name, playerSource.getInfo());
     if (result._cvar != NULL && result._cvar.getRealType() != Cvar.CVAR_String)
-      throwAbortException("%s Cvar is not string", name);
+      throwAbortException("%s Cvar isn't string", name);
     return result;
   }
 
@@ -5494,7 +5494,7 @@ class tt_TargetRadar : tt_TargetSource
   let distantTarget = tt_Target.of(distantActor);
   let targets       = env.targetRadar.getTargets();
 
-  it(tag .. ": distant actor is not in list",
+  it(tag .. ": distant actor isn't in list",
      AssertFalse(targets.contains(distantTarget)));
 
   assertSatisfaction(env.originSource.getSatisfaction(), tag);
@@ -5510,7 +5510,7 @@ class tt_TargetRadar : tt_TargetSource
   let targets         = env.targetRadar.getTargets();
   let nonLivingTarget = tt_Target.of(nonLiving);
 
-  it(tag .. ": non-living actor is not in list",
+  it(tag .. ": non-living actor isn't in list",
      AssertFalse(targets.contains(nonLivingTarget)));
 
   assertSatisfaction(env.originSource.getSatisfaction(), tag);
@@ -5526,7 +5526,7 @@ class tt_TargetRadar : tt_TargetSource
   let targets    = env.targetRadar.getTargets();
   let deadTarget = tt_Target.of(deadActor);
 
-  it(tag .. ": dead actor is not in list",
+  it(tag .. ": dead actor isn't in list",
      AssertFalse(targets.contains(deadTarget)));
 
   assertSatisfaction(env.originSource.getSatisfaction(), tag);
@@ -5887,7 +5887,7 @@ class tt_Projector : tt_TargetWidgetSource
       default: _projection = _glProjection; break;
       }
     }
-    else // cannot get render mode.
+    else // can't get render mode.
     {
       _projection = _glProjection;
     }
@@ -6180,7 +6180,7 @@ class tt_TargetWidgetRegistry : tt_TargetWidgetSource
       }
     }
 
-    // Widgets that are not new or not updated are thrown away.
+    // Widgets that aren't new or not updated are thrown away.
     tt_TargetWidgets temp = _registry;
     _registry    = _newRegistry;
     _newRegistry = temp;
@@ -6976,7 +6976,7 @@ OptionMenu tt_GeneralOptions
   StaticText "Reduce distractions"
 
   StaticText ""
-  Option     "Player cannot die", tt_buddha_enabled, OnOff
+  Option     "Player can't die", tt_buddha_enabled, OnOff
   StaticText "Applies on new level start."
 
   StaticText ""

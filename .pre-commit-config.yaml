@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+# SPDX-FileCopyrightText: © 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
 # This file contains pre-commit checks.
@@ -155,3 +155,15 @@ repos:
       files: \.org$
       language: pygrep
       entry: ",[*]"
+
+ # https://vale.sh/
+ - repo: https://github.com/vale-cli/vale
+   rev: v3.17.0
+   hooks:
+    - id: vale
+      name: vale sync
+      pass_filenames: false
+      args: [sync]
+    - id: vale
+      args: [--output=line]
+      exclude: 'documentation/CodeOfConduct\.org'

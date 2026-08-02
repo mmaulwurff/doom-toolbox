@@ -12,8 +12,8 @@
 Nomina is an add-on that helps with enemy names (tags).
 
 Features:
-- [[Automatic tags]]: if an enemy doesn't have a tag, Nomina assigns to beautify its
-  class name and use it is a tag.
+- [[Automatic tags]]: if an enemy doesn't have a tag, Nomina tries to beautify its
+  class name and use it as a tag.
 - [[In-game enemy tag correction]]: use ~na_rename <Class> <NewName>~ console command to
   assign a tag to a class manually.
 - [[Tag databases]]: load ~na_data.json~ JSON lump (file) that contains class-tag pairs.

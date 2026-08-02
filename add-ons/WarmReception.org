@@ -12,7 +12,7 @@
 WarmReception is a minimod for UZDoom that alters enemy behavior on level start.
 
 With this mod, you can either make your life harder by aggravating every enemy from
-the start, or effectively disable hot starts.
+the start or disable hot starts.
 
 WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
@@ -23,7 +23,7 @@ Options:
 - Turn enemies to you at level start.
 
 Known issues:
-- [[https://github.com/UZDoom/UZDoom/issues/1238][Actor.CheckSight freezes RAMP 2024]]
+- [[https://github.com/UZDoom/UZDoom/issues/1238][~Actor.CheckSight~ freezes RAMP 2024]]
 
 * Changelog
 

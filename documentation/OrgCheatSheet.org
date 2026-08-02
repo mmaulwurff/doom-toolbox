@@ -1,4 +1,4 @@
-# Lines starting with # are comments, they are not exported to HTML.
+# Lines starting with # are comments, they aren't exported to HTML.
 # Some comments have special meaning, like "#+title:", "#+begin_src", "#+end_src".
 #+title: Org Cheat Sheet
 

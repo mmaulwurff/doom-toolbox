@@ -44,7 +44,7 @@ Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]
 
 ** Note for Weapon Mod Authors
 
-If you want Gearbox to support your mod out of the box, assign Inventory.AltHudIcon
+If you want Gearbox to support your mod out of the box, assign ~Inventory.AltHudIcon~
 for your weapons! Tag property is also nice to have.
 
 ** Known Issues
@@ -55,7 +55,7 @@ for your weapons! Tag property is also nice to have.
   mods. The solution is the same: disable time PyWeaponWheel's time freezing.
 - Weapon icons in wheel aren't affected by "HUD preserves aspect ration" option.
 - Mouse input in wheel in multiplayer causes screen shake.
-- Cheat codes that contain keys assigned for weapon slots are not supported as
+- Cheat codes that contain keys assigned for weapon slots aren't supported as
   Gearbox blocks them.
 - Freezing enemies when menu is opened doesn't play well with ~freeze~ console
   command: everything may stay frozen.
@@ -1483,7 +1483,7 @@ class gb_InventoryMenu
 #+begin_src c :tangle ../build/Gearbox/zscript/inventory_user.zs
 
 // We could use inventory items directly, but player cannot use items when
-// totally frozen. Therefore, we have to wait until player is not frozen.
+// totally frozen. Therefore, we have to wait until player isn't frozen.
 class gb_InventoryUser play
 {
   static gb_InventoryUser from()
@@ -2808,7 +2808,7 @@ class gb_BlockyView
     tag.split(words, " ", Tok_SkipEmpty);
 
     // Start filling lines with words from bottom to top. If the word doesn't
-    // fit into the line, it is pushed into the new top line.
+    // fit into the line, it's pushed into the new top line.
     Array<string> lines;
     int nWords = words.size();
     lines.push(words[nWords - 1]);

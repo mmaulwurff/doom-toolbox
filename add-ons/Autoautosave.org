@@ -18,7 +18,7 @@
 Universal autosaver.
 
 It works as a configurable checkpoint system.
-It is designed to be compatible with any monster and weapon mod, and any map.
+It's designed to be compatible with any monster and weapon mod, and any map.
 
 Features:
 - autosave on various events: enemies alerted and killed, health or armor drops
@@ -404,7 +404,7 @@ v0.2
 - 2018-03-21 implement autosave on radsuit pickup
 - 2018-03-21 implement autosave on heal > 25
 - 2018-03-21 implement autosave on armor type change
-- 2018-03-21 do not autosave if 30 seconds didn't pass
+- 2018-03-21 don't autosave if 30 seconds didn't pass
 - 2018-03-21 implement autosave on secret found
 - 2018-03-21 implement autosave on all monsters killed and all items found
 
@@ -1834,7 +1834,7 @@ class aas_token : Inventory
 //    walks over this spot.
 class aas_pickup_example : Actor
 {
-  // Universal Autoautosave Tokens do not have to exist after being spawned.
+  // Universal Autoautosave Tokens don't have to exist after being spawned.
   States
   {
   Spawn:
@@ -1850,7 +1850,7 @@ class aas_pickup_example : Actor
 // 2. Spawn this class, and autoautosave happens immediately.
 class aas_instant_example : Actor
 {
-  // These tokens do not have to exist after being spawned.
+  // These tokens don't have to exist after being spawned.
   States
   {
   Spawn:
@@ -1867,7 +1867,7 @@ class aas_instant_example : Actor
 //    the voice notification, and without printing to console and to screen.
 class aas_silent_instant_example : Actor
 {
-  // These tokens do not have to exist after being spawned.
+  // These tokens don't have to exist after being spawned.
   States
   {
   Spawn:

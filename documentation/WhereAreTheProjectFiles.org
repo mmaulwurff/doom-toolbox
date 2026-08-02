@@ -11,7 +11,7 @@ Sheet]] for Org mode syntax.
 
 ** Logical code structure
 
-You can put related program components together, even if they are in different
+You can put related program components together, even if they're in different
 languages or file formats. Like this: conventional code structure:
 - application/file1: feature1 documentation, feature2 documentation;
 - application/file2: feature1 source code, feature2 source code;
@@ -39,16 +39,16 @@ To file sections, to other files, URLs.
 
 ** HTML documentation
 
-Export to HTML produces a very nicely formatted document. Also, GitHub shows .org
-files as a formatted HTML page, though macros and ~:noexport:~ sections are not
+Export to HTML produces a formatted document. Also, GitHub shows .org
+files as a formatted HTML page, though macros and ~:noexport:~ sections aren't
 supported.
 
 * Cons
 
 ** Limited text editor choice
 
-The best text editor choice for Org files is Emacs. There are plugins for some other
-text editors with varying level of support.
+The best text editor choice for Org files is Emacs. Some other text editors have
+plugins with varying level of support.
 
 ** Limited project size
 
@@ -72,5 +72,5 @@ are extracted from the Org files, not line numbers in the Org file.
 
 ** Licensing mess
 
-If you want to license your project properly and apply different licenses to project
-source files and documentation, it's a hassle to do that.
+If you want apply different licenses to project source files and documentation,
+it's a hassle to do that.

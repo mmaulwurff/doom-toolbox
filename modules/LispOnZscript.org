@@ -106,7 +106,7 @@ class tl_Test
     cases.insert("()",  "Error: unexpected empty list.");
     cases.insert("(",   "Error: unmatched \"(\".");
     cases.insert(")",   "Error: unexpected \")\".");
-    cases.insert("(2)", "Error: \"2\" is not a function.");
+    cases.insert("(2)", "Error: \"2\" isn't a function.");
     cases.insert("(+ 1 2 3)",
                  "Error: TODO: add support for different number of parameters.");
 
@@ -387,7 +387,7 @@ class tl_Eval
         if (result is "tl_Error") return result;
         let resultList = tl_List(result);
 
-        if (resultList == NULL) return error("car argument is not a list");
+        if (resultList == NULL) return error("car argument isn't a list");
         if (resultList.expressions.size() < 1) return error("empty list for car");
 
         return resultList.expressions[0];
@@ -401,7 +401,7 @@ class tl_Eval
         if (result is "tl_Error") return result;
         let resultList = tl_List(result);
 
-        if (resultList == NULL) return error("cdr argument is not a list");
+        if (resultList == NULL) return error("cdr argument isn't a list");
         if (resultList.expressions.size() < 1) return error("empty list for cdr");
 
         resultList.expressions.delete(0);
@@ -556,7 +556,7 @@ class tl_Eval
 
     let procFunction = tl_Function(proc);
     if (procFunction == NULL)
-      return error(string.format("\"%s\" is not a function", proc.toString()));
+      return error(string.format("\"%s\" isn't a function", proc.toString()));
 
     return procFunction.execute(exps);
   }
@@ -860,7 +860,7 @@ class tl_AutoFunction : tl_Function
     let objectExpression = tl_Object(exps[0]);
 
     if (objectExpression == NULL)
-      return error(string.format("cannot call \"%s\": \"%s\" is not an object",
+      return error(string.format("cannot call \"%s\": \"%s\" isn't an object",
                                  name,
                                  exps[0].toString()));
     Object anObject = objectExpression.value;

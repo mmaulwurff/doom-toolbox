@@ -12,10 +12,11 @@ The goal of DoomToolbox is to increase replayability of compatible games and mod
 make gameplay more enjoyable, and to have fun both while playing and developing this
 project. The development is done under "Move slow and fix things" flag.
 
-DoomToolbox is free and open source software. Add-ons are mostly licensed under
-[[file:LICENSES/GPL-3.0-only.txt][GPLv3]]. Modules are mostly licensed under [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]. See ~SPDX-License-Identifier~
-tag in each .org file for details. For third-party resources, such as image and sound
-files, see ~REUSE.toml~ files in their directories for licenses.
+DoomToolbox is free and open source software. It's licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]] and
+[[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]].
+See ~SPDX-License-Identifier~ tag in each .org file for details.
+For third-party resources, such as image and sound files, see ~REUSE.toml~ files in
+their directories for licenses.
 
 [[file:documentation/Acknowledgments.org][Acknowledgments]]
 
@@ -61,7 +62,7 @@ and doesn't use "AI" tools for development.
 | [[file:add-ons/ClematisM.org][ClematisM]]        | ZScript unit test framework                           |       |
 | [[file:add-ons/DoomDoctor.org][DoomDoctor]]       | mod development and debugging utilities               |       |
 
-Add-ons can be included and used in your own projects. However, this is not
+Add-ons can be included and used in your own projects. However, this isn't
 recommended, because when add-ons update, players won't be able to use new versions
 with your project until you update the included add-on inside your project.
 
@@ -153,7 +154,7 @@ Used languages:
 - add-ons, modules: ZScript (main), Emacs Lisp (supporting macros)
 - build: Python (main), Emacs Lisp (helper functions)
 
-Python or Emacs Lisp knowledge is not needed to contribute to add-ons and modules.
+Python or Emacs Lisp knowledge isn't needed to contribute to add-ons and modules.
 
 [[https://prek.j178.dev/][prek]] must be installed in Git repository for pre-commit checks.
 

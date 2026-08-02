@@ -22,7 +22,7 @@ TargetSpy shows enemy health, tag, and other things.
 TargetSpy is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 Features:
-- extensible modular structure;
+- extendable modular structure;
 - target finders: autoaim, shootable, non-shootable, no blockmap;
 - target filters: blocklist, monsters, light level, health, hidden, enemies, dormant,
   active;
@@ -37,7 +37,7 @@ Features:
 TargetSpy can be extended by declaring special classes. To be detected by TargetSpy,
 a class must inherit Actor and meet specific requirements, listed below.
 
-There are four types of TargetSpy extension classes:
+TargetSpy supports four types of extension classes:
 
 1. *Finders* find targets. They must have a name that starts with ~tsFinder_~ and
    have ~static Actor find()~ function.
@@ -64,12 +64,12 @@ There are four types of TargetSpy extension classes:
    contains.
 
 Note that Finders, Filters, and Getters classes don't depend on TargetSpy types in
-any way, and therefore can be safely included in other mods to provide TargetSpy
+any way, and therefore can be included in other mods to provide TargetSpy
 integration when loaded together.
 
-Extension classes are not meant to be instantiated, only their static functions are
+Extension classes aren't meant to be instantiated, only their static functions are
 used. Extension classes can have a translatable user string defined in ~LANGUAGE~
-lump. The string key is simply a class name. Extension classes are automatically
+lump. The string key is the class name. Extension classes are automatically
 added to TargetSpy option menus, and their toggle state is saved in game
 configuration.
 
@@ -678,7 +678,7 @@ class tsGetter_HealthAndMax : Actor
 
 *** Silent health and max health
 
-This getter is somewhat special. It is intended to:
+This getter is somewhat special. It's intended to:
 - carry health and max health even when other health getters are disabled.
 - be invisible.
 - be always on.
@@ -1686,7 +1686,7 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddFinder(class<Actor> aClass)
   {
-    // This class replaces something: skip, it is handled on replacee side.
+    // This class replaces something: skip, it's handled on replacee side.
     if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
@@ -1705,7 +1705,7 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddFilter(class<Actor> aClass)
   {
-    // This class replaces something: skip, it is handled on replacee side.
+    // This class replaces something: skip, it's handled on replacee side.
     if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
@@ -1723,7 +1723,7 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddGetter(class<Actor> aClass)
   {
-    // This class replaces something: skip, it is handled on replacee side.
+    // This class replaces something: skip, it's handled on replacee side.
     if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
@@ -1746,7 +1746,7 @@ class ts_EventHandler : StaticEventHandler
 
   private bool tryAddView(class<Actor> aClass)
   {
-    // This class replaces something: skip, it is handled on replacee side.
+    // This class replaces something: skip, it's handled on replacee side.
     if (getReplacee(aClass) != aClass) return true;
 
     // If this class is replaced, use that replacement but keep the original name.
@@ -2121,7 +2121,7 @@ class ts_Projector
 
   void prepare()
   {
-    // Projection type detection is not quite right here.
+    // Projection type detection isn't quite right here.
     // vid_rendermode contains more complex information.
     // If something breaks, look here.
     if (mCvarRenderer != NULL)
@@ -2685,10 +2685,10 @@ class ts_GettersOrderElement : OptionMenuItemCommand
 Configuration is a way to customize how TargetSpy processes finders, filters,
 getters and views. By default these classes are enabled or disabled by user choice.
 Configuration can force them to be on or off, and replace them with another class.
-If a class is forced on, it is always active and hidden from option menus.
-If a class is forced off, it is always disabled and hidden from option menus.
+If a class is forced on, it's always active and hidden from option menus.
+If a class is forced off, it's always disabled and hidden from option menus.
 
-Several configurations may be loaded at once. If more than one configuration
+More than one configuration may be loaded at once. If more than one configuration
 configures a class, the last loaded configuration wins.
 
 Configuration lump has name ~ts_config~ and is in JSON object format.
