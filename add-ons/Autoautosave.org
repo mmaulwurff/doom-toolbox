@@ -1227,7 +1227,7 @@ class aas_event_source play
 
     if (class_name.left(11) == "aas_pickup_")
     {
-      aas_token(Actor.Spawn("aas_token", item.pos)).init(aas_event.important, _handler, item);
+      aas_token(Actor.Spawn("aas_token", item.pos)).init(aas_event.important, _handler, NULL);
       return;
     }
 
@@ -1757,6 +1757,7 @@ class aas_token : Inventory
     _event_type = type;
     _handler    = handler;
     _origin     = origin;
+    _connected  = origin != NULL;
 
     return self;
   }
@@ -1772,6 +1773,9 @@ class aas_token : Inventory
   {
     Super.tick();
 
+    if (!_connected)
+      return;
+
     if (_origin == NULL)
     {
       destroy();
@@ -1784,6 +1788,7 @@ class aas_token : Inventory
 
   private int _event_type;
   private Actor _origin;
+  private bool _connected;
   private aas_event_handler _handler;
 }
 #+end_src
