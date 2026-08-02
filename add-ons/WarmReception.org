@@ -4,7 +4,7 @@
 
 #+name: meta
 #+begin_src js
-{ "old_version": "0.4.0" }
+{ "version": "0.4.0" }
 #+end_src
 
 * About
@@ -16,13 +16,43 @@ the start, or effectively disable hot starts.
 
 WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-** Options
-
+Options:
 - Wake every enemy on a level (optionally even enemies in ambush), or
 - Don't change original behavior, or
 - Turn away enemies that look at you at level start, or
 - Turn enemies to you at level start.
 
+Known issues:
+- [[https://github.com/UZDoom/UZDoom/issues/1238][Actor.CheckSight freezes RAMP 2024]]
+
+* Changelog
+
+v0.4.0
+- made more multiplayer-friendly
+- add separate switches for enemies at start, in ambush, and others
+- ignore visibility for checks
+- add random turn option
+
+v0.3.1
+- fix Warm Reception affecting summoned actors
+- update build script
+- add Downloads shield to Readme
+
+v0.3
+- add an option to kill monsters at start
+- add an option to remove enemies at start
+- add description to build.sh and fix shellcheck warnings
+
+v0.2.1
+- fix modifying behavior of modded enemies
+
+v0.2
+- add an option to imitate hot starts
+- add an option to wake even enemies in ambush
+- fix turning away monsters
+- lower GZDoom version requirement
+
+v0.1: initial release
 
 * [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
 
