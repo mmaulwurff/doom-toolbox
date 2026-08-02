@@ -6,7 +6,7 @@
 
 #+begin_src org :noweb-ref description
 
-StringUtils module version: 1.4.0
+StringUtils module version: 1.5.0
 
 StringUtils is a part of DoomToolbox.
 The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
@@ -283,6 +283,36 @@ static clearscope int getCodePointAt(string aString, int index)
   it("getCodePointAt 3", AssertEval(su.getCodePointAt("мышь", 3), "==", codePoint3));
   it("getCodePointAt -1", AssertEval(su.getCodePointAt("мышь", -1), "==", 0));
   it("getCodePointAt end", AssertEval(su.getCodePointAt("мышь", 4), "==", 0));
+}
+#+end_src
+
+*** begins with
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope bool beginsWith(string aString,
+                                  string subString,
+                                  bool caseSensitive = false)
+{
+  if (!caseSensitive)
+  {
+    aString = aString.makeLower();
+    subString = subString.makeLower();
+  }
+  return aString.left(subString.length()) == subString;
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  it ("beginsWith: yes", Assert(su.beginsWith("begins with", "BEGINS")));
+  it ("beginsWith: no", Assert(!su.beginsWith("begins with", "ends")));
+  it ("beginsWith: case: yes", Assert(su.beginsWith("begins with", "beg", true)));
+  it ("beginsWith: case: no", Assert(!su.beginsWith("begins with", "BEG", true)));
+  it ("beginsWith: unicode: yes", Assert(su.beginsWith("мышь", "Мы")));
+  it ("beginsWith: unicode: no", Assert(!su.beginsWith("мышь", "они")));
+  it ("beginsWith: empty string", Assert(!su.beginsWith("", "?")));
+  it ("beginsWith: empty substring", Assert(su.beginsWith("?", "")));
+  it ("beginsWith: empty both", Assert(su.beginsWith("", "")));
 }
 #+end_src
 

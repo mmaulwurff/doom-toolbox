@@ -238,7 +238,7 @@ class dd_Troublemaker : EventHandler
   {
     string command = event.name;
 
-    if (command.left(3) != "dd_") return;
+    if (!dd_su.beginsWith(command, "dd_")) return;
 
     if      (command == "dd_nullify_player") nullifyPlayer();
     else if (command == "dd_spawn_null_thing") nullifySpawnedThing();

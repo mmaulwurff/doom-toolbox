@@ -4,7 +4,10 @@
 
 #+name: meta
 #+begin_src js
-{ "old_version": "0.11.2" }
+{
+  "old_version": "0.11.2",
+  "depends": { "StringUtils": "x5_" }
+}
 #+end_src
 
 * About
@@ -171,7 +174,7 @@ class x5_EventHandler : EventHandler
 
   override void networkProcess(ConsoleEvent event)
   {
-    if (event.name.left(3) != "x5_") return;
+    if (!x5_su.beginsWith(event.name, "x5_")) return;
 
     mTypeMultipliers = Dictionary.fromString(event.name.mid(3));
   }
@@ -868,7 +871,7 @@ class x5t_Test : StaticEventHandler
       mTest = new ("x5t_Clematis");
       mTest.describe("10.5x test");
     }
-    else if (event.name.left(10) == "x5t_expect")
+    else if (x5_su.beginsWith(event.name, "x5t_expect"))
     {
       let expected = Dictionary.fromString(x5t_Quoter.quote(event.name.mid(10)));
       for (let i = DictionaryIterator.create(expected); i.next();)
@@ -942,7 +945,7 @@ class x5t_Quoter : EventHandler
 
   override void NetworkProcess(ConsoleEvent event)
   {
-    if (event.name.left(3) == "x5r")
+    if (x5_su.beginsWith(event.name, "x5r"))
       sendNetworkEvent("x5_"..quote(event.name.mid(3)));
   }
 }

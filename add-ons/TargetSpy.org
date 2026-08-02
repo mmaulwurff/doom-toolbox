@@ -2809,7 +2809,7 @@ clearscope void applyConfiguration(string prefix,
 {
   foreach (className, isEnabled : mConfiguration)
   {
-    if (className.left(prefix.length()) != prefix) continue;
+    if (!ts_su.beginsWith(className, prefix)) continue;
 
     string shortClassName = ts_Classes.shorten(className);
     int index = disabledClasses.find(shortClassName);

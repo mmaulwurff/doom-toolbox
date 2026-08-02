@@ -310,7 +310,7 @@ class tt_EventHandler : EventHandler
   {
     string command = event.Name;
 
-    if (command.left(3) != "tt_") return;
+    if (!tt_su_su.beginsWith(command, "tt_")) return;
 
     if      (command == "tt_unlock_mode"  ) _playerHandler.setMode(tt_Mode.None);
     else if (command == "tt_force_combat" ) _playerHandler.setMode(tt_Mode.Combat);

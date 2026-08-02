@@ -1554,7 +1554,7 @@ class gb_NeteventProcessor play
 
   int process(ConsoleEvent event)
   {
-    if (event.name.left(3) != "gb_") return InputNothing;
+    if (!gb_su.beginsWith(event.name, "gb_")) return InputNothing;
 
     Array<string> args;
     event.name.split(args, ":");

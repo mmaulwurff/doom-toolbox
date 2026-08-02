@@ -6,7 +6,10 @@
 #+begin_src js
 {
   "old_version": "2.0.0",
-  "depends": { "Fonts": "aas_" }
+  "depends": {
+    "Fonts": "aas_",
+    "StringUtils": "aas_"
+  }
 }
 #+end_src
 
@@ -1222,17 +1225,17 @@ class aas_event_source play
   {
     string class_name = item.getClassName();
 
-    if (class_name.left(4) == "aas_")
+    if (aas_su.beginsWith(class_name, "aas_"))
     {
-      if (class_name.left(11) == "aas_pickup_")
+      if (aas_su.beginsWith(class_name, "aas_pickup_"))
         aas_token(Actor.spawn("aas_token", item.pos)).init(aas_event.important,
                                                            _handler,
                                                            NULL);
 
-      else if (class_name.left(12) == "aas_instant_")
+      else if (aas_su.beginsWith(class_name, "aas_instant_"))
         on_event(aas_event.important);
 
-      else if (class_name.left(19) == "aas_silent_instant_")
+      else if (aas_su.beginsWith(class_name, "aas_silent_instant_"))
         _saver.on_event(aas_event.important);
 
       return;
@@ -2508,6 +2511,7 @@ version 4.14.3
 <<../tools/scripts.org:include("add-ons/Autoautosave.org", "build/Autoautosave/\\(zscript/.*zs\\)")>>
 
 #include "zscript/aas_Fonts.zs"
+#include "zscript/aas_StringUtils.zs"
 #+end_src
 
 #+begin_src c :tangle ../build/Autoautosave/mapinfo.txt

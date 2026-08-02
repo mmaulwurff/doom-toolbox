@@ -6,7 +6,10 @@
 #+begin_src js
 {
   "old_version": "1.0.0",
-  "depends": { "PlainTranslator": "cd_" }
+  "depends": {
+    "PlainTranslator": "cd_",
+    "StringUtils": "cd_"
+  }
 }
 #+end_src
 
@@ -793,6 +796,7 @@ version 4.14.3
 <<../tools/scripts.org:include("add-ons/FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
 
 #include "zscript/cd_PlainTranslator.zs"
+#include "zscript/cd_StringUtils.zs"
 #+end_src
 
 Note: ~cd_PlainTranslator.zs~ must be installed externally.
@@ -1130,7 +1134,7 @@ class cd_EventHandler : StaticEventHandler
 
   override void networkProcess(ConsoleEvent event)
   {
-    if (event.name.left(2) ~== "cd")
+    if (cd_su.beginsWith(event.name, "cd"))
     {
       let [className, functionName, value, when] = parseEffect(event.name);
       callByName(className, functionName, value);
@@ -1382,6 +1386,8 @@ class cde_Effects
 * Run :noexport:
 
 #+begin_src text :tangle ../build/FinalCustomDoomTest/commands.txt
-wait 2; openmenu cd_menu
-wait 2; quit
+wait 2; map map01
+wait 4; summon doomimp
+wait 6; openmenu cd_menu
+wait 8; quit
 #+end_src
