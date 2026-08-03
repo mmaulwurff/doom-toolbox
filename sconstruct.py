@@ -152,8 +152,7 @@ def add_pack_target(org_file, main_target):
     meta = extract_meta(org_file)
     if meta and 'version' in meta:
       return f'v{meta["version"]}'
-    else:
-      return git.Repo().head.object.hexsha[:10]
+    return git.Repo().head.object.hexsha[:10]
 
   def pack(target, source, env):
     shutil.copytree(
@@ -165,8 +164,8 @@ def add_pack_target(org_file, main_target):
     os.makedirs(licenses_path, exist_ok=True)
     project = reuse.project.Project.from_directory(build_path)
     report = reuse.report.ProjectReport.generate(project)
-    for license in report.used_licenses:
-      shutil.copy('LICENSES/' + license + '.txt', licenses_path)
+    for used_license in report.used_licenses:
+      shutil.copy('LICENSES/' + used_license + '.txt', licenses_path)
 
     # Note: project and report are duplicated intentionally
     # to re-read the directory after copying licenses.
@@ -207,10 +206,7 @@ def add_pack_target(org_file, main_target):
 
 
 def make_check_compatibility_target():
-  names = []
-  for org_file in Glob('add-ons/*.org'):
-    names.append(make_project_name(org_file))
-
+  names = [make_project_name(org_file) for org_file in Glob('add-ons/*.org')]
   projects = ['./build/' + name for name in names]
 
   def check_compatibility(target, source, env):
@@ -224,7 +220,8 @@ def make_check_compatibility_target():
       './tools/miniwad.wad',
       '+wait 2; map map01; wait 2; save test; wait 2; load test; wait 2; quit',
       '-file',
-    ] + projects
+      *projects,
+    ]
 
     if not Path('build/config.ini').exists():
       shutil.copy('tools/config.ini', 'build/config.ini')

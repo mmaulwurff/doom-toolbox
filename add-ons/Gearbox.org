@@ -129,7 +129,7 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Gearbox/zscript/event_processor.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/font_selector.zs :exports none
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_font_selector.zs :exports none
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/freezer.zs :exports none
