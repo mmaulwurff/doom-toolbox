@@ -121,7 +121,9 @@ SPDX-License-Identifier: LicenseRef-libeye
 // <<description>>
 #+end_src
 
-** GlScreen
+# vale off
+** GL screen
+# vale on
 
 #+begin_src c :tangle ../build/libeye/libeye.zs
 
@@ -277,7 +279,7 @@ class NAMESPACE_GlScreen : NAMESPACE_ProjScreen {
 }
 #+end_src
 
-** SwScreen
+** Software screen
 
 #+begin_src c :tangle ../build/libeye/libeye.zs
 
@@ -408,7 +410,7 @@ class NAMESPACE_SwScreen : NAMESPACE_ProjScreen {
 }
 #+end_src
 
-** ProjScreen
+** Projection screen
 
 #+begin_src c :tangle ../build/libeye/libeye.zs
 
@@ -822,7 +824,7 @@ version 4.14.3
 wait 2; map map01; wait 2; quit
 #+end_src
 
-** ShowBox
+** Show box
 
 #+begin_src c :tangle ../build/libeyeTest/bounding_box.zs
 
@@ -1116,7 +1118,7 @@ class ShowBox : EventHandler {
 }
 #+end_src
 
-** FreeAim
+** Free aim
 
 #+begin_quote
 
@@ -1348,7 +1350,7 @@ class FreeAim : EventHandler {
 }
 #+end_src
 
-** NoTurnPlayer
+** Not turning player
 
 #+begin_src c :tangle ../build/libeyeTest/no_turn_player.zs
 
@@ -1463,7 +1465,7 @@ class NoTurnRocket : DoomImpBall {
 }
 #+end_src
 
-** TextCandle
+** Text candle
 
 #+begin_src c :tangle ../build/libeyeTest/text_candle.zs
 

@@ -23,7 +23,7 @@ Gearbox provides more convenient ways to select weapons and items.
 
 Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-** How to Use
+** How to use
 
 1. open the menu by assigned key, or by next/previous weapon keys, if enabled in
    options
@@ -42,12 +42,12 @@ Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]
 - Inventory item selection
 - Ability to drop items or weapons from the menu
 
-** Note for Weapon Mod Authors
+** Note for weapon mod authors
 
 If you want Gearbox to support your mod out of the box, assign ~Inventory.AltHudIcon~
 for your weapons! Tag property is also nice to have.
 
-** Known Issues
+** Known issues
 
 - [[https://forum.zdoom.org/viewtopic.php?f=43&t=61061][PyWeaponWheel v0.3]] overrides time freezing. If you are using both mods and want to
   freeze time with Gearbox, set PyWeaponWheel's option "Freeze when wheel is open"
@@ -60,7 +60,7 @@ for your weapons! Tag property is also nice to have.
 - Freezing enemies when menu is opened doesn't play well with ~freeze~ console
   command: everything may stay frozen.
 
-** Creating a Soundpack
+** Creating a soundpack
 
 To create a new soundpack, replace the GB_PACK string in language.txt with your
 soundpack's name, then replace the sndinfo definitions with your own sounds, for
@@ -588,7 +588,9 @@ GB_CONSOLE_FONT   = "Console font";
 GB_BIG_FONT       = "Big font";
 #+end_src
 
+# vale off
 ** Brazilian Portuguese
+# vale on
 
 # spellchecker:off
 #+begin_src c :tangle ../build/Gearbox/language.txt
@@ -921,7 +923,7 @@ class gb_Changer play
 }
 #+end_src
 
-*** CustomWeaponOrderStorage
+*** Custom weapon order storage
 
 #+begin_src c :tangle ../build/Gearbox/zscript/custom_weapon_order_storage.zs
 
@@ -1084,7 +1086,7 @@ class gb_CustomWeaponOrderStorage
 nosave string gb_custom_weapon_order = "";
 #+end_src
 
-*** EventProcessor
+*** Event processor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/event_processor.zs
 
@@ -1107,7 +1109,7 @@ class gb_EventProcessor
 }
 #+end_src
 
-*** FontSelector
+*** Font selector
 
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_font_selector.zs
 
@@ -1300,7 +1302,7 @@ class gb_Input
 }
 #+end_src
 
-*** InputProcessor
+*** Input processor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/input_processor.zs
 
@@ -1340,7 +1342,7 @@ class gb_InputProcessor
 }
 #+end_src
 
-*** InventoryMenu
+*** Inventory menu
 
 #+begin_src c :tangle ../build/Gearbox/zscript/inventory_menu.zs
 
@@ -1478,7 +1480,7 @@ class gb_InventoryMenu
 }
 #+end_src
 
-*** InventoryUser
+*** Inventory user
 
 #+begin_src c :tangle ../build/Gearbox/zscript/inventory_user.zs
 
@@ -1539,7 +1541,7 @@ class gb_InventoryUser play
 }
 #+end_src
 
-*** NeteventProcessor
+*** Netevent processor
 
 #+begin_src c :tangle ../build/Gearbox/zscript/netevent_processor.zs
 
@@ -1965,7 +1967,7 @@ class gb_Sounds
 }
 #+end_src
 
-*** ViewModel
+*** View model
 
 #+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs
 
@@ -1989,7 +1991,7 @@ struct gb_ViewModel
 }
 #+end_src
 
-*** WeaponData
+*** Weapon data
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_data.zs
 
@@ -2000,7 +2002,7 @@ struct gb_WeaponData
 }
 #+end_src
 
-*** WeaponDataLoader
+*** Weapon data loader
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_data_loader.zs
 
@@ -2124,7 +2126,7 @@ struct gb_WeaponInfo
 }
 #+end_src
 
-*** WeaponMenu
+*** Weapon menu
 
 #+begin_src c :tangle ../build/Gearbox/zscript/weapon_menu.zs
 
@@ -2551,7 +2553,7 @@ class gb_WeaponMenu
 
 ** Display
 
-*** BlockyView
+*** Blocky view
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/blocky_view.zs
 
@@ -3128,7 +3130,7 @@ class gb_Dim
 }
 #+end_src
 
-*** FadeInOut
+*** Fade in out
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/fade_in_out.zs
 
@@ -3155,7 +3157,7 @@ class gb_FadeInOut
 }
 #+end_src
 
-*** TextView
+*** Text view
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/text_view.zs
 
@@ -3379,7 +3381,7 @@ class gb_Player
 }
 #+end_src
 
-*** WeaponWatcher
+*** Weapon watcher
 
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/weapon_watcher.zs
 
@@ -3404,7 +3406,7 @@ class gb_WeaponWatcher
 }
 #+end_src
 
-** EventHandler
+** Event handler
 
 #+begin_src c :tangle ../build/Gearbox/zscript/event_handler.zs
 
@@ -4031,7 +4033,7 @@ class gb_ServiceIterator
 }
 #+end_src
 
-*** IconService
+*** Icon service
 
 #+begin_src c :tangle ../build/Gearbox/zscript/service/icon_service.zs
 
@@ -4080,7 +4082,7 @@ class gb_IconService : gb_Service
 }
 #+end_src
 
-*** HideService
+*** Hide service
 
 #+begin_src c :tangle ../build/Gearbox/zscript/service/hide_service.zs
 
@@ -4201,7 +4203,7 @@ class gb_Log
 }
 #+end_src
 
-*** TextureCache
+*** Texture cache
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/texture_cache.zs
 
@@ -4344,7 +4346,7 @@ class gb_WheelController
 }
 #+end_src
 
-*** WheelControllerModel
+*** Wheel controller model
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/controller_model.zs
 
@@ -4355,7 +4357,7 @@ struct gb_WheelControllerModel
 }
 #+end_src
 
-*** WheelIndexer
+*** Wheel indexer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/indexer.zs
 
@@ -4584,7 +4586,7 @@ class gb_WheelIndexer
 }
 #+end_src
 
-*** WheelInnerIndexer
+*** Wheel inner indexer
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/inner_indexer.zs
 
@@ -4605,7 +4607,7 @@ class gb_WheelInnerIndexer
 }
 #+end_src
 
-*** MultiWheel
+*** Multi wheel
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel.zs
 
@@ -4656,7 +4658,7 @@ class gb_MultiWheel
 }
 #+end_src
 
-*** MultiWheelMode
+*** Multi wheel mode
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/multiwheel_mode.zs
 
@@ -4835,7 +4837,7 @@ class gb_Text
 }
 #+end_src
 
-*** WheelView
+*** Wheel view
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs
 

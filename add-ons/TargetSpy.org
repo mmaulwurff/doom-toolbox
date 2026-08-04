@@ -1922,7 +1922,7 @@ class ts_ClassList
 }
 #+end_src
 
-*** Existing Cvar
+*** Existing cvar
 
 TODO: move to a module?
 
@@ -1952,7 +1952,7 @@ class ts_Utils
 }
 #+end_src
 
-**** getActorMaxHealth
+**** Get actor max health
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -1977,7 +1977,7 @@ static play int getActorMaxHealth(Actor anActor)
 }
 #+end_src
 
-**** getColor
+**** Get color
 
 #+begin_src c :noweb-ref utils-functions
 
@@ -2169,7 +2169,7 @@ class ts_ViewUtils ui
 }
 #+end_src
 
-**** drawText
+**** Draw text
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 
@@ -2193,7 +2193,7 @@ static void drawText(Font aFont,
 }
 #+end_src
 
-**** drawBackground
+**** Draw background
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 
@@ -2225,7 +2225,7 @@ static string toText(ts_InformationPiece piece, ts_Options options)
 }
 #+end_src
 
-**** makeBar
+**** Make bar
 
 #+begin_src c :noweb-ref ts_ViewUtils.functions
 

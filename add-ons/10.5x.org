@@ -98,7 +98,7 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 
-* EventHandler
+* Event handler
 
 #+begin_src c :tangle ../build/10.5x/mapinfo.txt
 
@@ -485,7 +485,7 @@ class x5_Freezer play
 }
 #+end_src
 
-* WalkAbilityWatcher
+* Walk ability watcher
 
 This inventory item resets ~bThruActors~ flag if the actor is able to move without it.
 
@@ -580,7 +580,7 @@ class x5_Killer : Actor
 }
 #+end_src
 
-* language
+* Language
 
 #+begin_src c :tangle ../build/10.5x/language.txt
 
@@ -601,7 +601,7 @@ X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 
 * Global multiplier
 
-** OptionMenuItemX5Slider
+** Slider
 
 #+begin_src text :tangle ../build/10.5x/menudef.txt
 
@@ -645,7 +645,7 @@ class OptionMenuItemX5Slider : OptionMenuItemSlider
 
 * Type multipliers
 
-** TypeMultipliersMenu
+** Type multipliers menu
 
 #+begin_src text :tangle ../build/10.5x/menudef.txt
 
@@ -791,7 +791,7 @@ class x5_TypeSortElement
 }
 #+end_src
 
-** OptionMenuItemX5TypeSlider
+** Type slider
 
 #+begin_src c :tangle ../build/10.5x/zscript/OptionMenuItemX5TypeSlider.zs
 

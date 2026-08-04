@@ -61,7 +61,7 @@ SPDX-License-Identifier: GPL-3.0-only
 Notes:
 - Don't decrease the delay before reviving, the actor sometimes isn't fully dead yet.
   TODO: make the scripts wait until something happens.
-- Triggering several events at once to speed up tests. The events should not
+- Don't trigger more than one event at once to speed up tests. The events must not
   interfere with each other.
 - Warp and use commands are supposed to activate the [[https://github.com/fragglet/miniwad][Miniwad]] end level button.
 
@@ -168,7 +168,9 @@ version 4.14.3
 
 [[file:../modules/StringUtils.org][StringUtils]]
 
-* VM Abort Handling
+# vale off
+* VM abort handling
+# vale on
 
 [[file:../modules/VmAbortReporter.org][VmAbortReporter]]
 
@@ -404,7 +406,7 @@ ResetCvar dd_logging_process_events_enabled;
 Alias dd_logging_disable "<<dd_logging_disable()>>"
 #+end_src
 
-** BufferedConsole
+** Buffered console
 
 Prints to the engine console and saves the messages so they can be checked. Also
 prints level time.
@@ -442,10 +444,10 @@ class dd_BufferedConsole : StaticEventHandler
 ** Logger
 
 Notes
-- The following events are not logged, because nothing interesting can change here:
+- The following events aren't logged, because nothing interesting can change here:
   ~RenderOverlay~, ~RenderUnderlay~, ~UiTick~, ~PostUiTick~, ~InputProcess~,
   ~UiProcess~.
-- Events cannot be destroyed, so event parameters are never NULL.
+- Events can't be destroyed, so event parameters are never NULL.
 - Most events are followed by the test code that also works as an example of what an
   event report contains.
 
@@ -458,7 +460,7 @@ class dd_Logger : StaticEventHandler
 
 *** Engine events
 
-**** OnRegister
+**** Register
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnRegister()
 {
@@ -479,7 +481,7 @@ void OnRegisterTest()
 }
 #+end_src
 
-**** OnUnregister
+**** Unregister
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnUnregister()
@@ -493,7 +495,7 @@ override void OnUnregister()
 
 Note: event order for ~OnUnregister~ is reversed.
 
-**** OnEngineInitialize
+**** Engine initialize
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void OnEngineInitialize()
@@ -512,7 +514,7 @@ override void OnEngineInitialize()
 }
 #+end_src
 
-**** NewGame
+**** New game
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void NewGame()
@@ -535,7 +537,7 @@ override void NewGame()
 
 *** World events
 
-**** WorldLoaded
+**** World loaded
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLoaded(WorldEvent event)
 {
@@ -561,7 +563,7 @@ override void WorldLoaded(WorldEvent event)
 }
 #+end_src
 
-**** WorldUnloaded
+**** World unloaded
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldUnloaded(WorldEvent event)
@@ -575,7 +577,7 @@ override void WorldUnloaded(WorldEvent event)
 
 Note: event order for ~WorldUnloaded~ is reversed.
 
-**** WorldThingSpawned
+**** World thing spawned
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingSpawned(WorldEvent event)
@@ -598,7 +600,7 @@ override void WorldThingSpawned(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDied
+**** World thing died
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDied(WorldEvent event)
@@ -623,7 +625,7 @@ override void WorldThingDied(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingGround
+**** World thing ground
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingGround(WorldEvent event)
@@ -638,7 +640,7 @@ override void WorldThingGround(WorldEvent event)
 
 TODO: how to test this?
 
-**** WorldThingRevived
+**** World thing revived
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingRevived(WorldEvent event)
@@ -662,7 +664,7 @@ override void WorldThingRevived(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDamaged
+**** World thing damaged
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDamaged(WorldEvent event)
@@ -690,7 +692,7 @@ override void WorldThingDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldThingDestroyed
+**** World thing destroyed
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldThingDestroyed(WorldEvent event)
@@ -706,7 +708,7 @@ override void WorldThingDestroyed(WorldEvent event)
 
 Note: event order for ~WorldThingDestroyed~ is reversed.
 
-**** WorldLinePreActivated
+**** Before world line activated
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLinePreActivated(WorldEvent event)
@@ -729,7 +731,7 @@ override void WorldLinePreActivated(WorldEvent event)
 }
 #+end_src
 
-**** WorldLineActivated
+**** World line activated
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLineActivated(WorldEvent event)
@@ -751,7 +753,7 @@ override void WorldLineActivated(WorldEvent event)
 }
 #+end_src
 
-**** WorldSectorDamaged
+**** World sector damaged
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldSectorDamaged(WorldEvent event)
@@ -765,7 +767,7 @@ override void WorldSectorDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldLineDamaged
+**** World line damaged
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLineDamaged(WorldEvent event)
@@ -779,7 +781,7 @@ override void WorldLineDamaged(WorldEvent event)
 }
 #+end_src
 
-**** WorldLightning
+**** World lightning
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldLightning(WorldEvent event)
@@ -799,7 +801,7 @@ override void WorldLightning(WorldEvent event)
 }
 #+end_src
 
-**** WorldTick
+**** World tick
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void WorldTick()
@@ -812,7 +814,7 @@ override void WorldTick()
 
 *** Player events
 
-**** PlayerEntered
+**** Player entered
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerEntered(PlayerEvent event)
@@ -836,7 +838,7 @@ override void PlayerEntered(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerSpawned
+**** Player spawned
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerSpawned(PlayerEvent event)
@@ -860,7 +862,7 @@ override void PlayerSpawned(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerRespawned
+**** Player respawned
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerRespawned(PlayerEvent event)
@@ -880,7 +882,7 @@ override void PlayerRespawned(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerDied
+**** Player died
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerDied(PlayerEvent event)
@@ -900,7 +902,7 @@ override void PlayerDied(PlayerEvent event)
 }
 #+end_src
 
-**** PlayerDisconnected
+**** Player disconnected
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void PlayerDisconnected(PlayerEvent event)
@@ -917,7 +919,7 @@ TODO: test this.
 
 *** Process events
 
-**** ConsoleProcess
+**** Console process
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void ConsoleProcess(ConsoleEvent event)
@@ -938,7 +940,7 @@ override void ConsoleProcess(ConsoleEvent event)
 }
 #+end_src
 
-**** InterfaceProcess
+**** Interface process
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void InterfaceProcess(ConsoleEvent event)
@@ -960,7 +962,7 @@ override void InterfaceProcess(ConsoleEvent event)
 }
 #+end_src
 
-**** NetworkProcess
+**** Network process
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void NetworkProcess(ConsoleEvent event)
@@ -986,7 +988,7 @@ override void NetworkProcess(ConsoleEvent event)
 
 *** Replacement events
 
-**** CheckReplacement
+**** Check replacement
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void CheckReplacement(ReplaceEvent event)
@@ -1008,7 +1010,7 @@ override void CheckReplacement(ReplaceEvent event)
 }
 #+end_src
 
-**** CheckReplacee
+**** Check replacee
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 override void CheckReplacee(ReplacedEvent event)
@@ -1069,9 +1071,9 @@ const DamageProperties = Damage | DamageSource | DamageType;
 const LineProperties = ActivatedLine | ActivationType;
 #+end_src
 
-*** Private Functions
+*** Private functions
 
-TODO: move checks to somewhere where they are move visible.
+TODO: move checks to somewhere where they're move visible.
 TODO: add a check if weapons have icons. Filter by weapons that player can have.
 
 #+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs

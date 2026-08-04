@@ -222,9 +222,9 @@ SPDX-License-Identifier: BSD-3-Clause
  // <<license>>
 #+end_src
 
-* Event Handler
+* Event handler
 
-** EventHandler
+** Event handler
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_handler.zs
 
@@ -336,7 +336,7 @@ class tt_EventHandler : EventHandler
 }
 #+end_src
 
-** GameTweaks
+** Game tweaks
 
 #+begin_src c :tangle ../build/Typist.pk3/cvarinfo.txt
 
@@ -407,9 +407,9 @@ class tt_Buddha : PowerBuddha
 }
 #+end_src
 
-* Player Handler
+* Player handler
 
-** PlayerHandler
+** Player handler
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player_handler.zs
 
@@ -439,7 +439,7 @@ class tt_PlayerHandler abstract
 }
 #+end_src
 
-** PlayerSupervisor
+** Player supervisor
 
 #+begin_src c :tangle ../build/Typist.pk3/cvarinfo.txt
 
@@ -743,9 +743,9 @@ class tt_Server
 }
 #+end_src
 
-* World Changer
+* World changer
 
-** WorldChanger
+** World changer
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -756,7 +756,7 @@ class tt_WorldChanger abstract
 }
 #+end_src
 
-** WorldChangers
+** World changers
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -782,7 +782,7 @@ class tt_WorldChangers : tt_WorldChanger
 }
 #+end_src
 
-** PlayerWorldChangers
+** Player world changers
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -811,7 +811,7 @@ class tt_PlayerWorldChangers : tt_WorldChanger
 }
 #+end_src
 
-** EnemySpeedController
+** Enemy speed controller
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -846,7 +846,7 @@ class tt_EnemySpeedController : tt_WorldChanger
 }
 #+end_src
 
-** ProjectileSpeedController
+** Projectile speed controller
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -921,7 +921,7 @@ class tt_ProjectileSpeedController : tt_WorldChanger
 }
 #+end_src
 
-** VelocityStorage
+** Velocity storage
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -991,7 +991,7 @@ class tt_VelocityStorage : Inventory
 }
 #+end_src
 
-** HorizontalAimer
+** Horizontal aimer
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -1078,7 +1078,7 @@ class tt_HorizontalAimer : tt_WorldChanger
 }
 #+end_src
 
-** VerticalAimer
+** Vertical aimer
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 
@@ -1268,7 +1268,7 @@ class tt_ActivatableMock : tt_Activatable
 }
 #+end_src
 
-** PassThrough
+** Pass through
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_activatable.zs
 
@@ -1307,7 +1307,7 @@ class tt_PassThrough : tt_Activatable
 
 #+end_src
 
-** CommandDispatcher
+** Command dispatcher
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_activatable.zs
 
@@ -1543,7 +1543,7 @@ class tt_Answer
 }
 #+end_src
 
-** AnswerSource
+** Answer source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer.zs
 
@@ -1572,7 +1572,7 @@ class tt_AnswerSourceMock : tt_AnswerSource
 }
 #+end_src
 
-** InputBlockAfterCombat
+** Input block after combat
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer.zs
 
@@ -1635,7 +1635,7 @@ class tt_InputBlockAfterCombat : tt_AnswerSource
 }
 #+end_src
 
-** PlayerInput
+** Player input
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer.zs
 
@@ -1802,9 +1802,9 @@ class tt_PlayerInputTestEnvironment
 }
 #+end_src
 
-* Answer State
+* Answer state
 
-** AnswerState
+** Answer state
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer_state.zs
 
@@ -1825,7 +1825,7 @@ class tt_AnswerState
 }
 #+end_src
 
-** AnswerStateSource
+** Answer state source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer_state.zs
 
@@ -1854,7 +1854,7 @@ class tt_AnswerStateSourceMock : tt_AnswerStateSource
 }
 #+end_src
 
-** PressedAnswerState
+** Pressed answer state
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer_state.zs
 
@@ -2058,7 +2058,7 @@ class tt_ClockMock : tt_Clock
 }
 #+end_src
 
-** TotalClock
+** Total clock
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_clock.zs
 
@@ -2099,9 +2099,9 @@ class tt_TotalClock : tt_Clock
 }
 #+end_src
 
-* Event Reporters
+* Event reporters
 
-** AnswerReporter
+** Answer reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2128,7 +2128,7 @@ class tt_AnswerReporterMock : tt_AnswerReporter
 }
 #+end_src
 
-** SoundAnswerReporter
+** Sound answer reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2156,7 +2156,7 @@ class tt_SoundAnswerReporter : tt_AnswerReporter
 }
 #+end_src
 
-** KeyPressReporter
+** Key press reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2180,7 +2180,7 @@ class tt_KeyPressReporterMock : tt_KeyPressReporter
 }
 #+end_src
 
-** SoundKeyPressReporter
+** Sound key press reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2207,7 +2207,7 @@ class tt_SoundKeyPressReporter : tt_KeyPressReporter
 }
 #+end_src
 
-** ModeReporter
+** Mode reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2231,7 +2231,7 @@ class tt_ModeReporterMock : tt_ModeReporter
 }
 #+end_src
 
-** SoundModeReporter
+** Sound mode reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2262,7 +2262,7 @@ class tt_SoundModeReporter : tt_ModeReporter
 }
 #+end_src
 
-** SoundPlayer
+** Sound player
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2273,7 +2273,7 @@ class tt_SoundPlayer abstract
 }
 #+end_src
 
-** PlayerSoundPlayer
+** Player sound player
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 
@@ -2388,9 +2388,9 @@ $random tt/click5 { tt/click5-1 tt/click5-2 tt/click5-3 tt/click5-4 tt/click5-5 
 $volume tt/click5 0.2
 #+end_src
 
-* Input Manager
+* Input manager
 
-** InputManager
+** Input manager
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_input_manager.zs
 
@@ -2403,7 +2403,7 @@ class tt_InputManager abstract
 }
 #+end_src
 
-** InputByModeManager
+** Input by mode manager
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_input_manager.zs
 
@@ -2451,7 +2451,7 @@ class tt_InputByModeManager : tt_InputManager
 }
 #+end_src
 
-** PassThroughInputManager
+** Pass through input manager
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_input_manager.zs
 
@@ -2514,9 +2514,9 @@ class tt_PassThroughInputManager : tt_InputManager
 }
 #+end_src
 
-* Key Processor
+* Key processor
 
-** KeyProcessor
+** Key processor
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_key_processor.zs
 
@@ -2527,7 +2527,7 @@ class tt_KeyProcessor abstract
 }
 #+end_src
 
-** KeyProcessors
+** Key processors
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_key_processor.zs
 
@@ -2552,9 +2552,9 @@ class tt_KeyProcessors : tt_KeyProcessor
 }
 #+end_src
 
-* Known Target
+* Known target
 
-** KnownTarget
+** Known target
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -2580,7 +2580,7 @@ class tt_KnownTarget
 }
 #+end_src
 
-** KnownTargets
+** Known targets
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -2657,7 +2657,7 @@ class tt_KnownTargets
 }
 #+end_src
 
-** KnownTargetSource
+** Known target source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -2687,7 +2687,7 @@ class tt_KnownTargetSourceMock : tt_KnownTargetSource
 }
 #+end_src
 
-** KnownTargetSourceCache
+** Known target source cache
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -2733,7 +2733,7 @@ class tt_KnownTargetSourceCache : tt_KnownTargetSource
 }
 #+end_src
 
-** TargetRegistry
+** Target registry
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -3003,7 +3003,7 @@ class tt_TargetRegistryTestEnvironment
 }
 #+end_src
 
-** VisibleKnownTargetSource
+** Visible known target source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 
@@ -3183,7 +3183,7 @@ class tt_LessonMock : tt_Lesson
 }
 #+end_src
 
-** MathsLesson
+** Maths lesson
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 
@@ -3283,7 +3283,7 @@ class tt_MathsLesson : tt_Lesson
 }
 #+end_src
 
-** MixedLesson
+** Mixed lesson
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 
@@ -3337,7 +3337,7 @@ class tt_MixedLesson : tt_Lesson
 }
 #+end_src
 
-** RandomCharactersLesson
+** Random characters lesson
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 
@@ -3418,7 +3418,7 @@ class tt_RandomCharactersLesson : tt_Lesson
 }
 #+end_src
 
-** RandomNumberSource
+** Random number source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 
@@ -3450,7 +3450,7 @@ class tt_RandomNumberSource : tt_Lesson
 }
 #+end_src
 
-** StringSet
+** String set
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 
@@ -3570,7 +3570,7 @@ class tt_Mode
 }
 #+end_src
 
-** ModeSource
+** Mode source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -3595,7 +3595,7 @@ class tt_ModeSourceMock : tt_ModeSource
 }
 #+end_src
 
-** AutoModeSource
+** Auto mode source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -3647,7 +3647,7 @@ class tt_AutoModeSource : tt_ModeSource
 }
 #+end_src
 
-** DelayedCombatModeSource
+** Delayed combat mode source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -3867,7 +3867,7 @@ class tt_DelayedCombatModeSourceTestEnvironment
 }
 #+end_src
 
-** ModeCascade
+** Mode cascade
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -3935,7 +3935,7 @@ class tt_ModeCascade : tt_ModeSource
 }
 #+end_src
 
-** ModeStorage
+** Mode storage
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -3960,7 +3960,7 @@ class tt_ModeStorageMock : tt_ModeStorage
 }
 #+end_src
 
-** ReportedModeSource
+** Reported mode source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -4073,7 +4073,7 @@ class tt_ReportedModeSourceTestEnvironment
 }
 #+end_src
 
-** SettableMode
+** Settable mode
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -4115,7 +4115,7 @@ class tt_SettableMode : tt_ModeStorage
 }
 #+end_src
 
-** AutomapModeSource
+** Automap mode source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 
@@ -4158,7 +4158,7 @@ class tt_Origin
 }
 #+end_src
 
-** OriginSource
+** Origin source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4184,7 +4184,7 @@ class tt_OriginSourceMock : tt_OriginSource
 }
 #+end_src
 
-** HastyQuestionAnswerMatcher
+** Hasty question answer matcher
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4246,7 +4246,7 @@ class tt_HastyQuestionAnswerMatcher : tt_OriginSource
 }
 #+end_src
 
-** OriginSourceCache
+** Origin source cache
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4283,7 +4283,7 @@ class tt_OriginSourceCache : tt_OriginSource
 }
 #+end_src
 
-** PlayerOriginSource
+** Player origin source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4339,7 +4339,7 @@ class tt_PlayerOriginSource : tt_OriginSource
 }
 #+end_src
 
-** QuestionAnswerMatcher
+** Question answer matcher
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4539,7 +4539,7 @@ class tt_QuestionAnswerMatcherTestEnvironment
 }
 #+end_src
 
-** SelectableOriginSource
+** Selectable origin source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4571,7 +4571,7 @@ class tt_SelectableOriginSource : tt_OriginSource
 }
 #+end_src
 
-** ExternalOriginSource
+** External origin source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 
@@ -4600,7 +4600,7 @@ class tt_ExternalOriginSource : tt_OriginSource
 
 * Player
 
-** PlayerSource
+** Player source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player.zs
 
@@ -4630,7 +4630,7 @@ class tt_PlayerSourceMock : tt_PlayerSource
 }
 #+end_src
 
-** PlayerSourceImpl
+** Player source implementation
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player.zs
 
@@ -4722,7 +4722,7 @@ class tt_QuestionMock : tt_Question
 }
 #+end_src
 
-** FallbackQuestion
+** Fallback question
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_question.zs
 
@@ -4815,7 +4815,7 @@ class tt_Match : tt_Question
 
 * Settings
 
-** BoolSetting
+** Bool setting
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4841,7 +4841,7 @@ class tt_BoolSettingMock : tt_BoolSetting
 }
 #+end_src
 
-** IntSetting
+** Int setting
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4853,7 +4853,7 @@ class tt_IntSetting abstract
 }
 #+end_src
 
-** FloatSetting
+** Float setting
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4879,7 +4879,7 @@ class tt_FloatSettingMock : tt_FloatSetting
 }
 #+end_src
 
-** StringSetting
+** String setting
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4891,7 +4891,7 @@ class tt_StringSetting abstract
 }
 #+end_src
 
-** BoolCvar
+** Bool cvar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4914,7 +4914,7 @@ class tt_BoolCvar : tt_BoolSetting
 }
 #+end_src
 
-** PositiveIntCvar
+** Positive int cvar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4937,7 +4937,7 @@ class tt_PositiveIntCvar : tt_IntSetting
 }
 #+end_src
 
-** IntCvar
+** Int cvar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4960,7 +4960,7 @@ class tt_IntCvar : tt_IntSetting
 }
 #+end_src
 
-** FloatCvar
+** Float cvar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -4983,7 +4983,7 @@ class tt_FloatCvar : tt_FloatSetting
 }
 #+end_src
 
-** StringCvar
+** String cvar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -5006,7 +5006,7 @@ class tt_StringCvar : tt_StringSetting
 }
 #+end_src
 
-** RandomCharactersLessonSettings
+** Random characters lesson settings
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 
@@ -5031,7 +5031,7 @@ class tt_RandomCharactersLessonSettings abstract
 }
 #+end_src
 
-*** RandomCharactersLessonSettingsImpl
+*** Random characters lesson settings implementation
 
 #+begin_src c :tangle ../build/Typist.pk3/cvarinfo.txt
 
@@ -5094,9 +5094,9 @@ class tt_RandomCharactersLessonSettingsImpl : tt_RandomCharactersLessonSettings
 }
 #+end_src
 
-* Stale Marker
+* Stale marker
 
-** StaleMarker
+** Stale marker
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_stale_marker.zs
 
@@ -5110,7 +5110,7 @@ class tt_StaleMarker abstract
 }
 #+end_src
 
-** StaleMarkerImpl
+** Stale marker implementation
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_stale_marker.zs
 
@@ -5379,7 +5379,7 @@ class tt_Targets
 }
 #+end_src
 
-** TargetSource
+** Target source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
 
@@ -5404,7 +5404,7 @@ class tt_TargetSourceMock : tt_TargetSource
 }
 #+end_src
 
-** TargetRadar
+** Target radar
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
 
@@ -5551,7 +5551,7 @@ class tt_TargetRadarTestEnvironment
 }
 #+end_src
 
-** DeathReporter
+** Death reporter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
 
@@ -5608,7 +5608,7 @@ class tt_DeathReporter : tt_TargetSource
 }
 #+end_src
 
-** TargetSourceCache
+** Target source cache
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
 
@@ -5644,7 +5644,7 @@ class tt_TargetSourceCache : tt_TargetSource
 }
 #+end_src
 
-** TargetSourcePruner
+** Target source pruner
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
 
@@ -5682,9 +5682,9 @@ class tt_TargetSourcePruner : tt_TargetSource
 }
 #+end_src
 
-* Target Widget
+* Target widget
 
-** TargetWidget
+** Target widget
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
 
@@ -5729,7 +5729,7 @@ class tt_TargetWidget
 }
 #+end_src
 
-** TargetWidgets
+** Target widgets
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
 
@@ -5780,7 +5780,7 @@ class tt_TargetWidgets
 }
 #+end_src
 
-** TargetWidgetSource
+** Target widget source
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
 
@@ -5908,7 +5908,7 @@ class tt_Projector : tt_TargetWidgetSource
 }
 #+end_src
 
-** SorterByDistance
+** Sorter by distance
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
 
@@ -6137,7 +6137,7 @@ class tt_SorterByDistanceTest
 }
 #+end_src
 
-** TargetWidgetRegistry
+** Target widget registry
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
 
@@ -6349,7 +6349,7 @@ class tt_DoubleInterpolator
 }
 #+end_src
 
-** ConditionalView
+** Conditional view
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_view.zs
 
@@ -6379,7 +6379,7 @@ class tt_ConditionalView : tt_View
 }
 #+end_src
 
-** InfoPanel
+** Info panel
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_view.zs
 
@@ -6547,7 +6547,7 @@ class tt_InfoPanel : tt_View
 }
 #+end_src
 
-** TargetOverlay
+** Target overlay
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_view.zs
 
@@ -6825,7 +6825,7 @@ class tt_GunnerTestEnvironment
 }
 #+end_src
 
-** AnswerResetter
+** Answer resetter
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_effect.zs
 
@@ -6861,7 +6861,7 @@ class tt_AnswerResetter : tt_Effect
 }
 #+end_src
 
-** MatchWatcher
+** Match watcher
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_effect.zs
 
@@ -6913,7 +6913,7 @@ class tt_MatchWatcher : tt_Effect
 }
 #+end_src
 
-** TargetOriginSender
+** Target origin sender
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_effect.zs
 
@@ -6939,7 +6939,7 @@ class tt_TargetOriginSender : tt_Effect
 }
 #+end_src
 
-* Options Menu
+* Options menu
 
 ** Options
 
@@ -7101,7 +7101,7 @@ AddMenuKey "$TT_COMBAT" tt_force_combat
 AddMenuKey "$TT_SCORE"  zc_top
 #+end_src
 
-** AnimatedSubmenu
+** Animated submenu
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript/tt_option_menu_item_animated_submenu.zs
 
@@ -7344,7 +7344,7 @@ class tt_Satisfaction
 }
 #+end_src
 
-** Mock Macro :noexport:
+** Mock macro :noexport:
 
 #+begin_src c :tangle ../build/Typist.pk3Test/zscript/mocks.zs
 

@@ -15,7 +15,7 @@ Clematis is made by ZippeyKeys12, modified and renamed to ClematisM by m8f.
 
 ClematisM is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-** Making Test Suites
+** Making test suites
 
 #+begin_src c
 
@@ -56,29 +56,29 @@ class ClematisExample : Clematis {
 Override TestSuites and put in your own! Suites are started with ~Describe~ and end
 with ~EndDescribe~.
 
-** How to Run Tests
+** How to run tests
 
-*** On Instantiation
+*** On instantiation
 
 Tests run on instantiation by default, which can be disabled by overriding ~Init()~.
 
-**** Factory Method
+**** Factory method
 
 #+begin_src c
 Clematis.Create('ClematisExample');
 #+end_src
 
-**** Network Event
+**** Network event
 
 #+begin_src c
 EventHandler.SendNetworkEvent('test:ClematisExample');
 #+end_src
 
-**** Console Command
+**** Console command
 
 ~netevent test:ClematisExample~
 
-*** On Method Call
+*** On method call
 
 #+begin_src c
 Clematis Tester=Clematis.Create('ClematisExample');
@@ -533,7 +533,7 @@ class Clematis{
 }
 #+end_src
 
-**** Is A
+**** Is a
 
 #+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
@@ -568,7 +568,7 @@ class Clematis{
 }
 #+end_src
 
-**** Is Not A
+**** Is not a
 
 #+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 

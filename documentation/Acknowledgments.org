@@ -131,7 +131,7 @@ The order is alphabetical.
 
 # spellchecker:on
 
-* Special Thanks
+* Special thanks
 
 - [[https://github.com/ZDoom/gzdoom/graphs/contributors][GZDoom contributors]]
 - [[https://github.com/UZDoom/UZDoom/graphs/contributors][UZDoom contributors]]

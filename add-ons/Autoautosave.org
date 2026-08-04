@@ -2131,7 +2131,7 @@ class aas_level_clock : aas_clock
 
 ** Counters
 
-*** Enemies Counter
+*** Enemies counter
 
 #+begin_src c :tangle ../build/Autoautosave/zscript/aas_counters.zs
 

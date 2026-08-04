@@ -831,7 +831,7 @@ class tl_Lambda : tl_Function
 }
 #+end_src
 
-** Auto Function
+** Auto function
 
 #+begin_src c :noweb-ref source
 
@@ -1107,7 +1107,7 @@ class tl_Env
 }
 #+end_src
 
-* Global Functions
+* Global functions
 
 #+begin_src c :noweb-ref source
 

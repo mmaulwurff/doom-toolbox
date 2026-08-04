@@ -23,7 +23,7 @@ SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 - Compatible with old saves.
 - Options to configure looks.
 
-** Implementation Notes
+** Implementation notes
 
 - SoundToScreen won't work if UZDoom is launched with ~-nosound~.
 
