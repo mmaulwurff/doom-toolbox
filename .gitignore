@@ -27,6 +27,7 @@
 !*.txt
 !*.wad
 !*.yaml
+!*.zip
 
 # but do ignore them there:
 build/*

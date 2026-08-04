@@ -17,3 +17,33 @@ path = "miniwad.wad"
 SPDX-FileCopyrightText = """\
 Copyright © 2001-2018 Contributors to the Freedoom project. All rights reserved."""
 SPDX-License-Identifier = "BSD-3-Clause"
+
+# https://github.com/vale-cli/Microsoft
+[[annotations]]
+path = "vale-Microsoft-v0.15.0.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2018 - 2019 Joseph Kato"
+SPDX-License-Identifier = "MIT"
+
+# https://github.com/vale-cli/alex
+[[annotations]]
+path = "vale-alex-v0.2.3.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2020 errata.ai"
+SPDX-License-Identifier = "MIT"
+
+# https://github.com/a11yfred/neighbor
+[[annotations]]
+path = "vale-neighbor-v2.2.0.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2026 Mikey Ilagan"
+SPDX-License-Identifier = "MIT"
+
+# https://github.com/vale-cli/proselint
+[[annotations]]
+path = "vale-proselint-v0.3.4.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2019, errata.ai"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+# https://github.com/vale-cli/write-good
+[[annotations]]
+path = "vale-write-good-v0.4.1.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2019 errata.ai"
+SPDX-License-Identifier = "MIT"
