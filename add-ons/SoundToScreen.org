@@ -218,8 +218,10 @@ class st_EventHandler : StaticEventHandler
       return;
     }
 
-    vector2 center = (mXPositionCvar.getFloat() * Screen.getWidth(),
-                      mYPositionCvar.getFloat() * Screen.getHeight());
+    double  screenWidth  = Screen.getWidth();
+    double  screenHeight = Screen.getHeight();
+    vector2 center = (mXPositionCvar.getFloat() * screenWidth,
+                      mYPositionCvar.getFloat() * screenHeight);
     double radiusX = mXRadiusCvar.getFloat();
     double radiusY = mYRadiusCvar.getFloat();
     int    dotSize = mDotSizeCvar.getInt();
@@ -228,10 +230,10 @@ class st_EventHandler : StaticEventHandler
 
     for (int i = 0; i < DOTS_COUNT; ++i)
     {
-      drawDot(center + makePosition(i, 0.0, radiusX, radiusY),
-              baseColor,
-              dotSize,
-              alpha);
+      vector2 position = center + makePosition(i, 0.0, radiusX, radiusY);
+      position = (clamp(position.x, 0, screenWidth),
+                  clamp(position.y, 0, screenHeight));
+      drawDot(position, baseColor, dotSize, alpha);
     }
 
     if (level.mapTime < 2)
@@ -295,10 +297,10 @@ class st_EventHandler : StaticEventHandler
         double dotLevel = dotsBlurred[type][i];
         if (dotLevel > MIN_DOT_LEVEL)
         {
-          drawDot(center + makePosition(i, dotLevel, radiusX, radiusY),
-                  mColors[type],
-                  dotSize,
-                  alpha);
+          vector2 position = center + makePosition(i, dotLevel, radiusX, radiusY);
+          position = (clamp(position.x, 0, screenWidth),
+                      clamp(position.y, 0, screenHeight));
+          drawDot(position, mColors[type], dotSize, alpha);
         }
       }
     }
