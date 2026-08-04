@@ -76,6 +76,7 @@ OptionMenu st_Menu
   Slider      "Width",      st_x_radius, 20, 50, 1
   Slider      "Height",     st_y_radius, 20, 50, 1
   Slider      "Dot size",   st_dot_size,  1,  9, 2
+  Slider      "Alpha",      st_alpha, 0.1, 1.0, 0.1, 1
 
   StaticText  ""
   Option      "On automap", st_on_automap, OnOff
@@ -110,6 +111,7 @@ user float st_y_position = 0.3;
 user float st_x_radius = 30;
 user float st_y_radius = 30;
 user int   st_dot_size = 3;
+user float st_alpha    = 1.0;
 user bool  st_on_automap = false;
 
 user color st_color_base     = "000000"; // black
@@ -222,9 +224,15 @@ class st_EventHandler : StaticEventHandler
     double radiusY = mYRadiusCvar.getFloat();
     int    dotSize = mDotSizeCvar.getInt();
     Color  baseColor = mBaseColorCvar.getString();
+    double alpha   = mAlphaCvar.getFloat();
 
     for (int i = 0; i < DOTS_COUNT; ++i)
-      drawDot(center + makePosition(i, 0.0, radiusX, radiusY), baseColor, dotSize);
+    {
+      drawDot(center + makePosition(i, 0.0, radiusX, radiusY),
+              baseColor,
+              dotSize,
+              alpha);
+    }
 
     if (level.mapTime < 2)
     {
@@ -289,7 +297,8 @@ class st_EventHandler : StaticEventHandler
         {
           drawDot(center + makePosition(i, dotLevel, radiusX, radiusY),
                   mColors[type],
-                  dotSize);
+                  dotSize,
+                  alpha);
         }
       }
     }
@@ -308,10 +317,11 @@ class st_EventHandler : StaticEventHandler
            -(1 + dotLevel) * radiusY * cos(angle));
   }
 
-  private ui void drawDot(vector2 position, Color aColor, int dotSize)
+  private ui void drawDot(vector2 position, Color aColor, int dotSize, double alpha)
   {
     int halfSize = dotSize / 2;
-    Screen.dim(aColor, 1.0,
+    Screen.dim(aColor,
+               alpha,
                int(round(position.x)) - halfSize,
                int(round(position.y)) - halfSize,
                dotSize,
@@ -329,6 +339,7 @@ class st_EventHandler : StaticEventHandler
     mXRadiusCvar      = Cvar.getCvar("st_x_radius", player);
     mYRadiusCvar      = Cvar.getCvar("st_y_radius", player);
     mDotSizeCvar      = Cvar.getCvar("st_dot_size", player);
+    mAlphaCvar        = Cvar.getCvar("st_alpha", player);
 
     mOnAutomapCvar    = Cvar.getCvar("st_on_automap", player);
 
@@ -402,6 +413,7 @@ class st_EventHandler : StaticEventHandler
   private CVar mXRadiusCvar;
   private CVar mYRadiusCvar;
   private Cvar mDotSizeCvar;
+  private Cvar mAlphaCvar;
   private Cvar mOnAutomapCvar;
   private Cvar mBaseColorCvar;
   private Cvar mColorCvars[SoundTypesCount];
