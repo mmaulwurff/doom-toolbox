@@ -61,8 +61,9 @@ SPDX-License-Identifier: GPL-3.0-only
 * Changelog
 
 v2.1.0
+- show player's own sound
 - make dots hug screen edges
-- add alpha slider
+- add alpha (transparency) slider
 
 v2.0.1
 - fix initialization on saves
@@ -133,6 +134,7 @@ OptionMenu st_Menu
   ColorPicker "Noise",  st_color_noise
   ColorPicker "Level",  st_color_geometry
   ColorPicker "Danger", st_color_danger
+  ColorPicker "Player", st_color_player
 }
 
 AddOptionMenu OptionsMenu       { Submenu "$ST_MENU_NAME", st_Menu }
@@ -164,20 +166,12 @@ user color st_color_base     = "000000"; // black
 user color st_color_noise    = "FFFFFF"; // white
 user color st_color_geometry = "00FF00"; // green
 user color st_color_danger   = "FF0000"; // red
+user color st_color_player   = "0000FF"; // blue
 #+end_src
 
 * Code
 
-#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt
-
-GameInfo { EventHandlers = "st_EventHandler" }
-#+end_src
-
-#+begin_src c :tangle ../build/SoundToScreen/zscript.zs
-
-version 4.14.3
-
-#include "zscript/st_PlainTranslator.zs"
+#+begin_src c :noweb-ref code
 
 class st_EventHandler : StaticEventHandler
 {
@@ -194,7 +188,7 @@ class st_EventHandler : StaticEventHandler
 
     mIterator.reinit();
 
-    for (int type = Noise; type < SoundTypesCount; ++type)
+    for (int type = Own; type < SoundTypesCount; ++type)
       mColors[type] = mColorCvars[type].getString();
 
     for (int type = Noise; type < SoundTypesCount; ++type)
@@ -204,6 +198,9 @@ class st_EventHandler : StaticEventHandler
     }
 
     let player = players[consolePlayer].mo;
+    double playerSound = player.isActorPlayingSound(CHAN_AUTO) ? 0.25 : 0.0;
+    mDots[Own][0] = playerSound;
+
     Thinker aThinker;
     while (aThinker = mIterator.next())
     {
@@ -212,9 +209,14 @@ class st_EventHandler : StaticEventHandler
       {
         if (anActor == player) continue;
         if (anActor is "Inventory" && Inventory(anActor).owner != NULL) continue;
-        if (anActor.bMissile && anActor.target == player) continue;
         if (!anActor.isActorPlayingSound(CHAN_AUTO)) continue;
+
         double distance = anActor.distance3D(player);
+        if (anActor.bMissile && anActor.target == player)
+        {
+          if (distance < player.radius * 3) mDots[Own][0] = 0.25;
+          continue;
+        }
         if (anActor.bBoss) distance = min(distance, MAX_DISTANCE / 2);
         if (distance > MAX_DISTANCE) continue;
 
@@ -288,7 +290,7 @@ class st_EventHandler : StaticEventHandler
       return;
     }
 
-    for (int type = Noise; type < SoundTypesCount; ++type)
+    for (int type = Own; type < SoundTypesCount; ++type)
     {
       for (int i = 0; i < DOTS_COUNT; ++i)
       {
@@ -306,6 +308,8 @@ class st_EventHandler : StaticEventHandler
         for (int i = 0; i < DOTS_COUNT; ++i)
           dotsVariance[type][i] = frandom[SoundToScreen](-MIN_DOT_LEVEL, MIN_DOT_LEVEL);
       }
+
+      dotsVariance[Own][0] = frandom[SoundToScreen](-MIN_DOT_LEVEL, MIN_DOT_LEVEL);
     }
 
     // Gaussian blur, sigma 1.
@@ -333,6 +337,18 @@ class st_EventHandler : StaticEventHandler
             sum += dotsVariance[type][index];
         }
         dotsBlurred[type][i] = min(1.0, sum);
+      }
+    }
+
+    double ownDotLevel = mDotsInterpolated[Own][0] + dotsVariance[Own][0];
+    if (ownDotLevel > MIN_DOT_LEVEL)
+    {
+      for (int i = 0; i < DOTS_COUNT; ++i)
+      {
+          vector2 position = center + makeOwnPosition(i, ownDotLevel, radiusX, radiusY);
+          position = (clamp(position.x, 0, screenWidth),
+                      clamp(position.y, 0, screenHeight));
+          drawDot(position, mColors[Own], dotSize, alpha);
       }
     }
 
@@ -365,6 +381,16 @@ class st_EventHandler : StaticEventHandler
            -(1 + dotLevel) * radiusY * cos(angle));
   }
 
+  private ui vector2 makeOwnPosition(int i,
+                                     double dotLevel,
+                                     double radiusX,
+                                     double radiusY)
+  {
+    double angle = i * (360.0 / DOTS_COUNT);
+    return ((1 - dotLevel) * radiusX * sin(angle),
+           -(1 - dotLevel) * radiusY * cos(angle));
+  }
+
   private ui void drawDot(vector2 position, Color aColor, int dotSize, double alpha)
   {
     int halfSize = dotSize / 2;
@@ -395,6 +421,7 @@ class st_EventHandler : StaticEventHandler
     mColorCvars[Noise]    = Cvar.getCvar("st_color_noise", player);
     mColorCvars[Geometry] = Cvar.getCvar("st_color_geometry", player);
     mColorCvars[Danger]   = Cvar.getCvar("st_color_danger", player);
+    mColorCvars[Own]      = Cvar.getCvar("st_color_player", player);
   }
 
   private static int calculateActorScreenPosition(Actor target)
@@ -443,7 +470,7 @@ class st_EventHandler : StaticEventHandler
     return min(1.0, 1.0 / max(distance * distance / DISTANCE_FACTOR, 1.0));
   }
 
-  enum SoundType {Noise, Geometry, Danger, SoundTypesCount}
+  enum SoundType {Own, Noise, Geometry, Danger, SoundTypesCount}
   const DOTS_COUNT = 32; // Should be divisible by 4 for clear base directions.
   const MIN_DOT_LEVEL = 0.05;
   const DISTANCE_FACTOR = 100000.0;
@@ -473,6 +500,22 @@ class st_SectorMemory
   double floorHeight;
   double ceilingHeight;
 }
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt
+
+GameInfo { EventHandlers = "st_EventHandler" }
+#+end_src
+
+#+begin_src c :tangle ../build/SoundToScreen/zscript.zs
+
+version 4.14.3
+
+#include "zscript/st_PlainTranslator.zs"
+
+<<code>>
 #+end_src
 
 * Test
