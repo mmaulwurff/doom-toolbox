@@ -58,6 +58,52 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 
+* Changelog
+
+v2.1.0
+- make dots hug screen edges
+- add alpha slider
+
+v2.0.1
+- fix initialization on saves
+
+v2.0.0
+- fix automap option
+- adjust description
+- make compatible with old SoundToScreen
+- adjust options menu, add PlainTranslator
+- reset dots on level change, clean up
+- fix VM abort on titlemaps
+- make boss death always visible
+- ignore player's own projectiles (flying)
+- clean up code
+- calculate max distance automatically
+- add more options
+- fix sound cap
+- better portal awareness for geometry sounds
+- don't show sound when sector is not moving
+- redesign UI
+- check performance
+- add compatibility with saves without SoundToScreen
+
+v1.0.0
+- add an option to disable on automap
+- disable on titlemaps
+- dead enemies sounds are noise
+- add an option to show distance
+- harmless missiles and friendly monsters are noise, not danger
+- add option to disable noise detection
+
+v0.2.0-beta
+- add icon
+- make colors configurable
+- make max distance configurable
+- add implementation notes and inspiration to Readme
+- move background color to language lump
+- detect moving doors and elevators
+
+v0.1.0-beta: initial release
+
 * Options
 
 #+begin_src c :tangle ../build/SoundToScreen/menudef.txt
