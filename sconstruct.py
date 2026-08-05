@@ -30,7 +30,7 @@ emacs = (
   or shutil.which('emacs')
   or Path('c:/tools/emacs/bin/emacs.exe')
 )
-uzdoom = (
+engine = (
   os.path.expanduser(os.environ['DT_ENGINE'])
   if 'DT_ENGINE' in os.environ
   else shutil.which('uzdoom')
@@ -68,7 +68,7 @@ def add_test_target(org_file, main_target):
     print('------------------------------------------------------------')
 
     args = [
-      uzdoom,
+      engine,
       '-noautoload',
       '-nosound',
       '-config',
@@ -211,7 +211,7 @@ def make_check_compatibility_target():
 
   def check_compatibility(target, source, env):
     args = [
-      uzdoom,
+      engine,
       '-noautoload',
       '-nosound',
       '-config',
@@ -307,12 +307,12 @@ def add_autoautosave_generate_sounds_target():
   sound_directory = 'build/Autoautosave/sounds'
 
   def generate(target, source, env):
-    engine = pyttsx3.init()
+    sound_engine = pyttsx3.init()
     os.makedirs(sound_directory, exist_ok=True)
 
-    engine.setProperty('rate', 140)
-    engine.setProperty('pitch', 0)
-    engine.setProperty('voice', 'storm')
+    sound_engine.setProperty('rate', 140)
+    sound_engine.setProperty('pitch', 0)
+    sound_engine.setProperty('voice', 'storm')
 
     with open('build/Autoautosave/events.json', encoding='utf-8') as events_file:
       events = json.load(events_file)
@@ -321,15 +321,15 @@ def add_autoautosave_generate_sounds_target():
       wav_name = f'build/Autoautosave/sounds/aas{index}.wav'
       ogg_name = f'build/Autoautosave/sounds/aas{index}.ogg'
 
-      engine.save_to_file(text, wav_name)
-      engine.runAndWait()
+      sound_engine.save_to_file(text, wav_name)
+      sound_engine.runAndWait()
       if Path(ogg_name).is_file():
         os.remove(ogg_name)
       print(f'Converting to {ogg_name}...')
       FFmpeg().input(wav_name).output(ogg_name).execute()
       os.remove(wav_name)
 
-    engine.stop()
+    sound_engine.stop()
 
   return Command(sound_directory, 'add-ons/Autoautosave.org', generate)
 
