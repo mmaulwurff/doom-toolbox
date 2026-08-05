@@ -19,7 +19,8 @@ SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 
 ** Features
 
-- Three types of sound: noise (harmless), level (doors, elevators), danger (threats).
+- Four sound types:
+  player, noise (harmless), level (doors, elevators), danger (threats).
 - Compatible with old saves.
 - Options to configure looks.
 
@@ -55,6 +56,9 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/SoundToScreen/zscript.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/SoundToScreen/zscript/st_event_handler.zs :exports none
 // <<license>>
 #+end_src
 
@@ -171,7 +175,7 @@ user color st_color_player   = "0000FF"; // blue
 
 * Code
 
-#+begin_src c :noweb-ref code
+#+begin_src c :tangle ../build/SoundToScreen/zscript/st_event_handler.zs
 
 class st_EventHandler : StaticEventHandler
 {
@@ -514,35 +518,10 @@ GameInfo { EventHandlers = "st_EventHandler" }
 version 4.14.3
 
 #include "zscript/st_PlainTranslator.zs"
-
-<<code>>
+#include "zscript/st_event_handler.zs"
 #+end_src
 
 * Test
-
-#+begin_src c :tangle ../build/SoundToScreenTest/mapinfo.txt
-
-GameInfo { EventHandlers = "stt_EventHandler" }
-#+end_src
-
-#+begin_src c :tangle ../build/SoundToScreenTest/zscript.zs
-
-version 4.14.3
-
-class stt_EventHandler : StaticEventHandler
-{
-  override void networkProcess(ConsoleEvent command)
-  {
-    if (command.name == "stt_spawn_imps")
-    {
-      int count = command.args[0];
-      Console.printf("Spawning %d imps...", count);
-      for (int i = 0; i < count; ++i)
-        Actor.spawn("doomimp", players[consolePlayer].mo.pos + (50, 0, 0));
-    }
-  }
-}
-#+end_src
 
 #+begin_src text :tangle ../build/SoundToScreenTest/commands.txt
 
