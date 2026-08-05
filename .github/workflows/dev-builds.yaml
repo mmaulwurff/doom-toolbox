@@ -93,11 +93,12 @@ jobs:
 
       - parallel:
           - name: Install system dependencies
-            run: |
+            uses: awalsh128/cache-apt-pkgs-action@v1
+            with:
               # espeak-ng, libespeak1: for pyttsx3
               # ffmpeg: for python-ffmpeg
-              sudo apt-get update
-              sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg
+              packages: libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg
+              version: 1.0.0
 
           - name: Cache engine
             id: cache-engine
@@ -161,11 +162,12 @@ jobs:
 
       - parallel:
           - name: Install system dependencies
-            run: |
+            uses: awalsh128/cache-apt-pkgs-action@v1
+            with:
               # espeak-ng, libespeak1: for pyttsx3
               # ffmpeg: for python-ffmpeg
-              sudo apt-get update
-              sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+              packages: emacs-nox espeak-ng libespeak1 ffmpeg
+              version: 1.0.0
 
           - name: Install Python
             uses: actions/setup-python@v7
