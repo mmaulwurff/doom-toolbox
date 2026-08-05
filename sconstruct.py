@@ -218,7 +218,13 @@ def make_check_compatibility_target():
       './build/config.ini',
       '-iwad',
       './tools/miniwad.wad',
-      '+wait 2; map map01; wait 2; save test; wait 2; load test; wait 2; quit',
+      (
+        '+wait 2; map map01;'
+        ' wait 2; summon doomimp;'
+        ' wait 2; save test;'
+        ' wait 2; load test;'
+        ' wait 2; quit'
+      ),
       '-file',
       *projects,
     ]
