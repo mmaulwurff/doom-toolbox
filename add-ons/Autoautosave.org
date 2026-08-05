@@ -133,6 +133,8 @@ SPDX-License-Identifier = "CC0-1.0"
 v2.0.0
 - cleaned up Cvar and event names
 - removed voice types
+- autosave tokens now follow items
+- added silent autosave tokens
 
 v1.6.3
 - 2025-03-08 fix compatibility with GZDoom 4.14.1
