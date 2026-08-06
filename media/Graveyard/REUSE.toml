@@ -1,0 +1,30 @@
+# https://reuse.software/
+
+version = 1
+
+# https://forum.zdoom.org/viewtopic.php?p=1155756#p1155756
+# with minor edits by m8f
+[[annotations]]
+path = "graphics/gy_tomb1.png"
+SPDX-FileCopyrightText = "© 2020 Captain J"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
+
+# https://forum.zdoom.org/viewtopic.php?p=1155756#p1155756
+# mirrored from gy_tomb1.png by m8f
+[[annotations]]
+path = "graphics/gy_tomb2.png"
+SPDX-FileCopyrightText = "© 2020 Captain J"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
+
+# https://forum.zdoom.org/viewtopic.php?p=1155756#p1155756
+# minor edits by m8f
+[[annotations]]
+path = "graphics/gy_tomb3.png"
+SPDX-FileCopyrightText = "© 2020 Captain J"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
+
+# https://forum.zdoom.org/viewtopic.php?p=1155756#p1155756
+[[annotations]]
+path = "graphics/gy_tomb4.png"
+SPDX-FileCopyrightText = "© 2020 Captain J"
+SPDX-License-Identifier = "CC-BY-NC-SA-4.0"

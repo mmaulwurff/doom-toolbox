@@ -28,7 +28,6 @@ The order is alphabetical.
 - Blueberryy
 - bogus
 - Caligari87
-- Captain J
 - Carrascado
 - Churrupez
 - Colerx
@@ -45,6 +44,7 @@ The order is alphabetical.
 - dawnbreez
 - Derpford
 - Doctrine Dark
+- Dr_Cosmobyte
 - drogga (Commado Pen)
 - DrPyspy
 - Dutchygamer
@@ -140,7 +140,8 @@ The order is alphabetical.
 
 # spellchecker:off
 
-- 3saster: [[file:../modules/MD5.org][MD5]]
+- 3saster: [[file:../modules/MD5.org][MD5]], implementing real time access in GZDoom.
+- Captain J: sound design for Typist, graphics for Graveyard
 - Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
 - fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]
 - Gutawer: [[https://gitlab.com/Gutawer/gzdoom-gutamatics][Gutamatics]] (used in old versions)

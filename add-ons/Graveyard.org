@@ -1,0 +1,467 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: Graveyard
+
+#+name: meta
+#+begin_src js
+{
+  "old_version": "1.1.1",
+  "depends": {
+    "StringUtils":     "gy_",
+    "VmAbortReporter": "gy_"
+  }
+}
+#+end_src
+
+* About
+
+Graveyard places gravestones where you die.
+
+Gravestones are carried over play sessions, so:
+1. You die.
+2. You start a new game, or load the savegame.
+3. You see a gravestone where you died.
+
+Features
+- keys to remove gravestones on this map or all gravestones.
+- doesn't affect gameplay.
+- netgame compatible (players see other player's gravestones).
+
+* License
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/keyconf.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/language.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/mapinfo.txt
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/textures.txt
+// <<license>>
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/zscript.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs
+// <<license>>
+#+end_src
+
+* Keys
+
+#+begin_src c :tangle ../build/Graveyard/keyconf.txt
+
+Alias "gy_remove_all"  "netevent gy_remove_all"
+Alias "gy_remove_map"  "netevent gy_remove_map"
+
+AddKeySection "$GY_TITLE" "gy_keys"
+
+AddMenuKey "$GY_REMOVE_ALL"  "gy_remove_all"
+AddMenuKey "$GY_REMOVE_MAP"  "gy_remove_map"
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/language.txt
+
+[enu default]
+
+GY_TITLE = "Graveyard";
+
+GY_REMOVE_ALL  = "Remove all gravestones";
+GY_REMOVE_MAP  = "Remove gravestones on this map";
+
+GY_REMOVE_ALL_MESSAGE  = "All gravestones are removed.";
+GY_REMOVE_MAP_MESSAGE  = "Gravestones on this map are removed.";
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle ../build/Graveyard/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "gy_EventHandler", "gy_VmAbortHandler"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/zscript.zs
+
+version 4.14.3
+
+<<../tools/scripts.org:include("add-ons/Graveyard.org", "build/Graveyard/\\(zscript/.*zs\\)")>>
+
+#include "zscript/gy_StringUtils.zs"
+#include "zscript/gy_VmAbortReporter.zs"
+#+end_src
+
+#+begin_src text :tangle ../build/tmp.txt :exports none
+<<../tools/scripts.org:copy-media("Graveyard")>>
+#+end_src
+
+* Code
+
+** Event handler
+
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs
+
+class gy_EventHandler : EventHandler
+{
+  override void worldTick()
+  {
+    if (_isFired)
+    {
+      return;
+    }
+
+    _isFired = true;
+    removeStonesOnMap();
+
+    let storage = gy_Storage.of();
+
+    gy_Death death;
+    while (death = storage.next())
+    {
+      sendNetworkEvent("gy_spawn" .. death.toString());
+    }
+  }
+
+  override void worldThingDied(WorldEvent event)
+  {
+    if (event.thing == NULL || event.thing.player == NULL) { return; }
+
+    string name = event.thing.player.getUserName();
+    string obituaryPart;
+    if (event.thing.target != NULL)
+    {
+      string killerName = (event.thing.target.player != NULL)
+        ? event.thing.target.player.getUserName()
+        : event.thing.target.getTag();
+      obituaryPart = ", killed by " .. killerName;
+    }
+    string obituary = string.format("Here lies %s%s.\n%s\n%s",
+                                    name,
+                                    obituaryPart,
+                                    SystemTime.format("%F %T", _now),
+                                    level.timeFormatted());
+
+    let storage = gy_Storage.of();
+    let death   = gy_Death.of(event.thing.pos, obituary);
+    storage.registerDeath(death);
+
+    if (multiplayer) { sendNetworkEvent("gy_spawn" .. death.toString()); }
+  }
+
+  override void networkProcess(ConsoleEvent event)
+  {
+    if (event.name.left(8) == "gy_spawn")
+    {
+      let death = gy_Death.fromString(event.name.mid(8));
+      let pos   = death.getLocation();
+      int i     = abs(int(pos.x + pos.y + pos.z)) % 4;
+      let c     = string.format("gy_Stone%d", i);
+      let stone = gy_Stone(Actor.spawn(c, death.getLocation(), ALLOW_REPLACE));
+      stone.setObituary(death.getObituary());
+    }
+    else if (event.name == "gy_remove_all")
+    {
+      gy_Storage.of().clearAll();
+      removeStonesOnMap();
+      print("GY_REMOVE_ALL_MESSAGE");
+    }
+    else if (event.name == "gy_remove_map")
+    {
+      gy_Storage.of().clearThisMap();
+      removeStonesOnMap();
+      print("GY_REMOVE_MAP_MESSAGE");
+    }
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    // Workaround to get the current time, which is UI-scoped.
+    // Part 1/2.
+    int second = level.time / 35 + 1;
+    if (second > _lastSecond)
+    {
+      setNow(second, SystemTime.Now());
+    }
+  }
+
+  private void print(string message)
+  {
+    Console.printf("%s", StringTable.localize(message, false));
+  }
+
+  private void removeStonesOnMap()
+  {
+    let i = ThinkerIterator.create("gy_Stone");
+    Actor a;
+    while (a = Actor(i.Next()))
+    {
+      a.Destroy();
+    }
+  }
+
+  // Workaround to get the current time, which is UI-scoped.
+  // Part 2/2.
+  private void setNow(int lastSecond, int now) const
+  {
+    _lastSecond = lastSecond;
+    _now = now;
+  }
+
+  private transient bool _isFired;
+  private int _lastSecond;
+  private int _now;
+}
+#+end_src
+
+** Death
+
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs
+
+class gy_Death
+{
+  static gy_Death of(vector3 location, string obituary)
+  {
+    let result = new("gy_Death");
+    result._location = location;
+    result._obituary = obituary;
+    return result;
+  }
+
+  static gy_Death fromString(string s)
+  {
+    Array<string> t;
+    s.split(t, ":");
+    vector3 location = (t[0].toDouble(), t[1].toDouble(), t[2].toDouble());
+    string obituary = t[3];
+    for (int i = 4; i < t.size(); ++i)
+    {
+      obituary.appendFormat(":%s", t[i]);
+    }
+    return gy_Death.of(location, obituary);
+  }
+
+  string toString()
+  {
+    return string.format("%f:%f:%f:%s",
+                         _location.x,
+                         _location.y,
+                         _location.z,
+                         _obituary);
+  }
+
+  vector3 getLocation() const { return _location; }
+  string  getObituary() const { return _obituary; }
+
+  private vector3 _location;
+  private string  _obituary;
+}
+#+end_src
+
+** Stone
+
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
+
+class gy_Stone : Actor
+{
+  Default
+  {
+    Radius 16;
+    Height 1;
+    Gravity 1000;
+  }
+
+  void setObituary(string obituary)
+  {
+    _obituary = obituary;
+  }
+
+  override bool used(Actor user)
+  {
+    Console.printf("%s", _obituary);
+    return Super.used(user);
+  }
+
+  private string _obituary;
+}
+
+class gy_Stone0 : gy_Stone { States { Spawn: gy_t a -1; Stop; } }
+class gy_Stone1 : gy_Stone { States { Spawn: gy_t b -1; Stop; } }
+class gy_Stone2 : gy_Stone { States { Spawn: gy_t c -1; Stop; } }
+class gy_Stone3 : gy_Stone { States { Spawn: gy_t d -1; Stop; } }
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/textures.txt
+
+sprite gy_ta0, 33, 49
+{
+  patch gy_tomb1, 0, 0
+  offset 16, 49
+  xScale 1.5
+  yScale 1.8
+}
+
+sprite gy_tb0, 33, 49
+{
+  patch gy_tomb2, 0, 0
+  offset 16, 49
+  xScale 1.5
+  yScale 1.8
+}
+
+sprite gy_tc0, 32, 30
+{
+  patch gy_tomb3, 0, 0
+  offset 16, 30
+  xScale 1.1
+  yScale 1.32
+}
+
+sprite gy_td0, 38, 34
+{
+  patch gy_tomb4, 0, 0
+  offset 19, 34
+  xScale 1.1
+  yScale 1.32
+}
+#+end_src
+** Storage
+
+#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
+
+nosave string gy_hashes = "";
+nosave string gy_locations = "";
+nosave string gy_obituaries = "";
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs
+
+class gy_Storage
+{
+  static gy_Storage of()
+  {
+    let result = new("gy_Storage");
+    result._hashes     = Dictionary.fromString(Cvar.getCvar("gy_hashes"    ).getString());
+    result._locations  = Dictionary.fromString(Cvar.getCvar("gy_locations" ).getString());
+    result._obituaries = Dictionary.fromString(Cvar.getCvar("gy_obituaries").getString());
+    result._hashesIterator = DictionaryIterator.create(result._hashes);
+    return result;
+  }
+
+  gy_Death Next()
+  {
+    string checksum = level.getChecksum();
+    bool hasNext;
+    while ((hasNext = _hashesIterator.Next()) && _hashesIterator.value() != checksum);
+
+    if (!hasNext) { return NULL; }
+
+    string i  = _hashesIterator.Key();
+    Array<string> lc;
+    _locations.at(i).split(lc, ":");
+    vector3 location = (lc[0].toDouble(), lc[1].toDouble(), lc[2].toDouble());
+
+    return gy_Death.of(location, _obituaries.at(i));
+  }
+
+  void registerDeath(gy_Death death)
+  {
+    string i = string.format("%d", getNewIndex());
+    let    l = death.getLocation();
+
+    _hashes    .insert(i, level.getChecksum());
+    _locations .insert(i, string.format("%f:%f:%f", l.x, l.y, l.z));
+    _obituaries.insert(i, death.getObituary());
+
+    write();
+  }
+
+  void clearAll()
+  {
+    _hashes     = Dictionary.create();
+    _locations  = Dictionary.create();
+    _obituaries = Dictionary.create();
+
+    write();
+  }
+
+  void clearThisMap()
+  {
+    Dictionary newHashes     = Dictionary.create();
+    Dictionary newLocations  = Dictionary.create();
+    Dictionary newObituaries = Dictionary.create();
+    int index = 0;
+
+    string checksum = level.getChecksum();
+    let i = DictionaryIterator.create(_hashes);
+    while (i.Next())
+    {
+      if (i.value() != checksum)
+      {
+        string s = string.format("%d", index);
+        newHashes    .insert(s, i.value());
+        newLocations .insert(s, _locations .at(i.Key()));
+        newObituaries.insert(s, _obituaries.at(i.Key()));
+        ++index;
+      }
+    }
+
+    _hashes     = newHashes;
+    _locations  = newLocations;
+    _obituaries = newObituaries;
+
+    write();
+  }
+
+  private int getNewIndex()
+  {
+    int nRecords = 0;
+    let i = DictionaryIterator.create(_hashes);
+    while (i.Next())
+    {
+      ++nRecords;
+    }
+    return nRecords;
+  }
+
+  private void write()
+  {
+    Cvar.getCvar("gy_hashes"    ).setString(_hashes    .toString());
+    Cvar.getCvar("gy_locations" ).setString(_locations .toString());
+    Cvar.getCvar("gy_obituaries").setString(_obituaries.toString());
+  }
+
+  private Dictionary _hashes;
+  private DictionaryIterator _hashesIterator;
+  private Dictionary _locations;
+  private Dictionary _obituaries;
+}
+#+end_src
+
+* Test
+
+Basic check: the mod can be loaded without errors.
+
+#+begin_src text :tangle ../build/GraveyardTest/commands.txt
+wait 2; map map01; wait 2; quit
+#+end_src
