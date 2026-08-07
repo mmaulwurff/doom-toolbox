@@ -177,10 +177,16 @@ class gy_EventHandler : EventHandler
     {
       let death = gy_Death.fromString(event.name.mid(8));
       let pos   = death.getLocation();
-      int i     = abs(int(pos.x + pos.y + pos.z)) % 4;
+      int seed  = abs(int(pos.x + pos.y + pos.z));
+      int i     = seed % 4;
       let c     = string.format("gy_Stone%d", i);
+
       let stone = gy_Stone(Actor.spawn(c, death.getLocation(), ALLOW_REPLACE));
       stone.setObituary(death.getObituary());
+
+      double scaleX = (1 + (seed % 13 - 6) / 6.0 / 10.0);
+      double scaleY = (1 + (seed %  7 - 3) / 3.0 / 10.0);
+      stone.a_setScale(scaleX, scaleY);
     }
     else if (event.name == "gy_remove_all")
     {
