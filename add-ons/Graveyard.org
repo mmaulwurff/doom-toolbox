@@ -399,7 +399,7 @@ class gy_Storage
     let    l = death.getLocation();
 
     _hashes    .insert(i, level.getChecksum());
-    _locations .insert(i, string.format("%f:%f:%f", l.x, l.y, l.z));
+    _locations .insert(i, string.format("%.2f:%.2f:%.2f", l.x, l.y, l.z));
     _obituaries.insert(i, death.getObituary());
 
     write();
