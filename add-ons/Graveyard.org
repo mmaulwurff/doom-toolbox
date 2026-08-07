@@ -147,15 +147,16 @@ class gy_EventHandler : EventHandler
 
   override void worldThingDied(WorldEvent event)
   {
-    if (event.thing == NULL || event.thing.player == NULL) { return; }
+    Actor thing = event.thing;
+    if (thing == NULL || thing.player == NULL) { return; }
 
-    string name = event.thing.player.getUserName();
+    string name = thing.player.getUserName();
     string obituaryPart;
     if (event.thing.target != NULL)
     {
-      string killerName = (event.thing.target.player != NULL)
-        ? event.thing.target.player.getUserName()
-        : event.thing.target.getTag();
+      string killerName = (thing.target.player != NULL)
+        ? thing.target.player.getUserName()
+        : thing.target.getTag();
       obituaryPart = ", killed by " .. killerName;
     }
     string obituary = string.format("Here lies %s%s.\n%s\n%s",
@@ -165,7 +166,7 @@ class gy_EventHandler : EventHandler
                                     level.timeFormatted());
 
     let storage = gy_Storage.of();
-    let death   = gy_Death.of(event.thing.pos, obituary);
+    let death   = gy_Death.of(thing.pos, obituary);
     storage.registerDeath(death);
 
     if (multiplayer) { sendNetworkEvent("gy_spawn" .. death.toString()); }
@@ -206,7 +207,7 @@ class gy_EventHandler : EventHandler
   {
     // Workaround to get the current time, which is UI-scoped.
     // Part 1/2.
-    int second = level.time / 35 + 1;
+    int second = level.time / TICRATE + 1;
     if (second > _lastSecond)
     {
       setNow(second, SystemTime.now());
