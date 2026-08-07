@@ -15,6 +15,8 @@
 
 * About
 
+[[file:../media/Graveyard/graphics/gy_tomb4.png]]
+
 Graveyard places gravestones where you die.
 
 Gravestones are carried over play sessions, so:
@@ -25,7 +27,7 @@ Gravestones are carried over play sessions, so:
 Features
 - keys to remove gravestones on this map or all gravestones.
 - doesn't affect gameplay.
-- netgame compatible (players see other player's gravestones).
+- multiplayer compatible (players see other player's gravestones).
 
 * License
 
@@ -34,35 +36,35 @@ SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
+#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/keyconf.txt
+#+begin_src c :tangle ../build/Graveyard/keyconf.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/language.txt
+#+begin_src c :tangle ../build/Graveyard/language.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/mapinfo.txt
+#+begin_src c :tangle ../build/Graveyard/mapinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/textures.txt
+#+begin_src c :tangle ../build/Graveyard/textures.txt :exports none
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/Graveyard/zscript.zs
+#+begin_src c :tangle ../build/Graveyard/zscript.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs :exports none
 // <<license>>
 #+end_src
 
@@ -201,7 +203,7 @@ class gy_EventHandler : EventHandler
     int second = level.time / 35 + 1;
     if (second > _lastSecond)
     {
-      setNow(second, SystemTime.Now());
+      setNow(second, SystemTime.now());
     }
   }
 
@@ -214,9 +216,9 @@ class gy_EventHandler : EventHandler
   {
     let i = ThinkerIterator.create("gy_Stone");
     Actor a;
-    while (a = Actor(i.Next()))
+    while (a = Actor(i.next()))
     {
-      a.Destroy();
+      a.destroy();
     }
   }
 
@@ -368,15 +370,15 @@ class gy_Storage
     return result;
   }
 
-  gy_Death Next()
+  gy_Death next()
   {
     string checksum = level.getChecksum();
     bool hasNext;
-    while ((hasNext = _hashesIterator.Next()) && _hashesIterator.value() != checksum);
+    while ((hasNext = _hashesIterator.next()) && _hashesIterator.value() != checksum);
 
     if (!hasNext) { return NULL; }
 
-    string i  = _hashesIterator.Key();
+    string i  = _hashesIterator.key();
     Array<string> lc;
     _locations.at(i).split(lc, ":");
     vector3 location = (lc[0].toDouble(), lc[1].toDouble(), lc[2].toDouble());
@@ -414,14 +416,14 @@ class gy_Storage
 
     string checksum = level.getChecksum();
     let i = DictionaryIterator.create(_hashes);
-    while (i.Next())
+    while (i.next())
     {
       if (i.value() != checksum)
       {
         string s = string.format("%d", index);
         newHashes    .insert(s, i.value());
-        newLocations .insert(s, _locations .at(i.Key()));
-        newObituaries.insert(s, _obituaries.at(i.Key()));
+        newLocations .insert(s, _locations .at(i.key()));
+        newObituaries.insert(s, _obituaries.at(i.key()));
         ++index;
       }
     }
@@ -437,7 +439,7 @@ class gy_Storage
   {
     int nRecords = 0;
     let i = DictionaryIterator.create(_hashes);
-    while (i.Next())
+    while (i.next())
     {
       ++nRecords;
     }
