@@ -92,6 +92,8 @@ GY_REMOVE_MAP  = "Remove gravestones on this map";
 
 GY_REMOVE_ALL_MESSAGE  = "All gravestones are removed.";
 GY_REMOVE_MAP_MESSAGE  = "Gravestones on this map are removed.";
+
+GY_GRAVESTONE = "Gravestone";
 #+end_src
 
 * Project setup
@@ -298,6 +300,7 @@ class gy_Stone : Actor
     Radius 16;
     Height 1;
     Gravity 1000;
+    Tag "$GY_GRAVESTONE";
   }
 
   void setObituary(string obituary)
@@ -354,6 +357,7 @@ sprite gy_td0, 38, 34
   yScale 1.32
 }
 #+end_src
+
 ** Storage
 
 #+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
