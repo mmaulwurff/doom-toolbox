@@ -100,6 +100,7 @@ jobs:
               # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
               packages: libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
               version: 1.0.0
+              execute_install_scripts: true
 
           - name: Cache engine
             id: cache-engine
@@ -169,6 +170,7 @@ jobs:
               # ffmpeg: for python-ffmpeg
               packages: emacs-nox espeak-ng libespeak1 ffmpeg
               version: 1.0.0
+              execute_install_scripts: true
 
           - name: Install Python
             uses: actions/setup-python@v7
