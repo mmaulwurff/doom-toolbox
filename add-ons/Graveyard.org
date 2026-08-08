@@ -526,6 +526,49 @@ class gy_Storage
 }
 #+end_src
 
+* Soulspheres patch
+
+#+begin_src c :tangle ../build/GraveyardSoulsphere/zscript.zs
+
+version 4.14.3
+
+class gy_SoulStone0 : gy_Stone0 replaces gy_Stone0
+{
+  override void beginPlay()
+  {
+    Actor.spawn("SoulSphere", pos, ALLOW_REPLACE);
+    Super.beginPlay();
+  }
+}
+
+class gy_SoulStone1 : gy_Stone1 replaces gy_Stone1
+{
+  override void beginPlay()
+  {
+    Actor.spawn("SoulSphere", pos, ALLOW_REPLACE);
+    Super.beginPlay();
+  }
+}
+
+class gy_SoulStone2 : gy_Stone2 replaces gy_Stone2
+{
+  override void beginPlay()
+  {
+    Actor.spawn("SoulSphere", pos, ALLOW_REPLACE);
+    Super.beginPlay();
+  }
+}
+
+class gy_SoulStone3 : gy_Stone3 replaces gy_Stone3
+{
+  override void beginPlay()
+  {
+    Actor.spawn("SoulSphere", pos, ALLOW_REPLACE);
+    Super.beginPlay();
+  }
+}
+#+end_src
+
 * Test
 
 Basic check: the mod can be loaded without errors.
