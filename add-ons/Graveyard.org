@@ -98,6 +98,9 @@ GY_GRAVESTONE = "Gravestone";
 
 * Project setup
 
+Modules used:
+- [[file:../modules/VmAbortReporter.org][VmAbortReporter]]
+
 #+begin_src c :tangle ../build/Graveyard/mapinfo.txt
 
 GameInfo
@@ -118,6 +121,11 @@ version 4.14.3
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
 <<../tools/scripts.org:copy-media("Graveyard")>>
+#+end_src
+
+#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
+
+user bool gy_vm_abort_report_enabled = true;
 #+end_src
 
 * Code
@@ -145,6 +153,10 @@ class gy_EventHandler : EventHandler
     {
       sendNetworkEvent("gy_spawn" .. death.toString());
     }
+
+    gy_Death lastDeath = storage.getLastDeathOnThisMap();
+    if (lastDeath != NULL)
+      sendNetworkEvent("gy_mark" .. lastDeath.toString());
   }
 
   override void worldThingDied(WorldEvent event)
@@ -190,6 +202,16 @@ class gy_EventHandler : EventHandler
       double scaleX = (1 + (seed % 13 - 6) / 6.0 / 10.0);
       double scaleY = (1 + (seed %  7 - 3) / 3.0 / 10.0);
       stone.a_setScale(scaleX, scaleY);
+    }
+    if (event.name.left(7) == "gy_mark")
+    {
+      let death = gy_Death.fromString(event.name.mid(7));
+      let pos   = death.getLocation();
+      int seed  = abs(int(pos.x + pos.y + pos.z));
+      int i     = seed % 4;
+      let c     = string.format("gy_Marker%d", i);
+
+      Actor.spawn(c, death.getLocation(), ALLOW_REPLACE);
     }
     else if (event.name == "gy_remove_all")
     {
@@ -274,7 +296,7 @@ class gy_Death
 
   string toString()
   {
-    return string.format("%f:%f:%f:%s",
+    return string.format("%.2f:%.2f:%.2f:%s",
                          _location.x,
                          _location.y,
                          _location.z,
@@ -358,6 +380,16 @@ sprite gy_td0, 38, 34
 }
 #+end_src
 
+** Automap marker
+
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
+
+class gy_Marker0 : MapMarker { States { Spawn: gy_t a -1; Stop; } }
+class gy_Marker1 : MapMarker { States { Spawn: gy_t b -1; Stop; } }
+class gy_Marker2 : MapMarker { States { Spawn: gy_t c -1; Stop; } }
+class gy_Marker3 : MapMarker { States { Spawn: gy_t d -1; Stop; } }
+#+end_src
+
 ** Storage
 
 #+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
@@ -386,15 +418,21 @@ class gy_Storage
     string checksum = level.getChecksum();
     bool hasNext;
     while ((hasNext = _hashesIterator.next()) && _hashesIterator.value() != checksum);
+    return hasNext ? getDeathAt(_hashesIterator.key()) : NULL;
+  }
 
-    if (!hasNext) { return NULL; }
+  gy_Death getLastDeathOnThisMap()
+  {
+    string checksum = level.getChecksum();
+    int maxIndex = -1;
+    let i = DictionaryIterator.create(_hashes);
+    while (i.next())
+    {
+      if (i.value() == checksum)
+        maxIndex = max(maxIndex, i.key().toInt());
+    }
 
-    string i  = _hashesIterator.key();
-    Array<string> lc;
-    _locations.at(i).split(lc, ":");
-    vector3 location = (lc[0].toDouble(), lc[1].toDouble(), lc[2].toDouble());
-
-    return gy_Death.of(location, _obituaries.at(i));
+    return (maxIndex == -1) ? NULL : getDeathAt(string.format("%d", maxIndex));
   }
 
   void registerDeath(gy_Death death)
@@ -446,15 +484,25 @@ class gy_Storage
     write();
   }
 
+  private gy_Death getDeathAt(string i)
+  {
+    Array<string> lc;
+    _locations.at(i).split(lc, ":");
+    vector3 location = (lc[0].toDouble(), lc[1].toDouble(), lc[2].toDouble());
+
+    return gy_Death.of(location, _obituaries.at(i));
+  }
+
   private int getNewIndex()
   {
-    int nRecords = 0;
+    // Clearing gravestones on a particular map creates gaps in indexes,
+    // that's why new index is not just dictionary size.
+    int maxIndex = 0;
     let i = DictionaryIterator.create(_hashes);
     while (i.next())
-    {
-      ++nRecords;
-    }
-    return nRecords;
+      maxIndex = max(maxIndex, i.key().toInt());
+
+    return maxIndex + 1;
   }
 
   private void write()
