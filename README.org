@@ -90,6 +90,10 @@ and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
 
 [[file:media/screenshots/Gearbox-blocks.png]]
 
+Graveyard:
+
+[[file:media/screenshots/Graveyard.png]]
+
 HitImpact (with [[https://www.doomwiki.org/wiki/Back_to_Saturn_X][BTSX]] E1 MAP01):
 
 [[file:media/screenshots/HitImpact.gif]]
