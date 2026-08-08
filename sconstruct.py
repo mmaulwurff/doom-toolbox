@@ -31,19 +31,19 @@ emacs = (
   or Path('c:/tools/emacs/bin/emacs.exe')
 )
 engine = (
-  os.path.expanduser(os.environ['DT_ENGINE'])
+  Path.expanduser(os.environ['DT_ENGINE'])
   if 'DT_ENGINE' in os.environ
   else shutil.which('uzdoom')
 )
+build_el_path = Path('tools/build.el').resolve()
 
 
 # Common functions
 def make_project_name(org_file):
-  return os.path.splitext(os.path.basename(org_file))[0]
+  return Path(org_file).stem
 
 
 def make_export(source, prefix):
-  build_el_path = os.path.abspath('tools/build.el')
   return f'{emacs} {source} --quick --batch \
     --load {build_el_path} \
     --eval "(dt-export \\"{prefix}\\")"'
@@ -52,7 +52,6 @@ def make_export(source, prefix):
 # Target setup functions
 def add_main_target(org_file, target_format):
   zscript_name = target_format.format(make_project_name(org_file))
-  build_el_path = os.path.abspath('tools/build.el')
   tangle = f'{emacs} $SOURCE --quick --batch \
     --load {build_el_path} \
     --eval "(dt-tangle)"'
@@ -101,8 +100,9 @@ def add_test_target(org_file, main_target):
       print('timeout')
       return 1
 
-    with open(
-      'tools/IgnoredEngineOutput.txt', encoding='utf-8'
+    with Path.open(
+      'tools/IgnoredEngineOutput.txt',
+      encoding='utf-8',
     ) as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
@@ -113,10 +113,14 @@ def add_test_target(org_file, main_target):
     for line in filter(printable, result.stdout.splitlines()):
       line = re.sub(r'(.*)/:(.*), line (.*)', r'\1/\2:\3', line)
       line = re.sub(
-        r'Script error, \"(.*)/:(.*)\" line (.*)', r'ERROR: \1/\2:\3', line
+        r'Script error, \"(.*)/:(.*)\" line (.*)',
+        r'ERROR: \1/\2:\3',
+        line,
       )
       line = re.sub(
-        r'Script warning, \"(.*)/:(.*)\" line (.*)', r'WARNING: \1/\2:\3', line
+        r'Script warning, \"(.*)/:(.*)\" line (.*)',
+        r'WARNING: \1/\2:\3',
+        line,
       )
       has_errors = has_errors or 'ERROR' in line or 'WARNING' in line
       print(line)
@@ -133,7 +137,7 @@ def read_org_block(block_name, content):
 
 
 def extract_meta(org_file):
-  with open(org_file, encoding='utf-8') as project_file:
+  with Path.open(org_file, encoding='utf-8') as project_file:
 
     def read_whole():
       project_file.seek(0)
@@ -156,12 +160,14 @@ def add_pack_target(org_file, main_target):
 
   def pack(target, source, env):
     shutil.copytree(
-      'documentation', build_path / 'documentation', dirs_exist_ok=True
+      'documentation',
+      build_path / 'documentation',
+      dirs_exist_ok=True,
     )
     shutil.copy(org_file, build_path / 'README.org')
 
     licenses_path = build_path / 'LICENSES'
-    os.makedirs(licenses_path, exist_ok=True)
+    Path(licenses_path).mkdir(parents=True, exist_ok=True)
     project = reuse.project.Project.from_directory(build_path)
     report = reuse.report.ProjectReport.generate(project)
     for used_license in report.used_licenses:
@@ -191,12 +197,14 @@ def add_pack_target(org_file, main_target):
           report.files_without_licenses,
           'files without copyright',
           report.files_without_copyright,
-        ]
+        ],
       )
 
     version = extract_version()
     archive = shutil.make_archive(
-      Path(str(build_path) + '-' + version), 'zip', build_path
+      Path(str(build_path) + '-' + version),
+      'zip',
+      build_path,
     )
     result_path = Path(archive).with_suffix('.pk3')
     shutil.move(archive, result_path)
@@ -248,8 +256,9 @@ def make_check_compatibility_target():
       print('timeout')
       return 1
 
-    with open(
-      'tools/IgnoredEngineOutput.txt', encoding='utf-8'
+    with Path.open(
+      'tools/IgnoredEngineOutput.txt',
+      encoding='utf-8',
     ) as lines_to_skip_file:
       lines_to_skip = [line.rstrip() for line in lines_to_skip_file]
 
@@ -269,7 +278,7 @@ def make_index(target, source, env):
 
 
 def pack_module(target, source, env):
-  os.makedirs('build/modules', exist_ok=True)
+  Path('build/modules').mkdir(parents=True, exist_ok=True)
   for one_source in source:
     shutil.copy(one_source.sources[0], 'build/modules')
 
@@ -279,10 +288,10 @@ def add_dependency(main_target, project, module, namespace):
   destination = f'{target_directory}/{namespace}{module}.zs'
 
   def export_module(target, source, env):
-    os.makedirs(target_directory, exist_ok=True)
+    Path(target_directory).mkdir(parents=True, exist_ok=True)
     with (
-      open(destination, 'w', encoding='utf-8') as target_file,
-      open(source[0], encoding='utf-8') as module_file,
+      Path.open(destination, 'w', encoding='utf-8') as target_file,
+      Path.open(source[0], encoding='utf-8') as module_file,
     ):
       target_file.write(module_file.read().replace('NAMESPACE_', namespace))
 
@@ -308,13 +317,16 @@ def add_autoautosave_generate_sounds_target():
 
   def generate(target, source, env):
     sound_engine = pyttsx3.init()
-    os.makedirs(sound_directory, exist_ok=True)
+    Path(sound_directory).mkdir(parents=True, exist_ok=True)
 
     sound_engine.setProperty('rate', 140)
     sound_engine.setProperty('pitch', 0)
     sound_engine.setProperty('voice', 'storm')
 
-    with open('build/Autoautosave/events.json', encoding='utf-8') as events_file:
+    with Path.open(
+      'build/Autoautosave/events.json',
+      encoding='utf-8',
+    ) as events_file:
       events = json.load(events_file)
 
     for index, text in events.items():
@@ -323,11 +335,10 @@ def add_autoautosave_generate_sounds_target():
 
       sound_engine.save_to_file(text, wav_name)
       sound_engine.runAndWait()
-      if Path(ogg_name).is_file():
-        os.remove(ogg_name)
+      Path(ogg_name).unlink(missing_ok=True)
       print(f'Converting to {ogg_name}...')
       FFmpeg().input(wav_name).output(ogg_name).execute()
-      os.remove(wav_name)
+      Path(wav_name).unlink()
 
     sound_engine.stop()
 
@@ -336,10 +347,11 @@ def add_autoautosave_generate_sounds_target():
 
 # Targets
 compatibility_target = AlwaysBuild(
-  Alias('CheckCompatibility', None, make_check_compatibility_target())
+  Alias('CheckCompatibility', None, make_check_compatibility_target()),
 )
 clematis_target = Alias(
-  'ClematisM', add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs')
+  'ClematisM',
+  add_main_target('add-ons/ClematisM.org', 'build/{0}/zscript.zs'),
 )
 
 test_targets = []
@@ -384,14 +396,16 @@ for org_file in Glob('add-ons/*.org'):
 
 html_targets = []
 for org_file in Glob('*.org'):
-  html_name = f'{os.path.splitext(org_file)[0]}.html'
+  path = Path(org_file)
+  html_name = f'{path.parent}{path.stem}.html'
   html_targets.append(
-    Command(target=html_name, source=org_file, action=make_export(org_file, ''))
+    Command(target=html_name, source=org_file, action=make_export(org_file, '')),
   )
 for org_file in Glob('*/*.org'):
-  html_name = f'{os.path.splitext(org_file)[0]}.html'
+  path = Path(org_file)
+  html_name = f'{path.parent}{path.stem}.html'
   html_targets.append(
-    Command(target=html_name, source=org_file, action=make_export(org_file, '../'))
+    Command(target=html_name, source=org_file, action=make_export(org_file, '../')),
   )
 
 AlwaysBuild(Alias('PackModules', module_targets, pack_module))
@@ -407,7 +421,7 @@ AlwaysBuild(
       f'{emacs} {org_file} --quick --batch --eval "(print (org-lint))"'
       for org_file in Glob('*/*.org') + Glob('*.org')
     ],
-  )
+  ),
 )
 
 

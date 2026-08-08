@@ -14,10 +14,12 @@ lint.extend-select = [
   "BLE",
   "C4",
   "C90",
+  "COM",
   "E",
   "EM",
   "ERA",
   "F",
+  "FBT",
   "FLY",
   "FURB",
   "I",
@@ -25,14 +27,22 @@ lint.extend-select = [
   "N",
   "PERF",
   "PIE",
-  "PLR",
+  "PL",
+  "PTH",
   "RET",
   "RUF",
   "S",
   "SIM",
+  "SLF",
+  "TID",
+  "TRY",
   "UP",
   "W",
  ]
+lint.ignore = [
+  "COM812",
+  "PLW2901",
+]
 
 # https://github.com/crate-ci/typos/blob/master/docs/reference.md
 [tool.typos]
