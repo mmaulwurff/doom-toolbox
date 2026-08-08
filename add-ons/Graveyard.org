@@ -183,7 +183,13 @@ class gy_EventHandler : EventHandler
     let death   = gy_Death.of(thing.pos, obituary);
     storage.registerDeath(death);
 
-    if (multiplayer) { sendNetworkEvent("gy_spawn" .. death.toString()); }
+    foreach (marker : ThinkerIterator.create("gy_Marker", Thinker.STAT_MapMarker))
+    {
+      marker.destroy();
+      break;
+    }
+    sendNetworkEvent("gy_mark" .. death.toString());
+    sendNetworkEvent("gy_spawn" .. death.toString());
   }
 
   override void networkProcess(ConsoleEvent event)
@@ -384,10 +390,11 @@ sprite gy_td0, 38, 34
 
 #+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
 
-class gy_Marker0 : MapMarker { States { Spawn: gy_t a -1; Stop; } }
-class gy_Marker1 : MapMarker { States { Spawn: gy_t b -1; Stop; } }
-class gy_Marker2 : MapMarker { States { Spawn: gy_t c -1; Stop; } }
-class gy_Marker3 : MapMarker { States { Spawn: gy_t d -1; Stop; } }
+class gy_Marker : MapMarker {}
+class gy_Marker0 : gy_Marker { States { Spawn: gy_t a -1; Stop; } }
+class gy_Marker1 : gy_Marker { States { Spawn: gy_t b -1; Stop; } }
+class gy_Marker2 : gy_Marker { States { Spawn: gy_t c -1; Stop; } }
+class gy_Marker3 : gy_Marker { States { Spawn: gy_t d -1; Stop; } }
 #+end_src
 
 ** Storage
