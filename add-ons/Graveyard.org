@@ -5,7 +5,7 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "1.1.1",
+  "version": "1.2.0",
   "depends": {
     "StringUtils":     "gy_",
     "VmAbortReporter": "gy_"
@@ -67,6 +67,52 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs :exports none
 // <<license>>
 #+end_src
+
+* Changelog
+
+*v1.2.0*
+
+New:
+- spawn gravestones immediately on death
+- show last death on the automap
+- add size variance to tombstones
+
+Fixes:
+- add tag to gravestone class
+- use slightly less storage
+- update VM abort handler
+
+*v1.1.1*
+- update VM abort handler
+
+*v1.1.0*
+- make stones fall to floor faster when spawning
+- update Readme
+- add vm abort handler
+- rename patches directory to add-ons so GZDoom doesn't confuse it with textures
+- spawn gravestones immediately in multiplayer
+
+*v1.0*
+- add real time to obituaries, fix code style
+- add soulstones patch
+- allow replacing stones with custom ones
+
+*v0.3.2*
+- fix crash when gravestones are on some locations on the map
+- fix gravestones not loading even more
+
+*v0.3.1*
+- fix gravestones not loading sometimes more
+
+*v0.3*
+- fix gravestones not loading sometimes
+- add randomized gravestone graphics
+- add timestamp to grave description
+
+*v0.2*
+- fix new stones overwriting old ones after clearing stones on a map
+
+*v0.1*: initial release
 
 * Keys
 
