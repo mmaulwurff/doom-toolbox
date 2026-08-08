@@ -35,7 +35,7 @@ To use (besides ZScript code):
 - add event handlers in mapinfo:
   <<mapinfo>>
 
-VmAbortReporter module version: 1.0.0
+VmAbortReporter module version: 1.0.1
 
 VmAbortReporter is a part of DoomToolbox.
 The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
@@ -76,7 +76,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 * Source
 
-** ~VmAbortHandler~
+** VM abort handler
 
 TODO: make ~VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
 
@@ -84,8 +84,14 @@ TODO: make ~VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
 
 class NAMESPACE_VmAbortHandler : EventHandler
 {
+  const REPORT_ENABLED_CVAR_NAME = "NAMESPACE_vm_abort_report_enabled";
+
   override void playerSpawned(PlayerEvent event)
   {
+    Cvar enabledCvar = Cvar.getCvar(REPORT_ENABLED_CVAR_NAME, players[consolePlayer]);
+    if (enabledCvar == NULL)
+      Console.printf("ERROR: %s Cvar is not defined.", REPORT_ENABLED_CVAR_NAME);
+
     mReport = new("NAMESPACE_Report");
     if (event.playerNumber == consolePlayer) mReport.writePlayerInfo();
   }
@@ -98,9 +104,12 @@ class NAMESPACE_VmAbortHandler : EventHandler
 
   override void onDestroy()
   {
+    Cvar enabledCvar = Cvar.getCvar(REPORT_ENABLED_CVAR_NAME, players[consolePlayer]);
+
     if (gameState != GS_FullConsole
         || !amIFirst()
-        || !Cvar.getCvar("NAMESPACE_vm_abort_report_enabled", players[consolePlayer]).getBool())
+        || enabledCvar == NULL
+        || !enabledCvar.getBool())
       {
         return;
       }
@@ -152,7 +161,7 @@ class NAMESPACE_VmAbortHandler : EventHandler
 }
 #+end_src
 
-** ~Report~
+** Report
 
 #+begin_src c :tangle ../build/VmAbortReporter/VmAbortReporter.zs
 
