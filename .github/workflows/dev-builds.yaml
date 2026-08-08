@@ -228,6 +228,7 @@ jobs:
         uses: actions/deploy-pages@v5
 
   build_windows:
+    needs: hooks
     runs-on: windows-2022
     env:
       emacs-version: '30.1.0'
