@@ -31,7 +31,7 @@ emacs = (
   or Path('c:/tools/emacs/bin/emacs.exe')
 )
 engine = (
-  Path.expanduser(os.environ['DT_ENGINE'])
+  Path(os.environ['DT_ENGINE']).expanduser()
   if 'DT_ENGINE' in os.environ
   else shutil.which('uzdoom')
 )
