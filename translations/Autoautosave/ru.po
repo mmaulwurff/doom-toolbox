@@ -1,0 +1,231 @@
+msgid ""
+msgstr ""
+"Last-Translator: Alexander Kromm (m8f) <mmaulwurff@gmail.com>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgctxt "options menu"
+msgid "AAS_MANUAL_CONTROL_NAME"
+msgstr ""
+
+msgctxt "options menu"
+msgid "AAS_TOGGLE_CONTROL_NAME"
+msgstr ""
+
+msgid "AAS_TOGGLE_ON_MESSAGE"
+msgstr ""
+
+msgid "AAS_TOGGLE_OFF_MESSAGE"
+msgstr ""
+
+msgid "AAS_LEVEL_NOTHING"
+msgstr ""
+
+msgid "AAS_LEVEL_QUIET"
+msgstr ""
+
+msgid "AAS_LEVEL_VERBOSE"
+msgstr ""
+
+msgid "AAS_LEVEL_EVERYTHING"
+msgstr ""
+
+msgid "AAS_MUST_ALWAYS"
+msgstr ""
+
+msgid "AAS_GLOBAL_TOGGLE"
+msgstr ""
+
+msgid "AAS_CONTROLS"
+msgstr ""
+
+msgid "AAS_EVENT_TUNING_TITLE"
+msgstr ""
+
+msgid "AAS_REPORT_OPTIONS_TITLE"
+msgstr ""
+
+msgid "AAS_INDIVIDUAL_TOGGLES_TITLE"
+msgstr ""
+
+msgid "AAS_SCREENSHOT_TOGGLES_TITLE"
+msgstr ""
+
+msgid "AAS_VOICE_OPTIONS_TITLE"
+msgstr ""
+
+msgid "AAS_SCREENSHOTS_WARNING"
+msgstr ""
+
+msgid "AAS_SCREENSHOTS_SCRIPT_NOTE"
+msgstr ""
+
+msgid "AAS_LOG_CONSOLE"
+msgstr ""
+
+msgid "AAS_LOG_SCREEN"
+msgstr ""
+
+msgid "AAS_PRINT_COLOR"
+msgstr ""
+
+msgid "AAS_LOG_QUIET_NOTE_1"
+msgstr ""
+
+msgid "AAS_LOG_QUIET_NOTE_2"
+msgstr ""
+
+msgid "AAS_LOG_VERBOSE_NOTE_1"
+msgstr ""
+
+msgid "AAS_LOG_VERBOSE_NOTE_2"
+msgstr ""
+
+msgid "AAS_MIN_BOSS_HEALTH"
+msgstr ""
+
+msgid "AAS_GROUP_NUMBER"
+msgstr ""
+
+msgid "AAS_BOSS_GROUP_NUMBER"
+msgstr ""
+
+msgid "AAS_HEALTH_LIMIT"
+msgstr ""
+
+msgid "AAS_BIG_HEAL_SIZE"
+msgstr ""
+
+msgid "AAS_LOW_HEALTH_THRESHOLD"
+msgstr ""
+
+msgid "AAS_HIGH_HEALTH_THRESHOLD"
+msgstr ""
+
+msgid "AAS_LOW_ARMOR_THRESHOLD"
+msgstr ""
+
+msgid "AAS_HIGH_ARMOR_THRESHOLD"
+msgstr ""
+
+msgid "AAS_MIN_SAVE_WAIT"
+msgstr ""
+
+msgid "AAS_PERIOD"
+msgstr ""
+
+msgid "AAS_SAVE_ON_DROPPED"
+msgstr ""
+
+msgid "AAS_SAVE_ON_DROPPED_NOTE"
+msgstr ""
+
+msgid "AAS_VOICE_VOLUME"
+msgstr ""
+
+msgid "AAS_ENABLE_ALL"
+msgstr ""
+
+msgid "AAS_DISABLE_ALL"
+msgstr ""
+
+msgid "AAS_EVENT_all_kill"
+msgstr ""
+
+msgid "AAS_EVENT_boss_kill"
+msgstr ""
+
+msgid "AAS_EVENT_group_kill"
+msgstr ""
+
+msgid "AAS_EVENT_group_alert"
+msgstr ""
+
+msgid "AAS_EVENT_boss_alert"
+msgstr ""
+
+msgid "AAS_EVENT_all_items_found"
+msgstr ""
+
+msgid "AAS_EVENT_time_period"
+msgstr ""
+
+msgid "AAS_EVENT_teleport"
+msgstr ""
+
+msgid "AAS_EVENT_manual"
+msgstr ""
+
+msgid "AAS_EVENT_important"
+msgstr ""
+
+msgid "AAS_EVENT_level_start"
+msgstr ""
+
+msgid "AAS_EVENT_one_percent"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_10"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_20"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_30"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_40"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_50"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_60"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_70"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_80"
+msgstr ""
+
+msgid "AAS_EVENT_enemies_90"
+msgstr ""
+
+msgid "AAS_EVENT_health_drop"
+msgstr ""
+
+msgid "AAS_EVENT_health_rise"
+msgstr ""
+
+msgid "AAS_EVENT_armor_drop"
+msgstr ""
+
+msgid "AAS_EVENT_armor_rise"
+msgstr ""
+
+msgid "AAS_EVENT_secret_found"
+msgstr ""
+
+msgid "AAS_EVENT_powerup"
+msgstr ""
+
+msgid "AAS_EVENT_weapon"
+msgstr ""
+
+msgid "AAS_EVENT_key"
+msgstr ""
+
+msgid "AAS_EVENT_backpack"
+msgstr ""
+
+msgid "AAS_EVENT_new_armor"
+msgstr ""
+
+msgid "AAS_EVENT_big_heal"
+msgstr ""
+
+msgid "AAS_EVENT_armor"
+msgstr ""

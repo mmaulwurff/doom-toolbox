@@ -130,6 +130,8 @@ SPDX-License-Identifier = "CC0-1.0"
 
 * Changelog
 
+- move strings to translation system
+
 v2.0.0
 - cleaned up Cvar and event names
 - removed voice types
@@ -670,6 +672,14 @@ OptionMenu aas_EventTogglesMenu
 }
 #+end_src
 
+#+begin_src c :tangle ../build/Autoautosave/language.txt
+
+[enu default]
+
+AAS_TITLE = "Autoautosave";
+AAS_OPTIONS_TITLE = "Autoautosave \ct⍗";
+#+end_src
+
 * Events
 
 #+name: events-table
@@ -803,182 +813,6 @@ Alias aas_off "aas_enabled 0; netevent aas_log:AAS_TOGGLE_OFF_MESSAGE"
 Alias aas_toggle  "test $aas_enabled aas_off aas_on"
 AddMenuKey $AAS_TOGGLE_CONTROL_NAME aas_toggle
 #+end_src
-
-* Strings
-
-** English (US)
-
-#+begin_src c :tangle ../build/Autoautosave/language.txt
-
-[enu default]
-
-AAS_TITLE = "Autoautosave";
-
-AAS_MANUAL_CONTROL_NAME = "Manual autosave";
-AAS_TOGGLE_CONTROL_NAME = "Toggle Autoautosave";
-
-AAS_TOGGLE_ON_MESSAGE  = "Autoautosave enabled";
-AAS_TOGGLE_OFF_MESSAGE = "Autoautosave disabled";
-
-AAS_LEVEL_NOTHING     = "nothing";
-AAS_LEVEL_QUIET       = "quiet";
-AAS_LEVEL_VERBOSE     = "verbose";
-AAS_LEVEL_EVERYTHING  = "everything";
-
-AAS_OPTIONS_TITLE = "Autoautosave \ct⍗";
-
-AAS_MUST_ALWAYS   = "This must be set to";
-AAS_GLOBAL_TOGGLE = "Global toggle";
-AAS_CONTROLS      = "Controls";
-
-AAS_EVENT_TUNING_TITLE       = "Event Options";
-AAS_REPORT_OPTIONS_TITLE     = "Log Options";
-
-AAS_INDIVIDUAL_TOGGLES_TITLE = "Autosave Toggles";
-AAS_SCREENSHOT_TOGGLES_TITLE = "Screenshot Toggles";
-AAS_VOICE_OPTIONS_TITLE      = "Voice Toggles";
-
-AAS_SCREENSHOTS_WARNING = "Warning: too many screenshot can use up disk space.";
-
-AAS_SCREENSHOTS_SCRIPT_NOTE = "This must be set to \"On\".";
-
-AAS_LOG_CONSOLE = "Log to console";
-AAS_LOG_SCREEN  = "Log to screen";
-
-AAS_PRINT_COLOR = "Log color";
-
-AAS_LOG_QUIET_NOTE_1   = "Quiet:";
-AAS_LOG_QUIET_NOTE_2   = "enemies, time, teleport, items.";
-AAS_LOG_VERBOSE_NOTE_1 = "Verbose:";
-AAS_LOG_VERBOSE_NOTE_2 = "enemies, time, teleport, items, % kills, health, armor.";
-
-AAS_MIN_BOSS_HEALTH   = "Enemy is a boss when health is at least";
-AAS_GROUP_NUMBER      = "Group is at least N enemies";
-AAS_BOSS_GROUP_NUMBER = "Boss group is at least N enemies";
-AAS_HEALTH_LIMIT      = "Don't save when health is less than";
-AAS_BIG_HEAL_SIZE     = "Major healing amount";
-
-AAS_LOW_HEALTH_THRESHOLD  = "Low health threshold";
-AAS_HIGH_HEALTH_THRESHOLD = "High health threshold";
-AAS_LOW_ARMOR_THRESHOLD   = "Low armor threshold";
-AAS_HIGH_ARMOR_THRESHOLD  = "High armor threshold";
-
-AAS_MIN_SAVE_WAIT = "Don't save until seconds passed";
-AAS_PERIOD        = "Autosave every N seconds";
-
-AAS_SAVE_ON_DROPPED      = "Save on dropped items";
-AAS_SAVE_ON_DROPPED_NOTE = "Also picking up Hideous Destructor keys.";
-
-AAS_VOICE_VOLUME  = "Voice volume";
-
-AAS_ENABLE_ALL  = "Enable all";
-AAS_DISABLE_ALL = "Disable all";
-
-<<list-events("AAS_EVENT_%2$s \= \"%4$s\";")>>
-#+end_src
-
-** Brazilian Portuguese
-
-# spellchecker:off
-#+begin_src c :tangle ../build/Autoautosave/language.txt
-
-// SPDX-FileCopyrightText: © 2022 generic name guy
-
-[pt]
-
-AAS_MANUAL_CONTROL_NAME = "Autosave manual";
-AAS_TOGGLE_CONTROL_NAME = "Ligar Autoautosave";
-
-AAS_TOGGLE_ON_MESSAGE  = "Autoautosave ligado";
-AAS_TOGGLE_OFF_MESSAGE = "Autoautosave desligado";
-
-AAS_LEVEL_NOTHING     = "nada";
-AAS_LEVEL_QUIET       = "quieto";
-AAS_LEVEL_VERBOSE     = "verboso";
-AAS_LEVEL_EVERYTHING  = "tudo";
-
-AAS_MUST_ALWAYS   = "Isto deve estar definido como";
-AAS_GLOBAL_TOGGLE = "Ligar Mod";
-AAS_CONTROLS      = "Controles";
-
-AAS_EVENT_TUNING_TITLE       = "Opções de Evento";
-AAS_REPORT_OPTIONS_TITLE     = "Opções de registramento";
-
-AAS_INDIVIDUAL_TOGGLES_TITLE = "Opções de Autosave";
-AAS_SCREENSHOT_TOGGLES_TITLE = "Opções de Captura de Tela";
-AAS_VOICE_OPTIONS_TITLE      = "Opções de Voz";
-
-AAS_SCREENSHOTS_WARNING = "Aviso: Muitas capturas de tela podem usar espaço no disco.";
-
-AAS_SCREENSHOTS_SCRIPT_NOTE = "Isto deve estar definido como \"Sim\".";
-
-AAS_LOG_CONSOLE = "Registrar no Console";
-AAS_LOG_SCREEN  = "Registrar na Tela";
-
-AAS_PRINT_COLOR = "Cor do registro";
-
-AAS_LOG_QUIET_NOTE_1   = "Quieto:";
-AAS_LOG_QUIET_NOTE_2   = "Inimigos, tempo, teleporte, ítens.";
-AAS_LOG_VERBOSE_NOTE_1 = "Verboso:";
-AAS_LOG_VERBOSE_NOTE_2 = "Inimigos, tempo, teleporte, ítens, % de vítmas, vida, armadura.";
-
-AAS_MIN_BOSS_HEALTH   = "Inimigo é um chefão quando a vida for";
-AAS_GROUP_NUMBER      = "Grupo é pelo menos N inimigos";
-AAS_BOSS_GROUP_NUMBER = "Grupo de chefão é pelo menos N inimigos";
-AAS_HEALTH_LIMIT      = "Não salve quando a vida for menos de";
-AAS_BIG_HEAL_SIZE     = "Tanto de cura grande";
-
-AAS_LOW_HEALTH_THRESHOLD  = "Cota de vida baoxa";
-AAS_HIGH_HEALTH_THRESHOLD = "Cota de vida alta";
-AAS_LOW_ARMOR_THRESHOLD   = "Cota de armadura baixa";
-AAS_HIGH_ARMOR_THRESHOLD  = "Cota de armadura alta";
-
-AAS_MIN_SAVE_WAIT = "Não salve até segundos passados";
-AAS_PERIOD        = "Autosalvar todos N segundos";
-
-AAS_SAVE_ON_DROPPED      = "Salvar nos ítens derrubados";
-AAS_SAVE_ON_DROPPED_NOTE = "Também pegando chaves do Hideous Destructor";
-
-AAS_VOICE_VOLUME  = "Volume de voz";
-
-AAS_ENABLE_ALL  = "Habilitar todos";
-AAS_DISABLE_ALL = "Desabilitar todos";
-
-AAS_EVENT_all_kill     = "Todos os inimigos foram eliminados";
-AAS_EVENT_boss_kill    = "O chefão foi eliminado";
-AAS_EVENT_group_kill   = "Sem mais inimigos ativos (abate em grupo)";
-AAS_EVENT_group_alert  = "Novos inimigos ativos (alerta de grupo)";
-AAS_EVENT_boss_alert   = "O chefão foi alertado";
-AAS_EVENT_all_items_found = "Todos os ítens foram descobertos";
-AAS_EVENT_time_period  = "Tempo movido";
-AAS_EVENT_teleport     = "Você foi movido para outro lugar";
-AAS_EVENT_manual       = "Save manual";
-AAS_EVENT_important    = "Algo importante!";
-AAS_EVENT_level_start  = "Nível começado";
-AAS_EVENT_one_percent  = "Sua vida caiu para 1%";
-AAS_EVENT_enemies_10   = "Inimigos 10% mortos";
-AAS_EVENT_enemies_20   = "Inimigos 20% mortos";
-AAS_EVENT_enemies_30   = "Inimigos 30% mortos";
-AAS_EVENT_enemies_40   = "Inimigos 40% mortos";
-AAS_EVENT_enemies_50   = "Inimigos 50% mortos";
-AAS_EVENT_enemies_60   = "Inimigos 60% mortos";
-AAS_EVENT_enemies_70   = "Inimigos 70% mortos";
-AAS_EVENT_enemies_80   = "Inimigos 80% mortos";
-AAS_EVENT_enemies_90   = "Inimigos 90% mortos";
-AAS_EVENT_health_drop  = "Sua vida caiu baixo";
-AAS_EVENT_health_rise  = "Sua vida subiu alto";
-AAS_EVENT_armor_drop   = "Sua armadura caiu baixo";
-AAS_EVENT_armor_rise   = "Sua armadura subiu alto";
-AAS_EVENT_secret_found = "Um segredo foi encontrado";
-AAS_EVENT_powerup      = "Um poder foi encontrado";
-AAS_EVENT_weapon       = "Uma arma foi encontrada";
-AAS_EVENT_key          = "Uma chave foi encontrada";
-AAS_EVENT_backpack     = "Uma mochila foi encontrada";
-AAS_EVENT_new_armor    = "Novo tipo de armadura";
-AAS_EVENT_big_heal     = "Grande cura";
-AAS_EVENT_armor        = "Armadura foi encontrada";
-#+end_src
-# spellchecker:on
 
 * Sounds
 

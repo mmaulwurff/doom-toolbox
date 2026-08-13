@@ -5,6 +5,7 @@
 # See https://scons.github.io/docs/scons-user.html for details.
 
 
+import csv
 import json
 import os
 import re
@@ -13,6 +14,7 @@ import subprocess
 from pathlib import Path
 
 import git
+import polib
 import pyttsx3
 import reuse.project
 import reuse.report
@@ -345,6 +347,42 @@ def add_autoautosave_generate_sounds_target():
   return Command(sound_directory, 'add-ons/Autoautosave.org', generate)
 
 
+# TODO: copy copyright strings from REUSE to CSV.
+def make_translations_target(org_file):
+  name = make_project_name(org_file)
+  language_path = Path(f'build/{name}/language.csv')
+  po_file_names = Glob(f'translations/{name}/*.po')
+
+  if len(po_file_names) == 0:
+    return None
+
+  languages = [Path(file_name).stem for file_name in po_file_names]
+  default_language = 'enu'
+  languages.remove(default_language)
+  field_names = ['default', 'Identifier', 'Remarks', *languages]
+
+  def generate(target, source, env):
+    with Path.open(language_path, 'w', newline='') as language_file:
+      csv_writer = csv.DictWriter(language_file, field_names)
+      csv_writer.writeheader()
+      rows = {}
+
+      for po_file_name in po_file_names:
+        po_file = polib.pofile(po_file_name)
+        language = Path(po_file_name).stem
+        if language == default_language:
+          language = 'default'
+        for entry in po_file:
+          rows[entry.msgid] = rows.get(entry.msgid, {})
+          rows[entry.msgid]['Identifier'] = entry.msgid
+          rows[entry.msgid][language] = entry.msgstr
+
+      for row in rows.values():
+        csv_writer.writerow(row)
+
+  return Command(language_path, [org_file, *po_file_names], generate)
+
+
 # Targets
 compatibility_target = AlwaysBuild(
   Alias('CheckCompatibility', None, make_check_compatibility_target()),
@@ -393,6 +431,8 @@ for org_file in Glob('add-ons/*.org'):
   pack_targets.append(pack_target)
   addon_targets_names.append(f'{name}, {test_target[0]}, {pack_target[0]}')
   Depends(compatibility_target, main_target)
+
+  Depends(main_target, make_translations_target(org_file))
 
 html_targets = []
 for org_file in Glob('*.org'):

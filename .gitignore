@@ -22,6 +22,8 @@
 !*.ogg
 !*.org
 !*.png
+!*.po
+!*.pot
 !*.py
 !*.toml
 !*.txt

@@ -6,6 +6,9 @@
 # https://pypi.org/project/GitPython/
 GitPython ~= 3.1
 
+# polib is a library to manipulate, create, modify gettext files (pot, po and mo files).
+polib ~= 1.2
+
 # prek: framework to run hooks
 # https://prek.j178.dev/
 prek ~= 0.4

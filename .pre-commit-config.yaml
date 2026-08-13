@@ -62,6 +62,7 @@ repos:
    hooks:
     - id: typos
       name: typos
+      exclude: ^(?=.*\.po)(?!.*enu\.po)
       stages: [pre-commit]
       args: []
     - id: typos
