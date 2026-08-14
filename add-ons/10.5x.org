@@ -82,9 +82,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/10.5x/cvarinfo.txt :exports none
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/10.5x/language.txt :exports none
-// <<license>>
-#+end_src
 #+begin_src c :tangle ../build/10.5x/mapinfo.txt :exports none
 // <<license>>
 #+end_src
@@ -97,6 +94,10 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/10.5xTest/mapinfo.txt :exports none
 // <<license>>
 #+end_src
+
+* Changelog
+
+- move strings to translation system
 
 * Event handler
 
@@ -578,25 +579,6 @@ class x5_Killer : Actor
 
   private Actor mWatched;
 }
-#+end_src
-
-* Language
-
-#+begin_src c :tangle ../build/10.5x/language.txt
-
-// SPDX-FileCopyrightText: 2020 Blueberryy
-
-[enu default]
-X5_TYPE_MENU_TITLE = "10.5x Enemy Multipliers";
-X5_EXIT  = "Exit this menu to start the level.";
-X5_000   = "Per enemy type (on level start)";
-X5_HOST_SELECTS = "The host selects the multipliers";
-
-[ru]
-X5_TYPE_MENU_TITLE = "10.5x Коэффициенты врагов";
-X5_EXIT  = "Выйдите из этого меню, чтобы начать уровень.";
-X5_000   = "По типу врагов (при старте уровня)";
-X5_HOST_SELECTS = "Сервер выбирает коэффициенты";
 #+end_src
 
 * Global multiplier
