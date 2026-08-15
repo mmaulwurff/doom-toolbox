@@ -5,6 +5,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
+"SPDX-FileCopyrightText: © 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>\n"
+"SPDX-License-Identifier: CC-BY-SA-4.0"
 
 msgctxt "options menu"
 msgid "AAS_MANUAL_CONTROL_NAME"

@@ -347,7 +347,6 @@ def add_autoautosave_generate_sounds_target():
   return Command(sound_directory, 'add-ons/Autoautosave.org', generate)
 
 
-# TODO: copy copyright strings from REUSE to CSV.
 def make_translations_target(org_file):
   name = make_project_name(org_file)
   language_path = Path(f'build/{name}/language.csv')
@@ -362,13 +361,22 @@ def make_translations_target(org_file):
   field_names = ['default', 'Identifier', 'Remarks', *languages]
 
   def generate(target, source, env):
-    with Path.open(language_path, 'w', newline='') as language_file:
+    with Path.open(
+      language_path, 'w', newline='', encoding='utf-8'
+    ) as language_file:
       csv_writer = csv.DictWriter(language_file, field_names)
       csv_writer.writeheader()
       rows = {}
+      authors = set()
+      licenses = set()
+      # So REUSE doesn't trip over literals as if they were SPDX tags.
+      spdx_copyright = 'SPDX' + '-FileCopyrightText'
+      spdx_license = 'SPDX' + '-License-Identifier'
 
       for po_file_name in po_file_names:
-        po_file = polib.pofile(po_file_name)
+        po_file = polib.pofile(po_file_name, encoding='utf-8')
+        authors.add(po_file.metadata[spdx_copyright])
+        licenses.add(po_file.metadata[spdx_license])
         language = Path(po_file_name).stem
         if language == default_language:
           language = 'default'
@@ -376,6 +384,13 @@ def make_translations_target(org_file):
           rows[entry.msgid] = rows.get(entry.msgid, {})
           rows[entry.msgid]['Identifier'] = entry.msgid
           rows[entry.msgid][language] = entry.msgstr
+
+      # Hack: CSV doesn't have comments. REUSE wants \n after SPDX lines.
+      # So, put SPDX in the last column.
+      for author in authors:
+        csv_writer.writerow({languages[-1]: f'{spdx_copyright}: {author}'})
+      for a_license in licenses:
+        csv_writer.writerow({languages[-1]: f'{spdx_license}: {a_license}'})
 
       for row in rows.values():
         csv_writer.writerow(row)

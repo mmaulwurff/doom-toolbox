@@ -12,6 +12,7 @@
 *.ini  eol=lf
 *.md   eol=lf
 *.org  eol=lf
+*.po   eol=lf
 *.py   eol=lf
 *.toml eol=lf
 *.txt  eol=lf
