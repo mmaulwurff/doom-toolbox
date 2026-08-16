@@ -14,7 +14,6 @@ import subprocess
 from pathlib import Path
 
 import git
-import polib
 import pyttsx3
 import reuse.project
 import reuse.report
@@ -349,53 +348,58 @@ def add_autoautosave_generate_sounds_target():
 
 def make_translations_target(org_file):
   name = make_project_name(org_file)
-  language_path = Path(f'build/{name}/language.csv')
-  po_file_names = Glob(f'translations/{name}/*.po')
+  source_language_paths = Glob(f'translations/{name}/*.csv')
 
-  if len(po_file_names) == 0:
+  if len(source_language_paths) == 0:
     return None
 
-  languages = [Path(file_name).stem for file_name in po_file_names]
-  default_language = 'enu'
-  languages.remove(default_language)
-  field_names = ['default', 'Identifier', 'Remarks', *languages]
+  language_map = {'en_US': 'default', 'pt_BR': 'pt', 'ru_RU': 'ru'}
+  target_language_path = Path(f'build/{name}/language.csv')
+  target_field_names = [
+    'default',
+    'Identifier',
+    'Remarks',
+    *[language_map[Path(path).stem] for path in source_language_paths],
+  ]
 
   def generate(target, source, env):
+    authors = set()
+    licenses = set()
+    rows = {}
+
+    for source_language_path in source_language_paths:
+      with Path.open(
+        source_language_path, 'r', newline='', encoding='utf-8'
+      ) as source_language_file:
+        csv_reader = csv.DictReader(source_language_file)
+        for row in csv_reader:
+          string_id = row['context']
+          string = row['target']
+          if re.match('c[0-9]*', string_id):
+            authors.add(string)
+          elif string_id == 'i':
+            licenses.add(string)
+          else:
+            rows[string_id] = rows.get(string_id, {})
+            rows[string_id]['Identifier'] = string_id
+            rows[string_id][language_map[Path(source_language_path).stem]] = string
+
+    # So REUSE doesn't trip over literals as if they were SPDX tags.
     with Path.open(
-      language_path, 'w', newline='', encoding='utf-8'
-    ) as language_file:
-      csv_writer = csv.DictWriter(language_file, field_names)
+      target_language_path, 'w', newline='', encoding='utf-8'
+    ) as target_language_file:
+      csv_writer = csv.DictWriter(target_language_file, target_field_names)
       csv_writer.writeheader()
-      rows = {}
-      authors = set()
-      licenses = set()
-      # So REUSE doesn't trip over literals as if they were SPDX tags.
-      spdx_copyright = 'SPDX' + '-FileCopyrightText'
-      spdx_license = 'SPDX' + '-License-Identifier'
-
-      for po_file_name in po_file_names:
-        po_file = polib.pofile(po_file_name, encoding='utf-8')
-        authors.add(po_file.metadata[spdx_copyright])
-        licenses.add(po_file.metadata[spdx_license])
-        language = Path(po_file_name).stem
-        if language == default_language:
-          language = 'default'
-        for entry in po_file:
-          rows[entry.msgid] = rows.get(entry.msgid, {})
-          rows[entry.msgid]['Identifier'] = entry.msgid
-          rows[entry.msgid][language] = entry.msgstr
-
       # Hack: CSV doesn't have comments. REUSE wants \n after SPDX lines.
       # So, put SPDX in the last column.
       for author in authors:
-        csv_writer.writerow({languages[-1]: f'{spdx_copyright}: {author}'})
+        csv_writer.writerow({target_field_names[-1]: author})
       for a_license in licenses:
-        csv_writer.writerow({languages[-1]: f'{spdx_license}: {a_license}'})
-
+        csv_writer.writerow({target_field_names[-1]: a_license})
       for row in rows.values():
         csv_writer.writerow(row)
 
-  return Command(language_path, [org_file, *po_file_names], generate)
+  return Command(target_language_path, [org_file, *source_language_paths], generate)
 
 
 # Targets
