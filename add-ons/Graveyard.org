@@ -72,6 +72,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 *v1.2.1*
 - fixed double last death mark after loading a save
+- spawn gravestones directly on the floor
 
 *v1.2.0*
 
@@ -383,7 +384,6 @@ class gy_Stone : Actor
   {
     Radius 16;
     Height 1;
-    Gravity 1000;
     Tag "$GY_GRAVESTONE";
   }
 
@@ -396,6 +396,11 @@ class gy_Stone : Actor
   {
     Console.printf("%s", _obituary);
     return Super.used(user);
+  }
+
+  override void beginPlay()
+  {
+    setOrigin((pos.x, pos.y, floorZ), false);
   }
 
   private string _obituary;
