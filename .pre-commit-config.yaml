@@ -101,6 +101,7 @@ repos:
         Typist.pk3,\
         VmAbortReporter,\
         WarmReception,\
+        l10n,\
         libeye,\
         project",
         build, chore, docs, feat, fix, refactor, style, test]
