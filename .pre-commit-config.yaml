@@ -5,7 +5,7 @@
 # See https://github.com/j178/prek for details.
 
 ---
-exclude: LICENSES/.*|tools/aspell\.en\.pws
+exclude: ^LICENSES/.*|^tools/aspell\.en\.pws
 
 default_install_hook_types: [pre-commit, commit-msg]
 
@@ -118,7 +118,7 @@ repos:
    hooks:
     - id: yamllint
       name: yamllint
-      exclude: .clang-format
+      exclude: ^\.clang-format
       args:
        [-d,
         "{extends: default, rules: {\
@@ -139,8 +139,8 @@ repos:
     - id: editorconfig-checker
       name: editorconfig-checker
       exclude:
-       "modules/(libeye.org|MD5.org)|\
-       tools/(htmlize.el|.*.css|.*.wad)"
+       "^modules/(libeye.org|MD5.org)|\
+       ^tools/(htmlize.el|.*.css|.*.wad)"
       args: [-disable-indent-size]
 
  - repo: local
@@ -180,4 +180,4 @@ repos:
       args: [sync]
     - id: vale
       args: [--output=line]
-      exclude: documentation/CodeOfConduct\.org
+      exclude: ^documentation/CodeOfConduct\.org
