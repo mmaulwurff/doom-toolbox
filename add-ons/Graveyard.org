@@ -70,6 +70,9 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Changelog
 
+*v1.2.1*
+- fixed double last death mark after loading a save
+
 *v1.2.0*
 
 New:
@@ -229,11 +232,7 @@ class gy_EventHandler : EventHandler
     let death   = gy_Death.of(thing.pos, obituary);
     storage.registerDeath(death);
 
-    foreach (marker : ThinkerIterator.create("gy_Marker", Thinker.STAT_MapMarker))
-    {
-      marker.destroy();
-      break;
-    }
+    removeMarkers();
     sendNetworkEvent("gy_mark" .. death.toString());
     sendNetworkEvent("gy_spawn" .. death.toString());
   }
@@ -257,6 +256,8 @@ class gy_EventHandler : EventHandler
     }
     if (event.name.left(7) == "gy_mark")
     {
+      removeMarkers();
+
       let death = gy_Death.fromString(event.name.mid(7));
       let pos   = death.getLocation();
       int seed  = abs(int(pos.x + pos.y + pos.z));
@@ -287,6 +288,15 @@ class gy_EventHandler : EventHandler
     if (second > _lastSecond)
     {
       setNow(second, SystemTime.now());
+    }
+  }
+
+  private void removeMarkers()
+  {
+    foreach (marker : ThinkerIterator.create("gy_Marker", Thinker.STAT_MapMarker))
+    {
+      marker.destroy();
+      break;
     }
   }
 
