@@ -119,7 +119,7 @@ Typist.pk3:
 
 * Build
 
-[[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
+*[[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]*
 
 Build is supported on recent versions of GNU/Linux and Microsoft Windows.
 

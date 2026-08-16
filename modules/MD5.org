@@ -26,8 +26,6 @@ SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * Source
 
 #+begin_src c :tangle ../build/MD5/MD5.zs :exports none

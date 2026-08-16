@@ -111,8 +111,6 @@ v3.1.0:
 v3.0.0:
 - rewritten from scratch.
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

@@ -81,8 +81,6 @@ In sndinfo.txt, add
 And you're done! Just select "Custom Soundpack" in the Gearbox UI options, and check
 if your sounds work.
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

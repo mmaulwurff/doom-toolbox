@@ -33,8 +33,6 @@ SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 - [[https://forum.zdoom.org/viewtopic.php?f=4&t=71349][Toby Accessibility Mod]] by Alando1.
 - [[https://youtu.be/4NGe4dzlukc][Making Games Better for the Deaf and Hard of Hearing]] by Game Maker's Toolkit.
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

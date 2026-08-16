@@ -85,8 +85,6 @@ Clematis Tester=Clematis.Create('ClematisExample');
 Tester.Run();
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]

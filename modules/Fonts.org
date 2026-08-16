@@ -16,8 +16,6 @@ The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbo
 and Codeberg https://codeberg.org/m8f/doom-toolbox
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]

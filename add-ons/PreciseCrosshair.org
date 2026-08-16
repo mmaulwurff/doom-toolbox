@@ -105,8 +105,6 @@ v1.1:
 
 v1.0: initial release
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

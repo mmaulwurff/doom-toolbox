@@ -43,8 +43,6 @@ Known issues (for multiplier > 1):
 
 10.5x is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]

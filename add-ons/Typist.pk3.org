@@ -92,8 +92,6 @@ compatible with many UZDoom mods and games.
   emulated like for other mods. Guncaster support can't be added without
   modifications in Guncaster or the game engine.
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]

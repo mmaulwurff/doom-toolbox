@@ -22,8 +22,6 @@ FinalCustomDoom is a successor to Ultimate Custom Doom and Custom Doom.
 
 FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 #+begin_src text :noweb-ref license

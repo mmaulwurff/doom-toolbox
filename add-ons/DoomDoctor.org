@@ -54,8 +54,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<GPL>>
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * Tests preamble
 
 Notes:

@@ -9,8 +9,6 @@
 
 * About
 
-[[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]]
-
 #+name: description
 #+begin_src org
 

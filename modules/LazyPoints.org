@@ -73,8 +73,6 @@ OptionMenu NAMESPACE_lp_TopMenu
 // <<description>>
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 [[file:../LICENSES/BSD-3-Clause.txt][BSD-3-Clause]]

@@ -103,8 +103,6 @@ leave this note intact.
                         ((          /////         ((
 #+end_src
 
-* [[file:../documentation/WhereAreTheProjectFiles.org][Where are the project files?]] :noexport:
-
 * License
 
 #+begin_src text :noweb-ref license
