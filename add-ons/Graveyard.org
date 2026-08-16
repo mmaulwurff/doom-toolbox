@@ -625,6 +625,24 @@ class gy_SoulStone3 : gy_Stone3 replaces gy_Stone3
 }
 #+end_src
 
+* Doom dead bodies patch
+
+#+begin_src c :tangle ../build/GraveyardDoomDead/zscript.zs
+
+version 4.14.3
+
+class gy_DoomDead0 : gy_Stone replaces gy_Stone0 { Default {+XFLIP} States { Spawn: PLAY N -1; Stop; } }
+class gy_DoomDead1 : gy_Stone replaces gy_Stone1 { Default {+XFLIP} States { Spawn: PLAY W -1; Stop; } }
+class gy_DoomDead2 : gy_Stone replaces gy_Stone2 { States { Spawn: PLAY N -1; Stop; } }
+class gy_DoomDead3 : gy_Stone replaces gy_Stone3 { States { Spawn: PLAY W -1; Stop; } }
+
+// Note: XFLIP doesn't work on automap.
+class gy_DoomDeadMarker0 : gy_Marker replaces gy_Marker0 { States { Spawn: PLAY N -1; Stop; } }
+class gy_DoomDeadMarker1 : gy_Marker replaces gy_Marker1 { States { Spawn: PLAY W -1; Stop; } }
+class gy_DoomDeadMarker2 : gy_Marker replaces gy_Marker2 { States { Spawn: PLAY N -1; Stop; } }
+class gy_DoomDeadMarker3 : gy_Marker replaces gy_Marker3 { States { Spawn: PLAY W -1; Stop; } }
+#+end_src
+
 * Test
 
 Basic check: the mod can be loaded without errors.
