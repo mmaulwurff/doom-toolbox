@@ -42,6 +42,7 @@ lint.extend-select = [
 lint.ignore = [
   "COM812",
   "PLW2901",
+  "S603",
 ]
 
 # https://github.com/crate-ci/typos/blob/master/docs/reference.md
