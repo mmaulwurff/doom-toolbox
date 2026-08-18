@@ -23,4 +23,4 @@ reuse[charset-normalizer] ~= 6.2
 
 # SCons: software construction tool
 # http://www.scons.org/documentation.html
-scons ~= 4.10
+scons ~= 4.11
