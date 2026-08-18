@@ -1476,6 +1476,7 @@ class ts_EventHandler : StaticEventHandler
   override void renderOverlay(RenderEvent event)
   {
     if (players[consolePlayer].mo == NULL) return;
+    if (isAllInformationEmpty()) return;
 
     double alpha = mFader.getAlpha(event.fracTic);
 
@@ -1648,6 +1649,14 @@ class ts_EventHandler : StaticEventHandler
     int gettersCount = mGetters.size();
     for (int i = 0; i < gettersCount; ++i)
       mInformationPieces[i].kind = ts_Kind.Empty;
+  }
+
+  private bool isAllInformationEmpty() const
+  {
+    foreach (piece : mInformationPieces)
+      if (piece.kind != ts_Kind.Empty) return false;
+
+    return true;
   }
 
   private void collectGetters()
