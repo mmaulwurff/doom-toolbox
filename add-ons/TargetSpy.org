@@ -1470,6 +1470,7 @@ class ts_EventHandler : StaticEventHandler
   override void worldLoaded(WorldEvent event)
   {
     clearInformation();
+    mOldTarget = NULL;
   }
 
   override void renderOverlay(RenderEvent event)
@@ -1585,6 +1586,7 @@ class ts_EventHandler : StaticEventHandler
     {
       mLastTargetSize = (closestTarget.radius, closestTarget.height);
       mLastTargetPosition = closestTarget.pos;
+      mOldTarget = closestTarget;
     }
 
     mCurrentTarget.target = closestTarget;
@@ -1592,14 +1594,31 @@ class ts_EventHandler : StaticEventHandler
 
   private void collectInformation()
   {
-    if (mCurrentTarget.target == NULL)
+    Actor target = mCurrentTarget.target;
+
+    if (target == NULL)
     {
-      if (mFader.getAlpha(1.0) <= 0.0) clearInformation();
-      return;
+      if (mFader.getAlpha(1.0) <= 0.0)
+      {
+        clearInformation();
+        mOldTarget = NULL;
+        return;
+      }
+      else if (mOldTarget != NULL)
+      {
+        target = mOldTarget;
+      }
+      else
+      {
+        return;
+      }
+    }
+    else
+    {
+      mFader.reset();
     }
 
     clearInformation();
-    mFader.reset();
 
     Array<string> disabledClasses;
     mDisabledGettersCvar.getString().split(disabledClasses, ",", TOK_SkipEmpty);
@@ -1616,9 +1635,9 @@ class ts_EventHandler : StaticEventHandler
         [mInformationPieces[i].kind,
          mInformationPieces[i].text,
          mInformationPieces[i].value,
-         mInformationPieces[i].max] = mGetters[i].call(mCurrentTarget.target);
+         mInformationPieces[i].max] = mGetters[i].call(target);
         mInformationPieces[i].font = mFontGetters[i]
-          ? mFontGetters[i].call(mCurrentTarget.target)
+          ? mFontGetters[i].call(target)
           : mDefaultFont;
       }
     }
@@ -1780,6 +1799,7 @@ class ts_EventHandler : StaticEventHandler
   private Array<string> mFinderClasses;
   private Array<Actor> mTargets;
 
+  private Actor mOldTarget;
   private ts_TargetSource mCurrentTarget;
 
   private Array< Function<play bool(Actor)> > mFilters;
