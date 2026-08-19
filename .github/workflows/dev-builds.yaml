@@ -149,8 +149,6 @@ jobs:
     needs: test
     permissions:
       actions: read
-      # Allow to create dev-builds tag:
-      contents: write
       # Allow deployment to GitHub Pages:
       id-token: write
       pages: write
@@ -184,34 +182,9 @@ jobs:
         run: |
           scons Pk3All
           scons PackModules
-
-      - name: Devbuilds - prepare
-        run: |
-          git tag -d dev-builds || true
-          git push origin :refs/tags/dev-builds || true
-          git tag dev-builds ${{ github.event.workflow_run.head_sha }}
-          git push origin dev-builds
-          zip -r build/DoomToolbox build -i \*.pk3 build/modules/\*.zs
-
-      - name: Devbuilds - upload
-        uses: softprops/action-gh-release@v3.0.2
-        with:
-          name: DoomToolbox Devbuilds
-          tag_name: dev-builds
-          draft: false
-          prerelease: true
-          make_latest: false
-          generate_release_notes: false
-          files: build/DoomToolbox.zip
-          body: |
-            Warning: these packages may contain bugs or unfinished features.
-
-      - name: Clean up build
-        run: |
+          date --utc --rfc-3339=seconds > build/timestamp.txt
+          zip -r DoomToolbox build -i \*.pk3 build/modules/\*.zs build/timestamp.txt
           rm -r build
-
-      - name: Export to HTML
-        run: |
           scons -j 4 HtmlAll
 
       - name: Configure pages

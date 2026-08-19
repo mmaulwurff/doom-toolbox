@@ -5,28 +5,27 @@
 
 * About
 
-DoomToolbox is a collection of add-ons for Doom-based game engines which support
-ZScript, like [[https://zdoom.org/downloads][UZDoom and LZDoom]].
+DoomToolbox is a collection of add-ons for [[https://zdoom.org/downloads][UZDoom and LZDoom]] and their derivatives.
 
 The goal of DoomToolbox is to increase replayability of compatible games and mods,
 make gameplay more enjoyable, and to have fun both while playing and developing this
 project. The development is done under "Move slow and fix things" flag.
 
+- [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip][Dev builds]]
+- [[https://mmaulwurff.github.io/doom-toolbox/][HTML documentation]]
+- Source: [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]], [[https://codeberg.org/m8f/doom-toolbox][Codeberg]]
+- [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
+
 DoomToolbox is free and open source software. It's licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]] and
 [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]].
-See ~SPDX-License-Identifier~ tag in each .org file for details.
-For third-party resources, such as image and sound files, see ~REUSE.toml~ files in
-their directories for licenses.
-
-[[file:documentation/Acknowledgments.org][Acknowledgments]]
-
-HTML pages for DoomToolbox should be available [[https://mmaulwurff.github.io/doom-toolbox/][here]].
-The source code is available on [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]] and [[https://codeberg.org/m8f/doom-toolbox][Codeberg]].
-There is a [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
-The latest development builds of add-ons and modules and can be found [[https://github.com/mmaulwurff/doom-toolbox/releases/tag/dev-builds][here]].
+See ~SPDX-License-Identifier~ tag inside files or nearby ~REUSE.toml~ files for details.
 
 This project doesn't have any "AI" generated code or resources,
 and doesn't use "AI" tools for development.
+
+[[file:documentation/Acknowledgments.org][Acknowledgments]]
+
+* Projects
 
 | Name             | Description                                              | Forum |
 |------------------+----------------------------------------------------------+-------|
