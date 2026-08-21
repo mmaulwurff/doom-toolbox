@@ -47,3 +47,9 @@ SPDX-License-Identifier = "BSD-3-Clause"
 path = "vale-write-good-v0-4-1.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019 errata.ai"
 SPDX-License-Identifier = "MIT"
+
+# https://github.com/vale-cli/write-good
+[[annotations]]
+path = "vale-Openly-v0-4-6.zip"
+SPDX-FileCopyrightText = "Copyright (c) 2019 TestTheDocs - Incubator"
+SPDX-License-Identifier = "MIT"

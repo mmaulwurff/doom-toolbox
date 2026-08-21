@@ -51,9 +51,9 @@ To accommodate the slower pace of the game, the game is automatically changed:
   - arithmetic operations
   - custom words (a text file named ~typist_custom_text.txt~ with your words can be
     loaded together with Typist.pk3)
-- "Pass-through" command (~/pass~ by default): after you enter this command, the
-  following keyboard key acts like in normal game, so you can switch weapons, move
-  and do other actions while remaining in Combat mode
+- "pass-through" command (~/pass~ by default). After you enter this command, the
+  following keyboard key acts like in normal game. You can switch weapons, move
+  and shoot while remaining in Combat mode
 - scoring, with high scores table
 - options to enable infinite ammo, to disable enemy infighting, and to configure the
   HUD
@@ -83,12 +83,12 @@ almost at the right typing position.
 Typist.pk3 isn't coded specifically for any game, so there is a chance it's
 compatible with many UZDoom mods and games.
 
-- Typist.pk3 probably won't play well with mods and games which rely on melee combat,
-  because Typist.pk3 will only aim and fire, not move.
+- Typist.pk3 won't play well with mods and games which rely on melee combat:
+  Typist.pk3 will only aim and fire, not move.
 - Actors that are normally friendly, but changed their friendliness by scripts, don't
   count as targets.
-- Guncaster and Guncaster Vindicated aren't compatible with Typist.pk3. Reason:
-  Guncaster reads player input directly from player, so weapon firing can't be
+- Typist.pk3 isn't compatible with Guncaster and Guncaster Vindicated.
+  They read input directly from player, so weapon firing can't be
   emulated like for other mods. Guncaster support can't be added without
   modifications in Guncaster or the game engine.
 

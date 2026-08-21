@@ -51,7 +51,7 @@ for your weapons! Tag property is also nice to have.
 
 - [[https://forum.zdoom.org/viewtopic.php?f=43&t=61061][PyWeaponWheel v0.3]] overrides time freezing. If you are using both mods and want to
   freeze time with Gearbox, set PyWeaponWheel's option "Freeze when wheel is open"
-  (`py_weaponwheel_freeze` CVar) to Off. Note that PyWeaponWheel may be built in some
+  (~py_weaponwheel_freeze~ CVar) to Off. Note that PyWeaponWheel may be built in some
   mods. The solution is the same: disable time PyWeaponWheel's time freezing.
 - Weapon icons in wheel aren't affected by "HUD preserves aspect ration" option.
 - Mouse input in wheel in multiplayer causes screen shake.
@@ -62,24 +62,19 @@ for your weapons! Tag property is also nice to have.
 
 ** Creating a soundpack
 
-To create a new soundpack, replace the GB_PACK string in language.txt with your
-soundpack's name, then replace the sndinfo definitions with your own sounds, for
-example:
+1. Replace the GB_PACK string in language.txt with your soundpack's name,
+2. Replace the sndinfo definitions with your own sounds, for example:
 
-In sndinfo.txt, add
+   In sndinfo.txt, add:
+   - ~gearbox/pack/tick sounds/[soundpack name]_tick.ogg~
+   - ~gearbox/pack/open sounds/[soundpack name]_open.ogg~
+   - ~gearbox/pack/close sounds/[soundpack name]_close.ogg~
+   - ~gearbox/pack/nope sounds/[soundpack name]_nope.ogg~
 
-~gearbox/pack/tick sounds/[soundpack name]_tick.ogg~
+   (replace [soundpack name] with your own name!)
 
-~gearbox/pack/open sounds/[soundpack name]_open.ogg~
-
-~gearbox/pack/close sounds/[soundpack name]_close.ogg~
-
-~gearbox/pack/nope sounds/[soundpack name]_nope.ogg~
-
-(replace [soundpack name] with your own name!)
-
-And you're done! Just select "Custom Soundpack" in the Gearbox UI options, and check
-if your sounds work.
+3. Select "Custom Soundpack" in the Gearbox UI options, and check
+   if your sounds work.
 
 * License
 

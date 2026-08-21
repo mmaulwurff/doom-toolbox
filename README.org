@@ -7,9 +7,12 @@
 
 DoomToolbox is a collection of add-ons for [[https://zdoom.org/downloads][UZDoom and LZDoom]] and their derivatives.
 
-The goal of DoomToolbox is to increase replayability of compatible games and mods,
-make gameplay more enjoyable, and to have fun both while playing and developing this
-project. The development is done under "Move slow and fix things" flag.
+Goals:
+- to increase replayability of compatible games and mods,
+- to customize the game to your liking,
+- to have fun both while playing and developing this project.
+
+  The development is done under "Move slow and fix things" flag.
 
 - [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip][Dev builds]]
 - [[https://mmaulwurff.github.io/doom-toolbox/][HTML documentation]]
@@ -62,9 +65,9 @@ and doesn't use "AI" tools for development.
 | [[file:add-ons/ClematisM.org][ClematisM]]        | (originally by ZippeyKeys12) ZScript unit test framework |       |
 | [[file:add-ons/DoomDoctor.org][DoomDoctor]]       | mod development and debugging utilities                  |       |
 
-Add-ons can be included and used in your own projects. However, this isn't
-recommended, because when add-ons update, players won't be able to use new versions
-with your project until you update the included add-on inside your project.
+Add-ons can be included and used in your own projects. This isn't
+recommended: players can't play your project with updated add-ons until your
+project updates it.
 
 Modules are intended to be included as a part of other projects. Some DoomToolbox
 add-ons include them.
@@ -126,7 +129,7 @@ To build:
 1. Install Python, version >= 3.13
 2. Install Emacs, version >= 30.1
 3. Install UZDoom, version >= 4.14.3
-4. Install development tools (probably from a [[https://docs.python.org/3/library/venv.html][venv]]):
+4. Install development tools (a [[https://docs.python.org/3/library/venv.html][venv]] recommended):
    ~pip install -r tools/requirements-dev.txt~
 5. In console in project directory, see what can be built with command:
    ~scons --help~

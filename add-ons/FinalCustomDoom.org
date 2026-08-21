@@ -1266,7 +1266,7 @@ class cd_EffectsBase play
 You can use FinalCustomDoom (FCD) to add your own game settings. To do so, a FCD
 extension can be created. Basically, such extension consists of two parts: settings
 definition and settings implementation. Settings definition is contained in menudef
-lump, where settings are added to ~cd_Menu~, possibly via a submenu. Settings
+lump, where settings are added to ~cd_Menu~, for example in a submenu. Settings
 implementation provides in-game effects and is written in ZScript.
 
 Settings defined in a FCD extension don't have an entry in cvarinfo lump. They're

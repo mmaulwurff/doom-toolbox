@@ -60,15 +60,12 @@ thing, and helps prevent feature creep?
 
 Markers for code blocks: ~#+begin_src~, ~#+end_src~, etc litter the file. Besides
 your project's main programming language syntax and formatting, you now also have to
-spend time formatting Org.
-
-Markdown has less intrusive syntax, however Org/Emacs Lisp tandem seem to be the most
-powerful for writing [[macros]].
+spend time formatting Org. See [[file:OrgCheatSheet.org][Org cheat sheet]].
 
 ** Compilation error reporting
 
-The compiler reports errors and warnings with line numbers of the source files that
-are extracted from the Org files, not line numbers in the Org file.
+The compiler reports errors and warnings with line numbers of the extracted files,
+not line numbers in the Org file.
 
 ** Licensing mess
 

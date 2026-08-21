@@ -64,7 +64,7 @@ TargetSpy supports four types of extension classes:
    contains.
 
 Note that Finders, Filters, and Getters classes don't depend on TargetSpy types in
-any way, and therefore can be included in other mods to provide TargetSpy
+any way. Theyy can be included in other mods to provide TargetSpy
 integration when loaded together.
 
 Extension classes aren't meant to be instantiated, only their static functions are
@@ -77,7 +77,7 @@ All extensions are automatically added to the corresponding toggle menus, from w
 they can be turned on and off.
 
 In fact, all out-of-the-box TargetSpy finders, filters, getters, and views are
-implemented as extensions, and can be used as examples for implementing custom
+implemented as extensions. They can be used as examples for implementing custom
 extensions.
 
 *** Blocklist
@@ -676,7 +676,7 @@ class tsGetter_HealthAndMax : Actor
 
 *** Silent health and max health
 
-This getter is somewhat special. It's intended to:
+This getter is special. It's intended to:
 - carry health and max health even when other health getters are disabled.
 - be invisible.
 - be always on.

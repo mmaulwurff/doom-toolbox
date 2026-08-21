@@ -60,7 +60,7 @@ with ~EndDescribe~.
 
 *** On instantiation
 
-Tests run on instantiation by default, which can be disabled by overriding ~Init()~.
+Tests run when instantiated by default, which can be disabled by overriding ~Init()~.
 
 **** Factory method
 
