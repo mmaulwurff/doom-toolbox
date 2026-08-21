@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
 # SPDX-License-Identifier: CC0-1.0
 
-# This is build definitions for DoomToolbox.
+# Build definitions for DoomToolbox.
 # See https://scons.github.io/docs/scons-user.html for details.
 
 
@@ -384,14 +384,13 @@ def make_translations_target(org_file):
             rows[string_id]['Identifier'] = string_id
             rows[string_id][language_map[Path(source_language_path).stem]] = string
 
-    # So REUSE doesn't trip over literals as if they were SPDX tags.
     with Path.open(
       target_language_path, 'w', newline='', encoding='utf-8'
     ) as target_language_file:
       csv_writer = csv.DictWriter(target_language_file, target_field_names)
       csv_writer.writeheader()
       # Hack: CSV doesn't have comments. REUSE wants \n after SPDX lines.
-      # So, put SPDX in the last column.
+      # Put SPDX in the last column.
       for author in authors:
         csv_writer.writerow({target_field_names[-1]: author})
       for a_license in licenses:
