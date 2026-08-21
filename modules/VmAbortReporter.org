@@ -74,7 +74,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 * Source
 
-** VM abort handler
+** Event handler
 
 TODO: make ~VmAbortHandler~ savefile-compatible (~StaticEventHandler~).
 

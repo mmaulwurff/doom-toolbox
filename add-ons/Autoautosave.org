@@ -21,7 +21,7 @@ It works as a configurable checkpoint system.
 It's designed to be compatible with any monster and weapon mod, and any map.
 
 Features:
-- autosave on various events: enemies alerted and killed, health or armor drops
+- autosave on events: enemies alerted and killed, health or armor drops
   or rises, items are found, etc.
 - periodic autosave.
 - autosave on every event is optional.
@@ -404,7 +404,7 @@ v0.2
 - 2018-03-21 implement autosave on BFG pickup
 - 2018-03-21 implement autosave health limit
 - 2018-03-21 implement autosave on killing cyber and spider
-- 2018-03-21 implement autosave with period
+- 2018-03-21 implement periodic autosave
 - 2018-03-21 implement autosave on radsuit pickup
 - 2018-03-21 implement autosave on heal > 25
 - 2018-03-21 implement autosave on armor type change

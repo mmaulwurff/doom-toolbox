@@ -7,10 +7,10 @@ assignees: ''
 ---
 
 **Project**
-What add-on or module is this suggestion for [e.g. Gearbox, Typist.pk3, StringUtils]
+What add-on or module is this suggestion for [for example, Gearbox, Typist.pk3, StringUtils]
 
 **Is your feature request related to a problem? Please describe.**
-What the problem is. Ex. I'm always frustrated when [...]
+What the problem is. Ex. I'm always frustrated when […]
 
 **Describe the solution you'd like**
 What you want to happen.

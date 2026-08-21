@@ -37,7 +37,7 @@ literal project systems:
 
 To file sections, to other files, URLs.
 
-** HTML documentation
+** Documentation
 
 Export to HTML produces a formatted document. Also, GitHub shows .org
 files as a formatted HTML page, though macros and ~:noexport:~ sections aren't

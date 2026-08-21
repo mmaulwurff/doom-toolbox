@@ -30,7 +30,7 @@ SPDX-License-Identifier: BSD-3-Clause
 // <<description>>
 #+end_src
 
-** ~StringUtils~
+** String utilities
 
 This class acts as a namespace for static functions.
 
@@ -42,7 +42,7 @@ class NAMESPACE_su
 }
 #+end_src
 
-*** ~join~
+*** Join
 
 Joins strings to a single string separated by delimiter.
 
@@ -75,7 +75,7 @@ static clearscope string join(Array<string> strings, string delimiter = ", ")
 }
 #+end_src
 
-*** ~repeat~
+*** Repeat
 
 Repeats the specified string the specified number of times.
 
@@ -99,7 +99,7 @@ static clearscope string repeat(string aString, int times)
 }
 #+end_src
 
-*** ~boolToString~
+*** Bool to string
 
 Writes out a boolean value.
 
@@ -117,7 +117,7 @@ static clearscope string boolToString(bool value)
 }
 #+end_src
 
-*** ~isWordDelimiter~
+*** Is word delimiter
 
 #+begin_src c :noweb-ref StringUtilsBody
 
@@ -165,7 +165,7 @@ static clearscope bool isWordDelimiter(int character)
 }
 #+end_src
 
-*** ~splitByWords~
+*** Split by words
 
 Splits a UTF-8 text by words. Characters considered word delimiters: ASCII control
 characters, space, comma (','), period ('.'). Delimiters aren't included in the
@@ -220,7 +220,7 @@ static clearscope void splitByWords(string text, out Array<string> words)
 }
 #+end_src
 
-*** ~highlight~
+*** Highlight
 
 Highlights a character inside a string with a color.
 
@@ -254,7 +254,7 @@ it("highlight end", Assert("мыш\cgь\c-" == su.highlight("мышь",  3, Font
 it("highlight 4" ,  Assert("мышь"       == su.highlight("мышь",  4, Font.CR_Tan)));
 #+end_src
 
-*** ~getCodePointAt~
+*** Get code point at
 
 Finds a Unicode character by index. Attention: O(n).
 
@@ -284,7 +284,7 @@ static clearscope int getCodePointAt(string aString, int index)
 }
 #+end_src
 
-*** begins with
+*** Begins with
 
 #+begin_src c :noweb-ref StringUtilsBody
 
@@ -314,7 +314,7 @@ static clearscope bool beginsWith(string aString,
 }
 #+end_src
 
-** ~Description~
+** Description
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 
@@ -647,7 +647,7 @@ NAMESPACE_Description addState(string name, State aState)
 }
 #+end_src
 
-** ~Ascii~
+** Ascii
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 

@@ -30,7 +30,7 @@ Features:
 - target frame;
 - text crosshair with options and PreciseCrosshair support.
 
-** Extending TargetSpy
+** Extending
 
 *** Finders, filters, getters, and views
 

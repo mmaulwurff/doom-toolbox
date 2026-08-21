@@ -84,7 +84,7 @@ v2.0.0
 - add more options
 - fix sound cap
 - better portal awareness for geometry sounds
-- don't show sound when sector is not moving
+- don't show sound when sector isn't moving
 - redesign UI
 - check performance
 - add compatibility with saves without SoundToScreen

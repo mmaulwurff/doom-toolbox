@@ -531,7 +531,7 @@ class Clematis{
 }
 #+end_src
 
-**** Is a
+**** Is
 
 #+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
@@ -566,7 +566,7 @@ class Clematis{
 }
 #+end_src
 
-**** Is not a
+**** Isn't
 
 #+begin_src c :tangle ../build/ClematisM/zscript/clematis/assertions/object.zs
 
