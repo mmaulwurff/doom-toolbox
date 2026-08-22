@@ -183,6 +183,7 @@ jobs:
           scons Pk3All
           scons PackModules
           date --utc --rfc-3339=seconds > build/timestamp.txt
+          for m in build/mutators/*; do zip -jr build/$(basename $m).pk3 $m; done
           zip -r DoomToolbox build -i \*.pk3 build/modules/\*.zs build/timestamp.txt
           rm -r build
           scons -j 4 HtmlAll

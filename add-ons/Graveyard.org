@@ -587,9 +587,13 @@ class gy_Storage
 }
 #+end_src
 
-* Soulspheres patch
+* Patches
 
-#+begin_src c :tangle ../build/GraveyardSoulsphere/zscript.zs
+** Soulspheres
+
+#+begin_src c :tangle ../build/mutators/GraveyardSoulsphere/zscript.zs
+
+// <<license>>
 
 version 4.14.3
 
@@ -630,9 +634,11 @@ class gy_SoulStone3 : gy_Stone3 replaces gy_Stone3
 }
 #+end_src
 
-* Doom dead bodies patch
+** Doom dead bodies
 
-#+begin_src c :tangle ../build/GraveyardDoomDead/zscript.zs
+#+begin_src c :tangle ../build/mutators/GraveyardDoomDead/zscript.zs
+
+// <<license>>
 
 version 4.14.3
 
