@@ -73,6 +73,7 @@ SPDX-License-Identifier: GPL-3.0-only
 *v1.2.1*
 - fixed double last death mark after loading a save
 - spawn gravestones directly on the floor
+- translatable new obituaries
 
 *v1.2.0*
 
@@ -136,14 +137,6 @@ AddMenuKey "$GY_REMOVE_MAP"  "gy_remove_map"
 [enu default]
 
 GY_TITLE = "Graveyard";
-
-GY_REMOVE_ALL  = "Remove all gravestones";
-GY_REMOVE_MAP  = "Remove gravestones on this map";
-
-GY_REMOVE_ALL_MESSAGE  = "All gravestones are removed.";
-GY_REMOVE_MAP_MESSAGE  = "Gravestones on this map are removed.";
-
-GY_GRAVESTONE = "Gravestone";
 #+end_src
 
 * Project setup
@@ -209,23 +202,24 @@ class gy_EventHandler : EventHandler
       sendNetworkEvent("gy_mark" .. lastDeath.toString());
   }
 
+  // TODO: if rewriting Graveyard, separate translatable from verbatim text.
+  // Translation should happen when an obituary is shown, not when it's created.
   override void worldThingDied(WorldEvent event)
   {
     Actor thing = event.thing;
     if (thing == NULL || thing.player == NULL) { return; }
 
-    string name = thing.player.getUserName();
-    string obituaryPart;
-    if (event.thing.target != NULL)
-    {
-      string killerName = (thing.target.player != NULL)
-        ? thing.target.player.getUserName()
-        : thing.target.getTag();
-      obituaryPart = ", killed by " .. killerName;
-    }
-    string obituary = string.format("Here lies %s%s.\n%s\n%s",
-                                    name,
-                                    obituaryPart,
+    string killerPart = (event.thing.target == NULL)
+      ? ""
+      : string.format("\n%s: %s",
+                      StringTable.localize("$GY_KILLER"),
+                      thing.target.player
+                        ? thing.target.player.getUserName()
+                        : thing.target.getTag());
+    string obituary = string.format("%s: %s%s\n%s\n%s",
+                                    StringTable.localize("$GY_VICTIM"),
+                                    thing.player.getUserName(),
+                                    killerPart,
                                     SystemTime.format("%F %T", _now),
                                     level.timeFormatted());
 

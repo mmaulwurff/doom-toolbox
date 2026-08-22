@@ -361,6 +361,7 @@ def make_translations_target(org_file):
     'Remarks',
     *[language_map[Path(path).stem] for path in source_language_paths],
   ]
+  del target_field_names[target_field_names.index('default', 1)]
 
   def generate(target, source, env):
     authors = set()
