@@ -239,7 +239,7 @@ jobs:
         background: true
         uses: actions/cache@v6
         with:
-          path: ~/.cache/prek
+          path: c:\Users\runner\AppData\Local\prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Install Python
@@ -276,3 +276,4 @@ jobs:
         run: |
           scons -j 4 Pk3All
           Get-ChildItem -Path build
+          Write-Host $(whoami)
