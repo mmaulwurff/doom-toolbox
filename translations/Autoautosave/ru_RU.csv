@@ -1,7 +1,7 @@
 "context","target"
-"c1","SPDX-FileCopyrightText: © 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+"AAS_Copyright","SPDX-FileCopyrightText: © 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 "
-"i","SPDX-License-Identifier: CC-BY-SA-4.0
+"AAS_License","SPDX-License-Identifier: CC-BY-SA-4.0
 "
 AAS_MANUAL_CONTROL_NAME,
 AAS_TOGGLE_CONTROL_NAME,
