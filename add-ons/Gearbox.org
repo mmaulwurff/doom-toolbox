@@ -525,7 +525,7 @@ GB_ENABLE_ON_AUTOMAP = "Gearbox on automap";
 GB_LOCK_POSITION     = "Locked positions";
 GB_FROZEN_CAN_OPEN   = "Frozen player can open Gearbox";
 
-GB_REVERSE_SLOT_CYCLE_ORDER = "Reverse cycling order for the slot key";
+GB_REVERSE_SLOT_CYCLE_ORDER = "Reverse cycling order inside slots";
 GB_SELECT_FIRST_SLOT_WEAPON = "Always start at first weapon for the slot key";
 
 GB_FREEZE_TIME       = "Freeze";
@@ -2003,7 +2003,7 @@ class gb_WeaponDataLoader play
 {
   // Code is adapted from GZDoom:
   // src/gzdoom/wadsrc/static/zscript/actors/player/player_cheat.zs::CheatGive.
-  static void load(out gb_WeaponData data)
+  static void load(out gb_WeaponData data, bool isOriginalOrder)
   {
     gb_WeaponInfo info;
     PlayerInfo player = players[consolePlayer];
@@ -2030,6 +2030,8 @@ class gb_WeaponDataLoader play
 
       readonly<Weapon> def = GetDefaultByType(type);
       if (!def.CanPickup(player.mo)) continue;
+
+      if (isOriginalOrder) priority = 99 - priority;
 
       info.push(type, slot, priority);
     }
@@ -2080,7 +2082,7 @@ class gb_WeaponDataLoader play
     int slot = info.slots[index];
     if (slot == 0) slot = 99;
 
-    int result = slot * 100 + 99 - info.priorities[index];
+    int result = slot * 100 + info.priorities[index];
     return result;
   }
 }
@@ -2190,12 +2192,11 @@ class gb_WeaponMenu
   bool selectSlot(int slot, bool selectFirstWeapon = false)
   {
     int nWeapons = mWeapons.size();
-    int direction = mOptions.isSlotCycleOrderReversed() ? -1 : 1;
-    int startOffset = selectFirstWeapon ? 0 : (mSelectedIndex + direction);
+    int startOffset = selectFirstWeapon ? 0 : (mSelectedIndex + 1);
 
     for (int i = 0; i < nWeapons; ++i)
     {
-      int index = (startOffset + nWeapons + direction * i) % nWeapons;
+      int index = (startOffset + nWeapons + 1 * i) % nWeapons;
       if (mSlots[index] == slot
           && isInInventory(index)
           && !isHidden(mWeapons[index].getClassName()))
@@ -3796,7 +3797,7 @@ class gb_EventHandler : EventHandler
   {
     gb_CustomWeaponOrderStorage.reset(mWeaponSetHash);
     gb_WeaponData weaponData;
-    gb_WeaponDataLoader.load(weaponData);
+    gb_WeaponDataLoader.load(weaponData, !mOptions.isSlotCycleOrderReversed());
     mWeaponMenu = gb_WeaponMenu.from(weaponData, mOptions);
   }
 
@@ -3866,7 +3867,7 @@ class gb_EventHandler : EventHandler
     mSounds          = gb_Sounds.from(mOptions);
 
     gb_WeaponData weaponData;
-    gb_WeaponDataLoader.load(weaponData);
+    gb_WeaponDataLoader.load(weaponData, !mOptions.isSlotCycleOrderReversed());
     mWeaponSetHash   = gb_CustomWeaponOrderStorage.calculateHash(weaponData);
     mWeaponMenu      = gb_WeaponMenu.from(weaponData, mOptions);
     gb_CustomWeaponOrderStorage.applyOperations(mWeaponSetHash, mWeaponMenu);
