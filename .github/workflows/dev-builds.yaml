@@ -239,7 +239,7 @@ jobs:
         background: true
         uses: actions/cache@v6
         with:
-          path: c:\Users\runner\AppData\Local\prek
+          path: c:\Users\runneradmin\AppData\Local\prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Install Python
@@ -262,7 +262,7 @@ jobs:
         run: |
           prek run -a
 
-      - name: Wat for emacs cache
+      - name: Wait for emacs cache
         wait: cache-emacs
 
       # TODO: add emacs to PATH.
@@ -276,4 +276,5 @@ jobs:
         run: |
           scons -j 4 Pk3All
           Get-ChildItem -Path build
+          Write-Host "current user:"
           Write-Host $(whoami)
