@@ -35,15 +35,6 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - name: Install Python
-        uses: actions/setup-python@v7
-        id: install-python
-        background: true
-        with:
-          python-version: "3.13"
-          cache: pip
-          cache-dependency-path: tools/requirements-dev.txt
-
       - name: Cache prek
         id: cache-prek
         background: true
@@ -52,18 +43,20 @@ jobs:
           path: ~/.cache/prek
           key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Wait for Python
-        wait: install-python
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/requirements-dev.txt
 
       - name: Install Python dependencies
-        id: install-python-requirements
-        background: true
         run: |
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
       - name: Wait for prek
-        wait: [cache-prek, install-python-requirements]
+        wait: [cache-prek]
 
       - name: Check prek hooks
         run: |
@@ -108,8 +101,7 @@ jobs:
         # ffmpeg: for python-ffmpeg
         # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
         run: |
-          sudo apt-get update
-          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
+          sudo apt-get update && sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
 
       - name: Cache engine
         id: cache-engine
@@ -186,8 +178,7 @@ jobs:
         # espeak-ng, libespeak1: for pyttsx3
         # ffmpeg: for python-ffmpeg
         run: |
-          sudo apt-get update
-          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+          sudo apt-get update && sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
 
       - name: Install Python
         uses: actions/setup-python@v7
