@@ -35,25 +35,35 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - parallel:
-          - name: Install Python
-            uses: actions/setup-python@v7
-            with:
-              python-version: "3.13"
-              cache: pip
-              cache-dependency-path: tools/requirements-dev.txt
+      - name: Install Python
+        uses: actions/setup-python@v7
+        id: install-python
+        background: true
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/requirements-dev.txt
 
-          - name: Cache prek
-            id: prek
-            uses: actions/cache@v6
-            with:
-              path: ~/.cache/prek
-              key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Cache prek
+        id: cache-prek
+        background: true
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/prek
+          key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Wait for Python
+        wait: install-python
 
       - name: Install Python dependencies
+        id: install-python-requirements
+        background: true
         run: |
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
+
+      - name: Wait for prek
+        wait: [cache-prek, install-python-requirements]
 
       - name: Check prek hooks
         run: |
@@ -91,50 +101,62 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - parallel:
-          - name: Install system dependencies
-            # espeak-ng, libespeak1: for pyttsx3
-            # ffmpeg: for python-ffmpeg
-            # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
-            run: |
-              sudo apt-get update
-              sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
+      - name: Install system dependencies
+        id: install-system-dependencies
+        background: true
+        # espeak-ng, libespeak1: for pyttsx3
+        # ffmpeg: for python-ffmpeg
+        # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
+        run: |
+          sudo apt-get update
+          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
 
-          - name: Cache engine
-            id: cache-engine
-            if: ${{ !contains(matrix.engine.name, 'preview') }}
-            uses: actions/cache@v6
-            with:
-              path: ${{ matrix.engine.download-target }}
-              key: ${{ runner.os }}-${{ matrix.engine.name }}
+      - name: Cache engine
+        id: cache-engine
+        background: true
+        if: ${{ !contains(matrix.engine.name, 'preview') }}
+        uses: actions/cache@v6
+        with:
+          path: ${{ matrix.engine.download-target }}
+          key: ${{ runner.os }}-${{ matrix.engine.name }}
 
-          - name: Install Python
-            uses: actions/setup-python@v7
-            with:
-              python-version: "3.13"
-              cache: pip
-              cache-dependency-path: tools/requirements-dev.txt
+      - name: Install Python
+        id: install-python
+        background: true
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/requirements-dev.txt
+
+      - name: Wait for engine cache
+        wait: cache-engine
 
       - name: Download engine
         if: ${{ steps.cache-engine.outputs.cache-hit != 'true' }}
         run: |
           wget -qO- ${{ matrix.engine.url }} > ${{ matrix.engine.download-target }}
 
-      - parallel:
-          - name: Set up engine with dpkg
-            if: ${{ contains(matrix.engine.download-target, '.deb') }}
-            run: |
-              sudo dpkg -i ${{ matrix.engine.download-target }}
+      - name: Set up engine with dpkg
+        if: ${{ contains(matrix.engine.download-target, '.deb') }}
+        run: |
+          sudo dpkg -i ${{ matrix.engine.download-target }}
 
-          - name: Set up engine with chmod
-            if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
-            run: |
-              chmod +x ${{ matrix.engine.download-target }}
+      - name: Set up engine with chmod
+        if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
+        run: |
+          chmod +x ${{ matrix.engine.download-target }}
 
-          - name: Install Python dependencies
-            run: |
-              python -m pip install --upgrade pip
-              pip install -r tools/requirements-dev.txt
+      - name: Wait for Python
+        wait: install-python
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt
+
+      - name: Wait for system
+        wait: install-system-dependencies
 
       - name: Check compatibility
         run: |
@@ -158,25 +180,29 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - parallel:
-          - name: Install system dependencies
-            # espeak-ng, libespeak1: for pyttsx3
-            # ffmpeg: for python-ffmpeg
-            run: |
-              sudo apt-get update
-              sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+      - name: Install system dependencies
+        id: install-system-dependencies
+        background: true
+        # espeak-ng, libespeak1: for pyttsx3
+        # ffmpeg: for python-ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
 
-          - name: Install Python
-            uses: actions/setup-python@v7
-            with:
-              python-version: "3.13"
-              cache: pip
-              cache-dependency-path: tools/requirements-dev.txt
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/requirements-dev.txt
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
+
+      - name: Wait for system dependencies
+        wait: install-system-dependencies
 
       - name: Build
         run: |
@@ -201,6 +227,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5
 
+  # Couldn't make UZDoom work here. Most probably because of missing video drivers.
   build_windows:
     needs: hooks
     runs-on: windows-2022
@@ -208,68 +235,53 @@ jobs:
       emacs-version: 30.1.0
 
     steps:
+      - name: Cache Emacs
+        id: cache-emacs
+        background: true
+        uses: actions/cache@v6
+        with:
+          path: c:\tools\emacs
+          key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
+
       - name: Check out
         uses: actions/checkout@v7
 
-      - parallel:
-          - name: Cache Emacs
-            id: cache-emacs
-            uses: actions/cache@v6
-            with:
-              path: c:\tools\emacs
-              key: ${{ runner.os }}-emacs-v${{ env.emacs-version }}
+      - name: Cache prek
+        id: cache-prek
+        background: true
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/prek
+          key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
 
-          - name: Install Python
-            uses: actions/setup-python@v7
-            with:
-              python-version: "3.13"
-              cache: pip
-              cache-dependency-path: tools/requirements-dev.txt
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/requirements-dev.txt
 
-          - name: Cache prek
-            id: prek
-            uses: actions/cache@v6
-            with:
-              path: ~/.cache/prek
-              key: ${{ runner.os }}-prek-v${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt
 
-      - parallel:
-          # TODO: add emacs to PATH.
-          - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
-            name: Install Emacs
-            run: |
-              choco install emacs --version ${{ env.emacs-version }}
-
-          - name: Install Python dependencies
-            shell: bash
-            run: |
-              python -m pip install --upgrade pip
-              pip install -r tools/requirements-dev.txt
-
-      # No point if I cannot run UZDoom (see comments below).
-      # - name: Cache UZDoom
-      #   id: cache-uzdoom
-      #   uses: actions/cache@v6
-      #   with:
-      #     path: ~/UZDoom
-      #     key: ${{ runner.os }}-uzdoom-v4.14.3
-      #
-      # - if: ${{ steps.cache-uzdoom.outputs.cache-hit != 'true' }}
-      #   name: Install UZDoom
-      #   shell: bash
-      #   run: |
-      #     curl -kLSs https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Windows-UZDoom-4.14.3.zip -o ~/UZDoom.zip
-      #     mkdir -p ~/UZDoom
-      #     unzip ~/UZDoom.zip -d ~/UZDoom
+      - name: Wait for prek
+        wait: [cache-prek]
 
       - name: Check prek hooks
         run: |
           prek run -a
 
-      # I couldn't make UZDoom work here. Most probably because of missing video drivers.
-      # - name: try UZDoom
-      #   run: |
-      #     ~/UZDoom/uzdoom.exe -stdout -nosound -nodraw -iwad tools/miniwad.wad -config tools/config.ini +"map map01; wait 2; quit"
+      - name: Wat for emacs cache
+        wait: cache-emacs
+
+      # TODO: add emacs to PATH.
+      - if: ${{ steps.cache-emacs.outputs.cache-hit != 'true' }}
+        name: Install Emacs
+        run: |
+          choco install emacs --version ${{ env.emacs-version }}
 
       #  At least check that scons works.
       - name: Build
