@@ -91,9 +91,6 @@ jobs:
       DT_ENGINE: ${{ matrix.engine.bin }}
 
     steps:
-      - name: Check out
-        uses: actions/checkout@v7
-
       - name: Install system dependencies
         id: install-system-dependencies
         background: true
@@ -101,7 +98,8 @@ jobs:
         # ffmpeg: for python-ffmpeg
         # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
         run: |
-          sudo apt-get update && sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
+          sudo apt-get update
+          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
 
       - name: Cache engine
         id: cache-engine
@@ -112,14 +110,20 @@ jobs:
           path: ${{ matrix.engine.download-target }}
           key: ${{ runner.os }}-${{ matrix.engine.name }}
 
+      - name: Check out
+        uses: actions/checkout@v7
+
       - name: Install Python
-        id: install-python
-        background: true
         uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: tools/requirements-dev.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-dev.txt
 
       - name: Wait for engine cache
         wait: cache-engine
@@ -128,6 +132,9 @@ jobs:
         if: ${{ steps.cache-engine.outputs.cache-hit != 'true' }}
         run: |
           wget -qO- ${{ matrix.engine.url }} > ${{ matrix.engine.download-target }}
+
+      - name: Wait for system
+        wait: install-system-dependencies
 
       - name: Set up engine with dpkg
         if: ${{ contains(matrix.engine.download-target, '.deb') }}
@@ -138,17 +145,6 @@ jobs:
         if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
         run: |
           chmod +x ${{ matrix.engine.download-target }}
-
-      - name: Wait for Python
-        wait: install-python
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r tools/requirements-dev.txt
-
-      - name: Wait for system
-        wait: install-system-dependencies
 
       - name: Check compatibility
         run: |
@@ -178,7 +174,8 @@ jobs:
         # espeak-ng, libespeak1: for pyttsx3
         # ffmpeg: for python-ffmpeg
         run: |
-          sudo apt-get update && sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+          sudo apt-get update
+          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
 
       - name: Install Python
         uses: actions/setup-python@v7
