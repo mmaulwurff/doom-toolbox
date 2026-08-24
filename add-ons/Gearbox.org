@@ -269,8 +269,8 @@ v0.8.0
 - adds dropping from the menu
 
 v0.7.3
-- fix VM Abort when externalSelectedIndexInModel isn't set
-- TextureID type fixes for GZDoom 4.14
+- fix VM Abort when ~externalSelectedIndexInModel~ isn't set
+- ~TextureID~ type fixes for GZDoom 4.14
 - fix opening the menu on single weapon
 - fix VM abort when pending weapon is NULL
 - add Brazilian Portuguese localization
@@ -311,7 +311,7 @@ v0.6.0
 - fix VM abort in text view when no weapons
 - add plain text view
 - fix: take into account weapon scaling properties for icons
-- fix: SWWM GZ - two Explodium guns are selectable
+- fix: SWWM GZ - two Explodium guns can be selected
 - fix: velocity after freezing was restored even if freezing is off
 - fix: unblock mouse input in Blocks view
 - update build script
@@ -335,7 +335,7 @@ v0.5.0
 - wheel: draw weapon tag if it has no icon
 - add compatibility with Event Handler Destroyer
 - add Gearbox options menu to simplified options menu
-- don't call statusbar instance for static getInventoryIcon function
+- don't call statusbar instance for static ~getInventoryIcon~ function
 - fix height when frozen in Heretic water
 - move networking to sender
 - add icon to options menu
@@ -347,7 +347,7 @@ v0.5.0
 
 v0.4.1
 - hardcode icons for Smooth Doom
-- prevent vm abort when no inventory items
+- prevent VM abort when no inventory items
 - fix selecting hidden weapons
 - make previous weapon carry over to the next level
 - prevent blocks inventory view from aborting VM when there are no items
@@ -355,9 +355,9 @@ v0.4.1
 - increase max multiwheel threshold, draw selected weapon on top
 - add note about keys to Readme
 - fix constant ticking on tomed weapons
-- fix vm abort when the last inventory item is used up
+- fix VM abort when the last inventory item is used up
 - fix misaligned quantity dots when quantity is odd
-- add missing cvars to zabor and gb_reset
+- add missing cvars to Zabor and ~gb_reset~
 - fix truncation of floating point values
 
 v0.4
@@ -369,8 +369,8 @@ v0.4
 - make position configurable for blocks view
 - add blur option
 - add a command for manual report
-- add cvars dump to vm event handler
-- add vm abort handler
+- add cvars dump to VM event handler
+- add VM abort handler
 - add select previous weapon key from m_gizmos
 - fix complementary colors in blocks view
 - fix division by zero when max ammo is 0
@@ -382,7 +382,7 @@ v0.4
 - allow slot keys in inventory menu
 - add tick sound to inventory menu
 - fix next/previous buttons in inventory menu
-- barebones inventory menu
+- bare-bones inventory menu
 
 v0.3.2
 - increase minimal angle between wheel hands for clarity
@@ -432,7 +432,7 @@ v0.3
 - make disabling Gearbox on automap optional
 - fix overriding icons from invalid ones from service
 - LZDoom half-compatibility: only Blocks view
-- add HideService to show DualExplodiumGun from SWWM GZ only when appropriate
+- add ~HideService~ to show ~DualExplodiumGun~ from SWWM GZ only when appropriate
 - implement icon patches via Service
 - more consistent selection in multiwheel
 - multiwheel: click on slot selects the first weapon in this slot
@@ -471,7 +471,7 @@ v0.2
 - reorganize option menu
 - add an option for wheel horizontal position
 - fix preventing cheat code input in some circumstances
-- fix possible vm abort when dropping weapons
+- fix possible VM abort when dropping weapons
 - fix scaling for blocks view
 - fix scaling wheel pointer
 - fix wheel weapon selection scaling
@@ -483,9 +483,9 @@ v0.2
 - restore indexing the wheel by keys
 - multiwheel: indexer works fine
 - prettier multiwheel
-- wip multiwheel more
+- WIP multiwheel more
 - optimize graphics
-- wip multiwheel
+- WIP multiwheel
 - don't let wheel pointer get from screen bounds
 - fix VM abort with blocks view when there is only one weapon
 - reset wheel pointer on number keys
