@@ -256,6 +256,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 v0.8.1
 - expand "reverse cycling order" behavior
+- set original weapons order as default
 - fix blocks view max height calculation
 
 v0.8.0
@@ -551,7 +552,7 @@ OptionMenu gb_BehaviorOptions
 
   StaticText  ""
   Option      "$GB_OPEN_ON_SLOT",             gb_open_on_slot,             OnOff
-  Option      "$GB_REVERSE_SLOT_CYCLE_ORDER", gb_reverse_slot_cycle_order, OnOff
+  Option      "$GB_REVERSE_SLOT_CYCLE_ORDER", gb_reverse_slot_cycle_order, OffOn
   Option      "$GB_SELECT_FIRST_SLOT_WEAPON", gb_select_first_slot_weapon, OnOff
   Option      "$GB_NO_MENU_IF_ONE",           gb_no_menu_if_one,           OnOff
 
@@ -1872,7 +1873,7 @@ user string gb_font = "NewSmallFont";
 user bool gb_open_on_scroll   = false;
 
 user bool gb_open_on_slot     = true;
-user bool gb_reverse_slot_cycle_order  = false;
+user bool gb_reverse_slot_cycle_order  = true;
 user bool gb_select_first_slot_weapon  = false;
 
 user int gb_soundpack = 0;

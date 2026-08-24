@@ -19,6 +19,7 @@ The order is alphabetical.
 - 4thcharacter
 - AbsolutePsycho
 - Ac!d
+- aeonlight
 - Agitatio
 - Ahpiox
 - Apollucas
