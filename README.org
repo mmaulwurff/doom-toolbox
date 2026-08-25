@@ -78,38 +78,47 @@ Some of DoomToolbox add-ons were the part of so called "m8f's toolbox".
 
 10.5x:
 
+#+attr_HTML: :alt Screenshot of Doom II level "Entryway" with multiplied zombies
 [[file:media/screenshots/10.5x.png]]
 
 FinalCustomDoom:
 
+#+attr_HTML: :alt Screenshot of FinalCustomDoom menu: Player, Actors, Powerups and more
 [[file:media/screenshots/FinalCustomDoom.png]]
 
 Gearbox
 (with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]]
 and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
 
-[[file:media/screenshots/Gearbox-wheel.png]]
-
+#+attr_HTML: :alt Screenshot of Gearbox with guns from Treasure Tech
 [[file:media/screenshots/Gearbox-blocks.png]]
+
+#+attr_HTML: :alt Screenshot of Gearbox wheel with inventory items from Heretic
+[[file:media/screenshots/Gearbox-wheel.png]]
 
 Graveyard:
 
+#+attr_HTML: :alt Screenshot of Doom II level "Circle of Death" with gravestones
 [[file:media/screenshots/Graveyard.png]]
 
 HitImpact (with [[https://www.doomwiki.org/wiki/Back_to_Saturn_X][BTSX]] E1 MAP01):
 
+#+attr_HTML: :alt Animated image of bits of walls of BTSX E1 MAP01 flying off when shot
 [[file:media/screenshots/HitImpact.gif]]
 
 SoundToScreen:
 
+#+attr_HTML: :alt Screenshot of SoundToScreen showing where sounds come from
 [[file:media/screenshots/SoundToScreen.png]]
 
 TargetSpy:
 
+#+attr_HTML: :alt Screenshot of TargetSpy showing arch-vile health 535/700
 [[file:media/screenshots/TargetSpy.png]]
 
 Typist.pk3:
 
+#+attr_HTML: :alt Screenshot of Typist.pk3 displaying "20 + 32" and "repair" over zombies
 [[file:media/screenshots/Typist.pk3.png]]
 
 * Help appreciated

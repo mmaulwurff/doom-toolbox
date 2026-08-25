@@ -139,6 +139,7 @@ The order is alphabetical.
 - [[https://github.com/UZDoom/UZDoom/graphs/contributors][UZDoom contributors]]
 - [[https://forum.zdoom.org/][ZDoom Forums]] maintainers and admins
 - [[https://zdoom.org/w/index.php][ZDoom Wiki]] contributors
+- [[https://doomwiki.org][Doom Wiki]] contributors
 
 # spellchecker:off
 

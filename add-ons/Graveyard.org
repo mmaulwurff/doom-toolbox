@@ -15,6 +15,7 @@
 
 * About
 
+#+attr_HTML: :alt gravestone with "RIP" on it
 [[file:../media/Graveyard/graphics/gy_tomb4.png]]
 
 Graveyard places gravestones where you die.
