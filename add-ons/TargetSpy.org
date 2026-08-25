@@ -5,7 +5,7 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "3.1.2",
+  "version": "3.1.2",
   "depends": {
     "Fonts":           "ts_",
     "libeye":          "ts_",
@@ -92,6 +92,12 @@ headshots and enemy parts in some mods, put follower classes in ~ts_followers~ l
 Follower classes must have the real enemy actor set in their ~master~ field.
 
 * Changelog
+
+v3.1.2:
+- fix: replace broken extension replacement with working
+- fix: made font finding more robust
+- fix: don't draw frames from previous map
+- fix: fading text shows dead health instead of before death
 
 v3.1.0:
 - new:
