@@ -44,5 +44,5 @@ SPDX-License-Identifier: CC0-1.0
 -----
 This block puts this .org file into the exported HTML page verbatim for comparison.
 #+begin_src elisp :exports both
-(buffer-string)
+(org-file-contents "OrgCheatSheet.org")
 #+end_src
