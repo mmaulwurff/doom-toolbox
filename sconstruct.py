@@ -353,7 +353,29 @@ def make_translations_target(org_file):
   if len(source_language_paths) == 0:
     return None
 
-  language_map = {'en_US': 'default', 'pt_BR': 'pt', 'ru_RU': 'ru'}
+  language_map = {
+    'cs_CZ': 'cs',  # Czech
+    'de_DE': 'de',  # German
+    'en_GB': 'eng',  # English (UK)
+    'en_US': 'default',  # English (US)
+    'eo': 'eo',  # Esperanto
+    'es_419': 'esm',  # Latin American Spanish
+    'es_ES': 'es',  # Castilian Spanish
+    'fi_FI': 'fi',  # Finnish
+    'fr_FR': 'fr',  # French
+    'hu_HU': 'hu',  # Hungarian
+    'it_IT': 'it',  # Italian
+    'ja_JP': 'jp',  # Japanese
+    'ko_KR': 'ko',  # Korean
+    'nl_NL': 'nl',  # Dutch
+    'pl_PL': 'pl',  # Polish
+    'pt_BR': 'pt',  # Brazilian Portuguese
+    'pt_PT': 'ptg',  # European Portuguese
+    'ro_RO': 'ro',  # Romanian
+    'ru_RU': 'ru',  # Russian
+    'sr_RS': 'sr',  # Serbian
+    'uk_UA': 'uk',  # Ukrainian
+  }
   target_language_path = Path(f'build/{name}/language.csv')
   target_field_names = [
     'default',
