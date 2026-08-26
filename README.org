@@ -127,6 +127,9 @@ Typist.pk3:
 - UX suggestions: visuals, wording, usability
 - code reviews: errors, style, readability
 - code contributions: optimizations, features (try to keep project scope)
+- [[https://hosted.weblate.org/engage/doom-toolbox/][translations]]
+#+attr_HTML: :alt Translation status
+[[https://hosted.weblate.org/widget/doom-toolbox/open-graph.png]]
 
 * Build
 
