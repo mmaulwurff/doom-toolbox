@@ -7,7 +7,6 @@
 {
   "old_version": "1.0.0",
   "depends": {
-    "PlainTranslator": "cd_",
     "StringUtils": "cd_"
   }
 }
@@ -21,6 +20,12 @@ decrease the difficulty.
 FinalCustomDoom is a successor to Ultimate Custom Doom and Custom Doom.
 
 FinalCustomDoom is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+
+* Changelog
+
+- moved to the new translation system
+
+v1.0.0
 
 * License
 
@@ -74,22 +79,22 @@ SPDX-License-Identifier: GPL-3.0-only
 
 OptionMenu cd_Player
 {
-  <<OptionMenuTitle("Player")>>
-  <<OptionMenuNote("0 disables the option.")>>
+  <<OptionMenuTitle("$cd_Player")>>
+  <<OptionMenuNote("$cd_ZeroDisables")>>
 
-  TextField   "Weapon damage multiplier", "cd_Player:weaponDamage:Immediately"
-  TextField   "Taken damage multiplier" , "cd_Player:takenDamage:Immediately"
+  TextField   "$cd_WeaponDamageMultiplier", "cd_Player:weaponDamage:Immediately"
+  TextField   "$cd_TakenDamageMultiplier" , "cd_Player:takenDamage:Immediately"
   StaticText  ""
-  NumberField "Start health"            , "cd_Player:startHealth:OnPlayerStarted"
-  NumberField "Start armor"             , "cd_Player:startArmor:OnPlayerStarted"
-  TextField   "Save percent"            , "cd_Player:savePercent"
+  NumberField "$cd_StartHealth"           , "cd_Player:startHealth:OnPlayerStarted"
+  NumberField "$cd_StartArmor"            , "cd_Player:startArmor:OnPlayerStarted"
+  TextField   "$cd_SavePercent"           , "cd_Player:savePercent"
   StaticText  ""
-  NumberField "Max health"              , "cd_Player:maxHealth:Immediately"
-  TextField   "Speed multiplier"        , "cd_Player:speedMultiplier:Immediately"
-  TextField   "Jump height multiplier"  , "cd_Player:jumpMultiplier:Immediately"
+  NumberField "$cd_HealthMax"             , "cd_Player:maxHealth:Immediately"
+  TextField   "$cd_SpeedMultiplier"       , "cd_Player:speedMultiplier:Immediately"
+  TextField   "$cd_JumpHeightMultiplier"  , "cd_Player:jumpMultiplier:Immediately"
   StaticText  ""
-  TextField   "Friction multiplier"     , "cd_Player:friction:Immediately"
-  TextField   "Self damage multiplier"  , "cd_Player:selfDamage:Immediately"
+  TextField   "$cd_FrictionMultiplier"    , "cd_Player:friction:Immediately"
+  TextField   "$cd_SelfDamageMultiplier"  , "cd_Player:selfDamage:Immediately"
 }
 #+end_src
 
@@ -205,18 +210,18 @@ extend class cd_Player
 
 OptionMenu cd_Actors
 {
-  <<OptionMenuTitle("Actors")>>
-  <<OptionMenuNote("0 disables the option.")>>
+  <<OptionMenuTitle("$cd_Actors")>>
+  <<OptionMenuNote("$cd_ZeroDisables")>>
 
-  StaticText  "Enemies"          , White
-  TextField   "Health multiplier", "cd_Actors:enemyHealth:OnActorSpawned"
-  NumberField "Health max"       , "cd_Actors:enemyHealthMax:OnActorSpawned"
-  TextField   "Speed multiplier" , "cd_Actors:enemySpeed:OnActorSpawned"
+  StaticText  "$cd_Enemies"         , White
+  TextField   "$cd_HealthMultiplier", "cd_Actors:enemyHealth:OnActorSpawned"
+  NumberField "$cd_HealthMax"       , "cd_Actors:enemyHealthMax:OnActorSpawned"
+  TextField   "$cd_SpeedMultiplier" , "cd_Actors:enemySpeed:OnActorSpawned"
   StaticText  ""
-  StaticText  "Friends"          , White
-  TextField   "Health multiplier", "cd_Actors:friendHealth:OnActorSpawned"
-  NumberField "Health max"       , "cd_Actors:friendHealthMax:OnActorSpawned"
-  TextField   "Speed multiplier" , "cd_Actors:friendSpeed:OnActorSpawned"
+  StaticText  "$cd_Friends"         , White
+  TextField   "$cd_HealthMultiplier", "cd_Actors:friendHealth:OnActorSpawned"
+  NumberField "$cd_HealthMax"       , "cd_Actors:friendHealthMax:OnActorSpawned"
+  TextField   "$cd_SpeedMultiplier" , "cd_Actors:friendSpeed:OnActorSpawned"
 }
 #+end_src
 
@@ -364,34 +369,34 @@ class cd_Actors : cd_EffectsBase
 
 OptionMenu cd_Powerups
 {
-  <<OptionMenuTitle("Permanent powerups")>>
+  <<OptionMenuTitle("$cd_PermanentPowerups")>>
 
-  Option "Buddha"             , "cd_Powerups:buddha:Periodically"           , OnOff
-  Option "Damage"             , "cd_Powerups:damage:Periodically"           , OnOff
-  Option "Double firing speed", "cd_Powerups:doubleFiringSpeed:Periodically", OnOff
-  Option "Drain"              , "cd_Powerups:drain:Periodically"            , OnOff
-  Option "Flight"             , "cd_Powerups:flight:Periodically"           , OnOff
-  Option "Frightener"         , "cd_Powerups:frightener:Periodically"       , OnOff
-  Option "Ghost"              , "cd_Powerups:ghost:Periodically"            , OnOff
-  Option "High jump"          , "cd_Powerups:highJump:Periodically"         , OnOff
-  Option "Infinite ammo"      , "cd_Powerups:infiniteAmmo:Periodically"     , OnOff
-  Option "Invisibility"       , "cd_Powerups:invisibility:Periodically"     , OnOff
-  Option "Invulnerability"    , "cd_Powerups:invulnerability:Periodically"  , OnOff
-  Option "IronFeet"           , "cd_Powerups:ironFeet:Periodically"         , OnOff
-  Option "LightAmp"           , "cd_Powerups:lightAmp:Periodically"         , OnOff
-  Option "Mask"               , "cd_Powerups:mask:Periodically"             , OnOff
-  Option "Minotaur"           , "cd_Powerups:minotaur:Periodically"         , OnOff
-  Option "Morph"              , "cd_Powerups:morph:Periodically"            , OnOff
-  Option "Protection"         , "cd_Powerups:protection:Periodically"       , OnOff
-  Option "Regeneration"       , "cd_Powerups:regeneration:Periodically"     , OnOff
-  Option "Scanner"            , "cd_Powerups:scanner:Periodically"          , OnOff
-  Option "Shadow"             , "cd_Powerups:shadow:Periodically"           , OnOff
-  Option "Speed"              , "cd_Powerups:speed:Periodically"            , OnOff
-  Option "Strength"           , "cd_Powerups:strength:Periodically"         , OnOff
-  Option "Targeter"           , "cd_Powerups:targeter:Periodically"         , OnOff
-  Option "Time freeze"        , "cd_Powerups:timeFreeze:Periodically"       , OnOff
-  Option "Torch"              , "cd_Powerups:torch:Periodically"            , OnOff
-  Option "Weapon level 2"     , "cd_Powerups:weaponLevel2:Periodically"     , OnOff
+  Option "$cd_Buddha"           , "cd_Powerups:buddha:Periodically"           , OnOff
+  Option "$cd_Damage"           , "cd_Powerups:damage:Periodically"           , OnOff
+  Option "$cd_DoubleFiringSpeed", "cd_Powerups:doubleFiringSpeed:Periodically", OnOff
+  Option "$cd_Drain"            , "cd_Powerups:drain:Periodically"            , OnOff
+  Option "$cd_Flight"           , "cd_Powerups:flight:Periodically"           , OnOff
+  Option "$cd_Frightener"       , "cd_Powerups:frightener:Periodically"       , OnOff
+  Option "$cd_Ghost"            , "cd_Powerups:ghost:Periodically"            , OnOff
+  Option "$cd_HighJump"         , "cd_Powerups:highJump:Periodically"         , OnOff
+  Option "$cd_InfiniteAmmo"     , "cd_Powerups:infiniteAmmo:Periodically"     , OnOff
+  Option "$cd_Invisibility"     , "cd_Powerups:invisibility:Periodically"     , OnOff
+  Option "$cd_Invulnerability"  , "cd_Powerups:invulnerability:Periodically"  , OnOff
+  Option "$cd_IronFeet"         , "cd_Powerups:ironFeet:Periodically"         , OnOff
+  Option "$cd_LightAmp"         , "cd_Powerups:lightAmp:Periodically"         , OnOff
+  Option "$cd_Mask"             , "cd_Powerups:mask:Periodically"             , OnOff
+  Option "$cd_Minotaur"         , "cd_Powerups:minotaur:Periodically"         , OnOff
+  Option "$cd_Morph"            , "cd_Powerups:morph:Periodically"            , OnOff
+  Option "$cd_Protection"       , "cd_Powerups:protection:Periodically"       , OnOff
+  Option "$cd_Regeneration"     , "cd_Powerups:regeneration:Periodically"     , OnOff
+  Option "$cd_Scanner"          , "cd_Powerups:scanner:Periodically"          , OnOff
+  Option "$cd_Shadow"           , "cd_Powerups:shadow:Periodically"           , OnOff
+  Option "$cd_Speed"            , "cd_Powerups:speed:Periodically"            , OnOff
+  Option "$cd_Strength"         , "cd_Powerups:strength:Periodically"         , OnOff
+  Option "$cd_Targeter"         , "cd_Powerups:targeter:Periodically"         , OnOff
+  Option "$cd_TimeFreeze"       , "cd_Powerups:timeFreeze:Periodically"       , OnOff
+  Option "$cd_Torch"            , "cd_Powerups:torch:Periodically"            , OnOff
+  Option "$cd_WeaponLevel2"     , "cd_Powerups:weaponLevel2:Periodically"     , OnOff
 }
 #+end_src
 
@@ -457,19 +462,19 @@ class cd_Powerups : cd_EffectsBase
 
 OptionMenu cd_HealthRegeneration
 {
-  <<OptionMenuTitle("Health Regeneration")>>
-  <<OptionMenuNote("0 disables the option.")>>
+  <<OptionMenuTitle("$cd_HealthRegeneration")>>
+  <<OptionMenuNote("$cd_ZeroDisables")>>
 
-  NumberField "Amount", "cd_HealthRegeneration:amount:Periodically"
-  Option      "Type"  , "cd_HealthRegeneration:type", cd_RegenerationType
-  NumberField "Period (seconds)", "cd_HealthRegeneration:period"
+  NumberField "$cd_Amount", "cd_HealthRegeneration:amount:Periodically"
+  Option      "$cd_Type"  , "cd_HealthRegeneration:type", cd_RegenerationType
+  NumberField "$cd_Periodseconds", "cd_HealthRegeneration:period"
   StaticText  ""
-  NumberField "Min", "cd_HealthRegeneration:min"
-  NumberField "Max", "cd_HealthRegeneration:max"
+  NumberField "$cd_Min", "cd_HealthRegeneration:min"
+  NumberField "$cd_Max", "cd_HealthRegeneration:max"
   StaticText  ""
-  Textfield   "Sound effect volume"    , "cd_HealthRegeneration:sound"
-  TextField   "Visual effect intensity", "cd_HealthRegeneration:visual"
-  ColorPicker "Visual effect color"    , "cd_HealthRegeneration:color"
+  Textfield   "$cd_SoundEffectVolume"    , "cd_HealthRegeneration:sound"
+  TextField   "$cd_VisualEffectIntensity", "cd_HealthRegeneration:visual"
+  ColorPicker "$cd_VisualEffectColor"    , "cd_HealthRegeneration:color"
 }
 #+end_src
 
@@ -516,19 +521,19 @@ cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 
 OptionMenu cd_ArmorRegeneration
 {
-  <<OptionMenuTitle("$Armor Regeneration")>>
-  <<OptionMenuNote("0 disables the option.")>>
+  <<OptionMenuTitle("$cd_ArmorRegeneration")>>
+  <<OptionMenuNote("$cd_ZeroDisables")>>
 
-  NumberField "Amount", "cd_ArmorRegeneration:amount:Periodically"
-  Option      "Type"  , "cd_ArmorRegeneration:type", cd_RegenerationType
-  NumberField "Period (seconds)", "cd_ArmorRegeneration:period"
+  NumberField "$cd_Amount", "cd_ArmorRegeneration:amount:Periodically"
+  Option      "$cd_Type"  , "cd_ArmorRegeneration:type", cd_RegenerationType
+  NumberField "$cd_PeriodSeconds", "cd_ArmorRegeneration:period"
   StaticText  ""
-  NumberField "Min", "cd_ArmorRegeneration:min"
-  NumberField "Max", "cd_ArmorRegeneration:max"
+  NumberField "$cd_Min", "cd_ArmorRegeneration:min"
+  NumberField "$cd_Max", "cd_ArmorRegeneration:max"
   StaticText  ""
-  TextField   "Sound effect volume"    , "cd_ArmorRegeneration:sound"
-  TextField   "Visual effect intensity", "cd_ArmorRegeneration:visual"
-  ColorPicker "Visual effect color"    , "cd_ArmorRegeneration:color"
+  TextField   "$cd_SoundEffectVolume"    , "cd_ArmorRegeneration:sound"
+  TextField   "$cd_VisualEffectIntensity", "cd_ArmorRegeneration:visual"
+  ColorPicker "$cd_VisualEffectColor"    , "cd_ArmorRegeneration:color"
 }
 #+end_src
 
@@ -587,16 +592,16 @@ cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 
 OptionMenu cd_AmmoRegeneration
 {
-  <<OptionMenuTitle("Ammo Regeneration")>>
-  <<OptionMenuNote("0 disables the option.")>>
+  <<OptionMenuTitle("$cd_AmmoRegeneration")>>
+  <<OptionMenuNote("$cd_ZeroDisables")>>
 
-  NumberField "Amount"           , "cd_AmmoRegeneration:amount:Periodically"
-  NumberField "Period (seconds)" , "cd_AmmoRegeneration:period"
-  Option      "Backpack required", "cd_AmmoRegeneration:backpackRequired", OnOff
+  NumberField "$cd_Amount"          , "cd_AmmoRegeneration:amount:Periodically"
+  NumberField "$cd_PeriodSeconds"   , "cd_AmmoRegeneration:period"
+  Option      "$cd_BackpackRequired", "cd_AmmoRegeneration:backpackRequired", OnOff
   StaticText  ""
-  TextField   "Sound effect volume"    , "cd_AmmoRegeneration:sound"
-  TextField   "Visual effect intensity", "cd_AmmoRegeneration:visual"
-  ColorPicker "Visual effect color"    , "cd_AmmoRegeneration:color"
+  TextField   "$cd_SoundEffectVolume"    , "cd_AmmoRegeneration:sound"
+  TextField   "$cd_VisualEffectIntensity", "cd_AmmoRegeneration:visual"
+  ColorPicker "$cd_VisualEffectColor"    , "cd_AmmoRegeneration:color"
 }
 #+end_src
 
@@ -653,8 +658,8 @@ cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024
 
 OptionMenu cd_Commands
 {
-  <<OptionMenuTitle("Commands")>>
-  <<OptionMenuNote("Resetting and restoring aren't applied if in a game.")>>
+  <<OptionMenuTitle("$cd_Commands")>>
+  <<OptionMenuNote("$cd_NotAppliedInGame")>>
 
   SafeCommand "$cd_ResetOptions"   , cd_reset_to_defaults
   StaticText  ""
@@ -692,24 +697,6 @@ server string cd_settings_profile2;
 server string cd_settings_profile3;
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/language.txt
-
-[enu default]
-cd_ResetOptions    = "Reset options to defaults";
-
-cd_BackupOptions1  = "Back up options to Profile 1";
-cd_RestoreOptions1 = "Restore options from Profile 1 backup";
-
-cd_BackupOptions2  = "Back up options to Profile 2";
-cd_RestoreOptions2 = "Restore options from Profile 2 backup";
-
-cd_BackupOptions3  = "Back up options to Profile 3";
-cd_RestoreOptions3 = "Restore options from Profile 3 backup";
-
-[ru]
-cd_Player = "Игрок";
-
-#+end_src
 @@html:</details>@@
 :end:
 
@@ -725,19 +712,18 @@ AddOptionMenu OptionsMenuSimple { Submenu "$cd_Title", cd_Menu }
 OptionMenu cd_Menu protected
 {
   Class cd_Menu
-  cd_PlainTranslator
   <<OptionMenuTitle("$cd_Title")>>
 
-  Submenu    "Player"  , cd_Player
-  Submenu    "Actors"  , cd_Actors
-  Submenu    "Powerups", cd_Powerups
+  Submenu    "$cd_Player"  , cd_Player
+  Submenu    "$cd_Actors"  , cd_Actors
+  Submenu    "$cd_PermanentPowerups", cd_Powerups
   StaticText ""
-  StaticText "Regeneration/Degeneration", White
-  Submenu    "Health"  , cd_HealthRegeneration
-  Submenu    "Armor"   , cd_ArmorRegeneration
-  Submenu    "Ammo"    , cd_AmmoRegeneration
+  StaticText "$cd_RegenerationDegeneration", White
+  Submenu    "$cd_Health"  , cd_HealthRegeneration
+  Submenu    "$cd_Armor"   , cd_ArmorRegeneration
+  Submenu    "$cd_Ammo"    , cd_AmmoRegeneration
   StaticText ""
-  Submenu    "Commands", cd_Commands
+  Submenu    "$cd_Commands", cd_Commands
 }
 
 OptionValue cd_RegenerationType
@@ -770,19 +756,8 @@ StaticText \"\"" note)
 
 #+begin_src c :tangle ../build/FinalCustomDoom/language.txt
 
-// Translation note: most FCD menu items have their strings written in plain English
-// and not as $, but are still translatable, for example:
-// TextField "Weapon damage multiplier" "cd_something"
-// here the string identifier to translate is $cd_Weapon_damage_multiplier.
-// Normal $ string identifier can be used too.
-
 [enu default]
 cd_Title = "FinalCustomDoom \c[CDLightBlue]⚒";
-cd_Regeneration = "Regeneration";
-cd_Degeneration = "Degeneration";
-
-[ru]
-cd_Weapon_damage_multiplier = "Множитель урона от оружия";
 #+end_src
 
 ** Project setup :noexport:
@@ -793,13 +768,8 @@ version 4.14.3
 
 <<../tools/scripts.org:include("add-ons/FinalCustomDoom.org", "build/FinalCustomDoom/\\(zscript/.*zs\\)")>>
 
-#include "zscript/cd_PlainTranslator.zs"
 #include "zscript/cd_StringUtils.zs"
 #+end_src
-
-Note: ~cd_PlainTranslator.zs~ must be installed externally.
-
-[[file:../modules/PlainTranslator.org][PlainTranslator]]
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
 <<../tools/scripts.org:copy-media("FinalCustomDoom")>>
@@ -1266,7 +1236,7 @@ class cd_EffectsBase play
 You can use FinalCustomDoom (FCD) to add your own game settings. To do so, a FCD
 extension can be created. Basically, such extension consists of two parts: settings
 definition and settings implementation. Settings definition is contained in menudef
-lump, where settings are added to ~cd_Menu~, for example in a submenu. Settings
+lump, where settings are added to ~cd_Menu~, for example a submenu. Settings
 implementation provides in-game effects and is written in ZScript.
 
 Settings defined in a FCD extension don't have an entry in cvarinfo lump. They're
@@ -1288,8 +1258,6 @@ differences are:
     and have return type void (meaning it returns nothing).
   - ~EffectTime~: one of : ~Immediately~, ~OnPlayerStarted~, ~OnActorSpawned~,
     ~Periodically~, or left out.
-- Setting labels in some item types are made directly translatable. See the note in
-  language.txt in [[Menus]] section.
 
 See the example below.
 
