@@ -398,9 +398,9 @@ def make_translations_target(org_file):
         for row in csv_reader:
           string_id = row['context']
           string = row['target']
-          if re.match('c[0-9]*', string_id):
+          if string_id == name + 'Copyright':
             authors.add(string)
-          elif string_id == 'i':
+          elif string_id == name + 'License':
             licenses.add(string)
           else:
             rows[string_id] = rows.get(string_id, {})
