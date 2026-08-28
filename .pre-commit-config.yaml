@@ -49,7 +49,7 @@ repos:
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.16.4
+   rev: v0.16.5
    hooks:
     - id: ruff-check
       name: ruff-check
@@ -58,7 +58,7 @@ repos:
       name: ruff-format
 
  - repo: https://github.com/crate-ci/typos
-   rev: v1.49.0
+   rev: v1.49.1
    hooks:
     - id: typos
       name: typos
@@ -134,7 +134,7 @@ repos:
         --strict]
 
  - repo: https://github.com/editorconfig-checker/editorconfig-checker
-   rev: v3.11.1
+   rev: v3.11.2
    hooks:
     - id: editorconfig-checker
       name: editorconfig-checker
@@ -172,7 +172,7 @@ repos:
 
  # https://vale.sh/
  - repo: https://github.com/vale-cli/vale
-   rev: v3.18.0
+   rev: v3.19.0
    hooks:
     - id: vale
       name: vale sync
