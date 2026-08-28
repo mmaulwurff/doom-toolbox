@@ -9,7 +9,6 @@
   "depends": {
     "Fonts":           "gb_",
     "MD5":             "gb_",
-    "PlainTranslator": "gb_",
     "PreviousWeapon":  "gb_",
     "StringUtils":     "gb_",
     "VmAbortReporter": "gb_"
@@ -253,6 +252,8 @@ SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
 * Changelog
+
+- moved to the new translation system
 
 v0.8.1
 - expand "reverse cycling order" behavior
@@ -506,6 +507,12 @@ v0.1: initial release
 
 * Options
 
+#+begin_src c :tangle ../build/Gearbox/language.txt
+
+[enu default]
+GB_OPTIONS = "Gearbox \ch⚙";
+#+end_src
+
 #+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$GB_OPTIONS", gb_Options }
@@ -515,7 +522,6 @@ AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
 
 OptionMenu gb_Options
 {
-  gb_PlainTranslator
   Title "Gearbox"
 
   StaticText  ""
@@ -536,7 +542,7 @@ OptionMenu gb_Options
   Submenu     "$GB_BLOCKS_OPTIONS"   , gb_BlocksOptions
   Submenu     "$GB_TEXT_OPTIONS"     , gb_TextOptions
   Submenu     "$GB_ADVANCED_OPTIONS" , gb_AdvancedOptions
-  Submenu     "$GB_GZDOOM_OPTIONS"   , gb_GZDoomOptions
+  Submenu     "$GB_ENGINE_OPTIONS"   , gb_EngineOptions
 
   StaticText  ""
   SafeCommand "$GB_RESET"              , gb_reset
@@ -564,9 +570,9 @@ OptionMenu gb_BehaviorOptions
   Option      "$GB_FROZEN_CAN_OPEN",   gb_frozen_can_open,  OnOff
 }
 
-OptionMenu gb_GZDoomOptions
+OptionMenu gb_EngineOptions
 {
-  Title "$GB_GZDOOM_OPTIONS_TITLE"
+  Title "$GB_ENGINE_OPTIONS_TITLE"
 
   StaticText ""
   Option     "$SCALEMNU_HUDASPECT", hud_AspectScale, OnOff
@@ -585,7 +591,7 @@ OptionMenu gb_UiOptions
   Option      "$GB_SHOW_TAGS" , gb_show_tags      , OnOff
 
   StaticText  ""
-  Option      "Print selection", gb_print_selection, OnOff
+  Option      "$GB_PRINT_SELECTION", gb_print_selection, OnOff
 
   StaticText  ""
   Option      "$GB_DIM"       , gb_enable_dim     , OnOff
@@ -727,212 +733,6 @@ gearbox/notfound sounds/error.wav
 $volume gearbox/notfound 0.5
 #+end_src
 
-* Language
-
-** English
-
-#+begin_src c :tangle ../build/Gearbox/language.txt
-
-// SPDX-FileCopyrightText: © 2022 generic name guy
-
-[enu default]
-
-GB_PACK1 = "Custom Soundpack";
-
-GB_OPTIONS = "Gearbox \ch⚙";
-
-GB_UI_OPTIONS       = "UI options";
-GB_UI_OPTIONS_TITLE = "Gearbox UI Options";
-
-GB_COLOR          = "Color";
-GB_PLAYER_COLOR   = "Copy custom player color";
-GB_DIM_COLOR      = "Background dimming color";
-
-GB_SHOW_TAGS      = "Tags";
-GB_SOUND          = "Sound effects";
-
-GB_KEYSECTION            = "Gearbox Keys";
-GB_TOGGLE_WEAPON_MENU    = "Toggle weapon menu";
-GB_TOGGLE_INVENTORY_MENU = "Toggle inventory menu";
-GB_PREV_WEAPON           = "Select previous weapon";
-
-GB_VIEW_TYPE   = "Selector type";
-GB_BLOCKY_VIEW = "Blocks";
-GB_WHEEL_VIEW  = "Wheel";
-GB_TEXT_VIEW   = "Plain text";
-GB_DIM         = "Background dimming";
-GB_BLUR        = "Background blur";
-GB_WHEEL_X     = "Horizontal position";
-GB_WHEEL_SCALE = "Scale";
-GB_WHEEL_TINT  = "Colored tint on weapons";
-
-GB_BEHAVIOR_OPTIONS        = "Behavior options";
-GB_BEHAVIOR_OPTIONS_TITLE  = "Gearbox Behavior Options";
-
-GB_OPEN_ON_PREV_NEXT = "Open on next/previous weapon keys";
-GB_OPEN_ON_SLOT      = "Open on slot keys";
-GB_SELECT_ON_KEY_UP  = "Select on Toggle Menu key release";
-GB_NO_MENU_IF_ONE    = "Slot keys select if weapon is only one in slot";
-GB_ENABLE_ON_AUTOMAP = "Gearbox on automap";
-GB_LOCK_POSITION     = "Locked positions";
-GB_FROZEN_CAN_OPEN   = "Frozen player can open Gearbox";
-
-GB_REVERSE_SLOT_CYCLE_ORDER = "Reverse cycling order inside slots";
-GB_SELECT_FIRST_SLOT_WEAPON = "Always start at first weapon for the slot key";
-
-GB_FREEZE_TIME       = "Freeze";
-GB_LEVEL_AND_PLAYER  = "Enemies and player (single-player only)";
-GB_PLAYER            = "Player";
-
-GB_MOUSE_IN_WHEEL    = "Enable mouse input";
-GB_MULTIWHEEL_LIMIT  = "Multiwheel threshold";
-
-GB_MOUSE_SENSITIVITY = "Mouse sensitivity";
-GB_X = "Horizontal";
-GB_Y = "Vertical";
-GB_Y_BOUNDARY = "Vertical lower boundary";
-
-GB_WHEEL_OPTIONS        = "Wheel options";
-GB_WHEEL_OPTIONS_TITLE  = "Gearbox Wheel Options";
-GB_BLOCKS_OPTIONS       = "Blocks options";
-GB_BLOCKS_OPTIONS_TITLE = "Gearbox Blocks Options";
-
-GB_TEXT_OPTIONS         = "Plain text options";
-GB_TEXT_OPTIONS_TITLE   = "Gearbox Plain Text Options";
-GB_TEXT_USUAL_COLOR     = "Usual color";
-GB_TEXT_SELECTED_COLOR  = "Selected color";
-
-GB_FONT        = "Font";
-GB_FONT_CUSTOM = "Font (custom)";
-GB_BAD_FONT    = "Font \"%s\" not found.";
-
-GB_SCALE    = "Scale";
-GB_POSITION = "Position";
-GB_X        = "Horizontal";
-GB_Y        = "Vertical";
-
-GB_RESET        = "Reset Gearbox options to defaults";
-
-GB_RESET_CUSTOM_ORDER        = "Reset current custom weapon order";
-GB_RESET_CUSTOM_ORDER_NOTE   = "Works only while in game.";
-
-GB_GZDOOM_OPTIONS       = "Relevant GZDoom options";
-GB_GZDOOM_OPTIONS_TITLE = "GZDoom Options that affect Gearbox";
-GB_ASPECT_SCALE_NOTE    = "Doesn't affect weapons in wheel for now.";
-
-GB_ADVANCED_OPTIONS = "Advanced options";
-GB_ADVANCED_OPTIONS_TITLE = "Gearbox Advanced Options";
-GB_VM_ABORT_INFO_ENABLED  = "VM abort info";
-
-GB_ROTATE_WEAPON_PRIORITY = "Cycle weapon priority";
-GB_ROTATE_WEAPON_SLOT     = "Cycle weapon slot";
-GB_SOUNDPACK = "Soundpack";
-
-GB_SMALL_FONT     = "Small font";
-GB_CONSOLE_FONT   = "Console font";
-GB_BIG_FONT       = "Big font";
-#+end_src
-
-# vale off
-** Brazilian Portuguese
-# vale on
-
-# spellchecker:off
-#+begin_src c :tangle ../build/Gearbox/language.txt
-
-[pt]
-
-GB_PACK1 = "Pacote de Sons Personalizado";
-
-GB_UI_OPTIONS       = "Opções de IU";
-GB_UI_OPTIONS_TITLE = "Opções de IU do Gearbox";
-
-GB_COLOR          = "Cor";
-GB_PLAYER_COLOR   = "Copiar cor personalizada do jogador";
-GB_DIM_COLOR      = "Cor de atenuação do fundo";
-
-GB_SHOW_TAGS      = "Tags";
-GB_SOUND          = "Efeitos sonoros";
-
-GB_KEYSECTION            = "Teclas do Gearbox";
-GB_TOGGLE_WEAPON_MENU    = "Abrir menu de armas";
-GB_TOGGLE_INVENTORY_MENU = "Abrir menu de inventário";
-GB_PREV_WEAPON           = "Selecionar arma anterior";
-
-GB_VIEW_TYPE   = "Tipo de selecionador";
-GB_BLOCKY_VIEW = "Blocos";
-GB_WHEEL_VIEW  = "Roda";
-GB_TEXT_VIEW   = "Texto plano";
-GB_DIM         = "Atenuação do fundo";
-GB_BLUR        = "Borrar fundo";
-GB_WHEEL_X     = "Posição horizontal";
-GB_WHEEL_SCALE = "Tamanho";
-GB_WHEEL_TINT  = "Tonalidade colorida nas armas";
-
-GB_BEHAVIOR_OPTIONS        = "Opções de comportamento";
-GB_BEHAVIOR_OPTIONS_TITLE  = "Opções de comportamento do Gearbox";
-
-GB_OPEN_ON_PREV_NEXT = "Abrir nas teclas de arma proxima/anterior";
-GB_OPEN_ON_SLOT      = "Abrir nas teclas de número das armas";
-GB_SELECT_ON_KEY_UP  = "Selecionar quando soltar o botão de Abrir";
-GB_NO_MENU_IF_ONE    = "Teclas de slot se tiver apenas uma arma no slot";
-GB_ENABLE_ON_AUTOMAP = "Gearbox no automapa";
-GB_LOCK_POSITION     = "Posições travadas";
-GB_FROZEN_CAN_OPEN   = "Jogadores congelados podem abrir o Gearbox";
-
-GB_REVERSE_SLOT_CYCLE_ORDER = "Ordem de circulação reversa";
-GB_SELECT_FIRST_SLOT_WEAPON = "Sempre começar na primeira arma";
-
-GB_FREEZE_TIME       = "Congelar";
-GB_LEVEL_AND_PLAYER  = "Inimigos e jogador (Apenas singleplayer)";
-GB_PLAYER            = "Jogador";
-
-GB_MOUSE_IN_WHEEL    = "Habilitar mouse";
-GB_MULTIWHEEL_LIMIT  = "Limite de múltiplas rodas";
-
-GB_MOUSE_SENSITIVITY = "Sensibilidade do mouse";
-GB_Y_BOUNDARY = "Limite vertical";
-
-GB_WHEEL_OPTIONS        = "Opções de Roda";
-GB_WHEEL_OPTIONS_TITLE  = "Opções da Roda do Gearbox";
-GB_BLOCKS_OPTIONS       = "Opções de Blocos";
-GB_BLOCKS_OPTIONS_TITLE = "Opções de Blocos do Gearbox";
-
-GB_TEXT_OPTIONS         = "Opções de Texto Plano";
-GB_TEXT_OPTIONS_TITLE   = "Opções de Texto Plano do Gearbox";
-GB_TEXT_USUAL_COLOR     = "Cor normal";
-GB_TEXT_SELECTED_COLOR  = "Cor selecionada";
-
-GB_FONT        = "Fonte";
-GB_FONT_CUSTOM = "Fonte (Personalizada)";
-GB_BAD_FONT    = "A fonte \"%s\" não foi encontrada.";
-
-GB_SCALE    = "Tamanho";
-GB_POSITION = "Posição";
-
-GB_RESET        = "Redefinir configurações padrões do Gearbox";
-
-GB_RESET_CUSTOM_ORDER        = "Redefinir ordem de armas atual";
-GB_RESET_CUSTOM_ORDER_NOTE   = "Só funciona dentro do jogo.";
-
-GB_GZDOOM_OPTIONS       = "Opções relevantes do GZDoom";
-GB_GZDOOM_OPTIONS_TITLE = "Opções do GZDoom que afetam o Gearbox";
-GB_ASPECT_SCALE_NOTE    = "Não afeta armas na roda por agora.";
-
-GB_ADVANCED_OPTIONS = "Opções avançadas";
-GB_ADVANCED_OPTIONS_TITLE = "Opções avançadas do Gearbox";
-GB_VM_ABORT_INFO_ENABLED  = "Informações de VM Abort";
-
-GB_ROTATE_WEAPON_PRIORITY = "Circular prioridade de arma";
-GB_ROTATE_WEAPON_SLOT     = "Circular slot de arma";
-GB_SOUNDPACK = "Pacote de sons";
-
-GB_SMALL_FONT     = "Fonte pequena";
-GB_CONSOLE_FONT   = "Fonte do console";
-GB_BIG_FONT       = "Fonte grande";
-#+end_src
-# spellchecker:on
-
 * Keys
 
 #+begin_src c :tangle ../build/Gearbox/keyconf.txt
@@ -1020,7 +820,6 @@ version 4.14.3
 
 #include "zscript/gb_Fonts.zs"
 #include "zscript/gb_MD5.zs"
-#include "zscript/gb_PlainTranslator.zs"
 #include "zscript/gb_PreviousWeapon.zs"
 #include "zscript/gb_StringUtils.zs"
 #include "zscript/gb_VmAbortReporter.zs"
