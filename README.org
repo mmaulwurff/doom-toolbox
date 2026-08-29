@@ -55,7 +55,6 @@ and doesn't use "AI" tools for development.
 | [[file:modules/libeye.org][libeye]]           | (originally by KeksDose) level and screen projections    |       |
 | [[file:modules/LispOnZscript.org][LispOnZscript]]    | toy Lisp-like language on top of ZScript                 | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]  |
 | [[file:modules/MD5.org][MD5]]              | (originally by 3saster) MD5 implementation in ZScript    |       |
-| [[file:modules/PlainTranslator.org][PlainTranslator]]  | enables translation for plain text menu items            |       |
 | [[file:modules/PreviousWeapon.org][PreviousWeapon]]   | provides a key to select a previous weapon               |       |
 | [[file:modules/StringUtils.org][StringUtils]]      | string manipulation library                              |       |
 | [[file:modules/VmAbortReporter.org][VmAbortReporter]]  | prints a report when VM abort happens                    |       |

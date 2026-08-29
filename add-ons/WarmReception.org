@@ -84,8 +84,6 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Menu
 
-TODO: use PlainTranslator?
-
 #+begin_src c :tangle ../build/WarmReception/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$wr_Title", wr_Menu }
