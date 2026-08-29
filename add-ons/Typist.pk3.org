@@ -10,7 +10,6 @@
     "Fonts":           "tt_",
     "LazyPoints":      "tt_",
     "libeye":          "tt_le_",
-    "PlainTranslator": "tt_",
     "StringUtils":     "tt_su_"
   }
 }
@@ -91,6 +90,13 @@ compatible with many UZDoom mods and games.
   They read input directly from player, so weapon firing can't be
   emulated like for other mods. Guncaster support can't be added without
   modifications in Guncaster or the game engine.
+
+
+* Changelog
+
+- moved to the new translation system
+
+v0.8.3
 
 * License
 
@@ -4732,7 +4738,7 @@ class tt_FallbackQuestion : tt_Question
 
   override string getDescription()
   {
-    return StringTable.localize("TT_FALLBACK_QUESTION");
+    return StringTable.localize("$TT_FALLBACK_QUESTION");
   }
 
   override string getHintFor(string answer) { return getDescription(); }
@@ -6941,6 +6947,12 @@ class tt_TargetOriginSender : tt_Effect
 
 ** Options
 
+#+begin_src c :tangle ../build/Typist.pk3/language.txt
+
+[enu default]
+TT_TITLE  = "Typist.pk3 ⧆";
+#+end_src
+
 #+begin_src c :tangle ../build/Typist.pk3/menudef.txt
 
 AddOptionMenu OptionsMenu       { tt_AnimatedSubmenu "$TT_TITLE", tt_Options }
@@ -6948,90 +6960,88 @@ AddOptionMenu OptionsMenuSimple { tt_AnimatedSubmenu "$TT_TITLE", tt_Options }
 
 OptionMenu tt_Options
 {
-  tt_PlainTranslator
-
   Title      "Typist.pk3"
 
-  Submenu    "Controls", tt_Controls
+  Submenu    "$tt_Controls", tt_Controls
 
   StaticText ""
-  Submenu    "General Options", tt_GeneralOptions
-  Submenu    "Lesson Options",  tt_LessonOptions
-  Submenu    "Sound Options",   tt_SoundOptions
+  Submenu    "$tt_GeneralOptions", tt_GeneralOptions
+  Submenu    "$tt_LessonOptions",  tt_LessonOptions
+  Submenu    "$tt_SoundOptions",   tt_SoundOptions
 }
 
 OptionMenu tt_GeneralOptions
 {
-  Title      "Typist.pk3 General Options"
+  Title      "$tt_GeneralOptions"
 
   StaticText ""
-  Option     "Automatic word confirmation", tt_fast_confirmation, OnOff
+  Option     "$tt_AutoConfirmation", tt_fast_confirmation, OnOff
 
   StaticText ""
-  Slider     "Target text scale", tt_view_scale, 1, 4, 1, 0
+  Slider     "$tt_TargetTextScale", tt_view_scale, 1, 4, 1, 0
 
   StaticText ""
-  StaticText "Reduce distractions"
+  StaticText "$tt_ReduceDistractions"
 
   StaticText ""
-  Option     "Player can't die", tt_buddha_enabled, OnOff
-  StaticText "Applies on new level start."
+  Option     "$tt_PlayerNodie", tt_buddha_enabled, OnOff
+  StaticText "$tt_AppliesOnStart"
 
   StaticText ""
-  Option     "Infinite ammo",      sv_infiniteammo, OnOff
-  Option     "Enemy infighting",   infighting, tt_InfightingValues
+  Option     "$tt_InfiniteAmmo",    sv_infiniteammo, OnOff
+  Option     "$tt_EnemyInfighting", infighting, tt_InfightingValues
 
   StaticText ""
-  Option     "HUD",          screenblocks, tt_HudValues
-  Option     "Show score",   tt_lp_show, OnOff
-  Slider     "Pain flash",   blood_fade_scalar,  0, 1.0, 0.1
-  Slider     "Pickup flash", pickup_fade_scalar, 0, 1.0, 0.1
+  Option     "$tt_HUD",         screenblocks, tt_HudValues
+  Option     "$tt_ShowScore",   tt_lp_show, OnOff
+  Slider     "$tt_PainFlash",   blood_fade_scalar,  0, 1.0, 0.1
+  Slider     "$tt_PickupFlash", pickup_fade_scalar, 0, 1.0, 0.1
 }
 
 OptionValue tt_HudValues
 {
-  10, "Standard"
-  11, "Alternative"
-  12, "No HUD"
+  10, "$tt_Standard"
+  11, "$tt_Alternative"
+  12, "$tt_NoHUD"
 }
 
 OptionValue tt_InfightingValues
 {
-  -1, "Never"
-   0, "Sometimes (normal)"
-   1, "Always"
+  -1, "$tt_Never"
+   0, "$tt_Sometimes"
+   1, "$tt_Always"
 }
 
 OptionMenu tt_LessonOptions
 {
-  Title      "Lesson Options"
+  Title      "$tt_LessonOptions"
 
-  Option     "1000 Basic English Words", tt_is_english_enabled, OnOff
-  Option     "Random Characters",        tt_is_random_enabled,  OnOff
-  Option     "Arithmetic",               tt_is_maths_enabled,   OnOff
-  Option     "Custom Text",              tt_is_custom_enabled,  OnOff
-
-  StaticText ""
-  Submenu    "Random Characters Lesson Configuration", tt_RandomLesson
+  Option     "$tt_1000English",      tt_is_english_enabled, OnOff
+  Option     "$tt_RandomCharacters", tt_is_random_enabled,  OnOff
+  Option     "$tt_Arithmetic",       tt_is_maths_enabled,   OnOff
+  Option     "$tt_CustomText",       tt_is_custom_enabled,  OnOff
 
   StaticText ""
-  Command    "Update targets", tt_reset_targets
+  Submenu    "$tt_RandomCharactersConfiguration", tt_RandomLesson
 
   StaticText ""
-  StaticText "How to set up Custom Text lesson"
+  Command    "$tt_UpdateTargets", tt_reset_targets
+
+  StaticText ""
+  StaticText "$tt_HowToCustom"
   StaticText "$TT_CUSTOM_LESSON_HELP_TEXT"
 }
 
 OptionMenu tt_Controls
 {
-  Title      "Controls"
+  Title      "$tt_Controls"
 
   Control    "$TT_UNLOCK", tt_unlock_mode
   Control    "$TT_COMBAT", tt_force_combat
 
   StaticText ""
-  TextField  "Pass Through command", tt_command_pass_through
-  StaticText "Allows a single action key to be pressed without exiting Combat mode."
+  TextField  "$tt_PassThroughCommand", tt_command_pass_through
+  StaticText "$tt_PassThroughDescription"
 
   StaticText ""
   Control    "$TT_SCORE", zc_top
@@ -7039,29 +7049,29 @@ OptionMenu tt_Controls
 
 OptionMenu tt_SoundOptions
 {
-  Title  "Sound Options"
+  Title  "$tt_SoundOptions"
 
-  Option "Sound effects", tt_sound_enabled, OnOff
-  Option "Typing sound",  tt_sound_typing_enabled, OnOff
-  Option "Sound theme",   tt_sound_theme, tt_SoundThemes
+  Option "$tt_SoundEffects", tt_sound_enabled, OnOff
+  Option "$tt_TypingSound",  tt_sound_typing_enabled, OnOff
+  Option "$tt_SoundTheme",   tt_sound_theme, tt_SoundThemes
 }
 
 OptionMenu tt_RandomLesson
 {
-  Title  "Random Characters Lesson Configuration"
+  Title  "$tt_RandomCharactersConfiguration"
 
-  Slider "Length", tt_rc_length, 1, 10, 1, 0
+  Slider "$tt_Length", tt_rc_length, 1, 10, 1, 0
 
   StaticText ""
   Option "$TT_RANDOM_LESSON_UPPERCASE", tt_rc_uppercase_letters_enabled , OnOff
   Option "$TT_RANDOM_LESSON_LOWERCASE", tt_rc_lowercase_letters_enabled , OnOff
-  Option "0-9"                        , tt_rc_numbers_enabled           , OnOff
-  Option "Punctuation"                , tt_rc_punctuation_enabled       , OnOff
-  Option "Other characters"           , tt_rc_symbols_enabled           , OnOff
+  Option "0-9",                         tt_rc_numbers_enabled           , OnOff
+  Option "$tt_Punctuation",             tt_rc_punctuation_enabled       , OnOff
+  Option "$tt_OtherCharacters",         tt_rc_symbols_enabled           , OnOff
 
   StaticText ""
-  Option     "Custom string"  , tt_rc_custom_enabled, OnOff
-  TextField  "Custom string:" , tt_rc_custom, tt_rc_custom_enabled
+  Option     "$tt_CustomString", tt_rc_custom_enabled, OnOff
+  TextField  "$tt_CustomString", tt_rc_custom, tt_rc_custom_enabled
 }
 #+end_src
 
@@ -7069,17 +7079,17 @@ OptionMenu tt_RandomLesson
 
 OptionValue tt_SoundThemes
 {
-  1, "Default"
-  2, "SNES"
-  4, "Dakka"
-  5, "Grocery Store"
+  1, "$tt_Default"
+  2, "$tt_SNES"
+  4, "$tt_Dakka"
+  5, "$tt_GroceryStore"
 }
 
 // Score Menu
 OptionMenu tt_lp_TopMenu
 {
   class tt_lp_Top
-  Title "Top Points"
+  Title "$tt_TopPoints"
 }
 #+end_src
 
@@ -7114,7 +7124,7 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
   {
     Super.Init(label, command, param, centered);
 
-    _originalLabel  = stringTable.Localize(label);
+    _originalLabel  = StringTable.localize(label);
     _originalLength = _originalLabel.CodePointCount();
     _period         = DELAY_TICS + _originalLength * CHARACTER_TIMEOUT_TICS;
 
@@ -7148,34 +7158,6 @@ class OptionMenuItemtt_AnimatedSubmenu : OptionMenuItemSubmenu
 }
 #+end_src
 
-** Language
-
-#+begin_src c :tangle ../build/Typist.pk3/language.txt
-[enu default]
-
-TT_TITLE  = "Typist.pk3 ⧆";
-
-TT_UNLOCK = "Unlock Game Mode";
-TT_COMBAT = "Force Combat Mode";
-TT_SCORE  = "Open Score";
-
-TT_CUSTOM_LESSON_HELP_TEXT = "\
-1. Find any text or book in a .txt file (ASCII or UTF-8).\
-2. Rename text file to `typist_custom_text.txt`.\
-3. Load `typist_custom_text.txt` alongside Typist.pk3.\
-4. Enable Custom Text in this menu.";
-
-TT_RANDOM_LESSON_UPPERCASE = "A-Z";
-TT_RANDOM_LESSON_LOWERCASE = "a-z";
-
-TT_FALLBACK_QUESTION = "<empty lesson>";
-
-[ru]
-
-// Note: plain text in menus is translatable.
-TT_CONTROLS = "Управление";
-#+end_src
-
 * Mod setup
 
 #+begin_src c :tangle ../build/Typist.pk3/zscript.zs
@@ -7188,7 +7170,6 @@ version 4.14.3
 #include "zscript/tt_Fonts.zs"
 #include "zscript/tt_LazyPoints.zs"
 #include "zscript/tt_le_libeye.zs"
-#include "zscript/tt_PlainTranslator.zs"
 #include "zscript/tt_su_StringUtils.zs"
 #+end_src
 
@@ -7196,7 +7177,6 @@ Modules:
 - [[file:../modules/Fonts.org][Fonts]]
 - [[file:../modules/LazyPoints.org][LazyPoints]]
 - [[file:../modules/libeye.org][libeye]]
-- [[file:../modules/PlainTranslator.org][PlainTranslator]]
 - [[file:../modules/StringUtils.org][StringUtils]]
 
 #+begin_src text :tangle ../build/tmp.txt :exports none
