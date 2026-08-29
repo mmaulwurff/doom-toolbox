@@ -5,8 +5,7 @@
 #+name: meta
 #+begin_src js
 {
-  "old_version": "2.1.0",
-  "depends": { "PlainTranslator": "st_" }
+  "old_version": "2.1.0"
 }
 #+end_src
 
@@ -62,6 +61,8 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Changelog
 
+- move to the new translation system
+
 v2.1.0
 - show player's own sound
 - make dots hug screen edges
@@ -113,45 +114,38 @@ v0.1.0-beta: initial release
 
 OptionMenu st_Menu
 {
-  st_PlainTranslator
-
   Title "SoundToScreen"
 
-  StaticText  "Position"
-  Slider      "Horizontal", st_x_position, 0.0, 1.0, 0.01, 2
-  Slider      "Vertical",   st_y_position, 0.0, 1.0, 0.01, 2
+  StaticText  "$st_Position"
+  Slider      "$st_Horizontal", st_x_position, 0.0, 1.0, 0.01, 2
+  Slider      "$st_Vertical",   st_y_position, 0.0, 1.0, 0.01, 2
 
   StaticText  ""
-  Slider      "Width",      st_x_radius, 20, 50, 1
-  Slider      "Height",     st_y_radius, 20, 50, 1
-  Slider      "Dot size",   st_dot_size,  1,  9, 2
-  Slider      "Alpha",      st_alpha, 0.1, 1.0, 0.1, 1
+  Slider      "$st_Width",      st_x_radius, 20, 50, 1
+  Slider      "$st_Height",     st_y_radius, 20, 50, 1
+  Slider      "$st_DotSize",    st_dot_size,  1,  9, 2
+  Slider      "$st_Opacity",    st_alpha, 0.1, 1.0, 0.1, 1
 
   StaticText  ""
-  Option      "On automap", st_on_automap, OnOff
+  Option      "$st_OnAutomap", st_on_automap, OnOff
 
   StaticText  ""
-  StaticText  "Colors"
-  ColorPicker "Base",   st_color_base
-  ColorPicker "Noise",  st_color_noise
-  ColorPicker "Level",  st_color_geometry
-  ColorPicker "Danger", st_color_danger
-  ColorPicker "Player", st_color_player
+  StaticText  "$st_Colors"
+  ColorPicker "$st_Base",   st_color_base
+  ColorPicker "$st_Noise",  st_color_noise
+  ColorPicker "$st_Level",  st_color_geometry
+  ColorPicker "$st_Danger", st_color_danger
+  ColorPicker "$st_Player", st_color_player
 }
 
 AddOptionMenu OptionsMenu       { Submenu "$ST_MENU_NAME", st_Menu }
 AddOptionMenu OptionsMenuSimple { Submenu "$ST_MENU_NAME", st_Menu }
 #+end_src
 
-[[file:../modules/PlainTranslator.org][PlainTranslator]]
-
 #+begin_src c :tangle ../build/SoundToScreen/language.txt
 
 [enu default]
 ST_MENU_NAME  = "SoundToScreen \cj⚞";
-
-[ru]
-ST_DANGER = "Опасность";
 #+end_src
 
 #+begin_src c :tangle ../build/SoundToScreen/cvarinfo.txt
@@ -515,7 +509,6 @@ GameInfo { EventHandlers = "st_EventHandler" }
 
 version 4.14.3
 
-#include "zscript/st_PlainTranslator.zs"
 #include "zscript/st_event_handler.zs"
 #+end_src
 
