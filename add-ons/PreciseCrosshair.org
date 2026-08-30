@@ -43,6 +43,8 @@ PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][Doo
 
 * Changelog
 
+- moved to the new translation system
+
 v1.5.0:
 - added writing of result to external cvar
 - fixed GetDistanceScale was missing a return
@@ -157,6 +159,12 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Menus
 
+#+begin_src c :tangle ../build/PreciseCrosshair/language.txt
+
+[enu default]
+PC_TITLE  = "PreciseCrosshair \ck⚀";
+#+end_src
+
 #+begin_src c :tangle ../build/PreciseCrosshair/menudef.txt
 
 AddOptionMenu OptionsMenu       { Submenu "$PC_TITLE", pc_Menu }
@@ -164,7 +172,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$PC_TITLE", pc_Menu }
 
 OptionMenu pc_Menu
 {
-  Title      "$PC_TITLE"
+  Title      "PreciseCrosshair"
 
   StaticText "$PC_ENGINE"          , 1
 
@@ -220,39 +228,6 @@ user bool pc_target_health = false;
 
 user float pc_y;
 user float pc_scale;
-#+end_src
-
-* Language
-
-#+begin_src c :tangle ../build/PreciseCrosshair/language.txt
-
-[enu default]
-
-// Option menus
-
-PC_TITLE  = "PreciseCrosshair \ck⚀";
-
-PC_ENGINE = "Engine Crosshair Options";
-PC_OFF    = "This must be OFF:";
-PC_NONE   = "This must be not None:";
-PC_OTHER  = "Other crosshair options also apply to PreciseCrosshair:";
-
-PC_OPTIONS = "PreciseCrosshair Options";
-PC_ENABLE  = "Enabled";
-
-PC_MIRROR_H = "Mirror horizontally";
-PC_MIRROR_V = "Mirror vertically";
-PC_SLOT_1   = "Disable on slot 1";
-PC_NOT_READY = "Disable when weapon isn't ready";
-PC_NO_WEAPON = "Disable when there is no weapon";
-PC_TARGET_COLOR = "Show target color instead of player";
-PC_DISTANCE_SCALE = "Scale crosshair by distance";
-
-// Crosshair names
-
-PC_PIXEL = "Pixel";
-PC_BIG   = "Precise Big";
-PC_SMALL = "Precise Small";
 #+end_src
 
 * Additional crosshairs
