@@ -18,6 +18,7 @@
 ^I_Init: Setting up machine state.
 ^LoadActors: Load actor definitions.
 ^M_Init: Init menus.
+^M_LoadDefaults: Load system defaults\.$
 ^No bots.cfg, so no bots
 ^Number of detected displays 1 .
 ^P_Init: Init Playloop state.
@@ -30,6 +31,7 @@
 ^S_Init: Setting up sound.
 ^S_InitData: Load sound definitions.
 ^Script error, ".?zdoom.pk3:menudef.txt"
+^Selecting OpenGLES 2\.0 backend\.\.\.$
 ^Texman.Init: Init texture manager.
 ^Unknown texture M_EPISOD
 ^Using video driver x11
@@ -39,5 +41,6 @@
 ^adding .*miniwad.wad, .* lumps
 ^adding .*zdoom.pk3, .* lumps
 ^cc$
+^f 2$
 ^player 1 of 1 \(1 nodes\)
 ^script parsing took
