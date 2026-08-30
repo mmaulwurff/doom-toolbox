@@ -30,12 +30,6 @@ path = "vale-alex-v0-2-3.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2020 errata.ai"
 SPDX-License-Identifier = "MIT"
 
-# https://github.com/a11yfred/neighbor
-[[annotations]]
-path = "vale-neighbor-v2-2-0.zip"
-SPDX-FileCopyrightText = "Copyright (c) 2026 Mikey Ilagan"
-SPDX-License-Identifier = "MIT"
-
 # https://github.com/vale-cli/proselint
 [[annotations]]
 path = "vale-proselint-v0-3-4.zip"
