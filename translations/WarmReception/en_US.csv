@@ -1,7 +1,7 @@
 "context","target"
-"WarmReception_Copyright","SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+"WarmReceptionCopyright","SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 "
-"WarmReception_License","SPDX-License-Identifier: CC-BY-SA-4.0
+"WarmReceptionLicense","SPDX-License-Identifier: CC-BY-SA-4.0
 "
 "wr_Keep","Keep as is"
 "wr_Wake","Wake up (may wake up others)"

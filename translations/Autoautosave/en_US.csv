@@ -1,7 +1,7 @@
 "context","target"
-"Autoautosave_Copyright","SPDX-FileCopyrightText: © 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+"AutoautosaveCopyright","SPDX-FileCopyrightText: © 2018 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 "
-"Autoautosave_License","SPDX-License-Identifier: CC-BY-SA-4.0
+"AutoautosaveLicense","SPDX-License-Identifier: CC-BY-SA-4.0
 "
 AAS_MANUAL_CONTROL_NAME,Manual autosave
 AAS_TOGGLE_CONTROL_NAME,Toggle Autoautosave

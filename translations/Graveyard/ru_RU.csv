@@ -1,7 +1,7 @@
 "context","target"
-"Graveyard_Copyright","SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+"GraveyardCopyright","SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 "
-"Graveyard_License","SPDX-License-Identifier: CC-BY-SA-4.0
+"GraveyardLicense","SPDX-License-Identifier: CC-BY-SA-4.0
 "
 GY_REMOVE_ALL,
 GY_REMOVE_MAP,
