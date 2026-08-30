@@ -253,6 +253,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Changelog
 
+- removed unused and missing sound definition
 - moved to the new translation system
 
 v0.8.1
@@ -726,11 +727,6 @@ $volume gearbox/pack/close 0.2
 
 gearbox/pack/nope sounds/gb_nope.ogg
 $volume gearbox/pack/nope 0.5
-
-// Not found
-
-gearbox/notfound sounds/error.wav
-$volume gearbox/notfound 0.5
 #+end_src
 
 * Keys
