@@ -375,6 +375,7 @@ def make_translations_target(org_file):
     'ru_RU': 'ru',  # Russian
     'sr_RS': 'sr',  # Serbian
     'uk_UA': 'uk',  # Ukrainian
+    'zh_Hans': 'zh_Hans',  # Simplified Chinese
   }
   target_language_path = Path(f'build/{name}/language.csv')
   target_field_names = [
