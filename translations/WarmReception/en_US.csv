@@ -1,0 +1,15 @@
+"context","target"
+"WarmReception_Copyright","SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+"
+"WarmReception_License","SPDX-License-Identifier: CC-BY-SA-4.0
+"
+"wr_Keep","Keep as is"
+"wr_Wake","Wake up (may wake up others)"
+"wr_TurnAway","Turn away from player"
+"wr_TurnTowards","Turn towards player"
+"wr_TurnRandomly","Turn to a random direction"
+"wr_Kill","Kill (when alerted)"
+"wr_Remove","Remove (may break scripts)"
+"wr_Start","Enemies at start"
+"wr_Ambush","Enemies in ambush"
+"wr_Other","Other enemies"

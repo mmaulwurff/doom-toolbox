@@ -27,6 +27,8 @@ Known issues:
 
 * Changelog
 
+- moved to the new translation system
+
 v0.4.0
 - made more multiplayer-friendly
 - add separate switches for enemies at start, in ambush, and others
@@ -91,7 +93,7 @@ AddOptionMenu OptionsMenuSimple { Submenu "$wr_Title", wr_Menu }
 
 OptionMenu wr_Menu
 {
-  Title "$wr_Title"
+  Title "WarmReception"
 
   Option "$wr_Start",  wr_start,  wr_Actions
   Option "$wr_Ambush", wr_ambush, wr_SafeActions
@@ -122,20 +124,7 @@ OptionValue wr_SafeActions
 #+begin_src c :tangle ../build/WarmReception/language.txt
 
 [enu default]
-
-wr_Title       = "WarmReception \ci♨";
-
-wr_Keep        = "Keep as is";
-wr_Wake        = "Wake up (may wake up others)";
-wr_TurnAway    = "Turn away from player";
-wr_TurnTowards = "Turn towards player";
-wr_TurnRandomly = "Turn to a random direction";
-wr_Kill        = "Kill (when alerted)";
-wr_Remove      = "Remove (may break scripts)";
-
-wr_Start       = "Enemies at start";
-wr_Ambush      = "Enemies in ambush";
-wr_Other       = "Other enemies";
+wr_Title = "WarmReception \ci♨";
 #+end_src
 
 * Source
