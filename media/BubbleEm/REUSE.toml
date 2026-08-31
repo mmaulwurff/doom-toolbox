@@ -1,0 +1,22 @@
+# https://reuse.software/
+
+version = 1
+
+[[annotations]]
+path = "graphics/BE_1A0.png"
+SPDX-FileCopyrightText = "© 2020 Accensus"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Pop 1.ogg
+# https://freesound.org/people/FourthWoods/sounds/439184/
+[[annotations]]
+path = "sounds/be_pop.ogg"
+SPDX-FileCopyrightText = "© 2018 FourthWoods"
+SPDX-License-Identifier = "CC0-1.0"
+
+# Teleport-01b.wav
+# https://freesound.org/people/DWOBoyle/sounds/474179/
+[[annotations]]
+path = "sounds/be_swoosh.ogg"
+SPDX-FileCopyrightText = "© 2019 DWOBoyle"
+SPDX-License-Identifier = "CC-BY-4.0"

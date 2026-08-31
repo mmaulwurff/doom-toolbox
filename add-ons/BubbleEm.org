@@ -1,0 +1,391 @@
+#+property: header-args :comments no :mkdirp yes :noweb yes :results none
+
+#+title: BubbleEm
+
+#+name: meta
+#+begin_src js
+{ "old_version": "1.0.1" }
+#+end_src
+
+* About
+
+With this add-on don't die, they're put in safe bubbles instead.
+
+Features
+- purely cosmetic (doesn't affect gameplay)
+- universal* (compatible with every GZDoom game)
+- sound effects
+
+This mod should be compatible with every GZDoom game and mod. However, if death
+animations include body parts that fly away, with this mod they will still fly
+away.
+
+Incompatible mods
+- Zrift - Chasm in Doom - LE: enemies are invisible inside bubbles (checked on v1.1).
+- mk-champions (Champions): invisible enemies (checked on v2.666).
+
+* Changelog
+
+v1.0.1
+- prevent bubbling non-living things
+- fix boss death events
+- fix bubbles for some mods
+
+v1.0
+- add pop sound
+
+v0.2
+- fix VM abort on resurrection
+- add roll to bubbled enemies
+- add tag for bubble
+- new bubble graphics by Accensus
+
+v0.1: initial release
+
+* License
+
+[[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
+
+#+begin_src text :noweb-ref license
+SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
+SPDX-License-Identifier: GPL-3.0-only
+#+end_src
+
+#+begin_src c :tangle ../build/BubbleEm/mapinfo.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/BubbleEm/sndinfo.txt :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/BubbleEm/textures.txt :exports none
+// <<license>>
+#+end_src
+
+#+begin_src c :tangle ../build/BubbleEm/zscript.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_EventHandler.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Bubble.zs :exports none
+// <<license>>
+#+end_src
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Magic.zs :exports none
+// <<license>>
+#+end_src
+
+* Project setup
+
+#+begin_src c :tangle ../build/BubbleEm/mapinfo.txt
+
+GameInfo
+{
+  EventHandlers = "be_EventHandler"
+}
+#+end_src
+
+#+begin_src c :tangle ../build/BubbleEm/sndinfo.txt
+
+be/swoosh "sounds/be_swoosh.ogg"
+be/pop    "sounds/be_pop.ogg"
+#+end_src
+
+#+begin_src c :tangle ../build/BubbleEm/textures.txt
+
+Sprite be_2A0, 48, 40
+{
+  Patch be_1A0, 0, 0
+  Offset 24, 20
+  XScale 4
+  YScale 4
+}
+#+end_src
+
+#+begin_src c :tangle ../build/BubbleEm/zscript.zs
+
+version 4.14.3
+
+<<../tools/scripts.org:include("add-ons/BubbleEm.org", "build/BubbleEm/\\(zscript/.*zs\\)")>>
+#+end_src
+
+#+begin_src text :tangle ../build/tmp.txt :exports none
+<<../tools/scripts.org:copy-media("BubbleEm")>>
+#+end_src
+
+* Source
+
+** Event handler
+
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_EventHandler.zs
+
+class be_EventHandler : EventHandler
+{
+  override void WorldThingDied(WorldEvent event)
+  {
+    if (isValid(event))
+    {
+      inflate(event.thing);
+    }
+  }
+
+  override void WorldThingRevived(WorldEvent event)
+  {
+    if (isValid(event))
+    {
+      deflate(event.thing);
+    }
+  }
+
+  override void WorldThingSpawned(WorldEvent event)
+  {
+    if (event.thing)
+    {
+      event.thing.bNoExtremeDeath = true;
+    }
+  }
+
+  override void WorldThingDestroyed(WorldEvent event)
+  {
+    if (isValid(event))
+    {
+      transferMagic(event.thing);
+    }
+  }
+
+  private static void transferMagic(Actor destroyed)
+  {
+    let magic = findMagic(destroyed);
+    if (magic)
+    {
+      magic.transfer();
+    }
+  }
+
+  private static bool isValid(WorldEvent event)
+  {
+    if (event == NULL) return false;
+    let thing = event.thing;
+    return !(thing == NULL || thing is "PlayerPawn") && thing.bIsMonster;
+  }
+
+  private static void inflate(Actor died)
+  {
+    died.giveInventory(MAGIC_CLASS, 1);
+
+    let magic = findMagic(died);
+    if (magic)
+    {
+      magic.init(died);
+    }
+  }
+
+  private static void deflate(Actor revived)
+  {
+    let magic = findMagic(revived);
+    if (magic)
+    {
+      magic.restore();
+    }
+  }
+
+  private static be_Magic findMagic(Actor a)
+  {
+    return be_Magic(a.findInventory(MAGIC_CLASS));
+  }
+
+  const MAGIC_CLASS = "be_Magic";
+}
+#+end_src
+
+** Bubble
+
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Bubble.zs
+
+class be_Bubble : Actor
+{
+  Default
+  {
+    +Nogravity;
+    +NoInteraction;
+    +ForceXYBillboard;
+
+    FloatBobStrength 0.2;
+
+    RenderStyle 'Stencil';
+    Alpha  0;
+    XScale 6.66;
+    YScale 6.66;
+
+    Tag "Bubble";
+  }
+
+  States
+  {
+    Spawn:
+      BE_2 A 1;
+      loop;
+  }
+}
+#+end_src
+
+** Magic
+
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Magic.zs
+
+class be_Magic : Inventory
+{
+  void init(Actor original)
+  {
+    initOriginal(original);
+    initPretender();
+    initBubble();
+
+    mLifetime  = 0;
+  }
+
+  void restore()
+  {
+    mOriginal.A_SetRenderStyle(mOriginalAlpha, mOriginalRenderStyle);
+    mOriginal.A_StartSound("be/pop");
+
+    mPretender.destroy();
+    mBubble.destroy();
+    GoAwayAndDie();
+  }
+
+  void transfer()
+  {
+    mOriginal.RemoveInventory(self);
+    callTryPickup(mPretender);
+  }
+
+  private void initPretender()
+  {
+    let pos       = makePretenderPos();
+    let pretender = Actor.Spawn(mOriginal.getClass(), pos, false);
+
+    mPretender = pretender;
+
+    pretender.angle            = mOriginal.angle;
+    pretender.floatBobStrength = 0.2;
+    pretender.bFloatBob        = true;
+    pretender.bShootable       = false;
+    pretender.bNoInteraction   = true;
+    pretender.bNogravity       = true;
+    pretender.bIsMonster       = false;
+    pretender.bForceXYBillboard = true;
+    pretender.bRollSprite      = true;
+    pretender.bRollCenter      = true;
+    pretender.health = -1;
+    pretender.A_SetTics(int.Max);
+    mOrigScale = pretender.scale;
+    mRoll = random(-4, 4) / 10.0;
+
+    level.total_monsters -= pretender.bCountKill;
+
+    pretender.A_StartSound("be/swoosh");
+  }
+
+  private void initOriginal(Actor original)
+  {
+    mOriginal            = original;
+    mOriginalRenderStyle = original.GetRenderStyle();
+    mOriginalAlpha       = original.alpha;
+
+    mOriginal.A_SetRenderStyle(0.0, STYLE_None);
+    // no need to save, it won't be used anymore.
+    mOriginal.deathSound = "";
+  }
+
+  private void initBubble()
+  {
+    Vector3 bubblePos = makeBubblePos();
+    mBubble = Actor.Spawn("be_Bubble", bubblePos);
+    double bubbleScale = max(mPretender.radius / 16, mPretender.height / 32);
+    mOrigBubbleScale = mBubble.scale * bubbleScale;
+    mBubble.floatBobPhase = mPretender.floatBobPhase;
+    let shade = String.format( "%x%x%x%x%x%x"
+                             , random(9, 0xc)
+                             , random(9, 0xc)
+                             , random(9, 0xc)
+                             , random(9, 0xc)
+                             , random(9, 0xc)
+                             , random(9, 0xc)
+                             );
+    mBubble.setShade(shade);
+  }
+
+  override void Tick()
+  {
+    if (mBubble == NULL || mPretender == NULL)
+    {
+      return;
+    }
+
+    if (mLifetime < DURATION)
+    {
+      double ratio      = double(mLifetime) / DURATION;
+      double scaleRatio = (1 - ratio) * (1 - TARGET_SCALE) + TARGET_SCALE;
+
+      mPretender.scale = scaleRatio * mOrigScale;
+      mBubble.scale = scaleRatio * mOrigBubbleScale;
+      mBubble.alpha = ratio * 0.6;
+      mBubble.setOrigin(mPretender.pos + (0, 0, mPretender.height * scaleRatio / 2), true);
+
+      ++mLifetime;
+    }
+    else if (mLifetime == DURATION)
+    {
+      mBubble.bFloatBob = true;
+    }
+
+    // These things have to be set all the time.
+    mPretender.A_SetTics(int.Max);
+    mPretender.bFloatBob = true;
+    mPretender.A_SetRoll(mPretender.roll + mRoll);
+
+    if (mOriginal && mOriginal.vel != (0, 0, 0))
+    {
+      mPretender.setOrigin(makePretenderPos(), true);
+      mBubble   .setOrigin(makeBubblePos(), true);
+    }
+  }
+
+  private Vector3 makeBubblePos()
+  {
+    return mPretender.pos + (0, 0, mPretender.height * TARGET_SCALE / 2);
+  }
+
+  private Vector3 makePretenderPos()
+  {
+    return mOriginal.pos + (0, 0, 10);
+  }
+
+  const DURATION = 35 / 4;
+  const TARGET_SCALE = 0.1;
+
+  private Vector2   mOrigScale;
+  private Vector2   mOrigBubbleScale;
+  private int       mLifetime;
+
+  private int mOriginalRenderStyle;
+  private double mOriginalAlpha;
+
+  private Actor mBubble;
+  private Actor mPretender;
+  private Actor mOriginal;
+
+  private double mRoll;
+}
+#+end_src
+
+* Test
+
+Basic check: the mod can be loaded without errors, and bubbling doesn't cause errors.
+
+#+begin_src text :tangle ../build/BubbleEmTest/commands.txt
+wait 2; map map01
+wait 4; summon doomimp
+wait 6; mdk
+wait 9; quit
+#+end_src

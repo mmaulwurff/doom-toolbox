@@ -14,6 +14,7 @@ DoomToolbox is made with the following software:
     mods development)
 - [[https://www.audacityteam.org/][Audacity]]: audio editing app
 - [[https://www.gimp.org/][GIMP]]: image editor
+- [[https://slade.mancubus.net/][Slade]]: it's a Doom editor
 
 See also [[file:../tools/requirements-dev.txt][requirements]] and [[file:../.pre-commit-config.yaml][pre-commit checks]].
 

@@ -81,6 +81,7 @@ repos:
         --scopes,
         "10.5x,\
         Autoautosave,\
+        BubbleEm,\
         ClematisM,\
         DoomDoctor,\
         FinalCustomDoom,\

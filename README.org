@@ -36,6 +36,7 @@ and doesn't use "AI" tools for development.
 |------------------+----------------------------------------------------------+-------|
 | [[file:add-ons/10.5x.org][10.5x]]            | enemy number multiplier                                  | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]  |
 | [[file:add-ons/Autoautosave.org][Autoautosave]]     | universal autosaver                                      | [[https://forum.zdoom.org/viewtopic.php?t=59889][link]]  |
+| [[file:add-ons/BubbleEm.org][BubbleEm]]         | bubbles instead of corpses                               | [[https://forum.zdoom.org/viewtopic.php?f=46&t=68685][link]]  |
 | [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]  | gameplay customization options                           | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]  |
 | [[file:add-ons/Gearbox.org][Gearbox]]          | more convenient ways to select weapons and items         | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]  |
 | [[file:add-ons/Graveyard.org][Graveyard]]        | places gravestones where you die                         | [[https://forum.zdoom.org/viewtopic.php?t=68835][link]]  |
@@ -78,6 +79,11 @@ Some of DoomToolbox add-ons were the part of so called "m8f's toolbox".
 
 #+attr_HTML: :alt Screenshot of Doom II level "Entryway" with multiplied zombies
 [[file:media/screenshots/10.5x.png]]
+
+BubbleEm:
+
+#+attr_HTML: :alt Screenshot of a Cyberdemon and Cacodemon inside bubbles
+file:media/screenshots/BubbleEm.png
 
 FinalCustomDoom:
 
