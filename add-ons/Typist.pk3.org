@@ -7179,7 +7179,7 @@ Modules:
 - [[file:../modules/libeye.org][libeye]]
 - [[file:../modules/StringUtils.org][StringUtils]]
 
-#+begin_src text :tangle ../build/tmp.txt :exports none
+#+begin_src text :tangle ../build/tmp/Typist.pk3.txt :exports none
 <<../tools/scripts.org:copy-media("Typist.pk3")>>
 #+end_src
 
