@@ -117,7 +117,6 @@ repos:
    hooks:
     - id: yamllint
       name: yamllint
-      exclude: ^\.clang-format
       args:
        [-d,
         "{extends: default, rules: {\

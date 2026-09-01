@@ -948,10 +948,8 @@ Doom monsters with radius 20:
 
 #+begin_src c :tangle ../build/10.5xTest/zscript.zs
 
-// clang-format off
 class x5t_Archvile : Archvile {}
 class x5t_Revenant : Revenant {}
-// clang-format on
 
 class x5t_ArchvileReplacer : RandomSpawner replaces Archvile
 {

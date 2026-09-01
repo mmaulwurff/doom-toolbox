@@ -7,7 +7,6 @@
 # Except directories
 !**/
 # and these files:
-!.clang-format
 !.editorconfig
 !.gitattributes
 !.gitignore

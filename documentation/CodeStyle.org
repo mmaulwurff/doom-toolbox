@@ -44,7 +44,7 @@ style, unless there is a good reason not to.
 
 * Formatting
 
-See [[../.clang-format][.clang-format]], [[../.editorconfig][.editorconfig]], [[../.pre-commit-config.yaml][.pre-commit-config.yaml]], and [[../pyproject.toml][pyproject.toml]] for
+See [[../.editorconfig][.editorconfig]], [[../.pre-commit-config.yaml][.pre-commit-config.yaml]], and [[../pyproject.toml][pyproject.toml]] for
 formatting settings.
 
 * Abbreviations
