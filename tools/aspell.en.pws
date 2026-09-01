@@ -1,9 +1,11 @@
-personal_ws-1.1 en 163 
+personal_ws-1.1 en 169 
 ACS
 BFG
 BTSX
+BubbleEm
 CVar
 Cacowards
+ClematisM
 Codeberg
 DoomDoctor
 DoomToolbox
@@ -27,12 +29,14 @@ MTF
 Netevent
 Nomina
 PlainTranslator
+PreciseCrosshair
 PreviousWeapon
 QCDE
 SPDX
 SoundToScreen
 StringUtils
 TODO
+TargetSpy
 UI
 UX
 UZDoom
@@ -41,6 +45,7 @@ VmAbortReporter
 WIP
 WarmReception
 ZDoom
+ZScript
 Zandronum
 aas
 altfire
@@ -58,6 +63,7 @@ cfg
 changelog
 cmd
 cp
+crosshair
 ctrl
 cvar
 cvarinfo
