@@ -83,7 +83,7 @@ Some of DoomToolbox add-ons were the part of so called "m8f's toolbox".
 BubbleEm:
 
 #+attr_HTML: :alt Screenshot of a Cyberdemon and Cacodemon inside bubbles
-file:media/screenshots/BubbleEm.png
+[[file:media/screenshots/BubbleEm.png]]
 
 FinalCustomDoom:
 
