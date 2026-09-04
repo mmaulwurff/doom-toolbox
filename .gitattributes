@@ -5,10 +5,11 @@
 .gitattributes eol=lf
 .gitignore     eol=lf
 
+*.aff  eol=lf
 *.css  eol=lf
 *.csv  eol=lf
+*.dic  eol=lf
 *.el   eol=lf
-*.en.pws eol=lf
 *.ini  eol=lf
 *.md   eol=lf
 *.org  eol=lf

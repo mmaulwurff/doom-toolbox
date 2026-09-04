@@ -12,10 +12,11 @@
 !.gitignore
 
 # and these file types:
+!*.aff
 !*.css
 !*.csv
+!*.dic
 !*.el
-!*.en.pws
 !*.gif
 !*.ini
 !*.md
@@ -31,3 +32,4 @@
 
 # but do ignore them there:
 build/*
+tools/vale/vale-*/*

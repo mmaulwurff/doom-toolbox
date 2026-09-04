@@ -72,7 +72,7 @@ v1.4:
 
 v1.3:
 - add option to hide crosshair when no weapon is selected/weapon is holstered
-- add minimalistic crosshairs
+- add minimalist crosshairs
 
 v1.2.3:
 - fix menu

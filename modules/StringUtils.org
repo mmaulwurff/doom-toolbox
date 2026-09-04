@@ -647,7 +647,9 @@ NAMESPACE_Description addState(string name, State aState)
 }
 #+end_src
 
-** Ascii
+# vale off
+** ASCII
+# vale on
 
 #+begin_src c :tangle ../build/StringUtils/StringUtils.zs
 

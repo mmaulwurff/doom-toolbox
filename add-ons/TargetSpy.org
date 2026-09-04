@@ -63,7 +63,7 @@ TargetSpy supports four types of extension classes:
    contains.
 
 Note that Finders, Filters, and Getters classes don't depend on TargetSpy types in
-any way. Theyy can be included in other mods to provide TargetSpy
+any way. They can be included in other mods to provide TargetSpy
 integration when loaded together.
 
 Extension classes aren't meant to be instantiated, only their static functions are

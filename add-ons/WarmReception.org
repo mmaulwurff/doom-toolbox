@@ -9,12 +9,7 @@
 
 * About
 
-WarmReception is a minimod for UZDoom that alters enemy behavior on level start.
-
-With this mod, you can either make your life harder by aggravating every enemy from
-the start or disable hot starts.
-
-WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+WarmReception alters enemy behavior on level start.
 
 Options:
 - Wake every enemy on a level (optionally even enemies in ambush), or
@@ -24,6 +19,8 @@ Options:
 
 Known issues:
 - [[https://github.com/UZDoom/UZDoom/issues/1238][~Actor.CheckSight~ freezes RAMP 2024]]
+
+WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
 * Changelog
 
@@ -37,13 +34,10 @@ v0.4.0
 
 v0.3.1
 - fix Warm Reception affecting summoned actors
-- update build script
-- add Downloads shield to Readme
 
 v0.3
 - add an option to kill monsters at start
 - add an option to remove enemies at start
-- add description to build.sh and fix shellcheck warnings
 
 v0.2.1
 - fix modifying behavior of modded enemies

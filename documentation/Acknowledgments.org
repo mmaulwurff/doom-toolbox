@@ -15,6 +15,7 @@ The order is alphabetical.
 * Thanks
 
 # spellchecker:off
+# vale off
 
 - 4thcharacter
 - AbsolutePsycho
@@ -132,6 +133,7 @@ The order is alphabetical.
 - ZikShadow
 
 # spellchecker:on
+# vale on
 
 * Special thanks
 
@@ -142,6 +144,7 @@ The order is alphabetical.
 - [[https://doomwiki.org][Doom Wiki]] contributors
 
 # spellchecker:off
+# vale off
 
 - 3saster: [[file:../modules/MD5.org][MD5]], implementing real time access in GZDoom.
 - Captain J: sound design for Typist, graphics for Graveyard
@@ -155,3 +158,4 @@ The order is alphabetical.
 - ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606][Clematis]]
 
 # spellchecker:on
+# vale on

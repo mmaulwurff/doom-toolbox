@@ -3,11 +3,6 @@
 version = 1
 
 [[annotations]]
-path = "aspell.en.pws"
-SPDX-FileCopyrightText = "© 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
-SPDX-License-Identifier = "CC0-1.0"
-
-[[annotations]]
 path = "IgnoredEngineOutput.txt"
 SPDX-FileCopyrightText = "© 2024 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
 SPDX-License-Identifier = "CC0-1.0"
@@ -20,30 +15,40 @@ SPDX-License-Identifier = "BSD-3-Clause"
 
 # https://github.com/vale-cli/Microsoft
 [[annotations]]
-path = "vale-Microsoft-v0-15-0.zip"
+path = "vale/vale-Microsoft-v0-15-0.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2018 - 2019 Joseph Kato"
 SPDX-License-Identifier = "MIT"
 
 # https://github.com/vale-cli/alex
 [[annotations]]
-path = "vale-alex-v0-2-3.zip"
+path = "vale/vale-alex-v0-2-3.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2020 errata.ai"
 SPDX-License-Identifier = "MIT"
 
 # https://github.com/vale-cli/proselint
 [[annotations]]
-path = "vale-proselint-v0-3-4.zip"
+path = "vale/vale-proselint-v0-3-4.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019, errata.ai"
 SPDX-License-Identifier = "BSD-3-Clause"
 
 # https://github.com/vale-cli/write-good
 [[annotations]]
-path = "vale-write-good-v0-4-1.zip"
+path = "vale/vale-write-good-v0-4-1.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019 errata.ai"
 SPDX-License-Identifier = "MIT"
 
 # https://github.com/vale-cli/write-good
 [[annotations]]
-path = "vale-Openly-v0-4-6.zip"
+path = "vale/vale-Openly-v0-4-6.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019 TestTheDocs - Incubator"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "vale/config/dictionaries/doom.dic"
+SPDX-FileCopyrightText = "© 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "vale/config/dictionaries/doom.aff"
+SPDX-FileCopyrightText = "© 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
+SPDX-License-Identifier = "CC0-1.0"

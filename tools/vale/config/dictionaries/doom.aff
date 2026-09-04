@@ -1,0 +1,15 @@
+SET UTF-8
+
+SFX M Y 3
+SFX M   0 's
+SFX M   0 s
+SFX M   0 s'
+
+SFX D N 1
+SFX D   0 d
+
+SFX E N 1
+SFX E   0 ed
+
+SFX S Y 1
+SFX S   0 s

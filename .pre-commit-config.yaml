@@ -5,7 +5,7 @@
 # See https://github.com/j178/prek for details.
 
 ---
-exclude: ^LICENSES/.*|^tools/aspell\.en\.pws
+exclude: ^LICENSES/.*
 
 default_install_hook_types: [pre-commit, commit-msg]
 
@@ -175,7 +175,18 @@ repos:
     - id: vale
       name: vale sync
       pass_filenames: false
-      args: [sync]
+      args: [sync, --config=tools/vale/vale.ini]
     - id: vale
-      args: [--output=line]
+      args:
+       [--output=line,
+        --config=tools/vale/vale.ini,
+        --filter=.Name!="Vale.Spelling"]
+      exclude: ^documentation/CodeOfConduct\.org
+    - id: vale
+      name: vale spelling
+      args:
+       [--output=line,
+        --config=tools/vale/vale.ini,
+        --filter=.Name=="Vale.Spelling"]
+      stages: [manual]
       exclude: ^documentation/CodeOfConduct\.org
