@@ -157,6 +157,7 @@ jobs:
         if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
         with:
           path: build
+          name: build
           if-no-files-found: error
 
       - name: Upload build database
@@ -166,6 +167,7 @@ jobs:
         if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
         with:
           path: .sconsign.dblite
+          name: database
           include-hidden-files: true
           if-no-files-found: error
 
@@ -193,10 +195,20 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - name: Download build artifacts
-        id: download-build-artifacts
+      - name: Download build directory
+        id: download-build-directory
         uses: actions/download-artifact@v8
         background: true
+        with:
+          path: build
+          name: build
+
+      - name: Download build database
+        id: download-build-database
+        uses: actions/download-artifact@v8
+        background: true
+        with:
+          name: database
 
       - name: Install Python
         uses: actions/setup-python@v7
@@ -210,11 +222,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
-      - name: Wait for build artifacts
-        wait: download-build-artifacts
+      - name: Wait for build directory
+        wait: download-build-directory
+
+      - name: Wait for build database
+        wait: download-build-database
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -aR
 
       - name: Build
         run: |
