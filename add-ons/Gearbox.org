@@ -821,10 +821,6 @@ version 4.14.3
 #include "zscript/gb_VmAbortReporter.zs"
 #+end_src
 
-#+begin_src text :tangle ../build/tmp/Gearbox.txt :exports none
-<<../tools/scripts.org:copy-media("Gearbox")>>
-#+end_src
-
 #+begin_src c :tangle ../build/Gearbox/cvarinfo.txt
 
 // VmAbortReporter

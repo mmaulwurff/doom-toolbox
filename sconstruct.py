@@ -52,12 +52,19 @@ def make_export(source, prefix):
 
 # Target setup functions
 def add_main_target(org_file, target_format):
-  zscript_name = target_format.format(make_project_name(org_file))
+  project_name = make_project_name(org_file)
+  zscript_name = target_format.format(project_name)
   tangle = f'{emacs} $SOURCE --quick --batch \
     --load {build_el_path} \
     --eval "(dt-tangle)"'
 
-  return Command(target=zscript_name, source=org_file, action=tangle)
+  def copy_media(target, source, env):
+    source_name = 'media/' + project_name
+    if Path(source_name).exists():
+      target_name = 'build/' + project_name
+      shutil.copytree(source_name, target_name, dirs_exist_ok=True)
+
+  return Command(target=zscript_name, source=org_file, action=[tangle, copy_media])
 
 
 def add_test_target(org_file, main_target):

@@ -239,10 +239,6 @@ user float pc_scale;
 99 "$PC_SMALL"
 #+end_src
 
-#+begin_src text :tangle ../build/tmp/PreciseCrosshair.txt :exports none
-<<../tools/scripts.org:copy-media("PreciseCrosshair")>>
-#+end_src
-
 * Source
 
 ** Event handler

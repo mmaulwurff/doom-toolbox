@@ -30,19 +30,6 @@ zscript file name. Example: ~"build/MyMod/\\(zscript/.*zs\\)"~.
  "\n")
 #+end_src
 
-* Copy media files
-
-Copies the directory from media directory to the corresponding directory in build by
-~mod-name~.
-
-#+name: copy-media
-#+begin_src elisp :var mod-name=""
-
-(copy-directory
- (concat "../media/" mod-name)
- (concat "../build/" mod-name) nil t t)
-#+end_src
-
 * Waiting for file exec
 
 Peculiar behavior for command files executed by UZDoom with ~exec~: ~wait~ command

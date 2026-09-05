@@ -771,10 +771,6 @@ version 4.14.3
 #include "zscript/cd_StringUtils.zs"
 #+end_src
 
-#+begin_src text :tangle ../build/tmp/FinalCustomDoom.txt :exports none
-<<../tools/scripts.org:copy-media("FinalCustomDoom")>>
-#+end_src
-
 ** Menu item replacements
 
 #+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs

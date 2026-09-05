@@ -815,11 +815,6 @@ sprites/m8rda0.png:
 #+attr_HTML: :alt 10.5x enemy death marker
 [[file:../media/10.5x/sprites/m8rda0.png]]
 
-#+begin_src text :tangle ../build/tmp/10.5x.txt :exports none
-
-<<../tools/scripts.org:copy-media("10.5x")>>
-#+end_src
-
 * Tests
 
 #+begin_src c :tangle ../build/10.5xTest/mapinfo.txt
