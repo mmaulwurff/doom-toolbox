@@ -150,9 +150,21 @@ jobs:
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 CheckCompatibility
 
+      - name: Upload build directory
+        id: upload-build-directory
+        uses: actions/upload-artifact@v7
+        background: true
+        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        with:
+          path: build
+          if-no-files-found: error
+
       - name: Test
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
+
+      - name: Wait for build directory upload
+        wait: upload-build-directory
 
   build:
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -168,14 +180,12 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - name: Install system dependencies
-        id: install-system-dependencies
+      - name: Download build directory
+        id: download-build-directory
+        uses: actions/download-artifact@v8
         background: true
-        # espeak-ng, libespeak1: for pyttsx3
-        # ffmpeg: for python-ffmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+        with:
+          path: build
 
       - name: Install Python
         uses: actions/setup-python@v7
@@ -189,8 +199,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
-      - name: Wait for system dependencies
-        wait: install-system-dependencies
+      - name: Wait for build directory
+        wait: download-build-directory
 
       - name: Build
         run: |
