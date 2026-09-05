@@ -12,7 +12,7 @@ Goals:
 - to customize the game to your liking,
 - to have fun both while playing and developing this project.
 
-  The development is done under "Move slow and fix things" flag.
+Development style: "Move slow and fix things".
 
 - [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip][Dev builds]]
 - [[https://mmaulwurff.github.io/doom-toolbox/][HTML documentation]]
