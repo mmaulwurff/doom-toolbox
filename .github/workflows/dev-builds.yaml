@@ -193,19 +193,10 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - name: Download build directory
-        id: download-build-directory
+      - name: Download build artifacts
+        id: download-build-artifacts
         uses: actions/download-artifact@v8
         background: true
-        with:
-          path: build
-
-      - name: Download build database
-        id: download-build-database
-        uses: actions/download-artifact@v8
-        background: true
-        with:
-          path: .sconsign.dblite
 
       - name: Install Python
         uses: actions/setup-python@v7
@@ -219,11 +210,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
-      - name: Wait for build directory
-        wait: download-build-directory
-
-      - name: Wait for build database
-        wait: download-build-database
+      - name: Wait for build artifacts
+        wait: download-build-artifacts
 
       - name: Build
         run: |
