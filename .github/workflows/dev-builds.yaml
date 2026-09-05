@@ -159,12 +159,24 @@ jobs:
           path: build
           if-no-files-found: error
 
+      - name: Upload build database
+        id: upload-build-database
+        uses: actions/upload-artifact@v7
+        background: true
+        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        with:
+          path: .sconsign.dblite
+          if-no-files-found: error
+
       - name: Test
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Wait for build directory upload
         wait: upload-build-directory
+
+      - name: Wait for build database upload
+        wait: upload-build-database
 
   build:
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -187,6 +199,13 @@ jobs:
         with:
           path: build
 
+      - name: Download build database
+        id: download-build-database
+        uses: actions/download-artifact@v8
+        background: true
+        with:
+          path: .sconsign.dblite
+
       - name: Install Python
         uses: actions/setup-python@v7
         with:
@@ -201,6 +220,9 @@ jobs:
 
       - name: Wait for build directory
         wait: download-build-directory
+
+      - name: Wait for build database
+        wait: download-build-database
 
       - name: Build
         run: |

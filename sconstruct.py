@@ -22,7 +22,6 @@ from ffmpeg import FFmpeg
 from SCons.Script import Alias, AlwaysBuild, Command, Depends, Glob
 
 # General setup
-SCons.Script.Decider('timestamp-match')
 SCons.Script.Default(None)
 SCons.Script.DefaultEnvironment(ENV=os.environ.copy())
 
