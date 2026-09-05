@@ -240,7 +240,8 @@ class be_Magic : Inventory
     initPretender();
     initBubble();
 
-    mLifetime  = 0;
+    mLifetime = 0;
+    mDestroyTime = 0;
   }
 
   void restore()
@@ -257,6 +258,7 @@ class be_Magic : Inventory
   {
     mOriginal.RemoveInventory(self);
     callTryPickup(mPretender);
+    mDestroyTime = mLifetime;
   }
 
   private void initPretender()
@@ -328,15 +330,32 @@ class be_Magic : Inventory
 
       mPretender.scale = scaleRatio * mOrigScale;
       mBubble.scale = scaleRatio * mOrigBubbleScale;
-      mBubble.alpha = ratio * 0.6;
+      mBubble.alpha = ratio * TARGET_ALPHA;
       mBubble.setOrigin(mPretender.pos + (0, 0, mPretender.height * scaleRatio / 2), true);
-
-      ++mLifetime;
     }
     else if (mLifetime == DURATION)
     {
       mBubble.bFloatBob = true;
     }
+    else if (mDestroyTime != 0)
+    {
+      if (mLifeTime - mDestroyTime < FADE_OUT_DURATION)
+      {
+        double ratio = 1 - double(mLifetime - mDestroyTime) / FADE_OUT_DURATION;
+        // *= makes fading out faster than FADE_OUT_DURATION states. Oh welp.
+        mBubble.alpha *= ratio;
+        mPretender.a_setTranslucent(mPretender.alpha * ratio);
+      }
+      else
+      {
+        mPretender.destroy();
+        mBubble.destroy();
+        goAwayAndDie();
+        return;
+      }
+    }
+
+    ++mLifetime;
 
     // These things have to be set all the time.
     mPretender.A_SetTics(int.Max);
@@ -361,11 +380,14 @@ class be_Magic : Inventory
   }
 
   const DURATION = TICRATE / 4;
+  const FADE_OUT_DURATION = TICRATE * 60 * 3;
+  const TARGET_ALPHA = 0.6;
   const TARGET_SCALE = 0.1;
 
   private Vector2   mOrigScale;
   private Vector2   mOrigBubbleScale;
   private int       mLifetime;
+  private int       mDestroyTime;
 
   private int mOriginalRenderStyle;
   private double mOriginalAlpha;

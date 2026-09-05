@@ -56,3 +56,4 @@ default.extend-ignore-re = [
 ]
 [tool.typos.default.extend-words]
 aas = "aas"
+welp = "welp"
