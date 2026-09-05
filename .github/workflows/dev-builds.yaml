@@ -74,7 +74,7 @@ jobs:
             url: https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Linux-UZDoom-4.14.3.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
-          - name: lzdoom-v4.14.3a
+          - name: lzdoom-stable
             url: https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a_amd64.deb
             download-target: ~/lzdoom.deb
             bin: lzdoom
@@ -82,8 +82,8 @@ jobs:
             url: https://github.com/UZDoom/UZDoom/releases/download/x-preview/Linux-UZDoom-Preview-x86_64.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
-          - name: uzdoom-v5.0.0
-            url: https://github.com/UZDoom/UZDoom/releases/download/5.0.0/Linux-UZDoom-Release-x86_64.AppImage
+          - name: uzdoom-stable
+            url: https://github.com/UZDoom/UZDoom/releases/download/5.0.1/Linux-UZDoom-Release-x86_64.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
 
@@ -155,7 +155,7 @@ jobs:
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
       - name: Build
-        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        if: ${{ matrix.engine.name == 'uzdoom-stable' }}
         run: |
           scons Pk3All
           scons PackModules
@@ -165,7 +165,7 @@ jobs:
 
       - name: Upload build
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        if: ${{ matrix.engine.name == 'uzdoom-stable' }}
         with:
           path: DoomToolbox.zip
           if-no-files-found: error
@@ -181,20 +181,19 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-      - name: Check out
-        uses: actions/checkout@v7
-
-      - name: Download build
-        id: download-build
-        uses: actions/download-artifact@v8
-        background: true
-
       - name: Install system dependencies
         id: install-system-dependencies
         background: true
         run: |
           sudo apt-get update
           sudo apt-get install emacs-nox
+
+      - name: Download build
+        id: download-build
+        uses: actions/download-artifact@v8
+
+      - name: Check out
+        uses: actions/checkout@v7
 
       - name: Install Python
         uses: actions/setup-python@v7
@@ -208,18 +207,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
-      - name: Display structure of downloaded files
-        run: ls -aR
-
       - name: Wait for system dependencies
         wait: install-system-dependencies
 
       - name: Build HTML
         run: |
           scons -j 4 HtmlAll
-
-      - name: Wait for build
-        wait: download-build
 
       - name: Configure pages
         uses: actions/configure-pages@v6
