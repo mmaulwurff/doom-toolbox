@@ -166,6 +166,7 @@ jobs:
         if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
         with:
           path: .sconsign.dblite
+          include-hidden-files: true
           if-no-files-found: error
 
       - name: Test
