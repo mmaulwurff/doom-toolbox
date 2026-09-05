@@ -279,7 +279,7 @@ class be_Magic : Inventory
     pretender.health = -1;
     pretender.A_SetTics(int.Max);
     mOrigScale = pretender.scale;
-    mRoll = random(-4, 4) / 10.0;
+    mRoll = random[BubbleEm](-4, 4) / 10.0;
 
     level.total_monsters -= pretender.bCountKill;
 
@@ -304,14 +304,13 @@ class be_Magic : Inventory
     double bubbleScale = max(mPretender.radius / 16, mPretender.height / 32);
     mOrigBubbleScale = mBubble.scale * bubbleScale;
     mBubble.floatBobPhase = mPretender.floatBobPhase;
-    let shade = String.format( "%x%x%x%x%x%x"
-                             , random(9, 0xc)
-                             , random(9, 0xc)
-                             , random(9, 0xc)
-                             , random(9, 0xc)
-                             , random(9, 0xc)
-                             , random(9, 0xc)
-                             );
+    let shade = string.format("%x%x%x%x%x%x",
+                              random[BubbleEm](9, 0xc),
+                              random[BubbleEm](9, 0xc),
+                              random[BubbleEm](9, 0xc),
+                              random[BubbleEm](9, 0xc),
+                              random[BubbleEm](9, 0xc),
+                              random[BubbleEm](9, 0xc));
     mBubble.setShade(shade);
   }
 
