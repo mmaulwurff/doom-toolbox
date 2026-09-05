@@ -213,6 +213,9 @@ jobs:
       - name: Wait for build artifacts
         wait: download-build-artifacts
 
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Build
         run: |
           scons Pk3All
