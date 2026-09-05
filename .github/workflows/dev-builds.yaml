@@ -150,36 +150,25 @@ jobs:
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons -j 4 CheckCompatibility
 
-      - name: Upload build directory
-        id: upload-build-directory
-        uses: actions/upload-artifact@v7
-        background: true
-        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
-        with:
-          path: build
-          name: build
-          if-no-files-found: error
-
-      - name: Upload build database
-        id: upload-build-database
-        uses: actions/upload-artifact@v7
-        background: true
-        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
-        with:
-          path: .sconsign.dblite
-          name: database
-          include-hidden-files: true
-          if-no-files-found: error
-
       - name: Test
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
-      - name: Wait for build directory upload
-        wait: upload-build-directory
+      - name: Build
+        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        run: |
+          scons Pk3All
+          scons PackModules
+          date --utc --rfc-3339=seconds > build/timestamp.txt
+          for m in build/mutators/*; do zip -jr build/$(basename $m).pk3 $m; done
+          zip -r DoomToolbox build -i \*.pk3 build/modules/\*.zs build/timestamp.txt
 
-      - name: Wait for build database upload
-        wait: upload-build-database
+      - name: Upload build
+        uses: actions/upload-artifact@v7
+        if: ${{ matrix.engine.name == 'uzdoom-v5.0.0' }}
+        with:
+          path: DoomToolbox.zip
+          if-no-files-found: error
 
   build:
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -195,20 +184,17 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      - name: Download build directory
-        id: download-build-directory
+      - name: Download build
+        id: download-build
         uses: actions/download-artifact@v8
         background: true
-        with:
-          path: build
-          name: build
 
-      - name: Download build database
-        id: download-build-database
-        uses: actions/download-artifact@v8
+      - name: Install system dependencies
+        id: install-system-dependencies
         background: true
-        with:
-          name: database
+        run: |
+          sudo apt-get update
+          sudo apt-get install emacs-nox
 
       - name: Install Python
         uses: actions/setup-python@v7
@@ -222,24 +208,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r tools/requirements-dev.txt
 
-      - name: Wait for build directory
-        wait: download-build-directory
-
-      - name: Wait for build database
-        wait: download-build-database
-
       - name: Display structure of downloaded files
         run: ls -aR
 
-      - name: Build
+      - name: Wait for system dependencies
+        wait: install-system-dependencies
+
+      - name: Build HTML
         run: |
-          scons Pk3All
-          scons PackModules
-          date --utc --rfc-3339=seconds > build/timestamp.txt
-          for m in build/mutators/*; do zip -jr build/$(basename $m).pk3 $m; done
-          zip -r DoomToolbox build -i \*.pk3 build/modules/\*.zs build/timestamp.txt
-          rm -r build
           scons -j 4 HtmlAll
+
+      - name: Wait for build
+        wait: download-build
 
       - name: Configure pages
         uses: actions/configure-pages@v6
