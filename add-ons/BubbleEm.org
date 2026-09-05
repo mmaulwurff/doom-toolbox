@@ -344,7 +344,7 @@ class be_Magic : Inventory
     mPretender.bFloatBob = true;
     mPretender.A_SetRoll(mPretender.roll + mRoll);
 
-    if (mOriginal && mOriginal.vel != (0, 0, 0))
+    if (mOriginal)
     {
       mPretender.setOrigin(makePretenderPos(), true);
       mBubble   .setOrigin(makeBubblePos(), true);
@@ -361,7 +361,7 @@ class be_Magic : Inventory
     return mOriginal.pos + (0, 0, 10);
   }
 
-  const DURATION = 35 / 4;
+  const DURATION = TICRATE / 4;
   const TARGET_SCALE = 0.1;
 
   private Vector2   mOrigScale;
