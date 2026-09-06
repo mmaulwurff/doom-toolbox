@@ -12,15 +12,14 @@
 With this add-on don't die, they're put in safe bubbles instead.
 
 Features
-- purely cosmetic (doesn't affect gameplay)
-- universal* (compatible with every GZDoom game)
+- cosmetic (doesn't affect gameplay much)
+- universal, see below
 - sound effects
 
-This mod should be compatible with every GZDoom game and mod. However, if death
-animations include body parts that fly away, with this mod they will still fly
-away.
-
-Incompatible mods
+Compatibility
+- should be compatible with every UZDoom game and mod. However, if death
+  animations include body parts that fly away, with this mod they will still fly
+  away.
 - Zrift - Chasm in Doom - LE: enemies are invisible inside bubbles (checked on v1.1).
 - mk-champions (Champions): invisible enemies (checked on v2.666).
 
