@@ -255,6 +255,7 @@ SPDX-License-Identifier: GPL-3.0-only
 
 - removed unused and missing sound definition
 - moved to the new translation system
+- better handle cases when weapons disappear
 
 v0.8.1
 - expand "reverse cycling order" behavior
@@ -1795,7 +1796,6 @@ class gb_Options
     return (mTextPositionX.getDouble(), mTextPositionY.getDouble());
   }
 
-
   double getWheelPosition() const { return mWheelPosition.getDouble(); }
   double getWheelScale()    const { return mWheelScale.getDouble(); }
 
@@ -2464,7 +2464,6 @@ class gb_WeaponMenu
 
       TextureID icon = getIconFor(aWeapon);
 
-      // Workaround, casting TextureID to int may be unreliable.
       viewModel.icons.push(icon);
       viewModel.iconScaleXs.push(aWeapon.scale.x);
       viewModel.iconScaleYs.push(aWeapon.scale.y);
@@ -2477,6 +2476,9 @@ class gb_WeaponMenu
       viewModel.   quantity2.push(hasAmmo2 ? aWeapon.ammo2.   amount : -1);
       viewModel.maxQuantity2.push(hasAmmo2 ? aWeapon.ammo2.maxAmount : -1);
     }
+
+    viewModel.selectedIndex = min(viewModel.selectedIndex,
+                                  viewModel.tags.size() - 1);
   }
 
   private play bool isHidden(string className) const
