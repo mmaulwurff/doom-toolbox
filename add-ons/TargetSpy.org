@@ -93,6 +93,7 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 * Changelog
 
 - moved to the new translation system
+- respect screen boundaries
 
 v3.1.2:
 - fix: replace broken extension replacement with working
@@ -836,13 +837,13 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
     string line = ts_ViewUtils.toText(piece, options);
     if (line.length() == 0) continue;
 
-    lines.push(line);
     double lineWidth  = round(scale * piece.font.stringWidth(line));
     double lineHeight = round(scale * piece.font.getHeight());
 
-    totalWidth = max(totalWidth, piece.font.stringWidth(line));
+    totalWidth = max(totalWidth, lineWidth);
     totalHeight += lineHeight;
 
+    lines.push(line);
     lineWidths.push(lineWidth);
     lineHeights.push(lineHeight);
     fonts.push(piece.font);
@@ -851,15 +852,16 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   int linesCount = lines.size();
   if (linesCount == 0) return;
 
-  // Note: stringWidth underestimates.
-  totalWidth = totalWidth * 1.1 * scale;
-
-  int screenWidth = Screen.getWidth();
-  int screenHeight = Screen.getHeight();
+  let [viewX, viewY, viewWidth, viewHeight] = Screen.getViewWindow();
   vector2 position = getPosition(options, event, targetPosition, targetSize);
   if (options.getPlace() == ts_Options.PlaceAboveTarget)
     position.y -= totalHeight;
-  position.x = clamp(position.x, totalWidth / 2, screenWidth - totalWidth / 2);
+
+  position =
+  (
+    clamp(position.x, viewX + totalWidth / 2, viewWidth - totalWidth / 2 + viewX),
+    clamp(position.y, viewY, viewHeight - totalHeight + viewY)
+  );
 
   int color = options.isUsingHealthBarColors()
     ? ts_Utils.getHealthColor(options, informationPieces)
@@ -869,7 +871,6 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
   for (int i = 0; i < linesCount; ++i)
   {
     double lineHeight = lineHeights[i];
-    position.y = clamp(position.y, 0, screenHeight - totalHeight + lineHeight);
 
     if (isBackgroundEnabled)
     {
