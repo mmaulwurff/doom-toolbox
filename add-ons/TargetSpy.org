@@ -94,6 +94,7 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 
 - moved to the new translation system
 - respect screen boundaries
+- added option to use health bar colors only for health lines
 
 v3.1.2:
 - fix: replace broken extension replacement with working
@@ -823,11 +824,13 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
 
   ts_Options options = ts_EventHandler.getInstance().getOptions();
   double scale = options.getScale();
+  int healthColor = ts_Utils.getHealthColor(options, informationPieces);
 
   Array<string> lines;
   Array<double> lineWidths;
   Array<double> lineHeights;
   Array<Font>   fonts;
+  Array<int>    colors;
 
   double totalWidth  = 0;
   double totalHeight = 0;
@@ -847,6 +850,7 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
     lineWidths.push(lineWidth);
     lineHeights.push(lineHeight);
     fonts.push(piece.font);
+    colors.push(getColorFor(piece.id, options.usingHealthBarColors(), healthColor));
   }
 
   int linesCount = lines.size();
@@ -862,10 +866,6 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
     clamp(position.x, viewX + totalWidth / 2, viewWidth - totalWidth / 2 + viewX),
     clamp(position.y, viewY, viewHeight - totalHeight + viewY)
   );
-
-  int color = options.isUsingHealthBarColors()
-    ? ts_Utils.getHealthColor(options, informationPieces)
-    : Font.CR_Gray;
 
   bool isBackgroundEnabled = options.isBackgroundEnabled();
   for (int i = 0; i < linesCount; ++i)
@@ -887,10 +887,24 @@ static ui void draw(Array<ts_InformationPiece> informationPieces,
                           position,
                           alpha,
                           scale,
-                          color);
+                          colors[i]);
 
     position.y += lineHeight;
   }
+}
+
+private static ui int getColorFor(string id,
+                                  int usingHealthBarColors,
+                                  int healthColor)
+{
+  switch (usingHealthBarColors)
+  {
+    case 1: return healthColor;
+    case 2: return id == "Health" || id == "HealthAndMax"
+      ? healthColor
+      : Font.CR_Gray;
+  }
+  return Font.CR_Gray;
 }
 
 static ui vector2 getPosition(ts_Options options,
@@ -922,7 +936,7 @@ double getYPosition() const { return mYPositionCvar.getFloat(); }
 enum Places { PlaceFixed, PlaceAboveTarget, PlaceBelowTarget }
 int getPlace() const { return mPlaceCvar.getInt(); }
 bool isBackgroundEnabled() const { return mBackgroundCvar.getInt(); }
-bool isUsingHealthBarColors() const { return mHealthColors.getInt(); }
+int usingHealthBarColors() const { return mHealthColors.getInt(); }
 #+end_src
 #+begin_src c :noweb-ref ts_Options.members
 
@@ -949,7 +963,7 @@ user float ts_x_position = 0.5;
 user float ts_y_position = 0.2;
 user int   ts_place = 0;
 user bool  ts_background = false;
-user bool  ts_using_health_bar_colors = false;
+user int   ts_using_health_bar_colors = 0;
 #+end_src
 #+begin_src c :tangle ../build/TargetSpy/menudef.txt
 
@@ -962,7 +976,7 @@ OptionMenu ts_TextViewOptions
   Slider "$ts_Yposition",  ts_y_position, 0, 1.0, 0.01, 2
   Option "$ts_Place",      ts_place, ts_Places
   Option "$ts_Background", ts_background, OnOff
-  Option "$ts_UseHealthBarColors", ts_using_health_bar_colors, OnOff
+  Option "$ts_UseHealthBarColors", ts_using_health_bar_colors, ts_HealthBarColors
 
   StaticText ""
   Submenu "$ts_DefaultBarOptions", ts_DefaultBarOptions
@@ -975,6 +989,13 @@ OptionValue ts_Places
   0, "$ts_Fixed"
   1, "$ts_AboveTarget"
   2, "$ts_BelowTarget"
+}
+
+OptionValue ts_HealthBarColors
+{
+  0, "$TXT_NO"
+  1, "$ts_Everywhere"
+  2, "$ts_HealthOnly"
 }
 #+end_src
 
