@@ -38,7 +38,7 @@ lint.extend-select = [
   "TRY",
   "UP",
   "W",
- ]
+]
 lint.ignore = [
   "COM812",
   "PLW2901",
@@ -50,9 +50,9 @@ lint.ignore = [
 files.ignore-hidden = false
 default.locale = "en-us"
 default.extend-ignore-re = [
-    "SPDX-FileCopyrightText = .*",
-    # Ignore blocks between `# spellchecker:off` and `# spellchecker:on`
-    "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",
+  "SPDX-FileCopyrightText = .*",
+  # Ignore blocks between `# spellchecker:off` and `# spellchecker:on`
+  "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",
 ]
 [tool.typos.default.extend-words]
 aas = "aas"
