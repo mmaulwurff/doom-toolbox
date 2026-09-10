@@ -95,6 +95,7 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 - moved to the new translation system
 - respect screen boundaries
 - added option to use health bar colors only for health lines
+- added activity line
 
 v3.1.2:
 - fix: replace broken extension replacement with working
@@ -774,6 +775,26 @@ class tsGetter_Flags : Actor
       result = appendix;
     else
       result.appendFormat(", %s", appendix);
+  }
+}
+#+end_src
+
+*** Activity
+
+#+begin_src c :tangle ../build/TargetSpy/zscript/ts_getters.zs
+
+class tsGetter_Activity : Actor
+{
+  static int, string, int, int makeInformation(Actor anActor)
+  {
+    Actor target = anActor.target;
+    string result = (target == NULL)
+      ? "$ts_Idle"
+      : (target is "PlayerPawn")
+        ? "$ts_Fighting"
+        : "$ts_Infighting";
+
+    return ts_Kind.PlainText, StringTable.localize(result), 0, 0;
   }
 }
 #+end_src

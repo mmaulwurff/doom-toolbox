@@ -86,3 +86,7 @@
 "ts_ColorsForEmptyCharacters",""
 "ts_Everywhere",""
 "ts_HealthOnly",""
+"tsGetter_Activity",""
+"ts_Idle",""
+"ts_Fighting",""
+"ts_Infighting",""
