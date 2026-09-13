@@ -56,26 +56,28 @@ SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/BubbleEm/mapinfo.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/BubbleEm/mapinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/BubbleEm/sndinfo.txt :exports none
+#+begin_src c :tangle ../build/BubbleEm/sndinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/BubbleEm/textures.txt :exports none
+#+begin_src c :tangle ../build/BubbleEm/textures.txt
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/BubbleEm/zscript.zs :exports none
+#+begin_src c :tangle ../build/BubbleEm/zscript.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/BubbleEm/zscript/be_EventHandler.zs :exports none
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_EventHandler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/BubbleEm/zscript/be_Bubble.zs :exports none
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Bubble.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/BubbleEm/zscript/be_Magic.zs :exports none
+#+begin_src c :tangle ../build/BubbleEm/zscript/be_Magic.zs
 // <<license>>
 #+end_src
 

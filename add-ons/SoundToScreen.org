@@ -40,22 +40,25 @@ SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 SPDX-FileCopyrightText: © 2022 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/cvarinfo.txt :exports none
+
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/SoundToScreen/cvarinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/language.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/language.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/mapinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/menudef.txt :exports none
+#+begin_src c :tangle ../build/SoundToScreen/menudef.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/zscript.zs :exports none
+#+begin_src c :tangle ../build/SoundToScreen/zscript.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/SoundToScreen/zscript/st_event_handler.zs :exports none
+#+begin_src c :tangle ../build/SoundToScreen/zscript/st_event_handler.zs
 // <<license>>
 #+end_src
 

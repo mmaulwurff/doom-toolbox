@@ -37,35 +37,37 @@ SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/Graveyard/cvarinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/keyconf.txt :exports none
+#+begin_src c :tangle ../build/Graveyard/keyconf.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/language.txt :exports none
+#+begin_src c :tangle ../build/Graveyard/language.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/Graveyard/mapinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/textures.txt :exports none
+#+begin_src c :tangle ../build/Graveyard/textures.txt
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/Graveyard/zscript.zs :exports none
+#+begin_src c :tangle ../build/Graveyard/zscript.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs :exports none
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_death.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs :exports none
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_event_handler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs :exports none
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_stone.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs :exports none
+#+begin_src c :tangle ../build/Graveyard/zscript/gy_storage.zs
 // <<license>>
 #+end_src
 

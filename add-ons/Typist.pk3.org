@@ -91,7 +91,6 @@ compatible with many UZDoom mods and games.
   emulated like for other mods. Guncaster support can't be added without
   modifications in Guncaster or the game engine.
 
-
 * Changelog
 
 - moved to the new translation system
@@ -107,122 +106,124 @@ SPDX-FileCopyrightText: © 2019 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: BSD-3-Clause
 #+end_src
 
-#+begin_src c :tangle ../build/Typist.pk3/cvarinfo.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/Typist.pk3/cvarinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/keyconf.txt :exports none
+#+begin_src c :tangle ../build/Typist.pk3/keyconf.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/language.txt :exports none
+#+begin_src c :tangle ../build/Typist.pk3/language.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/Typist.pk3/mapinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/menudef.txt :exports none
+#+begin_src c :tangle ../build/Typist.pk3/menudef.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/sndinfo.txt :exports none
+#+begin_src c :tangle ../build/Typist.pk3/sndinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/tt_colors.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/tt_colors.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript.zs
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lp_LazyPointsParameters.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lp_LazyPointsParameters.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_activatable.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_activatable.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_handler.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_handler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_game_tweaks.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_game_tweaks.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_buddha.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_buddha.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player_handler.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player_handler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_world_changer.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer_state.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_answer_state.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_character.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_character.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_clock.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_clock.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_effect.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_effect.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_event_reporters.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_input_manager.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_input_manager.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_interpolator.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_interpolator.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_key_processor.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_key_processor.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_known_target.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_lesson.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_math.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_math.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_option_menu_item_animated_submenu.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_option_menu_item_animated_submenu.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_mode.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_origin.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_player.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_question.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_question.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_server.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_server.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_settings.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_stale_marker.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_stale_marker.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_strings.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_strings.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target.zs
  // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_target_widget.zs
  // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_view.zs :exports none
+#+begin_src c :tangle ../build/Typist.pk3/zscript/tt_view.zs
  // <<license>>
 #+end_src
 

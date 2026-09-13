@@ -50,13 +50,15 @@ SPDX-FileCopyrightText: © 2026 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/HitImpact/mapinfo.zs :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/HitImpact/mapinfo.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/HitImpact/zscript.zs :exports none
+#+begin_src c :tangle ../build/HitImpact/zscript.zs
 // <<license>>
 #+end_src
-#+begin_src text :tangle ../build/HitImpact/animdefs.txt :exports none
+#+begin_src text :tangle ../build/HitImpact/animdefs.txt
 // <<license>>
 #+end_src
 

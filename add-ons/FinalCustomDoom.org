@@ -36,38 +36,40 @@ SPDX-License-Identifier: GPL-3.0-only
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 
-#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/FinalCustomDoom/menudef.txt
 // <<license>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/sndinfo.txt
 // <<license>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/keyconf.txt
 // <<license>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/cvarinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/language.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/language.txt
 // <<license>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/textcolor.txt
 // <<license>>
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/mapinfo.txt
 // <<license>>
 #+end_src
 
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Effects.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_EventHandler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs :exports none
+#+begin_src c :tangle ../build/FinalCustomDoom/zscript/cd_Menu.zs
 // <<license>>
 #+end_src
 
@@ -508,7 +510,7 @@ class cd_HealthRegeneration : cd_EffectsBase
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_health = "sounds/540985__magnuswaker__heartbeat-dumpf-dumpf.ogg"
 #+end_src
@@ -579,7 +581,7 @@ class cd_ArmorBonus : BasicArmorBonus
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_armor = "sounds/778514__blondpanda__denim_and_cloth_step_foley_12.ogg"
 #+end_src
@@ -645,7 +647,7 @@ class cd_AmmoRegeneration : cd_EffectsBase
   }
 }
 #+end_src
-#+begin_src prog :tangle ../build/FinalCustomDoom/sndinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/sndinfo.txt
 
 cd_ammo = "sounds/730748__debsound__bullet-shell-falling-on-concrete-surface-024.ogg"
 #+end_src
@@ -676,7 +678,7 @@ OptionMenu cd_Commands
 
 :Details:
 @@html:<details><summary>Details</summary>@@
-#+begin_src prog :tangle ../build/FinalCustomDoom/keyconf.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/keyconf.txt
 
 Alias cd_reset_to_defaults "cd_settings \"\""
 
@@ -690,7 +692,7 @@ Alias cd_backup_options3  "cd_settings_profile3 $cd_settings"
 Alias cd_restore_options3 "cd_settings $cd_settings_profile3"
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 server string cd_settings_profile1;
 server string cd_settings_profile2;
@@ -733,7 +735,7 @@ OptionValue cd_RegenerationType
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/textcolor.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/textcolor.txt
 
 CDLightBlue { #111111 #99CCFF }
 #+end_src
@@ -853,7 +855,7 @@ mixin class cd_SettingItem
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 server string cd_settings;
 #+end_src
@@ -1023,14 +1025,14 @@ class cd_ColorPickerMenu : ColorPickerMenu
 }
 #+end_src
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/cvarinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/cvarinfo.txt
 
 user color cd_proxy_color;
 #+end_src
 
 ** Event handler
 
-#+begin_src prog :tangle ../build/FinalCustomDoom/mapinfo.txt
+#+begin_src c :tangle ../build/FinalCustomDoom/mapinfo.txt
 
 GameInfo { EventHandlers = "cd_EventHandler" }
 #+end_src

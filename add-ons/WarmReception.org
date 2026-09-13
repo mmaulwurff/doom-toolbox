@@ -59,22 +59,24 @@ SPDX-FileCopyrightText: © 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/WarmReception/menudef.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/WarmReception/menudef.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/WarmReception/language.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/language.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/WarmReception/cvarinfo.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/cvarinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/WarmReception/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/WarmReception/mapinfo.txt
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/WarmReception/zscript/wr_EventHandler.zs :exports none
+#+begin_src c :tangle ../build/WarmReception/zscript/wr_EventHandler.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/WarmReception/zscript.zs :exports none
+#+begin_src c :tangle ../build/WarmReception/zscript.zs
 // <<license>>
 #+end_src
 

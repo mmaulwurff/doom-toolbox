@@ -36,30 +36,30 @@ v2.0.0:
 * License
 
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
-
 #+begin_src c :noweb-ref GPL
 SPDX-FileCopyrightText: © 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/Nomina/zscript.zs :exports none
-// <<GPL>>
-#+end_src
-
 [[file:../LICENSES/CC0-1.0.txt][CC0-1.0]]
-
 #+begin_src text :noweb-ref CC
 SPDX-FileCopyrightText: © 2025 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src c :tangle ../build/Nomina/cvarinfo.txt :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/Nomina/zscript.zs
+// <<GPL>>
+#+end_src
+
+#+begin_src c :tangle ../build/Nomina/cvarinfo.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/Nomina/keyconf.txt :exports none
+#+begin_src c :tangle ../build/Nomina/keyconf.txt
 // <<CC>>
 #+end_src
-#+begin_src c :tangle ../build/Nomina/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/Nomina/mapinfo.txt
 // <<CC>>
 #+end_src
 

@@ -28,29 +28,31 @@ SPDX-FileCopyrightText: © 2021 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: CC0-1.0
 #+end_src
 
-#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt :exports none
-// <<CC>>
-#+end_src
-#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt :exports none
-// <<CC>>
-#+end_src
-#+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
-// <<CC>>
-#+end_src
-
 [[file:../LICENSES/GPL-3.0-only.txt][GPL-3.0-only]]
 #+begin_src text :noweb-ref GPL
 SPDX-FileCopyrightText: © 2021 Alexander Kromm (m8f) <mmaulwurff@gmail.com>
 SPDX-License-Identifier: GPL-3.0-only
 #+end_src
 
-#+begin_src c :tangle ../build/DoomDoctor/zscript.zs :exports none
+** Preambles :noexport:
+
+#+begin_src c :tangle ../build/DoomDoctor/cvarinfo.txt
+// <<CC>>
+#+end_src
+#+begin_src c :tangle ../build/DoomDoctor/keyconf.txt
+// <<CC>>
+#+end_src
+#+begin_src c :tangle ../build/DoomDoctor/mapinfo.txt
+// <<CC>>
+#+end_src
+
+#+begin_src c :tangle ../build/DoomDoctor/zscript.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_Logger.zs
 // <<GPL>>
 #+end_src
-#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_troublemaker.zs :exports none
+#+begin_src c :tangle ../build/DoomDoctor/zscript/dd_troublemaker.zs
 // <<GPL>>
 #+end_src
 
@@ -142,7 +144,7 @@ class dd_LoggerTestRunner : StaticEventHandler
 
 * Source code preamble
 
-#+begin_src text :tangle ../build/DoomDoctor/mapinfo.txt :exports none
+#+begin_src c :tangle ../build/DoomDoctor/mapinfo.txt :exports none
 
 GameInfo
 {
@@ -174,7 +176,7 @@ version 4.14.3
 
 ** Settings
 
-#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt
+#+begin_src c :tangle ../build/DoomDoctor/cvarinfo.txt
 user bool dd_vm_abort_report_enabled = true;
 #+end_src
 
@@ -375,7 +377,7 @@ class dd_Troublemaker : EventHandler
 
 ** Settings
 
-#+begin_src text :tangle ../build/DoomDoctor/cvarinfo.txt
+#+begin_src c :tangle ../build/DoomDoctor/cvarinfo.txt
 server bool dd_logging_engine_events_enabled  = false;
 server bool dd_logging_replace_events_enabled = false;
 
