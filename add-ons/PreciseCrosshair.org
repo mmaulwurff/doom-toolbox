@@ -8,42 +8,38 @@
   "old_version": "1.5.0",
   "depends": { "libeye": "pc_" }
 }
-
 #+end_src
 
 * About
 
-PreciseCrosshair makes a crosshair point to where you actually shoot*
-instead of the center of the screen.
-
-*If your weapons shoots straight and not from an angle.
+PreciseCrosshair tries to put a crosshair where you actually shoot.
 
 PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
 
-** How to use
-
-1. HUD Options -> Crosshair must be OFF.**
+How to use
+1. HUD Options -> Crosshair must be OFF.
 2. HUD Options -> Default crosshair must be not "None".
 
-** Features
+Features
+- shows where you shoot
+- respects autoaim
+- supports custom crosshairs
+- respects engine crosshair options
+- options to mirror crosshairs
+- options to disable crosshair on slot 1 and when weapon isn't ready
+- option to show target health
 
-- Shows where you shoot;
-- Respects autoaim;
-- Supports custom crosshairs;
-- Respects engine crosshair options*;
-- Options to mirror crosshairs;
-- Options to disable crosshair on slot 1 and when weapon isn't ready;
-- Option to show target health.
+Known issues
+- PreciseCrosshair can't be precise for custom weapons that shoot from an angle
+- Crosshair size may be off on UZDoom/LZDoom before v5.0.0
 
-*Except "Enable Crosshair". This option will disable only the standard crosshair.
-
-** Credits
-
-- Color calculation and crosshair code is ripped from GZDoom.
+Credits
+- Color calculation and crosshair code is ripped from GZDoom/UZDoom.
 
 * Changelog
 
 - moved to the new translation system
+- fixed crosshair size for UZDoom 5.0.0
 
 v1.5.0:
 - added writing of result to external cvar
@@ -300,7 +296,7 @@ class pc_EventHandler : EventHandler
     }
     else
     {
-      console.printf("warning, cannot get render mode");
+      Console.printf("WARNING: cannot get render mode");
       _projection = _glProjection;
     }
 
@@ -346,15 +342,15 @@ class pc_EventHandler : EventHandler
     int screenWidth  = Screen.GetWidth();
     int screenHeight = Screen.GetHeight();
 
-    double size = (crosshairscale > 0.0f)
-                ? screenHeight * crosshairscale / 200.0
-                : 1.0;
+    int mult = max(screenHeight / 720, 1); // 1080p: 1, 1440p: 2, 4K: 3
+    double size = ((crosshairscale > 0.0f) ? crosshairscale : 1.0) * mult;
 
-    if (crosshairgrow) { size *= StatusBar.CrosshairSize; }
+    if (crosshairgrow) size *= StatusBar.crosshairSize;
 
-    Vector2 textureSize = TexMan.GetScaledSize(_crosshairTexture);
-    double width  = textureSize.x * size;
-    double height = textureSize.y * size;
+    vector2 textureSize = TexMan.getScaledSize(_crosshairTexture) * size;
+    double width  = round(textureSize.x);
+    double height = round(textureSize.y);
+
     if (_settings.isScaledByDistance())
     {
       double distFac = GetDistanceScale(0, 512);
@@ -750,9 +746,6 @@ class pc_Puff : Actor
 // This class represents a single boolean setting.
 class pc_BoolSetting : pc_CvarSetting
 {
-
-  // public: ///////////////////////////////////////////////////////////////////
-
   bool value() { return variable().GetInt(); }
 
   pc_BoolSetting init(string cvarName, PlayerInfo p)
@@ -760,7 +753,6 @@ class pc_BoolSetting : pc_CvarSetting
     super.init(cvarName, p);
     return self;
   }
-
 }
 #+end_src
 
@@ -783,7 +775,6 @@ class pc_CvarSetting : pc_SettingsBase
   protected Cvar variable() { return _cvar; }
 
   private transient CVar _cvar;
-
 }
 #+end_src
 
