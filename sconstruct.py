@@ -26,6 +26,11 @@ SCons.Script.Decider('timestamp-match')
 SCons.Script.Default(None)
 SCons.Script.DefaultEnvironment(ENV=os.environ.copy())
 
+addon_files = Glob('add-ons/*.org')
+module_files = Glob('modules/*.org')
+top_level_org_files = ['README.org']
+second_level_org_files = Glob('*/*.org')
+
 emacs = (
   shutil.which('emacs-nox')
   or shutil.which('emacs')
@@ -222,7 +227,7 @@ def add_pack_target(org_file, main_target):
 
 
 def make_check_compatibility_target():
-  names = [make_project_name(org_file) for org_file in Glob('add-ons/*.org')]
+  names = [make_project_name(org_file) for org_file in addon_files]
   projects = ['./build/' + name for name in names]
 
   def check_compatibility(target, source, env):
@@ -444,7 +449,7 @@ clematis_target = Alias(
 test_targets = []
 module_targets = []
 module_targets_names = []
-for org_file in Glob('modules/*.org'):
+for org_file in module_files:
   name = make_project_name(org_file)
   main_target = Alias(name, add_main_target(org_file, 'build/{0}/{0}.zs'))
   test_target = add_test_target(org_file, main_target)
@@ -456,7 +461,7 @@ for org_file in Glob('modules/*.org'):
 
 addon_targets_names = []
 pack_targets = []
-for org_file in Glob('add-ons/*.org'):
+for org_file in addon_files:
   name = make_project_name(org_file)
   main_target = add_main_target(org_file, 'build/{0}/zscript.zs')
 
@@ -484,13 +489,13 @@ for org_file in Glob('add-ons/*.org'):
   Depends(main_target, make_translations_target(org_file))
 
 html_targets = []
-for org_file in Glob('*.org'):
+for org_file in top_level_org_files:
   path = Path(org_file)
   html_name = f'{path.parent}{path.stem}.html'
   html_targets.append(
     Command(target=html_name, source=org_file, action=make_export(org_file, '')),
   )
-for org_file in Glob('*/*.org'):
+for org_file in second_level_org_files:
   path = Path(org_file)
   html_name = f'{path.parent}{path.stem}.html'
   html_targets.append(
@@ -508,7 +513,7 @@ AlwaysBuild(
     None,
     [
       f'{emacs} {org_file} --quick --batch --eval "(print (org-lint))"'
-      for org_file in Glob('*/*.org') + Glob('*.org')
+      for org_file in top_level_org_files + second_level_org_files
     ],
   ),
 )

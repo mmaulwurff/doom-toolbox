@@ -3,24 +3,31 @@
 
 # This is the list of Python packages requirements for DoomToolbox.
 
+# GitPython is a Python library used to interact with Git repositories
 # https://pypi.org/project/GitPython/
 GitPython ~= 3.1
 
-# prek: framework to run hooks
+# A fast Git hook manager designed as a drop-in alternative to pre-commit, reimagined.
 # https://prek.j178.dev/
+# https://pypi.org/project/prek/
 prek ~= 0.5
 
+# A python binding for FFmpeg
 # https://github.com/jonghwanhyeon/python-ffmpeg
+# https://pypi.org/project/python-ffmpeg/
 python-ffmpeg ~= 2.0
 
-# Text to speech
+# Text to Speech (TTS) library for Python 3. Works without internet connection or delay.
 # https://github.com/nateshmbhat/pyttsx3
+# https://pypi.org/project/pyttsx3/
 pyttsx3 ~= 2.99
 
 # REUSE: open source licenses helper tool
 # https://reuse.software/
+# https://pypi.org/project/reuse/
 reuse[charset-normalizer] ~= 6.2
 
 # SCons: software construction tool
 # http://www.scons.org/documentation.html
+# https://pypi.org/project/SCons/
 scons ~= 4.11
