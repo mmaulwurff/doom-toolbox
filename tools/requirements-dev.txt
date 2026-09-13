@@ -10,7 +10,7 @@ GitPython ~= 3.1
 # A fast Git hook manager designed as a drop-in alternative to pre-commit, reimagined.
 # https://prek.j178.dev/
 # https://pypi.org/project/prek/
-prek ~= 0.5
+prek ~= 0.5.3
 
 # A python binding for FFmpeg
 # https://github.com/jonghwanhyeon/python-ffmpeg
