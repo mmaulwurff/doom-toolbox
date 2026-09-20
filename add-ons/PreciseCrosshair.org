@@ -223,7 +223,6 @@ user bool pc_distance_scale = true;
 user bool pc_target_health = false;
 
 // Precise External Interface
-
 user float pc_y;
 user float pc_scale;
 #+end_src
@@ -245,465 +244,585 @@ user float pc_scale;
 
 class pc_EventHandler : EventHandler
 {
-  override void WorldTick()
+  <<handler-functions>>
+
+  private Vector3        _targetPos;
+  private double         _distToTarget;
+  private bool           _hasTargetPos;
+
+  private ui int         _crosshairNum;
+  private ui bool        _isCrossExisting;
+  private ui TextureID   _crosshairTexture;
+
+  private transient bool _isInitialized;
+  private transient bool _isPrepared;
+  private transient Cvar _cvarRenderer;
+  private transient Cvar _externalY;
+  private transient Cvar _externalScale;
+
+  private pc_ProjScreen  _projection;
+  private pc_GlScreen    _glProjection;
+  private pc_SwScreen    _swProjection;
+
+  private pc_Settings    _settings;
+
+  private DynamicValueInterpolator _yPositionInterpolator;
+}
+#+end_src
+
+*** World tick
+
+#+begin_src c :noweb-ref handler-functions
+
+override void WorldTick()
+{
+  if (!_isInitialized) { initialize(); }
+  prepareProjection();
+}
+#+end_src
+
+*** Render overlay
+
+#+begin_src c :noweb-ref handler-functions
+
+override void RenderOverlay(RenderEvent event)
+{
+  if (!_isInitialized || !_isPrepared) { return; }
+
+  PlayerInfo player = players[consolePlayer];
+
+  if (player == NULL) { return; }
+
+  loadTarget(event.viewAngle, event.viewPitch);
+  loadCrosshair(player);
+  drawCrosshair(player, event);
+}
+#+end_src
+
+*** Initialize
+
+#+begin_src c :noweb-ref handler-functions
+
+private void initialize()
+{
+  PlayerInfo player = players[consolePlayer];
+
+  _glProjection  = new("pc_GlScreen");
+  _swProjection  = new("pc_SwScreen");
+  _cvarRenderer  = Cvar.GetCvar("vid_rendermode", player);
+  _settings      = new("pc_Settings").init(player);
+
+  _yPositionInterpolator = DynamicValueInterpolator.Create(Screen.GetHeight() / 2,
+                                                           0.5,
+                                                           1,
+                                                           1000000);
+
+  _isInitialized = true;
+}
+#+end_src
+
+*** Prepare projection
+
+#+begin_src c :noweb-ref handler-functions
+
+private void prepareProjection ()
+{
+  if(_cvarRenderer)
   {
-    if (!_isInitialized) { initialize(); }
-    prepareProjection();
-  }
-
-  override void RenderOverlay(RenderEvent event)
-  {
-    if (!_isInitialized || !_isPrepared) { return; }
-
-    PlayerInfo player = players[consolePlayer];
-
-    if (player == NULL) { return; }
-
-    loadTarget(event.viewAngle, event.viewPitch);
-    loadCrosshair(player);
-    drawCrosshair(player, event);
-  }
-
-  private void initialize()
-  {
-    PlayerInfo player = players[consolePlayer];
-
-    _glProjection  = new("pc_GlScreen");
-    _swProjection  = new("pc_SwScreen");
-    _cvarRenderer  = Cvar.GetCvar("vid_rendermode", player);
-    _settings      = new("pc_Settings").init(player);
-
-    _yPositionInterpolator = DynamicValueInterpolator.Create(Screen.GetHeight() / 2, 0.5, 1, 1000000);
-
-    _isInitialized = true;
-  }
-
-  private void prepareProjection ()
-  {
-    if(_cvarRenderer)
+    switch (_cvarRenderer.GetInt())
     {
-      switch (_cvarRenderer.GetInt())
-      {
-      default:
-        _projection = _glProjection;
-        break;
+    default:
+      _projection = _glProjection;
+      break;
 
-      case 0:
-      case 1:
-        _projection = _swProjection;
-        break;
-      }
+    case 0:
+    case 1:
+      _projection = _swProjection;
+      break;
+    }
+  }
+  else
+  {
+    Console.printf("WARNING: cannot get render mode");
+    _projection = _glProjection;
+  }
+
+  _isPrepared = (_projection != NULL);
+}
+#+end_src
+
+*** Load target
+
+#+begin_src c :noweb-ref handler-functions
+
+private void loadTarget(double angle, double pitch) const
+{
+  PlayerInfo p = players[consolePlayer];
+  PlayerPawn a = p.mo;
+  pitch = a.AimTarget() ? a.BulletSlope(NULL, ALF_PORTALRESTRICT) : pitch;
+
+  FLineTraceData data;
+  double hitHeight = a.height / 2 + a.AttackZOffset * p.crouchFactor;
+  _hasTargetPos    = a.LineTrace(angle, 4000.0, pitch, 0, hitHeight, 0, 0, data);
+  if (_hasTargetPos)
+  {
+    _targetPos = data.hitlocation;
+    _distToTarget = data.distance;
+  }
+}
+#+end_src
+
+*** Draw crosshair
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
+{
+  Vector2 drawPos = makeDrawPos(player, event);
+
+  setExternalY(player, drawPos.y);
+
+  if (  !_isCrossExisting
+     || gamestate == GS_TITLELEVEL
+     || player.mo.health <= 0
+     || automapactive
+     || !pc_enable
+     || disabledOnSlot1(player)
+     || disabledWhenNotReady(player)
+     || disabledOnNoWeapon(player)
+     || event.camera != player.mo
+     )
+  {
+    return;
+  }
+
+  int screenWidth  = Screen.GetWidth();
+  int screenHeight = Screen.GetHeight();
+
+  int mult = max(screenHeight / 720, 1); // 1080p: 1, 1440p: 2, 4K: 3
+  double size = ((crosshairscale > 0.0f) ? crosshairscale : 1.0) * mult;
+
+  if (crosshairgrow) size *= StatusBar.crosshairSize;
+
+  vector2 textureSize = TexMan.getScaledSize(_crosshairTexture) * size;
+  double width  = round(textureSize.x);
+  double height = round(textureSize.y);
+
+  if (_settings.isScaledByDistance())
+  {
+    double distFac = GetDistanceScale(0, 512);
+    width *= distFac;
+    height *= distFac;
+  }
+
+  let [hasHealth, health, maxHealth] = getHealths(player);
+  int crossColor = makeCrosshairColor(hasHealth, health, maxHealth);
+
+  _yPositionInterpolator.Update(int(drawPos.y));
+
+  Screen.DrawTexture( _crosshairTexture
+                    , false
+                    , screenWidth / 2
+                    , _yPositionInterpolator.GetValue()
+                    , DTA_DestWidthF    , width
+                    , DTA_DestHeightF   , height
+                    , DTA_AlphaChannel , true
+                    , DTA_KeepRatio    , true
+                    , DTA_FillColor    , crossColor & 0xFFFFFF
+                    , DTA_FlipX        , _settings.isFlipX()
+                    , DTA_FlipY        , _settings.isFlipY()
+                    );
+}
+#+end_src
+
+*** Get healths
+
+#+begin_src c :noweb-ref handler-functions
+
+// Returns noHealth flag, current health, max health.
+private ui bool, int, int getHealths(PlayerInfo player)
+{
+  if (_settings.isTargetHealth())
+  {
+    let aimTarget = getAimTarget(player.mo);
+    if (aimTarget)
+    {
+      return true, aimTarget.health, aimTarget.GetSpawnHealth();
     }
     else
     {
-      Console.printf("WARNING: cannot get render mode");
-      _projection = _glProjection;
-    }
-
-    _isPrepared = (_projection != NULL);
-  }
-
-  private void loadTarget(double angle, double pitch) const
-  {
-    PlayerInfo p = players[consolePlayer];
-    PlayerPawn a = p.mo;
-    pitch = a.AimTarget() ? a.BulletSlope(NULL, ALF_PORTALRESTRICT) : pitch;
-
-    FLineTraceData data;
-    double hitHeight = a.height / 2 + a.AttackZOffset * p.crouchFactor;
-    _hasTargetPos    = a.LineTrace(angle, 4000.0, pitch, 0, hitHeight, 0, 0, data);
-    if (_hasTargetPos)
-    {
-      _targetPos = data.hitlocation;
-      _distToTarget = data.distance;
+      return false, 0, 0;
     }
   }
 
-  private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
+  int health     = player.health;
+  int maxHealth  = getDefaultHealth(player);
+
+  return true, health, maxHealth;
+}
+#+end_src
+
+*** Get aim target
+
+#+begin_src c :noweb-ref handler-functions
+
+private play Actor getAimTarget(Actor a) const
+{
+  return a.AimTarget();
+}
+#+end_src
+
+*** Make crosshair color
+
+#+begin_src c :noweb-ref handler-functions
+
+private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHealth)
+{
+  if (!hasHealth) return crosshaircolor;
+
+  if (crosshairhealth == 1)
   {
-    Vector2 drawPos = makeDrawPos(player, event);
+    // "Standard" crosshair health (green-red)
+    int health = scale(health, 100, maxHealth);
 
-    setExternalY(player, drawPos.y);
-
-    if (  !_isCrossExisting
-       || gamestate == GS_TITLELEVEL
-       || player.mo.health <= 0
-       || automapactive
-       || !pc_enable
-       || disabledOnSlot1(player)
-       || disableWhenNotReady(player)
-       || disableOnNoWeapon(player)
-       || event.camera != player.mo
-       )
+    if (health >= 85)
     {
-      return;
+      return 0x00ff00;
     }
-
-    int screenWidth  = Screen.GetWidth();
-    int screenHeight = Screen.GetHeight();
-
-    int mult = max(screenHeight / 720, 1); // 1080p: 1, 1440p: 2, 4K: 3
-    double size = ((crosshairscale > 0.0f) ? crosshairscale : 1.0) * mult;
-
-    if (crosshairgrow) size *= StatusBar.crosshairSize;
-
-    vector2 textureSize = TexMan.getScaledSize(_crosshairTexture) * size;
-    double width  = round(textureSize.x);
-    double height = round(textureSize.y);
-
-    if (_settings.isScaledByDistance())
+    else
     {
-      double distFac = GetDistanceScale(0, 512);
-      width *= distFac;
-      height *= distFac;
-    }
+      int red;
+      int green;
 
-    bool hasHealth;
-    int  health, maxHealth;
-    [hasHealth, health, maxHealth] = getHealths(player);
-    int crossColor = makeCrosshairColor(hasHealth, health, maxHealth);
-
-    _yPositionInterpolator.Update(int(drawPos.y));
-
-    Screen.DrawTexture( _crosshairTexture
-                      , false
-                      , screenWidth / 2
-                      , _yPositionInterpolator.GetValue()
-                      , DTA_DestWidthF    , width
-                      , DTA_DestHeightF   , height
-                      , DTA_AlphaChannel , true
-                      , DTA_KeepRatio    , true
-                      , DTA_FillColor    , crossColor & 0xFFFFFF
-                      , DTA_FlipX        , _settings.isFlipX()
-                      , DTA_FlipY        , _settings.isFlipY()
-                      );
-  }
-
-  // Returns noHealth flag, current health, max health.
-  private ui bool, int, int getHealths(PlayerInfo player)
-  {
-    if (_settings.isTargetHealth())
-    {
-      let aimTarget = getAimTarget(player.mo);
-      if (aimTarget)
+      health -= 25;
+      if (health <  0) { health = 0; }
+      if (health < 30)
       {
-        return true, aimTarget.health, aimTarget.GetSpawnHealth();
+        red   = 255;
+        green = health * 255 / 30;
       }
       else
       {
-        return false, 0, 0;
+        red   = (60 - health) * 255 / 30;
+        green = 255;
       }
+      return (red<<16) | (green<<8);
     }
+  }
+  else if (crosshairhealth == 2)
+  {
+    // "Enhanced" crosshair health (blue-green-yellow-red)
+    int health = clamp(scale(health, 100, maxHealth), 0, 200);
+    double rr;
+    double gg;
+    double bb;
 
-    int health     = player.health;
-    int maxHealth  = getDefaultHealth(player);
+    double saturation = health < 150 ? 1.0 : 1.0 - (health - 150) / 100.0;
 
-    return true, health, maxHealth;
+    HSVtoRGB(rr, gg, bb, health * 1.2f, saturation, 1);
+    int red   = int(rr * 255);
+    int green = int(gg * 255);
+    int blue  = int(bb * 255);
+
+    return (red<<16) | (green<<8) | blue;
   }
 
-  private play Actor getAimTarget(Actor a) const
+  return crosshaircolor;
+}
+#+end_src
+
+*** Make draw position
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui Vector2 makeDrawPos(PlayerInfo player, RenderEvent event)
+{
+  if (!_hasTargetPos)
   {
-    return a.AimTarget();
+    int x, y, width, height;
+    [x, y, width, height] = Screen.GetViewWindow();
+    int screenHeight      = Screen.GetHeight();
+    int statusBarHeight   = screenHeight - height - x;
+    return (Screen.GetWidth() / 2, (Screen.GetHeight() - statusBarHeight) / 2);
   }
 
-  private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHealth)
+  _projection.CacheResolution();
+  _projection.CacheFov(player.fov);
+  _projection.OrientForRenderOverlay(event);
+  _projection.BeginProjection();
+
+  _projection.ProjectWorldPos(_targetPos);
+
+  pc_Viewport viewport;
+  viewport.FromHud();
+
+  Vector2 drawPos = viewport.SceneToWindow(_projection.ProjectToNormal());
+
+  return drawPos;
+}
+#+end_src
+
+*** Load crosshair
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui void loadCrosshair(PlayerInfo player)
+{
+  int num = 0;
+
+  if (!crosshairforce
+     && NULL != player.camera
+     && NULL != player.camera.player
+     && NULL != player.camera.player.readyWeapon)
   {
-    if (!hasHealth)
-    {
-      return crosshaircolor;
-    }
-
-    if (crosshairhealth == 1)
-    {
-      // "Standard" crosshair health (green-red)
-      int health = scale(health, 100, maxHealth);
-
-      if (health >= 85)
-      {
-        return 0x00ff00;
-      }
-      else
-      {
-        int red;
-        int green;
-
-        health -= 25;
-        if (health <  0) { health = 0; }
-        if (health < 30)
-        {
-          red   = 255;
-          green = health * 255 / 30;
-        }
-        else
-        {
-          red   = (60 - health) * 255 / 30;
-          green = 255;
-        }
-        return (red<<16) | (green<<8);
-      }
-    }
-    else if (crosshairhealth == 2)
-    {
-      // "Enhanced" crosshair health (blue-green-yellow-red)
-      int health = clamp(scale(health, 100, maxHealth), 0, 200);
-      double rr;
-      double gg;
-      double bb;
-
-      double saturation = health < 150 ? 1.0 : 1.0 - (health - 150) / 100.0;
-
-      HSVtoRGB(rr, gg, bb, health * 1.2f, saturation, 1);
-      int red   = int(rr * 255);
-      int green = int(gg * 255);
-      int blue  = int(bb * 255);
-
-      return (red<<16) | (green<<8) | blue;
-    }
-
-    return crosshaircolor;
+    num = player.camera.player.readyWeapon.crosshair;
+  }
+  if (num == 0)
+  {
+    num = crosshair;
+  }
+  if (_crosshairnum == num && _isCrossExisting)
+  {
+    return;
   }
 
-  private ui Vector2 makeDrawPos(PlayerInfo player, RenderEvent event)
+  if (num <= 0)
   {
-    if (!_hasTargetPos)
-    {
-      int x, y, width, height;
-      [x, y, width, height] = Screen.GetViewWindow();
-      int screenHeight      = Screen.GetHeight();
-      int statusBarHeight   = screenHeight - height - x;
-      return (Screen.GetWidth() / 2, (Screen.GetHeight() - statusBarHeight) / 2);
-    }
-
-    _projection.CacheResolution();
-    _projection.CacheFov(player.fov);
-    _projection.OrientForRenderOverlay(event);
-    _projection.BeginProjection();
-
-    _projection.ProjectWorldPos(_targetPos);
-
-    pc_Viewport viewport;
-    viewport.FromHud();
-
-    Vector2 drawPos = viewport.SceneToWindow(_projection.ProjectToNormal());
-
-    return drawPos;
+    _crosshairNum    = 0;
+    _isCrossExisting = false;
+    return;
   }
+  string size = (Screen.GetWidth() < 640) ? "S" : "B";
 
-  private ui void loadCrosshair(PlayerInfo player)
+  string texName = String.Format("XHAIR%s%d", size, num);
+  TextureID texId = checkTexture(texName);
+  if (!texId.isValid())
   {
-    int num = 0;
-
-    if (  !crosshairforce
-       && NULL != player.camera
-       && NULL != player.camera.player
-       && NULL != player.camera.player.readyWeapon
-       )
-    {
-      num = player.camera.player.readyWeapon.crosshair;
-    }
-    if (num == 0)
-    {
-      num = crosshair;
-    }
-    if (_crosshairnum == num && _isCrossExisting)
-    {
-      return;
-    }
-
-    if (num <= 0)
-    {
-      _crosshairNum    = 0;
-      _isCrossExisting = false;
-      return;
-    }
-    string size = (Screen.GetWidth() < 640) ? "S" : "B";
-
-    string texName = String.Format("XHAIR%s%d", size, num);
-    TextureID texId = checkTexture(texName);
+    texName = String.Format("XHAIR%s1", size);
+    texId = checkTexture(texName);
     if (!texId.isValid())
     {
-      texName = String.Format("XHAIR%s1", size);
-      texId = checkTexture(texName);
-      if (!texId.isValid())
-      {
-        texId = checkTexture("XHAIRS1");
-      }
-    }
-
-    _crosshairNum     = num;
-    _crosshairTexture = texId;
-    _isCrossExisting  = true;
-  }
-
-  private ui TextureId checkTexture(string name)
-  {
-    return TexMan.CheckForTexture( name
-                                 , TexMan.Type_MiscPatch
-                                 , TexMan.TryAny | TexMan.ShortNameOnly
-                                 );
-  }
-
-  private play void setExternalY(PlayerInfo player, double y) const
-  {
-    if (_externalY == NULL)
-    {
-      _externalY = Cvar.GetCVar("pc_y", player);
-    }
-
-    _externalY.SetFloat(y);
-  }
-
-  private play void setExternalScale (PlayerInfo player, double scale) const
-  {
-    if (_externalScale == NULL)
-    {
-      _externalScale = Cvar.GetCVar("pc_scale", player);
-    }
-
-    _externalScale.SetFloat(scale);
-  }
-
-  private ui static int scale(int value, int scaleMax, int valueMax)
-  {
-    return value * scaleMax / valueMax;
-  }
-
-  private ui static int getDefaultHealth(PlayerInfo player)
-  {
-    class<PlayerPawn> type = player.mo.GetClassName();
-    let default = GetDefaultByType(type);
-    return default.health;
-  }
-
-  private play bool disabledOnSlot1(PlayerInfo player) const
-  {
-    return _settings.isDisabledOnSlot1() && isSlot1(player);
-  }
-
-  private play bool disableWhenNotReady(PlayerInfo player) const
-  {
-    return _settings.isDisabledOnNotReady() && !isWeaponReady(player);
-  }
-
-  private play bool disableOnNoWeapon(PlayerInfo player) const
-  {
-    return _settings.isDisabledOnNoWeapon() && isNoWeapon(player);
-  }
-
-  private static bool isSlot1(PlayerInfo player)
-  {
-    Weapon w = player.readyWeapon;
-    if (w == NULL) { return false; }
-
-    int located;
-    int slot;
-    [located, slot] = player.weapons.LocateWeapon(w.GetClassName());
-
-    bool slot1 = (slot == 1);
-    return slot1;
-  }
-
-  private static bool isWeaponReady(PlayerInfo player)
-  {
-    bool isReady
-       = player.WeaponState & WF_WEAPONREADY
-      || player.WeaponState & WF_WEAPONREADYALT
-      || player.WeaponState & WF_WEAPONZOOMOK
-      || player.WeaponState & WF_WEAPONSWITCHOK
-      || player.cmd.buttons & BT_ATTACK
-      || player.cmd.buttons & BT_ALTATTACK
-       ;
-
-    return isReady;
-  }
-
-  private static bool isNoWeapon(PlayerInfo player)
-  {
-    Weapon w    = player.readyWeapon;
-    bool   isNo = (w == NULL) || (w.GetClassName() == "m8f_wm_Holstered");
-
-    return isNo;
-  }
-
-  private static ui void HSVtoRGB (out double r,
-                                   out double g,
-                                   out double b,
-                                   double h,
-                                   double s,
-                                   double v)
-  {
-    int i;
-    double f, p, q, t;
-
-    if (s == 0)
-    { // achromatic (grey)
-      r = g = b = v;
-      return;
-    }
-
-    h /= 60;                                    // sector 0 to 5
-    i = int(floor(h));
-    f = h - i;                                  // factorial part of h
-    p = v * (1 - s);
-    q = v * (1 - s * f);
-    t = v * (1 - s * (1 - f));
-
-    switch (i)
-    {
-    case 0:     r = v; g = t; b = p; break;
-    case 1:     r = q; g = v; b = p; break;
-    case 2:     r = p; g = v; b = t; break;
-    case 3:     r = p; g = q; b = v; break;
-    case 4:     r = t; g = p; b = v; break;
-    default:    r = v; g = p; b = q; break;
+      texId = checkTexture("XHAIRS1");
     }
   }
 
-  private static clearscope double LinearMap(double val,
-                                             double source_min,
-                                             double source_max,
-                                             double out_min,
-                                             double out_max)
-  {
-    return (val - source_min) * (out_max - out_min) / (source_max - source_min) + out_min;
+  _crosshairNum     = num;
+  _crosshairTexture = texId;
+  _isCrossExisting  = true;
+}
+#+end_src
+
+*** Check texture
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui TextureId checkTexture(string name)
+{
+  return TexMan.checkForTexture(name,
+                                TexMan.Type_MiscPatch,
+                                TexMan.TryAny | TexMan.ShortNameOnly);
+}
+#+end_src
+
+*** Set external y
+
+#+begin_src c :noweb-ref handler-functions
+
+private play void setExternalY(PlayerInfo player, double y) const
+{
+  if (_externalY == NULL)
+    _externalY = Cvar.GetCVar("pc_y", player);
+
+  _externalY.SetFloat(y);
+}
+#+end_src
+
+*** Set external scale
+
+#+begin_src c :noweb-ref handler-functions
+
+private play void setExternalScale (PlayerInfo player, double scale) const
+{
+  if (_externalScale == NULL)
+    _externalScale = Cvar.GetCVar("pc_scale", player);
+
+  _externalScale.SetFloat(scale);
+}
+#+end_src
+
+*** Scale
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui static int scale(int value, int scaleMax, int valueMax)
+{
+  return value * scaleMax / valueMax;
+}
+#+end_src
+
+*** Get default health
+
+#+begin_src c :noweb-ref handler-functions
+
+private ui static int getDefaultHealth(PlayerInfo player)
+{
+  class<PlayerPawn> type = player.mo.GetClassName();
+  let default = GetDefaultByType(type);
+  return default.health;
+}
+#+end_src
+
+*** Disabled on slot 1
+
+#+begin_src c :noweb-ref handler-functions
+
+private play bool disabledOnSlot1(PlayerInfo player) const
+{
+  return _settings.isDisabledOnSlot1() && isSlot1(player);
+}
+#+end_src
+
+*** Disabled when not ready
+
+#+begin_src c :noweb-ref handler-functions
+
+private play bool disabledWhenNotReady(PlayerInfo player) const
+{
+  return _settings.isDisabledOnNotReady() && !isWeaponReady(player);
+}
+#+end_src
+
+*** Disabled on no weapon
+
+#+begin_src c :noweb-ref handler-functions
+
+private play bool disabledOnNoWeapon(PlayerInfo player) const
+{
+  return _settings.isDisabledOnNoWeapon() && isNoWeapon(player);
+}
+#+end_src
+
+*** Is slot 1?
+
+#+begin_src c :noweb-ref handler-functions
+
+private static bool isSlot1(PlayerInfo player)
+{
+  Weapon w = player.readyWeapon;
+  if (w == NULL) { return false; }
+
+  int located;
+  int slot;
+  [located, slot] = player.weapons.LocateWeapon(w.GetClassName());
+
+  bool slot1 = (slot == 1);
+  return slot1;
+}
+#+end_src
+
+*** Is weapon ready?
+
+#+begin_src c :noweb-ref handler-functions
+
+private static bool isWeaponReady(PlayerInfo player)
+{
+  bool isReady
+     = player.WeaponState & WF_WEAPONREADY
+    || player.WeaponState & WF_WEAPONREADYALT
+    || player.WeaponState & WF_WEAPONZOOMOK
+    || player.WeaponState & WF_WEAPONSWITCHOK
+    || player.cmd.buttons & BT_ATTACK
+    || player.cmd.buttons & BT_ALTATTACK;
+
+  return isReady;
+}
+#+end_src
+
+*** Is no weapon?
+
+#+begin_src c :noweb-ref handler-functions
+
+private static bool isNoWeapon(PlayerInfo player)
+{
+  Weapon w    = player.readyWeapon;
+  bool   isNo = (w == NULL) || (w.GetClassName() == "m8f_wm_Holstered");
+
+  return isNo;
+}
+#+end_src
+
+# vale off
+*** HSV to RGB
+# vale on
+
+#+begin_src c :noweb-ref handler-functions
+
+private static ui void HSVtoRGB(out double r,
+                                out double g,
+                                out double b,
+                                double h,
+                                double s,
+                                double v)
+{
+  int i;
+  double f, p, q, t;
+
+  if (s == 0)
+  { // achromatic (grey)
+    r = g = b = v;
+    return;
   }
 
-  private ui double GetDistanceScale(double minDist = 0,
-                                     double maxDist = 1024,
-                                     double minScale = 1.0,
-                                     double maxScale = 4.0)
+  h /= 60;                                    // sector 0 to 5
+  i = int(floor(h));
+  f = h - i;                                  // factorial part of h
+  p = v * (1 - s);
+  q = v * (1 - s * f);
+  t = v * (1 - s * (1 - f));
+
+  switch (i)
   {
-    double scale = minScale;
-    if (_distToTarget < maxDist)
-    {
-      double dist = Clamp(_distToTarget, minDist, maxDist);
-      scale = LinearMap(dist, maxdist, mindist, minscale, maxscale);
-    }
-    setExternalScale(players[consoleplayer], scale);
-    return scale;
+  case 0:     r = v; g = t; b = p; break;
+  case 1:     r = q; g = v; b = p; break;
+  case 2:     r = p; g = v; b = t; break;
+  case 3:     r = p; g = q; b = v; break;
+  case 4:     r = t; g = p; b = v; break;
+  default:    r = v; g = p; b = q; break;
   }
+}
+#+end_src
 
-  private Vector3          _targetPos;
-  private double           _distToTarget;
-  private bool             _hasTargetPos;
+*** Linear map
 
-  private ui int           _crosshairNum;
-  private ui bool          _isCrossExisting;
-  private ui TextureID     _crosshairTexture;
+#+begin_src c :noweb-ref handler-functions
 
-  private transient bool   _isInitialized;
-  private transient bool   _isPrepared;
-  private transient Cvar   _cvarRenderer;
-  private transient Cvar   _externalY;
-  private transient Cvar   _externalScale;
+private static clearscope double linearMap(double val,
+                                           double source_min,
+                                           double source_max,
+                                           double out_min,
+                                           double out_max)
+{
+  return (val - source_min) * (out_max - out_min) / (source_max - source_min) + out_min;
+}
+#+end_src
 
-  private pc_ProjScreen _projection;
-  private pc_GlScreen   _glProjection;
-  private pc_SwScreen   _swProjection;
+*** Get distance scale
 
-  private pc_Settings      _settings;
+#+begin_src c :noweb-ref handler-functions
 
-  private DynamicValueInterpolator _yPositionInterpolator;
+private ui double getDistanceScale(double minDist = 0,
+                                   double maxDist = 1024,
+                                   double minScale = 1.0,
+                                   double maxScale = 4.0)
+{
+  double scale = minScale;
+  if (_distToTarget < maxDist)
+  {
+    double dist = Clamp(_distToTarget, minDist, maxDist);
+    scale = LinearMap(dist, maxdist, mindist, minscale, maxscale);
+  }
+  setExternalScale(players[consoleplayer], scale);
+  return scale;
 }
 #+end_src
 
