@@ -88,6 +88,7 @@ The order is alphabetical.
 - namsan
 - Nems
 - Nightsentinel
+- NonEmployee
 - Paul Fioravanti
 - Phantom Allies
 - physixcat
@@ -149,7 +150,7 @@ The order is alphabetical.
 # spellchecker:off
 # vale off
 
-- 3saster: [[file:../modules/MD5.org][MD5]], implementing real time access in GZDoom.
+- 3saster: [[file:../modules/MD5.org][MD5]], implementing real time access in GZDoom
 - Captain J: sound design for Typist, graphics for Graveyard
 - Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
 - fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]

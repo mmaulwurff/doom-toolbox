@@ -32,14 +32,17 @@ Features
 Known issues
 - PreciseCrosshair can't be precise for custom weapons that shoot from an angle
 - Crosshair size may be off on UZDoom/LZDoom before v5.0.0
+- "Inverted" crosshair color isn't supported yet
 
 Credits
-- Color calculation and crosshair code is ripped from GZDoom/UZDoom.
+- Color calculation and crosshair code is taken from GZDoom/UZDoom.
 
 * Changelog
 
+v1.6.0:
 - moved to the new translation system
 - fixed crosshair size for UZDoom 5.0.0
+- added new color formula
 
 v1.5.0:
 - added writing of result to external cvar
@@ -202,6 +205,7 @@ OptionMenu pc_Menu
   Option     "$PC_DISTANCE_SCALE"  , pc_distance_scale    , YesNo
 
   StaticText ""
+  Option     "$PC_NEW_COLOR_FORMULA", pc_new_color_formula, YesNo
   Option     "$PC_TARGET_COLOR"    , pc_target_health     , YesNo
 }
 #+end_src
@@ -221,6 +225,7 @@ user bool pc_disable_no_weapon = true;
 user bool pc_distance_scale = true;
 
 user bool pc_target_health = false;
+user bool pc_new_color_formula = true;
 
 // Precise External Interface
 user float pc_y;
@@ -267,6 +272,9 @@ class pc_EventHandler : EventHandler
   private pc_Settings    _settings;
 
   private DynamicValueInterpolator _yPositionInterpolator;
+
+  private Cvar _cvarCrosshairColorFull;
+  private Cvar _cvarCrosshairColorMax;
 }
 #+end_src
 
@@ -316,6 +324,9 @@ private void initialize()
                                                            0.5,
                                                            1,
                                                            1000000);
+
+  _cvarCrosshairColorFull = Cvar.getCvar("crosshairColorFull", player);
+  _cvarCrosshairColorMax  = Cvar.getCvar("crosshairColorMax", player);
 
   _isInitialized = true;
 }
@@ -416,7 +427,13 @@ private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
   }
 
   let [hasHealth, health, maxHealth] = getHealths(player);
-  int crossColor = makeCrosshairColor(hasHealth, health, maxHealth);
+
+  bool isNewColorFormula = _settings.isNewColorFormula();
+  int crossColor = !hasHealth
+    ? crosshaircolor
+    : isNewColorFormula
+      ? makeNewCrosshairColor(health, maxHealth)
+      : makeOldCrosshairColor(health, maxHealth);
 
   _yPositionInterpolator.Update(int(drawPos.y));
 
@@ -472,14 +489,154 @@ private play Actor getAimTarget(Actor a) const
 }
 #+end_src
 
-*** Make crosshair color
+*** Make new crosshair color
 
 #+begin_src c :noweb-ref handler-functions
 
-private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHealth)
-{
-  if (!hasHealth) return crosshaircolor;
+// Color functions are adapted from UZDoom/src/utility/colorspace.cpp
 
+private ui Color makeNewCrosshairColor(int health, int maxHealth)
+{
+  if (crosshairhealth == 0) return crosshaircolor;
+  if (crosshairhealth == 3) return 0xffffff;
+  if (_cvarCrosshairColorFull == NULL || _cvarCrosshairColorMax == NULL)
+    return makeOldCrosshairColor(health, maxHealth);
+
+  int health = clamp(health, 0, (crosshairhealth == 1) ? 100 : 200);
+
+  int hi = _cvarCrosshairColorFull.getInt();
+  int lo = crosshaircolor;
+  double mix = 1.0;
+
+  if (health > 100)
+  {
+    lo = hi;
+    hi = _cvarCrosshairColorMax.getInt();
+    mix = (health - 100) / 100.0;
+  }
+  else if (health <= 85)
+  {
+    mix = health / 85.0;
+  }
+
+  let c = mixColor(lo, hi, mix);
+
+  return Color(c.r, c.g, c.b);
+}
+
+private static ui Color mixColor(Color a, Color b, double mix)
+{
+  if (mix <= 0) return a;
+  if (mix >= 1) return b;
+
+  let [al, ac, ah] = rgbToOklch(a);
+  let [bl, bc, bh] = rgbToOklch(b);
+
+  double l = lerp(al, bl, mix);
+  double c = lerp(ac, bc, mix);
+  double h = alerp(ah, bh, mix);
+
+  return oklchToRgb(l, c, h);
+}
+
+private static ui double, double, double rgbToOklch(Color a)
+{
+  let [l, a, b] = rgbToOklab(a);
+  let [c, h] = oklabToOklch(a, b);
+  return l, c, h;
+}
+
+private static ui double, double, double rgbToOklab(Color a)
+{
+  double r = linear(a.r / 255.0);
+  double g = linear(a.g / 255.0);
+  double b = linear(a.b / 255.0);
+  double l = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b) ** (1.0 / 3);
+  double m = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b) ** (1.0 / 3);
+  double s = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b) ** (1.0 / 3);
+
+  return
+    (l * +0.2104542553 + m * +0.7936177850 + s * -0.0040720468),
+    (l * +1.9779984951 + m * -2.4285922050 + s * +0.4505937099),
+    (l * +0.0259040371 + m * +0.7827717662 + s * -0.8086757660);
+}
+
+private static ui double linear(double c)
+{
+  return (c >= 0.04045)
+    ? (((c + 0.055) / 1.055) ** 2.4)
+    : (c / 12.92);
+}
+
+private static ui double, double oklabToOklch(double a, double b)
+{
+  double c = sqrt(a * a + b * b);
+
+  if (c < 0.0001)
+    return c, double.NAN;
+
+  double h = atan2(b, a);
+
+  if (h >= 0)
+    return c, h;
+
+  return c, h + 360;
+}
+
+private static ui Color oklchToRgb(double l, double c, double h)
+{
+  let [a, b] = oklchToOklab(c, h);
+  return oklabToRgb(l, a, b);
+}
+
+private static ui double, double oklchToOklab(double c, double h)
+{
+  double a = (h == double.NAN) ? 0 : c * cos(h);
+  double b = (h == double.NAN) ? 0 : c * sin(h);
+  return a, b;
+}
+
+private static ui Color oklabToRgb(double l, double a, double b)
+{
+  double l2 = (L + a * +0.3963377774 + b * +0.2158037573) ** 3;
+  double m  = (L + a * -0.1055613458 + b * -0.0638541728) ** 3;
+  double s  = (L + a * -0.0894841775 + b * -1.2914855480) ** 3;
+
+  double r = gamma(l2 * +4.0767416621 + m * -3.3077115913 + s * +0.2309699292);
+  double g = gamma(l2 * -1.2684380046 + m * +2.6097574011 + s * -0.3413193965);
+  double b = gamma(l2 * -0.0041960863 + m * -0.7034186147 + s * +1.7076147010);
+
+  return Color(int(255 * r), int(255 * g), int(255 * b));
+}
+
+private static ui double gamma(double c)
+{
+  return clamp(((c >= 0.0031308) ? (1.055 * (c ** (1 / 2.4)) - 0.055) : (12.92 * c)),
+               0.0,
+               1.0);
+}
+
+private static ui double lerp(double a, double b, double t)
+{
+  // Naive, good enough.
+  return a + t * (b - a);
+}
+
+private static ui double alerp(double a, double b, double t)
+{
+  double delta = (b - a) % 360;
+  if (delta > 180) delta -= 360;
+  if (delta < -180) delta += 360;
+  return (a + delta * t + 360) % 360;
+}
+#+end_src
+
+*** Make old crosshair color
+
+#+begin_src c :noweb-ref handler-functions
+
+private static ui Color makeOldCrosshairColor(int health, int maxHealth)
+{
   if (crosshairhealth == 1)
   {
     // "Standard" crosshair health (green-red)
@@ -506,7 +663,7 @@ private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHeal
         red   = (60 - health) * 255 / 30;
         green = 255;
       }
-      return (red<<16) | (green<<8);
+      return Color(red, green, 0);
     }
   }
   else if (crosshairhealth == 2)
@@ -524,7 +681,7 @@ private static ui int makeCrosshairColor(bool hasHealth, int health, int maxHeal
     int green = int(gg * 255);
     int blue  = int(bb * 255);
 
-    return (red<<16) | (green<<8) | blue;
+    return Color(red, green, blue);
   }
 
   return crosshaircolor;
@@ -916,6 +1073,7 @@ class pc_Settings : pc_SettingsPack
   bool isScaledByDistance  () { checkInit(); return _distanceScale    .value(); }
 
   bool isTargetHealth() { checkInit(); return _targetHealth.value(); }
+  bool isNewColorFormula() { checkInit(); return _newColorFormula.value(); }
 
   private void checkInit()
   {
@@ -929,6 +1087,7 @@ class pc_Settings : pc_SettingsPack
     push(_disableOnNotReady = newBoolSetting("pc_disable_not_ready"));
     push(_disableNoWeapon   = newBoolSetting("pc_disable_no_weapon"));
     push(_targetHealth      = newBoolSetting("pc_target_health"    ));
+    push(_newColorFormula   = newBoolSetting("pc_new_color_formula"));
     push(_distanceScale     = newBoolSetting("pc_distance_scale"   ));
 
     _isInitialized = true;
@@ -945,6 +1104,7 @@ class pc_Settings : pc_SettingsPack
   private pc_BoolSetting _disableOnNotReady;
   private pc_BoolSetting _disableNoWeapon;
   private pc_BoolSetting _targetHealth;
+  private pc_BoolSetting _newColorFormula;
   private pc_BoolSetting _distanceScale;
 
   private PlayerInfo     _player;
