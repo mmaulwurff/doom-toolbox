@@ -170,7 +170,7 @@ repos:
 
  # https://vale.sh/
  - repo: https://github.com/vale-cli/vale
-   rev: v3.20.0
+   rev: v3.22.0
    hooks:
     - id: vale
       name: vale sync
