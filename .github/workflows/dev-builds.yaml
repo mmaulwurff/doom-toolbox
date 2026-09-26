@@ -82,7 +82,7 @@ jobs:
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
           - name: uzdoom-stable
-            url: https://github.com/UZDoom/UZDoom/releases/download/5.0.1/Linux-UZDoom-Release-x86_64.AppImage
+            url: https://github.com/UZDoom/UZDoom/releases/download/5.0.3/Linux-UZDoom-Release-x86_64.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
 
