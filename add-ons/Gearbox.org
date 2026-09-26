@@ -306,7 +306,7 @@ v0.7.0
 - adapt to inverted mouse settings
 - organize menus
 - fix VM abort in inventory menu
-- synchronize cvar lists
+- synchronize CVar lists
 - add resetting custom weapon order
 - add key to change weapon slot
 - add key to change weapon priority
@@ -329,7 +329,7 @@ v0.5.1
 
 v0.5.0
 - fix truncation of floating point warning
-- update Zabor, and an option to disable it
+- update VM abort handler, and an option to disable it
 - Revert "wheel: draw weapon tag if it has no icon"
 - add wheel scale
 - separate Screen class from blocks view, move to wheel
@@ -362,7 +362,7 @@ v0.4.1
 - fix constant ticking on tomed weapons
 - fix VM abort when the last inventory item is used up
 - fix misaligned quantity dots when quantity is odd
-- add missing cvars to Zabor and ~gb_reset~
+- add missing CVars to VM abort handler and ~gb_reset~
 - fix truncation of floating point values
 
 v0.4
@@ -374,7 +374,7 @@ v0.4
 - make position configurable for blocks view
 - add blur option
 - add a command for manual report
-- add cvars dump to VM event handler
+- add CVars dump to VM abort handler
 - add VM abort handler
 - add select previous weapon key from m_gizmos
 - fix complementary colors in blocks view

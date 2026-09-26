@@ -1,4 +1,10 @@
-159
+166
+CVar/S
+GZDoom
+LZDoom
+UZDoom
+ZDoom
+ZScript
 aas
 acs
 altfire
@@ -120,6 +126,7 @@ screenshooter
 sed
 setq
 shader
+shootable
 shotgunner/S
 slade
 slaughtermap
