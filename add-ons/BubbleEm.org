@@ -1,7 +1,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-
+# vale off
 #+title: BubbleEm
-
+# vale on
 #+name: meta
 #+begin_src js
 { "old_version": "1.1.0" }

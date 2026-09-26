@@ -1,6 +1,6 @@
 # Lines starting with # are comments, they aren't exported to HTML.
 # Some comments have special meaning, like "#+title:", "#+begin_src", "#+end_src".
-#+title: Org Cheat Sheet
+#+title: Org cheat sheet
 
 If you are reading this file on GitHub or Codeberg: not all Org features may be
 supported here. See HTML export for this file:

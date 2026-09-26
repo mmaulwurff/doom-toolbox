@@ -1,6 +1,7 @@
 #+property: header-args :comments no :mkdirp yes :noweb yes :results none
-
+# vale off
 #+title: PreviousWeapon
+# vale on
 
 * About
 

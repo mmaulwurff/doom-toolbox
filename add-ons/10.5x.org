@@ -800,7 +800,9 @@ class OptionMenuItemX5TypeSlider : OptionMenuItemSlider
 }
 #+end_src
 
+# vale off
 * ZScript :noexport:
+# vale on
 
 #+begin_src c :tangle ../build/10.5x/zscript.zs
 
