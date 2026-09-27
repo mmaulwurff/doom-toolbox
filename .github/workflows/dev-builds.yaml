@@ -69,12 +69,12 @@ jobs:
     strategy:
       matrix:
         engine:
-          - name: uzdoom-v4.14.3
+          - name: uzdoom-old-stable
             url: https://github.com/UZDoom/UZDoom/releases/download/4.14.3/Linux-UZDoom-4.14.3.AppImage
             download-target: ~/UZDoom.AppImage
             bin: ~/UZDoom.AppImage
           - name: lzdoom-stable
-            url: https://github.com/drfrag666/lzdoom/releases/download/l4.14.3a/lzdoom_4.14.3a_amd64.deb
+            url: https://github.com/drfrag666/lzdoom/releases/download/l4.14.4/lzdoom_4.14.4_amd64.deb
             download-target: ~/lzdoom.deb
             bin: lzdoom
           - name: uzdoom-preview
