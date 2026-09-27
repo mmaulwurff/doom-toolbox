@@ -426,14 +426,14 @@ private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
     height *= distFac;
   }
 
-  let [hasHealth, health, maxHealth] = getHealths(player);
+  let [hasHealth, health] = getHealths(player);
 
   bool isNewColorFormula = _settings.isNewColorFormula();
   int crossColor = !hasHealth
     ? crosshaircolor
     : isNewColorFormula
-      ? makeNewCrosshairColor(health, maxHealth)
-      : makeOldCrosshairColor(health, maxHealth);
+      ? makeNewCrosshairColor(health)
+      : makeOldCrosshairColor(health);
 
   _yPositionInterpolator.Update(int(drawPos.y));
 
@@ -456,26 +456,22 @@ private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
 
 #+begin_src c :noweb-ref handler-functions
 
-// Returns noHealth flag, current health, max health.
-private ui bool, int, int getHealths(PlayerInfo player)
+// Returns noHealth flag, current health (scaled to 0-100).
+private ui bool, int getHealths(PlayerInfo player)
 {
-  if (_settings.isTargetHealth())
-  {
-    let aimTarget = getAimTarget(player.mo);
-    if (aimTarget)
-    {
-      return true, aimTarget.health, aimTarget.GetSpawnHealth();
-    }
-    else
-    {
-      return false, 0, 0;
-    }
-  }
+  if (!_settings.isTargetHealth())
+    return true, scale(player.health, 100, getDefaultHealth(player));
 
-  int health     = player.health;
-  int maxHealth  = getDefaultHealth(player);
+  let aimTarget = getAimTarget(player.mo);
+  if (aimTarget)
+    return true, scale(aimTarget.health, 100, aimTarget.getSpawnHealth());
+  else
+    return false, 0;
+}
 
-  return true, health, maxHealth;
+private ui static int scale(int value, int scaleMax, int valueMax)
+{
+  return value * scaleMax / valueMax;
 }
 #+end_src
 
@@ -495,12 +491,12 @@ private play Actor getAimTarget(Actor a) const
 
 // Color functions are adapted from UZDoom/src/utility/colorspace.cpp
 
-private ui Color makeNewCrosshairColor(int health, int maxHealth)
+private ui Color makeNewCrosshairColor(int health)
 {
   if (crosshairhealth == 0) return crosshaircolor;
   if (crosshairhealth == 3) return 0xffffff;
   if (_cvarCrosshairColorFull == NULL || _cvarCrosshairColorMax == NULL)
-    return makeOldCrosshairColor(health, maxHealth);
+    return makeOldCrosshairColor(health);
 
   int health = clamp(health, 0, (crosshairhealth == 1) ? 100 : 200);
 
@@ -635,13 +631,11 @@ private static ui double alerp(double a, double b, double t)
 
 #+begin_src c :noweb-ref handler-functions
 
-private static ui Color makeOldCrosshairColor(int health, int maxHealth)
+private static ui Color makeOldCrosshairColor(int health)
 {
   if (crosshairhealth == 1)
   {
     // "Standard" crosshair health (green-red)
-    int health = scale(health, 100, maxHealth);
-
     if (health >= 85)
     {
       return 0x00ff00;
@@ -669,7 +663,7 @@ private static ui Color makeOldCrosshairColor(int health, int maxHealth)
   else if (crosshairhealth == 2)
   {
     // "Enhanced" crosshair health (blue-green-yellow-red)
-    int health = clamp(scale(health, 100, maxHealth), 0, 200);
+    int health = clamp(health, 0, 200);
     double rr;
     double gg;
     double bb;
@@ -804,16 +798,6 @@ private play void setExternalScale (PlayerInfo player, double scale) const
     _externalScale = Cvar.GetCVar("pc_scale", player);
 
   _externalScale.SetFloat(scale);
-}
-#+end_src
-
-*** Scale
-
-#+begin_src c :noweb-ref handler-functions
-
-private ui static int scale(int value, int scaleMax, int valueMax)
-{
-  return value * scaleMax / valueMax;
 }
 #+end_src
 
