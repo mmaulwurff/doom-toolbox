@@ -9,7 +9,6 @@
 "GB_COLOR","Cor"
 "GB_PLAYER_COLOR","Copiar cor personalizada do jogador"
 "GB_DIM_COLOR","Cor de atenuação do fundo"
-"GB_SHOW_TAGS","Tags"
 "GB_PRINT_SELECTION",
 "GB_SOUND","Efeitos sonoros"
 "GB_KEYSECTION","Teclas do Gearbox"
@@ -73,3 +72,6 @@
 "GB_SMALL_FONT","Fonte pequena"
 "GB_CONSOLE_FONT","Fonte do console"
 "GB_BIG_FONT","Fonte grande"
+"GB_SHOW_DESCRIPTION",""
+"GB_TAGS",""
+"GB_CLASSES",""

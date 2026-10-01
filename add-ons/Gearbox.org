@@ -592,7 +592,7 @@ OptionMenu gb_UiOptions
   Command     "$GB_PLAYER_COLOR", gb_copy_player_color
 
   StaticText  ""
-  Option      "$GB_SHOW_TAGS" , gb_show_tags      , OnOff
+  Option      "$GB_SHOW_DESCRIPTION" , gb_show_tags, gb_Tags
 
   StaticText  ""
   Option      "$GB_PRINT_SELECTION", gb_print_selection, OnOff
@@ -609,6 +609,13 @@ OptionMenu gb_UiOptions
   StaticText  ""
   Option      "$GB_FONT"        , gb_font , gb_FontValues
   TextField   "$GB_FONT_CUSTOM" , gb_font
+}
+
+OptionValue gb_Tags
+{
+  0, "$OPTVAL_OFF"
+  1, "$GB_TAGS"
+  2, "$GB_CLASSES"
 }
 
 OptionMenu gb_WheelOptions
@@ -1482,6 +1489,7 @@ class gb_InventoryMenu
         TextureID icon =
           BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
         viewModel.tags        .push(tag);
+        viewModel.classes     .push(item.getClassName());
         viewModel.slots       .push(index + 1);
         viewModel.indices     .push(index);
         viewModel.icons       .push(icon);
@@ -1638,7 +1646,7 @@ class gb_NeteventProcessor play
 user int   gb_scale     = 1;
 user color gb_color     = "22 22 CC";
 user color gb_dim_color = "99 99 99";
-user bool  gb_show_tags = true;
+user int   gb_show_tags = 1;
 user bool  gb_print_selection = false;
 
 // 0 - blocky view
@@ -1751,7 +1759,7 @@ class gb_Options
   bool isBlurEnabled()            const { return mIsBlurEnabled        .getBool(); }
   bool getWheelTint()             const { return mWheelTint            .getBool(); }
   int  getMultiWheelLimit()       const { return mMultiWheelLimit      .getInt();  }
-  bool isShowingTags()            const { return mShowTags             .getBool(); }
+  int  getShowingTags()           const { return mShowTags             .getInt();  }
   bool isPrintSelection()         const { return mPrintSelection       .getBool(); }
   bool isPositionLocked()         const { return mIsPositionLocked     .getBool(); }
   bool isFrozenCanOpen()          const { return mFrozenCanOpen        .getBool(); }
@@ -2014,6 +2022,7 @@ struct gb_ViewModel
   int selectedIndex;
 
   Array<string> tags;
+  Array<string> classes;
   Array<int> slots;
   Array<int> indices;
 
@@ -2286,6 +2295,7 @@ class gb_WeaponMenu
     {
       mCacheTime = level.time;
       mCachedViewModel.tags        .clear();
+      mCachedViewModel.classes     .clear();
       mCachedViewModel.slots       .clear();
       mCachedViewModel.indices     .clear();
       mCachedViewModel.icons       .clear();
@@ -2418,6 +2428,7 @@ class gb_WeaponMenu
     destination.selectedIndex = source.selectedIndex;
 
     destination.tags        .copy(source.tags);
+    destination.classes     .copy(source.classes);
     destination.slots       .copy(source.slots);
     destination.indices     .copy(source.indices);
     destination.icons       .copy(source.icons);
@@ -2443,6 +2454,7 @@ class gb_WeaponMenu
           TextureID nulltex;
           nulltex.SetInvalid();
           viewModel.tags        .push("");
+          viewModel.classes     .push("");
           viewModel.slots       .push(mSlots[i]);
           viewModel.indices     .push(i);
           viewModel.icons       .push(nulltex);
@@ -2461,6 +2473,7 @@ class gb_WeaponMenu
       if (mSelectedIndex == i) viewModel.selectedIndex = viewModel.tags.size();
 
       viewModel.tags.push(aWeapon.getTag());
+      viewModel.classes.push(aWeapon.getClassName());
       viewModel.slots.push(mSlots[i]);
       viewModel.indices.push(i);
 
@@ -2769,8 +2782,11 @@ class gb_BlockyView
                                );
         }
 
-        if (mOptions.isShowingTags())
+        int showingTags = mOptions.getShowingTags();
+        if (showingTags == 1)
           drawTag(viewModel.tags[i], aFont, slotX, weaponY);
+        if (showingTags == 2)
+          drawTag(viewModel.classes[i], aFont, slotX, weaponY);
       }
       else // not selected slot (small boxes)
       {
@@ -3198,7 +3214,7 @@ class gb_FadeInOut
 }
 #+end_src
 
-*** Text view
+*** Plain text view
 
 #+begin_src c :tangle ../build/Gearbox/zscript/display/text_view.zs
 
@@ -3245,6 +3261,7 @@ class gb_TextView
     double lineHeight    = aFont.getHeight();
     int    usualColor    = mOptions.getTextUsualColor();
     int    selectedColor = mOptions.getTextSelectedColor();
+    bool   isTagOrClass  = mOptions.getShowingTags() != 2;
 
     double maxX = 0;
     double maxY = 0;
@@ -3258,7 +3275,7 @@ class gb_TextView
     }
     for (int i = 0; i < nWeapons; ++i)
     {
-      string itemString = makeItemString(viewModel, i);
+      string itemString = makeItemString(viewModel, i, isTagOrClass);
       maxX = max(maxX, maxSlotWidth + x + aFont.stringWidth(itemString));
       y += lineHeight;
       if (i + 1 < nWeapons && viewModel.slots[i] != viewModel.slots[i + 1])
@@ -3306,7 +3323,7 @@ class gb_TextView
     {
       if (i != viewModel.selectedIndex)
       {
-        string itemText  = makeItemString(viewModel, i);
+        string itemText  = makeItemString(viewModel, i, isTagOrClass);
         drawText(aFont, usualColor, x + maxSlotWidth, y, itemText, mAlpha);
       }
       y += lineHeight;
@@ -3314,14 +3331,15 @@ class gb_TextView
         y += lineHeight / 3;
     }
     {
-      string itemText  = makeItemString(viewModel, viewModel.selectedIndex);
+      string itemText =
+        makeItemString(viewModel, viewModel.selectedIndex, isTagOrClass);
       drawText(aFont, selectedColor, x + maxSlotWidth, selectedY, itemText, mAlpha);
     }
   }
 
-  private string makeItemString(gb_ViewModel viewModel, int i)
+  private string makeItemString(gb_ViewModel viewModel, int i, bool isTagOrClass)
   {
-      string result = viewModel.tags[i];
+      string result = isTagOrClass ? viewModel.tags[i] : viewModel.classes[i];
 
       bool isQuantity1Valid =
         gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
@@ -3851,6 +3869,7 @@ class gb_EventHandler : EventHandler
   private ui void verifyViewModel(gb_ViewModel model)
   {
     int nTags           = model.tags        .size();
+    int nClasses        = model.classes     .size();
     int nSlots          = model.slots       .size();
     int nIndices        = model.indices     .size();
     int nIcons          = model.icons       .size();
@@ -3863,6 +3882,7 @@ class gb_EventHandler : EventHandler
 
     if (nTags > 0
         && (model.selectedIndex >= nTags
+            || nTags != nClasses
             || nTags != nSlots
             || nTags != nIndices
             || nTags != nIcons
@@ -3876,6 +3896,7 @@ class gb_EventHandler : EventHandler
       Console.printf("Bad view model:\n"
                      "selected index: %d,\n"
                      "tags: %d,\n"
+                     "classes: %d,\n"
                      "slots: %d,\n"
                      "indices: %d,\n"
                      "icons: %d,\n"
@@ -3887,6 +3908,7 @@ class gb_EventHandler : EventHandler
                      "max quantities 2: %d,\n"
                     , model.selectedIndex
                     , nTags
+                    , nClasses
                     , nSlots
                     , nIndices
                     , nIcons
@@ -5007,9 +5029,14 @@ class gb_WheelView
       drawPointer(controllerModel.angle, controllerModel.radius);
     }
 
-    if (mOptions.isShowingTags())
+    int showingTags = mOptions.getShowingTags();
+    if (showingTags)
     {
-      drawWeaponDescription(viewModel, innerIndex, nPlaces, isSlotExpanded);
+      drawWeaponDescription(viewModel,
+                            innerIndex,
+                            nPlaces,
+                            isSlotExpanded,
+                            showingTags == 1);
     }
   }
 
@@ -5369,14 +5396,16 @@ class gb_WheelView
                       );
   }
 
-  private void drawWeaponDescription( gb_ViewModel viewModel
-                            , int  innerIndex
-                            , int  nPlaces
-                            , bool isSlotExpanded
-                            )
+  private void drawWeaponDescription(gb_ViewModel viewModel,
+                                     int  innerIndex,
+                                     int  nPlaces,
+                                     bool isSlotExpanded,
+                                     bool isTagOrClass)
   {
     int    index       = viewModel.selectedIndex;
-    string description = viewModel.tags[index];
+    string description = isTagOrClass
+      ? viewModel.tags[index]
+      : viewModel.classes[index];
     if (description.length() == 0) return;
 
     string ammo1 = gb_Ammo.isValid(viewModel.quantity1[index],
