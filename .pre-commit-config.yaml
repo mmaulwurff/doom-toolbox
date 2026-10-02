@@ -46,7 +46,7 @@ repos:
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.16.9
+   rev: v0.16.10
    hooks:
     - id: ruff-check
       name: ruff-check
@@ -167,7 +167,7 @@ repos:
 
  # https://vale.sh/
  - repo: https://github.com/vale-cli/vale
-   rev: v3.23.0
+   rev: v3.24.0
    hooks:
     - id: vale
       name: vale sync
