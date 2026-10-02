@@ -18,7 +18,7 @@
 
 TargetSpy shows enemy health, tag, and other things.
 
-TargetSpy is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+TargetSpy is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 Features:
 - extendable modular structure;

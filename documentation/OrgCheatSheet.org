@@ -6,7 +6,7 @@ If you are reading this file on GitHub or Codeberg: not all Org features may be
 supported here. See HTML export for this file:
 https://mmaulwurff.github.io/doom-toolbox/documentation/OrgCheatSheet.html
 
-Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html][Org mode quickstart]]. Formatting:
+Paragraphs are separated by an empty line. Links: [[https://orgmode.org/quickstart.html ][Org mode quickstart]]. Formatting:
 *bold* _underlined_ ~monospace~ +strike-through+ /italics/ */_+combined+_/*.
 
 Unordered lists:

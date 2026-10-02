@@ -29,7 +29,7 @@ Features:
 - optional screenshot taking when events happen.
 - three options for event reporting: console, on-screen, and voice.
 
-Autoautosave is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+Autoautosave is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 * License
 

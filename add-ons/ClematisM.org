@@ -9,11 +9,11 @@
 
 * About
 
-Basic ZScript unit test framework for UZDoom. Inspired by [[https://github.com/chesko256/Lilac][Lilac]] by [[https://github.com/chesko256][Chesko]].
+Basic ZScript unit test framework for UZDoom. Inspired by [[https://github.com/chesko256/Lilac ][Lilac]] by [[https://github.com/chesko256 ][Chesko]].
 
 Clematis is made by ZippeyKeys12, modified and renamed to ClematisM by m8f.
 
-ClematisM is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+ClematisM is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 ** Making test suites
 

@@ -140,26 +140,26 @@ The order is alphabetical.
 
 * Special thanks
 
-- [[https://github.com/ZDoom/gzdoom/graphs/contributors][GZDoom contributors]]
-- [[https://github.com/UZDoom/UZDoom/graphs/contributors][UZDoom contributors]]
-- [[https://forum.zdoom.org/][ZDoom Forums]] maintainers and admins
-- [[https://www.doomworld.com/][Doomworld]] maintainers and admins
-- [[https://zdoom.org/w/index.php][ZDoom Wiki]] contributors
-- [[https://doomwiki.org][Doom Wiki]] contributors
+- [[https://github.com/ZDoom/gzdoom/graphs/contributors ][GZDoom contributors]]
+- [[https://github.com/UZDoom/UZDoom/graphs/contributors ][UZDoom contributors]]
+- [[https://forum.zdoom.org/ ][ZDoom Forums]] maintainers and admins
+- [[https://www.doomworld.com/ ][Doomworld]] maintainers and admins
+- [[https://zdoom.org/w/index.php ][ZDoom Wiki]] contributors
+- [[https://doomwiki.org ][Doom Wiki]] contributors
 
 # spellchecker:off
 # vale off
 
 - 3saster: [[file:../modules/MD5.org][MD5]], implementing real time access in GZDoom
 - Captain J: sound design for Typist, graphics for Graveyard
-- Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688][10x]]
-- fragglet: [[https://github.com/fragglet/miniwad][Miniwad]]
-- Gutawer: [[https://gitlab.com/Gutawer/gzdoom-gutamatics][Gutamatics]] (used in old versions)
-- KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566][libeye]], the concept of VM abort handler
-- Kinsie: [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]]
-- Lud (Accensus): [[https://forum.zdoom.org/viewtopic.php?t=51446][Custom Doom]], Dictionary testing
-- Marrub: ZScript [[https://github.com/zdoom-docs/stable][documentation]]
-- ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606][Clematis]]
+- Cutmanmike: [[https://forum.zdoom.org/viewtopic.php?t=17688 ][10x]]
+- fragglet: [[https://github.com/fragglet/miniwad ][Miniwad]]
+- Gutawer: [[https://gitlab.com/Gutawer/gzdoom-gutamatics ][Gutamatics]] (used in old versions)
+- KeksDose: [[https://forum.zdoom.org/viewtopic.php?t=64566 ][libeye]], the concept of VM abort handler
+- Kinsie: [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/ ][Kinsie's Gameplay Mod Test Map]]
+- Lud (Accensus): [[https://forum.zdoom.org/viewtopic.php?t=51446 ][Custom Doom]], Dictionary testing
+- Marrub: ZScript [[https://github.com/zdoom-docs/stable ][documentation]]
+- ZippeyKeys12: [[https://forum.zdoom.org/viewtopic.php?t=62606 ][Clematis]]
 
 # spellchecker:on
 # vale on

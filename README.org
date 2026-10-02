@@ -6,7 +6,7 @@
 
 * About
 
-DoomToolbox is a collection of add-ons for [[https://zdoom.org/downloads][UZDoom and LZDoom]] and their derivatives.
+DoomToolbox is a collection of add-ons for [[https://zdoom.org/downloads ][UZDoom and LZDoom]] and their derivatives.
 
 Goals:
 - to increase replayability of compatible games and mods,
@@ -15,10 +15,10 @@ Goals:
 
 Development style: "Move slow and fix things".
 
-- [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip][Dev builds]]
-- [[https://mmaulwurff.github.io/doom-toolbox/][HTML documentation]]
-- Source: [[https://github.com/mmaulwurff/doom-toolbox/][GitHub]], [[https://codeberg.org/m8f/doom-toolbox][Codeberg]]
-- [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
+- [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip ][Dev builds]]
+- [[https://mmaulwurff.github.io/doom-toolbox/ ][HTML documentation]]
+- Source: [[https://github.com/mmaulwurff/doom-toolbox/ ][GitHub]], [[https://codeberg.org/m8f/doom-toolbox ][Codeberg]]
+- [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/ ][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
 
 DoomToolbox is free and open source software. It's licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]] and
 [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]].
@@ -35,26 +35,26 @@ and doesn't use "AI" tools for development.
 |------------------+----------------------------------------------------------+-------|
 | *Add-ons*        |                                                          |       |
 |------------------+----------------------------------------------------------+-------|
-| [[file:add-ons/10.5x.org][10.5x]]            | enemy number multiplier                                  | [[https://forum.zdoom.org/viewtopic.php?t=65962][link]]  |
-| [[file:add-ons/Autoautosave.org][Autoautosave]]     | universal autosaver                                      | [[https://forum.zdoom.org/viewtopic.php?t=59889][link]]  |
-| [[file:add-ons/BubbleEm.org][BubbleEm]]         | bubbles instead of corpses                               | [[https://forum.zdoom.org/viewtopic.php?f=46&t=68685][link]]  |
-| [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]  | gameplay customization options                           | [[https://forum.zdoom.org/viewtopic.php?t=64678][link]]  |
-| [[file:add-ons/Gearbox.org][Gearbox]]          | more convenient ways to select weapons and items         | [[https://forum.zdoom.org/viewtopic.php?t=71086][link]]  |
-| [[file:add-ons/Graveyard.org][Graveyard]]        | places gravestones where you die                         | [[https://forum.zdoom.org/viewtopic.php?t=68835][link]]  |
-| [[file:add-ons/HitImpact.org][HitImpact]]        | textured particles when level geometry is hit            | [[https://forum.zdoom.org/viewtopic.php?t=81483][link]]  |
-| [[file:add-ons/Nomina.org][Nomina]]           | enemy names helper                                       | [[https://forum.zdoom.org/viewtopic.php?p=1150645][link]]  |
-| [[file:add-ons/PreciseCrosshair.org][PreciseCrosshair]] | makes a crosshair point to where you actually shoot      | [[https://forum.zdoom.org/viewtopic.php?f=43&t=64788][link]]  |
-| [[file:add-ons/SoundToScreen.org][SoundToScreen]]    | shows where sounds come from                             | [[https://forum.zdoom.org/viewtopic.php?p=1219682][link]]  |
-| [[file:add-ons/TargetSpy.org][TargetSpy]]        | enemy health bar                                         | [[https://forum.zdoom.org/viewtopic.php?t=60784][link]]  |
-| [[file:add-ons/Typist.pk3.org][Typist.pk3]]       | turns FPS games into typing exercises                    | [[https://forum.zdoom.org/viewtopic.php?t=66042][link]]  |
-| [[file:add-ons/WarmReception.org][WarmReception]]    | alters enemy behavior on level start                     | [[https://forum.zdoom.org/viewtopic.php?t=69486][link]]  |
+| [[file:add-ons/10.5x.org][10.5x]]            | enemy number multiplier                                  | [[https://forum.zdoom.org/viewtopic.php?t=65962 ][link]]  |
+| [[file:add-ons/Autoautosave.org][Autoautosave]]     | universal autosaver                                      | [[https://forum.zdoom.org/viewtopic.php?t=59889 ][link]]  |
+| [[file:add-ons/BubbleEm.org][BubbleEm]]         | bubbles instead of corpses                               | [[https://forum.zdoom.org/viewtopic.php?f=46&t=68685 ][link]]  |
+| [[file:add-ons/FinalCustomDoom.org][FinalCustomDoom]]  | gameplay customization options                           | [[https://forum.zdoom.org/viewtopic.php?t=64678 ][link]]  |
+| [[file:add-ons/Gearbox.org][Gearbox]]          | more convenient ways to select weapons and items         | [[https://forum.zdoom.org/viewtopic.php?t=71086 ][link]]  |
+| [[file:add-ons/Graveyard.org][Graveyard]]        | places gravestones where you die                         | [[https://forum.zdoom.org/viewtopic.php?t=68835 ][link]]  |
+| [[file:add-ons/HitImpact.org][HitImpact]]        | textured particles when level geometry is hit            | [[https://forum.zdoom.org/viewtopic.php?t=81483 ][link]]  |
+| [[file:add-ons/Nomina.org][Nomina]]           | enemy names helper                                       | [[https://forum.zdoom.org/viewtopic.php?p=1150645 ][link]]  |
+| [[file:add-ons/PreciseCrosshair.org][PreciseCrosshair]] | makes a crosshair point to where you actually shoot      | [[https://forum.zdoom.org/viewtopic.php?f=43&t=64788 ][link]]  |
+| [[file:add-ons/SoundToScreen.org][SoundToScreen]]    | shows where sounds come from                             | [[https://forum.zdoom.org/viewtopic.php?p=1219682 ][link]]  |
+| [[file:add-ons/TargetSpy.org][TargetSpy]]        | enemy health bar                                         | [[https://forum.zdoom.org/viewtopic.php?t=60784 ][link]]  |
+| [[file:add-ons/Typist.pk3.org][Typist.pk3]]       | turns FPS games into typing exercises                    | [[https://forum.zdoom.org/viewtopic.php?t=66042 ][link]]  |
+| [[file:add-ons/WarmReception.org][WarmReception]]    | alters enemy behavior on level start                     | [[https://forum.zdoom.org/viewtopic.php?t=69486 ][link]]  |
 |------------------+----------------------------------------------------------+-------|
 | *Modules*        |                                                          |       |
 |------------------+----------------------------------------------------------+-------|
 | [[file:modules/Fonts.org][Fonts]]            | fonts finder with graceful fallback                      |       |
 | [[file:modules/LazyPoints.org][LazyPoints]]       | points scoring                                           |       |
 | [[file:modules/libeye.org][libeye]]           | (originally by KeksDose) level and screen projections    |       |
-| [[file:modules/LispOnZscript.org][LispOnZscript]]    | toy Lisp-like language on top of ZScript                 | [[https://forum.zdoom.org/viewtopic.php?t=80881][link]]  |
+| [[file:modules/LispOnZscript.org][LispOnZscript]]    | toy Lisp-like language on top of ZScript                 | [[https://forum.zdoom.org/viewtopic.php?t=80881 ][link]]  |
 | [[file:modules/MD5.org][MD5]]              | (originally by 3saster) MD5 implementation in ZScript    |       |
 | [[file:modules/PreviousWeapon.org][PreviousWeapon]]   | provides a key to select a previous weapon               |       |
 | [[file:modules/StringUtils.org][StringUtils]]      | string manipulation library                              |       |
@@ -92,8 +92,8 @@ FinalCustomDoom:
 [[file:media/screenshots/FinalCustomDoom.png]]
 
 Gearbox
-(with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/][Kinsie's Gameplay Mod Test Map]]
-and with [[https://forum.zdoom.org/viewtopic.php?t=66995][Treasure Tech]]):
+(with Heretic on [[https://www.doomworld.com/forum/topic/146467-gzdoom-kinsies-gameplay-mod-test-map/ ][Kinsie's Gameplay Mod Test Map]]
+and with [[https://forum.zdoom.org/viewtopic.php?t=66995 ][Treasure Tech]]):
 
 #+attr_HTML: :alt Screenshot of Gearbox with guns from Treasure Tech
 [[file:media/screenshots/Gearbox-blocks.png]]
@@ -106,7 +106,7 @@ Graveyard:
 #+attr_HTML: :alt Screenshot of Doom II level "Circle of Death" with gravestones
 [[file:media/screenshots/Graveyard.png]]
 
-HitImpact (with [[https://www.doomwiki.org/wiki/Back_to_Saturn_X][BTSX]] E1 MAP01):
+HitImpact (with [[https://www.doomwiki.org/wiki/Back_to_Saturn_X ][BTSX]] E1 MAP01):
 
 #+attr_HTML: :alt Animated image of bits of walls of BTSX E1 MAP01 flying off when shot
 [[file:media/screenshots/HitImpact.gif]]
@@ -132,13 +132,13 @@ Typist.pk3:
 - UX suggestions: visuals, wording, usability
 - code reviews: errors, style, readability
 - code contributions: optimizations, features (try to keep project scope)
-- [[https://hosted.weblate.org/engage/doom-toolbox/][translations]]
+- [[https://hosted.weblate.org/engage/doom-toolbox/ ][translations]]
 #+attr_HTML: :alt Translation status
 [[https://hosted.weblate.org/widget/doom-toolbox/open-graph.png]]
 
 * Build
 
-*[[file:documentation/WhereAreTheProjectFiles.org][Where are the project files?]]*
+*[[file:documentation/WhereAreTheProjectFiles.org ][Where are the project files?]]*
 
 Build is supported on recent versions of GNU/Linux and Microsoft Windows.
 
@@ -146,7 +146,7 @@ To build:
 1. Install Python, version >= 3.13
 2. Install Emacs, version >= 30.1
 3. Install UZDoom, version >= 4.14.3
-4. Install development tools (a [[https://docs.python.org/3/library/venv.html][venv]] recommended):
+4. Install development tools (a [[https://docs.python.org/3/library/venv.html ][venv]] recommended):
    ~pip install -r tools/requirements-dev.txt~
 5. In console in project directory, see what can be built with command:
    ~scons --help~
@@ -170,7 +170,7 @@ files and directories there.
 - Org files may contain code, extracting the source files may execute it. Only
   extract files from Org files from the sources you trust.
 
-Tests use [[https://github.com/fragglet/miniwad][Miniwad]]: minimalist IWAD internally.
+Tests use [[https://github.com/fragglet/miniwad ][Miniwad]]: minimalist IWAD internally.
 
 * Development
 
@@ -180,7 +180,7 @@ Used languages:
 
 Python or Emacs Lisp knowledge isn't needed to contribute to add-ons and modules.
 
-[[https://prek.j178.dev/][prek]] must be installed in Git repository for pre-commit checks.
+[[https://prek.j178.dev/ ][prek]] must be installed in Git repository for pre-commit checks.
 
 Optional: Org mode extension for your preferred text editor, if it's not Emacs. Org
 mode files can be edited as plain text, but an extension should add convenience

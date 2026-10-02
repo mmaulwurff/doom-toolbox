@@ -12,7 +12,7 @@
 
 * About
 
-[[https://www.doomworld.com/cacowards/2019/gameplay/][2019 Cacowards Mini Mod Safari]]:
+[[https://www.doomworld.com/cacowards/2019/gameplay/ ][2019 Cacowards Mini Mod Safari]]:
 #+begin_quote
 Make anything into a slaughtermap, or make nuts.wad not melt your CPU, all from the
 reach of a single slider.
@@ -41,7 +41,7 @@ Known issues (for multiplier > 1):
 - It may not be possible to get 100% kills in maps with single-use monster
   teleporters.
 
-10.5x is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+10.5x is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 * License
 

@@ -20,7 +20,7 @@
 
 Gearbox provides more convenient ways to select weapons and items.
 
-Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+Gearbox is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 ** How to use
 
@@ -48,7 +48,7 @@ for your weapons! Tag property is also nice to have.
 
 ** Known issues
 
-- [[https://forum.zdoom.org/viewtopic.php?f=43&t=61061][PyWeaponWheel v0.3]] overrides time freezing. If you are using both mods and want to
+- [[https://forum.zdoom.org/viewtopic.php?f=43&t=61061 ][PyWeaponWheel v0.3]] overrides time freezing. If you are using both mods and want to
   freeze time with Gearbox, set PyWeaponWheel's option "Freeze when wheel is open"
   (~py_weaponwheel_freeze~ CVar) to Off. Note that PyWeaponWheel may be built in some
   mods. The solution is the same: disable time PyWeaponWheel's time freezing.

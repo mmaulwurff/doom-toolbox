@@ -14,7 +14,7 @@
 
 PreciseCrosshair tries to put a crosshair where you actually shoot.
 
-PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+PreciseCrosshair is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 How to use
 1. HUD Options -> Crosshair must be OFF.

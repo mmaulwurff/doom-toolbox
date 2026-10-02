@@ -30,6 +30,8 @@ Features
 - doesn't affect gameplay.
 - multiplayer compatible (players see other player's gravestones).
 
+Graveyard is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
+
 * License
 
 #+begin_src text :noweb-ref license

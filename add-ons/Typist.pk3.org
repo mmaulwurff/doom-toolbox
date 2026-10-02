@@ -19,7 +19,7 @@
 
 Typist.pk3 turns FPS games into typing exercises.
 
-Typist.pk3 is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+Typist.pk3 is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 ** How to play
 

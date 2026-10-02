@@ -18,9 +18,9 @@ Options:
 - Turn enemies to you at level start.
 
 Known issues:
-- [[https://github.com/UZDoom/UZDoom/issues/1238][~Actor.CheckSight~ freezes RAMP 2024]]
+- [[https://github.com/UZDoom/UZDoom/issues/1238 ][~Actor.CheckSight~ freezes RAMP 2024]]
 
-WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+WarmReception is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 * Changelog
 

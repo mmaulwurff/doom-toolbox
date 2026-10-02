@@ -23,6 +23,8 @@ Compatibility
 - Zrift - Chasm in Doom - LE: enemies are invisible inside bubbles (checked on v1.1).
 - mk-champions (Champions): invisible enemies (checked on v2.666).
 
+BubbleEm is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
+
 * Changelog
 
 v1.1.0

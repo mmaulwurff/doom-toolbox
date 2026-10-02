@@ -21,7 +21,7 @@ Features:
   - TODO: add command to export current in-game enemy tag corrections to na_data.json.
 - If an enemy without a tag has a name in a sequence definitions, Nomina uses it.
 
-Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+Nomina is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 * Changelog
 

@@ -14,7 +14,7 @@
 SoundToScreen shows where sounds come from. It may be useful for people who play
 without sound, with mono sound, or people with hearing impairment.
 
-SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomToolbox]].
+SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/ ][DoomToolbox]].
 
 ** Features
 
@@ -29,8 +29,8 @@ SoundToScreen is a part of [[https://github.com/mmaulwurff/doom-toolbox/][DoomTo
 
 ** Inspiration
 
-- [[https://forum.zdoom.org/viewtopic.php?f=4&t=71349][Toby Accessibility Mod]] by Alando1.
-- [[https://youtu.be/4NGe4dzlukc][Making Games Better for the Deaf and Hard of Hearing]] by Game Maker's Toolkit.
+- [[https://forum.zdoom.org/viewtopic.php?f=4&t=71349 ][Toby Accessibility Mod]] by Alando1.
+- [[https://youtu.be/4NGe4dzlukc ][Making Games Better for the Deaf and Hard of Hearing]] by Game Maker's Toolkit.
 
 * License
 

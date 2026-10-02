@@ -155,4 +155,4 @@ https://www.contributor-covenant.org/faq. Translations are provided at
 https://www.contributor-covenant.org/translations. Additional enforcement and
 community guideline resources can be found at
 https://www.contributor-covenant.org/resources. The enforcement ladder was inspired
-by the work of [[https://github.com/mozilla/inclusion][Mozilla's code of conduct team]].
+by the work of [[https://github.com/mozilla/inclusion ][Mozilla's code of conduct team]].

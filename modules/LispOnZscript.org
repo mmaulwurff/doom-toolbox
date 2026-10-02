@@ -10,7 +10,7 @@
 * About
 
 #+name: description
-#+begin_src org
+#+begin_src text
 
 LispOnZscript module version: v0.0.1
 LispOnZscript is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
@@ -20,13 +20,14 @@ LispOnZscript is a toy Lisp-like language written on top of ZScript for UZDoom.
 LispOnZscript is an experiment, a programming exercise, and isn't suitable for
 any practical purpose. I'll be surprised if it finds any practical purpose. See
 tests to see what expressions it can evaluate at the moment, also it contains
-~tl_Eval.eval~ usage example. Search for ~TODO~ in this file to see what remains
+tl_Eval.eval usage example. Search for TODO in this file to see what remains
 to be done to make LispOnZscript more usable.
 
-Key function is ~tl_Eval.eval~ function. It takes a parsed expression (from
-~tl_Parser.parse~) and an environment (normally from ~tl_Env.makeGlobalEnv~).
+Key function is tl_Eval.eval function. It takes a parsed expression (from
+tl_Parser.parse) and an environment (normally from tl_Env.makeGlobalEnv).
 
-Adapted from [[https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/][Lisp as the Maxwell's equations of software]] by Michael Nielsen.
+Adapted from "Lisp as the Maxwell's equations of software" by Michael Nielsen.
+https://www.michaelnielsen.org/ddi/lisp-as-the-maxwells-equations-of-software/
 
 TODO: add loading LispOnZscript code from a lump.
 
@@ -36,7 +37,7 @@ Things that I haven't find ways to do to make LispOnZscript more usable:
   be hard-coded.
 - Exposing ZScript structs. For example Cvar, vector. It can be done with wrapper
   classes, but it's not fun.
-- Exposing ZScript ~enum~ constants.
+- Exposing ZScript enum constants.
 #+end_src
 
 * License
