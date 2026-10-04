@@ -509,7 +509,9 @@ v0.2
 
 v0.1: initial release
 
-* Options
+* Option menus
+
+** Main
 
 #+begin_src c :tangle ../build/Gearbox/language.txt
 
@@ -521,8 +523,6 @@ GB_OPTIONS = "Gearbox \ch⚙";
 
 AddOptionMenu OptionsMenu       { Submenu "$GB_OPTIONS", gb_Options }
 AddOptionMenu OptionsMenuSimple { Submenu "$GB_OPTIONS", gb_Options }
-
-// Menus
 
 OptionMenu gb_Options
 {
@@ -548,6 +548,18 @@ OptionMenu gb_Options
   StaticText  "$GB_RESET_CUSTOM_ORDER_NOTE", black
 }
 
+OptionValue gb_ViewTypeValues
+{
+  0, "$GB_BLOCKY_VIEW"
+  1, "$GB_WHEEL_VIEW"
+  2, "$GB_TEXT_VIEW"
+}
+#+end_src
+
+** Keys
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
+
 OptionMenu gb_KeysMenu
 {
   Title "$GB_KEYSECTION"
@@ -558,6 +570,11 @@ OptionMenu gb_KeysMenu
   Control "$GB_ROTATE_WEAPON_PRIORITY", "gb_rotate_weapon_priority"
   Control "$GB_ROTATE_WEAPON_SLOT",     "gb_rotate_weapon_slot"
 }
+#+end_src
+
+** Behavior
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 OptionMenu gb_BehaviorOptions
 {
@@ -578,6 +595,18 @@ OptionMenu gb_BehaviorOptions
   Option      "$GB_LOCK_POSITION",     gb_lock_positions,   OnOff
   Option      "$GB_FROZEN_CAN_OPEN",   gb_frozen_can_open,  OnOff
 }
+
+OptionValue gb_FreezeValues
+{
+  0, "$OPTVAL_OFF"
+  1, "$GB_LEVEL_AND_PLAYER"
+  2, "$GB_PLAYER"
+}
+#+end_src
+
+** Common
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 OptionMenu gb_UiOptions
 {
@@ -614,6 +643,24 @@ OptionValue gb_Tags
   2, "$GB_CLASSES"
 }
 
+OptionValue gb_SoundpackValues
+{
+  0, "Gearbox"
+  1, "$GB_PACK1"
+}
+
+OptionString gb_FontValues
+{
+  "NewSmallFont" , "$GB_SMALL_FONT"
+  "ConsoleFont"  , "$GB_CONSOLE_FONT"
+  "BigFont"      , "$GB_BIG_FONT"
+}
+#+end_src
+
+** Wheel
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
+
 OptionMenu gb_WheelOptions
 {
   Title "$GB_WHEEL_OPTIONS_TITLE"
@@ -632,6 +679,11 @@ OptionMenu gb_WheelOptions
   Slider      "$GB_X", gb_mouse_sensitivity_x, 0.1, 5, 0.1, 1
   Slider      "$GB_Y", gb_mouse_sensitivity_y, 0.1, 5, 0.1, 1
 }
+#+end_src
+
+** Blocks
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 OptionMenu gb_BlocksOptions
 {
@@ -645,6 +697,11 @@ OptionMenu gb_BlocksOptions
   Slider     "$GB_X" , gb_blocks_position_x, 0.0, 1.0, 0.01, 2
   Slider     "$GB_Y" , gb_blocks_position_y, 0.0, 1.0, 0.01, 2
 }
+#+end_src
+
+** Plain text
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 OptionMenu gb_TextOptions
 {
@@ -663,6 +720,11 @@ OptionMenu gb_TextOptions
   Option "$GB_TEXT_USUAL_COLOR"    , gb_text_usual_color    , TextColors
   Option "$GB_TEXT_SELECTED_COLOR" , gb_text_selected_color , TextColors
 }
+#+end_src
+
+** Advanced
+
+#+begin_src c :tangle ../build/Gearbox/menudef.txt
 
 OptionMenu gb_AdvancedOptions
 {
@@ -674,35 +736,6 @@ OptionMenu gb_AdvancedOptions
   StaticText ""
   Option     "$SCALEMNU_HUDASPECT", hud_AspectScale, OnOff
   StaticText "$GB_ASPECT_SCALE_NOTE", black
-}
-
-// Option Values
-
-OptionValue gb_ViewTypeValues
-{
-  0, "$GB_BLOCKY_VIEW"
-  1, "$GB_WHEEL_VIEW"
-  2, "$GB_TEXT_VIEW"
-}
-
-OptionValue gb_SoundpackValues
-{
-  0, "Gearbox"
-  1, "$GB_PACK1"
-}
-
-OptionValue gb_FreezeValues
-{
-  0, "$OPTVAL_OFF"
-  1, "$GB_LEVEL_AND_PLAYER"
-  2, "$GB_PLAYER"
-}
-
-OptionString gb_FontValues
-{
-  "NewSmallFont" , "$GB_SMALL_FONT"
-  "ConsoleFont"  , "$GB_CONSOLE_FONT"
-  "BigFont"      , "$GB_BIG_FONT"
 }
 #+end_src
 
