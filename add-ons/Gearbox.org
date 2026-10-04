@@ -532,12 +532,7 @@ OptionMenu gb_Options
   Option      "$GB_VIEW_TYPE", gb_view_type, gb_ViewTypeValues
 
   StaticText  ""
-  StaticText  "$GB_KEYSECTION", 1
-  Control     "$GB_TOGGLE_WEAPON_MENU"    , "+gb_toggle_weapon_menu"
-  Control     "$GB_TOGGLE_INVENTORY_MENU" , "+gb_toggle_inventory_menu"
-  Control     "$GB_PREV_WEAPON"           , "gb_prev_weapon"
-  Control     "$GB_ROTATE_WEAPON_PRIORITY", "gb_rotate_weapon_priority"
-  Control     "$GB_ROTATE_WEAPON_SLOT"    , "gb_rotate_weapon_slot"
+  Submenu     "$GB_KEYSECTION", gb_KeysMenu
 
   StaticText  ""
   Submenu     "$GB_BEHAVIOR_OPTIONS" , gb_BehaviorOptions
@@ -552,6 +547,17 @@ OptionMenu gb_Options
   SafeCommand "$GB_RESET"              , gb_reset
   SafeCommand "$GB_RESET_CUSTOM_ORDER" , gb_reset_custom_order
   StaticText  "$GB_RESET_CUSTOM_ORDER_NOTE", black
+}
+
+OptionMenu gb_KeysMenu
+{
+  Title "$GB_KEYSECTION"
+
+  Control "$GB_TOGGLE_WEAPON_MENU",    "+gb_toggle_weapon_menu"
+  Control "$GB_TOGGLE_INVENTORY_MENU", "+gb_toggle_inventory_menu"
+  Control "$GB_PREV_WEAPON",            "gb_prev_weapon"
+  Control "$GB_ROTATE_WEAPON_PRIORITY", "gb_rotate_weapon_priority"
+  Control "$GB_ROTATE_WEAPON_SLOT",     "gb_rotate_weapon_slot"
 }
 
 OptionMenu gb_BehaviorOptions
