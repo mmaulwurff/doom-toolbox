@@ -541,7 +541,6 @@ OptionMenu gb_Options
   Submenu     "$GB_BLOCKS_OPTIONS"   , gb_BlocksOptions
   Submenu     "$GB_TEXT_OPTIONS"     , gb_TextOptions
   Submenu     "$GB_ADVANCED_OPTIONS" , gb_AdvancedOptions
-  Submenu     "$GB_ENGINE_OPTIONS"   , gb_EngineOptions
 
   StaticText  ""
   SafeCommand "$GB_RESET"              , gb_reset
@@ -578,15 +577,6 @@ OptionMenu gb_BehaviorOptions
   Option      "$GB_ENABLE_ON_AUTOMAP", gb_on_automap,       OnOff
   Option      "$GB_LOCK_POSITION",     gb_lock_positions,   OnOff
   Option      "$GB_FROZEN_CAN_OPEN",   gb_frozen_can_open,  OnOff
-}
-
-OptionMenu gb_EngineOptions
-{
-  Title "$GB_ENGINE_OPTIONS_TITLE"
-
-  StaticText ""
-  Option     "$SCALEMNU_HUDASPECT", hud_AspectScale, OnOff
-  StaticText "$GB_ASPECT_SCALE_NOTE", black
 }
 
 OptionMenu gb_UiOptions
@@ -680,6 +670,10 @@ OptionMenu gb_AdvancedOptions
 
   StaticText ""
   Option     "$GB_VM_ABORT_INFO_ENABLED", gb_vm_abort_report_enabled, OnOff
+
+  StaticText ""
+  Option     "$SCALEMNU_HUDASPECT", hud_AspectScale, OnOff
+  StaticText "$GB_ASPECT_SCALE_NOTE", black
 }
 
 // Option Values

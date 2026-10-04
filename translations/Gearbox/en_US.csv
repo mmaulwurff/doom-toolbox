@@ -60,8 +60,6 @@
 "GB_RESET","Reset Gearbox options to defaults"
 "GB_RESET_CUSTOM_ORDER","Reset current custom weapon order"
 "GB_RESET_CUSTOM_ORDER_NOTE","Works only while in game."
-"GB_ENGINE_OPTIONS","Relevant engine options"
-"GB_ENGINE_OPTIONS_TITLE","Engine Options that affect Gearbox"
 "GB_ASPECT_SCALE_NOTE","Doesn't affect weapons in wheel for now."
 "GB_ADVANCED_OPTIONS","Advanced options"
 "GB_ADVANCED_OPTIONS_TITLE","Gearbox Advanced Options"
