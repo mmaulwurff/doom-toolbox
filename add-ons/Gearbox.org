@@ -529,7 +529,8 @@ OptionMenu gb_Options
   Title "Gearbox"
 
   StaticText  ""
-  Option      "$GB_VIEW_TYPE", gb_view_type, gb_ViewTypeValues
+  Option      "$GB_WEAPONS",   gb_view_type,           gb_ViewTypeValues
+  Option      "$GB_INVENTORY", gb_inventory_view_type, gb_ViewTypeValues
 
   StaticText  ""
   Submenu     "$GB_KEYSECTION", gb_KeysMenu
@@ -818,6 +819,7 @@ ResetCvar gb_color;
 ResetCvar gb_dim_color;
 ResetCvar gb_show_tags;
 ResetCvar gb_view_type;
+ResetCvar gb_inventory_view_type;
 ResetCvar gb_enable_dim;
 ResetCvar gb_enable_blur;
 ResetCvar gb_wheel_position;
@@ -1685,6 +1687,7 @@ user bool  gb_print_selection = false;
 // 0 - blocky view
 // 1 - wheel view
 user int gb_view_type = 1;
+user int gb_inventory_view_type = 1;
 
 user bool  gb_enable_dim       = true;
 user bool  gb_enable_blur      = false;
@@ -1738,7 +1741,8 @@ class gb_Options
     result.mScale                  = gb_Cvar.from("gb_scale");
     result.mColor                  = gb_Cvar.from("gb_color");
     result.mDimColor               = gb_Cvar.from("gb_dim_color");
-    result.mViewType               = gb_Cvar.from("gb_view_type");
+    result.mWeaponsViewType        = gb_Cvar.from("gb_view_type");
+    result.mInventoryViewType      = gb_Cvar.from("gb_inventory_view_type");
     result.mIsDimEnabled           = gb_Cvar.from("gb_enable_dim");
     result.mIsBlurEnabled          = gb_Cvar.from("gb_enable_blur");
     result.mWheelTint              = gb_Cvar.from("gb_wheel_tint");
@@ -1784,7 +1788,8 @@ class gb_Options
     return result;
   }
 
-  int  getViewType()              const { return mViewType             .getInt();  }
+  int  getWeaponsViewType()       const { return mWeaponsViewType      .getInt();  }
+  int  getInventoryViewType()     const { return mInventoryViewType    .getInt();  }
   int  getScale()                 const { return mScale                .getInt();  }
   int  getColor()                 const { return mColor                .getInt();  }
   int  getDimColor()              const { return mDimColor             .getInt();  }
@@ -1845,7 +1850,8 @@ class gb_Options
   private gb_Cvar mScale;
   private gb_Cvar mColor;
   private gb_Cvar mDimColor;
-  private gb_Cvar mViewType;
+  private gb_Cvar mWeaponsViewType;
+  private gb_Cvar mInventoryViewType;
   private gb_Cvar mIsDimEnabled;
   private gb_Cvar mIsBlurEnabled;
   private gb_Cvar mWheelTint;
@@ -3545,7 +3551,7 @@ class gb_EventHandler : EventHandler
       // initializing weapon menu.
       mWeaponMenu.setSelectedWeapon(gb_WeaponWatcher.current());
     }
-    else if (mOptions.getViewType() == VIEW_TYPE_WHEEL)
+    else if (getActiveViewType() == VIEW_TYPE_WHEEL)
     {
       mWheelController.process();
     }
@@ -3730,7 +3736,7 @@ class gb_EventHandler : EventHandler
 
     gb_Dim.dim(alpha, mOptions);
 
-    switch (mOptions.getViewType())
+    switch (getActiveViewType())
     {
     case VIEW_TYPE_BLOCKY:
       mBlockyView.setAlpha(alpha);
@@ -3778,8 +3784,16 @@ class gb_EventHandler : EventHandler
       mTextView.setScale(mOptions.getTextScale());
       mTextView.display(viewModel);
       break;
-
     }
+  }
+
+  private int getActiveViewType() const
+  {
+    if (mActivity.isNone())      return VIEW_TYPE_NONE;
+    if (mActivity.isWeapons())   return mOptions.getWeaponsViewType();
+    if (mActivity.isInventory()) return mOptions.getInventoryViewType();
+    throwAbortException("ERROR: unexpected activity state");
+    return VIEW_TYPE_NONE;
   }
 
   private play bool isDisabledOnAutomap() const
@@ -3957,6 +3971,7 @@ class gb_EventHandler : EventHandler
 
   enum ViewTypes
   {
+    VIEW_TYPE_NONE   = -1,
     VIEW_TYPE_BLOCKY = 0,
     VIEW_TYPE_WHEEL  = 1,
     VIEW_TYPE_TEXT   = 2,

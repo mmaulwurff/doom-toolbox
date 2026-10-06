@@ -15,7 +15,6 @@
 "GB_TOGGLE_WEAPON_MENU","Abrir menu de armas"
 "GB_TOGGLE_INVENTORY_MENU","Abrir menu de inventário"
 "GB_PREV_WEAPON","Selecionar arma anterior"
-"GB_VIEW_TYPE","Tipo de selecionador"
 "GB_BLOCKY_VIEW","Blocos"
 "GB_WHEEL_VIEW","Roda"
 "GB_TEXT_VIEW","Texto plano"
@@ -73,3 +72,5 @@
 "GB_SHOW_DESCRIPTION",""
 "GB_TAGS",""
 "GB_CLASSES",""
+"GB_WEAPONS",""
+"GB_INVENTORY",""
