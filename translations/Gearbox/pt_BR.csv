@@ -9,7 +9,7 @@
 "GB_COLOR","Cor"
 "GB_PLAYER_COLOR","Copiar cor personalizada do jogador"
 "GB_DIM_COLOR","Cor de atenuação do fundo"
-"GB_PRINT_SELECTION",
+"GB_PRINT_SELECTION",""
 "GB_SOUND","Efeitos sonoros"
 "GB_KEYSECTION","Teclas do Gearbox"
 "GB_TOGGLE_WEAPON_MENU","Abrir menu de armas"
@@ -40,8 +40,8 @@
 "GB_MOUSE_IN_WHEEL","Habilitar mouse"
 "GB_MULTIWHEEL_LIMIT","Limite de múltiplas rodas"
 "GB_MOUSE_SENSITIVITY","Sensibilidade do mouse"
-"GB_X",
-"GB_Y",
+"GB_X",""
+"GB_Y",""
 "GB_Y_BOUNDARY","Limite vertical"
 "GB_WHEEL_OPTIONS","Opções de Roda"
 "GB_WHEEL_OPTIONS_TITLE","Opções da Roda do Gearbox"
@@ -53,7 +53,7 @@
 "GB_TEXT_SELECTED_COLOR","Cor selecionada"
 "GB_FONT","Fonte"
 "GB_FONT_CUSTOM","Fonte (Personalizada)"
-"GB_BAD_FONT","A fonte \"%s\" não foi encontrada."
+"GB_BAD_FONT","A fonte \%s\"" não foi encontrada."""
 "GB_SCALE","Tamanho"
 "GB_POSITION","Posição"
 "GB_RESET","Redefinir configurações padrões do Gearbox"
