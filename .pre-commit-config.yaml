@@ -55,7 +55,7 @@ repos:
       name: ruff-format
 
  - repo: https://github.com/crate-ci/typos
-   rev: v1.50.3
+   rev: v1.51.0
    hooks:
     - id: typos
       name: typos
