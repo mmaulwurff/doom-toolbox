@@ -5,7 +5,7 @@
 
 # GitPython is a Python library used to interact with Git repositories
 # https://pypi.org/project/GitPython/
-GitPython ~= 3.1
+GitPython ~= 3.2
 
 # A fast Git hook manager designed as a drop-in alternative to pre-commit, reimagined.
 # https://prek.j178.dev/
