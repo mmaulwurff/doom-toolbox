@@ -53,7 +53,7 @@
 "GB_TEXT_SELECTED_COLOR","Cor selecionada"
 "GB_FONT","Fonte"
 "GB_FONT_CUSTOM","Fonte (Personalizada)"
-"GB_BAD_FONT","A fonte \%s\"" não foi encontrada."""
+"GB_BAD_FONT","A fonte ""%s"" não foi encontrada."
 "GB_SCALE","Tamanho"
 "GB_POSITION","Posição"
 "GB_RESET","Redefinir configurações padrões do Gearbox"
