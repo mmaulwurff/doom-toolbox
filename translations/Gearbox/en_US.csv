@@ -53,7 +53,7 @@
 "GB_TEXT_SELECTED_COLOR","Selected color"
 "GB_FONT","Font"
 "GB_FONT_CUSTOM","Font (custom)"
-"GB_BAD_FONT","Font \"%s\" not found."
+"GB_BAD_FONT","Font ""%s"" not found."
 "GB_SCALE","Scale"
 "GB_POSITION","Position"
 "GB_RESET","Reset Gearbox options to defaults"
