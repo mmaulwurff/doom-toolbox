@@ -61,7 +61,7 @@ for your weapons! Tag property is also nice to have.
 
 ** Creating a soundpack
 
-1. Replace the GB_PACK string in language.txt with your soundpack's name,
+1. Replace the ~GB_PACK~ string in language.txt with your soundpack's name,
 2. Replace the sndinfo definitions with your own sounds, for example:
 
    In sndinfo.txt, add:
@@ -551,10 +551,25 @@ OptionMenu gb_Options
 
 OptionValue gb_ViewTypeValues
 {
-  0, "$GB_BLOCKY_VIEW"
-  1, "$GB_WHEEL_VIEW"
-  2, "$GB_TEXT_VIEW"
+  <<VIEW_TYPE_BLOCKY>>, "$GB_BLOCKY_VIEW"
+  <<VIEW_TYPE_WHEEL>>, "$GB_WHEEL_VIEW"
+  <<VIEW_TYPE_TEXT>>, "$GB_TEXT_VIEW"
 }
+#+end_src
+
+*** Constants :noexport:
+
+#+begin_src c :noweb-ref VIEW_TYPE_NONE
+-1
+#+end_src
+#+begin_src c :noweb-ref VIEW_TYPE_BLOCKY
+0
+#+end_src
+#+begin_src c :noweb-ref VIEW_TYPE_WHEEL
+1
+#+end_src
+#+begin_src c :noweb-ref VIEW_TYPE_TEXT
+2
 #+end_src
 
 ** Keys
@@ -599,10 +614,22 @@ OptionMenu gb_BehaviorOptions
 
 OptionValue gb_FreezeValues
 {
-  0, "$OPTVAL_OFF"
-  1, "$GB_LEVEL_AND_PLAYER"
-  2, "$GB_PLAYER"
+  <<FREEZE_OFF>>, "$OPTVAL_OFF"
+  <<FREEZE_LEVEL_AND_PLAYER>>, "$GB_LEVEL_AND_PLAYER"
+  <<FREEZE_PLAYER>>, "$GB_PLAYER"
 }
+#+end_src
+
+*** Constants :noexport:
+
+#+begin_src c :noweb-ref FREEZE_OFF
+0
+#+end_src
+#+begin_src c :noweb-ref FREEZE_LEVEL_AND_PLAYER
+1
+#+end_src
+#+begin_src c :noweb-ref FREEZE_PLAYER
+2
 #+end_src
 
 ** Common
@@ -639,9 +666,9 @@ OptionMenu gb_UiOptions
 
 OptionValue gb_Tags
 {
-  0, "$OPTVAL_OFF"
-  1, "$GB_TAGS"
-  2, "$GB_CLASSES"
+  <<TAGS_NONE>>, "$OPTVAL_OFF"
+  <<TAGS_TAGS>>, "$GB_TAGS"
+  <<TAGS_CLASSES>>, "$GB_CLASSES"
 }
 
 OptionValue gb_SoundpackValues
@@ -656,6 +683,18 @@ OptionString gb_FontValues
   "ConsoleFont"  , "$GB_CONSOLE_FONT"
   "BigFont"      , "$GB_BIG_FONT"
 }
+#+end_src
+
+*** Constants :noexport:
+
+#+begin_src c :noweb-ref TAGS_NONE
+0
+#+end_src
+#+begin_src c :noweb-ref TAGS_TAGS
+1
+#+end_src
+#+begin_src c :noweb-ref TAGS_CLASSES
+2
 #+end_src
 
 ** Wheel
@@ -775,9 +814,9 @@ $volume gearbox/pack/nope 0.5
 
 * Keys
 
-#+begin_src c :tangle ../build/Gearbox/keyconf.txt
+** Aliases
 
-// Aliases
+#+begin_src c :tangle ../build/Gearbox/keyconf.txt
 
 Alias +gb_toggle_weapon_menu "event gb_toggle_weapon_menu"
 Alias -gb_toggle_weapon_menu "event gb_toggle_weapon_menu_up"
@@ -797,16 +836,6 @@ Alias gb_copy_player_color "gb_color $color"
 
 // TODO: do this programmatically.
 Alias gb_reset "<<gb_reset()>>"
-
-// Keys
-
-AddKeySection "$GB_KEYSECTION" gb_Keys
-
-AddMenuKey "$GB_TOGGLE_WEAPON_MENU"    +gb_toggle_weapon_menu
-AddMenuKey "$GB_TOGGLE_INVENTORY_MENU" +gb_toggle_inventory_menu
-AddMenuKey "$GB_PREV_WEAPON"            gb_prev_weapon
-AddMenuKey "$GB_ROTATE_WEAPON_PRIORITY" gb_rotate_weapon_priority
-AddMenuKey "$GB_ROTATE_WEAPON_SLOT"     gb_rotate_weapon_slot
 #+end_src
 
 # This is just to put ResetCvar entries on a single line in code.
@@ -849,6 +878,19 @@ ResetCvar gb_time_freeze;
 ResetCvar gb_mouse_sensitivity_x;
 ResetCvar gb_mouse_sensitivity_y;
 "))
+#+end_src
+
+** Keys
+
+#+begin_src c :tangle ../build/Gearbox/keyconf.txt
+
+AddKeySection "$GB_KEYSECTION" gb_Keys
+
+AddMenuKey "$GB_TOGGLE_WEAPON_MENU"    +gb_toggle_weapon_menu
+AddMenuKey "$GB_TOGGLE_INVENTORY_MENU" +gb_toggle_inventory_menu
+AddMenuKey "$GB_PREV_WEAPON"            gb_prev_weapon
+AddMenuKey "$GB_ROTATE_WEAPON_PRIORITY" gb_rotate_weapon_priority
+AddMenuKey "$GB_ROTATE_WEAPON_SLOT"     gb_rotate_weapon_slot
 #+end_src
 
 * Project setup :noexport:
@@ -1274,19 +1316,16 @@ class gb_Freezer play
     thawPlayer();
   }
 
-  // Corresponds to gb_FreezeValues in menudef.
   private static bool isLevelFreezeEnabled(int freezeMode)
   {
-    return !multiplayer && (freezeMode == 1);
+    return !multiplayer && (freezeMode == <<FREEZE_LEVEL_AND_PLAYER>>);
   }
 
-  // Corresponds to gb_FreezeValues in menudef.
-  //
   // Freezing level without player causes weird behavior, like weapon bobbing
   // while Gearbox is open. So, freeze player when level is frozen too.
   private static bool isPlayerFreezeEnabled(int freezeMode)
   {
-    return freezeMode != 0;
+    return freezeMode != <<FREEZE_OFF>>;
   }
 
   // Thaw regardless of freeze mode.
@@ -1676,18 +1715,14 @@ class gb_NeteventProcessor play
 // When adding new options, don't forget to add them to:
 // - keyconf.txt:Alias gb_reset.
 
-// Options
-
 user int   gb_scale     = 1;
 user color gb_color     = "22 22 CC";
 user color gb_dim_color = "99 99 99";
-user int   gb_show_tags = 1;
+user int   gb_show_tags = <<TAGS_TAGS>>;
 user bool  gb_print_selection = false;
 
-// 0 - blocky view
-// 1 - wheel view
-user int gb_view_type = 1;
-user int gb_inventory_view_type = 1;
+user int gb_view_type = <<VIEW_TYPE_WHEEL>>;
+user int gb_inventory_view_type = <<VIEW_TYPE_WHEEL>>;
 
 user bool  gb_enable_dim       = true;
 user bool  gb_enable_blur      = false;
@@ -1724,7 +1759,7 @@ user bool gb_lock_positions   = false;
 user bool gb_enable_sounds    = true;
 user bool gb_frozen_can_open  = false;
 
-user int  gb_time_freeze      = 0;
+user int  gb_time_freeze = <<FREEZE_OFF>>;
 
 user float gb_mouse_sensitivity_x = 1.0;
 user float gb_mouse_sensitivity_y = 1.0;
@@ -2822,9 +2857,9 @@ class gb_BlockyView
         }
 
         int showingTags = mOptions.getShowingTags();
-        if (showingTags == 1)
+        if (showingTags == <<TAGS_TAGS>>)
           drawTag(viewModel.tags[i], aFont, slotX, weaponY);
-        if (showingTags == 2)
+        if (showingTags == <<TAGS_CLASSES>>)
           drawTag(viewModel.classes[i], aFont, slotX, weaponY);
       }
       else // not selected slot (small boxes)
@@ -3300,7 +3335,7 @@ class gb_TextView
     double lineHeight    = aFont.getHeight();
     int    usualColor    = mOptions.getTextUsualColor();
     int    selectedColor = mOptions.getTextSelectedColor();
-    bool   isTagOrClass  = mOptions.getShowingTags() != 2;
+    bool   isTagOrClass  = mOptions.getShowingTags() != <<TAGS_CLASSES>>;
 
     double maxX = 0;
     double maxY = 0;
@@ -3551,7 +3586,7 @@ class gb_EventHandler : EventHandler
       // initializing weapon menu.
       mWeaponMenu.setSelectedWeapon(gb_WeaponWatcher.current());
     }
-    else if (getActiveViewType() == VIEW_TYPE_WHEEL)
+    else if (getActiveViewType() == <<VIEW_TYPE_WHEEL>>)
     {
       mWheelController.process();
     }
@@ -3738,14 +3773,14 @@ class gb_EventHandler : EventHandler
 
     switch (getActiveViewType())
     {
-    case VIEW_TYPE_BLOCKY:
+    case <<VIEW_TYPE_BLOCKY>>:
       mBlockyView.setAlpha(alpha);
       mBlockyView.setScale(mOptions.getScale());
       mBlockyView.setBaseColor(mOptions.getColor());
       mBlockyView.display(viewModel);
       break;
 
-    case VIEW_TYPE_WHEEL:
+    case <<VIEW_TYPE_WHEEL>>:
     {
       gb_WheelControllerModel controllerModel;
       mWheelController.fill(controllerModel);
@@ -3779,7 +3814,7 @@ class gb_EventHandler : EventHandler
       break;
     }
 
-    case VIEW_TYPE_TEXT:
+    case <<VIEW_TYPE_TEXT>>:
       mTextView.setAlpha(alpha);
       mTextView.setScale(mOptions.getTextScale());
       mTextView.display(viewModel);
@@ -3789,11 +3824,11 @@ class gb_EventHandler : EventHandler
 
   private int getActiveViewType() const
   {
-    if (mActivity.isNone())      return VIEW_TYPE_NONE;
+    if (mActivity.isNone())      return <<VIEW_TYPE_NONE>>;
     if (mActivity.isWeapons())   return mOptions.getWeaponsViewType();
     if (mActivity.isInventory()) return mOptions.getInventoryViewType();
     throwAbortException("ERROR: unexpected activity state");
-    return VIEW_TYPE_NONE;
+    return <<VIEW_TYPE_NONE>>;
   }
 
   private play bool isDisabledOnAutomap() const
@@ -3967,14 +4002,6 @@ class gb_EventHandler : EventHandler
                     , nQuantitiesMax2
                     );
     }
-  }
-
-  enum ViewTypes
-  {
-    VIEW_TYPE_NONE   = -1,
-    VIEW_TYPE_BLOCKY = 0,
-    VIEW_TYPE_WHEEL  = 1,
-    VIEW_TYPE_TEXT   = 2,
   }
 
   private void initialize()
@@ -5078,7 +5105,7 @@ class gb_WheelView
     }
 
     int showingTags = mOptions.getShowingTags();
-    if (showingTags)
+    if (showingTags != <<TAGS_NONE>>)
     {
       drawWeaponDescription(viewModel,
                             innerIndex,
