@@ -39,6 +39,8 @@ Credits
 
 * Changelog
 
+- added option to disable crosshair when there is no target
+
 v1.6.0:
 - moved to the new translation system
 - fixed crosshair size for UZDoom 5.0.0
@@ -202,6 +204,7 @@ OptionMenu pc_Menu
   Option     "$PC_SLOT_1"          , pc_disable_slot_1    , YesNo
   Option     "$PC_NOT_READY"       , pc_disable_not_ready , YesNo
   Option     "$PC_NO_WEAPON"       , pc_disable_no_weapon , YesNo
+  Option     "$PC_NO_TARGET"       , pc_disable_no_target , YesNo
   Option     "$PC_DISTANCE_SCALE"  , pc_distance_scale    , YesNo
 
   StaticText ""
@@ -222,12 +225,17 @@ user bool pc_flip_x = false;
 user bool pc_disable_slot_1    = false;
 user bool pc_disable_not_ready = false;
 user bool pc_disable_no_weapon = true;
-user bool pc_distance_scale = true;
+user bool pc_disable_no_target = false;
+user bool pc_distance_scale    = true;
 
 user bool pc_target_health = false;
 user bool pc_new_color_formula = true;
+#+end_src
 
-// Precise External Interface
+* External interface
+
+#+begin_src c :tangle ../build/PreciseCrosshair/cvarinfo.txt
+
 user float pc_y;
 user float pc_scale;
 #+end_src
@@ -402,6 +410,7 @@ private ui void drawCrosshair(PlayerInfo player, RenderEvent event)
      || disabledWhenNotReady(player)
      || disabledOnNoWeapon(player)
      || event.camera != player.mo
+     || disabledOnNoTarget(player)
      )
   {
     return;
@@ -843,6 +852,16 @@ private play bool disabledOnNoWeapon(PlayerInfo player) const
 }
 #+end_src
 
+*** Disabled on no target
+
+#+begin_src c :noweb-ref handler-functions
+
+private play bool disabledOnNoTarget(PlayerInfo player) const
+{
+  return _settings.isDisabledOnNoTarget() && (getAimTarget(player.mo) == NULL);
+}
+#+end_src
+
 *** Is slot 1?
 
 #+begin_src c :noweb-ref handler-functions
@@ -1054,6 +1073,7 @@ class pc_Settings : pc_SettingsPack
   bool isDisabledOnSlot1   () { checkInit(); return _disableOnSlot1   .value(); }
   bool isDisabledOnNotReady() { checkInit(); return _disableOnNotReady.value(); }
   bool isDisabledOnNoWeapon() { checkInit(); return _disableNoWeapon  .value(); }
+  bool isDisabledOnNoTarget() { checkInit(); return _disableOnNoTarget.value(); }
   bool isScaledByDistance  () { checkInit(); return _distanceScale    .value(); }
 
   bool isTargetHealth() { checkInit(); return _targetHealth.value(); }
@@ -1070,6 +1090,7 @@ class pc_Settings : pc_SettingsPack
     push(_disableOnSlot1    = newBoolSetting("pc_disable_slot_1"   ));
     push(_disableOnNotReady = newBoolSetting("pc_disable_not_ready"));
     push(_disableNoWeapon   = newBoolSetting("pc_disable_no_weapon"));
+    push(_disableOnNoTarget = newBoolSetting("pc_disable_no_target"));
     push(_targetHealth      = newBoolSetting("pc_target_health"    ));
     push(_newColorFormula   = newBoolSetting("pc_new_color_formula"));
     push(_distanceScale     = newBoolSetting("pc_distance_scale"   ));
@@ -1087,6 +1108,7 @@ class pc_Settings : pc_SettingsPack
   private pc_BoolSetting _disableOnSlot1;
   private pc_BoolSetting _disableOnNotReady;
   private pc_BoolSetting _disableNoWeapon;
+  private pc_BoolSetting _disableOnNoTarget;
   private pc_BoolSetting _targetHealth;
   private pc_BoolSetting _newColorFormula;
   private pc_BoolSetting _distanceScale;
