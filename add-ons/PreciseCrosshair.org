@@ -257,8 +257,6 @@ user float pc_scale;
 
 class pc_EventHandler : EventHandler
 {
-  <<handler-functions>>
-
   private Vector3        _targetPos;
   private double         _distToTarget;
   private bool           _hasTargetPos;
@@ -283,6 +281,16 @@ class pc_EventHandler : EventHandler
 
   private Cvar _cvarCrosshairColorFull;
   private Cvar _cvarCrosshairColorMax;
+}
+#+end_src
+
+*** Bodies :noexport:
+
+#+begin_src c :tangle ../build/PreciseCrosshair/zscript/pc_event_handler.zs
+
+extend class pc_EventHandler
+{
+  <<handler-functions>>
 }
 #+end_src
 
@@ -1150,7 +1158,7 @@ class pc_SettingsPack : pc_SettingsBase
 }
 #+end_src
 
-* Project setup
+* Project setup :noexport:
 
 #+begin_src c :tangle ../build/PreciseCrosshair/mapinfo.txt
 
