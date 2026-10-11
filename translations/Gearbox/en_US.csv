@@ -27,7 +27,7 @@
 "GB_BEHAVIOR_OPTIONS_TITLE","Gearbox Behavior Options"
 "GB_OPEN_ON_PREV_NEXT","Open on next/previous weapon keys"
 "GB_OPEN_ON_SLOT","Open on slot keys"
-"GB_SELECT_ON_KEY_UP","Select on Toggle Menu key release"
+"GB_SELECT_ON_KEY_UP","Select weapon on Toggle Menu key release"
 "GB_NO_MENU_IF_ONE","Slot keys select if weapon is only one in slot"
 "GB_ENABLE_ON_AUTOMAP","Gearbox on automap"
 "GB_LOCK_POSITION","Locked positions"

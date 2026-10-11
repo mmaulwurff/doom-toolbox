@@ -258,6 +258,7 @@ SPDX-License-Identifier: GPL-3.0-only
 - removed unused and missing sound definition
 - moved to the new translation system
 - better handle cases when weapons disappear
+- make "select on release" option not affect inventory
 
 v0.8.1
 - expand "reverse cycling order" behavior
@@ -822,7 +823,7 @@ Alias +gb_toggle_weapon_menu "event gb_toggle_weapon_menu"
 Alias -gb_toggle_weapon_menu "event gb_toggle_weapon_menu_up"
 
 Alias +gb_toggle_inventory_menu "event gb_toggle_inventory_menu"
-Alias -gb_toggle_inventory_menu "event gb_toggle_inventory_menu_up"
+Alias -gb_toggle_inventory_menu ""
 
 Alias gb_prev_weapon "netevent gb_prev_weapon"
 
@@ -1222,8 +1223,7 @@ class gb_EventProcessor
       return InputConfirmSelection;
 
     if (event.name == "gb_toggle_inventory_menu") return InputToggleInventoryMenu;
-    if (event.name == "gb_toggle_inventory_menu_up" && isSelectOnKeyUp)
-      return InputConfirmSelection;
+
     if (event.name == "gb_rotate_weapon_priority") return InputRotateWeaponPriority;
     if (event.name == "gb_rotate_weapon_slot"    ) return InputRotateWeaponSlot;
 
