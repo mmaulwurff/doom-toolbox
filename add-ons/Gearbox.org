@@ -259,6 +259,7 @@ SPDX-License-Identifier: GPL-3.0-only
 - moved to the new translation system
 - better handle cases when weapons disappear
 - make "select on release" option not affect inventory
+- added options to choose view type for intercepted keys
 
 v0.8.1
 - expand "reverse cycling order" behavior
@@ -601,8 +602,8 @@ OptionMenu gb_BehaviorOptions
 {
   Title "$GB_BEHAVIOR_OPTIONS_TITLE"
 
-  Option     "$GB_OPEN_ON_PREV_NEXT", gb_open_on_scroll, OnOff
-  Option     "$GB_OPEN_ON_SLOT",      gb_open_on_slot,   OnOff
+  Option     "$GB_OPEN_ON_PREV_NEXT", gb_open_on_scroll, gb_OpenViewTypeValues
+  Option     "$GB_OPEN_ON_SLOT",      gb_open_on_slot,   gb_OpenViewTypeValues
 
   StaticText ""
   Option     "$GB_REVERSE_SLOT_CYCLE_ORDER", gb_reverse_slot_cycle_order, OffOn
@@ -623,6 +624,15 @@ OptionValue gb_FreezeValues
   <<FREEZE_LEVEL_AND_PLAYER>>, "$GB_LEVEL_AND_PLAYER"
   <<FREEZE_PLAYER>>, "$GB_PLAYER"
 }
+
+OptionValue gb_OpenViewTypeValues
+{
+  <<OPEN_VIEW_TYPE_OFF>>, "$OPTVAL_OFF"
+  <<OPEN_VIEW_TYPE_DEFAULT>>, "$OPTVAL_DEFAULT"
+  <<OPEN_VIEW_TYPE_BLOCKY>>, "$GB_BLOCKY_VIEW"
+  <<OPEN_VIEW_TYPE_WHEEL>>, "$GB_WHEEL_VIEW"
+  <<OPEN_VIEW_TYPE_TEXT>>, "$GB_TEXT_VIEW"
+}
 #+end_src
 
 *** Constants :noexport:
@@ -635,6 +645,22 @@ OptionValue gb_FreezeValues
 #+end_src
 #+begin_src c :noweb-ref FREEZE_PLAYER
 2
+#+end_src
+
+#+begin_src c :noweb-ref OPEN_VIEW_TYPE_OFF
+0
+#+end_src
+#+begin_src c :noweb-ref OPEN_VIEW_TYPE_DEFAULT
+1
+#+end_src
+#+begin_src c :noweb-ref OPEN_VIEW_TYPE_BLOCKY
+2
+#+end_src
+#+begin_src c :noweb-ref OPEN_VIEW_TYPE_WHEEL
+3
+#+end_src
+#+begin_src c :noweb-ref OPEN_VIEW_TYPE_TEXT
+4
 #+end_src
 
 ** Common
@@ -954,19 +980,16 @@ class gb_Activity
   bool isWeapons()   const { return mActivity == gb_Activity.Weapons;   }
   bool isInventory() const { return mActivity == gb_Activity.Inventory; }
 
-  void toggleWeaponMenu()
-  {
-    switch (mActivity)
-    {
-    case gb_Activity.Inventory:
-    case gb_Activity.None:    mActivity = gb_Activity.Weapons; break;
-    case gb_Activity.Weapons: mActivity = gb_Activity.None;    break;
-    }
-  }
+  int getOpenViewType() const { return mOpenViewType; }
 
   void close()         { mActivity = gb_Activity.None; }
-  void openWeapons()   { mActivity = gb_Activity.Weapons; }
   void openInventory() { mActivity = gb_Activity.Inventory; }
+
+  void openWeapons(int openViewType)
+  {
+    mActivity = gb_Activity.Weapons;
+    mOpenViewType = openViewType;
+  }
 
   enum Activity
   {
@@ -976,6 +999,7 @@ class gb_Activity
   }
 
   private int mActivity;
+  private int mOpenViewType;
 }
 #+end_src
 
@@ -1747,9 +1771,9 @@ user int   gb_text_selected_color =  9; // white
 
 user string gb_font = "NewSmallFont";
 
-user bool gb_open_on_scroll   = false;
+user int gb_open_on_scroll = <<OPEN_VIEW_TYPE_OFF>>;
+user int gb_open_on_slot   = <<OPEN_VIEW_TYPE_DEFAULT>>;
 
-user bool gb_open_on_slot     = true;
 user bool gb_reverse_slot_cycle_order  = true;
 user bool gb_select_first_slot_weapon  = false;
 
@@ -1842,8 +1866,8 @@ class gb_Options
   bool isFrozenCanOpen()          const { return mFrozenCanOpen        .getBool(); }
   bool isPreservingAspectRatio()  const { return mPreserveAspectRatio  .getBool(); }
 
-  bool isOpenOnScroll()           const { return mOpenOnScroll         .getBool(); }
-  bool isOpenOnSlot()             const { return mOpenOnSlot           .getBool(); }
+  int  getOpenOnScroll()          const { return mOpenOnScroll         .getInt();  }
+  int  getOpenOnSlot()            const { return mOpenOnSlot           .getInt();  }
   bool isSlotCycleOrderReversed() const { return mReverseSlotCycleOrder.getBool(); }
   bool isSelectFirstSlotWeapon()  const { return mSelectFirstSlotWeapon.getBool(); }
   bool isMouseInWheel()           const { return mMouseInWheel         .getBool(); }
@@ -3608,7 +3632,7 @@ class gb_EventHandler : EventHandler
 
     switch (gb_EventProcessor.process(event, mOptions.isSelectOnKeyUp()))
     {
-    case InputToggleWeaponMenu: toggleWeapons(); break;
+    case InputToggleWeaponMenu: toggleWeapons(<<OPEN_VIEW_TYPE_DEFAULT>>); break;
     case InputConfirmSelection: confirmSelection(); close(); break;
     case InputToggleInventoryMenu: toggleInventory(); break;
     case InputRotateWeaponPriority: rotateWeaponPriority(); break;
@@ -3682,7 +3706,8 @@ class gb_EventHandler : EventHandler
       {
         int slot = gb_Input.getSlot(input);
 
-        if (mOptions.isOpenOnSlot())
+        int openViewType = mOptions.getOpenOnSlot();
+        if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
         {
           if (mOptions.isNoMenuIfOne() && mWeaponMenu.isOneWeaponInSlot(slot))
           {
@@ -3692,7 +3717,7 @@ class gb_EventHandler : EventHandler
           else if (mWeaponMenu.selectSlot(slot, mOptions.isSelectFirstSlotWeapon()))
           {
             mSounds.playOpen();
-            mActivity.openWeapons();
+            mActivity.openWeapons(openViewType);
           }
           else
           {
@@ -3709,14 +3734,20 @@ class gb_EventHandler : EventHandler
         return true;
       }
 
-      if (mOptions.isOpenOnScroll())
+      int openViewType = mOptions.getOpenOnScroll();
+      if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
       {
         switch (input)
         {
         case InputSelectNextWeapon:
-          toggleWeapons(); mWeaponMenu.selectNextWeapon(); return true;
+          toggleWeapons(openViewType);
+          mWeaponMenu.selectNextWeapon();
+          return true;
+
         case InputSelectPrevWeapon:
-          toggleWeapons(); mWeaponMenu.selectPrevWeapon(); return true;
+          toggleWeapons(openViewType);
+          mWeaponMenu.selectPrevWeapon();
+          return true;
         }
         return false;
       }
@@ -3829,8 +3860,22 @@ class gb_EventHandler : EventHandler
   private int getActiveViewType() const
   {
     if (mActivity.isNone())      return <<VIEW_TYPE_NONE>>;
-    if (mActivity.isWeapons())   return mOptions.getWeaponsViewType();
     if (mActivity.isInventory()) return mOptions.getInventoryViewType();
+
+    if (mActivity.isWeapons())
+    {
+      switch (mActivity.getOpenViewType())
+      {
+      case <<OPEN_VIEW_TYPE_DEFAULT>>: return mOptions.getWeaponsViewType();
+      case <<OPEN_VIEW_TYPE_BLOCKY>>:  return <<VIEW_TYPE_BLOCKY>>;
+      case <<OPEN_VIEW_TYPE_WHEEL>>:   return <<VIEW_TYPE_WHEEL>>;
+      case <<OPEN_VIEW_TYPE_TEXT>>:    return <<VIEW_TYPE_TEXT>>;
+      }
+
+      throwAbortException("ERROR: unexpected open view type");
+      return <<VIEW_TYPE_NONE>>;
+    }
+
     throwAbortException("ERROR: unexpected activity state");
     return <<VIEW_TYPE_NONE>>;
   }
@@ -3850,10 +3895,10 @@ class gb_EventHandler : EventHandler
     if (mustTick) mSounds.playTick();
   }
 
-  private ui void toggleWeapons()
+  private ui void toggleWeapons(int openViewType)
   {
     if (mActivity.isWeapons()) close();
-    else openWeapons();
+    else openWeapons(openViewType);
   }
 
   private ui void toggleInventory()
@@ -3862,7 +3907,7 @@ class gb_EventHandler : EventHandler
     else openInventory();
   }
 
-  private ui void openWeapons()
+  private ui void openWeapons(int openViewType)
   {
     if (gb_Player.isDead() || mWeaponMenu.isThereNoWeapons())
     {
@@ -3872,7 +3917,7 @@ class gb_EventHandler : EventHandler
 
     mWeaponMenu.setSelectedWeapon(gb_WeaponWatcher.current());
     mSounds.playOpen();
-    mActivity.openWeapons();
+    mActivity.openWeapons(openViewType);
   }
 
   private ui void openInventory()
