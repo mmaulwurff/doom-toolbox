@@ -991,7 +991,7 @@ class gb_Activity
     mOpenViewType = openViewType;
   }
 
-  enum Activity
+  enum _
   {
     None,
     Weapons,
@@ -1246,16 +1246,20 @@ class gb_EventProcessor
 {
   static int process(ConsoleEvent event, bool isSelectOnKeyUp)
   {
-    if (event.name == "gb_toggle_weapon_menu") return InputToggleWeaponMenu;
+    if (event.name == "gb_toggle_weapon_menu")
+      return gb_Input.ToggleWeaponMenu;
     if (event.name == "gb_toggle_weapon_menu_up" && isSelectOnKeyUp)
-      return InputConfirmSelection;
+      return gb_Input.ConfirmSelection;
 
-    if (event.name == "gb_toggle_inventory_menu") return InputToggleInventoryMenu;
+    if (event.name == "gb_toggle_inventory_menu")
+      return gb_Input.ToggleInventoryMenu;
 
-    if (event.name == "gb_rotate_weapon_priority") return InputRotateWeaponPriority;
-    if (event.name == "gb_rotate_weapon_slot"    ) return InputRotateWeaponSlot;
+    if (event.name == "gb_rotate_weapon_priority")
+      return gb_Input.RotateWeaponPriority;
+    if (event.name == "gb_rotate_weapon_slot"    )
+      return gb_Input.RotateWeaponSlot;
 
-    return InputNothing;
+    return gb_Input.Nothing;
   }
 }
 #+end_src
@@ -1414,59 +1418,44 @@ class gb_Freezer play
 
 #+begin_src c :tangle ../build/Gearbox/zscript/input.zs
 
-enum gb_Inputs
-{
-  InputNothing,
-
-  InputSelectNextWeapon,
-  InputSelectPrevWeapon,
-  InputConfirmSelection,
-  InputDrop,
-  InputToggleWeaponMenu,
-
-  InputSelectSlotBegin,
-  InputSelectSlotEnd = InputSelectSlotBegin + 11,
-  InputClose,
-
-  InputToggleInventoryMenu,
-  InputConfirmInventorySelection,
-
-  InputRotateWeaponPriority,
-  InputRotateWeaponSlot,
-  InputResetCustomOrder,
-}
-
 class gb_Input
 {
-  static bool isSlot(gb_Inputs input)
+  enum _
   {
-    return (InputSelectSlotBegin <= input && input <= InputSelectSlotEnd);
+    Nothing,
+
+    SelectNextWeapon,
+    SelectPrevWeapon,
+    ConfirmSelection,
+    Drop,
+    ToggleWeaponMenu,
+
+    SelectSlot,
+    Close,
+
+    ToggleInventoryMenu,
+    ConfirmInventorySelection,
+
+    RotateWeaponPriority,
+    RotateWeaponSlot,
+    ResetCustomOrder,
   }
 
-  static int getSlot(gb_Inputs input)
+  // Returns input type and slot number (for InputSelectSlot only).
+  static int, int getInputFrom(InputEvent event)
   {
-    return input - InputSelectSlotBegin;
-  }
-
-  static gb_Inputs getInputFrom(InputEvent event)
-  {
-    if (event.type != InputEvent.Type_KeyDown) return InputNothing;
+    if (event.type != InputEvent.Type_KeyDown) return Nothing, 0;
 
     string binding = bindings.getBinding(event.keyScan);
-    if (binding == "weapnext"  ) return InputSelectNextWeapon;
-    if (binding == "weapprev"  ) return InputSelectPrevWeapon;
-    if (binding == "+attack"   ) return InputConfirmSelection;
-    if (binding == "+altattack") return InputClose;
-    if (binding == "weapdrop"  ) return InputDrop;
-    if (binding == "invdrop"   ) return InputDrop;
+    if (binding == "weapnext"  ) return SelectNextWeapon, 0;
+    if (binding == "weapprev"  ) return SelectPrevWeapon, 0;
+    if (binding == "+attack"   ) return ConfirmSelection, 0;
+    if (binding == "+altattack") return Close, 0;
+    if (binding == "weapdrop"  ) return Drop, 0;
+    if (binding == "invdrop"   ) return Drop, 0;
+    if (binding.left(5) == "slot ") return SelectSlot, binding.mid(5).toInt();
 
-    for (int i = 0; i <= 11; ++i)
-    {
-      if (binding == string.format("slot %d", i))
-        return i + InputSelectSlotBegin;
-    }
-
-    return InputNothing;
+    return Nothing, 0;
   }
 }
 #+end_src
@@ -1686,7 +1675,7 @@ class gb_NeteventProcessor play
 
   int process(ConsoleEvent event)
   {
-    if (!gb_su.beginsWith(event.name, "gb_")) return InputNothing;
+    if (!gb_su.beginsWith(event.name, "gb_")) return gb_Input.Nothing;
 
     Array<string> args;
     event.name.split(args, ":");
@@ -1708,9 +1697,9 @@ class gb_NeteventProcessor play
                              args[4].toDouble()),
                             args[5].toDouble());
     }
-    else if (args[0] == "gb_reset_custom_order") return InputResetCustomOrder;
+    else if (args[0] == "gb_reset_custom_order") return gb_Input.ResetCustomOrder;
 
-    return InputNothing;
+    return gb_Input.Nothing;
   }
 
   private gb_Changer mChanger;
@@ -3631,11 +3620,11 @@ override void consoleProcess(ConsoleEvent event)
 
   switch (gb_EventProcessor.process(event, mOptions.isSelectOnKeyUp()))
   {
-  case InputToggleWeaponMenu: toggleWeapons(<<OPEN_VIEW_TYPE_DEFAULT>>); break;
-  case InputConfirmSelection: confirmSelection(); close(); break;
-  case InputToggleInventoryMenu: toggleInventory(); break;
-  case InputRotateWeaponPriority: rotateWeaponPriority(); break;
-  case InputRotateWeaponSlot:     rotateWeaponSlot(); break;
+  case gb_Input.ToggleWeaponMenu: toggleWeapons(<<OPEN_VIEW_TYPE_DEFAULT>>); break;
+  case gb_Input.ConfirmSelection: confirmSelection(); close(); break;
+  case gb_Input.ToggleInventoryMenu: toggleInventory(); break;
+  case gb_Input.RotateWeaponPriority: rotateWeaponPriority(); break;
+  case gb_Input.RotateWeaponSlot:     rotateWeaponSlot(); break;
   }
 
   if (!mActivity.isNone()) mWheelController.reset();
@@ -3651,131 +3640,186 @@ and processing mouse input.
 
 override bool inputProcess(InputEvent event)
 {
-  if (players[consolePlayer].mo == NULL) return false;
-  if (!mIsInitialized || isDisabledOnAutomap() || gameState != GS_LEVEL)
-    return false;
-  if (isPlayerFrozen() && mActivity.isNone()) return false;
+  if (players[consolePlayer].mo == NULL
+      || !mIsInitialized
+      || isDisabledOnAutomap()
+      || gameState != GS_LEVEL
+      || (isPlayerFrozen() && mActivity.isNone())) return false;
 
-  gb_Inputs input = gb_Input.getInputFrom(event);
+  let [input, slot] = gb_Input.getInputFrom(event);
 
-  if (mActivity.isWeapons())
+  if (mActivity.isWeapons())   return processInputInWeapons(input, slot);
+  if (mActivity.isInventory()) return processInputInInventory(input, slot);
+  if (mActivity.isNone())      return processInputInNone(input, slot);
+
+  throwAbortException("ERROR: unknown activity state");
+  return false;
+}
+#+end_src
+
+*** Process input in weapons
+
+#+begin_src c :noweb-ref event-handler-body
+
+private ui bool processInputInWeapons(int input, int slot)
+{
+  switch (input)
   {
-    switch (input)
-    {
-    case InputSelectNextWeapon:
-      tickIf(mWeaponMenu.selectNextWeapon()); mWheelController.reset(); break;
-    case InputSelectPrevWeapon:
-      tickIf(mWeaponMenu.selectPrevWeapon()); mWheelController.reset(); break;
-    case InputConfirmSelection: confirmSelection(); close(); break;
-    case InputDrop:             dropItem(); break;
-    case InputClose:            close(); break;
-
-    default:
-      if (!gb_Input.isSlot(input)) return false;
-      mWheelController.reset();
-      tickIf(mWeaponMenu.selectSlot(gb_Input.getSlot(input)));
-      break;
-    }
-
-    return true;
-  }
-  else if (mActivity.isInventory())
-  {
-    switch (input)
-    {
-    case InputSelectNextWeapon:
-      tickIf(mInventoryMenu.selectNext()); mWheelController.reset(); break;
-    case InputSelectPrevWeapon:
-      tickIf(mInventoryMenu.selectPrev()); mWheelController.reset(); break;
-    case InputConfirmSelection: confirmSelection(); close(); break;
-    case InputDrop:             dropItem(); break;
-    case InputClose:            close(); break;
-
-    default:
-    {
-      if (!gb_Input.isSlot(input)) return false;
-      mWheelController.reset();
-      int slot = gb_Input.getSlot(input);
-      int index = (slot == 0) ? 9 : slot - 1;
-      tickIf(mInventoryMenu.setSelectedIndex(index));
-      break;
-    }
-    }
-    return true;
-  }
-  else if (mActivity.isNone())
-  {
+  case gb_Input.SelectNextWeapon:
+    tickIf(mWeaponMenu.selectNextWeapon());
     mWheelController.reset();
+    return true;
 
-    if (gb_Input.isSlot(input))
-    {
-      int slot = gb_Input.getSlot(input);
+  case gb_Input.SelectPrevWeapon:
+    tickIf(mWeaponMenu.selectPrevWeapon());
+    mWheelController.reset();
+    return true;
 
-      int openViewType = mOptions.getOpenOnSlot();
-      if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
-      {
-        if (mOptions.isNoMenuIfOne() && mWeaponMenu.isOneWeaponInSlot(slot))
-        {
-          tickIf(mWeaponMenu.selectSlot(slot));
-          gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
-        }
-        else if (mWeaponMenu.selectSlot(slot, mOptions.isSelectFirstSlotWeapon()))
-        {
-          mSounds.playOpen();
-          mActivity.openWeapons(openViewType);
-        }
-        else
-        {
-          mSounds.playNope();
-          return false;
-        }
-      }
-      else
-      {
-        tickIf(mWeaponMenu.selectSlot(slot));
-        gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
-      }
+  case gb_Input.ConfirmSelection:
+    confirmSelection();
+    close();
+    return true;
 
-      return true;
-    }
+  case gb_Input.Drop:
+    dropItem();
+    return true;
 
-    int openViewType = mOptions.getOpenOnScroll();
-    if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
-    {
-      switch (input)
-      {
-      case InputSelectNextWeapon:
-        toggleWeapons(openViewType);
-        mWeaponMenu.selectNextWeapon();
-        return true;
+  case gb_Input.Close:
+    close();
+    return true;
 
-      case InputSelectPrevWeapon:
-        toggleWeapons(openViewType);
-        mWeaponMenu.selectPrevWeapon();
-        return true;
-      }
-      return false;
-    }
-    else
-    {
-      switch (input)
-      {
-      case InputSelectNextWeapon:
-        mWeaponMenu.selectNextWeapon();
-        gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
-        return true;
-
-      case InputSelectPrevWeapon:
-        mWeaponMenu.selectPrevWeapon();
-        gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
-        return true;
-      }
-      return false;
-    }
+  case gb_Input.SelectSlot:
+    mWheelController.reset();
+    tickIf(mWeaponMenu.selectSlot(slot));
+    return true;
   }
 
   return false;
 }
+#+end_src
+
+*** Process input in inventory
+
+#+begin_src c :noweb-ref event-handler-body
+
+private ui bool processInputInInventory(int input, int slot)
+{
+  switch (input)
+  {
+  case gb_Input.SelectNextWeapon:
+    tickIf(mInventoryMenu.selectNext());
+    mWheelController.reset();
+    return true;
+
+  case gb_Input.SelectPrevWeapon:
+    tickIf(mInventoryMenu.selectPrev());
+    mWheelController.reset();
+    return true;
+
+  case gb_Input.ConfirmSelection:
+    confirmSelection();
+    close();
+    return true;
+
+  case gb_Input.Drop:
+    dropItem();
+    return true;
+
+  case gb_Input.Close:
+    close();
+    return true;
+
+  case gb_Input.SelectSlot:
+    mWheelController.reset();
+    tickIf(mInventoryMenu.setSelectedIndex((slot == 0) ? 9 : slot - 1));
+    return true;
+  }
+
+  return false;
+}
+#+end_src
+
+*** Process input in none
+
+#+begin_src c :noweb-ref event-handler-body
+
+private ui bool processInputInNone(int input, int slot)
+{
+  mWheelController.reset();
+
+  switch (input)
+  {
+  case gb_Input.SelectPrevWeapon: return processSelectPreviousWeaponInNone();
+  case gb_Input.SelectNextWeapon: return processSelectNextWeaponInNone();
+  case gb_Input.SelectSlot:       return processSelectSlotInNone(slot);
+  }
+
+  return false;
+}
+
+private ui bool processSelectPreviousWeaponInNone()
+{
+  int openViewType = mOptions.getOpenOnScroll();
+  if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
+  {
+    openWeapons(openViewType);
+    mWeaponMenu.selectPrevWeapon();
+  }
+  else
+  {
+    mWeaponMenu.selectPrevWeapon();
+    gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+  }
+
+  return true;
+}
+
+private ui bool processSelectNextWeaponInNone()
+{
+  int openViewType = mOptions.getOpenOnScroll();
+  if (openViewType != <<OPEN_VIEW_TYPE_OFF>>)
+  {
+    openWeapons(openViewType);
+    mWeaponMenu.selectNextWeapon();
+  }
+  else
+  {
+    mWeaponMenu.selectNextWeapon();
+    gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+  }
+
+  return true;
+}
+
+private ui bool processSelectSlotInNone(int slot)
+{
+  int openViewType = mOptions.getOpenOnSlot();
+  if (openViewType == <<OPEN_VIEW_TYPE_OFF>>)
+  {
+    tickIf(mWeaponMenu.selectSlot(slot));
+    gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+    return true;
+  }
+
+  if (mOptions.isNoMenuIfOne() && mWeaponMenu.isOneWeaponInSlot(slot))
+  {
+    tickIf(mWeaponMenu.selectSlot(slot));
+    gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
+  }
+  else if (mWeaponMenu.selectSlot(slot, mOptions.isSelectFirstSlotWeapon()))
+  {
+    mSounds.playOpen();
+    mActivity.openWeapons(openViewType);
+  }
+  else
+  {
+    mSounds.playNope();
+    return false;
+  }
+
+  return true;
+}
+
 #+end_src
 
 *** Network process
@@ -3790,7 +3834,7 @@ override void networkProcess(ConsoleEvent event)
 
   switch (input)
   {
-  case InputResetCustomOrder: resetCustomOrder(); break;
+  case gb_Input.ResetCustomOrder: resetCustomOrder(); break;
   }
 }
 #+end_src
