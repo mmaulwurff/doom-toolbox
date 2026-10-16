@@ -1447,45 +1447,26 @@ class gb_Input
   {
     return input - InputSelectSlotBegin;
   }
-}
-#+end_src
 
-*** Input processor
-
-#+begin_src c :tangle ../build/Gearbox/zscript/input_processor.zs
-
-class gb_InputProcessor
-{
-  static gb_Inputs process(InputEvent event)
+  static gb_Inputs getInputFrom(InputEvent event)
   {
     if (event.type != InputEvent.Type_KeyDown) return InputNothing;
 
-    int key = event.keyScan;
-    if (isKeyForCommand(key, "weapNext"  )) return InputSelectNextWeapon;
-    if (isKeyForCommand(key, "weapPrev"  )) return InputSelectPrevWeapon;
-    if (isKeyForCommand(key, "+attack"   )) return InputConfirmSelection;
-    if (isKeyForCommand(key, "+altAttack")) return InputClose;
-    if (isKeyForCommand(key, "weapdrop"  )) return InputDrop;
-    if (isKeyForCommand(key, "invdrop"   )) return InputDrop;
+    string binding = bindings.getBinding(event.keyScan);
+    if (binding == "weapnext"  ) return InputSelectNextWeapon;
+    if (binding == "weapprev"  ) return InputSelectPrevWeapon;
+    if (binding == "+attack"   ) return InputConfirmSelection;
+    if (binding == "+altattack") return InputClose;
+    if (binding == "weapdrop"  ) return InputDrop;
+    if (binding == "invdrop"   ) return InputDrop;
 
     for (int i = 0; i <= 11; ++i)
     {
-      if (isKeyForCommand(key, string.format("slot %d", i)))
+      if (binding == string.format("slot %d", i))
         return i + InputSelectSlotBegin;
     }
 
     return InputNothing;
-  }
-
-  private static bool isKeyForCommand(int key, string command)
-  {
-    Array<int> keys;
-    bindings.getAllKeysForCommand(keys, command);
-
-    foreach (aKey : keys)
-      if (aKey == key) return true;
-
-    return false;
   }
 }
 #+end_src
@@ -3675,7 +3656,7 @@ override bool inputProcess(InputEvent event)
     return false;
   if (isPlayerFrozen() && mActivity.isNone()) return false;
 
-  int input = gb_InputProcessor.process(event);
+  gb_Inputs input = gb_Input.getInputFrom(event);
 
   if (mActivity.isWeapons())
   {
