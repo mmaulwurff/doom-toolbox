@@ -260,6 +260,7 @@ SPDX-License-Identifier: GPL-3.0-only
 - better handle cases when weapons disappear
 - make "select on release" option not affect inventory
 - added options to choose view type for intercepted keys
+- inventory menu now uses the engine item selection
 
 v0.8.1
 - expand "reverse cycling order" behavior
@@ -1469,31 +1470,15 @@ class gb_InventoryMenu
   static gb_InventoryMenu from(gb_Options options)
   {
     let result = new("gb_InventoryMenu");
-    result.mSelectedIndex = 0;
     result.mOptions = options;
     return result;
   }
 
-  static bool thereAreNoItems()
-  {
-    return getItemsNumber() == 0;
-  }
-
   string confirmSelection() const
   {
-    let item  = players[consolePlayer].mo.inv;
-    int index = 0;
-    while (item != NULL)
-    {
-      if (item.bInvBar)
-      {
-        if (index == mSelectedIndex) return item.getClassName();
-        ++index;
-      }
-      item = item.inv;
-    }
-
-    return "";
+    let selected = players[consolePlayer].mo.invSel;
+    if (selected == NULL) return "";
+    return selected.getClassName();
   }
 
   ui bool selectNext()
@@ -1501,7 +1486,8 @@ class gb_InventoryMenu
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
 
-    setSelectedIndexImpl((mSelectedIndex + 1) % nItems);
+    int selectedIndex = getSelectedIndex();
+    setSelectedIndexImpl((selectedIndex + 1) % nItems);
 
     return true;
   }
@@ -1511,14 +1497,15 @@ class gb_InventoryMenu
     int nItems = getItemsNumber();
     if (nItems == 0) return false;
 
-    setSelectedIndexImpl((mSelectedIndex - 1 + nItems) % nItems);
+    int selectedIndex = getSelectedIndex();
+    setSelectedIndexImpl((selectedIndex - 1 + nItems) % nItems);
 
     return true;
   }
 
   ui bool setSelectedIndex(int index)
   {
-    if (index == -1 || mSelectedIndex == index) return false;
+    if (index == -1) return false;
 
     setSelectedIndexImpl(index);
 
@@ -1527,74 +1514,74 @@ class gb_InventoryMenu
 
   ui int getSelectedIndex() const
   {
-    return mSelectedIndex;
+    PlayerPawn pawn = players[consolePlayer].mo;
+    int index = 0;
+    for (let item = pawn.inv; item != NULL; item = item.inv)
+    {
+      if (!item.bInvBar) continue;
+      if (item == pawn.invSel) return index;
+      ++index;
+    }
+
+    return 0;
   }
 
   private ui void setSelectedIndexImpl(int index)
   {
-    if (index == mSelectedIndex) return;
-
-    mSelectedIndex = index;
+    int i = 0;
+    PlayerPawn pawn = players[consolePlayer].mo;
+    for (let item = pawn.inv; item != NULL; item = item.inv)
+    {
+      if (!item.bInvBar) continue;
+      if (i == index)
+      {
+        pawn.invSel = item;
+        break;
+      }
+      ++i;
+    }
 
     if (mOptions.isPrintSelection() && 0 <= index && index < getItemsNumber())
-    {
-      let item = players[consolePlayer].mo.inv;
-      int i = 0;
-      while (item != NULL && i != index)
-      {
-        item = item.inv;
-        ++i;
-      }
-      Console.printf("%s", item.getTag());
-    }
+      Console.printf("%s", pawn.invSel.getTag());
   }
 
   ui void fill(out gb_ViewModel viewModel)
   {
-    let item  = players[consolePlayer].mo.inv;
     int index = 0;
-    while (item != NULL)
+    for (let item = players[consolePlayer].mo.inv; item != NULL; item = item.inv)
     {
-      if (item.bInvBar)
-      {
-        string tag  = item.getTag();
-        TextureID icon =
-          BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
-        viewModel.tags        .push(tag);
-        viewModel.classes     .push(item.getClassName());
-        viewModel.slots       .push(index + 1);
-        viewModel.indices     .push(index);
-        viewModel.icons       .push(icon);
-        viewModel.iconScaleXs .push(1);
-        viewModel.iconScaleYs .push(1);
-        viewModel.quantity1   .push(item.maxAmount > 1 ? item.amount : -1);
-        viewModel.maxQuantity1.push(item.maxAmount);
-        viewModel.quantity2   .push(-1);
-        viewModel.maxQuantity2.push(-1);
+      if (!item.bInvBar) continue;
 
-        ++index;
-      }
-      item = item.inv;
+      string tag = item.getTag();
+      TextureID icon =
+        BaseStatusBar.getInventoryIcon(item, BaseStatusBar.DI_AltIconFirst);
+      viewModel.tags        .push(tag);
+      viewModel.classes     .push(item.getClassName());
+      viewModel.slots       .push(index + 1);
+      viewModel.indices     .push(index);
+      viewModel.icons       .push(icon);
+      viewModel.iconScaleXs .push(1);
+      viewModel.iconScaleYs .push(1);
+      viewModel.quantity1   .push(item.maxAmount > 1 ? item.amount : -1);
+      viewModel.maxQuantity1.push(item.maxAmount);
+      viewModel.quantity2   .push(-1);
+      viewModel.maxQuantity2.push(-1);
+
+      ++index;
     }
 
-    mSelectedIndex = min(mSelectedIndex, getItemsNumber() - 1);
-    if (mSelectedIndex == -1 && getItemsNumber() > 0) mSelectedIndex = 0;
-    viewModel.selectedIndex = mSelectedIndex;
+    viewModel.selectedIndex = getSelectedIndex();
   }
 
-  private static int getItemsNumber()
+  static int getItemsNumber()
   {
-    let item   = players[consolePlayer].mo.inv;
     int result = 0;
-    while (item != NULL)
-    {
+    for (let item = players[consolePlayer].mo.inv; item != NULL; item = item.inv)
       result += item.bInvBar;
-      item = item.inv;
-    }
+
     return result;
   }
 
-  private int mSelectedIndex;
   private gb_Options mOptions;
 }
 #+end_src
@@ -4021,7 +4008,7 @@ private ui void openWeapons(int openViewType)
 
 private ui void openInventory()
 {
-  if (gb_Player.isDead() || gb_InventoryMenu.thereAreNoItems())
+  if (gb_Player.isDead() || (gb_InventoryMenu.getItemsNumber() == 0))
   {
     mSounds.playNope();
     return;
