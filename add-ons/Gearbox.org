@@ -3621,18 +3621,35 @@ This function processes key bindings specific for Gearbox.
 
 override void consoleProcess(ConsoleEvent event)
 {
-  if (players[consolePlayer].mo == NULL) return;
-
-  if (!mIsInitialized || isDisabledOnAutomap()) return;
-  if (isPlayerFrozen() && mActivity.isNone()) return;
+  if (players[consolePlayer].mo == NULL
+      || !mIsInitialized
+      || isDisabledOnAutomap()
+      || (isPlayerFrozen() && mActivity.isNone())) return;
 
   switch (gb_EventProcessor.process(event, mOptions.isSelectOnKeyUp()))
   {
-  case gb_Input.ToggleWeaponMenu: toggleWeapons(<<OPEN_VIEW_TYPE_DEFAULT>>); break;
-  case gb_Input.ConfirmSelection: confirmSelection(); close(); break;
-  case gb_Input.ToggleInventoryMenu: toggleInventory(); break;
-  case gb_Input.RotateWeaponPriority: rotateWeaponPriority(); break;
-  case gb_Input.RotateWeaponSlot:     rotateWeaponSlot(); break;
+  case gb_Input.ToggleWeaponMenu:
+    if (mActivity.isWeapons()) close();
+    else openWeapons(<<OPEN_VIEW_TYPE_DEFAULT>>);
+    break;
+
+  case gb_Input.ToggleInventoryMenu:
+    if (mActivity.isInventory()) close();
+    else openInventory(<<OPEN_VIEW_TYPE_DEFAULT>>);
+    break;
+
+  case gb_Input.ConfirmSelection:
+    confirmSelection();
+    close();
+    break;
+
+  case gb_Input.RotateWeaponPriority:
+    rotateWeaponPriority();
+    break;
+
+  case gb_Input.RotateWeaponSlot:
+    rotateWeaponSlot();
+    break;
   }
 
   if (!mActivity.isNone()) mWheelController.reset();
@@ -3986,28 +4003,6 @@ private play bool isPlayerFrozen() const
 private ui void tickIf(bool mustTick)
 {
   if (mustTick) mSounds.playTick();
-}
-#+end_src
-
-*** Toggle weapons
-
-#+begin_src c :noweb-ref event-handler-body
-
-private ui void toggleWeapons(int openViewType)
-{
-  if (mActivity.isWeapons()) close();
-  else openWeapons(openViewType);
-}
-#+end_src
-
-*** Toggle inventory
-
-#+begin_src c :noweb-ref event-handler-body
-
-private ui void toggleInventory()
-{
-  if (mActivity.isInventory()) close();
-  else openInventory(<<OPEN_VIEW_TYPE_DEFAULT>>);
 }
 #+end_src
 
