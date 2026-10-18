@@ -25,7 +25,7 @@
 "GB_WHEEL_TINT","Colored tint on weapons"
 "GB_BEHAVIOR_OPTIONS","Behavior options"
 "GB_BEHAVIOR_OPTIONS_TITLE","Gearbox Behavior Options"
-"GB_OPEN_ON_PREV_NEXT","Open on next/previous weapon keys"
+"GB_OPEN_ON_PREV_NEXT","Open on next/previous keys"
 "GB_OPEN_ON_SLOT","Open on slot keys"
 "GB_SELECT_ON_KEY_UP","Select weapon on Toggle Menu key release"
 "GB_NO_MENU_IF_ONE","Slot keys select if weapon is only one in slot"
