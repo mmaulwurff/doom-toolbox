@@ -5305,7 +5305,9 @@ void display(gb_ViewModel viewModel,
                     radius,
                     allowedWidth,
                     viewModel,
-                    mCenter);
+                    mCenter,
+                    0.0,
+                    true);
     }
     drawHands(nPlaces, innerIndex, mCenter, 0);
   }
@@ -5386,15 +5388,15 @@ private void drawOuterWeapons(int innerIndex,
   }
 
   // draw the selected thing last in case of icon overlapping
-  displayWeapon( selectedPlace
-               , viewModel.selectedIndex
-               , nWeaponsInSlot * 2
-               , radius
-               , allowedWidth
-               , viewModel
-               , outerWheelCenter
-               , startingAngle
-               );
+  displayWeapon(selectedPlace,
+                viewModel.selectedIndex,
+                nWeaponsInSlot * 2,
+                radius,
+                allowedWidth,
+                viewModel,
+                outerWheelCenter,
+                startingAngle,
+                true);
 
   drawHands(nWeaponsInSlot * 2, outerIndex, outerWheelCenter, -startingAngle);
 }
@@ -5451,7 +5453,8 @@ private void displayWeapon(int place,
                            int allowedWidth,
                            gb_ViewModel viewModel,
                            vector2 center,
-                           double  startingAngle = 0.0) const
+                           double  startingAngle = 0.0,
+                           bool isHighlighted = false) const
 {
   TextureID texture     = viewModel.icons[iconIndex];
   vector2   textureSize = TexMan.getScaledSize(texture) * 2 * mScaleFactor;
@@ -5469,10 +5472,9 @@ private void displayWeapon(int place,
 
   double  angle = (startingAngle + itemAngle(nPlaces, place)) % 360;
   vector2 xy    = (sin(angle), -cos(angle)) * radius + center;
-  int width  = int(textureSize.x * scale);
-  int height = int(textureSize.y * scale);
+  vector2 size  = textureSize * scale;
 
-  drawIcon(texture, xy, width, height, angle, isTall);
+  drawIcon(texture, xy, size, angle, isTall, isHighlighted);
   drawAmmo(angle, center, viewModel, iconIndex);
 }
 #+end_src
@@ -5483,10 +5485,10 @@ private void displayWeapon(int place,
 
 private void drawIcon(TextureID texture,
                       vector2 xy,
-                      int w,
-                      int h,
+                      vector2 size,
                       double angle,
-                      bool isTall) const
+                      bool isTall,
+                      bool isHighlighted) const
 {
   bool flipX;
   double scaleY;
@@ -5510,13 +5512,30 @@ private void drawIcon(TextureID texture,
 
   if (!texture.isValid()) texture = mTextureCache.noIcon;
 
+  if (isHighlighted)
+  {
+    int highlightColor = Color(0xFFFF00);
+    Screen.drawTexture( texture
+                      , NO_ANIMATION
+                      , xy.x
+                      , xy.y
+                      , DTA_CenterOffset , true
+                      , DTA_DestWidthF   , size.x * 1.1
+                      , DTA_DestHeightF  , size.y * 1.1
+                      , DTA_ScaleY       , scaleY
+                      , DTA_FillColor    , highlightColor
+                      , DTA_Rotate       , angle
+                      , DTA_FlipX        , flipX
+                      );
+  }
+
   Screen.drawTexture( texture
                     , NO_ANIMATION
                     , xy.x
                     , xy.y
                     , DTA_CenterOffset , true
-                    , DTA_DestWidth    , w
-                    , DTA_DestHeight   , h
+                    , DTA_DestWidthF   , size.x
+                    , DTA_DestHeightF  , size.y
                     , DTA_ScaleY       , scaleY
                     , DTA_Alpha        , mAlpha
                     , DTA_Rotate       , angle
@@ -5531,8 +5550,8 @@ private void drawIcon(TextureID texture,
                     , xy.x
                     , xy.y
                     , DTA_CenterOffset , true
-                    , DTA_DestWidth    , w
-                    , DTA_DestHeight   , h
+                    , DTA_DestWidthF   , size.x
+                    , DTA_DestHeightF  , size.y
                     , DTA_ScaleY       , scaleY
                     , DTA_Alpha        , mAlpha * 0.3
                     , DTA_FillColor    , mBaseColor

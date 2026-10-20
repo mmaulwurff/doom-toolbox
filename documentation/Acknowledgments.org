@@ -54,6 +54,7 @@ The order is alphabetical.
 - efraletti
 - Enjay
 - eqagunn
+- Ermac
 - Eruanna
 - FaggoStorm
 - FoxBoy
