@@ -92,6 +92,9 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 
 * Changelog
 
+v3.2.1:
+- fixed "Always enabled" crosshair options
+
 v3.2.0:
 - moved to the new translation system
 - respect screen boundaries
@@ -1437,7 +1440,6 @@ class ts_EventHandler : StaticEventHandler
   override void renderOverlay(RenderEvent event)
   {
     if (players[consolePlayer].mo == NULL) return;
-    if (isAllInformationEmpty()) return;
 
     double alpha = mFader.getAlpha(event.fracTic);
 
@@ -1610,14 +1612,6 @@ class ts_EventHandler : StaticEventHandler
     int gettersCount = mGetters.size();
     for (int i = 0; i < gettersCount; ++i)
       mInformationPieces[i].kind = ts_Kind.Empty;
-  }
-
-  private bool isAllInformationEmpty() const
-  {
-    foreach (piece : mInformationPieces)
-      if (piece.kind != ts_Kind.Empty) return false;
-
-    return true;
   }
 
   private void collectGetters()
