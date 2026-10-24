@@ -29,6 +29,11 @@ Features:
 - target frame;
 - text crosshair with options and PreciseCrosshair support.
 
+The crosshair elements are configurable. Set them to space to disable an element.
+Try these characters and many others (copy and paste them into ~ts_crosshair_top~,
+~ts_crosshair_center~, or ~ts_crosshair_bottom~ CVars in the config):
+⋄ ∘ ○ ◯ ╭ ╮ ╯ ╰ ┌ ┐ └ ┘ ┏ ┓ ┗ ┛ ╔ ╗ ╚ ╝ ▛ ▜ ▙ ▟ ∧ ∨ ∩ ∪ ✚ ✛ ✜
+
 ** Extending
 
 *** Finders, filters, getters, and views
