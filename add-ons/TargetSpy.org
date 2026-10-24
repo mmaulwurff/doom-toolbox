@@ -99,6 +99,7 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 
 v3.2.1:
 - fixed "Always enabled" crosshair options
+- added crosshair opacity slider
 
 v3.2.0:
 - moved to the new translation system
@@ -1278,6 +1279,8 @@ class tsView_Crosshair : Actor
     else if (alpha <= 0.0)
       return;
 
+    alpha *= options.getCrosshairOpacity();
+
     Font    aFont  = eventHandler.getDefaultFont();
     double  scale  = options.getCrosshairScale();
     double  halfLineHeight = aFont.getHeight() * scale / 2;
@@ -1316,8 +1319,10 @@ class tsView_Crosshair : Actor
 #+end_src
 #+begin_src c :noweb-ref ts_Options.functions
 
-double getCrosshairHeight() const { return mCrosshairHeight.getFloat(); }
-double getCrosshairScale()  const { return mCrosshairScale.getFloat(); }
+double getCrosshairHeight()  const { return mCrosshairHeight .getFloat(); }
+double getCrosshairScale()   const { return mCrosshairScale  .getFloat(); }
+double getCrosshairOpacity() const { return mCrosshairOpacity.getFloat(); }
+
 string getCrosshairTop()    const { return mCrosshairTop   .getString(); }
 string getCrosshairCenter() const { return mCrosshairCenter.getString(); }
 string getCrosshairBottom() const { return mCrosshairBottom.getString(); }
@@ -1339,6 +1344,7 @@ double getCrosshairY() const
 
 private Cvar mCrosshairHeight;
 private Cvar mCrosshairScale;
+private Cvar mCrosshairOpacity;
 private Cvar mCrosshairTop;
 private Cvar mCrosshairCenter;
 private Cvar mCrosshairBottom;
@@ -1347,8 +1353,10 @@ private Cvar mCrosshairHealth;
 #+end_src
 #+begin_src c :noweb-ref options-cvar-initialization
 
-mCrosshairHeight = ts_ExistingCvar.find("ts_crosshair_height");
-mCrosshairScale  = ts_ExistingCvar.find("ts_crosshair_scale");
+mCrosshairHeight  = ts_ExistingCvar.find("ts_crosshair_height");
+mCrosshairScale   = ts_ExistingCvar.find("ts_crosshair_scale");
+mCrosshairOpacity = ts_ExistingCvar.find("ts_crosshair_opacity");
+
 mCrosshairTop    = ts_ExistingCvar.find("ts_crosshair_top");
 mCrosshairCenter = ts_ExistingCvar.find("ts_crosshair_center");
 mCrosshairBottom = ts_ExistingCvar.find("ts_crosshair_bottom");
@@ -1357,11 +1365,14 @@ mCrosshairHealth = ts_ExistingCvar.find("ts_crosshair_health");
 #+end_src
 #+begin_src c :tangle ../build/TargetSpy/cvarinfo.txt
 
-user float  ts_crosshair_height = 10.0;
-user float  ts_crosshair_scale  = 1.0;
+user float  ts_crosshair_height  = 10.0;
+user float  ts_crosshair_scale   =  1.0;
+user float  ts_crosshair_opacity =  1.0;
+
 user string ts_crosshair_top    = "v";
 user string ts_crosshair_center = "> <";
 user string ts_crosshair_bottom = "^";
+
 user bool   ts_crosshair_always = false;
 user bool   ts_crosshair_health = true;
 #+end_src
@@ -1377,6 +1388,7 @@ OptionMenu ts_CrosshairOptions
   StaticText ""
   Slider "$ts_Height", ts_crosshair_height, 0.5, 40, 0.1
   Slider "$ts_Scale",  ts_crosshair_scale,  0.5,  4, 0.1
+  Slider "$ts_Opacity", ts_crosshair_opacity, 0.1, 1.0, 0.1
 
   StaticText ""
   TextField "$ts_Top",    ts_crosshair_top
