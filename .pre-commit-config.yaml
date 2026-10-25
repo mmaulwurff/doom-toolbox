@@ -4,7 +4,6 @@
 # This file contains pre-commit checks.
 # See https://github.com/j178/prek for details.
 
----
 exclude: ^LICENSES/.*
 
 default_install_hook_types: [pre-commit, commit-msg]
@@ -117,6 +116,9 @@ repos:
       args:
        [-d,
         "{extends: default, rules: {\
+        comments-indentation: {level: error}, \
+        comments: {level: error}, \
+        document-start: disable, \
         empty-values: enable, \
         line-length: disable, \
         new-line-at-end-of-file: disable, \

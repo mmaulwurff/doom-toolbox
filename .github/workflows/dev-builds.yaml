@@ -7,7 +7,6 @@
 
 # Devbuilds release creation steps are based on UZDoom workflow.
 
----
 name: dev-builds
 
 on:
