@@ -37,7 +37,7 @@ path = "vale/vale-write-good-v0-4-1.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019 errata.ai"
 SPDX-License-Identifier = "MIT"
 
-# https://github.com/vale-cli/write-good
+# https://github.com/ChrisChinchilla/Openly
 [[annotations]]
 path = "vale/vale-Openly-v0-4-6.zip"
 SPDX-FileCopyrightText = "Copyright (c) 2019 TestTheDocs - Incubator"
