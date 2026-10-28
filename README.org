@@ -4,30 +4,19 @@
 #+title: DoomToolbox
 # vale on
 
-* About
-
 DoomToolbox is a collection of add-ons for [[https://zdoom.org/downloads ][UZDoom and LZDoom]] and their derivatives.
-
-Goals:
-- to increase replayability of compatible games and mods,
-- to customize the game to your liking,
-- to have fun both while playing and developing this project.
-
-Development style: "Move slow and fix things".
 
 - [[https://mmaulwurff.github.io/doom-toolbox/DoomToolbox.zip ][Dev builds]]
 - [[https://mmaulwurff.github.io/doom-toolbox/ ][HTML documentation]]
 - Source: [[https://github.com/mmaulwurff/doom-toolbox/ ][GitHub]], [[https://codeberg.org/m8f/doom-toolbox ][Codeberg]]
 - [[https://www.doomworld.com/forum/topic/99760-doomtoolbox/ ][Doomworld topic]], and some add-ons and modules also have ZDoom forums threads.
+- [[file:documentation/Acknowledgments.org][Acknowledgments]]
 
 DoomToolbox is free and open source software. It's licensed under [[file:LICENSES/GPL-3.0-only.txt][GPLv3]] and
 [[file:LICENSES/BSD-3-Clause.txt][BSD-3-Clause]].
 See ~SPDX-License-Identifier~ tag inside files or nearby ~REUSE.toml~ files for details.
-
 This project doesn't have any "AI" generated code or resources,
 and doesn't use "AI" tools for development.
-
-[[file:documentation/Acknowledgments.org][Acknowledgments]]
 
 * Projects
 
