@@ -1603,6 +1603,19 @@ class gb_InventoryMenu
       viewModel.quantity2   .push(-1);
       viewModel.maxQuantity2.push(-1);
 
+      if (icon.isValid())
+      {
+        viewModel.iconSubstitutes.push("");
+        viewModel.iconSubstituteColors.push(0);
+      }
+      else
+      {
+        let [substitute, substituteColor] =
+          gb_ViewModel.makeIconSubstitute(item.getClassName());
+        viewModel.iconSubstitutes.push(substitute);
+        viewModel.iconSubstituteColors.push(substituteColor);
+      }
+
       ++index;
     }
 
@@ -2141,25 +2154,127 @@ class gb_Sounds
 #+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs
 
 struct gb_ViewModel
+#+end_src
+
+#+begin_src c :tangle ../build/Gearbox/zscript/view_model.zs :exports none
 {
-  int selectedIndex;
-
-  Array<string> tags;
-  Array<string> classes;
-  Array<int> slots;
-  Array<int> indices;
-
-  Array<TextureID> icons;
-  Array<double> iconScaleXs;
-  Array<double> iconScaleYs;
-
-  Array<int> quantity1;
-  Array<int> maxQuantity1;
-
-  Array<int> quantity2;
-  Array<int> maxQuantity2;
+  <<gb_ViewModel-body>>
 }
 #+end_src
+
+**** Fields
+
+#+begin_src c :noweb-ref gb_ViewModel-body
+
+int selectedIndex;
+
+Array<string> tags;
+Array<string> classes;
+Array<int> slots;
+Array<int> indices;
+
+Array<TextureID> icons;
+Array<double> iconScaleXs;
+Array<double> iconScaleYs;
+
+Array<string> iconSubstitutes;
+Array<int> iconSubstituteColors;
+
+Array<int> quantity1;
+Array<int> maxQuantity1;
+
+Array<int> quantity2;
+Array<int> maxQuantity2;
+#+end_src
+
+**** Is valid
+
+#+begin_src c :noweb-ref gb_ViewModel-body
+
+bool isValid() const
+{
+  int tagCount = tags.size();
+
+  return (tagCount > selectedIndex || (tagCount == 0 && selectedIndex == 0))
+    && tagCount == classes     .size()
+    && tagCount == slots       .size()
+    && tagCount == indices     .size()
+    && tagCount == icons       .size()
+    && tagCount == iconScaleXs .size()
+    && tagCount == iconScaleYs .size()
+    && tagCount == iconSubstitutes.size()
+    && tagCount == iconSubstituteColors.size()
+    && tagCount == quantity1   .size()
+    && tagCount == maxQuantity1.size()
+    && tagCount == quantity2   .size()
+    && tagCount == maxQuantity2.size();
+}
+#+end_src
+
+**** Print
+
+#+begin_src c :noweb-ref gb_ViewModel-body
+
+string print() const
+{
+  return new("gb_Description")
+    .addInt("selected index",   selectedIndex)
+    .addInt("tags",             tags        .size())
+    .addInt("classes",          classes     .size())
+    .addInt("slots",            slots       .size())
+    .addInt("indices",          indices     .size())
+    .addInt("icons",            icons       .size())
+    .addInt("icon scale Xs",    iconScaleXs .size())
+    .addInt("icon scale Ys",    iconScaleYs .size())
+    .addInt("icon substitutes", iconSubstitutes.size())
+    .addInt("icon substitute colors", iconSubstituteColors.size())
+    .addInt("quantities 1",     quantity1   .size())
+    .addInt("max quantities 1", maxQuantity1.size())
+    .addInt("quantities 2",     quantity2   .size())
+    .addInt("max quantities 2", maxQuantity2.size())
+    .compose();
+}
+#+end_src
+
+**** Make icon substitute
+
+#+begin_src c :noweb-ref gb_ViewModel-body
+
+static string, Color makeIconSubstitute(string key)
+{
+  int count = key.length();
+  int seed = 0;
+  for (int i = 0; i < count; ++i)
+    seed += key.byteAt(i);
+
+  static const string substitutes[] =
+  {
+    "☉", "⊕", "⊖", "⊙", "⊜", "⊞", "⊟", "⊠", "⊡", "∴", "∵", "∶", "∷", "◇", "◆", "◈"
+  };
+  static const int colors[] =
+  {
+    Font.CR_BRICK,
+    Font.CR_TAN,
+    Font.CR_GREEN,
+    Font.CR_BROWN,
+    Font.CR_RED,
+    Font.CR_BLUE,
+    Font.CR_ORANGE,
+    Font.CR_WHITE,
+    Font.CR_YELLOW,
+    Font.CR_CREAM,
+    Font.CR_OLIVE,
+    Font.CR_DARKGREEN,
+    Font.CR_PURPLE,
+    Font.CR_CYAN,
+    Font.CR_SAPPHIRE,
+    Font.CR_TEAL
+  };
+
+  return substitutes[seed & 0xF], colors[(seed & 0xF0) >> 4];
+}
+#+end_src
+
 
 *** Weapon data
 
@@ -2424,6 +2539,8 @@ class gb_WeaponMenu
       mCachedViewModel.icons       .clear();
       mCachedViewModel.iconScaleXs .clear();
       mCachedViewModel.iconScaleYs .clear();
+      mCachedViewModel.iconSubstitutes.clear();
+      mCachedViewModel.iconSubstituteColors.clear();
       mCachedViewModel.quantity1   .clear();
       mCachedViewModel.maxQuantity1.clear();
       mCachedViewModel.quantity2   .clear();
@@ -2575,7 +2692,8 @@ class gb_WeaponMenu
         if (mOptions.isPositionLocked())
         {
           TextureID nulltex;
-          nulltex.SetInvalid();
+          nulltex.setInvalid();
+
           viewModel.tags        .push("");
           viewModel.classes     .push("");
           viewModel.slots       .push(mSlots[i]);
@@ -2583,6 +2701,8 @@ class gb_WeaponMenu
           viewModel.icons       .push(nulltex);
           viewModel.iconScaleXs .push(-1);
           viewModel.iconScaleYs .push(-1);
+          viewModel.iconSubstitutes.push("⊗");
+          viewModel.iconSubstituteColors.push(Font.CR_GRAY);
           viewModel.quantity1   .push(-1);
           viewModel.maxQuantity1.push(-1);
           viewModel.quantity2   .push(-1);
@@ -2605,6 +2725,19 @@ class gb_WeaponMenu
       viewModel.icons.push(icon);
       viewModel.iconScaleXs.push(aWeapon.scale.x);
       viewModel.iconScaleYs.push(aWeapon.scale.y);
+
+      if (icon.isValid())
+      {
+        viewModel.iconSubstitutes.push("");
+        viewModel.iconSubstituteColors.push(0);
+      }
+      else
+      {
+        let [substitute, substituteColor] =
+          gb_ViewModel.makeIconSubstitute(aWeapon.getClassName());
+        viewModel.iconSubstitutes.push(substitute);
+        viewModel.iconSubstituteColors.push(substituteColor);
+      }
 
       bool hasAmmo1 = aWeapon.ammo1;
       bool hasAmmo2 = aWeapon.ammo2 && aWeapon.ammo2 != aWeapon.ammo1;
@@ -2732,12 +2865,10 @@ class gb_WeaponMenu
 
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_action_menu.zs
 
-class gb_ActionMenu {}
+class gb_ActionMenu
 #+end_src
 
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_action_menu.zs :exports none
-
-extend class gb_ActionMenu
 {
   <<gb_ActionMenu-body>>
 }
@@ -2764,6 +2895,8 @@ private ui int  mSelectedIndex;
 private Array<string> mNames;
 private Array<string> mCommands;
 private Array<TextureID> mIcons;
+private Array<string> mIconSubstitutes;
+private Array<int> mIconSubstituteColors;
 
 private Array<int> mOrder;
 private Array<double> mOnes;
@@ -2803,6 +2936,10 @@ ui void initializeFromUi()
   {
     mNames.push(key);
     mCommands.push(value);
+
+    let [substitute, substituteColor] = gb_ViewModel.makeIconSubstitute(value);
+    mIconSubstitutes.push(substitute);
+    mIconSubstituteColors.push(substituteColor);
   }
 
   rememberBlanks();
@@ -2929,6 +3066,8 @@ ui void fill(out gb_ViewModel viewModel)
   viewModel.icons.copy(mIcons);
   viewModel.iconScaleXs.copy(mOnes);
   viewModel.iconScaleYs.copy(mOnes);
+  viewModel.iconSubstitutes.copy(mIconSubstitutes);
+  viewModel.iconSubstituteColors.copy(mIconSubstituteColors);
   viewModel.quantity1.copy(mZeroes);
   viewModel.maxQuantity1.copy(mZeroes);
   viewModel.quantity2.copy(mZeroes);
@@ -3857,12 +3996,10 @@ For multiplayer compatibility:
 
 #+begin_src c :tangle ../build/Gearbox/zscript/event_handler.zs
 
-class gb_EventHandler : EventHandler {}
+class gb_EventHandler : EventHandler
 #+end_src
 
 #+begin_src c :tangle ../build/Gearbox/zscript/event_handler.zs :exports none
-
-extend class gb_EventHandler
 {
   <<event-handler-body>>
 }
@@ -4238,7 +4375,8 @@ override void renderOverlay(RenderEvent event)
   else if (mActivity.isInventory()) mInventoryMenu.fill(viewModel);
   else if (mActivity.isActions())   mActionMenu.fill(viewModel);
 
-  verifyViewModel(viewModel);
+  if (!viewModel.isValid())
+    throwAbortException("ERROR: invalid view model: %s", viewModel.print());
 
   gb_Dim.dim(alpha, mOptions);
 
@@ -4503,67 +4641,6 @@ private void resetCustomOrder()
   gb_WeaponData weaponData;
   gb_WeaponDataLoader.load(weaponData, !mOptions.isSlotCycleOrderReversed());
   mWeaponMenu = gb_WeaponMenu.from(weaponData, mOptions);
-}
-#+end_src
-
-*** Verify view model
-
-#+begin_src c :noweb-ref event-handler-body
-
-private ui void verifyViewModel(gb_ViewModel model)
-{
-  int nTags           = model.tags        .size();
-  int nClasses        = model.classes     .size();
-  int nSlots          = model.slots       .size();
-  int nIndices        = model.indices     .size();
-  int nIcons          = model.icons       .size();
-  int nIconScaleXs    = model.iconScaleXs .size();
-  int nIconScaleYs    = model.iconScaleYs .size();
-  int nQuantities1    = model.quantity1   .size();
-  int nQuantitiesMax1 = model.maxQuantity1.size();
-  int nQuantities2    = model.quantity2   .size();
-  int nQuantitiesMax2 = model.maxQuantity2.size();
-
-  if (nTags > 0
-      && (model.selectedIndex >= nTags
-          || nTags != nClasses
-          || nTags != nSlots
-          || nTags != nIndices
-          || nTags != nIcons
-          || nTags != nIconScaleXs
-          || nTags != nIconScaleYs
-          || nTags != nQuantities1
-          || nTags != nQuantitiesMax1
-          || nTags != nQuantities2
-          || nTags != nQuantitiesMax2))
-  {
-    Console.printf("Bad view model:\n"
-                   "selected index: %d,\n"
-                   "tags: %d,\n"
-                   "classes: %d,\n"
-                   "slots: %d,\n"
-                   "indices: %d,\n"
-                   "icons: %d,\n"
-                   "icon scale X: %d,\n"
-                   "icon scale Y: %d,\n"
-                   "quantities 1: %d,\n"
-                   "max quantities 1: %d,\n"
-                   "quantities 2: %d,\n"
-                   "max quantities 2: %d,\n"
-                  , model.selectedIndex
-                  , nTags
-                  , nClasses
-                  , nSlots
-                  , nIndices
-                  , nIcons
-                  , nIconScaleXs
-                  , nIconScaleYs
-                  , nQuantities1
-                  , nQuantitiesMax1
-                  , nQuantities2
-                  , nQuantitiesMax2
-                  );
-  }
 }
 #+end_src
 
@@ -4936,7 +5013,6 @@ class gb_TextureCache
     hand       = loadTexture("gb_hand");
     pointer    = loadTexture("gb_pntr");
     textBox    = loadTexture("gb_desc");
-    noIcon     = loadTexture("gb_nope");
 
     // Blocks
     blockBox   = loadTexture("gb_box");
@@ -4959,7 +5035,6 @@ class gb_TextureCache
   transient TextureID hand;
   transient TextureID pointer;
   transient TextureID textBox;
-  transient TextureID noIcon;
 
   transient TextureID blockBox;
   transient TextureID blockBig;
@@ -5463,21 +5538,43 @@ class gb_Text
     return result;
   }
 
+  const HIGHLIGHT_FACTOR = 1.2;
+
   static void draw(string aString,
                    vector2 pos,
                    Font aFont,
                    double alpha,
-                   bool isBig = false)
+                   bool isBig = false,
+                   int color = Font.CR_WHITE,
+                   bool isHighlighted = false)
   {
     int textScale = isBig ? getBigTextScale() : getTextScale();
 
-    pos.x -= aFont.stringWidth(aString) * textScale / 2;
-    pos.y -= aFont.getHeight()          * textScale / 2;
+    if (isHighlighted)
+    {
+      double scale = textScale * HIGHLIGHT_FACTOR;
+      double x     = pos.x - aFont.stringWidth(aString) * scale / 2;
+      double y     = pos.y - aFont.getHeight()          * scale / 2;
+
+      Screen.drawText( aFont
+                     , Font.CR_YELLOW
+                     , x
+                     , y
+                     , aString
+                     , DTA_Alpha  , alpha
+                     , DTA_ScaleX , scale
+                     , DTA_ScaleY , scale
+                     , DTA_FillColor, Color(0xFFFF00)
+                     );
+    }
+
+    double x = pos.x - aFont.stringWidth(aString) * textScale / 2;
+    double y = pos.y - aFont.getHeight()          * textScale / 2;
 
     Screen.drawText( aFont
-                   , Font.CR_WHITE
-                   , pos.x
-                   , pos.y
+                   , color
+                   , x
+                   , y
                    , aString
                    , DTA_Alpha  , alpha
                    , DTA_ScaleX , textScale
@@ -5552,12 +5649,10 @@ class gb_Text
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs
 
-class gb_WheelView {}
+class gb_WheelView
 #+end_src
 
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/view.zs :exports none
-
-extend class gb_WheelView
 {
   <<gb_WheelView-body>>
 }
@@ -5828,25 +5923,32 @@ private void displayWeapon(int place,
                            double  startingAngle = 0.0,
                            bool isHighlighted = false) const
 {
-  TextureID texture     = viewModel.icons[iconIndex];
-  vector2   textureSize = TexMan.getScaledSize(texture) * 2 * mScaleFactor;
+  TextureID texture = viewModel.icons[iconIndex];
+  double  angle = (startingAngle + itemAngle(nPlaces, place)) % 360;
+  vector2 xy    = (sin(angle), -cos(angle)) * radius + center;
 
   if (texture.isValid())
   {
+    vector2 textureSize = TexMan.getScaledSize(texture) * 2 * mScaleFactor;
     textureSize.x *= viewModel.iconScaleXs[iconIndex];
     textureSize.y *= viewModel.iconScaleYs[iconIndex];
+
+    bool   isTall = (textureSize.y * 1.2 > textureSize.x);
+    double scale  = isTall
+      ? ((allowedWidth < textureSize.y) ? allowedWidth / textureSize.y : 1.0)
+      : ((allowedWidth < textureSize.x) ? allowedWidth / textureSize.x : 1.0);
+    vector2 size = textureSize * scale;
+
+    drawIcon(texture, xy, size, angle, isTall, isHighlighted);
+  }
+  else
+  {
+    drawIconSubstitute(viewModel.iconSubstitutes[iconIndex],
+                       viewModel.iconSubstituteColors[iconIndex],
+                       xy,
+                       isHighlighted);
   }
 
-  bool   isTall = (textureSize.y * 1.2 > textureSize.x);
-  double scale  = isTall
-    ? ((allowedWidth < textureSize.y) ? allowedWidth / textureSize.y : 1.0)
-    : ((allowedWidth < textureSize.x) ? allowedWidth / textureSize.x : 1.0);
-
-  double  angle = (startingAngle + itemAngle(nPlaces, place)) % 360;
-  vector2 xy    = (sin(angle), -cos(angle)) * radius + center;
-  vector2 size  = textureSize * scale;
-
-  drawIcon(texture, xy, size, angle, isTall, isHighlighted);
   drawAmmo(angle, center, viewModel, iconIndex);
 }
 #+end_src
@@ -5881,8 +5983,6 @@ private void drawIcon(TextureID texture,
     angle  = 0;
     scaleY = mOptions.isPreservingAspectRatio() ? 1.2 : 1.0;
   }
-
-  if (!texture.isValid()) texture = mTextureCache.noIcon;
 
   if (isHighlighted)
   {
@@ -5930,6 +6030,21 @@ private void drawIcon(TextureID texture,
                     , DTA_Rotate       , angle
                     , DTA_FlipX        , flipX
                     );
+}
+#+end_src
+
+*** Draw icon substitute
+
+#+begin_src c :noweb-ref gb_WheelView-body
+
+private void drawIconSubstitute(string text,
+                                int color,
+                                vector2 xy,
+                                bool isHighlighted)
+{
+  Font aFont = mFontSelector.getFont();
+
+  gb_Text.draw(text, xy, aFont, mAlpha, true, color, isHighlighted);
 }
 #+end_src
 

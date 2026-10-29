@@ -53,11 +53,6 @@ SPDX-FileCopyrightText = "© 2020 Accensus"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 [[annotations]]
-path = "graphics/gb_nope.png"
-SPDX-FileCopyrightText = "© 2021 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
-SPDX-License-Identifier = "CC-BY-SA-4.0"
-
-[[annotations]]
 path = "graphics/gb_pip.png"
 SPDX-FileCopyrightText = "© 2020 Alexander Kromm (m8f) <mmaulwurff@gmail.com>"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
