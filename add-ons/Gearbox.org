@@ -132,9 +132,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_input.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/gb_input_processor.zs
-// <<license>>
-#+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_inventory_menu.zs
 // <<license>>
 #+end_src
@@ -147,9 +144,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_options.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/gb_printer.zs
-// <<license>>
-#+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_sender.zs
 // <<license>>
 #+end_src
@@ -157,9 +151,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_view_model.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/gb_weapon_data.zs
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_weapon_data_loader.zs
@@ -171,7 +162,7 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Gearbox/zscript/display/gb_blocky_view.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_blur.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_effects.zs
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/gldefs.txt
@@ -183,9 +174,6 @@ SPDX-License-Identifier: GPL-3.0-only
 #+begin_src c :tangle ../build/Gearbox/zscript/display/gb_caption.zs
 // <<license>>
 #+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_dim.zs
-// <<license>>
-#+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/display/gb_fade_in_out.zs
 // <<license>>
 #+end_src
@@ -193,9 +181,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/gb_level.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/engine/gb_player.zs
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/gb_weapon_watcher.zs
@@ -211,9 +196,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/service/gb_hide_service.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/tools/gb_ammo.zs
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/gb_cvar.zs
@@ -232,9 +214,6 @@ SPDX-License-Identifier: GPL-3.0-only
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/gb_indexer.zs
-// <<license>>
-#+end_src
-#+begin_src c :tangle ../build/Gearbox/zscript/wheel/gb_inner_indexer.zs
 // <<license>>
 #+end_src
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/gb_multiwheel.zs
@@ -1982,32 +1961,6 @@ class gb_Options
 }
 #+end_src
 
-*** Printer
-
-#+begin_src c :tangle ../build/Gearbox/zscript/gb_printer.zs
-
-class gb_Printer
-{
-  static void printWeaponData(gb_WeaponData data)
-  {
-    int nWeapons = data.weapons.size();
-    int nSlots = data.slots.size();
-
-    console.printf("numbers: %d, %d", nWeapons, nSlots);
-
-    for (int i = 0; i < nWeapons; ++i)
-    {
-      let default = getDefaultByType(data.weapons[i]);
-      console.printf( "%s (%s), slot %d"
-                    , default.getTag()
-                    , default.getClassName()
-                    , data.slots[i]
-                    );
-    }
-  }
-}
-#+end_src
-
 *** Sender
 
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_sender.zs
@@ -2211,6 +2164,16 @@ bool isValid() const
 }
 #+end_src
 
+**** Is ammo valid
+
+#+begin_src c :noweb-ref gb_ViewModel-body
+
+static bool isAmmoValid(int ammo, int maxAmmo)
+{
+  return (ammo != -1 && maxAmmo > 0);
+}
+#+end_src
+
 **** Print
 
 #+begin_src c :noweb-ref gb_ViewModel-body
@@ -2278,7 +2241,7 @@ static string, Color makeIconSubstitute(string key)
 
 *** Weapon data
 
-#+begin_src c :tangle ../build/Gearbox/zscript/gb_weapon_data.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_weapon_menu.zs
 
 struct gb_WeaponData
 {
@@ -3264,7 +3227,8 @@ class gb_BlockyView
         // quantity indicators
         TextureID ammoTexture = mTextureCache.ammoLine;
         int ammoY = weaponY;
-        if (gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]))
+        if (gb_ViewModel.isAmmoValid(viewModel.quantity1[i],
+                                     viewModel.maxQuantity1[i]))
         {
           drawAlphaTexture( ammoTexture
                           , slotX + MARGIN * 2
@@ -3281,7 +3245,8 @@ class gb_BlockyView
                                );
           ammoY += MARGIN + AMMO_HEIGHT;
         }
-        if (gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]))
+        if (gb_ViewModel.isAmmoValid(viewModel.quantity2[i],
+                                     viewModel.maxQuantity2[i]))
         {
           drawAlphaTexture( ammoTexture
                           , slotX + MARGIN * 2
@@ -3595,7 +3560,7 @@ class gb_BlockyView
 
 *** Blur
 
-#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_blur.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_effects.zs
 
 class gb_Blur
 {
@@ -3685,7 +3650,7 @@ class gb_Caption
 
 *** Dim
 
-#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_dim.zs
+#+begin_src c :tangle ../build/Gearbox/zscript/display/gb_effects.zs
 
 class gb_Dim
 {
@@ -3857,10 +3822,10 @@ class gb_TextView
   {
       string result = isTagOrClass ? viewModel.tags[i] : viewModel.classes[i];
 
-      bool isQuantity1Valid =
-        gb_Ammo.isValid(viewModel.quantity1[i], viewModel.maxQuantity1[i]);
-      bool isQuantity2Valid =
-        gb_Ammo.isValid(viewModel.quantity2[i], viewModel.maxQuantity2[i]);
+      bool isQuantity1Valid = gb_ViewModel.isAmmoValid(viewModel.quantity1[i],
+                                                       viewModel.maxQuantity1[i]);
+      bool isQuantity2Valid = gb_ViewModel.isAmmoValid(viewModel.quantity2[i],
+                                                       viewModel.maxQuantity2[i]);
 
       if (isQuantity1Valid && isQuantity2Valid)
       {
@@ -3943,19 +3908,6 @@ class gb_Level
 }
 #+end_src
 
-*** Player
-
-#+begin_src c :tangle ../build/Gearbox/zscript/engine/gb_player.zs
-
-class gb_Player
-{
-  static bool isDead()
-  {
-    return (players[consolePlayer].mo.health <= 0);
-  }
-}
-#+end_src
-
 *** Weapon watcher
 
 #+begin_src c :tangle ../build/Gearbox/zscript/engine/gb_weapon_watcher.zs
@@ -4026,7 +3978,7 @@ override void worldTick()
   if (isClosed) mFreezer.thaw();
   else          mFreezer.freeze();
 
-  if (!isClosed && (gb_Player.isDead() || isDisabledOnAutomap()))
+  if (!isClosed && (isDead() || isDisabledOnAutomap()))
   {
     close();
   }
@@ -4504,7 +4456,7 @@ private ui void tickIf(bool mustTick)
 
 private ui void openWeapons(int openViewType)
 {
-  if (gb_Player.isDead() || mWeaponMenu.isThereNoWeapons())
+  if (isDead() || mWeaponMenu.isThereNoWeapons())
   {
     mSounds.playNope();
     return;
@@ -4522,7 +4474,7 @@ private ui void openWeapons(int openViewType)
 
 private ui void openInventory(int openViewType)
 {
-  if (gb_Player.isDead() || (gb_InventoryMenu.getItemsNumber() == 0))
+  if (isDead() || (gb_InventoryMenu.getItemsNumber() == 0))
   {
     mSounds.playNope();
     return;
@@ -4539,7 +4491,7 @@ private ui void openInventory(int openViewType)
 
 private ui void openActions(int openViewType)
 {
-  if (gb_Player.isDead())
+  if (isDead())
   {
     mSounds.playNope();
     return;
@@ -4548,6 +4500,16 @@ private ui void openActions(int openViewType)
   mWeaponMenu.setSelectedIndex(mActionMenu.getSelectedIndex());
   mSounds.playOpen();
   mActivity.openActions(openViewType);
+}
+#+end_src
+
+*** Is dead
+
+#+begin_src c :noweb-ref event-handler-body
+
+private clearscope static bool isDead()
+{
+  return (players[consolePlayer].mo.health <= 0);
 }
 #+end_src
 
@@ -4901,19 +4863,6 @@ class gb_HideService : gb_Service
 
 ** Tools
 
-*** Ammo
-
-#+begin_src c :tangle ../build/Gearbox/zscript/tools/gb_ammo.zs
-
-class gb_Ammo
-{
-  static bool isValid(int ammo, int maxAmmo)
-  {
-    return (ammo != -1 && maxAmmo > 0);
-  }
-}
-#+end_src
-
 *** Cvar
 
 #+begin_src c :tangle ../build/Gearbox/zscript/tools/gb_cvar.zs
@@ -5140,6 +5089,15 @@ struct gb_WheelControllerModel
 {
   double angle;
   double radius;
+
+  int getSelectedIndex(int nItems, gb_Screen screen) const
+  {
+    if (radius < screen.getWheelDeadRadius() || nItems == 0)
+      return -1;
+
+    int result = int(round(angle * nItems / 360.0)) % nItems;
+    return result;
+  }
 }
 #+end_src
 
@@ -5245,9 +5203,7 @@ class gb_WheelIndexer
 
     if (!mMultiWheelMode.isEngaged(viewModel))
     {
-      mSelectedIndex = gb_WheelInnerIndexer.getSelectedIndex(nWeapons,
-                                                             controllerModel,
-                                                             mScreen);
+      mSelectedIndex = controllerModel.getSelectedIndex(nWeapons, mScreen);
       mLastSlotIndex = UNDEFINED_INDEX;
       mInnerIndex    = mSelectedIndex;
       mOuterIndex    = UNDEFINED_INDEX;
@@ -5324,9 +5280,7 @@ class gb_WheelIndexer
                        , gb_ViewModel            viewModel
                        )
   {
-    int  innerIndex = gb_WheelInnerIndexer.getSelectedIndex(nPlaces,
-                                                            controllerModel,
-                                                            mScreen);
+    int  innerIndex = controllerModel.getSelectedIndex(nPlaces, mScreen);
     bool isWeapon   = multiWheelModel.isWeapon[innerIndex];
 
     mSelectedIndex = isWeapon
@@ -5369,27 +5323,6 @@ class gb_WheelIndexer
 
   private gb_MultiWheelMode mMultiWheelMode;
   private gb_Screen         mScreen;
-}
-#+end_src
-
-*** Wheel inner indexer
-
-#+begin_src c :tangle ../build/Gearbox/zscript/wheel/gb_inner_indexer.zs
-
-class gb_WheelInnerIndexer
-{
-  static int getSelectedIndex(int nItems,
-                              gb_WheelControllerModel controllerModel,
-                              gb_Screen screen)
-  {
-    if (controllerModel.radius < screen.getWheelDeadRadius() || nItems == 0)
-    {
-      return -1;
-    }
-
-    int result = int(round(controllerModel.angle * nItems / 360.0)) % nItems;
-    return result;
-  }
 }
 #+end_src
 
@@ -6105,8 +6038,8 @@ private void drawAmmo(double weaponAngle,
                       gb_ViewModel viewModel,
                       int weaponIndex)
 {
-  if (gb_Ammo.isValid(viewModel.quantity1[weaponIndex],
-                      viewModel.maxQuantity1[weaponIndex]))
+  if (gb_ViewModel.isAmmoValid(viewModel.quantity1[weaponIndex],
+                               viewModel.maxQuantity1[weaponIndex]))
   {
     int margin = int(10 * mScaleFactor);
     int radius = mScreen.getScaledScreenHeight() / 4 - margin;
@@ -6117,8 +6050,8 @@ private void drawAmmo(double weaponAngle,
     drawQuantityPips(radius, weaponAngle, center, nColoredPips, nTotalPips);
   }
 
-  if (gb_Ammo.isValid(viewModel.quantity2[weaponIndex],
-                      viewModel.maxQuantity2[weaponIndex]))
+  if (gb_ViewModel.isAmmoValid(viewModel.quantity2[weaponIndex],
+                               viewModel.maxQuantity2[weaponIndex]))
   {
     int margin = int(20 * mScaleFactor);
     int radius = mScreen.getScaledScreenHeight() / 4 - margin;
@@ -6242,14 +6175,14 @@ private void drawWeaponDescription(gb_ViewModel viewModel,
     : viewModel.classes[index];
   if (description.length() == 0) return;
 
-  string ammo1 = gb_Ammo.isValid(viewModel.quantity1[index],
-                                 viewModel.maxQuantity1[index])
+  string ammo1 = gb_ViewModel.isAmmoValid(viewModel.quantity1[index],
+                                          viewModel.maxQuantity1[index])
     ? string.format("%d/%d",
                     viewModel.quantity1[index],
                     viewModel.maxQuantity1[index])
     : "";
-  string ammo2 = gb_Ammo.isValid(viewModel.quantity2[index],
-                                 viewModel.maxQuantity2[index])
+  string ammo2 = gb_ViewModel.isAmmoValid(viewModel.quantity2[index],
+                                          viewModel.maxQuantity2[index])
     ? string.format("%d/%d",
                     viewModel.quantity2[index],
                     viewModel.maxQuantity2[index])
