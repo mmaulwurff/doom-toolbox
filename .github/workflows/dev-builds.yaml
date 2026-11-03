@@ -144,7 +144,7 @@ jobs:
         if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
         id: set-up-appimage-engine
         run: |
-          sudo apt-get install libfuse
+          sudo apt-get install libfuse2t64
           chmod +x ${{ matrix.engine.download-target }}
 
       - name: Build
