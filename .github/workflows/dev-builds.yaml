@@ -150,7 +150,6 @@ jobs:
           scons -j 4 $(for f in add-ons/* modules/*; do echo $(basename $f ".org"); done)
 
       - name: Wait for deb engine
-        if: ${{ contains(matrix.engine.download-target, '.deb') }}
         wait: set-up-deb-engine
 
       - name: Check compatibility
