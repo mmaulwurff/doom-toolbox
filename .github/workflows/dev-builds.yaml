@@ -89,15 +89,14 @@ jobs:
       DT_ENGINE: ${{ matrix.engine.bin }}
 
     steps:
-      - name: Install system dependencies
-        id: install-system-dependencies
+      - name: Install build dependencies
+        id: install-build-dependencies
         background: true
         # espeak-ng, libespeak1: for pyttsx3
         # ffmpeg: for python-ffmpeg
-        # libsdl2-2.0-0, libvorbisenc2, libopus0, libmpg123-0, libmp3lame0: lzdoom
         run: |
           sudo apt-get update
-          sudo apt-get install libfuse2t64 libpulse0 libsdl2-2.0-0 emacs-nox espeak-ng libespeak1 ffmpeg libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
+          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
 
       - name: Cache engine
         id: cache-engine
@@ -131,17 +130,28 @@ jobs:
           wget -qO- ${{ matrix.engine.url }} > ${{ matrix.engine.download-target }}
 
       - name: Wait for system
-        wait: install-system-dependencies
+        wait: install-build-dependencies
 
       - name: Set up engine with dpkg
         if: ${{ contains(matrix.engine.download-target, '.deb') }}
+        id: set-up-deb-engine
+        background: true
         run: |
+          sudo apt-get install libpulse0 libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
           sudo dpkg -i ${{ matrix.engine.download-target }}
 
       - name: Set up engine with chmod
         if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
         run: |
           chmod +x ${{ matrix.engine.download-target }}
+
+      - name: Build
+        run: |
+          scons -j 4 $(for f in add-ons/* modules/*; do echo $(basename $f ".org"); done)
+
+      - name: Wait for deb engine
+        if: ${{ contains(matrix.engine.download-target, '.deb') }}
+        wait: set-up-deb-engine
 
       - name: Check compatibility
         run: |
@@ -151,7 +161,7 @@ jobs:
         run: |
           xvfb-run --server-args "-screen 0 640x480x24" --auto-servernum scons TestAll
 
-      - name: Build
+      - name: Build packages
         if: ${{ matrix.engine.name == 'uzdoom-stable' }}
         run: |
           scons Pk3All
