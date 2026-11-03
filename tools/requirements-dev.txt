@@ -25,7 +25,7 @@ pyttsx3 ~= 2.99
 # REUSE: open source licenses helper tool
 # https://reuse.software/
 # https://pypi.org/project/reuse/
-reuse[charset-normalizer] ~= 6.2
+reuse[charset-normalizer] ~= 6.3
 
 # SCons: software construction tool
 # http://www.scons.org/documentation.html
