@@ -140,17 +140,19 @@ jobs:
           sudo apt-get install libpulse0 libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
           sudo dpkg -i ${{ matrix.engine.download-target }}
 
-      - name: Set up engine with chmod
+      - name: Set up AppImage engine
         if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
+        id: set-up-appimage-engine
         run: |
+          sudo apt-get install libfuse
           chmod +x ${{ matrix.engine.download-target }}
 
       - name: Build
         run: |
           scons -j 4 $(for f in add-ons/* modules/*; do echo $(basename $f ".org"); done)
 
-      - name: Wait for deb engine
-        wait: set-up-deb-engine
+      - name: Wait for the engine
+        wait: [set-up-deb-engine, set-up-appimage-engine]
 
       - name: Check compatibility
         run: |
