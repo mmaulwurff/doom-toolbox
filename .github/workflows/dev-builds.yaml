@@ -96,7 +96,7 @@ jobs:
         # ffmpeg: for python-ffmpeg
         run: |
           sudo apt-get update
-          sudo apt-get install emacs-nox espeak-ng libespeak1 ffmpeg
+          sudo apt-get --quiet --no-install-recommends install emacs-nox espeak-ng libespeak1 ffmpeg
 
       - name: Cache engine
         id: cache-engine
@@ -137,14 +137,14 @@ jobs:
         id: set-up-deb-engine
         background: true
         run: |
-          sudo apt-get install libpulse0 libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
+          sudo apt-get --quiet --no-install-recommends install libpulse0 libsdl2-2.0-0 libvorbisenc2 libopus0 libmpg123-0 libmp3lame0
           sudo dpkg -i ${{ matrix.engine.download-target }}
 
       - name: Set up AppImage engine
         if: ${{ contains(matrix.engine.download-target, '.AppImage') }}
         id: set-up-appimage-engine
         run: |
-          sudo apt-get install libfuse2t64
+          sudo apt-get --quiet --no-install-recommends install libfuse2t64
           chmod +x ${{ matrix.engine.download-target }}
 
       - name: Build
@@ -194,7 +194,7 @@ jobs:
         background: true
         run: |
           sudo apt-get update
-          sudo apt-get install emacs-nox
+          sudo apt-get --quiet --no-install-recommends install emacs-nox
 
       - name: Download build
         id: download-build
