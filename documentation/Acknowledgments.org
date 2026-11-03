@@ -69,6 +69,7 @@ The order is alphabetical.
 - IKA
 - insightguy
 - isaacpop23
+- Ismael Leblanc
 - Jarewill
 - Jekyll Grim Payne (Agent Ash)
 - Jimmy
@@ -102,6 +103,7 @@ The order is alphabetical.
 - przemko27
 - ramon.dexter
 - retronutcase
+- Revan
 - Rodman909
 - Rowsol
 - rparhkdtp
