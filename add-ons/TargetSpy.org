@@ -97,6 +97,8 @@ Follower classes must have the real enemy actor set in their ~master~ field.
 
 * Changelog
 
+- added Castilian Spanish translation (by Revan)
+
 v3.2.1:
 - fixed "Always enabled" crosshair options
 - added crosshair opacity slider

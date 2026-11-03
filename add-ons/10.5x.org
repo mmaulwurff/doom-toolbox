@@ -97,7 +97,8 @@ SPDX-License-Identifier: GPL-3.0-only
 
 * Changelog
 
-- move strings to translation system
+- moved strings to translation system
+- added Castilian Spanish translation (by Ismael Leblanc)
 
 * Event handler
 
