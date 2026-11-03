@@ -10,7 +10,7 @@ GitPython ~= 3.2
 # A fast Git hook manager designed as a drop-in alternative to pre-commit, reimagined.
 # https://prek.j178.dev/
 # https://pypi.org/project/prek/
-prek ~= 0.5.7
+prek ~= 0.5.9
 
 # A python binding for FFmpeg
 # https://github.com/jonghwanhyeon/python-ffmpeg
@@ -25,7 +25,7 @@ pyttsx3 ~= 2.99
 # REUSE: open source licenses helper tool
 # https://reuse.software/
 # https://pypi.org/project/reuse/
-reuse[charset-normalizer] ~= 6.2
+reuse[charset-normalizer] ~= 6.3
 
 # SCons: software construction tool
 # http://www.scons.org/documentation.html

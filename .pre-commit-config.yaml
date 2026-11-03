@@ -38,14 +38,14 @@ repos:
 
  # https://reuse.software/
  - repo: https://github.com/fsfe/reuse-tool
-   rev: v6.2.0
+   rev: v6.3.0
    hooks:
     - id: reuse
       name: reuse
 
  # https://docs.astral.sh/ruff/
  - repo: https://github.com/astral-sh/ruff-pre-commit
-   rev: v0.17.2
+   rev: v0.17.3
    hooks:
     - id: ruff-check
       name: ruff-check
@@ -66,7 +66,7 @@ repos:
       args: []
 
  - repo: https://github.com/compilerla/conventional-pre-commit
-   rev: v4.4.0
+   rev: v4.5.0
    hooks:
     - id: conventional-pre-commit
       stages: [commit-msg]
@@ -169,7 +169,7 @@ repos:
 
  # https://vale.sh/
  - repo: https://github.com/vale-cli/vale
-   rev: v3.25.1
+   rev: v3.26.0
    hooks:
     - id: vale
       name: vale sync
