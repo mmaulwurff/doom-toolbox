@@ -2108,7 +2108,6 @@ class gb_Sounds
 
 struct gb_ViewModel
 #+end_src
-
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_view_model.zs :exports none
 {
   <<gb_ViewModel-body>>
@@ -2237,7 +2236,6 @@ static string, Color makeIconSubstitute(string key)
   return substitutes[seed & 0xF], colors[(seed & 0xF0) >> 4];
 }
 #+end_src
-
 
 *** Weapon data
 
@@ -2637,6 +2635,8 @@ class gb_WeaponMenu
     destination.icons       .copy(source.icons);
     destination.iconScaleXs .copy(source.iconScaleXs);
     destination.iconScaleYs .copy(source.iconScaleYs);
+    destination.iconSubstitutes.copy(source.iconSubstitutes);
+    destination.iconSubstituteColors.copy(source.iconSubstituteColors);
     destination.quantity1   .copy(source.quantity1);
     destination.maxQuantity1.copy(source.maxQuantity1);
     destination.quantity2   .copy(source.quantity2);
@@ -2830,7 +2830,6 @@ class gb_WeaponMenu
 
 class gb_ActionMenu
 #+end_src
-
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_action_menu.zs :exports none
 {
   <<gb_ActionMenu-body>>
@@ -2895,7 +2894,11 @@ ui void initializeFromUi()
       events.insert(name, alias);
   }
 
+  Map<string, string> filteredEvents;
   foreach (key, value : events)
+    if (!isFilteredOut(value)) filteredEvents.insert(key, value);
+
+  foreach (key, value : filteredEvents)
   {
     mNames.push(key);
     mCommands.push(value);
@@ -2910,8 +2913,8 @@ ui void initializeFromUi()
 
 private static ui bool isEvent(string command)
 {
-  return command.left("netevent".length()) ~== "netevent"
-    || command.left("event".length()) ~== "event";
+  return command.left("netevent".length()) == "netevent"
+    || command.left("event".length()) == "event";
 }
 #+end_src
 
@@ -2984,6 +2987,16 @@ private ui void collectAliases(out Map<string, string> result)
 }
 
 const KEYCONF = "keyconf";
+#+end_src
+
+**** Is filtered out
+
+#+begin_src c :noweb-ref gb_ActionMenu-body
+
+private static bool isFilteredOut(string command)
+{
+  return (command == "event gb_toggle_action_menu");
+}
 #+end_src
 
 **** Remember blanks
@@ -3074,11 +3087,11 @@ ui bool setSelectedIndex(int index)
 }
 #+end_src
 
-**** Confirm selection
+**** Get selected command
 
 #+begin_src c :noweb-ref gb_ActionMenu-body
 
-ui string confirmSelection() const
+ui string getSelectedCommand() const
 {
   return mCommands[mSelectedIndex];
 }
@@ -3950,7 +3963,6 @@ For multiplayer compatibility:
 
 class gb_EventHandler : EventHandler
 #+end_src
-
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_event_handler.zs :exports none
 {
   <<event-handler-body>>
@@ -4004,6 +4016,11 @@ override void worldTick()
 This function processes key bindings specific for Gearbox.
 
 #+begin_src c :noweb-ref event-handler-body
+
+override void interfaceProcess(ConsoleEvent event)
+{
+  consoleProcess(event);
+}
 
 override void consoleProcess(ConsoleEvent event)
 {
@@ -4175,8 +4192,8 @@ private ui bool processInputInActions(int input, int slot)
     return true;
 
   case gb_Input.ConfirmSelection:
-    confirmSelection();
     close();
+    gb_Sender.sendEvent(mActionMenu.getSelectedCommand());
     return true;
 
   case gb_Input.Close:
@@ -4534,8 +4551,6 @@ private ui void confirmSelection()
     gb_Sender.sendSelectEvent(mWeaponMenu.confirmSelection());
   else if (mActivity.isInventory())
     gb_Sender.sendUseItemEvent(mInventoryMenu.confirmSelection());
-  else if (mActivity.isActions())
-    gb_Sender.sendEvent(mActionMenu.confirmSelection());
 }
 #+end_src
 
@@ -5584,7 +5599,6 @@ class gb_Text
 
 class gb_WheelView
 #+end_src
-
 #+begin_src c :tangle ../build/Gearbox/zscript/wheel/gb_view.zs :exports none
 {
   <<gb_WheelView-body>>
