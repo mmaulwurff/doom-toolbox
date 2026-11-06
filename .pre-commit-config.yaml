@@ -136,8 +136,9 @@ repos:
     - id: editorconfig-checker
       name: editorconfig-checker
       exclude:
-       "^modules/(libeye.org|MD5.org)|\
-       ^tools/(htmlize.el|.*.css|.*.wad)"
+       "^modules/(libeye\\.org|MD5\\.org)|\
+       ^tools/(htmlize\\.el|.*\\.css|.*\\.wad)|\
+       .*\\.o"
       args: [-disable-indent-size]
 
  - repo: local

@@ -63,13 +63,19 @@ def add_main_target(org_file, target_format):
     --load {build_el_path} \
     --eval "(dt-tangle)"'
 
+  copy_media = make_copy_media(project_name)
+
+  return Command(target=zscript_name, source=org_file, action=[tangle, copy_media])
+
+
+def make_copy_media(project_name):
   def copy_media(target, source, env):
     source_name = 'media/' + project_name
     if Path(source_name).exists():
       target_name = 'build/' + project_name
       shutil.copytree(source_name, target_name, dirs_exist_ok=True)
 
-  return Command(target=zscript_name, source=org_file, action=[tangle, copy_media])
+  return copy_media
 
 
 def add_test_target(org_file, main_target):
@@ -140,7 +146,9 @@ def add_test_target(org_file, main_target):
 
     return 1 if has_errors else 0
 
-  return AlwaysBuild(Alias(test_name, main_target, run_test))
+  copy_media = make_copy_media(test_name)
+
+  return AlwaysBuild(Alias(test_name, main_target, [copy_media, run_test]))
 
 
 def read_org_block(block_name, content):

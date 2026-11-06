@@ -838,10 +838,10 @@ $volume gearbox/pack/nope 0.5
 
 #+begin_src c :tangle ../build/Gearbox/keyconf.txt
 
-Alias +gb_toggle_weapon_menu "event gb_toggle_weapon_menu"
-Alias -gb_toggle_weapon_menu "event gb_toggle_weapon_menu_up"
+Alias +gb_toggle_weapon_menu "interfaceevent gb_toggle_weapon_menu"
+Alias -gb_toggle_weapon_menu "interfaceevent gb_toggle_weapon_menu_up"
 
-Alias +gb_toggle_inventory_menu "event gb_toggle_inventory_menu"
+Alias +gb_toggle_inventory_menu "interfaceevent gb_toggle_inventory_menu"
 Alias -gb_toggle_inventory_menu ""
 
 Alias +gb_toggle_action_menu "event gb_toggle_action_menu"
@@ -1713,6 +1713,38 @@ class gb_NeteventProcessor play
                             args[5].toDouble());
     }
     else if (args[0] == "gb_reset_custom_order") return gb_Input.ResetCustomOrder;
+    else if (args[0] == "gb_acs")
+    {
+      Acs_execute(args[1].toInt(),
+                  level.levelnum,
+                  event.args[0],
+                  event.args[1],
+                  event.args[2]);
+    }
+    else if (args[0] == "gb_acs_always")
+    {
+      Acs_executeAlways(args[1].toInt(),
+                        level.levelnum,
+                        event.args[0],
+                        event.args[1],
+                        event.args[2]);
+    }
+    else if (args[0] == "gb_acs_named")
+    {
+      Acs_execute(-int(Name(args[1])),
+                  level.levelnum,
+                  event.args[0],
+                  event.args[1],
+                  event.args[2]);
+    }
+    else if (args[0] == "gb_acs_named_always")
+    {
+      Acs_executeAlways(-int(Name(args[1])),
+                        level.levelnum,
+                        event.args[0],
+                        event.args[1],
+                        event.args[2]);
+    }
 
     return gb_Input.Nothing;
   }
@@ -1965,6 +1997,111 @@ class gb_Options
 
 #+begin_src c :tangle ../build/Gearbox/zscript/gb_sender.zs
 
+struct gb_ExternalEvent
+{
+  enum _
+  {
+    Network,
+    Interface,
+    Acs,
+    AcsAlways,
+    AcsNamed,
+    AcsNamedAlways,
+    Use
+  }
+
+  int type;
+  string name;
+  int script;
+  int args[3];
+
+  void dispatch(string command)
+  {
+    Array<string> tokens;
+    gb_su.tokenize(command, tokens);
+
+    int tokenCount = tokens.size();
+    if (tokenCount < 2) return;
+
+    type = getEventType(tokens[0].makeLower());
+
+    switch (type)
+    {
+    case Network:
+    case Interface:
+      self.name = gb_su.unwrap(tokens[1]);
+      fillArguments(tokens);
+      break;
+
+    case Use:
+      self.name = gb_su.unwrap(tokens[1]);
+      break;
+
+    case Acs:
+    {
+      int  scriptNumber = tokens[1].toInt();
+      bool isAlways     = scriptNumber < 0;
+      type   = isAlways ? AcsAlways : Acs;
+      script = isAlways ? -scriptNumber : scriptNumber;
+      fillArguments(tokens);
+      break;
+    }
+
+    case AcsNamed:
+    {
+      bool isAlways = (tokenCount > 2 && tokens[2] ~== "always");
+      self.name = gb_su.unwrap(tokens[1]);
+      type = isAlways ? AcsNamedAlways : AcsNamed;
+      fillArguments(tokens, isAlways ? 3 : 2);
+      break;
+    }
+
+    default:
+      Object.throwAbortException("ERROR: unknown event type: %d", type);
+    }
+  }
+
+  private void fillArguments(Array<string> tokens, int start = 2)
+  {
+    int argCount = min(tokens.size() - start, 3);
+    for (int i = 0; i < argCount; ++i)
+      args[i] = tokens[i + start].toInt();
+  }
+
+  string compose() const
+  {
+    switch (type)
+    {
+    case Network:
+    case Interface:      return self.name;
+    case Acs:            return string.format("gb_acs:%d", script);
+    case AcsAlways:      return string.format("gb_acs_always:%d", script);
+    case AcsNamed:       return string.format("gb_acs_named:%s", self.name);
+    case AcsNamedAlways: return string.format("gb_acs_named_always:%s", self.name);
+    case Use:            return string.format("gb_use_item:%s", self.name);
+    }
+
+    Object.throwAbortException("ERROR: unknown event type: %d", type);
+    return "";
+  }
+
+  private static int getEventType(string token)
+  {
+    // Note: AcsAlways and AcsNamedAlways are decided later.
+    if (token == "netevent") return Network;
+    if (token == "interfaceevent") return Interface;
+    if (token == "puke" || token == "acs") return Acs;
+    if (token == "pukename" || token == "acsn") return AcsNamed;
+    if (token == "use") return Use;
+
+    Object.throwAbortException("ERROR: unknown external event type: %s", token);
+    return Network;
+  }
+}
+#+end_src
+
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_sender.zs
+
 class gb_Sender
 {
   static void sendSelectEvent(string className)
@@ -2000,15 +2137,19 @@ class gb_Sender
 
   static void sendEvent(string command)
   {
-    if (command.left(NETEVENT.length()) == NETEVENT)
-      EventHandler.sendNetworkEvent(command.mid(NETEVENT.length() + 1));
-    else if (command.left(EVENT.length()) == EVENT)
-      EventHandler.sendInterfaceEvent(consolePlayer,
-                                      command.mid(EVENT.length() + 1));
-  }
+    gb_ExternalEvent event;
+    event.dispatch(command);
 
-  const NETEVENT = "netevent";
-  const EVENT = "event";
+    int arg1 = event.args[0];
+    int arg2 = event.args[1];
+    int arg3 = event.args[2];
+    string eventString = event.compose();
+
+    if (event.type == gb_ExternalEvent.Interface)
+      EventHandler.sendInterfaceEvent(consolePlayer, eventString, arg1, arg2, arg3);
+    else
+      EventHandler.sendNetworkEvent(eventString, arg1, arg2, arg3);
+  }
 }
 #+end_src
 
@@ -2207,7 +2348,7 @@ static string, Color makeIconSubstitute(string key)
   int count = key.length();
   int seed = 0;
   for (int i = 0; i < count; ++i)
-    seed += key.byteAt(i);
+    seed += key.charCodeAt(i);
 
   static const string substitutes[] =
   {
@@ -2725,7 +2866,7 @@ class gb_WeaponMenu
       if (hideResponse.length() != 0)
       {
         // convert to bool from "0" or "1".
-        bool isHidden = hideResponse.byteAt(0) - 48;
+        bool isHidden = hideResponse.charCodeAt(0) - 48;
         result = isHidden;
       }
     }
@@ -2889,16 +3030,12 @@ ui void initializeFromUi()
       continue;
     }
 
-    let [alias, aliasExists] = aliases.checkValue(command);
+    let [alias, aliasExists] = aliases.checkValue(command.makeLower());
     if (aliasExists && isEvent(alias))
       events.insert(alias, name);
   }
 
-  Map<string, string> filteredEvents;
   foreach (command, name : events)
-    if (!isFilteredOut(command)) filteredEvents.insert(command, name);
-
-  foreach (command, name : filteredEvents)
   {
     mNames.push(name);
     mCommands.push(command);
@@ -2913,8 +3050,13 @@ ui void initializeFromUi()
 
 private static ui bool isEvent(string command)
 {
-  return command.left("netevent".length()) == "netevent"
-    || command.left("event".length()) == "event";
+  static const string EVENTS[] =
+    { "netevent", "interfaceevent", "puke", "acs", "pukename", "acsn", "use" };
+
+  foreach (event : EVENTS)
+    if (command.left(event.length()) ~== event) return true;
+
+  return false;
 }
 #+end_src
 
@@ -2927,6 +3069,7 @@ Returns a map with command-name pairs.
 private static ui void collectCommands(MenuDescriptor descriptor,
                                        out Map<string, string> result)
 {
+  // TODO: forbid chained commands.
   let optionDescriptor = OptionMenuDescriptor(descriptor);
   if (optionDescriptor)
   {
@@ -2937,7 +3080,7 @@ private static ui void collectCommands(MenuDescriptor descriptor,
       else if (item is "OptionMenuItemControlBase")
       {
         string command = item.getAction();
-        result.insert(command.makeLower(), item.mLabel);
+        result.insert(command, item.mLabel);
       }
     }
     return;
@@ -2975,28 +3118,14 @@ private ui void collectAliases(out Map<string, string> result)
     foreach (line : lines)
     {
       Array<string> words;
-      line.split(words, " ", TOK_SKIPEMPTY);
-      if (words.size() < 3 || !(words[0] ~== "alias")) continue;
-      string name = words[1];
-      words.delete(0, 2);
-      string command = gb_su.join(words, " ");
-      command = command.mid(1, command.length() - 2);
-      result.insert(name, command.makeLower());
+      gb_su.tokenize(line, words);
+      if (words.size() != 3 || !(words[0] ~== "alias")) continue;
+      result.insert(gb_su.unwrap(words[1].makeLower()), gb_su.unwrap(words[2]));
     }
   }
 }
 
 const KEYCONF = "keyconf";
-#+end_src
-
-**** Is filtered out
-
-#+begin_src c :noweb-ref gb_ActionMenu-body
-
-private static bool isFilteredOut(string command)
-{
-  return (command == "event gb_toggle_action_menu");
-}
 #+end_src
 
 **** Remember blanks
@@ -4011,7 +4140,7 @@ override void worldTick()
 }
 #+end_src
 
-*** Console process
+*** Interface and console event processing
 
 This function processes key bindings specific for Gearbox.
 
@@ -6273,36 +6402,366 @@ private gb_TextureCache mTextureCache;
 private double mScaleFactor;
 #+end_src
 
-* Test
+* Tests
 
-** Test actions
+** Setup
 
-#+begin_src c :tangle ../build/GearboxTest/keyconf.txt
+*** Event handler
 
-Alias gbt2 "netevent gbt2 3 4 5"
-alias "gbt 3" "netevent gbt3"
-alias gbt5 "event gbt5"
+#+begin_src c :tangle ../build/GearboxTest/mapinfo.txt
+
+Gameinfo { EventHandlers = "gbt_EventHandler" }
 #+end_src
+#+begin_src c :tangle ../build/GearboxTest/zscript.zs
+
+version 4.14.3
+
+class gbt_EventHandler : Eventhandler
+#+end_src
+#+begin_src c :tangle ../build/GearboxTest/zscript.zs :exports none
+{
+  <<gbt_EventHandler-body>>
+}
+#+end_src
+
+#+begin_src c :noweb-ref gbt_EventHandler-body
+
+private ui bool isFired;
+
+override void uiTick()
+{
+  if (isFired) return;
+  isFired = true;
+
+  <<gbt_EventHandler.uiTick-body>>
+}
+#+end_src
+
+#+begin_src c :noweb-ref gbt_EventHandler-body
+
+private ui static void ensure(gb_ViewModel model, string tag, string aClass)
+{
+  int tagCount = model.tags.size();
+  for (int i = 0; i < tagCount; ++i)
+  {
+    if (model.tags[i] != tag) continue;
+    if (model.classes[i] == aClass) return;
+    Console.printf("ERROR: class for tag \"%s\": expected: \"%s\", got \"%s\"",
+                   tag, aClass, model.classes[i]);
+  }
+
+  Console.printf("ERROR: tag \"%s\" not found", tag);
+}
+#+end_src
+
+*** Menus
 
 #+begin_src c :tangle ../build/GearboxTest/menudef.txt
 
-AddOptionMenu OptionsMenu       { Submenu "Gearbox test", gbt_Options }
-AddOptionMenu OptionsMenuSimple { Submenu "Gearbox test", gbt_Options }
+AddOptionMenu OptionsMenu       { Submenu "Gearbox test actions", gbt_Actions }
+AddOptionMenu OptionsMenuSimple { Submenu "Gearbox test actions", gbt_Actions }
 
-OptionMenu gbt_Options
+OptionMenu gbt_Actions
+#+end_src
+#+begin_src c :tangle ../build/GearboxTest/menudef.txt :exports none
 {
-  Control "Action 1", "netevent gbt1 2 3 4"
-  Control "Action 2", gbt2
-  Control "Action 3", "gbt 3"
-  Control "Action 4", "event gbt4 5 6 7"
-  Control "Action 5", gbt5
+  <<gbt_Actions-body>>
 }
+#+end_src
+
+** Test collecting actions
+
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-body
+{
+  let actionMenu = gb_ActionMenu.from();
+  actionMenu.initializeFromUi();
+  gb_ViewModel viewModel;
+  actionMenu.fill(viewModel);
+#+end_src
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-body :exports none
+  <<gbt_EventHandler.uiTick-collecting-body>>
+}
+#+end_src
+
+#+begin_src c :noweb-ref gbt_Actions-body
+
+Control "no alias", "netevent gbt1"
+Control "alias", gbt2
+Control "alias with space", "gbt 3"
+#+end_src
+#+begin_src c :tangle ../build/GearboxTest/keyconf.txt
+
+Alias gbt2    "netevent gbt2"
+Alias "gbt 3" "netevent gbt3"
+#+end_src
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
+
+ensure(viewModel, "no alias", "netevent gbt1");
+ensure(viewModel, "alias", "netevent gbt2");
+ensure(viewModel, "alias with space", "netevent gbt3");
+#+end_src
+
+#+begin_src c :noweb-ref gbt_Actions-body
+
+Control "netevent", "netevent gbt4"
+Control "interfaceevent", "netevent gbt5"
+Control "puke", "puke 6"
+Control "pukename", "pukename gbt7"
+Control "acs", "acs 8"
+Control "acsn", "acsn gbt9"
+Control "use", "use gbt10"
+Control "use with space", "use \"gbt 13\""
+#+end_src
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
+
+ensure(viewModel, "netevent", "netevent gbt4");
+ensure(viewModel, "interfaceevent", "netevent gbt5");
+ensure(viewModel, "puke", "puke 6");
+ensure(viewModel, "pukename", "pukename gbt7");
+ensure(viewModel, "acs", "acs 8");
+ensure(viewModel, "acsn", "acsn gbt9");
+ensure(viewModel, "use", "use gbt10");
+ensure(viewModel, "use with space", "use \"gbt 13\"");
+#+end_src
+
+#+begin_src c :tangle ../build/GearboxTest/keyconf.txt
+
+Alias gbt12   "netevent gbt12"
+#+end_src
+#+begin_src c :noweb-ref gbt_Actions-body
+
+Control "NeTeVeNt", "NeTeVeNt gbt11"
+Control "GbT12", GbT12
+#+end_src
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
+
+ensure(viewModel, "NeTeVeNt", "NeTeVeNt gbt11");
+ensure(viewModel, "GbT12", "netevent gbt12");
+#+end_src
+
+** Test executing actions
+
+#+begin_src c :noweb-ref gbt_EventHandler-body
+
+private static clearscope
+string logStatus(int expected1, int expected2, int expected3,
+                 int actual1, int actual2, int actual3)
+{
+  return (expected1 == actual1 && expected2 == actual2 && expected3 == actual3)
+    ? "pass"
+    : string.format("values: expected %d %d %d, got %d %d %d",
+                    expected1, expected2, expected3,
+                    actual1, actual2, actual3);
+}
+#+end_src
+
+*** Network events
+
+#+begin_src c :noweb-ref gbt_EventHandler-body
+
+const NETEVENT_ACTION_COUNT = 4;
+private string[NETEVENT_ACTION_COUNT] mNeteventActionErrors;
+
+override void networkProcess(ConsoleEvent event)
+{
+  int actual1 = event.args[0];
+  int actual2 = event.args[1];
+  int actual3 = event.args[2];
+
+  if (event.name == "gbt_actions_run")
+  {
+    gb_Sender.sendEvent("netevent gbt_action0");
+    gb_Sender.sendEvent("netevent gbt_action1 1 2 42");
+    gb_Sender.sendEvent("NeTeVeNt gbt_action2");
+    gb_Sender.sendEvent("netevent GbT_AcTiOn3");
+
+    <<gbt_EventHandler.networkProcess.gbt_actions_run>>
+  }
+  else if (event.name == "gbt_action0")
+    mNeteventActionErrors[0] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_action1")
+    mNeteventActionErrors[1] = logStatus(1, 2, 42, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_action2")
+    mNeteventActionErrors[2] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "GbT_AcTiOn3")
+    mNeteventActionErrors[3] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_actions_check")
+  {
+    for (int i = 0; i < NETEVENT_ACTION_COUNT; ++i)
+    {
+      if (mNeteventActionErrors[i].isEmpty())
+        mNeteventActionErrors[i] = "not triggered";
+      if (mNeteventActionErrors[i] != "pass")
+        Console.printf("ERROR: action%d: %s", i, mNeteventActionErrors[i]);
+    }
+  }
+}
+#+end_src
+
+*** Interface events
+
+#+begin_src c :noweb-ref gbt_EventHandler.networkProcess.gbt_actions_run
+
+gb_Sender.sendEvent("interfaceevent gbt_interface_action0");
+gb_Sender.sendEvent("interfaceevent gbt_interface_action1 1 2 42");
+gb_Sender.sendEvent("InTerFacEevEnT gbt_interface_action2");
+gb_Sender.sendEvent("interfaceevent Gbt_IntErFaCe_AcTiOn3");
+#+end_src
+
+#+begin_src c :noweb-ref gbt_EventHandler-body
+
+const INTERFACE_EVENT_ACTION_COUNT = 4;
+private ui string[INTERFACE_EVENT_ACTION_COUNT] mInterfaceEventActionErrors;
+
+override void interfaceProcess(ConsoleEvent event)
+{
+  int actual1 = event.args[0];
+  int actual2 = event.args[1];
+  int actual3 = event.args[2];
+
+  if (event.name == "gbt_interface_action0")
+    mInterfaceEventActionErrors[0] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_interface_action1")
+    mInterfaceEventActionErrors[1] = logStatus(1, 2, 42, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_interface_action2")
+    mInterfaceEventActionErrors[2] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "Gbt_IntErFaCe_AcTiOn3")
+    mInterfaceEventActionErrors[3] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_interface_actions_check")
+  {
+    for (int i = 0; i < INTERFACE_EVENT_ACTION_COUNT; ++i)
+    {
+      if (mInterfaceEventActionErrors[i].isEmpty())
+        mInterfaceEventActionErrors[i] = "not triggered";
+      if (mInterfaceEventActionErrors[i] != "pass")
+        Console.printf("ERROR: interface action%d: %s",
+                       i, mInterfaceEventActionErrors[i]);
+    }
+  }
+}
+#+end_src
+
+*** Inventory
+
+#+begin_src c :noweb-ref gbt_EventHandler.networkProcess.gbt_actions_run
+
+gb_Sender.sendEvent("use gbt_Inventory1");
+gb_Sender.sendEvent("uSE gbt_Inventory2");
+gb_Sender.sendEvent("use GbT_inVeNtOrY3");
+gb_Sender.sendEvent("use GbT_inVeNtOrY3");
+gb_Sender.sendEvent("use \"gbt Inventory4\"");
+#+end_src
+
+#+begin_src c :tangle ../build/GearboxTest/zscript.zs
+
+class gbt_Inventory : Inventory
+{
+  override bool use(bool pickup)
+  {
+    mError = "pass";
+    return false;
+  }
+
+  override void onDestroy()
+  {
+    if (mError.isEmpty())
+      mError = "not triggered";
+    if (mError != "pass")
+      Console.printf("ERROR: %s: %s", getClassName(), mError);
+  }
+
+  private string mError;
+}
+
+class gbt_Inventory1 : gbt_Inventory {}
+class gbt_Inventory2 : gbt_Inventory {}
+class gbt_Inventory3 : gbt_Inventory {}
+#+end_src
+#+begin_src c :tangle ../build/GearboxTest/decorate.txt
+
+Actor "gbt Inventory4" : gbt_Inventory {}
+#+end_src
+
+*** Scripts
+
+#+begin_src c :noweb-ref gbt_EventHandler.networkProcess.gbt_actions_run
+
+gb_Sender.sendEvent("acs 1 2 3 4");
+gb_Sender.sendEvent("AcS 2");
+gb_Sender.sendEvent("puke 3");
+gb_Sender.sendEvent("acsn \"gb t4\" 3 5 7");
+gb_Sender.sendEvent("pukename \"gb t5\"");
+gb_Sender.sendEvent("acs -6 3 4 5");
+gb_Sender.sendEvent("acsn gbt7 always 4 5 6");
+#+end_src
+
+Note: if editing this ACS script, don't forget to compile it with ACC and put
+the result to ~media/GeorboxTest/acs/gbt.o~.
+
+#+begin_src c :tangle ../build/GearboxTest/test.acs
+
+#library "gbt"
+
+#libdefine ACTION_COUNT 7
+
+str errors[ACTION_COUNT];
+
+Script 1       (int a, int b, int c) { errors[0] = logStatus(2, 3, 4, a, b, c); }
+Script 2       (int a, int b, int c) { errors[1] = logStatus(0, 0, 0, a, b, c); }
+Script 3       (int a, int b, int c) { errors[2] = logStatus(0, 0, 0, a, b, c); }
+Script "gb t4" (int a, int b, int c) { errors[3] = logStatus(3, 5, 7, a, b, c); }
+Script "gb t5" (int a, int b, int c) { errors[4] = logStatus(0, 0, 0, a, b, c); }
+Script 6       (int a, int b, int c) { errors[5] = logStatus(3, 4, 5, a, b, c); }
+Script "gbt7"  (int a, int b, int c) { errors[6] = logStatus(4, 5, 6, a, b, c); }
+
+function str logStatus(int expected1, int expected2, int expected3,
+                       int actual1, int actual2, int actual3)
+{
+  return (expected1 == actual1 && expected2 == actual2 && expected3 == actual3)
+    ? "pass"
+    : strParam(s:"values: expected ",
+               i:expected1, s:" ", i:expected2, s:" ", i:expected3,
+               s:", got ", i:actual1, s:" ", i:actual2, s:" ", i:actual3);
+}
+
+Script "gbt_acs_actions_check" (void)
+{
+  for (int i = 0; i < ACTION_COUNT; ++i)
+  {
+    if (errors[i] == 0)
+      errors[i] = "not triggered";
+
+    if (errors[i] != "pass")
+      print(s:"ERROR: ACS action", i:i, s:": ", s:errors[i]);
+  }
+}
+#+end_src
+#+begin_src text :tangle ../build/GearboxTest/loadacs.txt :exports none
+gbt
 #+end_src
 
 ** Run scripts
 
-Basic check: the mod can be loaded without errors.
+#+begin_src c :tangle ../build/GearboxTest/commands.txt
 
-#+begin_src text :tangle ../build/GearboxTest/commands.txt
-wait 2; map map01; wait 7; quit
+wait 2; map map01;
+
+wait 3; give gbt_Inventory1;
+wait 3; give gbt_Inventory2;
+wait 3; give gbt_Inventory3;
+wait 3; give "gbt Inventory4";
+wait 4; netevent gbt_actions_run;
+wait 9; netevent gbt_actions_check;
+wait 9; interfaceevent gbt_interface_actions_check;
+wait 9; acsn gbt_acs_actions_check;
+
+wait 11; quit
 #+end_src

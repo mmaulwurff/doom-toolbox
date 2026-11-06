@@ -7,7 +7,7 @@
 
 #+begin_src org :noweb-ref description
 
-StringUtils module version: 1.5.0
+StringUtils module version: 1.6.0
 
 StringUtils is a part of DoomToolbox.
 The source code is available on GitHub https://github.com/mmaulwurff/doom-toolbox/
@@ -312,6 +312,172 @@ static clearscope bool beginsWith(string aString,
   it ("beginsWith: empty string", Assert(!su.beginsWith("", "?")));
   it ("beginsWith: empty substring", Assert(su.beginsWith("?", "")));
   it ("beginsWith: empty both", Assert(su.beginsWith("", "")));
+}
+#+end_src
+
+*** Tokenize
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope void tokenize(string input, out Array<string> tokens)
+{
+  bool isInString = false;
+  string currentToken;
+
+  int length = input.length();
+  for (int i = 0; i < length;)
+  {
+    int character;
+    [character, i] = input.getNextCodePoint(i);
+    int kind = getCharacterKind(character);
+    bool wasInString = isInString;
+    isInString ^= kind == CharacterKind_DoubleQuote;
+
+    if (isInString && kind == CharacterKind_Backslash)
+    {
+      if (i + 1 < length)
+      {
+        currentToken.appendCharacter(character);
+        [character, i] = input.getNextCodePoint(i);
+        currentToken.appendCharacter(character);
+      }
+
+      continue;
+    }
+
+    if (wasInString || kind == CharacterKind_Normal)
+    {
+      currentToken.appendCharacter(character);
+
+      if (kind == CharacterKind_DoubleQuote)
+      {
+        tokens.push(currentToken);
+        currentToken = "";
+      }
+
+      continue;
+    }
+
+    if (currentToken.length() != 0)
+    {
+      tokens.push(currentToken);
+      currentToken = "";
+    }
+
+    if (kind == CharacterKind_DoubleQuote)
+      currentToken.appendCharacter(character);
+
+    else if (kind == CharacterKind_Delimiter)
+      tokens.push(string.format("%c", character));
+  }
+
+  if (currentToken.length() != 0)
+    tokens.push(currentToken);
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  Array<string> tokens;
+  su.tokenize("", tokens);
+  it("tokenize: empty", Assert(tokens.size() == 0));
+}{
+  Array<string> tokens;
+  su.tokenize("one", tokens);
+  it("tokenize: one", Assert(tokens.size() == 1 && tokens[0] == "one"));
+}{
+  Array<string> tokens;
+  su.tokenize("one \"two three\" 4", tokens);
+  it("tokenize: types", Assert(tokens.size() == 3
+                               && tokens[0] == "one"
+                               && tokens[1] == "\"two three\""
+                               && tokens[2] == "4"));
+}{
+  Array<string> tokens;
+  su.tokenize("open \"quote", tokens);
+  it("tokenize: open quote", Assert(tokens.size() == 2
+                                    && tokens[0] == "open"
+                                    && tokens[1] == "\"quote"));
+}{
+  Array<string> tokens;
+  su.tokenize("one(three)five", tokens);
+  it("tokenize: delitimers", Assert(tokens.size() == 5
+                                    && tokens[0] == "one"
+                                    && tokens[1] == "("
+                                    && tokens[2] == "three"
+                                    && tokens[3] == ")"
+                                    && tokens[4] == "five"));
+}{
+  Array<string> tokens;
+  su.tokenize("\"\\\"one\\\"\"", tokens);
+  it("tokenize: string inside", Assert(tokens.size() == 1
+                                       && tokens[0] == "\"\\\"one\\\"\""));
+}
+#+end_src
+
+**** Helpers
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+enum _
+{
+  CharacterKind_Space,
+  CharacterKind_Delimiter,
+  CharacterKind_DoubleQuote,
+  CharacterKind_Normal,
+  CharacterKind_Backslash,
+}
+
+private static int getCharacterKind(int character)
+{
+  switch (character)
+  {
+  case NAMESPACE_Ascii.SPACE:
+  case NAMESPACE_Ascii.CHARACTER_TABULATION:
+  case NAMESPACE_Ascii.CARRIAGE_RETURN_CR:
+  case NAMESPACE_Ascii.LINE_FEED_LF:
+    return CharacterKind_Space;
+
+  case NAMESPACE_Ascii.LEFT_PARENTHESIS:
+  case NAMESPACE_Ascii.RIGHT_PARENTHESIS:
+    return CharacterKind_Delimiter;
+
+  case NAMESPACE_Ascii.QUOTATION_MARK:
+    return CharacterKind_DoubleQuote;
+
+  case NAMESPACE_Ascii.REVERSE_SOLIDUS:
+    return CharacterKind_Backslash;
+  }
+
+  return CharacterKind_Normal;
+}
+#+end_src
+
+*** Unwrap
+
+Unwraps the text from double quotes.
+
+#+begin_src c :noweb-ref StringUtilsBody
+
+static clearscope string unwrap(string input)
+{
+  if (input.isEmpty()) return "";
+
+  if (input.charCodeAt(0) == NAMESPACE_Ascii.QUOTATION_MARK
+    && input.charCodeAt(input.length() - 1) == NAMESPACE_Ascii.QUOTATION_MARK)
+  {
+    string result = input.mid(1, input.length() - 2);
+    return result.filter();
+  }
+
+  return input;
+}
+#+end_src
+#+begin_src c :noweb-ref TestsBody
+{
+  it("unwrap: empty", Assert(su.unwrap("") == ""));
+  it("unwrap: not wrapped", Assert(su.unwrap("text\"\"") == "text\"\""));
+  it("unwrap: wrapped", Assert(su.unwrap("\"te\\\"\\\"xt\"") == "te\"\"xt"));
+  it("unwrap: half", Assert(su.unwrap("\"text") == "\"text"));
 }
 #+end_src
 
