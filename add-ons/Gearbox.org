@@ -2881,29 +2881,29 @@ ui void initializeFromUi()
   collectAliases(aliases);
 
   Map<string, string> events;
-  foreach (name, command : commands)
+  foreach (command, name : commands)
   {
     if (isEvent(command))
     {
-      events.insert(name, command);
+      events.insert(command, name);
       continue;
     }
 
     let [alias, aliasExists] = aliases.checkValue(command);
     if (aliasExists && isEvent(alias))
-      events.insert(name, alias);
+      events.insert(alias, name);
   }
 
   Map<string, string> filteredEvents;
-  foreach (key, value : events)
-    if (!isFilteredOut(value)) filteredEvents.insert(key, value);
+  foreach (command, name : events)
+    if (!isFilteredOut(command)) filteredEvents.insert(command, name);
 
-  foreach (key, value : filteredEvents)
+  foreach (command, name : filteredEvents)
   {
-    mNames.push(key);
-    mCommands.push(value);
+    mNames.push(name);
+    mCommands.push(command);
 
-    let [substitute, substituteColor] = gb_ViewModel.makeIconSubstitute(value);
+    let [substitute, substituteColor] = gb_ViewModel.makeIconSubstitute(command);
     mIconSubstitutes.push(substitute);
     mIconSubstituteColors.push(substituteColor);
   }
@@ -2920,7 +2920,7 @@ private static ui bool isEvent(string command)
 
 **** Collect commands
 
-Returns a map with name-command pairs.
+Returns a map with command-name pairs.
 
 #+begin_src c :noweb-ref gb_ActionMenu-body
 
@@ -2937,7 +2937,7 @@ private static ui void collectCommands(MenuDescriptor descriptor,
       else if (item is "OptionMenuItemControlBase")
       {
         string command = item.getAction();
-        result.insert(item.mLabel, command.makeLower());
+        result.insert(command.makeLower(), item.mLabel);
       }
     }
     return;
