@@ -2017,6 +2017,9 @@ struct gb_ExternalEvent
 
   void dispatch(string command)
   {
+    // This assumes that semicolon can only appear at the end.
+    command.replace(";", "");
+
     Array<string> tokens;
     gb_su.tokenize(command, tokens);
 
@@ -3024,14 +3027,14 @@ ui void initializeFromUi()
   Map<string, string> events;
   foreach (command, name : commands)
   {
-    if (isEvent(command))
+    if (isEvent(command) && !isCompound(command))
     {
       events.insert(command, name);
       continue;
     }
 
     let [alias, aliasExists] = aliases.checkValue(command.makeLower());
-    if (aliasExists && isEvent(alias))
+    if (aliasExists && isEvent(alias) && !isCompound(alias))
       events.insert(alias, name);
   }
 
@@ -3058,6 +3061,12 @@ private static ui bool isEvent(string command)
 
   return false;
 }
+
+private static ui bool isCompound(string command)
+{
+  int semicolonPosition = command.indexOf(";");
+  return (semicolonPosition != -1 && semicolonPosition != command.length() - 1);
+}
 #+end_src
 
 **** Collect commands
@@ -3069,7 +3078,6 @@ Returns a map with command-name pairs.
 private static ui void collectCommands(MenuDescriptor descriptor,
                                        out Map<string, string> result)
 {
-  // TODO: forbid chained commands.
   let optionDescriptor = OptionMenuDescriptor(descriptor);
   if (optionDescriptor)
   {
@@ -6452,6 +6460,19 @@ private ui static void ensure(gb_ViewModel model, string tag, string aClass)
 
   Console.printf("ERROR: tag \"%s\" not found", tag);
 }
+
+private ui static void ensureNo(gb_ViewModel model, string tag)
+{
+  int tagCount = model.tags.size();
+  for (int i = 0; i < tagCount; ++i)
+  {
+    if (model.tags[i] == tag)
+    {
+      Console.printf("ERROR: found %s", tag);
+      return;
+    }
+  }
+}
 #+end_src
 
 *** Menus
@@ -6483,23 +6504,30 @@ OptionMenu gbt_Actions
 }
 #+end_src
 
+*** Aliases
+
 #+begin_src c :noweb-ref gbt_Actions-body
 
 Control "no alias", "netevent gbt1"
 Control "alias", gbt2
 Control "alias with space", "gbt 3"
+Control "GbT12", GbT12
 #+end_src
 #+begin_src c :tangle ../build/GearboxTest/keyconf.txt
 
 Alias gbt2    "netevent gbt2"
 Alias "gbt 3" "netevent gbt3"
+Alias gbt12   "netevent gbt12"
 #+end_src
 #+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
 
 ensure(viewModel, "no alias", "netevent gbt1");
 ensure(viewModel, "alias", "netevent gbt2");
 ensure(viewModel, "alias with space", "netevent gbt3");
+ensure(viewModel, "GbT12", "netevent gbt12");
 #+end_src
+
+*** Event types
 
 #+begin_src c :noweb-ref gbt_Actions-body
 
@@ -6510,7 +6538,10 @@ Control "pukename", "pukename gbt7"
 Control "acs", "acs 8"
 Control "acsn", "acsn gbt9"
 Control "use", "use gbt10"
+
 Control "use with space", "use \"gbt 13\""
+Control "NeTeVeNt", "NeTeVeNt gbt11"
+Control "semicolon", "netevent semicolon;"
 #+end_src
 #+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
 
@@ -6521,22 +6552,23 @@ ensure(viewModel, "pukename", "pukename gbt7");
 ensure(viewModel, "acs", "acs 8");
 ensure(viewModel, "acsn", "acsn gbt9");
 ensure(viewModel, "use", "use gbt10");
+
 ensure(viewModel, "use with space", "use \"gbt 13\"");
+ensure(viewModel, "NeTeVeNt", "NeTeVeNt gbt11");
+ensure(viewModel, "semicolon", "netevent semicolon;");
 #+end_src
 
-#+begin_src c :tangle ../build/GearboxTest/keyconf.txt
+*** Filtered controls
 
-Alias gbt12   "netevent gbt12"
-#+end_src
 #+begin_src c :noweb-ref gbt_Actions-body
 
-Control "NeTeVeNt", "NeTeVeNt gbt11"
-Control "GbT12", GbT12
+Control "nope1", "nope"
+Control "nope2", "netevent nope; netevent nope"
 #+end_src
 #+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
 
-ensure(viewModel, "NeTeVeNt", "NeTeVeNt gbt11");
-ensure(viewModel, "GbT12", "netevent gbt12");
+ensureNo(viewModel, "nope1");
+ensureNo(viewModel, "nope2");
 #+end_src
 
 ** Test executing actions
@@ -6559,7 +6591,7 @@ string logStatus(int expected1, int expected2, int expected3,
 
 #+begin_src c :noweb-ref gbt_EventHandler-body
 
-const NETEVENT_ACTION_COUNT = 4;
+const NETEVENT_ACTION_COUNT = 5;
 private string[NETEVENT_ACTION_COUNT] mNeteventActionErrors;
 
 override void networkProcess(ConsoleEvent event)
@@ -6574,6 +6606,7 @@ override void networkProcess(ConsoleEvent event)
     gb_Sender.sendEvent("netevent gbt_action1 1 2 42");
     gb_Sender.sendEvent("NeTeVeNt gbt_action2");
     gb_Sender.sendEvent("netevent GbT_AcTiOn3");
+    gb_Sender.sendEvent("netevent gbt_action4;");
 
     <<gbt_EventHandler.networkProcess.gbt_actions_run>>
   }
@@ -6588,6 +6621,9 @@ override void networkProcess(ConsoleEvent event)
 
   else if (event.name == "GbT_AcTiOn3")
     mNeteventActionErrors[3] = logStatus(0, 0, 0, actual1, actual2, actual3);
+
+  else if (event.name == "gbt_action4")
+    mNeteventActionErrors[4] = logStatus(0, 0, 0, actual1, actual2, actual3);
 
   else if (event.name == "gbt_actions_check")
   {
@@ -6704,7 +6740,7 @@ gb_Sender.sendEvent("acsn gbt7 always 4 5 6");
 #+end_src
 
 Note: if editing this ACS script, don't forget to compile it with ACC and put
-the result to ~media/GeorboxTest/acs/gbt.o~.
+the result to ~media/GearboxTest/acs/gbt.o~.
 
 #+begin_src c :tangle ../build/GearboxTest/test.acs
 
