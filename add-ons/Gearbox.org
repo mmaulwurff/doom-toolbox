@@ -6761,7 +6761,7 @@ wait 3; give "gbt Inventory4";
 wait 4; netevent gbt_actions_run;
 wait 9; netevent gbt_actions_check;
 wait 9; interfaceevent gbt_interface_actions_check;
-wait 9; acsn gbt_acs_actions_check;
+wait 9; pukename gbt_acs_actions_check;
 
 wait 11; quit
 #+end_src
