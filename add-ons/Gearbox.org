@@ -6593,7 +6593,7 @@ override void networkProcess(ConsoleEvent event)
   {
     for (int i = 0; i < NETEVENT_ACTION_COUNT; ++i)
     {
-      if (mNeteventActionErrors[i].isEmpty())
+      if (mNeteventActionErrors[i].length() == 0)
         mNeteventActionErrors[i] = "not triggered";
       if (mNeteventActionErrors[i] != "pass")
         Console.printf("ERROR: action%d: %s", i, mNeteventActionErrors[i]);
@@ -6639,7 +6639,7 @@ override void interfaceProcess(ConsoleEvent event)
   {
     for (int i = 0; i < INTERFACE_EVENT_ACTION_COUNT; ++i)
     {
-      if (mInterfaceEventActionErrors[i].isEmpty())
+      if (mInterfaceEventActionErrors[i].length() == 0)
         mInterfaceEventActionErrors[i] = "not triggered";
       if (mInterfaceEventActionErrors[i] != "pass")
         Console.printf("ERROR: interface action%d: %s",
@@ -6672,7 +6672,7 @@ class gbt_Inventory : Inventory
 
   override void onDestroy()
   {
-    if (mError.isEmpty())
+    if (mError.length() == 0)
       mError = "not triggered";
     if (mError != "pass")
       Console.printf("ERROR: %s: %s", getClassName(), mError);

@@ -460,7 +460,7 @@ Unwraps the text from double quotes.
 
 static clearscope string unwrap(string input)
 {
-  if (input.isEmpty()) return "";
+  if (input.length() == 0) return "";
 
   if (input.charCodeAt(0) == NAMESPACE_Ascii.QUOTATION_MARK
     && input.charCodeAt(input.length() - 1) == NAMESPACE_Ascii.QUOTATION_MARK)
