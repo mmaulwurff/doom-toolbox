@@ -1028,59 +1028,120 @@ class gb_Changer play
     return result;
   }
 
-  void selectWeapon(PlayerInfo player, string weapon)
-  {
-    Weapon targetWeapon = Weapon(player.mo.findInventory(weapon));
-    if (targetWeapon
-        && gb_WeaponWatcher.currentFor(player) != targetWeapon.getClass())
-    {
-      player.pendingWeapon = targetWeapon;
-      if (mOptions.isShowingWeaponTagsOnChange()) mCaption.setActor(targetWeapon);
-    }
-  }
-
-  void useItem(PlayerInfo player, string item)
-  {
-    mInventoryUser.addToQueue(player, item);
-  }
-
-  void dropItem(PlayerInfo player, string itemString)
-  {
-    Inventory item = player.mo.findInventory(itemString);
-    if (item)
-      player.mo.dropInventory(item, 1);
-  }
-
-  static void setAngles(PlayerInfo player, double pitch, double angle)
-  {
-    if (player.mo == NULL) return;
-
-    player.cheats |= CF_InterpView;
-    player.mo.pitch = pitch;
-    player.mo.angle = angle;
-
-    // To prevent mods that add weapon sway from swaying while moving mouse in wheel.
-    player.cmd.yaw   = 0;
-    player.cmd.pitch = 0;
-  }
-
-  static void freezePlayer(PlayerInfo player,
-                           int        cheats,
-                           vector3    velocity,
-                           double     gravity)
-  {
-    if (player.mo == NULL) return;
-
-    player.cheats     = cheats;
-    player.vel        = velocity.xy;
-    player.mo.vel     = velocity;
-    player.mo.gravity = gravity;
-  }
-
   private gb_Caption       mCaption;
   private gb_Options       mOptions;
   private gb_InventoryUser mInventoryUser;
+#+end_src
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_changer.zs :exports none
+  <<gb_Changer.body>>
 }
+#+end_src
+
+**** Select weapon
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+void selectWeapon(PlayerInfo player, string weapon)
+{
+  Weapon targetWeapon = Weapon(player.mo.findInventory(weapon));
+  if (targetWeapon
+      && gb_WeaponWatcher.currentFor(player) != targetWeapon.getClass())
+  {
+    player.pendingWeapon = targetWeapon;
+    if (mOptions.isShowingWeaponTagsOnChange()) mCaption.setActor(targetWeapon);
+  }
+}
+#+end_src
+
+**** Use item
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+void useItem(PlayerInfo player, string item)
+{
+  mInventoryUser.addToQueue(player, item);
+}
+#+end_src
+
+**** Drop item
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+void dropItem(PlayerInfo player, string itemString)
+{
+  Inventory item = player.mo.findInventory(itemString);
+  if (item)
+    player.mo.dropInventory(item, 1);
+}
+#+end_src
+
+**** Set angles
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+static void setAngles(PlayerInfo player, double pitch, double angle)
+{
+  if (player.mo == NULL) return;
+
+  player.cheats |= CF_InterpView;
+  player.mo.pitch = pitch;
+  player.mo.angle = angle;
+
+  // To prevent mods that add weapon sway from
+  // swaying while moving mouse in the wheel.
+  player.cmd.yaw   = 0;
+  player.cmd.pitch = 0;
+}
+#+end_src
+
+**** Freeze player
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+static void freezePlayer(PlayerInfo player,
+                         int        cheats,
+                         vector3    velocity,
+                         double     gravity)
+{
+  if (player.mo == NULL) return;
+
+  player.cheats     = cheats;
+  player.vel        = velocity.xy;
+  player.mo.vel     = velocity;
+  player.mo.gravity = gravity;
+}
+#+end_src
+
+**** Weapon functions
+
+#+begin_src c :noweb-ref gb_Changer.body
+
+const WF_ReloadOk = WF_WeaponReloadOk;
+const WF_ZoomOk   = WF_WeaponZoomOk;
+#+end_src
+#+name: gb_Changer.setWeaponState.template
+#+begin_example c
+
+static void setWeapon[[state]](PlayerInfo player)
+{
+  if (player.mo == NULL || player.readyWeapon == NULL) return;
+
+  if (!(player.weaponState & WF_[[state]]Ok)) return;
+
+  let state = player.readyWeapon.findState("[[state]]");
+  if (state == NULL) return;
+
+  player.cmd.buttons |= BT_[[state]];
+  player.getPSprite(PSP_Weapon).setState(state);
+}
+#+end_example
+#+name: gb_Changer.declareWeaponStates
+#+begin_src elisp :var body=gb_Changer.setWeaponState.template
+(mapconcat (lambda (state) (string-replace "[[state]]" state body))
+           '("Reload" "Zoom" "User1" "User2" "User3" "User4"))
+#+end_src
+#+begin_src c :noweb-ref gb_Changer.body :exports none
+<<gb_Changer.declareWeaponStates()>>
 #+end_src
 
 *** Custom weapon order storage
@@ -1745,6 +1806,12 @@ class gb_NeteventProcessor play
                         event.args[1],
                         event.args[2]);
     }
+    else if (args[0] == "gb_reload") mChanger.setWeaponReload(player);
+    else if (args[0] == "gb_zoom")   mChanger.setWeaponZoom(player);
+    else if (args[0] == "gb_user1")  mChanger.setWeaponUser1(player);
+    else if (args[0] == "gb_user2")  mChanger.setWeaponUser2(player);
+    else if (args[0] == "gb_user3")  mChanger.setWeaponUser3(player);
+    else if (args[0] == "gb_user4")  mChanger.setWeaponUser4(player);
 
     return gb_Input.Nothing;
   }
@@ -2007,7 +2074,13 @@ struct gb_ExternalEvent
     AcsAlways,
     AcsNamed,
     AcsNamedAlways,
-    Use
+    Use,
+    Reload,
+    Zoom,
+    User1,
+    User2,
+    User3,
+    User4,
   }
 
   int type;
@@ -2022,9 +2095,6 @@ struct gb_ExternalEvent
 
     Array<string> tokens;
     gb_su.tokenize(command, tokens);
-
-    int tokenCount = tokens.size();
-    if (tokenCount < 2) return;
 
     type = getEventType(tokens[0].makeLower());
 
@@ -2052,12 +2122,20 @@ struct gb_ExternalEvent
 
     case AcsNamed:
     {
-      bool isAlways = (tokenCount > 2 && tokens[2] ~== "always");
+      bool isAlways = (tokens.size() > 2 && tokens[2] ~== "always");
       self.name = gb_su.unwrap(tokens[1]);
       type = isAlways ? AcsNamedAlways : AcsNamed;
       fillArguments(tokens, isAlways ? 3 : 2);
       break;
     }
+
+    case Reload:
+    case Zoom:
+    case User1:
+    case User2:
+    case User3:
+    case User4:
+      break;
 
     default:
       Object.throwAbortException("ERROR: unknown event type: %d", type);
@@ -2082,6 +2160,12 @@ struct gb_ExternalEvent
     case AcsNamed:       return string.format("gb_acs_named:%s", self.name);
     case AcsNamedAlways: return string.format("gb_acs_named_always:%s", self.name);
     case Use:            return string.format("gb_use_item:%s", self.name);
+    case Reload:         return string.format("gb_reload");
+    case Zoom:           return string.format("gb_zoom");
+    case User1:          return string.format("gb_user1");
+    case User2:          return string.format("gb_user2");
+    case User3:          return string.format("gb_user3");
+    case User4:          return string.format("gb_user4");
     }
 
     Object.throwAbortException("ERROR: unknown event type: %d", type);
@@ -2096,6 +2180,12 @@ struct gb_ExternalEvent
     if (token == "puke" || token == "acs") return Acs;
     if (token == "pukename" || token == "acsn") return AcsNamed;
     if (token == "use") return Use;
+    if (token == "+reload") return Reload;
+    if (token == "+zoom") return Zoom;
+    if (token == "+user1") return User1;
+    if (token == "+user2") return User2;
+    if (token == "+user3") return User3;
+    if (token == "+user4") return User4;
 
     Object.throwAbortException("ERROR: unknown external event type: %s", token);
     return Network;
@@ -3054,7 +3144,10 @@ ui void initializeFromUi()
 private static ui bool isEvent(string command)
 {
   static const string EVENTS[] =
-    { "netevent", "interfaceevent", "puke", "acs", "pukename", "acsn", "use" };
+  {
+    "netevent", "interfaceevent", "puke", "acs", "pukename", "acsn", "use",
+    "+reload", "+zoom", "+user1", "+user2", "+user3", "+user4"
+  };
 
   foreach (event : EVENTS)
     if (command.left(event.length()) ~== event) return true;
@@ -6571,6 +6664,18 @@ ensureNo(viewModel, "nope1");
 ensureNo(viewModel, "nope2");
 #+end_src
 
+*** Engine controls
+
+#+begin_src c :noweb-ref gbt_EventHandler.uiTick-collecting-body
+
+ensure(viewModel, "$CNTRLMNU_RELOAD", "+reload");
+ensure(viewModel, "$CNTRLMNU_ZOOM",   "+zoom");
+ensure(viewModel, "$CNTRLMNU_USER1",  "+user1");
+ensure(viewModel, "$CNTRLMNU_USER2",  "+user2");
+ensure(viewModel, "$CNTRLMNU_USER3",  "+user3");
+ensure(viewModel, "$CNTRLMNU_USER4",  "+user4");
+#+end_src
+
 ** Test executing actions
 
 #+begin_src c :noweb-ref gbt_EventHandler-body
@@ -6784,6 +6889,61 @@ Script "gbt_acs_actions_check" (void)
 gbt
 #+end_src
 
+*** Weapon actions
+
+#+begin_src c :noweb-ref gbt_EventHandler.networkProcess.gbt_actions_run
+
+gb_Sender.sendEvent("+reload");
+gb_Sender.sendEvent("+zoom");
+gb_Sender.sendEvent("+user1");
+gb_Sender.sendEvent("+user2");
+gb_Sender.sendEvent("+user3");
+gb_Sender.sendEvent("+user4");
+#+end_src
+
+#+begin_src c :tangle ../build/GearboxTest/zscript.zs
+
+class gbt_AllFunctionsPistol : Pistol
+{
+  override void onDestroy()
+  {
+    if (!isReloaded) Console.printf("ERROR: weapon not reloaded");
+    if (!isZoomed)   Console.printf("ERROR: weapon not zoomed");
+    if (!isUser1ed)  Console.printf("ERROR: weapon not User1'ed");
+    if (!isUser2ed)  Console.printf("ERROR: weapon not User2'ed");
+    if (!isUser3ed)  Console.printf("ERROR: weapon not User3'ed");
+    if (!isUser4ed)  Console.printf("ERROR: weapon not User4'ed");
+  }
+
+  private bool isReloaded;
+  private bool isZoomed;
+  private bool isUser1ed;
+  private bool isUser2ed;
+  private bool isUser3ed;
+  private bool isUser4ed;
+
+  States
+  {
+	Select: goto Ready;
+  Ready:
+   PISG A 1 A_WeaponReady(WRF_AllowReload
+                           | WRF_AllowZoom
+                           | WRF_AllowUser1
+                           | WRF_AllowUser2
+                           | WRF_AllowUser3
+                           | WRF_AllowUser4);
+    loop;
+
+  Reload: TNT1 A 0 { invoker.isReloaded = true; } goto Ready;
+  Zoom:   TNT1 A 0 { invoker.isZoomed   = true; } goto Ready;
+  User1:  TNT1 A 0 { invoker.isUser1ed  = true; } goto Ready;
+  User2:  TNT1 A 0 { invoker.isUser2ed  = true; } goto Ready;
+  User3:  TNT1 A 0 { invoker.isUser3ed  = true; } goto Ready;
+  User4:  TNT1 A 0 { invoker.isUser4ed  = true; } goto Ready;
+  }
+}
+#+end_src
+
 ** Run scripts
 
 #+begin_src c :tangle ../build/GearboxTest/commands.txt
@@ -6794,6 +6954,7 @@ wait 3; give gbt_Inventory1;
 wait 3; give gbt_Inventory2;
 wait 3; give gbt_Inventory3;
 wait 3; give "gbt Inventory4";
+wait 3; give gbt_AllFunctionsPistol;
 wait 4; netevent gbt_actions_run;
 wait 9; netevent gbt_actions_check;
 wait 9; interfaceevent gbt_interface_actions_check;
