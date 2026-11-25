@@ -3101,6 +3101,34 @@ private Array<int> mZeroes;
 
 **** Initialize
 
+Note: the point of using an array of string pairs and not a map here is to
+preserve the menu item order.
+
+#+begin_src c :tangle ../build/Gearbox/zscript/gb_action_menu.zs
+
+class gb_StringPair
+{
+  string first;
+  string second;
+}
+
+struct gb_StringPairs
+{
+  Array<gb_StringPair> items;
+
+  void pushUniqueByFirst(string first, string second)
+  {
+    foreach (item : items)
+      if (item.first == first) return;
+
+    let item = new("gb_StringPair");
+    item.first = first;
+    item.second = second;
+    items.push(item);
+  }
+}
+#+end_src
+
 #+begin_src c :noweb-ref gb_ActionMenu-body
 
 ui void initializeFromUi()
@@ -3108,29 +3136,32 @@ ui void initializeFromUi()
   if (mIsInitialized) return;
   mIsInitialized = true;
 
-  Map<string, string> commands;
+  gb_StringPairs commands;
   collectCommands(MenuDescriptor.getDescriptor("MainMenu"), commands);
 
   Map<string, string> aliases;
   collectAliases(aliases);
 
-  Map<string, string> events;
-  foreach (command, name : commands)
+  gb_StringPairs events;
+  foreach (commandName : commands.items)
   {
+    string command = commandName.first;
+    string name = commandName.second;
     if (isEvent(command) && !isCompound(command))
     {
-      events.insert(command, name);
+      events.pushUniqueByFirst(command, name);
       continue;
     }
 
     let [alias, aliasExists] = aliases.checkValue(command.makeLower());
     if (aliasExists && isEvent(alias) && !isCompound(alias))
-      events.insert(alias, name);
+      events.pushUniqueByFirst(alias, name);
   }
 
-  foreach (command, name : events)
+  foreach (commandName : events.items)
   {
-    mNames.push(name);
+    string command = commandName.first;
+    mNames.push(commandName.second);
     mCommands.push(command);
 
     let [substitute, substituteColor] = gb_ViewModel.makeIconSubstitute(command);
@@ -3169,7 +3200,7 @@ Returns a map with command-name pairs.
 #+begin_src c :noweb-ref gb_ActionMenu-body
 
 private static ui void collectCommands(MenuDescriptor descriptor,
-                                       out Map<string, string> result)
+                                       out gb_StringPairs result)
 {
   let optionDescriptor = OptionMenuDescriptor(descriptor);
   if (optionDescriptor)
@@ -3181,7 +3212,7 @@ private static ui void collectCommands(MenuDescriptor descriptor,
       else if (item is "OptionMenuItemControlBase")
       {
         string command = item.getAction();
-        result.insert(command, item.mLabel);
+        result.pushUniqueByFirst(command, item.mLabel);
       }
     }
     return;
